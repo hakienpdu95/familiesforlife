@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/rolescope",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\RoleScope\\": "app/",
+            "Modules\\RoleScope\\Database\\Factories\\": "database/factories/",
+            "Modules\\RoleScope\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\RoleScope\\Tests\\": "tests/"
+        }
+    }
+}

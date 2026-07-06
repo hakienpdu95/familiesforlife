@@ -1,0 +1,11 @@
+{
+    "name": "LeadPipelineStage",
+    "alias": "lead-pipeline-stage",
+    "description": "Manages lead pipeline stages per organization",
+    "keywords": ["lead", "pipeline", "stage", "crm"],
+    "priority": 0,
+    "providers": [
+        "Modules\\LeadPipelineStage\\Providers\\LeadPipelineStageServiceProvider"
+    ],
+    "files": []
+}

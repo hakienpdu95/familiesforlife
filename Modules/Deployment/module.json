@@ -1,0 +1,11 @@
+{
+    "name": "Deployment",
+    "alias": "deployment",
+    "description": "Deployment Engine — generic vertical routes, controllers, views",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Deployment\\Providers\\DeploymentServiceProvider"
+    ],
+    "files": []
+}

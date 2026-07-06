@@ -1,0 +1,11 @@
+{
+    "name": "KcCategory",
+    "alias": "kccategory",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\KcCategory\\Providers\\KcCategoryServiceProvider"
+    ],
+    "files": []
+}

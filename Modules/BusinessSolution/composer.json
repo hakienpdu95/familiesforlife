@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/businesssolution",
+    "description": "",
+    "authors": [
+        {
+            "name": "KienDH",
+            "email": "bonhuyn@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\BusinessSolution\\": "app/",
+            "Modules\\BusinessSolution\\Database\\Factories\\": "database/factories/",
+            "Modules\\BusinessSolution\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\BusinessSolution\\Tests\\": "tests/"
+        }
+    }
+}

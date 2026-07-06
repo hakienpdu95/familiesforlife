@@ -1,0 +1,11 @@
+{
+    "name": "LeadSource",
+    "alias": "lead-source",
+    "description": "Manages lead sources per organization",
+    "keywords": ["lead", "source", "crm"],
+    "priority": 0,
+    "providers": [
+        "Modules\\LeadSource\\Providers\\LeadSourceServiceProvider"
+    ],
+    "files": []
+}

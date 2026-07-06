@@ -1,0 +1,25 @@
+// Modules/Survey/resources/assets/sass/survey.scss
+@use 'tom-select';
+@use 'form-patterns';
+
+// ── Survey take — question card option (radio / checkbox) ──────────────────
+
+.survey-option-card {
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+// ── Survey take — star rating button ──────────────────────────────────────
+
+.survey-star {
+    line-height: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    outline: none;
+    border-radius: 0.25rem;
+
+    &:focus-visible {
+        outline: 2px solid oklch(var(--p));
+        outline-offset: 2px;
+    }
+}

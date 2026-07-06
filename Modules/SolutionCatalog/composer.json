@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/solutioncatalog",
+    "description": "",
+    "authors": [
+        {
+            "name": "KienDH",
+            "email": "bonhuyn@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\SolutionCatalog\\": "app/",
+            "Modules\\SolutionCatalog\\Database\\Factories\\": "database/factories/",
+            "Modules\\SolutionCatalog\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\SolutionCatalog\\Tests\\": "tests/"
+        }
+    }
+}

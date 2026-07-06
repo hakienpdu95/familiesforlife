@@ -1,0 +1,79 @@
+// Modules/User/resources/assets/sass/_user-components.scss
+// CSS đặc thù module User: identity preview, permission matrix, role presets.
+
+@use 'tokens' as t;
+@use 'mixins' as m;
+
+// ── Role preset grid ─────────────────────────────────────────────────
+.role-preset-btn {
+    display:     flex;
+    align-items: center;
+    gap:         .375rem;
+    padding:     .5rem .625rem;
+    border-radius: t.$radius-lg;
+    border:      1px solid t.$border;
+    font-size:   .8125rem;
+    font-weight: 500;
+    cursor:      pointer;
+    transition:  border-color t.$transition-fast,
+                 background   t.$transition-fast,
+                 color        t.$transition-fast;
+
+    &:hover {
+        border-color: oklch(var(--p) / .4);
+        background:   t.$base-200;
+    }
+
+    &.active {
+        border-color: t.$primary;
+        background:   t.$primary-subtle;
+        color:        t.$primary;
+        box-shadow:   0 0 0 1px oklch(var(--p) / .3);
+    }
+}
+
+// ── Permission matrix table ───────────────────────────────────────────
+.perm-matrix-wrap {
+    overflow-x: auto;
+    margin-top: .75rem;
+}
+
+.perm-matrix {
+    width:       100%;
+    font-size:   .8125rem;
+    border-collapse: separate;
+    border-spacing: 0;
+
+    th {
+        font-size:      .6875rem;
+        font-weight:    700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        color:          t.$text-muted;
+        padding:        .375rem .75rem;
+        border-bottom:  1px solid t.$border;
+        text-align:     left;
+    }
+
+    td {
+        padding:        .375rem .75rem;
+        border-bottom:  1px solid oklch(var(--b3) / .5);
+        vertical-align: middle;
+    }
+
+    tr:last-child td { border-bottom: none; }
+}
+
+// ── Sidebar module chips (preview quyền) ─────────────────────────────
+.sidebar-module-chip {
+    display:        inline-flex;
+    align-items:    center;
+    padding:        .15rem .5rem;
+    border-radius:  t.$radius-sm;
+    font-size:      .6875rem;
+    font-weight:    500;
+    border:         1px solid t.$border;
+    color:          t.$text-muted;
+    background:     t.$base-100;
+    white-space:    nowrap;
+}

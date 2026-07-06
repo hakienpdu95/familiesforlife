@@ -1,0 +1,7 @@
+// Modules/User/resources/assets/sass/user.scss
+// Entry point SCSS module User.
+// Blade: @vite(['Modules/User/resources/assets/sass/user.scss'], 'build/backend')
+
+@use 'form-patterns';   // shared patterns
+@use 'tom-select';      // TomSelect theme
+@use 'user-components'; // module-specific

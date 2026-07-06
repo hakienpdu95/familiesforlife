@@ -1,0 +1,11 @@
+{
+    "name": "RoleScope",
+    "alias": "rolescope",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\RoleScope\\Providers\\RoleScopeServiceProvider"
+    ],
+    "files": []
+}

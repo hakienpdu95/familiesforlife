@@ -1,0 +1,10 @@
+// Modules/AiCopilot/resources/assets/sass/ai-copilot.scss
+// Build: vite.config.backend.js → public/build/backend/assets/modules/ai-copilot.[hash].css
+//
+// Blade:
+//   @push('styles')
+//       @vite(['Modules/AiCopilot/resources/assets/sass/ai-copilot.scss'], 'build/backend')
+//   @endpush
+
+@use 'form-patterns';   // .field-readonly, .form-submit-bar...
+@use 'tom-select';      // TomSelect dark/light theme

@@ -1,0 +1,13 @@
+// Modules/Customer/resources/assets/sass/customer.scss
+// ─────────────────────────────────────────────────────────────────────
+// Entry point SCSS của module Customer.
+// Build: vite.config.backend.js → public/build/backend/assets/modules/customer.[hash].css
+//
+// Blade:
+//   @push('styles')
+//       @vite(['Modules/Customer/resources/assets/sass/customer.scss'], 'build/backend')
+//   @endpush
+// ─────────────────────────────────────────────────────────────────────
+
+@use 'form-patterns';
+@use 'tom-select';

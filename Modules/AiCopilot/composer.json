@@ -1,0 +1,15 @@
+{
+    "name": "minhan/ai-copilot",
+    "description": "AI Copilot module for Minhan Platform",
+    "autoload": {
+        "psr-4": {
+            "Modules\\AiCopilot\\": "app/",
+            "Modules\\AiCopilot\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\AiCopilot\\Tests\\": "tests/"
+        }
+    }
+}

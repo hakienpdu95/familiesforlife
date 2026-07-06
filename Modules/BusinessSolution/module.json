@@ -1,0 +1,11 @@
+{
+    "name": "BusinessSolution",
+    "alias": "businesssolution",
+    "description": "Danh mục Business Solution (tách biệt khỏi Vertical) — bảng cha cho BusinessBlueprint và OrganizationSolution",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\BusinessSolution\\Providers\\BusinessSolutionServiceProvider"
+    ],
+    "files": []
+}

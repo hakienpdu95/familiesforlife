@@ -1,0 +1,11 @@
+{
+    "name": "Sop",
+    "alias": "sop",
+    "description": "SOP Flowchart Engine — quản lý quy trình vận hành chuẩn",
+    "keywords": ["sop", "flowchart", "process"],
+    "priority": 0,
+    "providers": [
+        "Modules\\Sop\\Providers\\SopServiceProvider"
+    ],
+    "files": []
+}

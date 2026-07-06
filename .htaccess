@@ -1,0 +1,11 @@
+Options -Indexes
+
+# Block all sensitive files at project root
+<FilesMatch "^(\.env.*|\.git.*|composer\.json|composer\.lock|package\.json|package-lock\.json|artisan|phpunit\.xml|\.editorconfig|\.gitignore|webpack\.mix\.js|vite\.config\.js)$">
+    Require all denied
+</FilesMatch>
+
+# Redirect everything to public/ so the project root is never served directly
+RewriteEngine On
+RewriteCond %{REQUEST_URI} !^/minhan/public/
+RewriteRule ^(.*)$ public/$1 [L]

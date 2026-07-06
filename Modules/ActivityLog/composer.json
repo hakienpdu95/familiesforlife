@@ -1,0 +1,27 @@
+{
+    "name": "nwidart/activitylog",
+    "description": "Activity logging module — audit trail, alerting, export",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\ActivityLog\\": "app/",
+            "Modules\\ActivityLog\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\ActivityLog\\Tests\\": "tests/"
+        }
+    }
+}

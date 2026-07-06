@@ -1,0 +1,11 @@
+{
+    "name": "JobPosting",
+    "alias": "job-posting",
+    "description": "Job Posting Center — tạo và quản lý tin tuyển dụng",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\JobPosting\\Providers\\JobPostingServiceProvider"
+    ],
+    "files": []
+}

@@ -1,0 +1,11 @@
+{
+    "name": "OrgChart",
+    "alias": "orgchart",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\OrgChart\\Providers\\OrgChartServiceProvider"
+    ],
+    "files": []
+}

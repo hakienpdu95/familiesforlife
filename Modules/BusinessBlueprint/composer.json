@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/businessblueprint",
+    "description": "",
+    "authors": [
+        {
+            "name": "KienDH",
+            "email": "bonhuyn@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\BusinessBlueprint\\": "app/",
+            "Modules\\BusinessBlueprint\\Database\\Factories\\": "database/factories/",
+            "Modules\\BusinessBlueprint\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\BusinessBlueprint\\Tests\\": "tests/"
+        }
+    }
+}

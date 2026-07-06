@@ -1,0 +1,11 @@
+{
+    "name": "KpiGoal",
+    "alias": "kpigoal",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\KpiGoal\\Providers\\KpiGoalServiceProvider"
+    ],
+    "files": []
+}

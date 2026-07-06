@@ -1,0 +1,11 @@
+{
+    "name": "AiCopilot",
+    "alias": "ai_copilot",
+    "description": "AI Copilot — task execution, prompt library, usage tracking",
+    "keywords": ["ai", "copilot", "claude", "openai"],
+    "priority": 0,
+    "providers": [
+        "Modules\\AiCopilot\\Providers\\AiCopilotServiceProvider"
+    ],
+    "files": []
+}

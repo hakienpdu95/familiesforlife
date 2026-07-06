@@ -1,0 +1,11 @@
+{
+    "name": "KcItem",
+    "alias": "kcitem",
+    "description": "Knowledge Center — Quản lý tài liệu / tri thức",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\KcItem\\Providers\\KcItemServiceProvider"
+    ],
+    "files": []
+}

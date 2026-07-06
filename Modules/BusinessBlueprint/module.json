@@ -1,0 +1,11 @@
+{
+    "name": "BusinessBlueprint",
+    "alias": "businessblueprint",
+    "description": "Blueprint Authoring & Versioning — 8 thành phần Blueprint (Outcome/Capability/Workflow/Phase/Checklist/Resource/AI/Analytics) + Versioning/Publish/Clone/Compare",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\BusinessBlueprint\\Providers\\BusinessBlueprintServiceProvider"
+    ],
+    "files": []
+}

@@ -1,0 +1,451 @@
+[
+    [
+        "organizations///add///settings///Thêm owner_id và các trường thông tin doanh nghiệp vào bảng organizations",
+        "is_system///boolean///__///NOT_NULL///false///__///True = org hệ thống mặc định cho super-admin",
+        "owner_id///unsignedBigInteger///__///_NULL///NULL///->index()///ID người sở hữu — không có FK ở DB",
+        "tax_code///string///20///_NULL///NULL///__///Mã số thuế doanh nghiệp",
+        "phone///string///20///_NULL///NULL///__///Số điện thoại liên hệ",
+        "email///string///255///_NULL///NULL///__///Email liên hệ của tổ chức",
+        "website///string///255///_NULL///NULL///__///Website của tổ chức",
+        "industry///string///100///_NULL///NULL///->index()///Ngành nghề kinh doanh",
+        "address///string///500///_NULL///NULL///__///Địa chỉ đầy đủ",
+        "city///string///100///_NULL///NULL///__///Thành phố",
+        "country///string///2///NOT_NULL///'VN'///->index()///Mã quốc gia ISO 3166-1",
+        "postal_code///string///20///_NULL///NULL///__///Mã bưu chính",
+        "description///text///__///_NULL///NULL///__///Mô tả về tổ chức",
+        "logo_path///string///500///_NULL///NULL///__///Đường dẫn đến file logo",
+        "province_code///char///2///_NULL///NULL///->references('province_code')->constrained('provinces')->nullOnDelete()///Tỉnh/thành phố — FK tới provinces.province_code",
+        "ward_code///char///5///_NULL///NULL///->references('ward_code')->constrained('wards')->nullOnDelete()///Phường/xã — FK tới wards.ward_code",
+        "full_address///text///__///_NULL///NULL///__///Địa chỉ đầy đủ kết hợp (số nhà + phường/xã + tỉnh)",
+        "__index///index///__///__///__///province_code,ward_code,status,created_at///Index cho column",
+        "lead_assessment_code///string///64///_NULL///NULL///__///Assessment code dùng để chấm điểm lead sâu. NULL = tắt.",
+        "source///string///50///_NULL///NULL///__///marketplace_signup | admin_created | etc.",
+        "approved_by///unsignedBigInteger///__///_NULL///NULL///__///__",
+        "approved_at///timestamp///__///_NULL///NULL///__///__",
+        "email_domain///string///100///_NULL///NULL///__///VD: company.com — dùng để phát hiện email tổ chức khi HR tạo tài khoản NV"
+    ],
+    [
+        "users///add///email///Thêm organization_id và các trường bổ sung vào bảng users",
+        "organization_id///unsignedBigInteger///__///_NULL///NULL///->constrained('organizations')->nullOnDelete()///Thuộc tổ chức nào — null nếu super-admin",
+        "department///string///50///_NULL///NULL///->index()///Phòng ban: hr, sales, ops, marketing",
+        "last_active_at///timestamp///__///_NULL///NULL///__///Lần hoạt động cuối cùng",
+        "is_active///boolean///__///NOT_NULL///true///->index()///Trạng thái tài khoản",
+        "__index///index///__///__///__///organization_id///Index cho FK organization_id",
+        "branch_id///unsignedBigInteger///__///_NULL///NULL///__///__",
+        "department_id///unsignedBigInteger///__///_NULL///NULL///__///__",
+        "account_type///string///20///NOT_NULL///'free'///__///free | org_member | suspended",
+        "current_org_id///unsignedBigInteger///__///_NULL///NULL///__///NULL nếu free",
+        "trust_level///unsignedTinyInteger///__///NOT_NULL///0///__///0=unverified, 1=email, 3=cccd, 4=cccd_biometric",
+        "national_id_hash///string///64///_NULL///NULL///->unique()///SHA-256(số_CCCD) — check uniqueness, không lưu số thật",
+        "__index///index///__///__///__///account_type|users_account_type_index///__",
+        "__index///index///__///__///__///trust_level|users_trust_level_index///__"
+    ],
+    [
+        "activity_log///add///__///",
+        "level///unsignedTinyInteger///__///NOT_NULL///2///__///1=debug 2=info 3=warning 4=error 5=critical",
+        "organization_id///unsignedBigInteger///__///_NULL///NULL///__///Tenant context — NULL khi CLI/system job",
+        "module///string///64///_NULL///NULL///__///__",
+        "action///string///128///_NULL///NULL///__///__",
+        "actor_name///string///255///_NULL///NULL///__///Snapshot tên actor tại thời điểm log",
+        "actor_ip///string///45///_NULL///NULL///__///IPv4 hoặc IPv6",
+        "request_id///char///36///_NULL///NULL///__///__",
+        "session_id///string///255///_NULL///NULL///__///__",
+        "subject_label///string///255///_NULL///NULL///__///Snapshot label của subject (name/title/email)",
+        "__index///index///__///__///__///organization_id,created_at|idx_org_created///__",
+        "__index///index///__///__///__///level,created_at|idx_level///__",
+        "__index///index///__///__///__///module,action,created_at|idx_module_action///__",
+        "__index///index///__///__///__///request_id|idx_request///__"
+    ],
+    [
+        "branches///add///__///",
+        "manager_id///unsignedBigInteger///__///_NULL///NULL///__///__",
+        "__index///index///__///__///__///manager_id|idx_branches_manager///__"
+    ],
+    [
+        "departments///add///__///",
+        "head_id///unsignedBigInteger///__///_NULL///NULL///__///__",
+        "deputy_head_id///unsignedBigInteger///__///_NULL///NULL///__///__",
+        "__index///index///__///__///__///head_id|idx_depts_head///__"
+    ],
+    [
+        "workflow_executions///add///__///",
+        "context///json///__///_NULL///NULL///__///__",
+        "steps_skipped///unsignedTinyInteger///__///NOT_NULL///0///__///__",
+        "steps_halted///unsignedTinyInteger///__///NOT_NULL///0///__///__",
+        "steps_waiting///unsignedTinyInteger///__///NOT_NULL///0///__///__",
+        "run_context///text///__///_NULL///NULL///__///__"
+    ],
+    [
+        "surveys///add///__///",
+        "assessment_code///string///50///_NULL///NULL///__///Mã định danh cho Scoring Engine — nullable nếu survey không có scoring",
+        "lead_notify_email///string///255///_NULL///NULL///__///Email nhận alert khi hot lead nộp bài — để trống = không gửi",
+        "allow_multiple_responses///boolean///__///NOT_NULL///true///__///__",
+        "organization_id///unsignedBigInteger///__///_NULL///NULL///->constrained()->onDelete('restrict')///__",
+        "specialized_set_code///string///50///_NULL///NULL///__///__",
+        "__index///unique///__///__///__///assessment_code,specialized_set_code|surveys_assessment_specialized_unique///__",
+        "description///text///__///_NULL///NULL///__///__",
+        "turnstile_site_id///unsignedBigInteger///__///_NULL///NULL///->constrained('survey_turnstile_sites')->onDelete('set null')///__"
+    ],
+    [
+        "maturity_levels///add///__///",
+        "lead_temperature///string///10///NOT_NULL///'cold'///__///hot | warm | cold — dùng để classify lead"
+    ],
+    [
+        "score_rules///add///__///",
+        "feature_code///string///100///_NULL///NULL///__///Định danh đặc trưng Fi — cầu nối với feature_weights. Mặc định = field_key",
+        "question_scoring_type///string///30///_NULL///NULL///__///none | boolean | single_choice | multi_choice | numeric_range. NULL = dùng condition_type",
+        "min_score_cap///integer///__///_NULL///NULL///__///multi_choice: chặn dưới tổng score",
+        "max_score_cap///integer///__///_NULL///NULL///__///multi_choice: chặn trên tổng score",
+        "section_id///unsignedBigInteger///__///_NULL///NULL///->constrained('survey_sections')->onDelete('set null')///FK -> survey_sections, dùng cho sectioned aggregation",
+        "__index///unique///__///__///__///assessment_code,field_key,domain_code,condition_type|uq_score_rule_v2///__"
+    ],
+    [
+        "score_rule_options///add///__///",
+        "option_label///string///255///NOT_NULL///''///__///Nhãn hiển thị của option"
+    ],
+    [
+        "survey_sections///add///__///",
+        "section_code///string///50///_NULL///NULL///__///Code định danh section — dùng cho sectioned aggregation",
+        "assessment_code///string///50///_NULL///NULL///__///Gắn section vào assessment — dùng cho sectioned aggregation",
+        "min_score///integer///__///NOT_NULL///0///__///Raw score thấp nhất lý thuyết (dùng cho normalize)",
+        "max_score///integer///__///NOT_NULL///100///__///Raw score cao nhất lý thuyết (dùng cho normalize)"
+    ],
+    [
+        "roadmap_phases///add///__///",
+        "band_code///string///50///_NULL///NULL///__///Gắn phase theo score_band.band_code — mới theo spec. NULL = dùng maturity_level (cũ)"
+    ],
+    [
+        "survey_responses///add///__///",
+        "__index///index///__///__///__///survey_id,respondent_ref|survey_responses_survey_respondent_idx///__"
+    ],
+    [
+        "submission_behavior_log///add///__///",
+        "__index///index///__///__///__///response_id,occurred_at|behavior_logs_response_occurred_idx///__"
+    ],
+    [
+        "survey_tokens///add///__///",
+        "usage_limit///unsignedInteger///__///_NULL///NULL///__///__",
+        "usage_count///unsignedInteger///__///NOT_NULL///0///__///__"
+    ],
+    [
+        "survey_answers///add///__///",
+        "row_key///string///100///_NULL///NULL///__///__",
+        "__index///index///__///__///__///response_id,field_id,row_key|sa_response_field_row_idx///__"
+    ],
+    [
+        "scoring_feedback///add///__///",
+        "submitted_by///unsignedBigInteger///__///_NULL///NULL///__///__",
+        "submitted_at///timestamp///__///_NULL///NULL///__///__"
+    ],
+    [
+        "assessment_results///add///__///",
+        "public_token///string///64///_NULL///NULL///->unique()///Token cho phép xem kết quả công khai không cần đăng nhập"
+    ],
+    [
+        "employees///add///__///",
+        "personal_email///string///150///_NULL///NULL///__///__",
+        "address///text///__///_NULL///NULL///__///__",
+        "national_id_issued///date///__///_NULL///NULL///__///__",
+        "bank_account///string///30///_NULL///NULL///__///__",
+        "bank_name///string///100///_NULL///NULL///__///__",
+        "probation_end_date///date///__///_NULL///NULL///__///__",
+        "contract_start///date///__///_NULL///NULL///__///__",
+        "contract_end///date///__///_NULL///NULL///__///__",
+        "salary_base///decimal///15,2///_NULL///NULL///__///__",
+        "salary_currency///char///3///NOT_NULL///'VND'///__///__",
+        "work_location///string///20///_NULL///NULL///__///__",
+        "emergency_contact_name///string///150///_NULL///NULL///__///__",
+        "emergency_contact_phone///string///20///_NULL///NULL///__///__",
+        "resigned_at///date///__///_NULL///NULL///__///__",
+        "resignation_reason///text///__///_NULL///NULL///__///__",
+        "notes///text///__///_NULL///NULL///__///__",
+        "digital_competency_score///decimal///5,2///_NULL///NULL///__///Điểm năng lực số — model đã khai báo trong $casts nhưng thiếu migration, gây MissingAttributeException khi tạo/đọc Employee",
+        "digital_maturity_level///string///64///_NULL///NULL///__///band_code/persona_code mức độ trưởng thành số — set bởi UpdateEmployeeDigitalCompetencyListener",
+        "latest_assessment_result_id///unsignedBigInteger///__///_NULL///NULL///->constrained('assessment_results')->onDelete('set null')///Kết quả assessment TDWCF gần nhất",
+        "last_assessed_at///timestamp///__///_NULL///NULL///__///__"
+    ],
+    [
+        "employee_history///add///__///",
+        "old_salary_base///decimal///15,2///_NULL///NULL///__///__",
+        "new_salary_base///decimal///15,2///_NULL///NULL///__///__"
+    ],
+    [
+        "job_titles///add///__///",
+        "salary_min///decimal///15,2///_NULL///NULL///__///__",
+        "salary_max///decimal///15,2///_NULL///NULL///__///__",
+        "salary_currency///char///3///NOT_NULL///'VND'///__///__",
+        "is_manager_role///tinyInteger///__///NOT_NULL///0///__///__",
+        "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm"
+    ],
+    [
+        "rc_candidates///add///__///",
+        "date_of_birth///date///__///_NULL///NULL///__///__",
+        "gender///enum///[male,female,other]///_NULL///NULL///__///__",
+        "current_title///string///150///_NULL///NULL///__///__",
+        "current_company///string///150///_NULL///NULL///__///__",
+        "years_experience///smallInteger///__///_NULL///NULL///__///__",
+        "skills///text///__///_NULL///NULL///__///__",
+        "referred_by///unsignedBigInteger///__///_NULL///NULL///__///__",
+        "mkt_applicant_id///char///36///_NULL///NULL///->index()///__",
+        "status///string///20///NOT_NULL///'active'///->index()///__",
+        "blacklist_reason///text///__///_NULL///NULL///__///__",
+        "created_by///unsignedBigInteger///__///_NULL///NULL///__///__",
+        "updated_by///unsignedBigInteger///__///_NULL///NULL///__///__",
+        "__index///index///__///__///__///org_id,status,source|idx_rc_cand_status///__"
+    ],
+    [
+        "rc_applications///add///__///",
+        "current_stage_id///unsignedBigInteger///__///_NULL///NULL///__///__",
+        "expected_salary///decimal///15,2///_NULL///NULL///__///__",
+        "notice_period_days///smallInteger///__///_NULL///NULL///__///__",
+        "is_disqualified///boolean///__///NOT_NULL///false///__///__",
+        "disqualify_reason///text///__///_NULL///NULL///__///__",
+        "assigned_to///unsignedBigInteger///__///_NULL///NULL///__///__",
+        "rejection_reason///text///__///_NULL///NULL///__///__",
+        "applied_at///timestamp///__///_NULL///NULL///__///__",
+        "__index///index///__///__///__///current_stage_id,status|idx_rc_app_stage///__",
+        "__index///index///__///__///__///assigned_to,status|idx_rc_app_assigned///__",
+        "__index///index///__///__///__///org_id,is_disqualified,created_at|idx_rc_app_disq///__"
+    ],
+    [
+        "mkt_listings///add///__///",
+        "posted_by///unsignedBigInteger///__///NOT_NULL///0///__///__",
+        "slug///string///320///_NULL///NULL///->unique()///__",
+        "benefits///text///__///_NULL///NULL///__///__",
+        "visibility///string///20///NOT_NULL///'public'///__///__",
+        "salary_is_negotiable///boolean///__///NOT_NULL///false///__///__",
+        "salary_is_visible///boolean///__///NOT_NULL///true///__///__",
+        "budget_min///decimal///15,2///_NULL///NULL///__///__",
+        "budget_max///decimal///15,2///_NULL///NULL///__///__",
+        "duration_days///integer///__///_NULL///NULL///__///__",
+        "department_id///unsignedBigInteger///__///_NULL///NULL///__///__",
+        "position_id///unsignedBigInteger///__///_NULL///NULL///__///__",
+        "bookmark_count///integer///__///NOT_NULL///0///__///__",
+        "jp_sync_status///string///20///_NULL///NULL///__///__",
+        "auto_close_on_jp///boolean///__///NOT_NULL///true///__///__"
+    ],
+    [
+        "assessments///add///__///",
+        "organization_id///unsignedBigInteger///__///_NULL///NULL///->constrained()->onDelete('restrict')///__",
+        "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm",
+        "source_type///string///30///NOT_NULL///'standalone'///__///global_template|survey_linked|lead_scoring|standalone",
+        "source_ref///string///255///_NULL///NULL///__///slug/code của entity nguồn — VD: survey slug nếu survey_linked"
+    ],
+    [
+        "media///add///__///",
+        "organization_id///unsignedBigInteger///__///_NULL///NULL///__///__",
+        "uploaded_at///timestamp///__///_NULL///NULL///__///Timestamp user thực sự upload — bảo toàn khi migrate từ bảng cũ",
+        "last_touched_at///timestamp///__///_NULL///NULL///__///Jodit orphan TTL: update mỗi khi session active; NULL = không phải jodit orphan",
+        "__index///index///__///__///__///model_type,model_id,collection_name|idx_media_polymorphic///__",
+        "__index///index///__///__///__///disk,created_at|idx_media_disk///__",
+        "__index///index///__///__///__///collection_name,model_type,last_touched_at|idx_media_orphan///__"
+    ],
+    [
+        "jp_skill_masters///add///__///",
+        "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm"
+    ],
+    [
+        "jp_benefit_masters///add///__///",
+        "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm"
+    ],
+    [
+        "org_chart_configs///add///__///",
+        "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm"
+    ],
+    [
+        "user_role_scopes///add///__///",
+        "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm"
+    ],
+    [
+        "workflows///add///__///",
+        "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm",
+        "category///string///64///_NULL///NULL///__///__",
+        "icon///string///64///_NULL///NULL///__///__",
+        "color///string///7///_NULL///NULL///__///__",
+        "tags///text///__///_NULL///NULL///__///__",
+        "definition_status///unsignedTinyInteger///__///NOT_NULL///1///__///__",
+        "version///unsignedTinyInteger///__///NOT_NULL///1///__///__",
+        "cooldown_window_min///unsignedSmallInteger///__///_NULL///NULL///__///__",
+        "cooldown_count_max///unsignedTinyInteger///__///_NULL///NULL///__///__",
+        "allowed_trigger_roles///text///__///_NULL///NULL///__///__",
+        "template_id///unsignedBigInteger///__///_NULL///NULL///__///__",
+        "__index///index///__///__///__///organization_id,category|idx_org_category///__"
+    ],
+    [
+        "projects///add///__///",
+        "progress_pct///unsignedSmallInteger///__///NOT_NULL///0///__///__",
+        "task_total///unsignedSmallInteger///__///NOT_NULL///0///__///__",
+        "task_done///unsignedSmallInteger///__///NOT_NULL///0///__///__",
+        "vertical_code///string///50///_NULL///NULL///->index()///__"
+    ],
+    [
+        "workflow_steps///add///__///",
+        "group_id///unsignedBigInteger///__///_NULL///NULL///__///__",
+        "step_key///string///64///_NULL///NULL///__///__",
+        "label///string///191///_NULL///NULL///__///__",
+        "step_type///unsignedTinyInteger///__///NOT_NULL///1///__///__",
+        "action_config///text///__///_NULL///NULL///__///__",
+        "condition_config///text///__///_NULL///NULL///__///__",
+        "step_output_key///string///64///_NULL///NULL///__///__",
+        "halt_on_fail///boolean///__///NOT_NULL///false///__///__",
+        "retry_times///unsignedTinyInteger///__///NOT_NULL///3///__///__",
+        "timeout_seconds///unsignedSmallInteger///__///NOT_NULL///30///__///__",
+        "__index///index///__///__///__///group_id///__"
+    ],
+    [
+        "workflow_execution_steps///add///__///",
+        "condition_result///boolean///__///_NULL///NULL///__///__",
+        "skip_reason///string///64///_NULL///NULL///__///__",
+        "output_data///text///__///_NULL///NULL///__///__"
+    ],
+    [
+        "plans///add///__///",
+        "tag_line///string///120///_NULL///NULL///__///__",
+        "tier///string///32///NOT_NULL///'growth'///__///__",
+        "badge_color///string///64///_NULL///NULL///__///__",
+        "is_public///boolean///__///NOT_NULL///true///__///__",
+        "annual_price///decimal///15,2///_NULL///NULL///__///__",
+        "currency_local///string///10///NOT_NULL///'VND'///__///__",
+        "price_local///decimal///15,2///_NULL///NULL///__///__"
+    ],
+    [
+        "organization_feature_overrides///add///__///",
+        "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm"
+    ],
+    [
+        "subscription_invoices///add///__///",
+        "gateway///string///32///_NULL///NULL///__///__",
+        "invoice_type///string///32///NOT_NULL///'renewal'///__///__",
+        "new_plan_id///unsignedBigInteger///__///_NULL///NULL///__///__",
+        "__index///index///__///__///__///new_plan_id|idx_inv_new_plan///__"
+    ],
+    [
+        "leads///add///__///",
+        "customer_id///unsignedBigInteger///__///_NULL///NULL///__///__",
+        "__index///index///__///__///__///organization_id,customer_id|idx_lead_customer///__"
+    ],
+    [
+        "customers///add///__///",
+        "secondary_email///string///255///_NULL///NULL///__///__",
+        "secondary_phone///string///30///_NULL///NULL///__///__",
+        "province_name///string///100///_NULL///NULL///__///__",
+        "ward_code///string///20///_NULL///NULL///__///__",
+        "ward_name///string///100///_NULL///NULL///__///__",
+        "address_line///string///500///_NULL///NULL///__///__",
+        "notes///string///2000///_NULL///NULL///__///__",
+        "customer_code///string///50///_NULL///NULL///__///__"
+    ],
+    [
+        "sandbox_sessions///add///__///",
+        "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm"
+    ],
+    [
+        "workforce_certifications///add///__///",
+        "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm"
+    ],
+    [
+        "notifications///add///__///",
+        "organization_id///unsignedBigInteger///__///_NULL///NULL///->index()///__"
+    ],
+    [
+        "recommendation_rules///add///__///",
+        "kc_category_id///unsignedBigInteger///__///_NULL///NULL///__///__",
+        "kc_item_tag///string///100///_NULL///NULL///__///__",
+        "career_pathway_step_code///string///100///_NULL///NULL///__///__"
+    ],
+    [
+        "workforce_recommendations///add///__///",
+        "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm"
+    ],
+    [
+        "workforce_portfolios///add///__///",
+        "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm"
+    ],
+    [
+        "organization_members///add///__///",
+        "status///string///20///NOT_NULL///'active'///__///active | inactive | paused | suspended",
+        "left_at///timestamp///__///_NULL///NULL///__///__",
+        "exit_reason///string///50///_NULL///NULL///__///resigned | terminated | retired | contract_end | internal_transfer",
+        "exit_initiated_by///string///20///_NULL///NULL///__///self | hr | system",
+        "job_title_at_exit///string///200///_NULL///NULL///__///__",
+        "department_at_exit///string///200///_NULL///NULL///__///__",
+        "role_at_exit///string///50///_NULL///NULL///__///__",
+        "account_was_org_created///tinyInteger///__///NOT_NULL///0///__///1 nếu org tạo tài khoản này (không phải user tự đăng ký)",
+        "contract_end_date///date///__///_NULL///NULL///__///Ngày hết hợp đồng — hệ thống auto-suspend nếu HR không offboard trước",
+        "auto_suspended_at///timestamp///__///_NULL///NULL///__///Thời điểm hệ thống tự suspend do hết contract_end_date",
+        "last_active_at///timestamp///__///_NULL///NULL///__///Lần cuối user có activity trong org này (login + action)",
+        "effective_left_at///timestamp///__///_NULL///NULL///__///Ngày thực tế nghỉ việc — do HR nhập, có thể khác left_at",
+        "offboarded_at///timestamp///__///_NULL///NULL///__///Ngày HR click offboard trên hệ thống",
+        "late_offboard_gap_days///unsignedSmallInteger///__///_NULL///NULL///__///Số ngày gap giữa effective_left_at và offboarded_at — 0 nếu offboard đúng hạn",
+        "__index///index///__///__///__///status|om_status_index///__",
+        "__index///index///__///__///__///left_at|om_left_at_index///__"
+    ],
+    [
+        "identity_verifications///add///__///",
+        "issuing_province_code///char///2///_NULL///NULL///__///2-char province code từ provinces.province_code — derived từ 3 chữ số đầu CCCD",
+        "email_candidate///string///255///_NULL///NULL///__///Email address captured at send time; compared on confirm to detect mid-flight email changes"
+    ],
+    [
+        "deployment_targets///add///__///",
+        "readiness_response_id///unsignedBigInteger///__///_NULL///NULL///->constrained('survey_responses')->onDelete('set null')///__",
+        "readiness_score///unsignedTinyInteger///__///_NULL///NULL///__///0-100 readiness score; null = not assessed yet",
+        "data_collection_response_id///unsignedBigInteger///__///_NULL///NULL///->constrained('survey_responses')->onDelete('set null')///__",
+        "deployment_id///unsignedBigInteger///__///_NULL///NULL///->constrained('deployments')->onDelete('set null')///Deployment Engine (spec Phần 4) — pin runtime vào lần deploy đã tạo ra nó",
+        "blueprint_version_id///unsignedBigInteger///__///_NULL///NULL///->constrained('blueprint_versions')->onDelete('set null')///Deployment Engine (spec Phần 4) — pin runtime vào đúng Blueprint Version đã deploy"
+    ],
+    [
+        "vertical_templates///add///__///",
+        "data_collection_template_slug///string///100///_NULL///NULL///__///slug survey template thu thập dữ liệu thực địa — ví dụ: data_collection_v1",
+        "export_config///json///__///_NULL///NULL///__///Optional export config JSON (sheets, columns, source mappings) for future vertical-specific export formats",
+        "organization_id///unsignedBigInteger///__///_NULL///NULL///->constrained()->onDelete('cascade')///Hợp nhất thư viện + bản instance tổ chức — null = thư viện dùng chung, có giá trị = bản của tổ chức",
+        "source_template_id///unsignedBigInteger///__///_NULL///NULL///->constrained('vertical_templates')->onDelete('set null')///Bản mẫu gốc khi nhân bản — null nếu tự tạo từ đầu",
+        "status///string///20///NOT_NULL///'active'///__///Thay vai trò bảng organization_verticals (active|inactive)",
+        "activated_at///timestamp///__///_NULL///NULL///__///Thời điểm kích hoạt cho tổ chức",
+        "activated_by///unsignedBigInteger///__///_NULL///NULL///->constrained('users')->onDelete('set null')///Người kích hoạt",
+        "__index///unique///__///__///__///organization_id,code|uq_vertical_template_org_code///Composite unique thay cho unique global trên code — cho phép mỗi organization có 1 bản activate riêng với cùng code"
+    ],
+    [
+        "vertical_templates///drop///__///Dọn cột chết — chuyển phases/checklist sang bảng con vertical_phases/vertical_checklist_items",
+        "phases///json///__///_NULL///NULL///__///__",
+        "default_checklist///json///__///_NULL///NULL///__///__",
+        "default_activity_types///json///__///_NULL///NULL///__///__",
+        "default_legal_doc_types///json///__///_NULL///NULL///__///__",
+        "default_hierarchy///json///__///_NULL///NULL///__///__",
+        "export_adapter///string///200///_NULL///NULL///__///__",
+        "__index///unique///__///__///__///vertical_templates_code_unique///Xoá unique global trên code — đã thay bằng uq_vertical_template_org_code (composite theo organization_id)"
+    ],
+    [
+        "vertical_config_items///add///sort_order///Đổi khóa từ (organization_id, vertical_code) sang vertical_template_id",
+        "vertical_template_id///unsignedBigInteger///__///NOT_NULL///__///->constrained('vertical_templates')->onDelete('cascade')///FK -> vertical_templates — thay cho (organization_id, vertical_code)",
+        "__index///unique///__///__///__///vertical_template_id,config_group,code|uq_vertical_config_item_template///Unique theo template thay vì theo org+code cũ",
+        "__index///index///__///__///__///vertical_template_id,config_group,is_active|idx_vertical_config_lookup_template///Lookup theo template thay vì theo org+code cũ"
+    ],
+    [
+        "vertical_config_items///drop///__///Xóa organization_id, vertical_code — đã thay bằng vertical_template_id",
+        "__index///unique///__///__///__///uq_vertical_config_item///Composite key cũ chứa organization_id+vertical_code — phải xoá trước khi drop cột, nếu không MySQL báo lỗi 1072",
+        "__index///index///__///__///__///idx_vertical_config_lookup///Composite index cũ chứa organization_id+vertical_code — phải xoá trước khi drop cột",
+        "organization_id///unsignedBigInteger///__///NOT_NULL///__///->constrained()->onDelete('cascade')///__",
+        "vertical_code///string///50///NOT_NULL///__///__///__"
+    ],
+    [
+        "kc_items///add///__///",
+        "domain_code///string///10///_NULL///NULL///__///__",
+        "difficulty///unsignedTinyInteger///__///_NULL///NULL///__///__",
+        "__index///index///__///__///__///domain_code///__",
+        "__index///index///__///__///__///difficulty///__"
+    ],
+    [
+        "deployment_issues///add///__///Thêm issue_type (mã VerticalConfigItem, tuỳ biến theo từng tổ chức) và severity_detail (mô tả chi tiết mức độ, tách khỏi description chung)",
+        "issue_type///string///50///_NULL///NULL///__///Mã loại issue — tra theo vertical_config_items(config_group=issue_type) của đúng vertical_template_id tổ chức, không FK cứng vì danh mục tự tổ chức định nghĩa riêng",
+        "severity_detail///text///__///_NULL///NULL///__///Mô tả chi tiết mức độ/tình trạng (vd: diện tích nhiễm, biện pháp đã xử lý) — tách khỏi description chung"
+    ],
+    [
+        "deployment_progress_logs///add///__///Liên kết trực tiếp log tới checklist item — cho phép truy vết + ghi chú nhật ký riêng theo từng đề mục, thay vì chỉ nhúng tên mục vào remark dạng text",
+        "deployment_checklist_item_id///unsignedBigInteger///__///_NULL///NULL///->constrained('deployment_checklist_items')->onDelete('set null')///Null nếu log ghi nhận chung (form Nhật ký tiến độ), có giá trị nếu log gắn với 1 mục checklist cụ thể (tick hoặc ghi chú riêng)",
+        "__index///index///__///__///__///deployment_checklist_item_id///__"
+    ],
+    [
+        "deployment_checklist_items///add///__///Cho phép PM chỉ định trước ai (hồ sơ nhân sự) phụ trách từng đề mục checklist — tách khỏi done_by (chỉ biết được sau khi đã làm)",
+        "assigned_employee_id///unsignedBigInteger///__///_NULL///NULL///->constrained('employees')->onDelete('set null')///Nhân viên được PM chỉ định phụ trách mục này — khác done_by (người thực tế đã tick)"
+    ]
+]

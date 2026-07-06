@@ -1,0 +1,6 @@
+*.sqlite*
+storage/*
+/vendor
+.env
+!storage/framework/*
+!.gitignore

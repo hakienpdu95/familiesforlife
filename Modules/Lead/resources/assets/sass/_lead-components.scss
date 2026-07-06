@@ -1,0 +1,139 @@
+// Modules/Lead/resources/assets/sass/_lead-components.scss
+// ─────────────────────────────────────────────────────────────────────
+// CSS đặc thù module Lead: pipeline badge, kanban card, stage colors...
+// Không import trực tiếp — được @use từ lead.scss.
+// ─────────────────────────────────────────────────────────────────────
+
+@use 'tokens' as t;   // DaisyUI vars: $primary, $border, $text-muted...
+@use 'mixins' as m;   // Mixins: card-base, truncate, flex-center...
+
+// ── Pipeline stage colors (CSS custom properties) ────────────────────
+// Định nghĩa riêng Lead, không ảnh hưởng module khác.
+:root {
+    --lead-stage-new:       oklch(60% 0.14 250);   // xanh dương
+    --lead-stage-contacted: oklch(62% 0.16 200);   // xanh lá nhạt
+    --lead-stage-qualified: oklch(64% 0.16 170);   // xanh lá
+    --lead-stage-proposal:  oklch(65% 0.17 75);    // vàng cam
+    --lead-stage-won:       oklch(60% 0.18 150);   // xanh lá đậm
+    --lead-stage-lost:      oklch(58% 0.18 25);    // đỏ
+}
+
+// ── Pipeline stage badge ─────────────────────────────────────────────
+.lead-stage-badge {
+    display:       inline-flex;
+    align-items:   center;
+    gap:           .3rem;
+    padding:       .2rem .65rem;
+    border-radius: 999px;
+    font-size:     .75rem;
+    font-weight:   500;
+    white-space:   nowrap;
+
+    &::before {
+        content:       '';
+        width:         6px;
+        height:        6px;
+        border-radius: 50%;
+        background:    currentColor;
+        flex-shrink:   0;
+    }
+}
+
+// ── Kanban column ────────────────────────────────────────────────────
+.lead-kanban-col {
+    min-width:     260px;
+    max-width:     300px;
+    flex-shrink:   0;
+
+    .col-header {
+        @include m.flex-center;
+        justify-content: space-between;
+        padding:         .5rem .75rem;
+        border-radius:   t.$radius-lg t.$radius-lg 0 0;
+        font-size:       .8125rem;
+        font-weight:     600;
+        color:           t.$text;
+        background:      t.$base-200;
+        border-bottom:   2px solid t.$border;
+    }
+
+    .col-body {
+        min-height:    200px;
+        padding:       .5rem;
+        background:    oklch(var(--b2) / .4);
+        border-radius: 0 0 t.$radius-lg t.$radius-lg;
+        display:       flex;
+        flex-direction: column;
+        gap:           .5rem;
+    }
+}
+
+// ── Kanban card ──────────────────────────────────────────────────────
+.lead-kanban-card {
+    @include m.card-base;
+    padding:    .75rem;
+    cursor:     pointer;
+    transition: transform t.$transition-fast, box-shadow t.$transition-fast;
+
+    &:hover {
+        transform:  translateY(-1px);
+        box-shadow: t.$shadow-md;
+    }
+
+    .card-name {
+        font-size:   .875rem;
+        font-weight: 600;
+        @include m.truncate;
+        color: t.$text;
+    }
+
+    .card-company {
+        font-size:  .75rem;
+        color:      t.$text-muted;
+        @include m.truncate;
+        margin-top: .125rem;
+    }
+
+    .card-value {
+        font-size:   .75rem;
+        font-weight: 500;
+        color:       t.$primary;
+        margin-top:  .375rem;
+    }
+
+    .card-tags {
+        display:    flex;
+        flex-wrap:  wrap;
+        gap:        .25rem;
+        margin-top: .375rem;
+    }
+}
+
+// ── Lead stats card (dashboard/index) ────────────────────────────────
+.lead-stat-card {
+    @include m.card-base;
+    padding:    1rem;
+    text-align: center;
+
+    .stat-value {
+        font-size:   1.5rem;
+        font-weight: 700;
+        color:       t.$text;
+        line-height: 1.2;
+    }
+
+    .stat-label {
+        font-size:  .75rem;
+        color:      t.$text-muted;
+        margin-top: .25rem;
+    }
+
+    .stat-delta {
+        font-size:   .75rem;
+        font-weight: 500;
+        margin-top:  .25rem;
+
+        &.up   { color: t.$success; }
+        &.down { color: t.$error; }
+    }
+}

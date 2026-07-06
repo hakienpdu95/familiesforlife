@@ -1,0 +1,11 @@
+{
+    "name": "PerformanceReview",
+    "alias": "performancereview",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\PerformanceReview\\Providers\\PerformanceReviewServiceProvider"
+    ],
+    "files": []
+}

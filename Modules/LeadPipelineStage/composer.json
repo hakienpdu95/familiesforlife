@@ -1,0 +1,27 @@
+{
+    "name": "nwidart/lead-pipeline-stage",
+    "description": "Lead Pipeline Stage module",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\LeadPipelineStage\\": "app/",
+            "Modules\\LeadPipelineStage\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\LeadPipelineStage\\Tests\\": "tests/"
+        }
+    }
+}

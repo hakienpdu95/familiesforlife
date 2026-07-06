@@ -1,0 +1,15 @@
+{
+    "name": "minhan/report",
+    "description": "Report & Analytics module for Minhan Platform",
+    "autoload": {
+        "psr-4": {
+            "Modules\\Report\\": "app/",
+            "Modules\\Report\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Report\\Tests\\": "tests/"
+        }
+    }
+}

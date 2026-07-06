@@ -1,0 +1,11 @@
+{
+    "name": "SolutionCatalog",
+    "alias": "solutioncatalog",
+    "description": "UI danh mục Business Solution cho System Admin/tổ chức duyệt và kích hoạt — module thuần UI/Query, không có bảng dữ liệu riêng (đọc business_solutions/blueprint_versions)",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\SolutionCatalog\\Providers\\SolutionCatalogServiceProvider"
+    ],
+    "files": []
+}

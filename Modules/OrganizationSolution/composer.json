@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/organizationsolution",
+    "description": "",
+    "authors": [
+        {
+            "name": "KienDH",
+            "email": "bonhuyn@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\OrganizationSolution\\": "app/",
+            "Modules\\OrganizationSolution\\Database\\Factories\\": "database/factories/",
+            "Modules\\OrganizationSolution\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\OrganizationSolution\\Tests\\": "tests/"
+        }
+    }
+}

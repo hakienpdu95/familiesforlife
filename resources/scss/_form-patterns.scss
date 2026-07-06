@@ -1,0 +1,248 @@
+// resources/scss/_form-patterns.scss
+// ─────────────────────────────────────────────────────────────────────
+// Pattern CSS dùng chung cho MỌI form trong hệ thống.
+// Không có class nào ở đây là module-specific.
+//
+// Load: @use 'form-patterns';  (không cần alias vì không export biến)
+// ─────────────────────────────────────────────────────────────────────
+
+@use 'tokens' as t;
+@use 'mixins' as m;
+
+// ── 0. DaisyUI v5 width override ─────────────────────────────────────
+// DaisyUI v5 dùng width: clamp(3rem, 20rem, 100%) trên .input và .select —
+// bị cap 320px khi cột rộng hơn 20rem. Override để luôn fill hết container.
+.form-control {
+    > .input,
+    > .select,
+    > .textarea,
+    > .join > .input,
+    > .join > .select {
+        width: 100%;
+    }
+}
+
+// ── 1. Color picker combo ────────────────────────────────────────────
+// Dùng: <div class="color-picker-combo">
+.color-picker-combo {
+    display:     flex;
+    gap:         .5rem;
+    align-items: center;
+
+    input[type="color"] {
+        width:         3rem;
+        height:        t.$input-h;          // khớp input-sm
+        padding:       .2rem;
+        border-radius: t.$radius-md;
+        border:        1px solid t.$border;
+        background:    t.$base-100;
+        cursor:        pointer;
+        flex-shrink:   0;
+        transition:    border-color t.$transition-fast;
+
+        &:focus { border-color: t.$border-focus; outline: none; }
+    }
+}
+
+// ── 2. Readonly / Display-only field ────────────────────────────────
+// Dùng: <input class="input input-bordered input-sm field-readonly" readonly>
+.field-readonly {
+    background:  t.$base-200 !important;
+    cursor:      not-allowed;
+    opacity:     .8;
+    font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+    font-size:   .8125rem;
+}
+
+// ── 3. Tag checkbox group ────────────────────────────────────────────
+// Dùng: <div class="tag-checkbox-group">
+.tag-checkbox-group {
+    display:   flex;
+    flex-wrap: wrap;
+    gap:       .5rem;
+
+    .tag-item {
+        cursor: pointer;
+
+        > input[type="checkbox"] { @include m.sr-only; }
+
+        .tag-badge {
+            display:        inline-flex;
+            align-items:    center;
+            padding:        .25rem .75rem;
+            border-radius:  999px;
+            font-size:      .75rem;
+            font-weight:    500;
+            border:         1.5px solid currentColor;
+            cursor:         pointer;
+            user-select:    none;
+            transition:     background-color t.$transition-fast,
+                            color           t.$transition-fast;
+        }
+    }
+}
+
+// ── 4. Wizard step indicator line ───────────────────────────────────
+// DaisyUI steps không đủ linh hoạt — dùng pattern tự viết
+.wizard-step-dot {
+    width:        2rem;
+    height:       2rem;
+    border-radius: 50%;
+    @include m.flex-center;
+    font-size:    .875rem;
+    font-weight:  700;
+    transition:   background-color t.$transition-normal,
+                  color           t.$transition-normal,
+                  box-shadow      t.$transition-normal;
+
+    &--active  {
+        background: t.$primary;
+        color:      t.$primary-content;
+        box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-primary) 20%, transparent);
+    }
+    &--done    { background: t.$success; color: #fff; }
+    &--pending { background: t.$base-200; color: t.$text-faint; }
+}
+
+.wizard-step-line {
+    flex:             1;
+    height:           2px;
+    margin:           0 .5rem;
+    margin-bottom:    1.25rem;    // align với tâm dot
+    background:       t.$border;
+    transition:       background-color t.$transition-normal;
+
+    &--done { background: t.$success; }
+}
+
+// ── 5. Form review box (wizard step cuối — xác nhận thông tin) ───────
+.form-review-box {
+    background:    t.$base-200;
+    border-radius: t.$radius-lg;
+    padding:       1rem;
+    font-size:     .875rem;
+
+    .review-grid {
+        display:               grid;
+        grid-template-columns: 1fr 1fr;
+        gap:                   .375rem .75rem;
+    }
+
+    .review-label { color: t.$text-muted; }
+    .review-value { font-weight: 500; color: t.$text; }
+}
+
+// ── 6. Identity preview (User form — live avatar + name) ─────────────
+.identity-preview {
+    display:       flex;
+    align-items:   center;
+    gap:           .75rem;
+    padding:       .75rem;
+    background:    color-mix(in oklch, var(--color-base-200) 50%, transparent);
+    border-radius: t.$radius-xl;
+
+    .avatar-ring {
+        position:      relative;
+        width:         3rem;
+        height:        3rem;
+        border-radius: 50%;
+        flex-shrink:   0;
+        overflow:      hidden;
+        ring:          2px solid t.$border;
+        transition:    ring-color t.$transition-fast;
+
+        &--active { ring-color: t.$primary; }
+
+        img, svg {
+            width:  100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    }
+
+    .identity-name {
+        font-size:   .875rem;
+        font-weight: 600;
+        @include m.truncate;
+        transition:  color t.$transition-fast;
+
+        &--placeholder { color: t.$text-faint; }
+    }
+
+    .identity-email {
+        font-size: .75rem;
+        @include m.truncate;
+        margin-top: .125rem;
+
+        &--placeholder { color: t.$text-faint; }
+    }
+}
+
+// ── 7. Password strength bar ─────────────────────────────────────────
+.pw-checks {
+    display:   flex;
+    flex-wrap: wrap;
+    gap:       .375rem .75rem;
+    margin-top: .375rem;
+
+    .pw-check {
+        display:     flex;
+        align-items: center;
+        gap:         .25rem;
+        font-size:   .75rem;
+        color:       t.$text-faint;
+        transition:  color t.$transition-fast;
+
+        &.ok  { color: t.$success; }
+    }
+}
+
+// ── 8. Submit sticky bar ─────────────────────────────────────────────
+// Dùng cho form dài — nút submit luôn visible
+.form-submit-bar {
+    display:     flex;
+    align-items: center;
+    gap:         .75rem;
+    padding:     1rem 0 .5rem;
+    margin-top:  1rem;
+    border-top:  1px solid t.$border;
+
+    // Sticky behavior — chỉ khi cần thiết, không áp dụng mặc định
+    &--sticky {
+        position:   sticky;
+        bottom:     0;
+        background: t.$base-100;
+        padding:    .75rem 1.5rem;
+        margin:     0 -1.5rem;   // bù padding card-body
+        z-index:    10;
+        box-shadow: 0 -1px 0 t.$border;
+    }
+
+    .submit-actions { margin-left: auto; display: flex; gap: .5rem; }
+}
+
+// ── 9. Skeleton loading ──────────────────────────────────────────────
+.form-skeleton {
+    .skeleton-line {
+        @include m.skeleton;
+        height:       1rem;
+        margin-bottom: .75rem;
+
+        &--short  { width: 40%; }
+        &--medium { width: 65%; }
+        &--full   { width: 100%; }
+    }
+}
+
+// ── 10. Empty state generic ──────────────────────────────────────────
+.empty-state {
+    @include m.flex-center;
+    flex-direction: column;
+    padding:        3rem 1rem;
+    text-align:     center;
+    color:          t.$text-faint;
+
+    .empty-icon  { width: 2.5rem; height: 2.5rem; margin-bottom: .75rem; }
+    .empty-title { font-size: .875rem; font-weight: 500; color: t.$text-muted; }
+    .empty-desc  { font-size: .75rem; margin-top: .25rem; }
+}

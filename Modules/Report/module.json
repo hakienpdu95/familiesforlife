@@ -1,0 +1,11 @@
+{
+    "name": "Report",
+    "alias": "report",
+    "description": "Báo cáo tổng hợp cross-module: HR, Sales, Project KPI",
+    "keywords": ["report", "analytics", "dashboard"],
+    "priority": 0,
+    "providers": [
+        "Modules\\Report\\Providers\\ReportServiceProvider"
+    ],
+    "files": []
+}

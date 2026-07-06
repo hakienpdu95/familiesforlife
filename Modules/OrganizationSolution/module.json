@@ -1,0 +1,11 @@
+{
+    "name": "OrganizationSolution",
+    "alias": "organizationsolution",
+    "description": "Kích hoạt (activation) Business Solution cho 1 tổ chức + wizard cấu hình overlay — không sửa Blueprint gốc",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\OrganizationSolution\\Providers\\OrganizationSolutionServiceProvider"
+    ],
+    "files": []
+}

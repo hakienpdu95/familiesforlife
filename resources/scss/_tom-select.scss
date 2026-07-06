@@ -1,0 +1,262 @@
+// resources/scss/_tom-select.scss
+// ─────────────────────────────────────────────────────────────────────
+// TomSelect v2 — theme override cho DaisyUI 5 (light + dark).
+//
+// Lý do dùng !important:
+//   TomSelect JS import CSS tại runtime → inject SAU module SCSS trong cascade.
+//   !important cần thiết để override màu hardcoded (#d0d0d0, #fff, #303030...)
+//   trên các property visual chính. Logic/layout giữ nguyên mặc định TomSelect.
+//
+// DaisyUI v5: biến --color-base-100 / --color-primary / --color-base-content ...
+//   (không còn --b1/--p/--bc như v3/v4).
+//   Opacity dùng color-mix(in oklch, <color> <pct>%, transparent).
+// ─────────────────────────────────────────────────────────────────────
+
+@use 'tokens' as t;
+
+// ── Positioning variables (TomSelect dùng để tính padding-right) ─────
+.ts-wrapper {
+    --ts-pr-caret: 1.75rem;
+    --ts-pr-min:   0.5rem;
+}
+.ts-wrapper.plugin-clear_button {
+    --ts-pr-clear-button: 1.25rem;
+}
+
+// ── Wrapper ───────────────────────────────────────────────────────────
+// DaisyUI .select (copied from <select> by TomSelect) adds:
+//   padding-inline: .75rem 1.75rem  → right gap for native arrow
+//   background-image: linear-gradient(...)  → the native chevron triangles
+// TomSelect renders its own chevron via ::after → strip all of it.
+.ts-wrapper {
+    position:         relative !important;
+    width:            100% !important;
+    padding:          0 !important;
+    background-image: none !important;
+}
+
+// ── Control (ô hiển thị) ──────────────────────────────────────────────
+.ts-control,
+.ts-wrapper.single.input-active .ts-control {
+    background:    t.$base-100 !important;
+    border:        1px solid t.$border !important;
+    border-radius: t.$radius-md !important;
+    color:         t.$text !important;
+    font-family:   inherit !important;
+    font-size:     t.$input-font !important;
+    line-height:   1 !important;
+    min-height:    t.$input-h;
+    padding-top:   0 !important;
+    padding-bottom: 0 !important;
+    padding-left:  t.$input-px !important;
+    box-shadow:    none !important;
+    align-items:   center;
+    cursor:        pointer;
+    transition:    border-color t.$transition-fast, box-shadow t.$transition-fast;
+}
+
+// ── Search input bên trong control ───────────────────────────────────
+.ts-control > input {
+    color:        t.$text !important;
+    font-size:    t.$input-font !important;
+    font-family:  inherit !important;
+    line-height:  normal !important;
+    background:   transparent !important;
+    min-height:   0 !important;
+    max-height:   none !important;
+
+    &::placeholder {
+        color:   t.$text-muted;
+        opacity: 1;
+    }
+}
+
+// ── Focus ─────────────────────────────────────────────────────────────
+.ts-wrapper.focus .ts-control {
+    border-color: t.$border-focus !important;
+    box-shadow:   0 0 0 2px color-mix(in oklch, var(--color-primary) 20%, transparent) !important;
+    outline:      none !important;
+}
+
+// ── Disabled ──────────────────────────────────────────────────────────
+.ts-wrapper.disabled .ts-control,
+.ts-wrapper.disabled .ts-control *,
+.disabled .ts-control,
+.disabled .ts-control * {
+    background: t.$base-200 !important;
+    color:      t.$text-muted !important;
+    cursor:     not-allowed !important;
+}
+
+// ── Single: chevron arrow (thay thế triangle mặc định) ───────────────
+.ts-wrapper.single .ts-control::after {
+    content:          '' !important;
+    border:           none !important;
+    display:          block !important;
+    position:         absolute !important;
+    right:            0.4rem !important;
+    top:              50% !important;
+    transform:        translateY(-50%) !important;
+    width:            1.1rem !important;
+    height:           1.1rem !important;
+    pointer-events:   none !important;
+    background-color: color-mix(in oklch, var(--color-base-content) 40%, transparent) !important;
+    -webkit-mask:     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E") center / contain no-repeat !important;
+    mask:             url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E") center / contain no-repeat !important;
+    transition:       transform t.$transition-fast;
+}
+// Chevron xoay khi dropdown mở
+.ts-wrapper.single.dropdown-active .ts-control::after {
+    transform: translateY(-50%) rotate(180deg) !important;
+}
+// Focus state: chevron đậm hơn
+.ts-wrapper.single.focus .ts-control::after {
+    background-color: t.$primary !important;
+}
+
+// ── Single: item đã chọn ──────────────────────────────────────────────
+.ts-wrapper.single .ts-control .item {
+    color:         t.$text;
+    overflow:      hidden;
+    text-overflow: ellipsis;
+    white-space:   nowrap;
+    font-size:     t.$input-font;
+}
+
+// ── Multi: chip items ─────────────────────────────────────────────────
+.ts-wrapper.multi .ts-control {
+    padding-top:    .25rem !important;
+    padding-bottom: .25rem !important;
+    min-height:     t.$input-h;
+    height:         auto;
+    line-height:    normal !important;
+    align-items:    center;
+    gap:            .25rem;
+
+    > div {
+        display:       inline-flex !important;
+        align-items:   center !important;
+        gap:           .2rem !important;
+        background:    t.$primary-subtle !important;
+        border:        1px solid color-mix(in oklch, var(--color-primary) 25%, transparent) !important;
+        color:         t.$primary !important;
+        border-radius: t.$radius-sm !important;
+        font-size:     .8rem !important;
+        padding:       .125rem .4rem !important;
+        margin:        0 !important;
+        line-height:   1.4 !important;
+
+        &.active {
+            background:   color-mix(in oklch, var(--color-primary) 20%, transparent) !important;
+            border-color: t.$primary !important;
+        }
+    }
+}
+.ts-wrapper.multi.has-items .ts-control {
+    padding-top:    .25rem !important;
+    padding-bottom: .25rem !important;
+}
+
+// ── Clear button (plugin-clear_button) ────────────────────────────────
+.plugin-clear_button .clear-button {
+    color:        color-mix(in oklch, var(--color-base-content) 35%, transparent) !important;
+    font-size:    .875rem !important;
+    line-height:  1 !important;
+    margin-right: 0 !important;
+    padding:      .15rem .2rem !important;
+    transition:   color t.$transition-fast;
+
+    &:hover { color: t.$error !important; }
+}
+
+// ── Dropdown ──────────────────────────────────────────────────────────
+.ts-dropdown {
+    background:    t.$base-100 !important;
+    border:        1px solid t.$border !important;
+    border-top:    1px solid t.$border !important;
+    border-radius: t.$radius-lg !important;
+    box-shadow:    0 8px 24px rgb(0 0 0 / .12), 0 2px 8px rgb(0 0 0 / .06) !important;
+    z-index:       t.$z-dropdown !important;
+    margin-top:    .3rem !important;
+    overflow:      hidden;
+    color:         t.$text !important;
+    font-family:   inherit !important;
+    font-size:     t.$input-font !important;
+}
+
+// ── Dropdown content scroll container ────────────────────────────────
+.ts-dropdown .ts-dropdown-content {
+    max-height:          280px;
+    overflow-y:          auto;
+    overscroll-behavior: contain;
+    padding:             .25rem 0;
+    scrollbar-width:     thin;
+    scrollbar-color:     color-mix(in oklch, var(--color-base-content) 15%, transparent) transparent;
+}
+
+// ── Options ───────────────────────────────────────────────────────────
+.ts-dropdown .ts-option,
+.ts-dropdown [data-selectable] {
+    color:       t.$text !important;
+    background:  transparent !important;
+    padding:     .45rem .75rem !important;
+    font-size:   t.$input-font !important;
+    line-height: 1.4 !important;
+    cursor:      pointer;
+    transition:  background-color t.$transition-fast;
+
+    &:hover,
+    &.active {
+        background: t.$base-200 !important;
+        color:      t.$text !important;
+    }
+    &.selected {
+        background:  t.$primary-subtle !important;
+        color:       t.$primary !important;
+        font-weight: 500;
+    }
+    &.selected.active {
+        background: color-mix(in oklch, var(--color-primary) 18%, transparent) !important;
+        color:      t.$primary !important;
+    }
+    &.disabled,
+    &.option-disabled {
+        color:          t.$text-faint !important;
+        cursor:         not-allowed !important;
+        pointer-events: none;
+    }
+}
+
+// ── Optgroup header ───────────────────────────────────────────────────
+.ts-dropdown .ts-optgroup-header,
+.ts-dropdown .optgroup-header {
+    font-size:      .6875rem !important;
+    font-weight:    700 !important;
+    letter-spacing: .06em !important;
+    text-transform: uppercase !important;
+    color:          t.$text-muted !important;
+    background:     transparent !important;
+    padding:        .55rem .75rem .3rem !important;
+    border-bottom:  1px solid t.$border;
+}
+
+// ── No results ────────────────────────────────────────────────────────
+.ts-dropdown .no-results {
+    padding:    .75rem !important;
+    font-size:  .875rem !important;
+    color:      t.$text-muted !important;
+    text-align: center !important;
+    background: transparent !important;
+}
+
+// ── Error state ───────────────────────────────────────────────────────
+.ts-wrapper.select-error .ts-control {
+    border-color: t.$border-error !important;
+}
+.ts-wrapper.select-error.focus .ts-control {
+    box-shadow: 0 0 0 2px color-mix(in oklch, var(--color-error) 20%, transparent) !important;
+}
+.form-control:has(.form-val-msg) .ts-wrapper .ts-control,
+.form-control:has(p.text-error)  .ts-wrapper .ts-control {
+    border-color: t.$border-error !important;
+}

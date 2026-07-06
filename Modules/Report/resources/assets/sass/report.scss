@@ -1,0 +1,9 @@
+// Report module styles
+.report-stat-card {
+  @apply card bg-base-100 border border-base-300 shadow-sm;
+}
+
+.report-chart-container {
+  @apply w-full;
+  min-height: 280px;
+}

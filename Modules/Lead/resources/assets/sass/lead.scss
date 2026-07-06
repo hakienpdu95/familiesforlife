@@ -1,0 +1,18 @@
+// Modules/Lead/resources/assets/sass/lead.scss
+// ─────────────────────────────────────────────────────────────────────
+// Entry point SCSS của module Lead.
+// Build: vite.config.backend.js → public/build/backend/assets/modules/lead.[hash].css
+//
+// Blade:
+//   @push('styles')
+//       @vite(['Modules/Lead/resources/assets/sass/lead.scss'], 'build/backend')
+//   @endpush
+// ─────────────────────────────────────────────────────────────────────
+
+// ── Shared (từ resources/scss/ qua loadPaths trong vite.config.backend.js) ──
+@use 'form-patterns';   // .color-picker-combo, .field-readonly, .tag-checkbox-group,
+                        // .wizard-step-dot, .form-submit-bar, .empty-state, ...
+@use 'tom-select';      // TomSelect dark/light theme override
+
+// ── Module-specific ───────────────────────────────────────────────────
+@use 'lead-components'; // Kanban, pipeline badge, lead card, ...

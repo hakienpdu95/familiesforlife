@@ -1,0 +1,16 @@
+{
+    "name": "nwidart/deployment",
+    "description": "Deployment Engine — generic vertical deployment management",
+    "autoload": {
+        "psr-4": {
+            "Modules\\Deployment\\": "app/",
+            "Modules\\Deployment\\Database\\Factories\\": "database/factories/",
+            "Modules\\Deployment\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Deployment\\Tests\\": "tests/"
+        }
+    }
+}

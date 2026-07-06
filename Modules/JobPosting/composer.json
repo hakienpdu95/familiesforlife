@@ -1,0 +1,19 @@
+{
+    "name": "modules/job-posting",
+    "description": "",
+    "authors": [],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\JobPosting\\": "app/",
+            "Modules\\JobPosting\\Database\\Factories\\": "database/factories/",
+            "Modules\\JobPosting\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "require": {}
+}
