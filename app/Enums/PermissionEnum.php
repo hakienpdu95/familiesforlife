@@ -156,6 +156,23 @@ enum PermissionEnum: string
     // Admin=Full manage (dashboard/vertical-templates)
     case VERTICAL_TEMPLATES_MANAGE = 'vertical_templates.manage';
 
+    // ══ PRODUCT (Danh mục Sản phẩm & Dịch vụ — catalog dùng chung cho Post CTA Box) ═
+    // Marketing/Sales=Soạn thảo | CEO/Ops=Full | System Admin=Full + quản lý danh mục | còn lại=View
+    case PRODUCT_CATEGORY_MANAGE = 'product_category.manage';
+    case PRODUCT_VIEW            = 'product.view';
+    case PRODUCT_CREATE          = 'product.create';
+    case PRODUCT_EDIT            = 'product.edit';
+    case PRODUCT_DELETE          = 'product.delete';
+
+    // ══ POST (Bài viết theo danh mục + Product CTA Box) ═════════════
+    // Marketing=Soạn thảo | CEO/Ops=Duyệt & publish | System_Admin=Full + quản lý danh mục | còn lại=View (bài đã published)
+    case POST_CATEGORY_MANAGE = 'post_category.manage';
+    case POST_ARTICLE_VIEW    = 'post_article.view';
+    case POST_ARTICLE_CREATE  = 'post_article.create';
+    case POST_ARTICLE_EDIT    = 'post_article.edit';
+    case POST_ARTICLE_DELETE  = 'post_article.delete';
+    case POST_ARTICLE_PUBLISH = 'post_article.publish';
+
     // ══ OCOP RUBRIC (Bộ tiêu chí OCOP — QĐ 26/2026/QĐ-TTg) ═════════
     // System Admin=Full manage (danh mục 26 Bộ sản phẩm + cây tiêu chí)
     case OCOP_RUBRIC_MANAGE = 'ocop_rubric.manage';

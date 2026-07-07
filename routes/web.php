@@ -54,8 +54,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('backend.')->group(functi
     });
 
     // ── Placeholder routes (modules chưa triển khai) ──────────────────
-    Route::get('/products',         fn () => abort(503, 'Module đang phát triển'))->name('products.index');
-    Route::get('/products/create',  fn () => abort(503, 'Module đang phát triển'))->name('products.create');
+    // products.index/products.create giờ do Modules/Product/routes/web.php đảm nhiệm
     Route::get('/orders',           fn () => abort(503, 'Module đang phát triển'))->name('orders.index');
     Route::get('/customers',        fn () => abort(503, 'Module đang phát triển'))->name('customers.index');
     Route::get('/customers/create', fn () => abort(503, 'Module đang phát triển'))->name('customers.create');

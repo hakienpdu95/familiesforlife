@@ -150,6 +150,13 @@ const BASE = {
     spellcheck:           false,
     imageDefaultWidth:    800,
     removeButtons:        ['about', 'classSpan'],
+    // Mặc định Jodit dùng Ace editor tải từ cdnjs.cloudflare.com cho nút "source" —
+    // bị chặn bởi CSP script-src của app (chỉ cho phép 'self'/cdn.jsdelivr.net) và
+    // là 1 dependency mạng ngoài không cần thiết. 'area' = plain <textarea>, không cần CDN.
+    sourceEditor:         'area',
+    // beautifyHTML mặc định = true cũng tự tải js-beautify từ cdnjs.cloudflare.com
+    // (độc lập với sourceEditor ở trên) — cùng lý do, tắt hẳn để không phụ thuộc CDN ngoài.
+    beautifyHTML:         false,
     uploader:             BASE_UPLOADER,
     popup: {
         img: [
@@ -248,6 +255,11 @@ window.JoditInstances = JoditInstances;
 function _buildOptions(el, overrides, editorKey) {
     const preset = PRESETS[el.dataset.joditPreset] ?? PRESETS.standard;
     const opts   = { ...BASE, ...preset, ...overrides };
+
+    // `popup` là object lồng nhau theo selector (img, + selector tuỳ biến module khác truyền
+    // qua overrides) — merge theo key thay vì spread nông ở trên, tránh mất popup.img mặc định
+    // (xoá/sửa/căn ảnh) khi 1 module gọi initJoditAll(sel, { popup: {...} }).
+    opts.popup = { ...BASE.popup, ...preset.popup, ...overrides.popup };
 
     if (el.dataset.joditHeight) opts.height = Number(el.dataset.joditHeight);
 

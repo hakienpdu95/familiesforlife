@@ -1,0 +1,11 @@
+{
+    "name": "Product",
+    "alias": "product",
+    "description": "Danh mục Sản phẩm & Dịch vụ — catalog dùng chung cho Product CTA Box (module Post) và các tính năng khác cần \"sản phẩm có giá/ảnh/mô tả/link affiliate\"",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Product\\Providers\\ProductServiceProvider"
+    ],
+    "files": []
+}

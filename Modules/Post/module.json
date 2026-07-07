@@ -1,0 +1,11 @@
+{
+    "name": "Post",
+    "alias": "post",
+    "description": "Quản lý Bài viết theo Danh mục & Product CTA Box — biên tập nội dung marketing, phụ thuộc module Product để hiển thị sản phẩm/dịch vụ trong bài viết",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Post\\Providers\\PostServiceProvider"
+    ],
+    "files": []
+}

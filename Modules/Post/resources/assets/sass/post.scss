@@ -1,0 +1,88 @@
+// Modules/Post/resources/assets/sass/post.scss
+// Style cho block-composer soạn bài viết (dãy block text/sản phẩm, kiểu Gutenberg) —
+// thay cho cách nhúng khối sản phẩm trực tiếp vào 1 Jodit editor duy nhất trước đây.
+
+.pbc-composer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.pbc-block {
+    border: 1px solid oklch(var(--b3));
+    border-radius: 0.75rem;
+    background: oklch(var(--b1));
+    overflow: hidden;
+}
+
+.pbc-block-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.625rem;
+    background: oklch(var(--b2) / 0.6);
+    border-bottom: 1px solid oklch(var(--b3));
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: oklch(var(--bc) / 0.5);
+}
+
+.pbc-block-header .pbc-badge-text { color: oklch(var(--in)); }
+.pbc-block-header .pbc-badge-product { color: oklch(var(--p)); }
+
+.pbc-block-body { padding: 0.75rem; }
+
+.pbc-add-row {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    padding: 0.5rem;
+    border: 1px dashed oklch(var(--b3));
+    border-radius: 0.75rem;
+}
+
+.pbc-product-search-results {
+    max-height: 220px;
+    overflow-y: auto;
+    border: 1px solid oklch(var(--b3));
+    border-radius: 0.5rem;
+}
+
+.pbc-product-result-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.375rem 0.5rem;
+    cursor: pointer;
+    border-bottom: 1px solid oklch(var(--b2));
+
+    &:hover { background: oklch(var(--b2)); }
+    &:last-child { border-bottom: none; }
+}
+
+.pbc-selected-item {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    border: 1px solid oklch(var(--b3));
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+}
+
+.pbc-link-chip {
+    cursor: pointer;
+    font-size: 0.6875rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 999px;
+    border: 1px solid oklch(var(--b3));
+    margin-right: 0.25rem;
+    display: inline-block;
+
+    &.active {
+        border-color: oklch(var(--p));
+        background: oklch(var(--p) / 0.1);
+        color: oklch(var(--p));
+    }
+}

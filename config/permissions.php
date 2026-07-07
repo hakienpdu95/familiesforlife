@@ -81,6 +81,13 @@ return [
         // Deployment Engine: Full (chạy deploy + xem log)
         P::DEPLOYMENT_RUN->value,
         P::DEPLOYMENT_VIEW_LOGS->value,
+        // Product: Full (CEO tự quản lý catalog sản phẩm/dịch vụ dùng cho Post CTA Box)
+        P::PRODUCT_VIEW->value,
+        P::PRODUCT_CREATE->value,
+        P::PRODUCT_EDIT->value,
+        // Post: View + Duyệt & publish (không tự soạn thảo — Marketing soạn)
+        P::POST_ARTICLE_VIEW->value,
+        P::POST_ARTICLE_PUBLISH->value,
     ],
 
     R::SALES->value => [
@@ -106,6 +113,12 @@ return [
         // Reports: Personal + Team
         P::REPORTS_PERSONAL->value,
         P::REPORTS_TEAM->value,
+        // Product: Soạn thảo (Sales tự thêm sản phẩm/dịch vụ giới thiệu cho khách)
+        P::PRODUCT_VIEW->value,
+        P::PRODUCT_CREATE->value,
+        P::PRODUCT_EDIT->value,
+        // Post: View only (xem bài đã publish)
+        P::POST_ARTICLE_VIEW->value,
         // Business Solution: View
         P::SOLUTION_CATALOG_VIEW->value,
         // Business Blueprint: View
@@ -157,6 +170,13 @@ return [
         P::OCOP_PRODUCT_MANAGE->value,
         // OCOP Scoring: Practice only (self-assessment dành riêng CEO — trách nhiệm hồ sơ pháp lý)
         P::OCOP_PRACTICE_USE->value,
+        // Product: Full (Ops quản lý catalog sản phẩm/dịch vụ dùng cho Post CTA Box)
+        P::PRODUCT_VIEW->value,
+        P::PRODUCT_CREATE->value,
+        P::PRODUCT_EDIT->value,
+        // Post: View + Duyệt & publish
+        P::POST_ARTICLE_VIEW->value,
+        P::POST_ARTICLE_PUBLISH->value,
         // Business Solution: View
         P::SOLUTION_CATALOG_VIEW->value,
         // Business Blueprint: View
@@ -183,6 +203,15 @@ return [
         P::REPORTS_MARKETING->value,
         // Marketplace: View (Marketing monitors public listings)
         P::MARKETPLACE_VIEW->value,
+        // Product: Soạn thảo (Marketing biên tập catalog sản phẩm dùng cho Post CTA Box)
+        P::PRODUCT_VIEW->value,
+        P::PRODUCT_CREATE->value,
+        P::PRODUCT_EDIT->value,
+        // Post: Soạn thảo (Marketing tự viết/sửa/xoá bài, gửi duyệt — CEO/Ops publish)
+        P::POST_ARTICLE_VIEW->value,
+        P::POST_ARTICLE_CREATE->value,
+        P::POST_ARTICLE_EDIT->value,
+        P::POST_ARTICLE_DELETE->value,
         // Business Solution: View
         P::SOLUTION_CATALOG_VIEW->value,
         // Business Blueprint: View
@@ -220,6 +249,10 @@ return [
         P::MARKETPLACE_EDIT->value,
         // OCOP Scoring: Practice only — nhân viên luyện tập, không sửa sản phẩm
         P::OCOP_PRACTICE_USE->value,
+        // Product: View only
+        P::PRODUCT_VIEW->value,
+        // Post: View only
+        P::POST_ARTICLE_VIEW->value,
         // Business Solution: View
         P::SOLUTION_CATALOG_VIEW->value,
         // Business Blueprint: View
@@ -257,6 +290,10 @@ return [
         P::ASSESSMENT_CONFIG->value,
         P::ASSESSMENT_RESULTS->value,
         P::ASSESSMENT_REPROCESS->value,
+        // Product: View only
+        P::PRODUCT_VIEW->value,
+        // Post: View only
+        P::POST_ARTICLE_VIEW->value,
         // Business Solution: View
         P::SOLUTION_CATALOG_VIEW->value,
         // Business Blueprint: View
@@ -321,6 +358,19 @@ return [
         P::VERTICAL_TEMPLATES_MANAGE->value,
         // OCOP Rubric: Full manage (danh mục 26 Bộ sản phẩm + cây tiêu chí — QĐ 26/2026/QĐ-TTg)
         P::OCOP_RUBRIC_MANAGE->value,
+        // Product: Full manage (catalog sản phẩm/dịch vụ + quản lý danh mục)
+        P::PRODUCT_VIEW->value,
+        P::PRODUCT_CREATE->value,
+        P::PRODUCT_EDIT->value,
+        P::PRODUCT_DELETE->value,
+        P::PRODUCT_CATEGORY_MANAGE->value,
+        // Post: Full manage (bài viết + quản lý danh mục)
+        P::POST_ARTICLE_VIEW->value,
+        P::POST_ARTICLE_CREATE->value,
+        P::POST_ARTICLE_EDIT->value,
+        P::POST_ARTICLE_DELETE->value,
+        P::POST_ARTICLE_PUBLISH->value,
+        P::POST_CATEGORY_MANAGE->value,
         // Business Solution: Full manage (tạo/sửa/publish/archive danh mục) + View
         P::SOLUTION_CATALOG_MANAGE->value,
         P::SOLUTION_CATALOG_VIEW->value,
@@ -353,6 +403,10 @@ return [
         P::REPORTS_SHARED->value,
         // OCOP Product: View only
         P::OCOP_PRODUCT_VIEW->value,
+        // Product: View only
+        P::PRODUCT_VIEW->value,
+        // Post: View only
+        P::POST_ARTICLE_VIEW->value,
         // Business Solution: View
         P::SOLUTION_CATALOG_VIEW->value,
         // Business Blueprint: View

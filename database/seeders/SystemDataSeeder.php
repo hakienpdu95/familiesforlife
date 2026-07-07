@@ -21,6 +21,8 @@ use Modules\LeadSource\Database\Seeders\LeadSourceSeeder;
 use Modules\BusinessBlueprint\Database\Seeders\BusinessBlueprintDatabaseSeeder;
 use Modules\BusinessSolution\Database\Seeders\BusinessSolutionDatabaseSeeder;
 use Modules\OcopRubric\Database\Seeders\OcopRubricDatabaseSeeder;
+use Modules\Product\Database\Seeders\ProductDatabaseSeeder;
+use Modules\Post\Database\Seeders\PostDatabaseSeeder;
 use Modules\Organization\Database\Seeders\OrganizationRolePermissionSeeder;
 use Modules\OrganizationSolution\Database\Seeders\OrganizationSolutionDatabaseSeeder;
 use Modules\Recruitment\Database\Seeders\RecruitmentDatabaseSeeder;
@@ -124,6 +126,12 @@ class SystemDataSeeder extends Seeder
 
             // ── 23. Demo end-to-end: HTX Tiên Dương kích hoạt + deploy AI-TXNG ──
             HtxTienDuongDemoSeeder::class,
+
+            // ── 24. Product: permissions (product.*/product_category.*) — catalog cho Post CTA Box ──
+            ProductDatabaseSeeder::class,
+
+            // ── 25. Post: permissions (post_article.*/post_category.*) — bài viết + Product CTA Box ──
+            PostDatabaseSeeder::class,
         ]);
 
         $this->command->newLine();

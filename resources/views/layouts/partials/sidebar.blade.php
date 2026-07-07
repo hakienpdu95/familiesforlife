@@ -96,6 +96,50 @@
         </details>
         @endcan
 
+        @can(\App\Enums\PermissionEnum::PRODUCT_VIEW->value)
+        <details {{ request()->routeIs('backend.products.*') ? 'open' : '' }}>
+            <summary class="nav-summary {{ request()->routeIs('backend.products.*') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25a1.125 1.125 0 001.125-1.125V6a1.125 1.125 0 00-1.125-1.125H3.375A1.125 1.125 0 002.25 6v.375a1.125 1.125 0 001.125 1.125z"/></svg>
+                <span class="nav-label">Sản phẩm & Dịch vụ</span>
+                <svg class="nav-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m9 18 6-6-6-6"/></svg>
+            </summary>
+            <div class="sub-menu">
+                <a href="{{ route('backend.products.index') }}"
+                   class="sub-link {{ request()->routeIs('backend.products.index') ? 'active' : '' }}">Danh sách sản phẩm</a>
+                @can('create', \Modules\Product\Models\Product::class)
+                <a href="{{ route('backend.products.create') }}"
+                   class="sub-link {{ request()->routeIs('backend.products.create') ? 'active' : '' }}">Thêm sản phẩm</a>
+                @endcan
+                @can(\App\Enums\PermissionEnum::PRODUCT_CATEGORY_MANAGE->value)
+                <a href="{{ route('backend.products.categories.index') }}"
+                   class="sub-link {{ request()->routeIs('backend.products.categories.*') ? 'active' : '' }}">Danh mục sản phẩm</a>
+                @endcan
+            </div>
+        </details>
+        @endcan
+
+        @can(\App\Enums\PermissionEnum::POST_ARTICLE_VIEW->value)
+        <details {{ request()->routeIs('backend.post.*') ? 'open' : '' }}>
+            <summary class="nav-summary {{ request()->routeIs('backend.post.*') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l6 6v10a2 2 0 01-2 2z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 13h6M9 17h6M9 9h1"/></svg>
+                <span class="nav-label">Bài viết</span>
+                <svg class="nav-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m9 18 6-6-6-6"/></svg>
+            </summary>
+            <div class="sub-menu">
+                <a href="{{ route('backend.post.articles.index') }}"
+                   class="sub-link {{ request()->routeIs('backend.post.articles.*') ? 'active' : '' }}">Danh sách bài viết</a>
+                @can('create', \Modules\Post\Models\PostArticle::class)
+                <a href="{{ route('backend.post.articles.create') }}"
+                   class="sub-link {{ request()->routeIs('backend.post.articles.create') ? 'active' : '' }}">Thêm bài viết</a>
+                @endcan
+                @can(\App\Enums\PermissionEnum::POST_CATEGORY_MANAGE->value)
+                <a href="{{ route('backend.post.categories.index') }}"
+                   class="sub-link {{ request()->routeIs('backend.post.categories.*') ? 'active' : '' }}">Danh mục bài viết</a>
+                @endcan
+            </div>
+        </details>
+        @endcan
+
         @if(auth()->user()?->hasAnyPermission(['leads.view_all','leads.view_assigned','leads.view_source']))
         <p class="section-title" style="margin-top:16px;">CRM</p>
         <div class="nav-group">

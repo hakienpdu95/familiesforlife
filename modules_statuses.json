@@ -35,5 +35,7 @@
     "BusinessSolution": true,
     "BusinessBlueprint": true,
     "OrganizationSolution": true,
-    "SolutionCatalog": true
+    "SolutionCatalog": true,
+    "Product": true,
+    "Post": true
 }
