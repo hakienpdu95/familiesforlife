@@ -1,11 +1,11 @@
-# News Module — Quản lý Tin tức theo Danh mục & Product CTA Box (Đặc tả kỹ thuật)
+# Post Module — Quản lý Bài viết theo Danh mục & Product CTA Box (Đặc tả kỹ thuật)
 
 > **Pattern stack:** AVSA + CQRS-lite + Laravel Modules (NWIDART 13) + Laravel Actions (lorisleiva 2.x)
 > **Module tham chiếu kiến trúc:** `Modules/OcopRubric`, `Modules/Subscription`, `Modules/Academy` (xem `docs/academy-spec.md`) — Feature-first, **không** theo layer-first cũ (`Actions/Backend` + `Data/Requests`) của `Modules/KcItem`.
-> **Phụ thuộc module:** `Modules/Product` (`docs/product-catalog-spec.md`) — News **phụ thuộc** Product (1 chiều) để lấy dữ liệu sản phẩm/dịch vụ hiển thị trong Product CTA Box. Product phải được scaffold **trước** News (xem `docs/product-catalog-spec.md` §16 Phase 0).
-> **Spec version:** 1.5 — 2026-07-07 (v1.1: tách bảng `products` độc lập, xem `docs/product-catalog-spec.md`. v1.2: bổ sung §9.8 an toàn bắt buộc (XSS/tenant/URL validation/volume cap), giới hạn 2-7 sản phẩm/khối, UX chống quá tải form, sửa/xoá khối qua Jodit popup + `item_key`/`button_key` bảo toàn `click_count`. v1.3: §9.8.5 — phân tích hiệu năng sửa/xoá khối, thêm endpoint batch-fetch sản phẩm, dirty-check trước khi UPDATE, xác nhận 2 bước trước khi xoá khối. v1.4: **tối đa 3 khối/bài** (đổi từ cap chống-abuse 20 → quy tắc biên tập thật); gộp "thêm mới"/"sửa" vào 1 dialog "Quản lý khối sản phẩm" dùng chung chế độ Form, gated bởi đếm khối hiện có — xem §9.1/§9.8.6. v1.5: sửa lỗi thiết kế — chèn khối phải đúng **vị trí con trỏ**, không phải luôn cuối bài; dùng `editor.s.save()`/`restore()` (API thật của Jodit) để bảo toàn vị trí qua suốt thời gian mở dialog, kèm dọn marker khi huỷ dialog — xem §9.1 bước 0/6/7 và §9.8.7)
+> **Phụ thuộc module:** `Modules/Product` (`docs/product-catalog-spec.md`) — Post **phụ thuộc** Product (1 chiều) để lấy dữ liệu sản phẩm/dịch vụ hiển thị trong Product CTA Box. Product phải được scaffold **trước** Post (xem `docs/product-catalog-spec.md` §16 Phase 0).
+> **Spec version:** 1.6 — 2026-07-07 (v1.1: tách bảng `products` độc lập, xem `docs/product-catalog-spec.md`. v1.2: bổ sung §9.8 an toàn bắt buộc (XSS/tenant/URL validation/volume cap), giới hạn 2-7 sản phẩm/khối, UX chống quá tải form, sửa/xoá khối qua Jodit popup + `item_key`/`button_key` bảo toàn `click_count`. v1.3: §9.8.5 — phân tích hiệu năng sửa/xoá khối, thêm endpoint batch-fetch sản phẩm, dirty-check trước khi UPDATE, xác nhận 2 bước trước khi xoá khối. v1.4: **tối đa 3 khối/bài** (đổi từ cap chống-abuse 20 → quy tắc biên tập thật); gộp "thêm mới"/"sửa" vào 1 dialog "Quản lý khối sản phẩm" dùng chung chế độ Form, gated bởi đếm khối hiện có — xem §9.1/§9.8.6. v1.5: sửa lỗi thiết kế — chèn khối phải đúng **vị trí con trỏ**, không phải luôn cuối bài; dùng `editor.s.save()`/`restore()` (API thật của Jodit) để bảo toàn vị trí qua suốt thời gian mở dialog, kèm dọn marker khi huỷ dialog — xem §9.1 bước 0/6/7 và §9.8.7. v1.6: thay CTA `use_product_default` (1 link chung chung) bằng `use_product_link` + `product_link_type` — mỗi nút chọn dùng **1 trong tối đa 4 link affiliate cố định** (Shopee/TikTok/NCC/homepage NCC) đã cấu hình sẵn ở tầng `Product`, khớp `docs/product-catalog-spec.md` v1.2 §6.2/§7/§9 — xem §7.7/§8/§9.1 bước 5/§9.5/§9.6)
 > **Nguồn tham khảo nghiệp vụ:** ảnh chụp màn hình tại `docs/tintuc/` (site Families for Life — cây danh mục theo chủ đề/độ tuổi, trang danh mục đa định dạng nội dung, sidebar điều hướng cây; site Motherly/Babylist — box sản phẩm nhúng inline trong bài viết làm CTA)
-> **Quyết định đã chốt với stakeholder:** module độc lập (`Modules/News`), không tách `NewsCategory`/`NewsArticle` thành 2 module riêng như tiền lệ `KcCategory`/`KcItem`. Product CTA Box tham chiếu catalog sản phẩm qua module `Product` riêng (không nhập tay/không soft-link `OcopProduct` như bản v1.0).
+> **Quyết định đã chốt với stakeholder:** module độc lập (`Modules/Post`), không tách `PostCategory`/`PostArticle` thành 2 module riêng như tiền lệ `KcCategory`/`KcItem`. Product CTA Box tham chiếu catalog sản phẩm qua module `Product` riêng (không nhập tay/không soft-link `OcopProduct` như bản v1.0).
 
 ---
 
@@ -13,10 +13,10 @@
 
 `docs/tintuc/` cho thấy 2 mảng nghiệp vụ cần kết hợp:
 
-1. **Tin tức theo danh mục** — cây danh mục không giới hạn cấp (Marriage/Newborn/Toddlers.../ Development→Behaviour→bài viết), mỗi bài có thể thuộc nhiều danh mục, có "định dạng nội dung" riêng (Article/Video/Activity/Tip/Step-by-step) độc lập với cây danh mục.
+1. **Bài viết theo danh mục** — cây danh mục không giới hạn cấp (Marriage/Newborn/Toddlers.../ Development→Behaviour→bài viết), mỗi bài có thể thuộc nhiều danh mục, có "định dạng nội dung" riêng (Article/Video/Activity/Tip/Step-by-step) độc lập với cây danh mục.
 2. **Product CTA Box** — bài viết dạng Motherly/Babylist nhúng inline 1 hoặc nhiều box sản phẩm (ảnh, tên, giá, nút hành động) ngay trong nội dung để tăng tỉ lệ chuyển đổi, không phải chỉ 1 banner cuối bài.
 
-Mục tiêu module: cho phép Marketing của từng tổ chức tự biên tập tin tức, chèn box sản phẩm vào **bất kỳ vị trí nào** trong bài bằng thao tác kéo-thả/chọn trong editor sẵn có (Jodit), và trang chi tiết render ra đúng những gì đã thấy ở ảnh mẫu.
+Mục tiêu module: cho phép Marketing của từng tổ chức tự biên tập bài viết, chèn box sản phẩm vào **bất kỳ vị trí nào** trong bài bằng thao tác kéo-thả/chọn trong editor sẵn có (Jodit), và trang chi tiết render ra đúng những gì đã thấy ở ảnh mẫu.
 
 ### ⚠️ Phát hiện quan trọng — đã giải quyết bằng module `Product` riêng (v1.1)
 
@@ -24,13 +24,13 @@ Model `OcopProduct` (`Modules/OcopRubric/app/Models/OcopProduct.php`) — **ch�
 
 Bản v1.0 của spec này từng chọn hướng "nhập tay toàn bộ dữ liệu hiển thị tại thời điểm chèn" để né vấn đề trên — nhưng ở quy mô hàng nghìn bài viết × hàng chục nghìn sản phẩm, cách này buộc phải sửa giá ở **từng vị trí đã chèn** khi giá thay đổi, không scale được.
 
-→ **Quyết định v1.1**: tách 1 module `Product` độc lập (`docs/product-catalog-spec.md`) làm catalog sản phẩm/dịch vụ thật (có `price`/`cover_image_url`/`description`/`status`). `news_product_block_items` giờ tham chiếu **FK cứng** `product_id` tới bảng `products`, chỉ giữ các cột `*_override` (nullable) để tuỳ biến riêng từng vị trí khi cần — xem §7.6 và §9 bản cập nhật bên dưới.
+→ **Quyết định v1.1**: tách 1 module `Product` độc lập (`docs/product-catalog-spec.md`) làm catalog sản phẩm/dịch vụ thật (có `price`/`cover_image_url`/`description`/`status`). `post_product_block_items` giờ tham chiếu **FK cứng** `product_id` tới bảng `products`, chỉ giữ các cột `*_override` (nullable) để tuỳ biến riêng từng vị trí khi cần — xem §7.6 và §9 bản cập nhật bên dưới.
 
 ---
 
 ## 2. Đặt tên & vị trí module
 
-**Tên module: `News`** (`Modules/News`) — module độc lập, không tách theo tiền lệ `KcCategory`/`KcItem`.
+**Tên module: `Post`** (`Modules/Post`) — module độc lập, không tách theo tiền lệ `KcCategory`/`KcItem`.
 
 | Lý do gộp 1 module (đã chốt) |
 |---|
@@ -38,7 +38,7 @@ Bản v1.0 của spec này từng chọn hướng "nhập tay toàn bộ dữ li
 | Giảm số `module.json`/`ServiceProvider`/permission-seeder phải bảo trì song song cho 1 tính năng duy nhất. |
 | Khác với `KcCategory`/`KcItem`: Kc là kho tri thức nội bộ dùng chung nhiều loại "item" (document/sop/video/form...), category ở đó có lý do tồn tại độc lập với item hơn. |
 
-Thuộc **Platform Core**, ngang hàng `Academy`/`KcItem` (theo `docs/PLATFORM_DESIGN.md` §2.1) — mỗi tổ chức tự biên tập tin tức riêng, không phải tính năng riêng của 1 vertical.
+Thuộc **Platform Core**, ngang hàng `Academy`/`KcItem` (theo `docs/PLATFORM_DESIGN.md` §2.1) — mỗi tổ chức tự biên tập bài viết riêng, không phải tính năng riêng của 1 vertical.
 
 ---
 
@@ -46,7 +46,7 @@ Thuộc **Platform Core**, ngang hàng `Academy`/`KcItem` (theo `docs/PLATFORM_D
 
 ### 3.1 Trong phạm vi (đợt này)
 
-1. Quản trị **cây danh mục** tin tức (CRUD, không giới hạn cấp, sắp xếp thứ tự).
+1. Quản trị **cây danh mục** bài viết (CRUD, không giới hạn cấp, sắp xếp thứ tự).
 2. Quản trị **bài viết**: soạn thảo (Jodit), gán 1-nhiều danh mục + tag, chọn định dạng nội dung (Article/Video/Activity/Tip/Step-by-step), workflow duyệt trước khi publish, lên lịch xuất bản.
 3. **Product CTA Box** nhúng inline trong nội dung: chèn 1 hoặc nhiều sản phẩm/nhóm sản phẩm cùng lúc, chọn template hiển thị, tự định nghĩa nhãn + đường dẫn cho từng nút CTA.
 4. Trang công khai: danh sách theo danh mục (có breadcrumb cây), trang chi tiết bài viết render đầy đủ product box, đếm view/click.
@@ -56,24 +56,24 @@ Thuộc **Platform Core**, ngang hàng `Academy`/`KcItem` (theo `docs/PLATFORM_D
 | Nghiệp vụ | Vì sao không làm ở đây |
 |---|---|
 | Giỏ hàng/thanh toán trong box sản phẩm | Box chỉ là CTA điều hướng (link ngoài/trang liên hệ/Zalo/điện thoại), không phải checkout — hệ thống hiện chưa có catalog bán hàng thật (xem cảnh báo §1) |
-| A/B testing nhãn CTA | Không có yêu cầu cụ thể, có thể thêm sau bằng cách cho phép nhiều `NewsProductBlockButton` cùng vị trí + đo `click_count` so sánh thủ công trước |
+| A/B testing nhãn CTA | Không có yêu cầu cụ thể, có thể thêm sau bằng cách cho phép nhiều `PostProductBlockButton` cùng vị trí + đo `click_count` so sánh thủ công trước |
 | Bình luận/đánh giá bài viết | Chưa có trong ảnh mẫu, không nằm trong yêu cầu |
 | Đa ngôn ngữ nội dung | MVP tiếng Việt; có thể thêm cột `language` sau theo đúng tiền lệ `KcItem` mà không phá schema |
-| Log click chi tiết theo user/IP (chỉ đếm tổng) | MVP dùng `click_count` tăng dần đủ cho nhu cầu đo hiệu quả; nếu cần phễu chi tiết theo thời gian, thêm bảng `news_product_block_click_logs` ở phase sau (xem §16 Open Questions) |
+| Log click chi tiết theo user/IP (chỉ đếm tổng) | MVP dùng `click_count` tăng dần đủ cho nhu cầu đo hiệu quả; nếu cần phễu chi tiết theo thời gian, thêm bảng `post_product_block_click_logs` ở phase sau (xem §16 Open Questions) |
 
 ---
 
 ## 4. Nguyên tắc kiến trúc
 
-| Nguyên tắc | Áp dụng trong `News` |
+| Nguyên tắc | Áp dụng trong `Post` |
 |---|---|
 | **AVSA + CQRS-lite** | `Features/{Slice}/Actions` (`AsAction`) + `Features/{Slice}/Queries` (`*Query`+`*Handler`) — không business logic trong Controller |
-| **Tenant-scoped toàn bộ** | Mọi bảng top-level (`news_categories`, `news_articles`, `news_tags`, `news_product_blocks`) extend `App\Foundation\Models\TenantAwareModel` |
-| **No JSON storage** | Không cột JSON ở bất kỳ đâu. Cấu hình nhiều sản phẩm/nhiều nút CTA trong 1 block là **bảng quan hệ** (`news_product_block_items`, `news_product_block_buttons`), không phải mảng JSON |
-| **Placeholder trong content KHÔNG phải nguồn sự thật cuối** | `content` (HTML) chỉ chứa placeholder tham chiếu tới `news_product_blocks.uuid` — dữ liệu hiển thị thật nằm ở bảng quan hệ, đồng bộ 2 chiều lúc lưu bài (xem §9.5) |
-| **Soft delete** | `news_categories`, `news_articles` (nội dung có thể phục hồi). **Không** soft-delete `news_product_blocks`/`*_items`/`*_buttons` (bảng con, vòng đời gắn chặt bài viết, xoá cứng theo cascade — giống `academy_quiz_options`) |
-| **UUID public** | `news_categories.uuid`, `news_articles.uuid` expose qua route công khai. `news_product_blocks.uuid` không lộ qua route riêng nhưng **được nhúng trực tiếp vào content HTML** làm placeholder key — xem §9.2 |
-| **Tiền tố bảng `news_`** | Theo tiền lệ `academy_*`, `ocop_*`, `kc_*` |
+| **Tenant-scoped toàn bộ** | Mọi bảng top-level (`post_categories`, `post_articles`, `post_tags`, `post_product_blocks`) extend `App\Foundation\Models\TenantAwareModel` |
+| **No JSON storage** | Không cột JSON ở bất kỳ đâu. Cấu hình nhiều sản phẩm/nhiều nút CTA trong 1 block là **bảng quan hệ** (`post_product_block_items`, `post_product_block_buttons`), không phải mảng JSON |
+| **Placeholder trong content KHÔNG phải nguồn sự thật cuối** | `content` (HTML) chỉ chứa placeholder tham chiếu tới `post_product_blocks.uuid` — dữ liệu hiển thị thật nằm ở bảng quan hệ, đồng bộ 2 chiều lúc lưu bài (xem §9.5) |
+| **Soft delete** | `post_categories`, `post_articles` (nội dung có thể phục hồi). **Không** soft-delete `post_product_blocks`/`*_items`/`*_buttons` (bảng con, vòng đời gắn chặt bài viết, xoá cứng theo cascade — giống `academy_quiz_options`) |
+| **UUID public** | `post_categories.uuid`, `post_articles.uuid` expose qua route công khai. `post_product_blocks.uuid` không lộ qua route riêng nhưng **được nhúng trực tiếp vào content HTML** làm placeholder key — xem §9.2 |
+| **Tiền tố bảng `post_`** | Theo tiền lệ `academy_*`, `ocop_*`, `kc_*` |
 | **Enum** | PHP backed enum (`string`), cột DB là `string` thường (không dùng enum native của MySQL), có `label()` |
 
 ---
@@ -81,7 +81,7 @@ Thuộc **Platform Core**, ngang hàng `Academy`/`KcItem` (theo `docs/PLATFORM_D
 ## 5. Directory Structure (Feature-first)
 
 ```
-Modules/News/
+Modules/Post/
 ├── app/
 │   ├── Features/
 │   │   ├── CategoryManagement/         ← Slice: quản trị cây danh mục
@@ -110,20 +110,20 @@ Modules/News/
 │   ├── Support/
 │   │   └── ArticleContentParser.php    ← Dùng chung: parse content HTML ⇄ danh sách block placeholder (xem §9.5/9.6)
 │   │
-│   ├── Models/          (NewsCategory, NewsArticle, NewsTag, NewsProductBlock,
-│   │                      NewsProductBlockItem, NewsProductBlockButton)
+│   ├── Models/          (PostCategory, PostArticle, PostTag, PostProductBlock,
+│   │                      PostProductBlockItem, PostProductBlockButton)
 │   ├── Enums/           (ArticleStatus, ArticleFormat, ProductBlockTemplate, ButtonUrlType, ButtonTarget, ButtonStyle)
-│   ├── Policies/        (NewsCategoryPolicy, NewsArticlePolicy)
-│   └── Providers/       (NewsServiceProvider, EventServiceProvider, RouteServiceProvider)
+│   ├── Policies/        (PostCategoryPolicy, PostArticlePolicy)
+│   └── Providers/       (PostServiceProvider, EventServiceProvider, RouteServiceProvider)
 │
-├── config/config.php     → ['name' => 'News']
+├── config/config.php     → ['name' => 'Post']
 ├── database/
 │   ├── migrations/       (8 file, xem §7)
-│   └── seeders/          (NewsPermissionSeeder, NewsDemoContentSeeder, NewsDatabaseSeeder)
+│   └── seeders/          (PostPermissionSeeder, PostDemoContentSeeder, PostDatabaseSeeder)
 ├── resources/
 │   ├── views/            (admin/categories, admin/articles, public/category, public/article,
 │   │                       components/product-block/{single_card,multi_grid,banner,compact_list}.blade.php)
-│   └── assets/js/jodit-news-product.js   ← plugin Jodit (xem §9.1)
+│   └── assets/js/jodit-post-product.js   ← plugin Jodit (xem §9.1)
 ├── routes/{web.php, api.php}
 ├── module.json, composer.json
 ```
@@ -133,36 +133,36 @@ Modules/News/
 ## 6. Data Model — ERD tổng quan
 
 ```
-NewsCategory (self-ref parent_id, cây không giới hạn cấp)
-      │ (n:n qua news_article_categories, is_primary)
-NewsArticle ──< (n:n qua news_article_tag) >── NewsTag
+PostCategory (self-ref parent_id, cây không giới hạn cấp)
+      │ (n:n qua post_article_categories, is_primary)
+PostArticle ──< (n:n qua post_article_tag) >── PostTag
       │
       │ content (HTML) chứa placeholder <div data-block-uuid="...">
       │
-      └──< (1:n) NewsProductBlock  [template, heading, sort_order]
+      └──< (1:n) PostProductBlock  [template, heading, sort_order]
                        │
-                       ├──< (1:n) NewsProductBlockItem  [product_id (FK cứng → Modules\Product\products),
+                       ├──< (1:n) PostProductBlockItem  [product_id (FK cứng → Modules\Product\products),
                        │           │                     title/price_label/description/image_url *_override (nullable)]
-                       │           └──< (1:n) NewsProductBlockButton  [label, url_type, url, target, style, click_count]
+                       │           └──< (1:n) PostProductBlockButton  [label, url_type, url, target, style, click_count]
                        │
-                       └──< (1:n) NewsProductBlockButton  [button gắn cấp khối, block_item_id = null,
+                       └──< (1:n) PostProductBlockButton  [button gắn cấp khối, block_item_id = null,
                                                             vd "Xem tất cả sản phẩm"]
 
-Modules\Product\Product (org catalog)  ──< (1:n, restrictOnDelete) NewsProductBlockItem.product_id
+Modules\Product\Product (org catalog)  ──< (1:n, restrictOnDelete) PostProductBlockItem.product_id
 ```
 
 ---
 
 ## 7. Data Model — Chi tiết từng bảng
 
-### 7.1 `news_categories` — Danh mục (cây)
+### 7.1 `post_categories` — Danh mục (cây)
 
 ```php
-Schema::create('news_categories', function (Blueprint $table) {
+Schema::create('post_categories', function (Blueprint $table) {
     $table->id();
     $table->uuid('uuid')->unique();
     $table->foreignId('organization_id')->constrained()->restrictOnDelete();
-    $table->foreignId('parent_id')->nullable()->constrained('news_categories')->restrictOnDelete();
+    $table->foreignId('parent_id')->nullable()->constrained('post_categories')->restrictOnDelete();
     $table->string('name', 150);
     $table->string('slug', 160);
     $table->text('description')->nullable();
@@ -175,17 +175,17 @@ Schema::create('news_categories', function (Blueprint $table) {
     $table->timestamps();
     $table->softDeletes();
 
-    $table->unique(['organization_id', 'slug'], 'uq_news_cat_org_slug');
-    $table->index(['organization_id', 'parent_id', 'sort_order'], 'idx_news_cat_sort');
-    $table->index(['organization_id', 'is_active'], 'idx_news_cat_active');
+    $table->unique(['organization_id', 'slug'], 'uq_post_cat_org_slug');
+    $table->index(['organization_id', 'parent_id', 'sort_order'], 'idx_post_cat_sort');
+    $table->index(['organization_id', 'is_active'], 'idx_post_cat_active');
 });
 ```
 Mô hình y hệt `kc_categories` (đã kiểm chứng qua production) — `parent_id` tự tham chiếu, không giới hạn cấp, khớp cây "Marriage/Newborn/.../Development→Behaviour" ở ảnh mẫu.
 
-### 7.2 `news_articles` — Bài viết
+### 7.2 `post_articles` — Bài viết
 
 ```php
-Schema::create('news_articles', function (Blueprint $table) {
+Schema::create('post_articles', function (Blueprint $table) {
     $table->id();
     $table->uuid('uuid')->unique();
     $table->foreignId('organization_id')->constrained()->restrictOnDelete();
@@ -209,68 +209,68 @@ Schema::create('news_articles', function (Blueprint $table) {
     $table->timestamps();
     $table->softDeletes();
 
-    $table->unique(['organization_id', 'slug'], 'uq_news_article_org_slug');
-    $table->index(['organization_id', 'status', 'published_at'], 'idx_news_article_org_status_pub');
-    $table->index(['organization_id', 'format'], 'idx_news_article_org_format');
+    $table->unique(['organization_id', 'slug'], 'uq_post_article_org_slug');
+    $table->index(['organization_id', 'status', 'published_at'], 'idx_post_article_org_status_pub');
+    $table->index(['organization_id', 'format'], 'idx_post_article_org_format');
 });
 ```
 `cover_image_url` là string đơn giản (upload qua FilePond có sẵn, giống `resources/views/backend/products/*.blade.php`) — không dùng Spatie MediaLibrary vì chỉ cần 1 ảnh đại diện, tránh over-engineering.
 
-### 7.3 `news_article_categories` — pivot Bài viết ↔ Danh mục (n:n, có "danh mục chính")
+### 7.3 `post_article_categories` — pivot Bài viết ↔ Danh mục (n:n, có "danh mục chính")
 
 ```php
-Schema::create('news_article_categories', function (Blueprint $table) {
-    $table->foreignId('article_id')->constrained('news_articles')->cascadeOnDelete();
-    $table->foreignId('category_id')->constrained('news_categories')->cascadeOnDelete();
+Schema::create('post_article_categories', function (Blueprint $table) {
+    $table->foreignId('article_id')->constrained('post_articles')->cascadeOnDelete();
+    $table->foreignId('category_id')->constrained('post_categories')->cascadeOnDelete();
     $table->boolean('is_primary')->default(false);   // dùng cho breadcrumb + URL canonical
     $table->primary(['article_id', 'category_id']);
 });
 ```
 1 bài có thể lên nhiều danh mục (vd vừa "Babies" vừa "Sleep") mà không nhân bản nội dung; `is_primary` quyết định breadcrumb hiển thị ở trang chi tiết (ảnh mẫu 3).
 
-### 7.4 `news_tags` / `news_article_tag` — Tag phẳng (cross-cutting)
+### 7.4 `post_tags` / `post_article_tag` — Tag phẳng (cross-cutting)
 
 ```php
-Schema::create('news_tags', function (Blueprint $table) {
+Schema::create('post_tags', function (Blueprint $table) {
     $table->id();
     $table->foreignId('organization_id')->constrained()->restrictOnDelete();
     $table->string('name', 120);
     $table->string('slug', 140);
     $table->timestamps();
 
-    $table->unique(['organization_id', 'slug'], 'uq_news_tag_org_slug');
+    $table->unique(['organization_id', 'slug'], 'uq_post_tag_org_slug');
 });
 
-Schema::create('news_article_tag', function (Blueprint $table) {
-    $table->foreignId('article_id')->constrained('news_articles')->cascadeOnDelete();
-    $table->foreignId('tag_id')->constrained('news_tags')->cascadeOnDelete();
+Schema::create('post_article_tag', function (Blueprint $table) {
+    $table->foreignId('article_id')->constrained('post_articles')->cascadeOnDelete();
+    $table->foreignId('tag_id')->constrained('post_tags')->cascadeOnDelete();
     $table->primary(['article_id', 'tag_id']);
 });
 ```
 
-### 7.5 `news_product_blocks` — Khối sản phẩm nhúng trong bài (1 khối = 1 vị trí chèn trong content)
+### 7.5 `post_product_blocks` — Khối sản phẩm nhúng trong bài (1 khối = 1 vị trí chèn trong content)
 
 ```php
-Schema::create('news_product_blocks', function (Blueprint $table) {
+Schema::create('post_product_blocks', function (Blueprint $table) {
     $table->id();
     $table->uuid('uuid')->unique();      // = placeholder key nhúng trong content HTML, xem §9.2
     $table->foreignId('organization_id')->constrained()->restrictOnDelete();
-    $table->foreignId('article_id')->constrained('news_articles')->cascadeOnDelete();
+    $table->foreignId('article_id')->constrained('post_articles')->cascadeOnDelete();
     $table->string('template', 30)->default('single_card'); // ProductBlockTemplate
     $table->string('heading', 200)->nullable();   // tiêu đề khối, vd "Sản phẩm gợi ý cho mẹ và bé"
     $table->unsignedSmallInteger('sort_order')->default(0); // vị trí xuất hiện trong content, đồng bộ lại mỗi lần save
     $table->timestamps();
 
-    $table->index(['organization_id', 'article_id'], 'idx_news_pb_org_article');
+    $table->index(['organization_id', 'article_id'], 'idx_post_pb_org_article');
 });
 ```
 
-### 7.6 `news_product_block_items` — 1-nhiều sản phẩm trong 1 khối (v1.1 — FK cứng tới `Modules/Product`)
+### 7.6 `post_product_block_items` — 1-nhiều sản phẩm trong 1 khối (v1.1 — FK cứng tới `Modules/Product`)
 
 ```php
-Schema::create('news_product_block_items', function (Blueprint $table) {
+Schema::create('post_product_block_items', function (Blueprint $table) {
     $table->id();
-    $table->foreignId('block_id')->constrained('news_product_blocks')->cascadeOnDelete();
+    $table->foreignId('block_id')->constrained('post_product_blocks')->cascadeOnDelete();
     $table->string('item_key', 20);   // sinh 1 lần ở client lúc thêm item (nanoid ngắn), giữ nguyên qua các lần sửa — xem §9.4/§9.8
     $table->foreignId('product_id')->constrained('products')->restrictOnDelete(); // nguồn sự thật — xem docs/product-catalog-spec.md §6.2
 
@@ -283,9 +283,9 @@ Schema::create('news_product_block_items', function (Blueprint $table) {
     $table->unsignedSmallInteger('sort_order')->default(0); // thứ tự trong khối (template multi_grid/compact_list)
     $table->timestamps();
 
-    $table->unique(['block_id', 'item_key'], 'uq_news_pbi_block_key');
-    $table->index(['block_id', 'sort_order'], 'idx_news_pbi_block_order');
-    $table->index('product_id', 'idx_news_pbi_product');
+    $table->unique(['block_id', 'item_key'], 'uq_post_pbi_block_key');
+    $table->index(['block_id', 'sort_order'], 'idx_post_pbi_block_order');
+    $table->index('product_id', 'idx_post_pbi_product');
 });
 ```
 `product_id` là **FK cứng** (`restrictOnDelete`) — không phải soft-link string như bản v1.0. Lý do đổi: ở quy mô hàng chục nghìn sản phẩm × hàng nghìn bài viết, soft-link (`product_ref_type`/`product_ref_id` kiểu string) không cho phép JOIN hiệu quả để render hàng loạt hay tổng hợp báo cáo ("sản phẩm nào được nhắc nhiều nhất"), và không có ràng buộc toàn vẹn (dễ trỏ tới sản phẩm đã xoá). `restrictOnDelete` buộc `Product` phải dùng vòng đời `status` (`discontinued`...) thay vì xoá cứng khi còn tham chiếu — xem `docs/product-catalog-spec.md` §9.
@@ -294,35 +294,38 @@ Mọi cột `*_override` để **null** trong đa số trường hợp — chỉ
 
 **Giới hạn số lượng (bắt buộc validate ở `SyncProductBlocksAction`, xem §9.8.2)**: `single_card`/`banner` = đúng 1 item; `multi_grid`/`compact_list` = tối thiểu 2, **tối đa 7** item/khối.
 
-### 7.7 `news_product_block_buttons` — Nút CTA tuỳ biến (1-nhiều nút/item hoặc 1-nhiều nút/khối)
+### 7.7 `post_product_block_buttons` — Nút CTA tuỳ biến (1-nhiều nút/item hoặc 1-nhiều nút/khối)
 
 ```php
-Schema::create('news_product_block_buttons', function (Blueprint $table) {
+Schema::create('post_product_block_buttons', function (Blueprint $table) {
     $table->id();
-    $table->foreignId('block_id')->constrained('news_product_blocks')->cascadeOnDelete();
-    $table->foreignId('block_item_id')->nullable()->constrained('news_product_block_items')->cascadeOnDelete();
+    $table->foreignId('block_id')->constrained('post_product_blocks')->cascadeOnDelete();
+    $table->foreignId('block_item_id')->nullable()->constrained('post_product_block_items')->cascadeOnDelete();
     // null = nút áp dụng cho cả khối (vd "Xem tất cả sản phẩm"), có giá trị = nút riêng của 1 sản phẩm (vd "Mua ngay")
     $table->string('button_key', 20); // sinh 1 lần ở client, giữ nguyên qua các lần sửa — bảo toàn click_count, xem §9.4/§9.8
-    $table->string('label', 60)->nullable();        // null khi url_type=use_product_default → lấy product->default_cta_label
-    $table->string('url_type', 20);                  // ButtonUrlType: use_product_default|custom_url|phone|zalo|email
-    $table->string('url', 500)->nullable();          // null khi url_type=use_product_default → lấy product->default_cta_url
+    $table->string('label', 60)->nullable();        // null khi url_type=use_product_link → lấy ProductLinkType::label()
+    $table->string('url_type', 20);                  // ButtonUrlType: use_product_link|custom_url|phone|zalo|email
+    $table->string('url', 500)->nullable();          // null khi url_type=use_product_link → lấy product->{ProductLinkType::urlColumn()}
+    $table->string('product_link_type', 30)->nullable(); // ProductLinkType: shopee|tiktok|supplier_product|supplier_homepage — chỉ set khi url_type=use_product_link
     $table->string('target', 10)->default('_blank'); // ButtonTarget: _self|_blank
     $table->string('style', 20)->default('primary'); // ButtonStyle: primary|secondary|outline|ghost (map DaisyUI btn-*)
     $table->unsignedSmallInteger('sort_order')->default(0);
     $table->unsignedInteger('click_count')->default(0);
     $table->timestamps();
 
-    $table->unique(['block_id', 'button_key'], 'uq_news_pbb_block_key');
-    $table->index(['block_id', 'block_item_id'], 'idx_news_pbb_block_item');
+    $table->unique(['block_id', 'button_key'], 'uq_post_pbb_block_key');
+    $table->index(['block_id', 'block_item_id'], 'idx_post_pbb_block_item');
 });
 ```
 Đây là phần trả lời trực tiếp yêu cầu "định nghĩa nhập các nút button cho phép custom điều hướng link": mỗi item (hoặc cả khối) có thể có **nhiều nút**, mỗi nút tự chọn `url_type` + nhập `url` riêng — không giới hạn 1 nút "Mua ngay" cố định. Tối đa **5 nút/item** (validate ở `SyncProductBlocksAction`, xem §9.8.2) — đủ cho các kịch bản thực tế (Mua ngay + Zalo + Gọi điện...) mà không phá layout template.
 
-> **v1.1**: thêm `url_type = use_product_default` — khi 1 sản phẩm phổ biến được chèn ở hàng nghìn bài với cùng 1 CTA chuẩn ("Mua ngay" → `products.default_cta_url`), Marketing không cần nhập lại `label`/`url` mỗi lần chèn, chỉ chọn `use_product_default`; vẫn có thể override riêng khi bài viết cần CTA đặc biệt (`custom_url`/`phone`/`zalo`/`email` như trước).
+> **v1.1**: thêm `url_type = use_product_default` (thay bằng `use_product_link` từ v1.6, xem dưới) — khi 1 sản phẩm phổ biến được chèn ở hàng nghìn bài, Marketing không cần nhập lại `label`/`url` mỗi lần chèn; vẫn có thể override riêng khi bài viết cần CTA đặc biệt (`custom_url`/`phone`/`zalo`/`email` như trước).
+>
+> **v1.6**: `use_product_default` (1 link chung chung) đổi thành `use_product_link` + cột `product_link_type` — vì nghiệp vụ thật là **affiliate đa kênh**: 1 sản phẩm thường bán song song trên Shopee/TikTok/qua NCC, cần chọn đúng kênh cho từng vị trí chèn chứ không phải 1 "Mua ngay" duy nhất. `Modules/Product` cấu hình sẵn tối đa 4 link cố định (`shopee_url`/`tiktok_url`/`supplier_url`/`supplier_homepage_url`, xem `docs/product-catalog-spec.md` §6.2/§7) — Post chỉ **chọn dùng link nào** khi định nghĩa nút, không nhập tay URL. Dialog Jodit (§9.1 bước 5) chỉ liệt kê các `ProductLinkType` mà sản phẩm đã cấu hình URL (không hiện lựa chọn dẫn tới link rỗng). Sản phẩm đổi link (đổi shop, đổi domain) → sửa 1 lần ở `Product`, mọi nút `use_product_link` ở mọi bài đã chèn tự động trỏ đúng.
 
 ---
 
-## 8. Enums (`Modules/News/app/Enums/`)
+## 8. Enums (`Modules/Post/app/Enums/`)
 
 ```php
 enum ArticleStatus: string {
@@ -349,10 +352,11 @@ enum ProductBlockTemplate: string {
 }
 
 enum ButtonUrlType: string {
-    case CustomUrl = 'custom_url';
-    case Phone     = 'phone';
-    case Zalo      = 'zalo';
-    case Email     = 'email';
+    case UseProductLink = 'use_product_link'; // resolve qua product_link_type + Modules\Product\Enums\ProductLinkType::urlColumn()
+    case CustomUrl      = 'custom_url';
+    case Phone          = 'phone';
+    case Zalo           = 'zalo';
+    case Email          = 'email';
 }
 
 enum ButtonTarget: string {
@@ -379,14 +383,14 @@ Dự án đang dùng **Jodit 4.12.2 (MIT, free — không phải bản Pro)** qu
 - Cơ chế **custom toolbar button** (xem `popup.img` trong `jodit.js`, hoặc plugin gốc `hr`/`link` của Jodit dùng `pluginSystem.add()` + `Config.prototype.controls` + `editor.registerButton()`/`editor.registerCommand()`).
 - Cơ chế **dialog**: `editor.dlg({...})` → `.setTitle()/.setContent(html)/.open()/.close()`.
 
-> **v1.4 — ràng buộc nghiệp vụ mới**: **tối đa 3 `NewsProductBlock`/bài viết** (không phải giới hạn chống-abuse chung chung như bản v1.2 nói "20 khối/bài" — đây là quy tắc biên tập thật: 1 bài chi tiết chỉ nên có tối đa 3 vị trí chèn CTA sản phẩm). Con số nhỏ này đổi lại cách thiết kế dialog — xem lại toàn bộ luồng bên dưới.
+> **v1.4 — ràng buộc nghiệp vụ mới**: **tối đa 3 `PostProductBlock`/bài viết** (không phải giới hạn chống-abuse chung chung như bản v1.2 nói "20 khối/bài" — đây là quy tắc biên tập thật: 1 bài chi tiết chỉ nên có tối đa 3 vị trí chèn CTA sản phẩm). Con số nhỏ này đổi lại cách thiết kế dialog — xem lại toàn bộ luồng bên dưới.
 
-File mới `Modules/News/resources/assets/js/jodit-news-product.js` đăng ký 1 nút **"Sản phẩm"** vào toolbar (thêm preset `news` trong `jodit.js`). Vì mỗi bài chỉ có tối đa 3 khối, **1 nút duy nhất** phục vụ cả 3 việc — thêm mới, sửa, xoá — thay vì tách "chèn mới" và "sửa" thành 2 luồng riêng như bản v1.2/v1.3:
+File mới `Modules/Post/resources/assets/js/jodit-post-product.js` đăng ký 1 nút **"Sản phẩm"** vào toolbar (thêm preset `post` trong `jodit.js`). Vì mỗi bài chỉ có tối đa 3 khối, **1 nút duy nhất** phục vụ cả 3 việc — thêm mới, sửa, xoá — thay vì tách "chèn mới" và "sửa" thành 2 luồng riêng như bản v1.2/v1.3:
 
 **Click nút "Sản phẩm" → dialog mở ở chế độ Danh sách (list-view), không phải form nhập liệu ngay:**
 
 0. **Lưu vị trí con trỏ trước khi mở dialog**: gọi `editor.s.save()` — Jodit chèn 1 marker `<span>` vô hình vào đúng vị trí con trỏ hiện tại (API thật, đã xác nhận trong `node_modules/jodit/esm/core/selection/selection.js`). Bắt buộc làm bước này **trước** khi mở dialog vì mở modal khiến editor mất focus/selection — không lưu lại thì lúc xác nhận form sẽ không còn biết chèn vào đâu, dễ rơi vào tình trạng luôn chèn ở vị trí sai (vd cuối bài) bất kể con trỏ gốc ở đâu. Đây chính là cơ chế xử lý đúng ví dụ thực tế: gõ 200 ký tự → đặt con trỏ → bấm "Sản phẩm" → dù thao tác trong dialog mất bao lâu, khối vẫn chèn đúng ngay sau 200 ký tự đó.
-1. Đếm số khối hiện có bằng `editor.editor.querySelectorAll('.news-product-block').length` — thao tác DOM thuần, tức thời (0 khối tới tối đa 3, không đáng để đo hiệu năng). Hiển thị tiêu đề "Khối sản phẩm trong bài (N/3)".
+1. Đếm số khối hiện có bằng `editor.editor.querySelectorAll('.post-product-block').length` — thao tác DOM thuần, tức thời (0 khối tới tối đa 3, không đáng để đo hiệu năng). Hiển thị tiêu đề "Khối sản phẩm trong bài (N/3)".
 2. Liệt kê tối đa 3 card, mỗi card ứng với 1 khối đã chèn: heading (nếu có) hoặc nhãn tự sinh ("Khối 1 — 3 sản phẩm"), badge template, số sản phẩm — kèm 2 nút "Sửa" / "Xoá" (xoá vẫn qua xác nhận 2 bước, §9.8.5).
 3. Nút **"+ Thêm khối mới"**: nếu N < 3 → chuyển dialog sang **chế độ Form** (luồng chọn danh mục/sản phẩm/template/override/CTA mô tả bên dưới); nếu N = 3 → nút bị vô hiệu hoá kèm tooltip "Bài viết đã đạt tối đa 3 khối sản phẩm — hãy sửa hoặc xoá khối hiện có trước".
 4. Bấm "Sửa" trên 1 card → chuyển dialog sang **chế độ Form**, tiền điền dữ liệu qua `parseExistingBlock()` (giống popup double-click ở §9.8.4 — **cùng 1 hàm dùng chung**, không viết 2 lần logic điền form).
@@ -397,7 +401,7 @@ File mới `Modules/News/resources/assets/js/jodit-news-product.js` đăng ký 1
 2. **Danh sách sản phẩm dạng checkbox** (không phải click-chọn-1-rồi-đóng như thiết kế cũ) — cho phép **tick nhiều sản phẩm cùng lúc** để chèn thành 1 khối `multi_grid`/`compact_list` (2-7 sản phẩm, §9.8.2), hoặc tick đúng 1 sản phẩm để chèn `single_card`/`banner`. Kết quả tìm kiếm luôn phân trang (catalog có thể tới hàng chục nghìn dòng) — dialog không bao giờ load hết danh sách vào 1 lần.
 3. **Chọn template hiển thị** (radio 4 lựa chọn ở §7.5/§8, kèm ảnh minh hoạ mini) — mặc định `single_card` nếu chọn 1 sản phẩm, `multi_grid` nếu chọn ≥2.
 4. **Với mỗi sản phẩm đã chọn**: hiển thị sẵn `name`/`price_label`/`cover_image_url` lấy thẳng từ `Product` (không cần nhập tay) — chỉ cho sửa nếu muốn **override riêng vị trí này** (`title_override`/`price_label_override`/`description_override`/`image_url_override`, để trống = dùng dữ liệu gốc; ẩn sau toggle "Tuỳ chỉnh", xem §9.8.3).
-5. **Định nghĩa nút CTA**: mặc định chọn `use_product_default` (dùng `default_cta_label`/`default_cta_url` có sẵn của sản phẩm, không cần nhập lại) — hoặc "+ Thêm nút tuỳ biến" để override: `label`, `url_type` (Link tuỳ ý/Số điện thoại/Zalo/Email), `url`, `target`, `style`. Cho phép thêm nút cấp-khối riêng (vd "Xem tất cả") không gắn với sản phẩm nào.
+5. **Định nghĩa nút CTA**: với mỗi sản phẩm, dialog liệt kê **các link đã cấu hình sẵn** ở `Product` (chỉ hiện những `ProductLinkType` sản phẩm này có URL — vd chỉ có Shopee + NCC thì không hiện lựa chọn "TikTok") dưới dạng nút bấm nhanh "+ Mua trên Shopee" / "+ Mua trên TikTok" / "+ Xem tại nhà cung cấp" / "+ Website nhà cung cấp" — bấm 1 cái là thêm ngay 1 `PostProductBlockButton` với `url_type=use_product_link` + `product_link_type` tương ứng, **không cần nhập gì thêm** (label/url tự resolve lúc render, §9.5). Muốn CTA khác (số điện thoại riêng của bài, Zalo tư vấn, link ngoài đặc biệt...) thì "+ Thêm nút tuỳ biến" để override: `label`, `url_type` (Link tuỳ ý/Số điện thoại/Zalo/Email), `url`, `target`, `style`. Cho phép thêm nút cấp-khối riêng (vd "Xem tất cả") không gắn với sản phẩm nào. Sản phẩm chưa cấu hình link nào ở `Product` → không có nút nhanh nào hiện ra, chỉ còn lựa chọn "+ Thêm nút tuỳ biến".
 6. Xác nhận:
    - Nếu đang **thêm mới** → gọi `editor.s.restore()` **trước tiên** để dựng lại đúng con trỏ đã lưu ở bước 0 (marker bị xoá trong quá trình này), rồi mới build HTML lồng nhau (§9.2) và `editor.s.insertHTML(...)` — khối chèn đúng tại vị trí con trỏ gốc, không phải cuối bài. Mặc định `insertCursorAfter=true` của `insertHTML` (API thật, xem `selection.js`) tự đặt con trỏ ngay sau khối vừa chèn, nên gõ tiếp nội dung sau đó nối liền đúng chỗ.
    - Nếu đang **sửa** → build lại HTML với **cùng `block_uuid`**, giữ nguyên `item_key`/`button_key` của phần không đổi (§9.8.4), thay thế đúng node cũ trong editor bằng chính node đó (không cần cơ chế con trỏ vì đang thao tác trên tham chiếu DOM có sẵn, không phải chèn mới), đóng dialog.
@@ -410,17 +414,17 @@ Việc gộp "thêm mới"/"sửa" vào **cùng 1 chế độ Form** (chỉ khá
 Toàn bộ cấu hình (nhiều item, nhiều nút/item) được nhét vào **thuộc tính `data-*` của 1 cây DOM lồng nhau**, bọc trong `contenteditable="false"` để Jodit coi là 1 khối nguyên vẹn (không bị gõ đè/xoá lẻ):
 
 ```html
-<div class="news-product-block" contenteditable="false"
+<div class="post-product-block" contenteditable="false"
      data-block-uuid="8f3a1c2e-..." data-template="multi_grid" data-heading="Sản phẩm gợi ý cho mẹ và bé">
 
-  <div class="npb-item" data-item-key="k7f2a" data-product-id="42"
+  <div class="ppb-item" data-item-key="k7f2a" data-product-id="42"
        data-title-override="" data-price-label-override="" data-image-url-override="" data-description-override="">
-    <div class="npb-btn" data-btn-key="b1c9d" data-label="" data-url-type="use_product_default" data-url="" data-target="_blank" data-style="primary"></div>
-    <div class="npb-btn" data-btn-key="b2e01" data-label="Tư vấn qua Zalo" data-url-type="zalo"
+    <div class="ppb-btn" data-btn-key="b1c9d" data-label="" data-url-type="use_product_link" data-product-link-type="shopee" data-url="" data-target="_blank" data-style="primary"></div>
+    <div class="ppb-btn" data-btn-key="b2e01" data-label="Tư vấn qua Zalo" data-url-type="zalo"
          data-url="https://zalo.me/0912345678" data-target="_blank" data-style="outline"></div>
   </div>
 
-  <div class="npb-item" data-item-key="k9d31" data-product-id="108" data-title-override="Ưu đãi riêng cho độc giả tin tức" ...>
+  <div class="ppb-item" data-item-key="k9d31" data-product-id="108" data-title-override="Ưu đãi riêng cho bạn đọc" ...>
     ...
   </div>
 
@@ -430,62 +434,62 @@ Toàn bộ cấu hình (nhiều item, nhiều nút/item) được nhét vào **t
 
 > ⚠️ **Toàn bộ giá trị `data-*` ở trên phải được HTML-escape trước khi build chuỗi** (client) — xem §9.8.1. Ví dụ `data-title-override` chứa dấu `"` hoặc `<` chưa escape sẽ phá vỡ ranh giới attribute, mở đường XSS.
 
-Đây **không phải lưu JSON** — chỉ là 1 mini-DOM làm phương tiện truyền dữ liệu từ client, được `Modules/News/app/Support/ArticleContentParser.php` (dùng `Symfony\Component\DomCrawler\Crawler` — đã có sẵn trong `composer.lock` qua dependency gián tiếp, cần khai báo trực tiếp trong `composer.json` nếu import trực tiếp trong code PHP) đọc ra và **ghi thành các dòng quan hệ thật** (`news_product_blocks`/`*_items`/`*_buttons`) khi lưu bài — xem §9.5. Trong editor, nội dung bên trong `.npb-item`/`.npb-btn` chỉ để hiển thị preview tĩnh (ảnh nhỏ + tên + giá lấy từ `Product` qua API picker), không phải nơi lưu trữ chính thức.
+Đây **không phải lưu JSON** — chỉ là 1 mini-DOM làm phương tiện truyền dữ liệu từ client, được `Modules/Post/app/Support/ArticleContentParser.php` (dùng `Symfony\Component\DomCrawler\Crawler` — đã có sẵn trong `composer.lock` qua dependency gián tiếp, cần khai báo trực tiếp trong `composer.json` nếu import trực tiếp trong code PHP) đọc ra và **ghi thành các dòng quan hệ thật** (`post_product_blocks`/`*_items`/`*_buttons`) khi lưu bài — xem §9.5. Trong editor, nội dung bên trong `.ppb-item`/`.ppb-btn` chỉ để hiển thị preview tĩnh (ảnh nhỏ + tên + giá lấy từ `Product` qua API picker), không phải nơi lưu trữ chính thức.
 
 ### 9.3 Template hiển thị & cách mở rộng
 
 Mỗi giá trị `ProductBlockTemplate` map 1 file Blade component:
 
 ```
-Modules/News/resources/views/components/product-block/
-├── single-card.blade.php    (nhận 1 NewsProductBlockItem, layout ảnh lớn trái + nội dung phải)
+Modules/Post/resources/views/components/product-block/
+├── single-card.blade.php    (nhận 1 PostProductBlockItem, layout ảnh lớn trái + nội dung phải)
 ├── multi-grid.blade.php     (nhận collection items, grid 2-4 cột, mỗi ô đủ ảnh/tên/giá/nút)
 ├── banner.blade.php         (nhận 1 item chủ đạo, full-width, nhấn mạnh price_label lớn)
 └── compact-list.blade.php   (nhận collection items, danh sách dọc gọn, 1 nút/dòng)
 ```
 
-`Modules/News/app/Support/ArticleContentParser::render(NewsArticle $article): string` thay từng placeholder trong `content` bằng `Blade::render("news::components.product-block.{$block->template->value}", ['block' => $block])`. Thêm template mới về sau: thêm 1 case enum + 1 file Blade — không đổi migration, không đổi Action nào khác.
+`Modules/Post/app/Support/ArticleContentParser::render(PostArticle $article): string` thay từng placeholder trong `content` bằng `Blade::render("post::components.product-block.{$block->template->value}", ['block' => $block])`. Thêm template mới về sau: thêm 1 case enum + 1 file Blade — không đổi migration, không đổi Action nào khác.
 
 ### 9.4 Đồng bộ lúc lưu bài (Sync-on-save)
 
 Trong `CreateArticleAction`/`UpdateArticleAction`, sau khi ghi `content`:
 
-1. `ArticleContentParser::extractBlocks(string $html): array` — quét mọi `.news-product-block`, trả về mảng theo **đúng thứ tự xuất hiện** (dùng làm `sort_order`), mỗi phần tử gồm `block_uuid` + `template` + `heading` + danh sách item (`item_key`, `product_id`, override, danh sách button `button_key`...).
-2. **Validate trước khi ghi DB** (bắt buộc — xem §9.8.1 lý do): số item/khối theo đúng giới hạn template (§7.6), số button/item ≤ 5 (§7.7), `product_id` resolve được qua `Product::find()` có tenant-scope (reject nếu null), `url`/`url_type` hợp lệ theo format tương ứng (§9.8.1). Bài viết **không được lưu** nếu bất kỳ block nào vi phạm — trả lỗi validation rõ ràng theo từng block, không âm thầm cắt bớt dữ liệu.
-3. **Trước khi mutate**: đọc `productIdsBefore` = distinct `product_id` hiện có trong `news_product_block_items` của bài (join qua `news_product_blocks.article_id`).
+1. `ArticleContentParser::extractBlocks(string $html): array` — quét mọi `.post-product-block`, trả về mảng theo **đúng thứ tự xuất hiện** (dùng làm `sort_order`), mỗi phần tử gồm `block_uuid` + `template` + `heading` + danh sách item (`item_key`, `product_id`, override, danh sách button `button_key`...).
+2. **Validate trước khi ghi DB** (bắt buộc — xem §9.8.1 lý do): số item/khối theo đúng giới hạn template (§7.6), số button/item ≤ 5 (§7.7), `product_id` resolve được qua `Product::find()` có tenant-scope (reject nếu null), `url`/`url_type` hợp lệ theo format tương ứng — riêng `url_type = use_product_link` thì validate `product_link_type` thuộc đúng enum `ProductLinkType` thay vì validate `url` (URL không lưu, luôn resolve động từ `Product` lúc render/click) (§9.8.1). Bài viết **không được lưu** nếu bất kỳ block nào vi phạm — trả lỗi validation rõ ràng theo từng block, không âm thầm cắt bớt dữ liệu.
+3. **Trước khi mutate**: đọc `productIdsBefore` = distinct `product_id` hiện có trong `post_product_block_items` của bài (join qua `post_product_blocks.article_id`).
 4. Trong `DB::transaction`, với mỗi `block_uuid`:
    - Đã tồn tại → cập nhật `template`/`heading`/`sort_order`, rồi **upsert `items` theo `item_key`** (giữ nguyên `id` nếu key đã có, tạo mới nếu key chưa có, xoá row nào có `item_key` không còn xuất hiện) và **upsert `buttons` theo `button_key`** cùng logic — **không xoá-tạo-lại toàn bộ** như thiết kế ban đầu, vì làm vậy sẽ reset `click_count` của những nút không hề đổi mỗi lần Marketing chỉ sửa 1 chi tiết nhỏ trong khối.
-   - `block_uuid` mới (chưa có trong DB) → tạo `NewsProductBlock` mới cùng `items`/`buttons` (mọi `item_key`/`button_key` đều mới).
+   - `block_uuid` mới (chưa có trong DB) → tạo `PostProductBlock` mới cùng `items`/`buttons` (mọi `item_key`/`button_key` đều mới).
    - `block_uuid` cũ trong DB nhưng **không còn xuất hiện** trong content mới → xoá (cascade xoá luôn `items`/`buttons`) — người dùng đã xoá khối đó khỏi bài.
 5. **Sau khi mutate**: tính `productIdsAfter` = distinct `product_id` parse được từ content mới, rồi gọi rollup usage-count sang `Modules/Product` — xem §9.7.
 6. Không cần cơ chế "dọn rác" kiểu orphan-tracking ảnh (`_cleanRemovedImages` trong `jodit.js`) vì **không có gì được ghi xuống DB cho tới khi form bài viết được submit thật** — khác với ảnh (phải upload file lên storage ngay lúc chọn).
 
 ### 9.5 Render lúc hiển thị
 
-`PublicReading::GetPublishedArticleQuery/Handler` trả `NewsArticle` kèm `productBlocks.items.product` + `productBlocks.items.buttons` (eager load qua FK thật `product_id` — 1 JOIN, không N+1 dù bài có nhiều block). Controller gọi `ArticleContentParser::render($article)` để có HTML cuối cùng đưa ra view — **luôn build từ dữ liệu DB hiện tại**, không cache HTML thô có product-box bên trong.
+`PublicReading::GetPublishedArticleQuery/Handler` trả `PostArticle` kèm `productBlocks.items.product` + `productBlocks.items.buttons` (eager load qua FK thật `product_id` — 1 JOIN, không N+1 dù bài có nhiều block). Controller gọi `ArticleContentParser::render($article)` để có HTML cuối cùng đưa ra view — **luôn build từ dữ liệu DB hiện tại**, không cache HTML thô có product-box bên trong.
 
-**Cơ chế fallback** (giải quyết bài toán scale nêu ở §1): với mỗi item, giá trị hiển thị = `$item->title_override ?? $item->product->name`, tương tự cho `price_label`/`description`/`image_url`; nút CTA khi `url_type = use_product_default` lấy `$item->product->default_cta_label`/`default_cta_url`. Nhờ vậy sửa giá 1 lần ở `Modules/Product` phản ánh ngay tại mọi vị trí đã chèn, không cần sửa lại từng bài viết. Nếu `product->status` là `discontinued`/`out_of_stock` (`docs/product-catalog-spec.md` §7), Blade component ẩn nút CTA mặc định và hiện nhãn "Sản phẩm hiện không khả dụng" thay vào đó — nút CTA tuỳ biến (`custom_url`/`phone`/`zalo`/`email`) vẫn hiển thị bình thường vì không phụ thuộc trạng thái sản phẩm.
+**Cơ chế fallback** (giải quyết bài toán scale nêu ở §1): với mỗi item, giá trị hiển thị = `$item->title_override ?? $item->product->name`, tương tự cho `price_label`/`description`/`image_url`; nút CTA khi `url_type = use_product_link` lấy `$button->label ?? ProductLinkType::from($button->product_link_type)->label()` cho nhãn, và `$item->product->{ProductLinkType::from($button->product_link_type)->urlColumn()}` cho URL đích (`docs/product-catalog-spec.md` §7). Nhờ vậy sửa giá/link 1 lần ở `Modules/Product` phản ánh ngay tại mọi vị trí đã chèn, không cần sửa lại từng bài viết. Nếu cột link tương ứng đang `null` (sản phẩm đã gỡ link đó sau khi nút được chèn) → Blade component ẩn hẳn nút này, không render nút dẫn tới URL rỗng. Nếu `product->status` là `discontinued`/`out_of_stock` (`docs/product-catalog-spec.md` §7), Blade component ẩn toàn bộ nút `use_product_link` và hiện nhãn "Sản phẩm hiện không khả dụng" thay vào đó — nút CTA tuỳ biến (`custom_url`/`phone`/`zalo`/`email`) vẫn hiển thị bình thường vì không phụ thuộc trạng thái/link sản phẩm.
 
 ### 9.6 Click tracking
 
 Mỗi nút CTA render ra trỏ tới route trung gian, không trỏ thẳng URL đích:
 
 ```
-GET /news/cta/{button}  →  ProductBlockClickController::redirect
+GET /posts/cta/{button}  →  ProductBlockClickController::redirect
 ```
-Action `RecordProductBlockClickAction`: trong 1 transaction — `increment('click_count')` trên `NewsProductBlockButton`, resolve URL đích (`use_product_default` → lấy `product->default_cta_url`; ngược lại tự thêm `tel:`/`https://zalo.me/`.../`mailto:` tuỳ `url_type`) rồi `redirect()->away(...)`, **và** gọi `ProductCatalogContract::incrementClickCount($productId)` (`docs/product-catalog-spec.md` §11.2) để cộng dồn `products.total_cta_click_count` — rollup phục vụ báo cáo "top sản phẩm CTA hiệu quả nhất" mà không phải `SUM()` qua bảng click có thể lên hàng triệu dòng theo thời gian. Không cần JS beacon, hoạt động cả khi tắt JS, cho Marketing số liệu conversion theo từng nút/từng vị trí.
+Action `RecordProductBlockClickAction`: trong 1 transaction — `increment('click_count')` trên `PostProductBlockButton`, resolve URL đích (`use_product_link` → lấy `product->{ProductLinkType::from($button->product_link_type)->urlColumn()}`, vd `product->shopee_url`; nếu cột đó `null` — sản phẩm đã gỡ link sau khi nút được chèn — trả 404 thay vì redirect tới URL rỗng; ngược lại tự thêm `tel:`/`https://zalo.me/`.../`mailto:` tuỳ `url_type`) rồi `redirect()->away(...)`, **và** gọi `ProductCatalogContract::incrementClickCount($productId)` (`docs/product-catalog-spec.md` §11.2) để cộng dồn `products.total_cta_click_count` — rollup phục vụ báo cáo "top sản phẩm CTA hiệu quả nhất" mà không phải `SUM()` qua bảng click có thể lên hàng triệu dòng theo thời gian. Không cần JS beacon, hoạt động cả khi tắt JS, cho Marketing số liệu conversion theo từng nút/từng vị trí/**từng kênh affiliate** (biết rõ click đến từ nút "Shopee" hay "TikTok" của cùng 1 sản phẩm).
 
 ### 9.7 Usage-count rollup — "sản phẩm này đang được bao nhiêu bài viết dùng" & xử lý khi xoá sản phẩm
 
-Đối xứng với cơ chế mô tả ở `docs/product-catalog-spec.md` §9.1 — chi tiết hoá phần thuộc trách nhiệm của `News`:
+Đối xứng với cơ chế mô tả ở `docs/product-catalog-spec.md` §9.1 — chi tiết hoá phần thuộc trách nhiệm của `Post`:
 
 - Sau bước 4 ở §9.4, so `$productIdsAfter` với `$productIdsBefore`:
   - `$added = productIdsAfter − productIdsBefore` → gọi `ProductCatalogContract::incrementArticleUsageCount($productId)` cho từng id (sản phẩm **lần đầu** được bài này nhắc tới).
   - `$removed = productIdsBefore − productIdsAfter` → gọi `decrementArticleUsageCount($productId)` (bài **không còn** nhắc sản phẩm đó ở vị trí nào nữa — phân biệt với việc chỉ gỡ bớt 1 trong 2 vị trí cùng trỏ 1 sản phẩm, trường hợp đó không gọi gì vì bài vẫn còn dùng).
   - Sản phẩm nằm trong cả 2 tập → không gọi gì, giữ nguyên counter.
-- **Khi nào 1 sản phẩm không xoá được**: `Modules/Product::DeleteProductAction` chặn xoá cứng nếu `products.used_in_articles_count > 0` (đọc trực tiếp cột đã được `News` duy trì ở trên, không cần query chéo module). Admin chỉ có thể chuyển `status → discontinued` (hoặc `inactive`/`out_of_stock`) — dữ liệu ở các bài viết cũ **không bị ảnh hưởng gì cả**: tên/ảnh/giá vẫn hiển thị nguyên vẹn (vì `product_id` vẫn còn tồn tại, chỉ đổi `status`), chỉ riêng nút CTA mặc định (`use_product_default`) bị ẩn/thay bằng nhãn "Sản phẩm hiện không khả dụng" — xem §9.5. Nút CTA tuỳ biến (`custom_url`/`phone`/`zalo`/`email`) không bị ảnh hưởng vì không phụ thuộc `status`.
-- **Drill-down cho admin**: `ArticleAuthoring::ListArticlesReferencingProductQuery/Handler(productId, ?onlyPublished = false)` — trả danh sách bài viết (mọi status khi gọi từ trang quản trị) đang tham chiếu 1 `product_id`, dùng bởi route `GET dashboard/news/articles?product_id=` (§12) mà màn hình danh sách sản phẩm bên `Modules/Product` trỏ link sang (`docs/product-catalog-spec.md` §9.1) để admin chủ động rà soát/thay thế CTA trước khi ngừng kinh doanh 1 sản phẩm. Cùng 1 Query này, gọi với `onlyPublished = true`, phục vụ luôn khối "Bài viết liên quan" công khai ở `PublicReading` (§11.4) — không cần viết 2 lần logic.
-- **Đối soát định kỳ**: artisan command `news:recalculate-product-usage-counts` (đăng ký Laravel Scheduler, chạy hàng đêm) — với mỗi `product_id` xuất hiện trong `news_product_block_items`, tính `COUNT(DISTINCT news_product_blocks.article_id)` thật rồi gọi `ProductCatalogContract::setArticleUsageCount($productId, $trueCount)` để sửa lệch nếu có (rollup tăng/giảm dần có rủi ro lệch nếu 1 request giữa chừng lỗi).
+- **Khi nào 1 sản phẩm không xoá được**: `Modules/Product::DeleteProductAction` chặn xoá cứng nếu `products.used_in_articles_count > 0` (đọc trực tiếp cột đã được `Post` duy trì ở trên, không cần query chéo module). Admin chỉ có thể chuyển `status → discontinued` (hoặc `inactive`/`out_of_stock`) — dữ liệu ở các bài viết cũ **không bị ảnh hưởng gì cả**: tên/ảnh/giá vẫn hiển thị nguyên vẹn (vì `product_id` vẫn còn tồn tại, chỉ đổi `status`), chỉ riêng các nút `use_product_link` bị ẩn/thay bằng nhãn "Sản phẩm hiện không khả dụng" — xem §9.5. Nút CTA tuỳ biến (`custom_url`/`phone`/`zalo`/`email`) không bị ảnh hưởng vì không phụ thuộc `status`.
+- **Drill-down cho admin**: `ArticleAuthoring::ListArticlesReferencingProductQuery/Handler(productId, ?onlyPublished = false)` — trả danh sách bài viết (mọi status khi gọi từ trang quản trị) đang tham chiếu 1 `product_id`, dùng bởi route `GET dashboard/posts/articles?product_id=` (§12) mà màn hình danh sách sản phẩm bên `Modules/Product` trỏ link sang (`docs/product-catalog-spec.md` §9.1) để admin chủ động rà soát/thay thế CTA trước khi ngừng kinh doanh 1 sản phẩm. Cùng 1 Query này, gọi với `onlyPublished = true`, phục vụ luôn khối "Bài viết liên quan" công khai ở `PublicReading` (§11.4) — không cần viết 2 lần logic.
+- **Đối soát định kỳ**: artisan command `post:recalculate-product-usage-counts` (đăng ký Laravel Scheduler, chạy hàng đêm) — với mỗi `product_id` xuất hiện trong `post_product_block_items`, tính `COUNT(DISTINCT post_product_blocks.article_id)` thật rồi gọi `ProductCatalogContract::setArticleUsageCount($productId, $trueCount)` để sửa lệch nếu có (rollup tăng/giảm dần có rủi ro lệch nếu 1 request giữa chừng lỗi).
 
 ### 9.8 An toàn & Trải nghiệm chỉnh sửa (bổ sung sau rà soát bảo mật/UX)
 
@@ -495,10 +499,10 @@ Product Box đưa 1 bề mặt input mới (HTML do editor tự build, chèn qua
 
 | Rủi ro | Biện pháp |
 |---|---|
-| XSS qua thuộc tính `data-*` khi build chuỗi HTML phía client | HTML-escape mọi giá trị text (`title_override`, `label`, tên sản phẩm hiển thị preview...) trước khi chèn vào template string trong `jodit-news-product.js`. Khi render ra trang công khai, Blade dùng `{{ }}` cho mọi field text — tuyệt đối không `{!! !!}` ngoài chính khối HTML `content` đã qua sanitize (dòng dưới) |
-| Stored XSS qua `content` nói chung (không riêng product-block) | Sanitize `content` bằng bộ lọc allowlist (thẻ/thuộc tính được phép) ngay trong `CreateArticleAction`/`UpdateArticleAction` trước khi lưu DB — allowlist phải khai báo rõ `div.news-product-block` + toàn bộ `data-*` mong đợi của nó, mọi thẻ/thuộc tính khác (`<script>`, `on*=`, `javascript:`) bị strip |
+| XSS qua thuộc tính `data-*` khi build chuỗi HTML phía client | HTML-escape mọi giá trị text (`title_override`, `label`, tên sản phẩm hiển thị preview...) trước khi chèn vào template string trong `jodit-post-product.js`. Khi render ra trang công khai, Blade dùng `{{ }}` cho mọi field text — tuyệt đối không `{!! !!}` ngoài chính khối HTML `content` đã qua sanitize (dòng dưới) |
+| Stored XSS qua `content` nói chung (không riêng product-block) | Sanitize `content` bằng bộ lọc allowlist (thẻ/thuộc tính được phép) ngay trong `CreateArticleAction`/`UpdateArticleAction` trước khi lưu DB — allowlist phải khai báo rõ `div.post-product-block` + toàn bộ `data-*` mong đợi của nó, mọi thẻ/thuộc tính khác (`<script>`, `on*=`, `javascript:`) bị strip |
 | Tin nhầm `product_id` đọc từ HTML, kể cả xuyên tenant | `SyncProductBlocksAction` luôn resolve qua `Product::find($id)` (có global scope `TenantAwareModel`, tự lọc theo `organization_id` hiện tại) — không insert thẳng ID thô vào cột FK. Không tìm thấy (sai tenant/không tồn tại) → chặn lưu, báo lỗi rõ theo block |
-| Open redirect / `javascript:` href trong nút CTA | Validate `url` theo đúng `url_type` trước khi lưu: `custom_url` → `filter_var(FILTER_VALIDATE_URL)` + bắt buộc scheme `http`/`https`; `phone` → regex số điện thoại; `email` → `filter_var(FILTER_VALIDATE_EMAIL)`; `zalo` → bắt buộc dạng `https://zalo.me/...` hoặc số điện thoại thuần |
+| Open redirect / `javascript:` href trong nút CTA | Validate `url` theo đúng `url_type` trước khi lưu: `custom_url` → `filter_var(FILTER_VALIDATE_URL)` + bắt buộc scheme `http`/`https`; `phone` → regex số điện thoại; `email` → `filter_var(FILTER_VALIDATE_EMAIL)`; `zalo` → bắt buộc dạng `https://zalo.me/...` hoặc số điện thoại thuần; `use_product_link` → không nhận `url`/`label` thô từ client (bỏ qua nếu có), chỉ validate `product_link_type` thuộc đúng enum `ProductLinkType` — URL thật luôn resolve từ cột đã được validate sẵn ở tầng `Product` lúc lưu sản phẩm (`docs/product-catalog-spec.md` §10.2), không tin giá trị `url` client tự chèn vào `data-url` của placeholder |
 | 1 bài viết bị nhồi HTML rác tạo hàng nghìn dòng con, hoặc vi phạm quy tắc biên tập | Cap cứng ở `SyncProductBlocksAction` (§9.4 bước 2): **tối đa 3 khối/bài** (quy tắc biên tập, không chỉ chống-abuse — xem §9.1), số item/khối theo §7.6 (1 hoặc 2-7 tuỳ template), tối đa 5 nút/item — vượt bất kỳ giới hạn nào thì chặn lưu, không âm thầm cắt bớt |
 
 #### 9.8.2 Giới hạn số sản phẩm mỗi khối — 4-7 sản phẩm
@@ -508,7 +512,7 @@ Product Box đưa 1 bề mặt input mới (HTML do editor tự build, chèn qua
 Lý do giới hạn:
 1. **UX** — dialog chọn sản phẩm phải hiển thị gọn danh sách đã chọn dạng card thu nhỏ; quá 7 sản phẩm bắt đầu phải cuộn dài, khó rà soát trước khi chèn.
 2. **Thẩm mỹ layout** — `multi_grid` (2-4 cột) và `compact_list` được thiết kế cho một cụm sản phẩm gọn, không phải danh sách dài; nhồi 20 sản phẩm vào 1 khối phá bố cục và làm trang chậm.
-3. **Vẫn linh hoạt cho nhu cầu lớn hơn** — nếu Marketing cần giới thiệu nhiều hơn 7 sản phẩm trong 1 bài, giải pháp đúng là **chèn thêm 1 khối thứ 2** (khác `heading`, vd "Sản phẩm cho mẹ" / "Sản phẩm cho bé") thay vì nhồi vào 1 khối — điều này bài viết đã hỗ trợ sẵn (nhiều `NewsProductBlock`/bài không giới hạn).
+3. **Vẫn linh hoạt cho nhu cầu lớn hơn** — nếu Marketing cần giới thiệu nhiều hơn 7 sản phẩm trong 1 bài, giải pháp đúng là **chèn thêm 1 khối thứ 2** (khác `heading`, vd "Sản phẩm cho mẹ" / "Sản phẩm cho bé") thay vì nhồi vào 1 khối — điều này bài viết đã hỗ trợ sẵn (nhiều `PostProductBlock`/bài không giới hạn).
 
 Validate ở **cả 2 lớp**: client (dialog vô hiệu hoá checkbox khi đã chọn đủ 7, hiện "Đã chọn 5/7 sản phẩm") để phản hồi tức thì, và server (`SyncProductBlocksAction`, §9.8.1) làm lớp chặn thật sự — không tin client-side validation là đủ.
 
@@ -517,17 +521,17 @@ Validate ở **cả 2 lớp**: client (dialog vô hiệu hoá checkbox khi đã 
 Form gốc (mỗi sản phẩm hiện đủ override + nhiều nút ngay khi chọn) quá tải khi chọn 5-7 sản phẩm cùng lúc. Thiết kế lại dialog:
 
 - Mỗi sản phẩm đã chọn hiện dạng **card thu gọn 1 dòng** (ảnh nhỏ + tên + giá lấy sẵn từ catalog) trong danh sách bên phải dialog — không expand field nào theo mặc định.
-- Toàn bộ override (`title`/`price_label`/`description`/`image`) + cấu hình nút CTA nằm sau 1 toggle **"Tuỳ chỉnh"** trên từng card — đóng mặc định. Không chạm gì thì sản phẩm dùng nguyên dữ liệu catalog + CTA `use_product_default` — **0 field bắt buộc điền** cho trường hợp phổ biến nhất.
+- Toàn bộ override (`title`/`price_label`/`description`/`image`) + cấu hình nút CTA nằm sau 1 toggle **"Tuỳ chỉnh"** trên từng card — đóng mặc định. Không chạm gì thì sản phẩm dùng nguyên dữ liệu catalog + các nút CTA nhanh `use_product_link` đã cấu hình sẵn — **0 field bắt buộc điền** cho trường hợp phổ biến nhất.
 - Input nút CTA đổi theo `url_type` đã chọn: chọn "Số điện thoại" → ô nhập chuyển `type="tel"` kèm placeholder mẫu; chọn "Zalo" → tự điền sẵn tiền tố `https://zalo.me/`; chọn "Email" → `type="email"` — giảm lỗi format ngay từ lúc gõ, không phải đợi submit thất bại.
 - Cho sắp xếp lại thứ tự sản phẩm đã chọn ngay trong dialog (nút mũi tên lên/xuống trên mỗi card) để set `sort_order` trực quan, không phải sửa lại sau khi chèn.
 
 #### 9.8.4 Sửa & xoá khối đã chèn — tái dùng cơ chế `popup` có sẵn của Jodit
 
-Bản thiết kế trước chỉ có luồng "chèn mới", chưa có cách sửa/xoá 1 khối đã tồn tại trong bài. Bổ sung bằng cách tái dùng **chính cơ chế `popup` mà `jodit.js` đã dùng cho ảnh** (`popup.img` — xem `resources/js/modules/jodit.js`), áp cho selector `div.news-product-block`:
+Bản thiết kế trước chỉ có luồng "chèn mới", chưa có cách sửa/xoá 1 khối đã tồn tại trong bài. Bổ sung bằng cách tái dùng **chính cơ chế `popup` mà `jodit.js` đã dùng cho ảnh** (`popup.img` — xem `resources/js/modules/jodit.js`), áp cho selector `div.post-product-block`:
 
 ```js
 popup: {
-    'div.news-product-block': [
+    'div.post-product-block': [
         { name: 'pencil', tooltip: 'Sửa khối sản phẩm', exec: (editor, block) => openProductPicker(editor, parseExistingBlock(block)) },
         { name: 'bin',    tooltip: 'Xoá khối',           exec: (editor, block) => editor.s.removeNode(block) },
     ],
@@ -549,17 +553,17 @@ popup: {
 
 **Xoá khối — đã tối ưu, xác nhận lại vì sao**:
 - `editor.s.removeNode(block)` xoá **nguyên 1 subtree DOM trong 1 lệnh gọi** — vì toàn bộ `item`/`button` đều nằm lồng bên trong node `contenteditable="false"` ngoài cùng (§9.2), không có phần tử con nào "mồ côi" cần dọn riêng. Đây là thao tác thuần client, O(1), không có network call, không lag dù khối có bao nhiêu sản phẩm/nút.
-- Việc xoá **chỉ ảnh hưởng state đang soạn thảo trong trình duyệt** — dòng DB thật (`news_product_blocks`/`*_items`/`*_buttons`) chỉ mất đi khi bài viết được **lưu** thật sự (§9.4 bước 4: `block_uuid` không còn xuất hiện → xoá cascade). Đây là chủ đích: đóng tab/huỷ chỉnh sửa mà chưa lưu thì không mất gì ở DB — nhất quán với lý do "không cần dọn rác" đã nêu ở §9.4.
+- Việc xoá **chỉ ảnh hưởng state đang soạn thảo trong trình duyệt** — dòng DB thật (`post_product_blocks`/`*_items`/`*_buttons`) chỉ mất đi khi bài viết được **lưu** thật sự (§9.4 bước 4: `block_uuid` không còn xuất hiện → xoá cascade). Đây là chủ đích: đóng tab/huỷ chỉnh sửa mà chưa lưu thì không mất gì ở DB — nhất quán với lý do "không cần dọn rác" đã nêu ở §9.4.
 - **Bổ sung 1 bước còn thiếu**: xoá 1 khối đã cấu hình nhiều sản phẩm + nút CTA tuỳ biến là mất công sức biên tập thật, nên nút "🗑 Xoá" trong popup cần **xác nhận 2 bước** (click lần 1 đổi label thành "Bấm lần nữa để xác nhận" trong ~3 giây, hoặc `editor.confirm(...)` có sẵn của Jodit — xem `Dlgs::confirm()` đã dùng ở plugin `link`) thay vì xoá ngay sau 1 click — tránh mất dữ liệu do bấm nhầm, vì Jodit undo/redo không đảm bảo phục hồi đúng 1 atomic node đã bị `removeNode`.
 
 #### 9.8.6 Phân tích kỹ thuật — Thêm mới / Sửa khối dưới ràng buộc tối đa 3 khối/bài
 
 Con số 3 nhỏ tới mức phần lớn "tối ưu hiệu năng" không nằm ở tốc độ xử lý (3 phần tử DOM là chi phí không đáng kể ở bất kỳ máy nào) mà nằm ở **giảm số bước thao tác và tránh trạng thái nhầm lẫn** cho người biên tập. Cụ thể:
 
-1. **Đếm khối hiện có — không cần cơ chế theo dõi (tracking) phức tạp**: `editor.editor.querySelectorAll('.news-product-block').length` chạy lại **mỗi lần** người dùng click nút "Sản phẩm" là đủ — không cần đăng ký thêm `editor.events.on('change', ...)` để duy trì 1 biến đếm phản ứng theo thời gian thực. Lý do: tần suất click nút này thấp (vài lần/lượt soạn bài), chi phí query DOM cho tối đa 3 phần tử là microseconds — thêm state tracking ở đây là over-engineering không cần thiết, chỉ tăng bề mặt lỗi (biến đếm bị lệch nếu người dùng xoá khối bằng cách khác, vd bôi đen + Delete thay vì qua popup).
+1. **Đếm khối hiện có — không cần cơ chế theo dõi (tracking) phức tạp**: `editor.editor.querySelectorAll('.post-product-block').length` chạy lại **mỗi lần** người dùng click nút "Sản phẩm" là đủ — không cần đăng ký thêm `editor.events.on('change', ...)` để duy trì 1 biến đếm phản ứng theo thời gian thực. Lý do: tần suất click nút này thấp (vài lần/lượt soạn bài), chi phí query DOM cho tối đa 3 phần tử là microseconds — thêm state tracking ở đây là over-engineering không cần thiết, chỉ tăng bề mặt lỗi (biến đếm bị lệch nếu người dùng xoá khối bằng cách khác, vd bôi đen + Delete thay vì qua popup).
 2. **Gộp "thêm mới" và "sửa" vào cùng 1 chế độ Form (§9.1)** thay vì 2 hàm/2 luồng riêng: giảm chỗ dễ lệch (vd sửa `single_card` quên đồng bộ validate giới hạn item giống hệt lúc thêm mới). Điểm khác biệt duy nhất giữa 2 luồng là hành động lúc xác nhận — `insertHTML` (thêm) hay thay thế node cũ theo `block_uuid` (sửa) — toàn bộ bước chọn sản phẩm/template/override/CTA và toàn bộ validate (giới hạn item/nút, format URL...) dùng chung 100% code.
 3. **Chặn sớm ở phía client, xác nhận lại ở server**: nút "+ Thêm khối mới" bị vô hiệu hoá ngay khi đếm được 3 khối — người dùng không mất công điền cả form rồi mới bị từ chối lúc lưu bài. Nhưng `SyncProductBlocksAction` vẫn phải đếm lại và chặn ở server (§9.4/§9.8.1) — không tin đếm phía client là đủ, vì nội dung vẫn có thể bị sửa tay qua "source" view của Jodit (đúng nguyên tắc "không tin dữ liệu client" đã nêu ở §9.8.1) để chèn thêm khối thứ 4 bằng tay.
-4. **Giới hạn 3 khối × tối đa 7 item × tối đa 5 nút giữ toàn bộ hệ thống nằm trong vùng dữ liệu nhỏ, có thể dự đoán được**: trường hợp xấu nhất 1 bài chỉ tạo ra tối đa 3×7 = 21 dòng `news_product_block_items` + 21×5 = 105 dòng `news_product_block_buttons`. Nhân với "hàng nghìn bài viết" ở quy mô mục tiêu (§1), tổng số dòng vẫn nằm gọn trong hàng chục nghìn — đúng tầm index/JOIN đã thiết kế ở §7, không cần điều chỉnh gì thêm ở tầng schema vì giới hạn nghiệp vụ mới này.
+4. **Giới hạn 3 khối × tối đa 7 item × tối đa 5 nút giữ toàn bộ hệ thống nằm trong vùng dữ liệu nhỏ, có thể dự đoán được**: trường hợp xấu nhất 1 bài chỉ tạo ra tối đa 3×7 = 21 dòng `post_product_block_items` + 21×5 = 105 dòng `post_product_block_buttons`. Nhân với "hàng nghìn bài viết" ở quy mô mục tiêu (§1), tổng số dòng vẫn nằm gọn trong hàng chục nghìn — đúng tầm index/JOIN đã thiết kế ở §7, không cần điều chỉnh gì thêm ở tầng schema vì giới hạn nghiệp vụ mới này.
 
 #### 9.8.7 Chèn khối đúng vị trí con trỏ giữa nội dung dài — ví dụ cụ thể
 
@@ -569,7 +573,7 @@ Con số 3 nhỏ tới mức phần lớn "tối ưu hiệu năng" không nằm 
 
 **(b) Thứ tự vật lý được bảo toàn tự nhiên, không cần xử lý thêm**: `ArticleContentParser::extractBlocks()` (§9.4) duyệt `content` theo đúng thứ tự DOM (`querySelectorAll` trả về node theo document order), gán `sort_order` theo thứ tự đó — nên dù giữa 2 khối có 500 ký tự hay 5.000 ký tự văn bản, thứ tự khối trong DB vẫn luôn khớp thứ tự xuất hiện thật trong bài. Không có logic nào cần biết "khối cách nhau bao nhiêu ký tự" — chỉ cần biết thứ tự trước/sau.
 
-**(c) HTML hợp lệ khi chèn giữa đoạn văn**: nếu con trỏ đang nằm giữa 1 thẻ `<p>` (trường hợp phổ biến sau khi gõ 200 ký tự liên tục, chưa xuống dòng), chèn 1 `<div class="news-product-block">` (block-level) vào giữa `<p>` về nguyên tắc HTML không hợp lệ (`<p>` không được chứa phần tử block). Trình duyệt/Jodit tự tách `<p>` thành 2 đoạn quanh phần tử chèn (hành vi chuẩn của contenteditable khi insertNode 1 block-level giữa inline content — cùng cơ chế mà chính plugin `hr` gốc của Jodit đã xử lý, xem `Dom.closest(..., Dom.isBlock, ...)` trong `hr.js`), nhưng đây là hành vi của trình duyệt/thư viện, không phải thứ tự tự viết ra — **bắt buộc kiểm thử thủ công thật trên UI** (không chỉ tin theo lý thuyết) để xác nhận không sinh ra `<p><div>...</div></p>` lồng sai. Ghi rõ thành acceptance criterion riêng (§18) thay vì giả định suông.
+**(c) HTML hợp lệ khi chèn giữa đoạn văn**: nếu con trỏ đang nằm giữa 1 thẻ `<p>` (trường hợp phổ biến sau khi gõ 200 ký tự liên tục, chưa xuống dòng), chèn 1 `<div class="post-product-block">` (block-level) vào giữa `<p>` về nguyên tắc HTML không hợp lệ (`<p>` không được chứa phần tử block). Trình duyệt/Jodit tự tách `<p>` thành 2 đoạn quanh phần tử chèn (hành vi chuẩn của contenteditable khi insertNode 1 block-level giữa inline content — cùng cơ chế mà chính plugin `hr` gốc của Jodit đã xử lý, xem `Dom.closest(..., Dom.isBlock, ...)` trong `hr.js`), nhưng đây là hành vi của trình duyệt/thư viện, không phải thứ tự tự viết ra — **bắt buộc kiểm thử thủ công thật trên UI** (không chỉ tin theo lý thuyết) để xác nhận không sinh ra `<p><div>...</div></p>` lồng sai. Ghi rõ thành acceptance criterion riêng (§18) thay vì giả định suông.
 
 **Ở phía render công khai**: `ArticleContentParser::render()` (§9.5) chỉ thay thế đúng node placeholder bằng partial Blade tương ứng, toàn bộ text bao quanh (200 ký tự, 500 ký tự...) giữ nguyên không đụng tới — không có rủi ro nào riêng cho trường hợp nhiều khối xen giữa nhiều đoạn văn.
 
@@ -579,51 +583,51 @@ Con số 3 nhỏ tới mức phần lớn "tối ưu hiệu năng" không nằm 
 
 Thêm vào `app/Enums/PermissionEnum.php`:
 ```php
-// ══ NEWS (Tin tức theo danh mục + Product CTA Box) ═════════════
+// ══ POST (Bài viết theo danh mục + Product CTA Box) ═════════════
 // Marketing=Soạn thảo | CEO/Ops=Duyệt & publish | System_Admin=Full + quản lý danh mục | còn lại=View (bài đã published)
-case NEWS_CATEGORY_MANAGE = 'news_category.manage';
-case NEWS_ARTICLE_VIEW    = 'news_article.view';
-case NEWS_ARTICLE_CREATE  = 'news_article.create';
-case NEWS_ARTICLE_EDIT    = 'news_article.edit';
-case NEWS_ARTICLE_DELETE  = 'news_article.delete';
-case NEWS_ARTICLE_PUBLISH = 'news_article.publish';
+case POST_CATEGORY_MANAGE = 'post_category.manage';
+case POST_ARTICLE_VIEW    = 'post_article.view';
+case POST_ARTICLE_CREATE  = 'post_article.create';
+case POST_ARTICLE_EDIT    = 'post_article.edit';
+case POST_ARTICLE_DELETE  = 'post_article.delete';
+case POST_ARTICLE_PUBLISH = 'post_article.publish';
 ```
 
-`config/permissions.php`: `NEWS_ARTICLE_VIEW` vào **cả 8 role block** (ai cũng xem được bài đã publish); `NEWS_ARTICLE_CREATE/EDIT/DELETE` vào `R::MARKETING` + `R::ADMIN`; `NEWS_ARTICLE_PUBLISH` vào `R::CEO`, `R::OPS`, `R::ADMIN`; `NEWS_CATEGORY_MANAGE` chỉ `R::ADMIN`.
+`config/permissions.php`: `POST_ARTICLE_VIEW` vào **cả 8 role block** (ai cũng xem được bài đã publish); `POST_ARTICLE_CREATE/EDIT/DELETE` vào `R::MARKETING` + `R::ADMIN`; `POST_ARTICLE_PUBLISH` vào `R::CEO`, `R::OPS`, `R::ADMIN`; `POST_CATEGORY_MANAGE` chỉ `R::ADMIN`.
 
-`Modules/News/database/seeders/NewsPermissionSeeder.php` clone cấu trúc `AcademyPermissionSeeder` (`docs/academy-spec.md` §9) — dùng tên role lowercase thật (`system_admin`, `ceo`, `marketing`...), **không** dùng Title-Case sai như policy cũ của `KcItem`.
+`Modules/Post/database/seeders/PostPermissionSeeder.php` clone cấu trúc `AcademyPermissionSeeder` (`docs/academy-spec.md` §9) — dùng tên role lowercase thật (`system_admin`, `ceo`, `marketing`...), **không** dùng Title-Case sai như policy cũ của `KcItem`.
 
 **Policy:**
-- `NewsCategoryPolicy`: `viewAny/view` → `can('news_article.view')`; `create/update/delete` → `can('news_category.manage')`.
-- `NewsArticlePolicy`: `viewAny/view` → `can('news_article.view')` (chỉ bài `published` nếu không có quyền edit); `create` → `can('news_article.create')`; `update/delete` → `can('news_article.edit')`/`can('news_article.delete')` **và** (`$article->created_by === $user->id` hoặc có `news_article.publish`); `submitForReview` → `can('news_article.edit')`; `publish/schedule/archive` → `can('news_article.publish')`.
+- `PostCategoryPolicy`: `viewAny/view` → `can('post_article.view')`; `create/update/delete` → `can('post_category.manage')`.
+- `PostArticlePolicy`: `viewAny/view` → `can('post_article.view')` (chỉ bài `published` nếu không có quyền edit); `create` → `can('post_article.create')`; `update/delete` → `can('post_article.edit')`/`can('post_article.delete')` **và** (`$article->created_by === $user->id` hoặc có `post_article.publish`); `submitForReview` → `can('post_article.edit')`; `publish/schedule/archive` → `can('post_article.publish')`.
 
-**Sidebar**: gate bằng `@can(\App\Enums\PermissionEnum::NEWS_ARTICLE_VIEW->value)`, sub-link "Danh mục" chỉ hiện khi `@can(NEWS_CATEGORY_MANAGE)`.
+**Sidebar**: gate bằng `@can(\App\Enums\PermissionEnum::POST_ARTICLE_VIEW->value)`, sub-link "Danh mục" chỉ hiện khi `@can(POST_CATEGORY_MANAGE)`.
 
 ---
 
 ## 11. Feature Slices — Chi tiết
 
-### 11.1 Slice `CategoryManagement` (quyền `news_category.manage`)
-- **Actions**: `CreateCategoryAction`/`UpdateCategoryAction`/`DeleteCategoryAction` (chặn xoá nếu còn bài viết gán trực tiếp — kiểm `news_article_categories`), `ReorderCategoriesAction` (nhận `[category_id => sort_order]`).
+### 11.1 Slice `CategoryManagement` (quyền `post_category.manage`)
+- **Actions**: `CreateCategoryAction`/`UpdateCategoryAction`/`DeleteCategoryAction` (chặn xoá nếu còn bài viết gán trực tiếp — kiểm `post_article_categories`), `ReorderCategoriesAction` (nhận `[category_id => sort_order]`).
 - **Queries**: `GetCategoryTreeQuery/Handler` (dựng cây đệ quy từ `parent_id`, dùng cho sidebar quản trị + menu công khai), `ListCategoriesForAdminQuery/Handler` (phẳng, kèm đếm số bài viết).
 - **Http**: `CategoryAdminController` — resource controller mỏng.
 
-### 11.2 Slice `ArticleAuthoring` (quyền `news_article.create/edit/delete/publish`)
+### 11.2 Slice `ArticleAuthoring` (quyền `post_article.create/edit/delete/publish`)
 - **Actions**:
-  - `CreateArticleAction`/`UpdateArticleAction` — nhận `ArticleData` (title/excerpt/content/format/category_ids/is_primary_category_id/tag_ids), trong `DB::transaction`: lưu `NewsArticle` → sync `news_article_categories`/`news_article_tag` → gọi `ArticleContentParser` để sync product blocks (§9.4).
+  - `CreateArticleAction`/`UpdateArticleAction` — nhận `ArticleData` (title/excerpt/content/format/category_ids/is_primary_category_id/tag_ids), trong `DB::transaction`: lưu `PostArticle` → sync `post_article_categories`/`post_article_tag` → gọi `ArticleContentParser` để sync product blocks (§9.4).
   - `SubmitArticleForReviewAction` — `status: draft → pending_review`.
   - `PublishArticleAction` — `status → published`, set `published_at = now()` (nếu chưa có), `approved_by/approved_at`; bắn `ArticlePublished`.
-  - `ScheduleArticleAction` — `status → scheduled`, `published_at = future date`; 1 scheduled command (`news:publish-due`, chạy qua Laravel Scheduler) quét `scheduled` có `published_at <= now()` → tự chuyển `published`.
+  - `ScheduleArticleAction` — `status → scheduled`, `published_at = future date`; 1 scheduled command (`post:publish-due`, chạy qua Laravel Scheduler) quét `scheduled` có `published_at <= now()` → tự chuyển `published`.
   - `ArchiveArticleAction`/`DeleteArticleAction`.
 - **Queries**: `ListArticlesForAdminQuery/Handler` (mọi status, filter theo category/format/status, **hỗ trợ filter `product_id`** — dùng chung implementation với `ListArticlesReferencingProductQuery/Handler` bên dưới, xem §9.7), `GetArticleDetailForAdminQuery/Handler` (kèm product blocks đầy đủ để render lại trong editor), `ListArticlesReferencingProductQuery/Handler(productId, ?onlyPublished = false)` (§9.7 — phục vụ cả drill-down quản trị lẫn "bài viết liên quan" công khai ở §11.4).
 - **Http**: `ArticleAdminController` (action `index` nhận query string `?product_id=` để phục vụ drill-down từ `Modules/Product`, xem §12).
 
-### 11.3 Slice `ProductBlockPicker` (API nội bộ phục vụ dialog Jodit, quyền `news_article.create` hoặc `edit`)
+### 11.3 Slice `ProductBlockPicker` (API nội bộ phục vụ dialog Jodit, quyền `post_article.create` hoặc `edit`)
 - **v1.1**: slice này **không tự query catalog** — chỉ là 1 lớp mỏng proxy sang `Modules/Product`, giữ đúng ranh giới module (`docs/product-catalog-spec.md` §11).
-- **Queries**: `ListProductCategoriesForPickerQuery/Handler` và `SearchProductsForPickerQuery/Handler` gọi `ProductCatalogContract::search(...)` (hoặc gọi thẳng API `GET /api/v1/products/search` nếu picker chạy phía client, xem §12) — trả kèm đầy đủ `name`/`price_label`/`cover_image_url`/`default_cta_label`/`default_cta_url` thật từ catalog, không còn thiếu `price`/`image` như khi còn dựa vào `OcopProduct`.
-- **Http**: `ProductPickerApiController@categories`, `@search` trong `Modules/News` có thể bị loại bỏ hoàn toàn nếu client (`jodit-news-product.js`) gọi thẳng `/api/v1/products/search` của `Modules/Product` — quyết định cụ thể để ở Phase 6 lúc code (xem §17), không ảnh hưởng schema.
+- **Queries**: `ListProductCategoriesForPickerQuery/Handler` và `SearchProductsForPickerQuery/Handler` gọi `ProductCatalogContract::search(...)` (hoặc gọi thẳng API `GET /api/v1/products/search` nếu picker chạy phía client, xem §12) — trả kèm đầy đủ `name`/`price_label`/`cover_image_url`/`shopee_url`/`tiktok_url`/`supplier_url`/`supplier_homepage_url` thật từ catalog, không còn thiếu `price`/`image` như khi còn dựa vào `OcopProduct`.
+- **Http**: `ProductPickerApiController@categories`, `@search` trong `Modules/Post` có thể bị loại bỏ hoàn toàn nếu client (`jodit-post-product.js`) gọi thẳng `/api/v1/products/search` của `Modules/Product` — quyết định cụ thể để ở Phase 6 lúc code (xem §17), không ảnh hưởng schema.
 
-### 11.4 Slice `PublicReading` (quyền `news_article.view`, hoặc không cần đăng nhập nếu public — xem §16 Open Questions)
+### 11.4 Slice `PublicReading` (quyền `post_article.view`, hoặc không cần đăng nhập nếu public — xem §16 Open Questions)
 - **Actions**: `RecordArticleViewAction` (increment `view_count`, debounce theo session để tránh spam F5), `RecordProductBlockClickAction` (§9.6).
 - **Queries**: `GetPublishedArticleQuery/Handler`, `ListArticlesByCategoryQuery/Handler` (kèm cây danh mục con để render sidebar giống ảnh mẫu 3). Khối "Bài viết liên quan" (nếu cần) tái dùng `ArticleAuthoring::ListArticlesReferencingProductQuery/Handler(productId, onlyPublished: true)` — không viết lại logic riêng.
 - **Http**: `PublicArticleController@show`, `PublicCategoryController@show`, `ProductBlockClickController@redirect`.
@@ -634,7 +638,7 @@ case NEWS_ARTICLE_PUBLISH = 'news_article.publish';
 
 ```php
 // routes/web.php
-Route::middleware(['auth'])->prefix('dashboard/news')->name('backend.news.')->group(function () {
+Route::middleware(['auth'])->prefix('dashboard/posts')->name('backend.post.')->group(function () {
     Route::resource('categories', CategoryAdminController::class);
     Route::post('categories/reorder', [CategoryAdminController::class, 'reorder'])->name('categories.reorder');
 
@@ -646,24 +650,24 @@ Route::middleware(['auth'])->prefix('dashboard/news')->name('backend.news.')->gr
 });
 
 // Public (không middleware auth — xem §16 Open Questions về phạm vi public)
-Route::prefix('tin-tuc')->name('news.public.')->group(function () {
+Route::prefix('bai-viet')->name('post.public.')->group(function () {
     Route::get('/', [PublicCategoryController::class, 'index'])->name('home');
     Route::get('danh-muc/{category:slug}', [PublicCategoryController::class, 'show'])->name('category');
     Route::get('{article:slug}', [PublicArticleController::class, 'show'])->name('article');
 });
-Route::get('news/cta/{button}', [ProductBlockClickController::class, 'redirect'])->name('news.cta.redirect');
+Route::get('posts/cta/{button}', [ProductBlockClickController::class, 'redirect'])->name('post.cta.redirect');
 
 // routes/api.php — nội bộ, dùng bởi dialog Jodit
-Route::middleware(['auth:sanctum'])->prefix('api/v1/news')->group(function () {
+Route::middleware(['auth:sanctum'])->prefix('api/v1/posts')->group(function () {
     Route::get('product-categories', [ProductPickerApiController::class, 'categories']);
     Route::get('products', [ProductPickerApiController::class, 'search']);
 });
 ```
-`GET dashboard/news/articles?product_id={id}` (drill-down từ `Modules/Product`, xem §9.7) dùng chung route `backend.news.articles.index` có sẵn ở trên — không cần route riêng, chỉ thêm filter `product_id` vào `ListArticlesForAdminQuery`.
+`GET dashboard/posts/articles?product_id={id}` (drill-down từ `Modules/Product`, xem §9.7) dùng chung route `backend.post.articles.index` có sẵn ở trên — không cần route riêng, chỉ thêm filter `product_id` vào `ListArticlesForAdminQuery`.
 
-**Console command** (`routes/console.php` hoặc `app/Console/Kernel.php` của `Modules/News`):
+**Console command** (`routes/console.php` hoặc `app/Console/Kernel.php` của `Modules/Post`):
 ```php
-Schedule::command('news:recalculate-product-usage-counts')->dailyAt('02:00');
+Schedule::command('post:recalculate-product-usage-counts')->dailyAt('02:00');
 ```
 Route path/tên theo `docs/PLATFORM_DESIGN.md` §12.2 (`backend.{noun}.{action}`, `/dashboard/{resource}`), route-model-binding theo `uuid`/`slug` — không lộ `id` số nguyên.
 
@@ -671,9 +675,9 @@ Route path/tên theo `docs/PLATFORM_DESIGN.md` §12.2 (`backend.{noun}.{action}`
 
 ## 13. Seed Data
 
-`Modules/News/database/seeders/NewsDemoContentSeeder.php` — chỉ chạy nếu `news_categories` rỗng trong org đang seed:
-- 4-5 `NewsCategory` gốc + 2-3 cấp con (lấy cảm hứng từ ảnh 1: Marriage/Newborn/Toddlers/Babies).
-- 3-4 `NewsArticle` `published`, mỗi bài có tối thiểu 1 `NewsProductBlock` (đủ cả 4 template) để test render ngay không cần soạn tay.
+`Modules/Post/database/seeders/PostDemoContentSeeder.php` — chỉ chạy nếu `post_categories` rỗng trong org đang seed:
+- 4-5 `PostCategory` gốc + 2-3 cấp con (lấy cảm hứng từ ảnh 1: Marriage/Newborn/Toddlers/Babies).
+- 3-4 `PostArticle` `published`, mỗi bài có tối thiểu 1 `PostProductBlock` (đủ cả 4 template) để test render ngay không cần soạn tay.
 
 ---
 
@@ -681,11 +685,11 @@ Route path/tên theo `docs/PLATFORM_DESIGN.md` §12.2 (`backend.{noun}.{action}`
 
 | Ảnh mẫu (`docs/tintuc/`) | Route | Ghi chú |
 |---|---|---|
-| `1.png` (menu Resources, cây theo độ tuổi) | `news.public.home` | Menu công khai build từ `GetCategoryTreeQuery` |
-| `2.png` (trang danh mục nhiều định dạng: Articles/Videos/Activities/Tips) | `news.public.category` | Lọc theo `format` (query string `?format=video`), không phải sub-category riêng — đúng quyết định §7.6/§8 |
-| `3.png` (sidebar cây Development→Behaviour, bài chi tiết) | `news.public.article` | Sidebar = cây `NewsCategory` quanh danh mục chính (`is_primary`) của bài |
-| `4.png`/`5.png` (listing filter, activities theo độ tuổi) | `news.public.category` | Filter theo category/format qua query string |
-| `2026-07-06_19-59/22-05/22-09.png` (Motherly/Babylist — box sản phẩm inline, nút Shop) | `news.public.article` → render qua `ArticleContentParser` | Chính là `NewsProductBlock` — xem toàn bộ §9 |
+| `1.png` (menu Resources, cây theo độ tuổi) | `post.public.home` | Menu công khai build từ `GetCategoryTreeQuery` |
+| `2.png` (trang danh mục nhiều định dạng: Articles/Videos/Activities/Tips) | `post.public.category` | Lọc theo `format` (query string `?format=video`), không phải sub-category riêng — đúng quyết định §7.6/§8 |
+| `3.png` (sidebar cây Development→Behaviour, bài chi tiết) | `post.public.article` | Sidebar = cây `PostCategory` quanh danh mục chính (`is_primary`) của bài |
+| `4.png`/`5.png` (listing filter, activities theo độ tuổi) | `post.public.category` | Filter theo category/format qua query string |
+| `2026-07-06_19-59/22-05/22-09.png` (Motherly/Babylist — box sản phẩm inline, nút Shop) | `post.public.article` → render qua `ArticleContentParser` | Chính là `PostProductBlock` — xem toàn bộ §9 |
 
 ---
 
@@ -693,13 +697,14 @@ Route path/tên theo `docs/PLATFORM_DESIGN.md` §12.2 (`backend.{noun}.{action}`
 
 | Quyết định | Lý do | Đánh đổi |
 |---|---|---|
-| Module gộp `News` duy nhất, không tách `NewsCategory`/`NewsArticle` | Bounded context nhỏ, luôn đi cùng nhau (quyết định của stakeholder) | Nếu sau này category cần dùng chung cho nhiều loại content khác ngoài Article, phải tách lại — chấp nhận được vì chưa có nhu cầu đó |
+| Module gộp `Post` duy nhất, không tách `PostCategory`/`PostArticle` | Bounded context nhỏ, luôn đi cùng nhau (quyết định của stakeholder) | Nếu sau này category cần dùng chung cho nhiều loại content khác ngoài Article, phải tách lại — chấp nhận được vì chưa có nhu cầu đó |
 | **(v1.1)** Product box lấy dữ liệu qua **FK cứng tới module `Product` riêng**, không còn nhập tay/soft-link `OcopProduct` như v1.0 | Ở quy mô hàng chục nghìn sản phẩm × hàng nghìn bài viết, nhập tay từng vị trí không scale (sửa giá phải touch từng dòng); soft-link string không JOIN hiệu quả, không ràng buộc toàn vẹn | Thêm 1 module phụ thuộc (`Modules/Product`) phải scaffold trước — đổi lại sửa giá 1 lần phản ánh khắp nơi, JOIN hiệu quả cho báo cáo (xem `docs/product-catalog-spec.md`) |
 | Cấu hình block/item/button là bảng quan hệ, placeholder trong content chỉ là data-carrier tạm thời | Tuân "No JSON storage"; cho phép query "sản phẩm nào được nhắc ở bài nào", đếm click theo từng nút | Phải viết `ArticleContentParser` (parse + re-sync mỗi lần save) thay vì đọc thẳng content — độ phức tạp cao hơn nhưng đổi lại truy vấn được structured data |
-| **(v1.1)** Thêm `url_type = use_product_default`, không còn "mọi nút đều bắt buộc nhập URL" như v1.0 | Sản phẩm giờ có `default_cta_url` thật ở tầng `Product` — không cần Marketing nhập lại CTA giống nhau ở hàng nghìn vị trí chèn cùng 1 sản phẩm | Vẫn giữ `custom_url`/`phone`/`zalo`/`email` cho trường hợp cần CTA đặc biệt riêng từng bài — không mất tính linh hoạt của v1.0 |
+| **(v1.1→v1.6)** Thêm `url_type = use_product_link` (đổi tên từ `use_product_default` ở v1.1), không còn "mọi nút đều bắt buộc nhập URL" như v1.0 | Sản phẩm có sẵn tối đa 4 link affiliate cố định ở tầng `Product` (`docs/product-catalog-spec.md` §6.2/§7) — không cần Marketing nhập lại URL giống nhau ở hàng nghìn vị trí chèn cùng 1 sản phẩm, và chọn được đúng kênh (Shopee/TikTok/NCC) cho từng vị trí thay vì chỉ 1 CTA chung | Vẫn giữ `custom_url`/`phone`/`zalo`/`email` cho trường hợp cần CTA đặc biệt riêng từng bài — không mất tính linh hoạt của v1.0 |
+| **(v1.6)** `use_product_link` cần thêm cột `product_link_type` (chọn 1 trong 4 kênh) thay vì fallback về đúng 1 URL mặc định | Thực tế nghiệp vụ: 1 sản phẩm bán song song nhiều kênh (Shopee + TikTok + NCC) cùng lúc, mỗi bài/vị trí chèn có thể muốn dẫn tới kênh khác nhau — 1 slot `default_cta_url` duy nhất không đủ biểu diễn | Thêm 1 cột + 1 bước chọn kênh trong dialog — đổi lại linh hoạt đúng với mô hình affiliate đa sàn thay vì phải tự dựng qua `custom_url` gõ tay (mất tính "sửa 1 nơi phản ánh khắp nơi") |
 | Multi-select sản phẩm trong 1 lần chèn (thay vì chèn từng cái) | Khớp yêu cầu "chọn 1 hoặc nhiều sản phẩm", khớp template `multi_grid`/`compact_list` | Dialog phức tạp hơn (checkbox + form lặp lại theo từng item đã chọn) |
 | Không dọn "rác" cho product-block kiểu orphan-tracking ảnh | Không có gì ghi DB cho tới khi submit form bài viết thật (khác ảnh phải upload file ngay) | Không cần — không phải đánh đổi |
-| **(v1.1)** `used_in_articles_count` đếm theo **bài viết** (distinct), không theo số vị trí chèn; tính diff before/after mỗi lần save thay vì query lại từ đầu | Đúng ngữ nghĩa "bao nhiêu bài dùng sản phẩm này"; tính incremental rẻ hơn `COUNT(DISTINCT)` chạy lại mỗi lần hiển thị danh sách sản phẩm | Rollup có thể lệch nếu có lỗi giữa chừng — cần lệnh đối soát `news:recalculate-product-usage-counts` chạy định kỳ (§9.7) |
+| **(v1.1)** `used_in_articles_count` đếm theo **bài viết** (distinct), không theo số vị trí chèn; tính diff before/after mỗi lần save thay vì query lại từ đầu | Đúng ngữ nghĩa "bao nhiêu bài dùng sản phẩm này"; tính incremental rẻ hơn `COUNT(DISTINCT)` chạy lại mỗi lần hiển thị danh sách sản phẩm | Rollup có thể lệch nếu có lỗi giữa chừng — cần lệnh đối soát `post:recalculate-product-usage-counts` chạy định kỳ (§9.7) |
 | `ListArticlesReferencingProductQuery` dùng chung cho cả drill-down quản trị (mọi status) lẫn "bài viết liên quan" công khai (chỉ published), phân biệt qua tham số `onlyPublished` | Tránh viết trùng 2 lần cùng 1 logic lọc theo `product_id` | Query cần 1 nhánh điều kiện thêm, không đáng kể |
 | **(v1.2)** Giới hạn cứng 2-7 sản phẩm/khối (`multi_grid`/`compact_list`), 1 sản phẩm/khối (`single_card`/`banner`), tối đa 5 nút/item, validate ở cả client lẫn server | Chống quá tải UI dialog, giữ layout template đẹp, chặn abuse (nhồi HTML tạo hàng nghìn dòng con) | Cần nhiều hơn 7 sản phẩm → phải tách 2 khối riêng trong bài (đã hỗ trợ sẵn multi-block/bài), không phá được giới hạn |
 | **(v1.2)** `item_key`/`button_key` sinh ở client, giữ nguyên qua các lần sửa; sync theo cơ chế **upsert-by-key** thay vì xoá-tạo-lại toàn bộ | Bảo toàn `click_count` của nút không đổi khi Marketing chỉ sửa 1 chi tiết nhỏ — xoá-tạo-lại (thiết kế v1.1) sẽ reset counter mỗi lần save, sai lệch số liệu báo cáo | `ArticleContentParser`/`SyncProductBlocksAction` phức tạp hơn 1 chút (upsert theo key thay vì delete+insert đơn giản) — chấp nhận được vì đổi lấy đúng đắn dữ liệu |
@@ -718,32 +723,32 @@ Route path/tên theo `docs/PLATFORM_DESIGN.md` §12.2 (`backend.{noun}.{action}`
 
 ## 16. Open Questions (cần xác nhận trước khi triển khai)
 
-1. Trang công khai (`news.public.*`) có cần **không đăng nhập** (SEO, chia sẻ ra ngoài) hay chỉ hiển thị nội bộ cho user đã login trong tổ chức? Ảnh hưởng tới middleware group + có cần sitemap/meta OG hay không.
+1. Trang công khai (`post.public.*`) có cần **không đăng nhập** (SEO, chia sẻ ra ngoài) hay chỉ hiển thị nội bộ cho user đã login trong tổ chức? Ảnh hưởng tới middleware group + có cần sitemap/meta OG hay không.
 2. ~~`ListProductCategoriesForPickerQuery` lấy danh mục sản phẩm từ đâu~~ — **đã giải quyết (v1.1)**: module `Product` riêng với `product_categories` độc lập, không phụ thuộc `OcopProductGroup` (xem `docs/product-catalog-spec.md` §2).
-3. Cần **log click chi tiết theo thời điểm/IP** (không chỉ tổng `click_count`) để vẽ biểu đồ hiệu quả CTA theo thời gian không? Nếu có, thêm bảng `news_product_block_click_logs` ở phase sau — lưu ý rollup `products.total_cta_click_count` (`docs/product-catalog-spec.md` §9) vẫn giữ nguyên dù có thêm log chi tiết, 2 cơ chế phục vụ 2 mục đích khác nhau (tổng nhanh vs biểu đồ theo thời gian).
-4. Multi-tenant: bài viết có cần công khai theo **subdomain riêng của từng tổ chức** (`{org}.domain.com/tin-tuc`) hay dùng chung 1 domain có filter theo `organization_id` trong route?
-5. `NewsArticlePolicy::update/delete` có nên giới hạn "chỉ tác giả hoặc người có quyền publish" hay mọi người có `news_article.edit` đều sửa được bài của người khác trong cùng tổ chức?
-6. **(mới, v1.1)** Khi `ProductCatalogContract::search()` chạy phía server (Blade admin) thì gọi trực tiếp qua Contract; nhưng dialog Jodit chạy phía **client** (JS `fetch()`) — có nên expose thẳng API `/api/v1/products/search` của `Modules/Product` cho client gọi (đơn giản hơn), hay bắt buộc đi qua 1 endpoint proxy trong `Modules/News` để giữ ranh giới module chặt hơn (thêm 1 lớp, chậm hơn 1 hop)? Khuyến nghị: gọi thẳng API `Product` (đơn giản, giảm latency), vì đây vốn đã là API công khai nội bộ (`auth:sanctum`), không phải chi tiết triển khai riêng tư.
+3. Cần **log click chi tiết theo thời điểm/IP** (không chỉ tổng `click_count`) để vẽ biểu đồ hiệu quả CTA theo thời gian không? Nếu có, thêm bảng `post_product_block_click_logs` ở phase sau — lưu ý rollup `products.total_cta_click_count` (`docs/product-catalog-spec.md` §9) vẫn giữ nguyên dù có thêm log chi tiết, 2 cơ chế phục vụ 2 mục đích khác nhau (tổng nhanh vs biểu đồ theo thời gian).
+4. Multi-tenant: bài viết có cần công khai theo **subdomain riêng của từng tổ chức** (`{org}.domain.com/bai-viet`) hay dùng chung 1 domain có filter theo `organization_id` trong route?
+5. `PostArticlePolicy::update/delete` có nên giới hạn "chỉ tác giả hoặc người có quyền publish" hay mọi người có `post_article.edit` đều sửa được bài của người khác trong cùng tổ chức?
+6. **(mới, v1.1)** Khi `ProductCatalogContract::search()` chạy phía server (Blade admin) thì gọi trực tiếp qua Contract; nhưng dialog Jodit chạy phía **client** (JS `fetch()`) — có nên expose thẳng API `/api/v1/products/search` của `Modules/Product` cho client gọi (đơn giản hơn), hay bắt buộc đi qua 1 endpoint proxy trong `Modules/Post` để giữ ranh giới module chặt hơn (thêm 1 lớp, chậm hơn 1 hop)? Khuyến nghị: gọi thẳng API `Product` (đơn giản, giảm latency), vì đây vốn đã là API công khai nội bộ (`auth:sanctum`), không phải chi tiết triển khai riêng tư.
 
 ---
 
 ## 17. Phased Implementation Plan
 
-> **Tiền điều kiện**: `Modules/Product` (`docs/product-catalog-spec.md`) phải hoàn thành tối thiểu Phase 0-3 (scaffold + data model + permissions + CRUD catalog) **trước khi** bắt đầu Phase 5 của News dưới đây — Phase 5 cần bảng `products` đã tồn tại để tạo FK.
+> **Tiền điều kiện**: `Modules/Product` (`docs/product-catalog-spec.md`) phải hoàn thành tối thiểu Phase 0-3 (scaffold + data model + permissions + CRUD catalog) **trước khi** bắt đầu Phase 5 của Post dưới đây — Phase 5 cần bảng `products` đã tồn tại để tạo FK.
 
 | Phase | Nội dung | Output kiểm tra được |
 |---|---|---|
-| **Phase 0 — Scaffold module** | `module.json`, `composer.json`, `NewsServiceProvider`/`RouteServiceProvider`/`EventServiceProvider`, `config/config.php`, thêm `"News": true` vào `modules_statuses.json` | `php artisan module:list` thấy `News` enabled |
-| **Phase 1 — Data model** | 7 migration (§7), 6 model (`Models/`), 6 enum (§8) | `php artisan migrate` chạy sạch; tạo thử 1 `NewsCategory`→`NewsArticle` qua tinker không lỗi |
-| **Phase 2 — Permissions** | `PermissionEnum` +6 case, `config/permissions.php`, `NewsPermissionSeeder`, `NewsDatabaseSeeder`, đăng ký vào `SystemDataSeeder` | `php artisan db:seed` không lỗi; bảng `permissions` có `news_*` |
+| **Phase 0 — Scaffold module** | `module.json`, `composer.json`, `PostServiceProvider`/`RouteServiceProvider`/`EventServiceProvider`, `config/config.php`, thêm `"Post": true` vào `modules_statuses.json` | `php artisan module:list` thấy `Post` enabled |
+| **Phase 1 — Data model** | 7 migration (§7), 6 model (`Models/`), 6 enum (§8) | `php artisan migrate` chạy sạch; tạo thử 1 `PostCategory`→`PostArticle` qua tinker không lỗi |
+| **Phase 2 — Permissions** | `PermissionEnum` +6 case, `config/permissions.php`, `PostPermissionSeeder`, `PostDatabaseSeeder`, đăng ký vào `SystemDataSeeder` | `php artisan db:seed` không lỗi; bảng `permissions` có `post_*` |
 | **Phase 3 — Slice `CategoryManagement`** | Actions/Queries/Http/Policy + Blade admin (cây danh mục kéo-thả sắp xếp) | Tạo được cây danh mục 3 cấp qua UI |
-| **Phase 4 — Slice `ArticleAuthoring` (chưa có product block)** | Actions/Data/Queries/Http/Policy + Blade admin (form Jodit preset `news`, chọn category/tag/format, workflow submit/publish/schedule/archive) | Soạn + publish 1 bài viết đầy đủ, không có box sản phẩm, hiển thị đúng ở trang công khai |
-| **Phase 5 — `ArticleContentParser` + Product Block schema** | `news_product_blocks`/`*_items`/`*_buttons` migration (FK `product_id` tới `products`, cột `item_key`/`button_key`), `ArticleContentParser::extractBlocks/render`, sync **upsert-by-key** trong `CreateArticleAction`/`UpdateArticleAction` kèm validate giới hạn số lượng + tenant-scope + diff usage-count (§9.4, §9.7, §9.8.1/§9.8.2) | Chèn thủ công đoạn HTML placeholder qua "source code" view của Jodit → save → kiểm tra DB có đúng dòng tương ứng + `products.used_in_articles_count` tăng đúng; xoá placeholder → save → dòng DB bị xoá theo + counter giảm đúng; cố tình chèn > 7 item hoặc `product_id` sai tenant → bị chặn lưu với lỗi rõ ràng |
-| **Phase 6 — Sanitization & validation server-side** | Bộ lọc allowlist HTML cho `content` (bao gồm cấu trúc `.news-product-block`/`.npb-item`/`.npb-btn`), validate `url`/`url_type` theo format tương ứng, escape output ở mọi Blade component product-block (§9.8.1) | Cố tình lưu `content` chứa `<script>`/`onerror=`/`javascript:` href → bị strip/chặn trước khi ghi DB; `url_type=phone` với giá trị không phải số điện thoại → bị từ chối validate |
-| **Phase 7 — Jodit plugin `jodit-news-product.js`** | Nút toolbar "Sản phẩm" mở dialog **list-view** (đếm khối hiện có, gate "+ Thêm khối mới" ở N=3) + **chế độ Form dùng chung** cho thêm mới/sửa (multi-select tối đa 7, form thu gọn theo §9.8.3, input đổi theo `url_type`, sinh `item_key`/`button_key`, build placeholder HTML đã escape) + popup double-click sửa/xoá nhanh (§9.1/§9.8.4/§9.8.5/§9.8.6) | Bài chưa có khối nào → mở dialog thấy list-view rỗng + nút "+ Thêm khối" hoạt động; thêm đủ 3 khối → nút "+ Thêm khối" tự vô hiệu hoá kèm tooltip; xoá 1 khối → nút kích hoạt lại; double-click khối đã chèn → dialog hiện ngay không chờ mạng, dữ liệu refresh qua đúng 1 request batch; sửa 1 nút rồi lưu → `click_count` của các nút khác không bị reset; click "Xoá khối" 1 lần → chưa xoá, phải xác nhận lần 2 |
-| **Phase 8 — Template rendering** | 4 Blade component (§9.3), route `news.cta.redirect` + `RecordProductBlockClickAction` | Trang công khai render đủ 4 kiểu template, bấm nút CTA tăng đúng `click_count` và chuyển hướng đúng `url_type` |
-| **Phase 9 — Drill-down & đối soát** | `ListArticlesReferencingProductQuery/Handler` + filter `product_id` trên `ArticleAdminController@index`, command `news:recalculate-product-usage-counts` + đăng ký Scheduler | Từ danh sách sản phẩm bên `Modules/Product`, click số "N bài viết" → thấy đúng danh sách bài viết trong `News`; cố tình làm lệch counter rồi chạy command → số được sửa đúng |
-| **Phase 10 — Seed & Sidebar** | `NewsDemoContentSeeder`, sidebar entry gate theo `news_article.view`/`news_category.manage` | Org mới seed có sẵn danh mục + bài demo đủ 4 template dùng được ngay |
+| **Phase 4 — Slice `ArticleAuthoring` (chưa có product block)** | Actions/Data/Queries/Http/Policy + Blade admin (form Jodit preset `post`, chọn category/tag/format, workflow submit/publish/schedule/archive) | Soạn + publish 1 bài viết đầy đủ, không có box sản phẩm, hiển thị đúng ở trang công khai |
+| **Phase 5 — `ArticleContentParser` + Product Block schema** | `post_product_blocks`/`*_items`/`*_buttons` migration (FK `product_id` tới `products`, cột `item_key`/`button_key`, cột `product_link_type` trên `*_buttons` — xem §7.7), `ArticleContentParser::extractBlocks/render`, sync **upsert-by-key** trong `CreateArticleAction`/`UpdateArticleAction` kèm validate giới hạn số lượng + tenant-scope + diff usage-count (§9.4, §9.7, §9.8.1/§9.8.2) | Chèn thủ công đoạn HTML placeholder qua "source code" view của Jodit → save → kiểm tra DB có đúng dòng tương ứng + `products.used_in_articles_count` tăng đúng; xoá placeholder → save → dòng DB bị xoá theo + counter giảm đúng; cố tình chèn > 7 item hoặc `product_id` sai tenant → bị chặn lưu với lỗi rõ ràng; chèn nút `url_type=use_product_link` kèm `product_link_type=shopee` → save → dòng `post_product_block_buttons` lưu đúng `product_link_type`, cột `url`/`label` để `null` (không lưu URL thô từ client) |
+| **Phase 6 — Sanitization & validation server-side** | Bộ lọc allowlist HTML cho `content` (bao gồm cấu trúc `.post-product-block`/`.ppb-item`/`.ppb-btn`), validate `url`/`url_type` theo format tương ứng cho `custom_url`/`phone`/`zalo`/`email`; riêng `use_product_link` validate `product_link_type` thuộc enum `ProductLinkType` và **bỏ qua mọi `url`/`label` client gửi kèm** (không ghi xuống DB), escape output ở mọi Blade component product-block (§9.8.1) | Cố tình lưu `content` chứa `<script>`/`onerror=`/`javascript:` href → bị strip/chặn trước khi ghi DB; `url_type=phone` với giá trị không phải số điện thoại → bị từ chối validate; cố tình chèn tay `url_type=use_product_link` kèm `data-url="https://evil.example"` → save → cột `url` trong DB vẫn là `null`, không lưu giá trị độc hại đó; `product_link_type` không thuộc 4 giá trị hợp lệ → bị từ chối validate |
+| **Phase 7 — Jodit plugin `jodit-post-product.js`** | Nút toolbar "Sản phẩm" mở dialog **list-view** (đếm khối hiện có, gate "+ Thêm khối mới" ở N=3) + **chế độ Form dùng chung** cho thêm mới/sửa (multi-select tối đa 7, form thu gọn theo §9.8.3, input đổi theo `url_type`, sinh `item_key`/`button_key`, build placeholder HTML đã escape) + popup double-click sửa/xoá nhanh (§9.1/§9.8.4/§9.8.5/§9.8.6) | Bài chưa có khối nào → mở dialog thấy list-view rỗng + nút "+ Thêm khối" hoạt động; thêm đủ 3 khối → nút "+ Thêm khối" tự vô hiệu hoá kèm tooltip; xoá 1 khối → nút kích hoạt lại; double-click khối đã chèn → dialog hiện ngay không chờ mạng, dữ liệu refresh qua đúng 1 request batch; sửa 1 nút rồi lưu → `click_count` của các nút khác không bị reset; click "Xoá khối" 1 lần → chưa xoá, phải xác nhận lần 2 |
+| **Phase 8 — Template rendering** | 4 Blade component (§9.3), route `post.cta.redirect` + `RecordProductBlockClickAction` | Trang công khai render đủ 4 kiểu template, bấm nút CTA tăng đúng `click_count` và chuyển hướng đúng `url_type` |
+| **Phase 9 — Drill-down & đối soát** | `ListArticlesReferencingProductQuery/Handler` + filter `product_id` trên `ArticleAdminController@index`, command `post:recalculate-product-usage-counts` + đăng ký Scheduler | Từ danh sách sản phẩm bên `Modules/Product`, click số "N bài viết" → thấy đúng danh sách bài viết trong `Post`; cố tình làm lệch counter rồi chạy command → số được sửa đúng |
+| **Phase 10 — Seed & Sidebar** | `PostDemoContentSeeder`, sidebar entry gate theo `post_article.view`/`post_category.manage` | Org mới seed có sẵn danh mục + bài demo đủ 4 template dùng được ngay |
 | **Phase 11 — Kiểm thử & nghiệm thu** | Xem §18 | Tất cả kịch bản chấp nhận pass |
 
 ---
@@ -754,25 +759,29 @@ Route path/tên theo `docs/PLATFORM_DESIGN.md` §12.2 (`backend.{noun}.{action}`
 - Given danh mục còn bài viết gán trực tiếp → When xoá → Then bị chặn hoặc yêu cầu gỡ bài trước (tuỳ quyết định UX, ghi rõ trong PR).
 
 **`ArticleAuthoring`**
-- Given user role `viewer` (không có `news_article.create`) gọi route tạo bài → Then 403.
+- Given user role `viewer` (không có `post_article.create`) gọi route tạo bài → Then 403.
 - Given bài `draft` → When `SubmitArticleForReviewAction` → Then `status = pending_review`.
-- Given user không có `news_article.publish` → When gọi action publish → Then 403 dù là tác giả.
-- Given `ScheduleArticleAction` với `published_at` trong tương lai → When command `news:publish-due` chạy trước thời điểm đó → Then bài vẫn `scheduled`, chưa hiện công khai.
+- Given user không có `post_article.publish` → When gọi action publish → Then 403 dù là tác giả.
+- Given `ScheduleArticleAction` với `published_at` trong tương lai → When command `post:publish-due` chạy trước thời điểm đó → Then bài vẫn `scheduled`, chưa hiện công khai.
 
 **`ArticleContentParser` / Product Block**
-- Given content có 2 placeholder `.news-product-block` với `block-uuid` mới, mỗi cái trỏ 1 `product_id` khác nhau → When `UpdateArticleAction` → Then tạo đúng 2 dòng `news_product_blocks` + đúng số `items`/`buttons` tương ứng, `sort_order` khớp thứ tự xuất hiện trong HTML, và `products.used_in_articles_count` của cả 2 sản phẩm tăng đúng 1.
-- Given bài đã có 1 block → When user xoá placeholder đó khỏi content rồi save → Then dòng `news_product_blocks` cùng `items`/`buttons` bị xoá cứng (cascade), không còn sót; `products.used_in_articles_count` của sản phẩm đó giảm đúng 1.
-- Given 1 `NewsProductBlockButton` với `url_type=phone` → When gọi `news.cta.redirect` → Then redirect tới `tel:{url}`, `click_count` tăng đúng 1.
-- Given trang chi tiết bài viết đã publish, `NewsProductBlockItem` không set `price_label_override` → When admin sửa `price`/`price_label` của `Product` gốc trong trang quản trị `Modules/Product` (không sửa content bài viết) → Then trang công khai hiển thị giá mới ngay lần load sau.
+- Given content có 2 placeholder `.post-product-block` với `block-uuid` mới, mỗi cái trỏ 1 `product_id` khác nhau → When `UpdateArticleAction` → Then tạo đúng 2 dòng `post_product_blocks` + đúng số `items`/`buttons` tương ứng, `sort_order` khớp thứ tự xuất hiện trong HTML, và `products.used_in_articles_count` của cả 2 sản phẩm tăng đúng 1.
+- Given bài đã có 1 block → When user xoá placeholder đó khỏi content rồi save → Then dòng `post_product_blocks` cùng `items`/`buttons` bị xoá cứng (cascade), không còn sót; `products.used_in_articles_count` của sản phẩm đó giảm đúng 1.
+- Given 1 `PostProductBlockButton` với `url_type=phone` → When gọi `post.cta.redirect` → Then redirect tới `tel:{url}`, `click_count` tăng đúng 1.
+- Given 1 sản phẩm có sẵn `shopee_url` và `tiktok_url` (nhưng `supplier_url`/`supplier_homepage_url` để trống) → When mở dialog Form chọn CTA cho sản phẩm này → Then chỉ hiện 2 nút nhanh "Mua trên Shopee"/"Mua trên TikTok", không hiện lựa chọn NCC.
+- Given 1 nút `url_type=use_product_link`, `product_link_type=shopee` → When admin sửa `shopee_url` của sản phẩm đó ở `Modules/Product` (không đụng gì tới bài viết) → Then click nút trên trang công khai chuyển hướng đúng tới `shopee_url` **mới**.
+- Given 1 nút `url_type=use_product_link`, `product_link_type=tiktok`, nhưng sau đó admin xoá trắng `tiktok_url` của sản phẩm → Then nút này bị ẩn khi render trang công khai; nếu cố truy cập trực tiếp `post.cta.redirect` của nút đó → Then trả 404, không redirect tới URL rỗng.
+- Given content chèn tay (qua "source" view) 1 nút với `url_type=use_product_link` kèm `data-url="https://evil.example/phish"` → When lưu bài → Then giá trị `data-url` client gửi lên bị bỏ qua hoàn toàn, `SyncProductBlocksAction` không ghi `url` đó vào DB — URL thật luôn resolve lại từ `product->{urlColumn()}` lúc render/click, không tin dữ liệu client.
+- Given trang chi tiết bài viết đã publish, `PostProductBlockItem` không set `price_label_override` → When admin sửa `price`/`price_label` của `Product` gốc trong trang quản trị `Modules/Product` (không sửa content bài viết) → Then trang công khai hiển thị giá mới ngay lần load sau.
 - Given cố xoá 1 `Product` đang có `used_in_articles_count = 2` → When `DeleteProductAction` → Then bị chặn; đổi `status → discontinued` thay vào đó → Then thành công, box cũ vẫn hiển thị tên/ảnh/giá nhưng nút CTA mặc định thay bằng "Sản phẩm hiện không khả dụng".
-- Given click vào cột "N bài viết" ở danh sách sản phẩm (`Modules/Product`) → Then điều hướng sang `dashboard/news/articles?product_id={id}` và thấy đúng danh sách bài viết đang tham chiếu sản phẩm đó (mọi status).
+- Given click vào cột "N bài viết" ở danh sách sản phẩm (`Modules/Product`) → Then điều hướng sang `dashboard/posts/articles?product_id={id}` và thấy đúng danh sách bài viết đang tham chiếu sản phẩm đó (mọi status).
 
 **An toàn (§9.8.1)**
 - Given content chèn tay (qua "source" view của Jodit) 1 placeholder với `data-title-override='"><script>alert(1)</script>'` → When lưu bài → Then giá trị bị escape/strip, không có `<script>` nào xuất hiện trong `content` đã lưu DB lẫn HTML render ra trang công khai.
-- Given `data-product-id` trỏ tới 1 `product_id` thuộc tổ chức khác (không cùng tenant với bài viết đang sửa) → When `SyncProductBlocksAction` chạy → Then bị chặn lưu với lỗi rõ ràng, **không** tạo `NewsProductBlockItem` nào trỏ sai tenant.
+- Given `data-product-id` trỏ tới 1 `product_id` thuộc tổ chức khác (không cùng tenant với bài viết đang sửa) → When `SyncProductBlocksAction` chạy → Then bị chặn lưu với lỗi rõ ràng, **không** tạo `PostProductBlockItem` nào trỏ sai tenant.
 - Given 1 nút CTA với `url_type=custom_url` và `url="javascript:alert(1)"` → When lưu bài → Then bị từ chối validate (scheme không thuộc `http`/`https`).
 - Given 1 nút CTA với `url_type=phone` và `url="not-a-phone-number"` → When lưu bài → Then bị từ chối validate.
-- Given content chứa 4 placeholder `.news-product-block` (vượt cap 3/bài, chèn tay qua "source" view) → When lưu bài → Then bị chặn, báo lỗi vượt giới hạn, không tạo dòng nào.
+- Given content chứa 4 placeholder `.post-product-block` (vượt cap 3/bài, chèn tay qua "source" view) → When lưu bài → Then bị chặn, báo lỗi vượt giới hạn, không tạo dòng nào.
 
 **Giới hạn số lượng & UX (§9.8.2/§9.8.3/§9.8.4)**
 - Given template `multi_grid`, chọn 8 sản phẩm trong dialog → Then checkbox sản phẩm thứ 8 bị vô hiệu hoá phía client (giới hạn 7); nếu vẫn cố lưu content đã bị sửa tay vượt 7 item → Then server chặn lưu.
@@ -803,5 +812,5 @@ Route path/tên theo `docs/PLATFORM_DESIGN.md` §12.2 (`backend.{noun}.{action}`
 - Given chèn khối vào giữa 1 đoạn `<p>` đang có chữ trước và sau vị trí con trỏ → Then HTML sinh ra hợp lệ (đoạn `<p>` được tách đúng thành 2 phần quanh khối, không có `<div>` lồng bên trong `<p>`) — kiểm tra bằng validator HTML hoặc xem trực tiếp DOM đã render.
 
 **`PublicReading`**
-- Given bài `status != published` → When truy cập `news.public.article` không có quyền `news_article.edit` → Then 404 (không lộ nội dung chưa duyệt).
+- Given bài `status != published` → When truy cập `post.public.article` không có quyền `post_article.edit` → Then 404 (không lộ nội dung chưa duyệt).
 - Given F5 liên tục trang chi tiết trong cùng session → Then `view_count` không tăng liên tục (debounce theo session).
