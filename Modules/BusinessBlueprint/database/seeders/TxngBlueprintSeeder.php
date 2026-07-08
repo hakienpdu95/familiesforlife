@@ -5,7 +5,6 @@ namespace Modules\BusinessBlueprint\Database\Seeders;
 use App\Models\User;
 use App\Shared\Tenancy\Models\Organization;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 use Modules\BusinessBlueprint\Enums\BlueprintVersionStatus;
 use Modules\BusinessBlueprint\Features\BlueprintAuthoring\Actions\CreateBlueprintAction;
 use Modules\BusinessBlueprint\Features\BlueprintAuthoring\Actions\PublishBlueprintVersionAction;
@@ -16,7 +15,6 @@ use Modules\BusinessBlueprint\Features\BlueprintAuthoring\Actions\UpsertChecklis
 use Modules\BusinessBlueprint\Features\BlueprintAuthoring\Actions\UpsertDeploymentRoleAction;
 use Modules\BusinessBlueprint\Features\BlueprintAuthoring\Actions\UpsertOutcomeAction;
 use Modules\BusinessBlueprint\Features\BlueprintAuthoring\Actions\UpsertPhaseAction;
-use Modules\BusinessBlueprint\Features\BlueprintAuthoring\Actions\UpsertResourceLinkAction;
 use Modules\BusinessBlueprint\Features\BlueprintAuthoring\Actions\UpsertSidebarItemAction;
 use Modules\BusinessBlueprint\Features\BlueprintAuthoring\Actions\UpsertWorkflowAction;
 use Modules\BusinessBlueprint\Features\BlueprintAuthoring\Data\AiCapabilityData;
@@ -27,15 +25,12 @@ use Modules\BusinessBlueprint\Features\BlueprintAuthoring\Data\ChecklistData;
 use Modules\BusinessBlueprint\Features\BlueprintAuthoring\Data\DeploymentRoleData;
 use Modules\BusinessBlueprint\Features\BlueprintAuthoring\Data\OutcomeData;
 use Modules\BusinessBlueprint\Features\BlueprintAuthoring\Data\PhaseData;
-use Modules\BusinessBlueprint\Features\BlueprintAuthoring\Data\ResourceLinkData;
 use Modules\BusinessBlueprint\Features\BlueprintAuthoring\Data\SidebarItemData;
 use Modules\BusinessBlueprint\Features\BlueprintAuthoring\Data\WorkflowData;
 use Modules\BusinessBlueprint\Features\BlueprintAuthoring\Queries\ValidateBlueprintIntegrityHandler;
 use Modules\BusinessBlueprint\Features\BlueprintAuthoring\Queries\ValidateBlueprintReadinessHandler;
 use Modules\BusinessBlueprint\Models\Blueprint;
 use Modules\BusinessSolution\Models\BusinessSolution;
-use Modules\KcCategory\Models\KcCategory;
-use Modules\KcItem\Models\KcItem;
 
 /**
  * Dựng Blueprint "BP-TXNG" đầy đủ 8 thành phần (Overview/Outcomes/Capabilities/
@@ -65,8 +60,6 @@ class TxngBlueprintSeeder extends Seeder
         $solution    = BusinessSolution::where('code', 'AI-TXNG')->firstOrFail();
         $systemOrg   = Organization::where('slug', 'system')->firstOrFail();
         $systemUser  = User::where('email', 'admin@demo.test')->firstOrFail();
-
-        $bm01Form = $this->seedFormResource($systemOrg, $systemUser);
 
         $blueprint = (new CreateBlueprintAction())->handle(BlueprintData::from([
             'business_solution_id' => $solution->id,
@@ -158,7 +151,7 @@ class TxngBlueprintSeeder extends Seeder
             'phase_id' => $phThuThap->id, 'code' => 'CL-TH-02', 'name' => 'Thu thập ảnh/video hiện trạng canh tác',
             'required' => false,
         ]));
-        $clChuanHoa = (new UpsertChecklistAction())->handle(ChecklistData::from([
+        (new UpsertChecklistAction())->handle(ChecklistData::from([
             'phase_id' => $phChuanHoa->id, 'code' => 'CL-CH-01',
             'name' => 'Chuẩn hóa dữ liệu theo biểu mẫu chuẩn BM-01',
         ]));
@@ -175,12 +168,6 @@ class TxngBlueprintSeeder extends Seeder
         (new UpsertChecklistAction())->handle(ChecklistData::from([
             'phase_id' => $phBanGiao->id, 'code' => 'CL-BG-02',
             'name' => 'Bàn giao hồ sơ điện tử cho đối tác thu mua', 'need_approval' => true,
-        ]));
-
-        // ── Resources — chỉ Reference, không copy (DP-08) ─────────────────
-        (new UpsertResourceLinkAction())->handle(ResourceLinkData::from([
-            'blueprint_version_id' => $version->id, 'checklist_id' => $clChuanHoa->id,
-            'resource_type' => 'knowledge', 'resource_id' => $bm01Form->id, 'is_required' => true,
         ]));
 
         // ── AI Capabilities — Blueprint chỉ khai báo "AI cần hỗ trợ ở đâu", KHÔNG
@@ -255,36 +242,5 @@ class TxngBlueprintSeeder extends Seeder
         ))->handle($version->fresh(), $systemUser->id);
 
         $this->command?->info('  ✓ Blueprint BP-TXNG v1.0.0 đã dựng đầy đủ & publish.');
-    }
-
-    private function seedFormResource(Organization $systemOrg, User $systemUser): KcItem
-    {
-        $category = KcCategory::withoutTenant()->firstOrCreate(
-            ['organization_id' => $systemOrg->id, 'slug' => 'bieu-mau-truy-xuat-nguon-goc'],
-            [
-                'uuid'       => (string) Str::uuid(),
-                'name'       => 'Biểu mẫu & Tài liệu truy xuất nguồn gốc',
-                'is_active'  => true,
-                'created_by' => $systemUser->id,
-            ]
-        );
-
-        return KcItem::withoutTenant()->firstOrCreate(
-            ['organization_id' => $systemOrg->id, 'slug' => 'bm-01-bieu-mau-khao-sat-vung-trong'],
-            [
-                'uuid'        => (string) Str::uuid(),
-                'category_id' => $category->id,
-                'title'       => 'BM-01 — Biểu mẫu khảo sát vùng trồng',
-                'summary'     => 'Biểu mẫu chuẩn thu thập thông tin vùng trồng khi khảo sát thực địa.',
-                'type'        => 'form',
-                'status'      => 'approved',
-                'visibility'  => 'internal',
-                'version'     => 1,
-                'owner_id'    => $systemUser->id,
-                'approved_by' => $systemUser->id,
-                'approved_at' => now(),
-                'created_by'  => $systemUser->id,
-            ]
-        );
     }
 }

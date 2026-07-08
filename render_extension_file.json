@@ -397,12 +397,5 @@
         "__index///index///__///__///__///idx_vertical_config_lookup///Composite index cũ chứa organization_id+vertical_code — phải xoá trước khi drop cột",
         "organization_id///unsignedBigInteger///__///NOT_NULL///__///->constrained()->onDelete('cascade')///__",
         "vertical_code///string///50///NOT_NULL///__///__///__"
-    ],
-    [
-        "kc_items///add///__///",
-        "domain_code///string///10///_NULL///NULL///__///__",
-        "difficulty///unsignedTinyInteger///__///_NULL///NULL///__///__",
-        "__index///index///__///__///__///domain_code///__",
-        "__index///index///__///__///__///difficulty///__"
     ]
 ]

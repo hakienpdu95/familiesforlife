@@ -84,8 +84,6 @@ const JS_OUTPUT = {
   'project':                'assets/modules/project.[hash].js',
   'org-chart':              'assets/modules/org-chart.[hash].js',
   'role-scope':             'assets/modules/role-scope.[hash].js',
-  'kc-category':            'assets/modules/kc-category.[hash].js',
-  'kc-item':                'assets/modules/kc-item.[hash].js',
   'job-posting':            'assets/modules/job-posting.[hash].js',
   'leave':                  'assets/modules/leave.[hash].js',
   'kpi-goal':               'assets/modules/kpi-goal.[hash].js',
@@ -131,8 +129,6 @@ const CSS_OUTPUT = {
   'project.css':                'assets/modules/project.[hash].css',
   'org-chart.css':              'assets/modules/org-chart.[hash].css',
   'role-scope.css':             'assets/modules/role-scope.[hash].css',
-  'kc-category.css':            'assets/modules/kc-category.[hash].css',
-  'kc-item.css':                'assets/modules/kc-item.[hash].css',
   'job-posting.css':            'assets/modules/job-posting.[hash].css',
   'leave.css':                  'assets/modules/leave.[hash].css',
   'kpi-goal.css':               'assets/modules/kpi-goal.[hash].css',
@@ -203,12 +199,6 @@ const MODULE_ENTRIES = [
   // RoleScope
   'Modules/RoleScope/resources/assets/sass/role-scope.scss',
   'Modules/RoleScope/resources/assets/js/role-scope.js',
-  // KcCategory
-  'Modules/KcCategory/resources/assets/sass/kc-category.scss',
-  'Modules/KcCategory/resources/assets/js/kc-category.js',
-  // KcItem
-  'Modules/KcItem/resources/assets/sass/kc-item.scss',
-  'Modules/KcItem/resources/assets/js/kc-item.js',
   // JobPosting
   'Modules/JobPosting/resources/assets/sass/job-posting.scss',
   'Modules/JobPosting/resources/assets/js/job-posting.js',

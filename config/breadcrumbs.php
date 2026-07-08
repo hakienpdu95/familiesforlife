@@ -68,10 +68,6 @@ return [
         'listings'            => 'Tin đăng',
         'org-approvals'       => 'Duyệt tổ chức',
 
-        // ── Knowledge Center ──────────────────────────────────────────────
-        'kc'                  => 'Kho tri thức',
-        'kc-items'            => 'Bài viết KC',
-        'kc-categories'       => 'Danh mục KC',
         'versions'            => 'Phiên bản',
 
         // ── KPI ───────────────────────────────────────────────────────────
