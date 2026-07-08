@@ -4,7 +4,6 @@ namespace Modules\KpiGoal\Models;
 
 use App\Foundation\Models\TenantAwareModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Modules\Assessment\Events\ImpactSnapshotRecorded;
 use Modules\Employee\Models\Employee;
 
 class AiImpactSnapshot extends TenantAwareModel
@@ -62,9 +61,6 @@ class AiImpactSnapshot extends TenantAwareModel
             }
         });
 
-        static::created(function (self $snapshot): void {
-            event(new ImpactSnapshotRecorded($snapshot));
-        });
     }
 
     // AII = Productivity×40% + Quality×30% + Time Saving×30%

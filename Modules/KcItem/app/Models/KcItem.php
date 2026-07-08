@@ -7,7 +7,6 @@ use App\Traits\HasTenantMedia;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Modules\Assessment\Models\RoadmapMilestone;
 use Modules\KcCategory\Models\KcCategory;
 use Modules\KcItem\Enums\KcItemStatus;
 use Modules\KcItem\Enums\KcItemType;
@@ -120,12 +119,6 @@ class KcItem extends TenantAwareModel implements HasMedia
         return $this->hasMany(KcViewLog::class, 'item_id');
     }
 
-    public function roadmapMilestones(): BelongsToMany
-    {
-        return $this->belongsToMany(RoadmapMilestone::class, 'roadmap_milestone_kc_items', 'kc_item_id', 'roadmap_milestone_id')
-            ->withPivot('sort_order')
-            ->withTimestamps();
-    }
 
     // ── Scopes ────────────────────────────────────────────────────────────────
 

@@ -17,7 +17,6 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Modules\Assessment\Models\IdentityVerification;
 use Modules\Auth\Models\SocialAccount;
 use Modules\Organization\Models\OrganizationMember;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
@@ -63,11 +62,6 @@ class User extends Authenticatable implements MustVerifyEmail
     public function organizationMemberships(): HasMany
     {
         return $this->hasMany(OrganizationMember::class);
-    }
-
-    public function identityVerifications(): HasMany
-    {
-        return $this->hasMany(IdentityVerification::class);
     }
 
     public function pushSubscriptions(): HasMany

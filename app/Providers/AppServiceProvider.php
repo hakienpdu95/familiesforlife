@@ -17,8 +17,6 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use App\Foundation\Vertical\VerticalTemplate;
 use App\Policies\VerticalTemplatePolicy;
-use Modules\Assessment\Models\PassportEntry;
-use Modules\Assessment\Policies\PassportEntryPolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -47,10 +45,9 @@ class AppServiceProvider extends ServiceProvider
             return $user->hasRole('super-admin') ? true : null;
         });
 
-        // Passport policies
-        Gate::policy(PassportEntry::class, PassportEntryPolicy::class);
-
-        // Vertical templates (thư viện mẫu — System Admin)
+        // VerticalTemplate: authorize phase/checklist builder (VerticalPhaseController /
+        // VerticalChecklistItemController) — dùng chung bởi Organization vertical config,
+        // không còn admin library CRUD nữa (đã xoá dashboard/vertical-templates)
         Gate::policy(VerticalTemplate::class, VerticalTemplatePolicy::class);
 
         // Sidebar: load active verticals for current org

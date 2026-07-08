@@ -30,12 +30,9 @@
     "Customer": true,
     "AiCopilot": true,
     "Report": true,
-    "Deployment": true,
-    "OcopRubric": true,
     "BusinessSolution": true,
     "BusinessBlueprint": true,
     "OrganizationSolution": true,
-    "SolutionCatalog": true,
     "Product": true,
     "Post": true
 }

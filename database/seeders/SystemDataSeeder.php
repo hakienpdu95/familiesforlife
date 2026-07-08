@@ -6,13 +6,7 @@ use Illuminate\Database\Seeder;
 use Modules\ActivityLog\Database\Seeders\ActivityLogPermissionsSeeder;
 use Modules\AiCopilot\Database\Seeders\AiCopilotDatabaseSeeder;
 use Modules\Assessment\Database\Seeders\AssessmentDatabaseSeeder;
-use Modules\Assessment\Database\Seeders\MarketplaceDemoSeeder;
 use Modules\Auth\Database\Seeders\AuthDatabaseSeeder;
-use Modules\Deployment\Database\Seeders\DataCollectionV1Seeder;
-use Modules\Deployment\Database\Seeders\DefaultVerticalTemplateSeeder;
-use Modules\Deployment\Database\Seeders\DeploymentEnginePermissionSeeder;
-use Modules\Deployment\Database\Seeders\HtxTienDuongDemoSeeder;
-use Modules\Deployment\Database\Seeders\ReadinessV1SurveySeeder;
 use Modules\JobPosting\Database\Seeders\JobPostingDatabaseSeeder;
 use Modules\JobTitle\Database\Seeders\JobTitleDatabaseSeeder;
 use Modules\Lead\Database\Seeders\LeadDatabaseSeeder;
@@ -20,7 +14,6 @@ use Modules\LeadPipelineStage\Database\Seeders\LeadPipelineStageSeeder;
 use Modules\LeadSource\Database\Seeders\LeadSourceSeeder;
 use Modules\BusinessBlueprint\Database\Seeders\BusinessBlueprintDatabaseSeeder;
 use Modules\BusinessSolution\Database\Seeders\BusinessSolutionDatabaseSeeder;
-use Modules\OcopRubric\Database\Seeders\OcopRubricDatabaseSeeder;
 use Modules\Product\Database\Seeders\ProductDatabaseSeeder;
 use Modules\Post\Database\Seeders\PostDatabaseSeeder;
 use Modules\Organization\Database\Seeders\OrganizationRolePermissionSeeder;
@@ -39,9 +32,6 @@ use Modules\Survey\Database\Seeders\SurveyDatabaseSeeder;
  * Không bao gồm:
  *   - OrganizationDemoSeeder (1000 orgs demo — chỉ chạy thủ công khi cần)
  *   - Các seeder rỗng (Employee, Customer, Branch, Department, Project...)
- *
- * Bao gồm demo data:
- *   - MarketplaceDemoSeeder: 3 free users (trust_level 1-2) + 5 open campaigns
  */
 class SystemDataSeeder extends Seeder
 {
@@ -101,17 +91,6 @@ class SystemDataSeeder extends Seeder
             // ── 15. AI Copilot: system agents + system prompts ────────────
             AiCopilotDatabaseSeeder::class,
 
-            // ── 16. Marketplace demo: 3 free users + 5 open campaigns ─────
-            MarketplaceDemoSeeder::class,
-
-            // ── 17. Deployment: survey templates + 1 bản mẫu vertical mặc định ──
-            DataCollectionV1Seeder::class,
-            ReadinessV1SurveySeeder::class,
-            DefaultVerticalTemplateSeeder::class,
-
-            // ── 18. OCOP Rubric: permissions + 5 hạng sao + 26 Bộ sản phẩm ──
-            OcopRubricDatabaseSeeder::class,
-
             // ── 19. Business Solution: permissions + verticals + 3 solution bespoke ──
             BusinessSolutionDatabaseSeeder::class,
 
@@ -120,12 +99,6 @@ class SystemDataSeeder extends Seeder
 
             // ── 21. Organization Solution: permissions (organization_solution.*) ──
             OrganizationSolutionDatabaseSeeder::class,
-
-            // ── 22. Deployment Engine: permissions (deployment_engine.*) ──
-            DeploymentEnginePermissionSeeder::class,
-
-            // ── 23. Demo end-to-end: HTX Tiên Dương kích hoạt + deploy AI-TXNG ──
-            HtxTienDuongDemoSeeder::class,
 
             // ── 24. Product: permissions (product.*/product_category.*) — catalog cho Post CTA Box ──
             ProductDatabaseSeeder::class,

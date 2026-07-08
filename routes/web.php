@@ -8,7 +8,6 @@ use App\Http\Controllers\Backend\NotificationCenterController;
 use App\Http\Controllers\Backend\NotificationPreferenceController;
 use App\Http\Controllers\Backend\VerticalChecklistItemController;
 use App\Http\Controllers\Backend\VerticalPhaseController;
-use App\Http\Controllers\Backend\VerticalTemplateController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect()->route('backend.dashboard'));
@@ -72,11 +71,9 @@ Route::middleware(['auth'])->prefix('dashboard')->name('backend.')->group(functi
         Route::delete('/{uuid}',    [NotificationCenterController::class,    'destroy'])     ->name('destroy');
     });
 
-    // ── Vertical templates — thư viện mẫu (System Admin) ──────────────────
-    Route::resource('vertical-templates', VerticalTemplateController::class)->except(['show']);
-    Route::get('vertical-templates/survey-options', [VerticalTemplateController::class, 'surveyOptions'])
-        ->name('vertical-templates.survey-options');
-
+    // ── Vertical template builder — phase/checklist API dùng chung bởi Organization
+    //    vertical config (organizations.verticals.config); không còn admin library CRUD
+    //    (đã xoá dashboard/vertical-templates index/create/edit) ─────────────────────
     Route::prefix('vertical-templates/{vertical_template}/phases')
         ->name('vertical-templates.phases.')
         ->group(function () {

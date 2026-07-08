@@ -4,7 +4,6 @@ use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 use Modules\Auth\Models\SocialAccount;
-use Modules\Assessment\Jobs\SendCampaignReminderJob;
 use Modules\Survey\Jobs\PurgeDeletedResponsesJob;
 
 Artisan::command('inspire', function () {
@@ -72,24 +71,6 @@ Schedule::command('notifications:task-overdue')
 Schedule::command('notifications:kpi-missed')
     ->name('notifications:kpi-missed')
     ->dailyAt('09:00')
-    ->onOneServer();
-
-// Passport Phase 0: auto-suspend membership đã quá contract_end_date
-Schedule::command('passport:auto-suspend-expired')
-    ->name('passport:auto-suspend-expired')
-    ->dailyAt('01:00')
-    ->onOneServer();
-
-// Passport Phase 0: weekly report thành viên không hoạt động > 45 ngày
-Schedule::command('passport:flag-inactive-members')
-    ->name('passport:flag-inactive-members')
-    ->weeklyOn(1, '08:00')
-    ->onOneServer();
-
-// Campaign: nhắc ứng viên đang in_progress khi campaign còn ≤ 3 ngày
-Schedule::job(new SendCampaignReminderJob())
-    ->name('campaign:send-reminders')
-    ->dailyAt('08:00')
     ->onOneServer();
 
 // Social Auth: xóa token đã hết hạn > 30 ngày (giảm dữ liệu nhạy cảm lưu trữ)

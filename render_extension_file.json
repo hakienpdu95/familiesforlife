@@ -336,14 +336,6 @@
         "customer_code///string///50///_NULL///NULL///__///__"
     ],
     [
-        "sandbox_sessions///add///__///",
-        "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm"
-    ],
-    [
-        "workforce_certifications///add///__///",
-        "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm"
-    ],
-    [
         "notifications///add///__///",
         "organization_id///unsignedBigInteger///__///_NULL///NULL///->index()///__"
     ],
@@ -352,14 +344,6 @@
         "kc_category_id///unsignedBigInteger///__///_NULL///NULL///__///__",
         "kc_item_tag///string///100///_NULL///NULL///__///__",
         "career_pathway_step_code///string///100///_NULL///NULL///__///__"
-    ],
-    [
-        "workforce_recommendations///add///__///",
-        "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm"
-    ],
-    [
-        "workforce_portfolios///add///__///",
-        "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm"
     ],
     [
         "organization_members///add///__///",
@@ -379,19 +363,6 @@
         "late_offboard_gap_days///unsignedSmallInteger///__///_NULL///NULL///__///Số ngày gap giữa effective_left_at và offboarded_at — 0 nếu offboard đúng hạn",
         "__index///index///__///__///__///status|om_status_index///__",
         "__index///index///__///__///__///left_at|om_left_at_index///__"
-    ],
-    [
-        "identity_verifications///add///__///",
-        "issuing_province_code///char///2///_NULL///NULL///__///2-char province code từ provinces.province_code — derived từ 3 chữ số đầu CCCD",
-        "email_candidate///string///255///_NULL///NULL///__///Email address captured at send time; compared on confirm to detect mid-flight email changes"
-    ],
-    [
-        "deployment_targets///add///__///",
-        "readiness_response_id///unsignedBigInteger///__///_NULL///NULL///->constrained('survey_responses')->onDelete('set null')///__",
-        "readiness_score///unsignedTinyInteger///__///_NULL///NULL///__///0-100 readiness score; null = not assessed yet",
-        "data_collection_response_id///unsignedBigInteger///__///_NULL///NULL///->constrained('survey_responses')->onDelete('set null')///__",
-        "deployment_id///unsignedBigInteger///__///_NULL///NULL///->constrained('deployments')->onDelete('set null')///Deployment Engine (spec Phần 4) — pin runtime vào lần deploy đã tạo ra nó",
-        "blueprint_version_id///unsignedBigInteger///__///_NULL///NULL///->constrained('blueprint_versions')->onDelete('set null')///Deployment Engine (spec Phần 4) — pin runtime vào đúng Blueprint Version đã deploy"
     ],
     [
         "vertical_templates///add///__///",
@@ -433,19 +404,5 @@
         "difficulty///unsignedTinyInteger///__///_NULL///NULL///__///__",
         "__index///index///__///__///__///domain_code///__",
         "__index///index///__///__///__///difficulty///__"
-    ],
-    [
-        "deployment_issues///add///__///Thêm issue_type (mã VerticalConfigItem, tuỳ biến theo từng tổ chức) và severity_detail (mô tả chi tiết mức độ, tách khỏi description chung)",
-        "issue_type///string///50///_NULL///NULL///__///Mã loại issue — tra theo vertical_config_items(config_group=issue_type) của đúng vertical_template_id tổ chức, không FK cứng vì danh mục tự tổ chức định nghĩa riêng",
-        "severity_detail///text///__///_NULL///NULL///__///Mô tả chi tiết mức độ/tình trạng (vd: diện tích nhiễm, biện pháp đã xử lý) — tách khỏi description chung"
-    ],
-    [
-        "deployment_progress_logs///add///__///Liên kết trực tiếp log tới checklist item — cho phép truy vết + ghi chú nhật ký riêng theo từng đề mục, thay vì chỉ nhúng tên mục vào remark dạng text",
-        "deployment_checklist_item_id///unsignedBigInteger///__///_NULL///NULL///->constrained('deployment_checklist_items')->onDelete('set null')///Null nếu log ghi nhận chung (form Nhật ký tiến độ), có giá trị nếu log gắn với 1 mục checklist cụ thể (tick hoặc ghi chú riêng)",
-        "__index///index///__///__///__///deployment_checklist_item_id///__"
-    ],
-    [
-        "deployment_checklist_items///add///__///Cho phép PM chỉ định trước ai (hồ sơ nhân sự) phụ trách từng đề mục checklist — tách khỏi done_by (chỉ biết được sau khi đã làm)",
-        "assigned_employee_id///unsignedBigInteger///__///_NULL///NULL///->constrained('employees')->onDelete('set null')///Nhân viên được PM chỉ định phụ trách mục này — khác done_by (người thực tế đã tick)"
     ]
 ]

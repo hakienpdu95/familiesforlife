@@ -204,12 +204,12 @@
 @endsection
 
 @push('styles')
-    @vite(['Modules/Deployment/resources/assets/sass/deployment.scss'], 'build/backend')
+    @vite(['Modules/Organization/resources/assets/sass/organization.scss'], 'build/backend')
 @endpush
 
 @push('scripts')
     @vite([
         'resources/js/modules/tom-select.js',
-        'Modules/Deployment/resources/assets/js/deployment.js',
+        'Modules/Organization/resources/assets/js/organization.js',
     ], 'build/backend')
 @endpush

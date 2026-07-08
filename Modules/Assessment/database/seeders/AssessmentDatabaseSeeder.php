@@ -11,12 +11,6 @@ class AssessmentDatabaseSeeder extends Seeder
         $this->call([
             TdwcfAssessmentSeeder::class,
             FivePillarAssessmentSeeder::class,
-            CertificationDefinitionSeeder::class,
-            SandboxEnvironmentSeeder::class,
-            CareerPathwaySeeder::class,
-            JobTitleDomainRequirementsSeeder::class,
-            WorkforceProfileSeeder::class,
-            WorkforceRoleActivationSeeder::class,   // phải sau WorkforceProfileSeeder
         ]);
     }
 }

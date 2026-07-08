@@ -99,7 +99,7 @@ Reverb isn't started. Run it:
 
 # > Đọc file docs/thuchoc/02-DAC-TA-THIET-KE-5-MODULE-MOI.md và làm module đầu tiên, implement theo đúng và sát spec đó, tuân thủ quy tắc và nguyên tắc hệ thống hiện tại để build
 
-# > Đọc file docs/form-ui-spec.md và implement theo đúng spec đó, áp dụng spec này vào module Customer, review và tối ưu UI/UX form chuẩn để hành vi người dùng dễ thao tác và sử dụng linh hoạt, thuận tiện
+# > Đọc file docs/form-ui-spec.md và implement theo đúng spec đó, áp dụng spec này vào module Product, review và tối ưu UI/UX form chuẩn để hành vi người dùng dễ thao tác và sử dụng linh hoạt, thuận tiện
 
 Notification Thông báo in-app  + push — (thông báo trên chuông) tất cả module đều cần
 
