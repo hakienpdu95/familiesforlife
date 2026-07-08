@@ -98,6 +98,7 @@ const JS_OUTPUT = {
   'report':                 'assets/modules/report.[hash].js',
   'deployment':             'assets/modules/deployment.[hash].js',
   'post':                   'assets/modules/post.[hash].js',
+  'product':                'assets/modules/product.[hash].js',
 };
 
 /** CSS asset name → output path.
@@ -146,6 +147,7 @@ const CSS_OUTPUT = {
   'report.css':                 'assets/modules/report.[hash].css',
   'deployment.css':             'assets/modules/deployment.[hash].css',
   'post.css':                   'assets/modules/post.[hash].css',
+  'product.css':                'assets/modules/product.[hash].css',
 };
 
 // ─── Module input entries ─────────────────────────────────────────────
@@ -250,6 +252,9 @@ const MODULE_ENTRIES = [
   // Post
   'Modules/Post/resources/assets/sass/post.scss',
   'Modules/Post/resources/assets/js/post.js',
+  // Product
+  'Modules/Product/resources/assets/sass/product.scss',
+  'Modules/Product/resources/assets/js/product.js',
 ];
 
 // ─────────────────────────────────────────────────────────────────────

@@ -2,6 +2,9 @@
 // Style cho block-composer soạn bài viết (dãy block text/sản phẩm, kiểu Gutenberg) —
 // thay cho cách nhúng khối sản phẩm trực tiếp vào 1 Jodit editor duy nhất trước đây.
 
+@use 'form-patterns';   // .color-picker-combo, .field-readonly, .form-submit-bar
+@use 'tom-select';      // TomSelect dark/light theme
+
 .pbc-composer {
     display: flex;
     flex-direction: column;

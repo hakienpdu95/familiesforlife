@@ -1,0 +1,10 @@
+// Modules/Product/resources/assets/sass/product.scss
+// Build: vite.config.backend.js → public/build/backend/assets/modules/product.[hash].css
+//
+// Blade:
+//   @push('styles')
+//       @vite(['Modules/Product/resources/assets/sass/product.scss'], 'build/backend')
+//   @endpush
+
+@use 'form-patterns';   // .field-readonly, .form-submit-bar, .empty-state
+@use 'tom-select';      // TomSelect dark/light theme
