@@ -20,8 +20,6 @@
         'leads'       => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>',
         'leads_won'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>',
         'workflow'    => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 10V3L4 14h7v7l9-11h-7z"/>',
-        'leave'       => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>',
-        'recruitment' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>',
     ];
 
     $colorMap = [
@@ -58,7 +56,6 @@
         'users'    => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>',
         'crm'      => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>',
         'user'     => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z"/>',
-        'calendar' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>',
         'log'      => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>',
     ];
 
@@ -132,41 +129,11 @@
         </div>
     </div>
 
-    {{-- ── Row 1: Task Throughput + Headcount ──────────────────────────── --}}
-    <div class="grid grid-cols-1 {{ $showHeadcount ? 'lg:grid-cols-3' : '' }} gap-5">
-
-        {{-- Task Throughput — Line chart --}}
-        <div class="{{ $showHeadcount ? 'lg:col-span-2' : '' }} card bg-base-100 border border-base-200 shadow-sm">
-            <div class="card-body p-4">
-                <div class="flex items-center justify-between mb-3">
-                    <div>
-                        <h3 class="font-semibold text-sm text-base-content">Tiến độ Task</h3>
-                        <p class="text-xs text-base-content/40 mt-0.5">Tasks tạo mới so với tasks hoàn thành mỗi ngày</p>
-                    </div>
-                    <div class="flex items-center gap-3 text-xs">
-                        <span class="flex items-center gap-1 text-base-content/50">
-                            <span class="inline-block w-3 h-0.5 bg-primary rounded"></span>
-                            Tạo mới
-                        </span>
-                        <span class="flex items-center gap-1 text-base-content/50">
-                            <span class="inline-block w-3 h-0.5 bg-success rounded"></span>
-                            Hoàn thành
-                        </span>
-                    </div>
-                </div>
-                <div id="chart-task-throughput"
-                     class="w-full"
-                     style="height: 220px;"
-                     data-chart="task-throughput"
-                     :data-days="days">
-                    {{-- Skeleton --}}
-                    <div class="skeleton w-full h-full rounded-xl" id="skel-task-throughput"></div>
-                </div>
-            </div>
-        </div>
+    {{-- ── Row 1: Headcount ─────────────────────────────────────────────── --}}
+    @if($showHeadcount)
+    <div class="grid grid-cols-1 gap-5">
 
         {{-- Headcount by Dept — Donut --}}
-        @if($showHeadcount)
         <div class="card bg-base-100 border border-base-200 shadow-sm">
             <div class="card-body p-4">
                 <div class="mb-3">
@@ -181,8 +148,8 @@
                 </div>
             </div>
         </div>
-        @endif
     </div>
+    @endif
 
     {{-- ── Row 2: Lead Funnel + Workflow Health ────────────────────────── --}}
     @if($showLeadFunnel || $showWorkflowHealth)
@@ -265,7 +232,7 @@
                     <span class="badge badge-error badge-xs">{{ count($action_feed) }}</span>
                     @endif
                 </div>
-                <a href="{{ route('backend.tasks.index') }}" class="text-xs text-primary hover:underline">Xem tất cả</a>
+                <a href="{{ route('workflow.tasks.my') }}" class="text-xs text-primary hover:underline">Xem tất cả</a>
             </div>
 
             @if(empty($action_feed))
@@ -363,7 +330,6 @@
     <div class="flex flex-wrap gap-2">
         @php
         $shortcuts = [
-            ['label' => 'Tasks',       'route' => route('backend.tasks.index'),         'icon' => 'task'],
             ['label' => 'Workflows',   'route' => route('workflows.index'),              'icon' => 'bolt'],
             ['label' => 'Nhân viên',   'route' => route('backend.employees.index'),      'icon' => 'users'],
         ];
@@ -371,7 +337,6 @@
             $shortcuts[] = ['label' => 'CRM / Leads', 'route' => route('lead.index'), 'icon' => 'crm'];
         if (in_array('users', $visibleModules))
             $shortcuts[] = ['label' => 'Người dùng', 'route' => route('backend.users.index'), 'icon' => 'user'];
-        $shortcuts[] = ['label' => 'Nghỉ phép',    'route' => route('backend.leave.requests.index'), 'icon' => 'calendar'];
         $shortcuts[] = ['label' => 'Activity Log', 'route' => route('activitylog.index'),             'icon' => 'log'];
         @endphp
         @foreach($shortcuts as $s)
@@ -428,7 +393,6 @@ document.addEventListener('alpine:init', () => {
             this.days = val;
             sessionStorage.setItem('dash_days', String(val));
             // Re-render time-series charts
-            this._renderChart('task-throughput',  this._taskThroughputOptions.bind(this));
             this._renderChart('workflow-health',  this._workflowHealthOptions.bind(this));
         },
 
@@ -437,7 +401,6 @@ document.addEventListener('alpine:init', () => {
         },
 
         _renderAll() {
-            this._renderChart('task-throughput',  this._taskThroughputOptions.bind(this));
             this._renderChart('headcount',        this._headcountOptions.bind(this));
             this._renderChart('lead-funnel',      this._leadFunnelOptions.bind(this));
             this._renderChart('workflow-health',  this._workflowHealthOptions.bind(this));
@@ -457,9 +420,8 @@ document.addEventListener('alpine:init', () => {
             const skel = document.getElementById('skel-' + id);
 
             // Build URL with current days param where applicable
-            const needsDays = ['task-throughput', 'workflow-health'].includes(id);
+            const needsDays = ['workflow-health'].includes(id);
             const baseUrls  = {
-                'task-throughput': '{{ route("backend.dashboard.charts.task-throughput") }}',
                 'lead-funnel':     '{{ route("backend.dashboard.charts.lead-funnel") }}',
                 'workflow-health': '{{ route("backend.dashboard.charts.workflow-health") }}',
                 'headcount':       '{{ route("backend.dashboard.charts.headcount") }}',
@@ -503,67 +465,6 @@ document.addEventListener('alpine:init', () => {
         },
 
         // ── Chart option builders ─────────────────────────────────────────
-
-        _taskThroughputOptions(d) {
-            const isDark    = this._isDark();
-            const textColor = isDark ? '#94a3b8' : '#64748b';
-            const gridColor = isDark ? '#1e293b' : '#f1f5f9';
-
-            return {
-                backgroundColor: 'transparent',
-                grid: { top: 16, right: 16, bottom: 36, left: 40, containLabel: false },
-                tooltip: {
-                    trigger: 'axis',
-                    backgroundColor: isDark ? '#1e293b' : '#fff',
-                    borderColor:     isDark ? '#334155' : '#e2e8f0',
-                    textStyle:       { color: isDark ? '#e2e8f0' : '#1e293b', fontSize: 12 },
-                    formatter: (params) => {
-                        const label  = params[0].axisValue;
-                        const rows   = params.map(p =>
-                            `<div class="flex justify-between gap-4"><span>${p.marker}${p.seriesName}</span><b>${p.value}</b></div>`
-                        ).join('');
-                        return `<div class="text-xs"><p class="font-semibold mb-1">${label}</p>${rows}</div>`;
-                    },
-                },
-                xAxis: {
-                    type: 'category', data: d.labels, boundaryGap: false,
-                    axisLine:  { lineStyle: { color: gridColor } },
-                    axisTick:  { show: false },
-                    axisLabel: {
-                        color: textColor, fontSize: 11,
-                        interval: Math.floor(d.labels.length / 6),
-                    },
-                },
-                yAxis: {
-                    type: 'value', minInterval: 1,
-                    splitLine: { lineStyle: { color: gridColor, type: 'dashed' } },
-                    axisLabel: { color: textColor, fontSize: 11 },
-                    axisLine: { show: false }, axisTick: { show: false },
-                },
-                series: [
-                    {
-                        name: 'Tạo mới', type: 'line', data: d.created,
-                        smooth: true, symbol: 'circle', symbolSize: 4,
-                        lineStyle: { width: 2, color: '#6366f1' },
-                        itemStyle: { color: '#6366f1' },
-                        areaStyle: {
-                            color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
-                                colorStops: [{ offset: 0, color: 'rgba(99,102,241,0.18)' }, { offset: 1, color: 'rgba(99,102,241,0)' }] }
-                        },
-                    },
-                    {
-                        name: 'Hoàn thành', type: 'line', data: d.closed,
-                        smooth: true, symbol: 'circle', symbolSize: 4,
-                        lineStyle: { width: 2, color: '#22c55e' },
-                        itemStyle: { color: '#22c55e' },
-                        areaStyle: {
-                            color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
-                                colorStops: [{ offset: 0, color: 'rgba(34,197,94,0.18)' }, { offset: 1, color: 'rgba(34,197,94,0)' }] }
-                        },
-                    },
-                ],
-            };
-        },
 
         _headcountOptions(d) {
             const isDark    = this._isDark();

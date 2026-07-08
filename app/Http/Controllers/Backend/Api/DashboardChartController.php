@@ -10,64 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Modules\Employee\Enums\EmployeeStatus;
 use Modules\Lead\Enums\LeadStatus;
-use Modules\Task\Enums\TaskStatus;
 
 class DashboardChartController extends Controller
 {
-    // ── Task Throughput — Line chart, N days ──────────────────────────────
-    public function taskThroughput(Request $request): JsonResponse
-    {
-        $orgId = TenantContext::getOrganizationId();
-        $days  = (int) $request->input('days', 30);
-        $days  = min(max($days, 7), 90);
-        $from  = now()->subDays($days - 1)->startOfDay();
-
-        // Build a full date spine so gaps show as 0
-        $spine = [];
-        for ($i = 0; $i < $days; $i++) {
-            $spine[$from->copy()->addDays($i)->format('Y-m-d')] = ['created' => 0, 'closed' => 0];
-        }
-
-        // Tasks created per day
-        $created = DB::table('tasks')
-            ->where('organization_id', $orgId)
-            ->whereNull('deleted_at')
-            ->whereDate('created_at', '>=', $from)
-            ->select(DB::raw('DATE(created_at) as day'), DB::raw('COUNT(*) as cnt'))
-            ->groupBy('day')
-            ->pluck('cnt', 'day');
-
-        // Tasks closed per day
-        $closed = DB::table('tasks')
-            ->where('organization_id', $orgId)
-            ->whereNull('deleted_at')
-            ->where('status', TaskStatus::Done->value)
-            ->whereNotNull('completed_at')
-            ->whereDate('completed_at', '>=', $from)
-            ->select(DB::raw('DATE(completed_at) as day'), DB::raw('COUNT(*) as cnt'))
-            ->groupBy('day')
-            ->pluck('cnt', 'day');
-
-        foreach ($spine as $day => &$row) {
-            $row['created'] = (int) ($created[$day] ?? 0);
-            $row['closed']  = (int) ($closed[$day] ?? 0);
-        }
-        unset($row);
-
-        $labels       = array_keys($spine);
-        $createdSerie = array_column($spine, 'created');
-        $closedSerie  = array_column($spine, 'closed');
-
-        // Short label: 'dd/mm' for display
-        $shortLabels = array_map(fn ($d) => substr($d, 8, 2) . '/' . substr($d, 5, 2), $labels);
-
-        return response()->json([
-            'labels'  => $shortLabels,
-            'created' => $createdSerie,
-            'closed'  => $closedSerie,
-        ]);
-    }
-
     // ── Lead Funnel — funnel chart by pipeline stage ───────────────────────
     public function leadFunnel(): JsonResponse
     {

@@ -4,11 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Modules\ActivityLog\Database\Seeders\ActivityLogPermissionsSeeder;
-use Modules\AiCopilot\Database\Seeders\AiCopilotDatabaseSeeder;
 use Modules\Assessment\Database\Seeders\AssessmentDatabaseSeeder;
 use Modules\Auth\Database\Seeders\AuthDatabaseSeeder;
-use Modules\JobPosting\Database\Seeders\JobPostingDatabaseSeeder;
-use Modules\JobTitle\Database\Seeders\JobTitleDatabaseSeeder;
 use Modules\Lead\Database\Seeders\LeadDatabaseSeeder;
 use Modules\LeadPipelineStage\Database\Seeders\LeadPipelineStageSeeder;
 use Modules\LeadSource\Database\Seeders\LeadSourceSeeder;
@@ -18,7 +15,6 @@ use Modules\Product\Database\Seeders\ProductDatabaseSeeder;
 use Modules\Post\Database\Seeders\PostDatabaseSeeder;
 use Modules\Organization\Database\Seeders\OrganizationRolePermissionSeeder;
 use Modules\OrganizationSolution\Database\Seeders\OrganizationSolutionDatabaseSeeder;
-use Modules\Recruitment\Database\Seeders\RecruitmentDatabaseSeeder;
 use Modules\Subscription\Database\Seeders\SubscriptionDatabaseSeeder;
 use Modules\Survey\Database\Seeders\SurveyDatabaseSeeder;
 
@@ -69,27 +65,17 @@ class SystemDataSeeder extends Seeder
             SubscriptionDatabaseSeeder::class,
 
             // ── 9. Danh mục dùng chung (global master data) ───────────────
-            JobTitleDatabaseSeeder::class,
             LeadPipelineStageSeeder::class,   // global template stages (org_id = null)
             LeadSourceSeeder::class,           // global template sources (org_id = null)
 
             // ── 10. Module Lead: stages + sources cho demo org ────────────
             LeadDatabaseSeeder::class,
 
-            // ── 11. Tuyển dụng: pipeline stages mặc định ─────────────────
-            RecruitmentDatabaseSeeder::class,
-
-            // ── 12. Đăng tuyển: skill masters + benefit masters ───────────
-            JobPostingDatabaseSeeder::class,
-
             // ── 13. Assessment: TDWCF, 5-Pillar, certifications, sandbox ──
             AssessmentDatabaseSeeder::class,
 
             // ── 14. Survey: permissions, AI Readiness, scoring config ──────
             SurveyDatabaseSeeder::class,
-
-            // ── 15. AI Copilot: system agents + system prompts ────────────
-            AiCopilotDatabaseSeeder::class,
 
             // ── 19. Business Solution: permissions + verticals + 3 solution bespoke ──
             BusinessSolutionDatabaseSeeder::class,

@@ -28,7 +28,7 @@ class ListEmployeesHandler implements QueryHandlerInterface
 
         $q = Employee::withoutTenant()
             ->select('employees.*')
-            ->with(['branch:id,name,code', 'department:id,name,code', 'jobTitle:id,name,level', 'manager:id,full_name,employee_code',
+            ->with(['manager:id,full_name,employee_code',
                 'media' => fn ($q) => $q->where('collection_name', 'avatar'),
             ])
             ->where('employees.organization_id', TenantContext::getOrganizationId());

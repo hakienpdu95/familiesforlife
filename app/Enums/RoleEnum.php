@@ -43,14 +43,14 @@ enum RoleEnum: string
     public function visibleModules(): array
     {
         return match($this) {
-            self::CEO    => ['ceo_dashboard','crm','sales_ai','tasks','sop','workflow','prompt','ai_logs','ai_copilot','users','reports','activity_log'],
-            self::SALES  => ['crm','sales_ai','tasks','sop','reports','ai_copilot'],
-            self::OPS    => ['ceo_dashboard','crm','tasks','sop','workflow','ai_logs','ai_copilot','reports'],
-            self::MARKETING => ['crm','sales_ai','tasks','sop','reports','ai_copilot'],
-            self::HR     => ['tasks','sop','users','reports','ai_copilot'],
-            self::AI_OP  => ['ceo_dashboard','crm','tasks','sop','workflow','prompt','ai_logs','ai_copilot','reports'],
-            self::ADMIN  => ['ceo_dashboard','crm','sales_ai','tasks','sop','workflow','prompt','ai_logs','ai_copilot','users','roles','reports','integrations','activity_log','vertical_templates'],
-            self::VIEWER => ['ceo_dashboard','tasks','sop','reports'],
+            self::CEO    => ['ceo_dashboard','crm','sales_ai','sop','workflow','users','reports','activity_log'],
+            self::SALES  => ['crm','sales_ai','sop','reports'],
+            self::OPS    => ['ceo_dashboard','crm','sop','workflow','reports'],
+            self::MARKETING => ['crm','sales_ai','sop','reports'],
+            self::HR     => ['sop','users','reports'],
+            self::AI_OP  => ['ceo_dashboard','crm','sop','workflow','reports'],
+            self::ADMIN  => ['ceo_dashboard','crm','sales_ai','sop','workflow','users','roles','reports','integrations','activity_log','vertical_templates'],
+            self::VIEWER => ['ceo_dashboard','sop','reports'],
         };
     }
 }

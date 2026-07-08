@@ -7,8 +7,6 @@
     'apiUrl'         => route('backend.api.employees'),
     'statuses'       => $statuses,
     'employmentTypes'=> $employmentTypes,
-    'branches'       => $branches,
-    'departments'    => $departments,
     'canDelete'      => auth()->user()->can('delete', \Modules\Employee\Models\Employee::class),
 ]) }})">
 
@@ -189,20 +187,6 @@
                         <span class="label-text text-xs font-medium">Loại hợp đồng</span>
                     </label>
                     <select id="filter-employment-type" class="select select-sm select-bordered w-full"></select>
-                </div>
-
-                <div class="form-control w-52">
-                    <label class="label py-0.5">
-                        <span class="label-text text-xs font-medium">Chi nhánh</span>
-                    </label>
-                    <select id="filter-branch" class="select select-sm select-bordered w-full"></select>
-                </div>
-
-                <div class="form-control w-52">
-                    <label class="label py-0.5">
-                        <span class="label-text text-xs font-medium">Phòng ban</span>
-                    </label>
-                    <select id="filter-department" class="select select-sm select-bordered w-full"></select>
                 </div>
 
             </div>

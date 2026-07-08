@@ -28,11 +28,11 @@ class StoreEmployeeData extends Data
         #[Required, Email, Max(255)]
         public readonly string $email,
 
-        #[Required]
-        public readonly int $branch_id,
+        #[Nullable]
+        public readonly ?int $branch_id,
 
-        #[Required]
-        public readonly int $department_id,
+        #[Nullable]
+        public readonly ?int $department_id,
 
         public readonly EmployeeStatus $status,
 
@@ -120,8 +120,8 @@ class StoreEmployeeData extends Data
                     ->whereNull('deleted_at'),
                 Rule::exists('users', 'id'),
             ],
-            'branch_id'     => ['required', 'integer', Rule::exists('branches', 'id')->where('organization_id', $orgId)],
-            'department_id' => ['required', 'integer', Rule::exists('departments', 'id')->where('organization_id', $orgId)],
+            'branch_id'     => ['nullable', 'integer', Rule::exists('branches', 'id')->where('organization_id', $orgId)],
+            'department_id' => ['nullable', 'integer', Rule::exists('departments', 'id')->where('organization_id', $orgId)],
             'job_title_id'  => ['nullable', 'integer', Rule::exists('job_titles', 'id')->where('organization_id', $orgId)],
             'manager_id'    => ['nullable', 'integer', Rule::exists('employees', 'id')->where('organization_id', $orgId)],
             'gender'              => ['nullable', 'string', 'in:male,female,other'],

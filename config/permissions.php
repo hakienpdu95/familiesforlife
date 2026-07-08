@@ -28,21 +28,8 @@ return [
         // Sales AI: Full (view + use)
         P::SALES_AI_VIEW->value,
         P::SALES_AI_USE->value,
-        // Tasks: Full
-        P::TASKS_VIEW_ALL->value,
-        P::TASKS_CREATE->value,
-        P::TASKS_EDIT->value,
-        P::TASKS_ASSIGN->value,
-        P::TASKS_CLOSE->value,
         // Workflow: Monitor only — KHÔNG có edit
         P::WORKFLOW_MONITOR->value,
-        // Prompt: View only
-        P::PROMPT_VIEW->value,
-        // AI Logs: View summary
-        P::AI_LOGS_VIEW->value,
-        // AI Copilot: Use + View usage
-        P::AI_COPILOT_USE->value,
-        P::AI_COPILOT_VIEW_USAGE->value,
         // Users: View
         P::USERS_VIEW->value,
         // Reports: Full
@@ -50,16 +37,6 @@ return [
         // Assessment: View + Results
         P::ASSESSMENT_VIEW->value,
         P::ASSESSMENT_RESULTS->value,
-        // Job Posting: Full
-        P::JOB_POSTING_VIEW->value,
-        P::JOB_POSTING_CREATE->value,
-        P::JOB_POSTING_EDIT->value,
-        P::JOB_POSTING_DELETE->value,
-        P::JOB_POSTING_PUBLISH->value,
-        // Recruitment: View
-        P::RECRUITMENT_VIEW->value,
-        // Marketplace: View
-        P::MARKETPLACE_VIEW->value,
         // Product: Full (CEO tự quản lý catalog sản phẩm/dịch vụ dùng cho Post CTA Box)
         P::PRODUCT_VIEW->value,
         P::PRODUCT_CREATE->value,
@@ -80,11 +57,6 @@ return [
         P::CUSTOMERS_EDIT->value,
         // Sales AI: Use (dùng output, không config)
         P::SALES_AI_USE->value,
-        // AI Copilot: Use
-        P::AI_COPILOT_USE->value,
-        // Tasks: Assigned
-        P::TASKS_VIEW_ASSIGNED->value,
-        P::TASKS_CREATE->value,
         // Workflow: Limited (visibility=public)
         P::WORKFLOW_VIEW_LIMITED->value,
         // Reports: Personal + Team
@@ -113,27 +85,14 @@ return [
         P::CUSTOMERS_CREATE->value,
         P::CUSTOMERS_EDIT->value,
         P::CUSTOMERS_EXPORT->value,
-        // Tasks: Full team (view all + full CRUD + assign)
-        P::TASKS_VIEW_ALL->value,
-        P::TASKS_CREATE->value,
-        P::TASKS_EDIT->value,
-        P::TASKS_ASSIGN->value,
-        P::TASKS_CLOSE->value,
         // Workflow: Monitor/Edit
         P::WORKFLOW_MONITOR->value,
         P::WORKFLOW_EDIT->value,
-        // AI Logs: Limited (view, không full)
-        P::AI_LOGS_VIEW->value,
-        // AI Copilot: Use + View usage
-        P::AI_COPILOT_USE->value,
-        P::AI_COPILOT_VIEW_USAGE->value,
         // Reports: Operations scope
         P::REPORTS_OPS->value,
         // Assessment: View + Results
         P::ASSESSMENT_VIEW->value,
         P::ASSESSMENT_RESULTS->value,
-        // Job Posting: View only
-        P::JOB_POSTING_VIEW->value,
         // Product: Full (Ops quản lý catalog sản phẩm/dịch vụ dùng cho Post CTA Box)
         P::PRODUCT_VIEW->value,
         P::PRODUCT_CREATE->value,
@@ -151,16 +110,10 @@ return [
         P::CUSTOMERS_VIEW_ALL->value,
         // Sales AI: Limited (view, không use/config)
         P::SALES_AI_VIEW->value,
-        // Tasks: Limited (visibility=public only)
-        P::TASKS_VIEW_LIMITED->value,
         // Workflow: Limited
         P::WORKFLOW_VIEW_LIMITED->value,
-        // AI Copilot: Use
-        P::AI_COPILOT_USE->value,
         // Reports: Marketing scope
         P::REPORTS_MARKETING->value,
-        // Marketplace: View (Marketing monitors public listings)
-        P::MARKETPLACE_VIEW->value,
         // Product: Soạn thảo (Marketing biên tập catalog sản phẩm dùng cho Post CTA Box)
         P::PRODUCT_VIEW->value,
         P::PRODUCT_CREATE->value,
@@ -173,31 +126,12 @@ return [
     ],
 
     R::HR->value => [
-        // Tasks: HR tasks (dept=hr only)
-        P::TASKS_VIEW_DEPT->value,
-        P::TASKS_CREATE->value,
         // Workflow: Limited
         P::WORKFLOW_VIEW_LIMITED->value,
-        // AI Copilot: Use
-        P::AI_COPILOT_USE->value,
         // Users: Limited (tạo user nội bộ, onboarding)
         P::USERS_HR->value,
         // Reports: HR scope
         P::REPORTS_HR->value,
-        // Job Posting: Full (HR manages hiring)
-        P::JOB_POSTING_VIEW->value,
-        P::JOB_POSTING_CREATE->value,
-        P::JOB_POSTING_EDIT->value,
-        P::JOB_POSTING_PUBLISH->value,
-        // Recruitment: Full (HR Admin = manage, HR = edit+create)
-        P::RECRUITMENT_VIEW->value,
-        P::RECRUITMENT_CREATE->value,
-        P::RECRUITMENT_EDIT->value,
-        P::RECRUITMENT_MANAGE->value,
-        // Marketplace: Full (HR manages listings + reviews applicants)
-        P::MARKETPLACE_VIEW->value,
-        P::MARKETPLACE_CREATE->value,
-        P::MARKETPLACE_EDIT->value,
         // Product: View only
         P::PRODUCT_VIEW->value,
         // Post: View only
@@ -213,21 +147,9 @@ return [
         P::CUSTOMERS_VIEW_ALL->value,
         // Sales AI: Config prompt
         P::SALES_AI_CONFIG_PROMPT->value,
-        // Tasks: Limited
-        P::TASKS_VIEW_LIMITED->value,
         // Workflow: Monitor + AI config
         P::WORKFLOW_MONITOR->value,
         P::WORKFLOW_AI_CONFIG->value,
-        // Prompt Management: Full
-        P::PROMPT_FULL->value,
-        // AI Logs: Full
-        P::AI_LOGS_FULL->value,
-        // AI Copilot: Use + Config + View usage
-        P::AI_COPILOT_USE->value,
-        P::AI_COPILOT_CONFIG->value,
-        P::AI_COPILOT_VIEW_USAGE->value,
-        // Reports: AI usage scope
-        P::REPORTS_AI_USAGE->value,
         // Assessment: Config + Reprocess
         P::ASSESSMENT_VIEW->value,
         P::ASSESSMENT_CONFIG->value,
@@ -256,16 +178,9 @@ return [
         P::CUSTOMERS_CONFIG->value,
         P::CUSTOMERS_VIEW_ALL->value,
         P::SALES_AI_CONFIG->value,
-        P::TASKS_CONFIG->value,
         P::WORKFLOW_MONITOR->value,
         P::WORKFLOW_EDIT->value,
         P::WORKFLOW_FULL_CONFIG->value,
-        P::PROMPT_ADMIN_CONFIG->value,
-        P::AI_LOGS_FULL->value,
-        // AI Copilot: Use + Config + View usage
-        P::AI_COPILOT_USE->value,
-        P::AI_COPILOT_CONFIG->value,
-        P::AI_COPILOT_VIEW_USAGE->value,
         // User & roles management
         P::USERS_MANAGE->value,
         P::ROLES_MANAGE->value,
@@ -279,19 +194,6 @@ return [
         P::ASSESSMENT_CONFIG->value,
         P::ASSESSMENT_RESULTS->value,
         P::ASSESSMENT_REPROCESS->value,
-        // Job Posting: Manage (system admin)
-        P::JOB_POSTING_VIEW->value,
-        P::JOB_POSTING_MANAGE->value,
-        // Recruitment: Full manage
-        P::RECRUITMENT_VIEW->value,
-        P::RECRUITMENT_CREATE->value,
-        P::RECRUITMENT_EDIT->value,
-        P::RECRUITMENT_MANAGE->value,
-        // Marketplace: Full manage (approve orgs, global view)
-        P::MARKETPLACE_VIEW->value,
-        P::MARKETPLACE_CREATE->value,
-        P::MARKETPLACE_EDIT->value,
-        P::MARKETPLACE_MANAGE->value,
         // Product: Full manage (catalog sản phẩm/dịch vụ + quản lý danh mục)
         P::PRODUCT_VIEW->value,
         P::PRODUCT_CREATE->value,
@@ -310,8 +212,6 @@ return [
     R::VIEWER->value => [
         // CEO Dashboard: View limited
         P::CEO_DASH_VIEW->value,
-        // Tasks: View limited (public only)
-        P::TASKS_VIEW_LIMITED->value,
         // Reports: Shared only
         P::REPORTS_SHARED->value,
         // Product: View only

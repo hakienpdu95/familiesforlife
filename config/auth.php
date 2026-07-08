@@ -42,11 +42,6 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
-
-        'marketplace' => [
-            'driver' => 'session',
-            'provider' => 'mkt_applicants',
-        ],
     ],
 
     /*
@@ -70,11 +65,6 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', User::class),
-        ],
-
-        'mkt_applicants' => [
-            'driver' => 'eloquent',
-            'model' => \Modules\Marketplace\Models\MktApplicant::class,
         ],
 
         // 'users' => [

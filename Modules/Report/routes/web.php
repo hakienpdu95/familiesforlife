@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\Route;
 use Modules\Report\Http\Controllers\ReportDashboardController;
 use Modules\Report\Http\Controllers\HrReportController;
 use Modules\Report\Http\Controllers\SalesReportController;
-use Modules\Report\Http\Controllers\ProjectKpiReportController;
 
 Route::middleware(['auth', 'verified', 'tenant'])
     ->prefix('report')
@@ -19,9 +18,6 @@ Route::middleware(['auth', 'verified', 'tenant'])
             ->group(function () {
                 Route::get('/',            [HrReportController::class, 'index']      )->name('index');
                 Route::get('/headcount',   [HrReportController::class, 'headcount']  )->name('headcount');
-                Route::get('/leave',       [HrReportController::class, 'leave']      )->name('leave');
-                Route::get('/recruitment', [HrReportController::class, 'recruitment'])->name('recruitment');
-                Route::get('/performance', [HrReportController::class, 'performance'])->name('performance');
             });
 
         // ── Sales ────────────────────────────────────────────────────
@@ -32,22 +28,5 @@ Route::middleware(['auth', 'verified', 'tenant'])
                 Route::get('/pipeline',   [SalesReportController::class, 'pipeline']   )->name('pipeline');
                 Route::get('/conversion', [SalesReportController::class, 'conversion'] )->name('conversion');
                 Route::get('/activity',   [SalesReportController::class, 'activity']   )->name('activity');
-            });
-
-        // ── Project ──────────────────────────────────────────────────
-        Route::middleware('can:reports.ops,reports.full')
-            ->prefix('project')->name('project.')
-            ->group(function () {
-                Route::get('/',      [ProjectKpiReportController::class, 'projectIndex'])->name('index');
-                Route::get('/tasks', [ProjectKpiReportController::class, 'tasks']       )->name('tasks');
-            });
-
-        // ── KPI ──────────────────────────────────────────────────────
-        Route::middleware('can:reports.ops,reports.full')
-            ->prefix('kpi')->name('kpi.')
-            ->group(function () {
-                Route::get('/',         [ProjectKpiReportController::class, 'kpiIndex']   )->name('index');
-                Route::get('/cycle',    [ProjectKpiReportController::class, 'kpiCycle']   )->name('cycle');
-                Route::get('/snapshot', [ProjectKpiReportController::class, 'kpiSnapshot'])->name('snapshot');
             });
     });

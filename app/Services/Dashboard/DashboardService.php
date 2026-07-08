@@ -10,13 +10,8 @@ use Illuminate\Support\Collection;
 use Modules\ActivityLog\Models\ActivityLog;
 use Modules\Employee\Enums\EmployeeStatus;
 use Modules\Employee\Models\Employee;
-use Modules\Leave\Enums\LeaveRequestStatus;
-use Modules\Leave\Models\LeaveRequest;
 use Modules\Lead\Enums\LeadStatus;
 use Modules\Lead\Models\Lead;
-use Modules\Recruitment\Models\RcApplication;
-use Modules\Task\Enums\TaskStatus;
-use Modules\Task\Models\Task;
 use Modules\WorkflowAutomation\Models\WorkflowExecution;
 use Modules\WorkflowAutomation\Models\WorkflowUserTask;
 
@@ -54,30 +49,14 @@ class DashboardService
             'hint'    => 'Workflow user task đang chờ',
         ];
 
-        // ── Always: my overdue tasks ──────────────────────────────────────
-        $myOverdue = $this->countMyOverdueTasks($user, $orgId);
-        $cards[] = [
-            'id'      => 'tasks_overdue_mine',
-            'label'   => 'Task quá hạn của tôi',
-            'value'   => $myOverdue,
-            'icon'    => 'task_overdue',
-            'color'   => $myOverdue > 0 ? 'error' : 'ghost',
-            'urgent'  => $myOverdue > 0,
-            'link'    => route('backend.tasks.index'),
-            'hint'    => 'Cần xử lý ngay',
-        ];
-
         // ── Role-specific cards ───────────────────────────────────────────
         if ($this->isFull($role)) {
             // CEO / Admin / Ops / AI_OP
             $cards[] = $this->cardEmployeesActive($orgId);
             $cards[] = $this->cardLeadsActive($orgId);
             $cards[] = $this->cardWorkflowToday($orgId);
-            $cards[] = $this->cardLeavePending($orgId);
         } elseif ($role === RoleEnum::HR->value) {
             $cards[] = $this->cardEmployeesActive($orgId);
-            $cards[] = $this->cardLeavePending($orgId);
-            $cards[] = $this->cardRecruitmentActive($orgId);
         } elseif ($role === RoleEnum::SALES->value) {
             $cards[] = $this->cardMyLeads($user, $orgId);
             $cards[] = $this->cardLeadsConvertedThisMonth($orgId);
@@ -201,42 +180,6 @@ class DashboardService
         ];
     }
 
-    private function cardLeavePending(?int $orgId): array
-    {
-        $count = LeaveRequest::where('organization_id', $orgId)
-            ->where('status', LeaveRequestStatus::Pending->value)
-            ->count();
-
-        return [
-            'id'     => 'leave_pending',
-            'label'  => 'Đơn nghỉ phép chờ duyệt',
-            'value'  => $count,
-            'icon'   => 'leave',
-            'color'  => $count > 0 ? 'warning' : 'ghost',
-            'urgent' => $count > 0,
-            'link'   => route('backend.leave.requests.index'),
-            'hint'   => 'Cần phê duyệt',
-        ];
-    }
-
-    private function cardRecruitmentActive(?int $orgId): array
-    {
-        $count = RcApplication::where('organization_id', $orgId)
-            ->where('status', 'active')
-            ->count();
-
-        return [
-            'id'     => 'recruitment_active',
-            'label'  => 'Ứng tuyển đang xử lý',
-            'value'  => $count,
-            'icon'   => 'recruitment',
-            'color'  => 'info',
-            'urgent' => false,
-            'link'   => route('backend.recruitment.candidates'),
-            'hint'   => 'Chờ đánh giá / phỏng vấn',
-        ];
-    }
-
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private function countMyPendingApprovals(User $user, ?int $orgId): int
@@ -249,25 +192,6 @@ class DashboardService
                 $q->where('assignee_id', $user->id)
                   ->orWhereIn('assignee_role', $roles);
             })
-            ->count();
-    }
-
-    private function countMyOverdueTasks(User $user, ?int $orgId): int
-    {
-        $employeeId = Employee::where('organization_id', $orgId)
-            ->where('user_id', $user->id)
-            ->value('id');
-
-        return Task::where('organization_id', $orgId)
-            ->where(function ($q) use ($user, $employeeId) {
-                $q->where('created_by', $user->id);
-                if ($employeeId) {
-                    $q->orWhere('employee_id', $employeeId);
-                }
-            })
-            ->whereNotNull('due_date')
-            ->where('due_date', '<', today())
-            ->whereNotIn('status', [TaskStatus::Done->value, TaskStatus::Cancelled->value])
             ->count();
     }
 
@@ -302,40 +226,6 @@ class DashboardService
                 'badge'      => $overdue ? 'Quá hạn' : ($dueAt ? $dueAt->diffForHumans() : 'Đang chờ'),
                 'badge_color'=> $overdue ? 'error' : 'warning',
                 'link'       => route('workflow.tasks.show', $task->task_token),
-                'created_at' => $task->created_at,
-            ];
-        }
-
-        // Overdue tasks
-        $employeeId = Employee::where('organization_id', $orgId)
-            ->where('user_id', $user->id)
-            ->value('id');
-
-        $overdueTasks = Task::where('organization_id', $orgId)
-            ->where(function ($q) use ($user, $employeeId) {
-                $q->where('created_by', $user->id);
-                if ($employeeId) {
-                    $q->orWhere('employee_id', $employeeId);
-                }
-            })
-            ->whereNotNull('due_date')
-            ->where('due_date', '<', today())
-            ->whereNotIn('status', [TaskStatus::Done->value, TaskStatus::Cancelled->value])
-            ->with('project:id,name')
-            ->orderBy('due_date')
-            ->limit(5)
-            ->get();
-
-        foreach ($overdueTasks as $task) {
-            $daysLate = (int) Carbon::parse($task->due_date)->diffInDays(today());
-            $items[] = [
-                'type'       => 'task_overdue',
-                'title'      => $task->title,
-                'subtitle'   => $task->project ? $task->project->name : 'Không thuộc dự án',
-                'urgent'     => $daysLate > 2,
-                'badge'      => "Trễ {$daysLate} ngày",
-                'badge_color'=> $daysLate > 2 ? 'error' : 'warning',
-                'link'       => route('backend.tasks.index'),
                 'created_at' => $task->created_at,
             ];
         }

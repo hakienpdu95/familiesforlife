@@ -54,9 +54,6 @@ class MediaUploadController extends Controller
     private const ENTITY_MAP = [
         'employee'                => \Modules\Employee\Models\Employee::class,
         'organization'            => \Modules\Organization\Models\Organization::class,
-        'mkt_applicant'           => \Modules\Marketplace\Models\MktApplicant::class,
-        'mkt_applicant_portfolio' => \Modules\Marketplace\Models\MktApplicantPortfolio::class,
-        'rc_candidate'            => \Modules\Recruitment\Models\RcCandidate::class,
     ];
 
     public function __construct(

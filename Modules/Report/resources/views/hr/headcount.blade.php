@@ -71,22 +71,6 @@
                     </div>
                 </div>
 
-                {{-- Branch --}}
-                <div class="form-control w-52">
-                    <label class="label py-0.5">
-                        <span class="label-text text-xs font-medium">Chi nhánh</span>
-                    </label>
-                    <select id="filter-branch" class="select select-sm select-bordered w-full"></select>
-                </div>
-
-                {{-- Department --}}
-                <div class="form-control w-52">
-                    <label class="label py-0.5">
-                        <span class="label-text text-xs font-medium">Phòng ban</span>
-                    </label>
-                    <select id="filter-department" class="select select-sm select-bordered w-full"></select>
-                </div>
-
                 {{-- Date presets --}}
                 <div class="form-control">
                     <label class="label py-0.5 invisible"><span class="label-text text-xs">.</span></label>
@@ -345,8 +329,6 @@
     <script>
         window.__REPORT_HR_HEADCOUNT__ = {
             API_URL:            "{{ route('api.report.hr.headcount') }}",
-            BRANCH_OPTIONS_URL: "{{ route('api.branches.options') }}",
-            DEPT_OPTIONS_URL:   "{{ route('api.departments.options') }}",
         };
     </script>
 @endpush

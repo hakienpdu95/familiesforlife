@@ -100,8 +100,7 @@ class TransferEmployeeAction
         }
 
         if (isset($updates['job_title_id'])) {
-            $newJt = \Modules\JobTitle\Models\JobTitle::withoutTenant()->find($updates['job_title_id']);
-            $newLevel = $newJt?->level ?? 0;
+            $newLevel = DB::table('job_titles')->where('id', $updates['job_title_id'])->value('level') ?? 0;
             if ($newLevel > ($oldSnapLevel ?? 0)) return EmployeeHistoryChangeType::Promotion->value;
             if ($newLevel < ($oldSnapLevel ?? 0)) return EmployeeHistoryChangeType::Demotion->value;
             return EmployeeHistoryChangeType::Promotion->value;

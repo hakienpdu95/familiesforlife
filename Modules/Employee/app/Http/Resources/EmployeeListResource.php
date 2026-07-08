@@ -29,12 +29,6 @@ class EmployeeListResource extends JsonResource
             'employment_type_label' => $type->label(),
             'employment_type_badge' => $type->badgeClass(),
 
-            'branch_name'   => $this->branch?->name,
-            'branch_code'   => $this->branch?->code,
-            'dept_name'     => $this->department?->name,
-            'dept_code'     => $this->department?->code,
-            'job_title'     => $this->jobTitle?->name,
-            'job_level'     => $this->jobTitle?->level,
             'manager_name'  => $this->manager?->full_name,
 
             // Snapshot fields (fast display without extra joins)

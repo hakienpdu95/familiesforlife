@@ -57,17 +57,6 @@
         "__index///index///__///__///__///request_id|idx_request///__"
     ],
     [
-        "branches///add///__///",
-        "manager_id///unsignedBigInteger///__///_NULL///NULL///__///__",
-        "__index///index///__///__///__///manager_id|idx_branches_manager///__"
-    ],
-    [
-        "departments///add///__///",
-        "head_id///unsignedBigInteger///__///_NULL///NULL///__///__",
-        "deputy_head_id///unsignedBigInteger///__///_NULL///NULL///__///__",
-        "__index///index///__///__///__///head_id|idx_depts_head///__"
-    ],
-    [
         "workflow_executions///add///__///",
         "context///json///__///_NULL///NULL///__///__",
         "steps_skipped///unsignedTinyInteger///__///NOT_NULL///0///__///__",
@@ -170,61 +159,6 @@
         "new_salary_base///decimal///15,2///_NULL///NULL///__///__"
     ],
     [
-        "job_titles///add///__///",
-        "salary_min///decimal///15,2///_NULL///NULL///__///__",
-        "salary_max///decimal///15,2///_NULL///NULL///__///__",
-        "salary_currency///char///3///NOT_NULL///'VND'///__///__",
-        "is_manager_role///tinyInteger///__///NOT_NULL///0///__///__",
-        "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm"
-    ],
-    [
-        "rc_candidates///add///__///",
-        "date_of_birth///date///__///_NULL///NULL///__///__",
-        "gender///enum///[male,female,other]///_NULL///NULL///__///__",
-        "current_title///string///150///_NULL///NULL///__///__",
-        "current_company///string///150///_NULL///NULL///__///__",
-        "years_experience///smallInteger///__///_NULL///NULL///__///__",
-        "skills///text///__///_NULL///NULL///__///__",
-        "referred_by///unsignedBigInteger///__///_NULL///NULL///__///__",
-        "mkt_applicant_id///char///36///_NULL///NULL///->index()///__",
-        "status///string///20///NOT_NULL///'active'///->index()///__",
-        "blacklist_reason///text///__///_NULL///NULL///__///__",
-        "created_by///unsignedBigInteger///__///_NULL///NULL///__///__",
-        "updated_by///unsignedBigInteger///__///_NULL///NULL///__///__",
-        "__index///index///__///__///__///org_id,status,source|idx_rc_cand_status///__"
-    ],
-    [
-        "rc_applications///add///__///",
-        "current_stage_id///unsignedBigInteger///__///_NULL///NULL///__///__",
-        "expected_salary///decimal///15,2///_NULL///NULL///__///__",
-        "notice_period_days///smallInteger///__///_NULL///NULL///__///__",
-        "is_disqualified///boolean///__///NOT_NULL///false///__///__",
-        "disqualify_reason///text///__///_NULL///NULL///__///__",
-        "assigned_to///unsignedBigInteger///__///_NULL///NULL///__///__",
-        "rejection_reason///text///__///_NULL///NULL///__///__",
-        "applied_at///timestamp///__///_NULL///NULL///__///__",
-        "__index///index///__///__///__///current_stage_id,status|idx_rc_app_stage///__",
-        "__index///index///__///__///__///assigned_to,status|idx_rc_app_assigned///__",
-        "__index///index///__///__///__///org_id,is_disqualified,created_at|idx_rc_app_disq///__"
-    ],
-    [
-        "mkt_listings///add///__///",
-        "posted_by///unsignedBigInteger///__///NOT_NULL///0///__///__",
-        "slug///string///320///_NULL///NULL///->unique()///__",
-        "benefits///text///__///_NULL///NULL///__///__",
-        "visibility///string///20///NOT_NULL///'public'///__///__",
-        "salary_is_negotiable///boolean///__///NOT_NULL///false///__///__",
-        "salary_is_visible///boolean///__///NOT_NULL///true///__///__",
-        "budget_min///decimal///15,2///_NULL///NULL///__///__",
-        "budget_max///decimal///15,2///_NULL///NULL///__///__",
-        "duration_days///integer///__///_NULL///NULL///__///__",
-        "department_id///unsignedBigInteger///__///_NULL///NULL///__///__",
-        "position_id///unsignedBigInteger///__///_NULL///NULL///__///__",
-        "bookmark_count///integer///__///NOT_NULL///0///__///__",
-        "jp_sync_status///string///20///_NULL///NULL///__///__",
-        "auto_close_on_jp///boolean///__///NOT_NULL///true///__///__"
-    ],
-    [
         "assessments///add///__///",
         "organization_id///unsignedBigInteger///__///_NULL///NULL///->constrained()->onDelete('restrict')///__",
         "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm",
@@ -241,22 +175,6 @@
         "__index///index///__///__///__///collection_name,model_type,last_touched_at|idx_media_orphan///__"
     ],
     [
-        "jp_skill_masters///add///__///",
-        "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm"
-    ],
-    [
-        "jp_benefit_masters///add///__///",
-        "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm"
-    ],
-    [
-        "org_chart_configs///add///__///",
-        "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm"
-    ],
-    [
-        "user_role_scopes///add///__///",
-        "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm"
-    ],
-    [
         "workflows///add///__///",
         "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm",
         "category///string///64///_NULL///NULL///__///__",
@@ -270,13 +188,6 @@
         "allowed_trigger_roles///text///__///_NULL///NULL///__///__",
         "template_id///unsignedBigInteger///__///_NULL///NULL///__///__",
         "__index///index///__///__///__///organization_id,category|idx_org_category///__"
-    ],
-    [
-        "projects///add///__///",
-        "progress_pct///unsignedSmallInteger///__///NOT_NULL///0///__///__",
-        "task_total///unsignedSmallInteger///__///NOT_NULL///0///__///__",
-        "task_done///unsignedSmallInteger///__///NOT_NULL///0///__///__",
-        "vertical_code///string///50///_NULL///NULL///->index()///__"
     ],
     [
         "workflow_steps///add///__///",

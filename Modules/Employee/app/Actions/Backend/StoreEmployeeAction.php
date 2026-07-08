@@ -47,12 +47,14 @@ class StoreEmployeeAction
         ]);
 
         // Tạo bản ghi employee_departments (primary)
-        EmployeeDepartment::create([
-            'employee_id'   => $employee->id,
-            'department_id' => $data->department_id,
-            'is_primary'    => true,
-            'joined_at'     => $data->hired_at ?? now()->toDateString(),
-        ]);
+        if ($data->department_id) {
+            EmployeeDepartment::create([
+                'employee_id'   => $employee->id,
+                'department_id' => $data->department_id,
+                'is_primary'    => true,
+                'joined_at'     => $data->hired_at ?? now()->toDateString(),
+            ]);
+        }
 
         // Ghi employee_history (hire)
         \Modules\Employee\Models\EmployeeHistory::create([

@@ -40,54 +40,14 @@ return [
 
         // ── HR / Org ──────────────────────────────────────────────────────
         'employees'           => 'Nhân viên',
-        'branches'            => 'Chi nhánh',
-        'branch'              => 'Chi nhánh',
-        'departments'         => 'Phòng ban',
-        'department'          => 'Phòng ban',
-        'job-titles'          => 'Chức danh',
         'organizations'       => 'Tổ chức',
-        'org-charts'          => 'Sơ đồ tổ chức',
-        'role-scopes'         => 'Phạm vi vai trò',
         'users'               => 'Người dùng',
         'roles'               => 'Vai trò',
         'permissions'         => 'Quyền hạn',
 
-        // ── Recruitment ───────────────────────────────────────────────────
-        'recruitment'         => 'Tuyển dụng',
-        'candidates'          => 'Ứng viên',
-        'applications'        => 'Đơn ứng tuyển',
-        'interviews'          => 'Phỏng vấn',
-        'evaluations'         => 'Đánh giá phỏng vấn',
-        'offers'              => 'Đề nghị việc làm',
         'pipeline-stages'     => 'Giai đoạn Pipeline',
-        'board'               => 'Kanban Board',
-        'job-posts'           => 'Tin tuyển dụng',
-
-        // ── Marketplace ───────────────────────────────────────────────────
-        'marketplace'         => 'Marketplace',
-        'listings'            => 'Tin đăng',
-        'org-approvals'       => 'Duyệt tổ chức',
 
         'versions'            => 'Phiên bản',
-
-        // ── KPI ───────────────────────────────────────────────────────────
-        'kpi'                 => 'KPI',
-        'goals'               => 'Mục tiêu',
-        'cycles'              => 'Chu kỳ',
-        'leaderboard'         => 'Bảng xếp hạng',
-
-        // ── Leave ─────────────────────────────────────────────────────────
-        'leave'               => 'Nghỉ phép',
-        'policies'            => 'Chính sách',
-        'requests'            => 'Đơn xin nghỉ',
-        'balances'            => 'Số dư phép',
-        'pending'             => 'Chờ duyệt',
-
-        // ── Performance Review ────────────────────────────────────────────
-        'performance-reviews' => 'Đánh giá hiệu suất',
-
-        // ── Project ───────────────────────────────────────────────────────
-        'projects'            => 'Dự án',
 
         // ── SOP ───────────────────────────────────────────────────────────
         'sop'                 => 'Quy trình SOP',

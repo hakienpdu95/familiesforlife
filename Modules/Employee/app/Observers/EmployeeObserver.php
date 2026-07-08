@@ -2,6 +2,7 @@
 
 namespace Modules\Employee\Observers;
 
+use Illuminate\Support\Facades\DB;
 use Modules\Employee\Enums\EmployeeStatus;
 use Modules\Employee\Enums\EmploymentType;
 use Modules\Employee\Models\Employee;
@@ -86,17 +87,15 @@ class EmployeeObserver
     private function refreshSnapshots(Employee $employee): void
     {
         if ($employee->branch_id) {
-            $branch = \Modules\Branch\Models\Branch::withoutTenant()->find($employee->branch_id);
-            $employee->snap_branch_name = $branch?->name;
+            $employee->snap_branch_name = DB::table('branches')->where('id', $employee->branch_id)->value('name');
         }
 
         if ($employee->department_id) {
-            $dept = \Modules\Department\Models\Department::withoutTenant()->find($employee->department_id);
-            $employee->snap_dept_name = $dept?->name;
+            $employee->snap_dept_name = DB::table('departments')->where('id', $employee->department_id)->value('name');
         }
 
         if ($employee->job_title_id) {
-            $jt = \Modules\JobTitle\Models\JobTitle::withoutTenant()->find($employee->job_title_id);
+            $jt = DB::table('job_titles')->where('id', $employee->job_title_id)->first(['name', 'level']);
             $employee->snap_job_title = $jt?->name;
             $employee->snap_job_level = $jt?->level;
         }

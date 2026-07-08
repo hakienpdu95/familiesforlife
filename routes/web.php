@@ -46,7 +46,6 @@ Route::middleware(['auth'])->prefix('dashboard')->name('backend.')->group(functi
 
     // ── Dashboard chart API ───────────────────────────────────────────────
     Route::prefix('api/dashboard/charts')->name('dashboard.charts.')->middleware('tenant')->group(function () {
-        Route::get('task-throughput', [DashboardChartController::class, 'taskThroughput'])->name('task-throughput');
         Route::get('lead-funnel',     [DashboardChartController::class, 'leadFunnel'])    ->name('lead-funnel');
         Route::get('workflow-health', [DashboardChartController::class, 'workflowHealth'])->name('workflow-health');
         Route::get('headcount',       [DashboardChartController::class, 'headcount'])     ->name('headcount');

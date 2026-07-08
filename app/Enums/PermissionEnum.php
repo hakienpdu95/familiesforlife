@@ -41,18 +41,6 @@ enum PermissionEnum: string
     case SALES_AI_CONFIG_PROMPT = 'sales_ai.config_prompt'; // AI Operator
     case SALES_AI_CONFIG        = 'sales_ai.config';        // System Admin
 
-    // ══ TASKS ══════════════════════════════════════════════════════
-    // CEO=Full | Sales=Assigned | Ops=Full team | Marketing=Limited | HR=HR tasks | AI_OP=Limited | Admin=Config | Viewer=View limited
-    case TASKS_VIEW_ALL      = 'tasks.view_all';      // Ops (full team scope)
-    case TASKS_VIEW_ASSIGNED = 'tasks.view_assigned'; // Sales
-    case TASKS_VIEW_DEPT     = 'tasks.view_dept';     // HR (HR tasks — dept=hr)
-    case TASKS_VIEW_LIMITED  = 'tasks.view_limited';  // Marketing, AI_OP, Viewer (visibility=public)
-    case TASKS_CREATE        = 'tasks.create';        // CEO, Sales, Ops, HR
-    case TASKS_EDIT          = 'tasks.edit';          // CEO, Ops
-    case TASKS_ASSIGN        = 'tasks.assign';        // CEO, Ops
-    case TASKS_CLOSE         = 'tasks.close';         // CEO, Ops
-    case TASKS_CONFIG        = 'tasks.config';        // System Admin
-
     // ══ WORKFLOW ═══════════════════════════════════════════════════
     // CEO=Monitor | Sales=Limited | Ops=Monitor/Edit | Marketing=Limited | HR=Limited
     // AI_OP=AI config | Admin=Full config
@@ -61,23 +49,6 @@ enum PermissionEnum: string
     case WORKFLOW_VIEW_LIMITED = 'workflow.view_limited'; // Sales, Marketing, HR
     case WORKFLOW_AI_CONFIG    = 'workflow.ai_config';    // AI Operator
     case WORKFLOW_FULL_CONFIG  = 'workflow.full_config';  // System Admin
-
-    // ══ PROMPT MANAGEMENT ══════════════════════════════════════════
-    // CEO=View | AI_OP=Full | Admin=Admin config
-    case PROMPT_VIEW         = 'prompt.view';         // CEO (read-only)
-    case PROMPT_FULL         = 'prompt.full';         // AI Operator
-    case PROMPT_ADMIN_CONFIG = 'prompt.admin_config'; // System Admin
-
-    // ══ AI LOGS ════════════════════════════════════════════════════
-    // CEO=View summary | Ops=Limited | AI_OP=Full | Admin=Full
-    case AI_LOGS_FULL    = 'ai_logs.full';    // AI Operator, Admin
-    case AI_LOGS_VIEW    = 'ai_logs.view';    // CEO(summary), Ops(limited)
-
-    // ══ AI COPILOT ═════════════════════════════════════════════════
-    // CEO=Use+ViewUsage | Sales=Use | Ops=Use | HR=Use | Marketing=Use | AI_OP=Use+Config | Admin=Use+Config
-    case AI_COPILOT_USE        = 'ai_copilot.use';        // Sử dụng AI task execution
-    case AI_COPILOT_CONFIG     = 'ai_copilot.config';     // Quản lý agents + prompts
-    case AI_COPILOT_VIEW_USAGE = 'ai_copilot.view_usage'; // Xem usage stats / logs
 
     // ══ USERS ══════════════════════════════════════════════════════
     // CEO=View | HR=Limited | Admin=Full
@@ -96,7 +67,6 @@ enum PermissionEnum: string
     case REPORTS_OPS       = 'reports.ops';       // Ops
     case REPORTS_MARKETING = 'reports.marketing'; // Marketing
     case REPORTS_HR        = 'reports.hr';        // HR
-    case REPORTS_AI_USAGE  = 'reports.ai_usage';  // AI Operator
     case REPORTS_SHARED    = 'reports.shared';    // Viewer
 
     // ══ ASSESSMENT (Chấm điểm khảo sát) ═══════════════════════════
@@ -105,29 +75,6 @@ enum PermissionEnum: string
     case ASSESSMENT_CONFIG    = 'assessment.config';    // AI_OP, Admin — wizard cấu hình
     case ASSESSMENT_RESULTS   = 'assessment.results';   // CEO, Ops, AI_OP — xem kết quả
     case ASSESSMENT_REPROCESS = 'assessment.reprocess'; // AI_OP, Admin — force recalculate
-
-    // ══ JOB POSTING ════════════════════════════════════════════════
-    // CEO=Full | HR=Full | Ops=View | Admin=Config | Viewer=No
-    case JOB_POSTING_VIEW    = 'job_posting.view';    // CEO, HR, Ops
-    case JOB_POSTING_CREATE  = 'job_posting.create';  // CEO, HR
-    case JOB_POSTING_EDIT    = 'job_posting.edit';    // CEO, HR
-    case JOB_POSTING_DELETE  = 'job_posting.delete';  // CEO only
-    case JOB_POSTING_PUBLISH = 'job_posting.publish'; // CEO, HR
-    case JOB_POSTING_MANAGE  = 'job_posting.manage';  // System Admin
-
-    // ══ RECRUITMENT (ATS) ══════════════════════════════════════════
-    // HR_Admin=Full | Recruiter=Process | Hiring_Manager=View own | Interviewer=View+Eval
-    case RECRUITMENT_VIEW    = 'recruitment.view';    // All HR roles, Hiring Manager, Interviewer
-    case RECRUITMENT_CREATE  = 'recruitment.create';  // HR Admin, Recruiter
-    case RECRUITMENT_EDIT    = 'recruitment.edit';    // HR Admin, Recruiter
-    case RECRUITMENT_MANAGE  = 'recruitment.manage';  // HR Admin — config pipeline, delete
-
-    // ══ MARKETPLACE CENTER ═════════════════════════════════════════
-    // CEO=View | HR=Full | Marketing=View | Admin=Manage (approve orgs, global)
-    case MARKETPLACE_VIEW   = 'marketplace.view';   // CEO, HR, Marketing — xem listings của org
-    case MARKETPLACE_CREATE = 'marketplace.create'; // HR — tạo listing mới
-    case MARKETPLACE_EDIT   = 'marketplace.edit';   // HR — sửa/đóng listing
-    case MARKETPLACE_MANAGE = 'marketplace.manage'; // System Admin — duyệt org, xem tất cả
 
     // ══ SUBSCRIPTION ═══════════════════════════════════════════════
     case SUBSCRIPTION_VIEW    = 'subscription.view';

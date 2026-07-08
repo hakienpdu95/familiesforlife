@@ -8,8 +8,6 @@ use App\Shared\Tenancy\TenantContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Modules\Branch\Models\Branch;
-use Modules\Department\Models\Department;
 use Modules\Employee\Actions\Backend\DestroyEmployeeAction;
 use Modules\Employee\Actions\Backend\StoreEmployeeAction;
 use Modules\Employee\Actions\Backend\UpdateEmployeeAction;
@@ -18,7 +16,6 @@ use Modules\Employee\Data\Requests\UpdateEmployeeData;
 use Modules\Employee\Enums\EmployeeStatus;
 use Modules\Employee\Enums\EmploymentType;
 use Modules\Employee\Models\Employee;
-use Modules\JobTitle\Models\JobTitle;
 
 class EmployeeController extends Controller
 {
@@ -79,50 +76,16 @@ class EmployeeController extends Controller
             ->map(fn ($t) => ['value' => $t->value, 'text' => $t->label()])
             ->all();
 
-        $branches = Branch::withoutTenant()
-            ->where('organization_id', $orgId)
-            ->where('status', 'active')
-            ->orderBy('name')
-            ->get(['id', 'name', 'code'])
-            ->map(fn ($b) => ['value' => $b->id, 'text' => $b->name . ' (' . $b->code . ')'])
-            ->all();
-
-        $departments = Department::withoutTenant()
-            ->where('organization_id', $orgId)
-            ->where('status', 'active')
-            ->orderBy('name')
-            ->get(['id', 'name', 'code'])
-            ->map(fn ($d) => ['value' => $d->id, 'text' => $d->name . ' (' . $d->code . ')'])
-            ->all();
-
         return view('employee::index', compact(
             'totalAll', 'totalActive', 'totalProbation', 'totalOnLeave', 'totalInactive', 'totalContractor',
             'contractAlerts', 'contractAlerts30', 'contractAlerts90',
-            'statuses', 'employmentTypes', 'branches', 'departments'
+            'statuses', 'employmentTypes'
         ));
     }
 
     public function create()
     {
         $orgId = TenantContext::getOrganizationId();
-
-        $branches = Branch::withoutTenant()
-            ->where('organization_id', $orgId)
-            ->where('status', 'active')
-            ->orderBy('name')
-            ->get(['id', 'name', 'code']);
-
-        $departments = Department::withoutTenant()
-            ->where('organization_id', $orgId)
-            ->where('status', 'active')
-            ->orderBy('name')
-            ->get(['id', 'name', 'code']);
-
-        $jobTitles = JobTitle::withoutTenant()
-            ->where('organization_id', $orgId)
-            ->where('is_active', true)
-            ->orderBy('level')
-            ->get(['id', 'name', 'category', 'level']);
 
         $managers = Employee::withoutTenant()
             ->where('organization_id', $orgId)
@@ -141,7 +104,7 @@ class EmployeeController extends Controller
         [$organizations, $defaultOrgId, $orgLocked] = $this->_resolveOrganizations();
 
         return view('employee::create', compact(
-            'branches', 'departments', 'jobTitles', 'managers', 'statuses', 'employmentTypes', 'organizations', 'defaultOrgId', 'orgLocked'
+            'managers', 'statuses', 'employmentTypes', 'organizations', 'defaultOrgId', 'orgLocked'
         ));
     }
 
@@ -163,8 +126,8 @@ class EmployeeController extends Controller
     public function show(Employee $employee)
     {
         $employee->load([
-            'branch', 'department', 'jobTitle', 'manager',
-            'employeeDepartments.department',
+            'manager',
+            'employeeDepartments',
             'history.changedBy',
             'createdBy', 'updatedBy',
         ]);
@@ -175,24 +138,6 @@ class EmployeeController extends Controller
     public function edit(Employee $employee)
     {
         $orgId = TenantContext::getOrganizationId();
-
-        $branches = Branch::withoutTenant()
-            ->where('organization_id', $orgId)
-            ->where('status', 'active')
-            ->orderBy('name')
-            ->get(['id', 'name', 'code']);
-
-        $departments = Department::withoutTenant()
-            ->where('organization_id', $orgId)
-            ->where('status', 'active')
-            ->orderBy('name')
-            ->get(['id', 'name', 'code']);
-
-        $jobTitles = JobTitle::withoutTenant()
-            ->where('organization_id', $orgId)
-            ->where('is_active', true)
-            ->orderBy('level')
-            ->get(['id', 'name', 'category', 'level']);
 
         $managers = Employee::withoutTenant()
             ->where('organization_id', $orgId)
@@ -209,12 +154,10 @@ class EmployeeController extends Controller
             ->map(fn ($t) => ['value' => $t->value, 'text' => $t->label()])
             ->all();
 
-        $employee->load(['branch', 'department', 'jobTitle']);
-
         [$organizations, , $orgLocked] = $this->_resolveOrganizations();
 
         return view('employee::edit', compact(
-            'employee', 'branches', 'departments', 'jobTitles', 'managers', 'statuses', 'employmentTypes', 'organizations', 'orgLocked'
+            'employee', 'managers', 'statuses', 'employmentTypes', 'organizations', 'orgLocked'
         ));
     }
 

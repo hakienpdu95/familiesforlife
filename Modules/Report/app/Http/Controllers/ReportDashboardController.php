@@ -21,6 +21,6 @@ class ReportDashboardController extends Controller
             abort(403, 'Bạn không có quyền xem báo cáo.');
         }
 
-        return view('report::index', compact('canHr', 'canSales', 'canOps'));
+        return view('report::index', compact('canHr', 'canSales'));
     }
 }

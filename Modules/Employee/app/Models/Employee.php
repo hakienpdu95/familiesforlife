@@ -97,21 +97,6 @@ class Employee extends TenantAwareModel implements HasMedia
         return $this->belongsTo(User::class);
     }
 
-    public function branch(): BelongsTo
-    {
-        return $this->belongsTo(\Modules\Branch\Models\Branch::class);
-    }
-
-    public function department(): BelongsTo
-    {
-        return $this->belongsTo(\Modules\Department\Models\Department::class);
-    }
-
-    public function jobTitle(): BelongsTo
-    {
-        return $this->belongsTo(\Modules\JobTitle\Models\JobTitle::class)->withoutGlobalScopes();
-    }
-
     public function manager(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'manager_id');

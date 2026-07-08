@@ -200,8 +200,6 @@ document.addEventListener('alpine:init', () => {
             apiUrl          = '',
             statuses        = [],
             employmentTypes = [],
-            branches        = [],
-            departments     = [],
             canDelete       = false,
         } = serverData;
 
@@ -210,15 +208,12 @@ document.addEventListener('alpine:init', () => {
         let tableInst      = null;
         let statusTsInst   = null;
         let typeTsInst     = null;
-        let branchTsInst   = null;
-        let deptTsInst     = null;
         let dateFpInst     = null;
         let settingPreset  = false;
 
         return {
             filters: {
                 search: '', status: '', employment_type: '',
-                branch_id: '', department_id: '',
                 date_from: '', date_to: '',
             },
             activeDatePreset: '',
@@ -232,7 +227,7 @@ document.addEventListener('alpine:init', () => {
 
             get hasFilters() {
                 const f = this.filters;
-                return !!(f.search || f.status || f.employment_type || f.branch_id || f.department_id || f.date_from);
+                return !!(f.search || f.status || f.employment_type || f.date_from);
             },
 
             get activeChips() {
@@ -245,14 +240,6 @@ document.addEventListener('alpine:init', () => {
                 if (f.employment_type) {
                     const t = employmentTypes.find(x => x.value === f.employment_type);
                     chips.push({ key: 'employment_type', label: t ? t.text : f.employment_type });
-                }
-                if (f.branch_id) {
-                    const b = branches.find(x => String(x.value) === String(f.branch_id));
-                    chips.push({ key: 'branch', label: 'CN: ' + (b ? b.text : f.branch_id) });
-                }
-                if (f.department_id) {
-                    const d = departments.find(x => String(x.value) === String(f.department_id));
-                    chips.push({ key: 'department', label: 'PB: ' + (d ? d.text : f.department_id) });
                 }
                 if (f.date_from && f.date_to)
                     chips.push({ key: 'date', label: empDisplayDate(f.date_from) + ' — ' + empDisplayDate(f.date_to) });
@@ -277,8 +264,6 @@ document.addEventListener('alpine:init', () => {
                         if (f.search)          p.search          = f.search;
                         if (f.status)          p.status          = f.status;
                         if (f.employment_type) p.employment_type = f.employment_type;
-                        if (f.branch_id)       p.branch_id       = f.branch_id;
-                        if (f.department_id)   p.department_id   = f.department_id;
                         if (f.date_from)       p.date_from       = f.date_from;
                         if (f.date_to)         p.date_to         = f.date_to;
                         return p;
@@ -349,44 +334,6 @@ document.addEventListener('alpine:init', () => {
                     },
                 });
 
-                // Branch TomSelect
-                branchTsInst = new window.TomSelect('#filter-branch', {
-                    dropdownParent: 'body',
-                    placeholder:    'Tất cả chi nhánh...',
-                    maxOptions:     null,
-                    searchField:    ['text'],
-                    plugins:        ['clear_button'],
-                    options:        branches,
-                    valueField:     'value',
-                    labelField:     'text',
-                    items:          self.filters.branch_id ? [self.filters.branch_id] : [],
-                    onChange(val) {
-                        self.filters.branch_id = val || '';
-                        self.saveState();
-                        self.refresh();
-                    },
-                    render: { no_results: () => '<div class="no-results p-3 text-sm opacity-50">Không tìm thấy</div>' },
-                });
-
-                // Department TomSelect
-                deptTsInst = new window.TomSelect('#filter-department', {
-                    dropdownParent: 'body',
-                    placeholder:    'Tất cả phòng ban...',
-                    maxOptions:     null,
-                    searchField:    ['text'],
-                    plugins:        ['clear_button'],
-                    options:        departments,
-                    valueField:     'value',
-                    labelField:     'text',
-                    items:          self.filters.department_id ? [self.filters.department_id] : [],
-                    onChange(val) {
-                        self.filters.department_id = val || '';
-                        self.saveState();
-                        self.refresh();
-                    },
-                    render: { no_results: () => '<div class="no-results p-3 text-sm opacity-50">Không tìm thấy</div>' },
-                });
-
                 // Flatpickr date range
                 dateFpInst = window.initDateRangePicker('#filter-date', {
                     disableMobile: true,
@@ -416,8 +363,6 @@ document.addEventListener('alpine:init', () => {
                 if (p.has('q'))    this.filters.search          = p.get('q');
                 if (p.has('st'))   this.filters.status          = p.get('st');
                 if (p.has('typ'))  this.filters.employment_type = p.get('typ');
-                if (p.has('br'))   this.filters.branch_id       = p.get('br');
-                if (p.has('dp'))   this.filters.department_id   = p.get('dp');
                 if (p.has('from')) this.filters.date_from       = p.get('from');
                 if (p.has('to'))   this.filters.date_to         = p.get('to');
                 if (p.has('dpre')) this.activeDatePreset        = p.get('dpre');
@@ -428,8 +373,6 @@ document.addEventListener('alpine:init', () => {
                 if (f.search)          p.set('q',    f.search);
                 if (f.status)          p.set('st',   f.status);
                 if (f.employment_type) p.set('typ',  f.employment_type);
-                if (f.branch_id)       p.set('br',   f.branch_id);
-                if (f.department_id)   p.set('dp',   f.department_id);
                 if (f.date_from)       p.set('from', f.date_from);
                 if (f.date_to)         p.set('to',   f.date_to);
                 if (this.activeDatePreset) p.set('dpre', this.activeDatePreset);
@@ -468,20 +411,16 @@ document.addEventListener('alpine:init', () => {
                 if (key === 'search')          this.filters.search = '';
                 if (key === 'status')        { this.filters.status = '';          statusTsInst?.clear(true); }
                 if (key === 'employment_type') { this.filters.employment_type = ''; typeTsInst?.clear(true); }
-                if (key === 'branch')        { this.filters.branch_id = '';       branchTsInst?.clear(true); }
-                if (key === 'department')    { this.filters.department_id = '';   deptTsInst?.clear(true); }
                 if (key === 'date')          { this.clearDate(); return; }
                 this.saveState();
                 this.refresh();
             },
 
             reset() {
-                this.filters = { search: '', status: '', employment_type: '', branch_id: '', department_id: '', date_from: '', date_to: '' };
+                this.filters = { search: '', status: '', employment_type: '', date_from: '', date_to: '' };
                 this.activeDatePreset = '';
                 statusTsInst?.clear(true);
                 typeTsInst?.clear(true);
-                branchTsInst?.clear(true);
-                deptTsInst?.clear(true);
                 dateFpInst?.clear(false);
                 history.replaceState(null, '', location.pathname);
                 this.refresh();

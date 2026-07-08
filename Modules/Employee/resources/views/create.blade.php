@@ -6,7 +6,7 @@
 <div x-data="{
     tab: 'basic',
     tabFields: {
-        basic:    ['organization_id', 'full_name', 'employee_code', 'email', 'branch_id', 'department_id', 'job_title_id', 'manager_id', 'employment_type'],
+        basic:    ['organization_id', 'full_name', 'employee_code', 'email', 'manager_id', 'employment_type'],
         personal: ['phone', 'gender', 'date_of_birth', 'national_id', 'national_id_issued', 'tax_code', 'locale', 'personal_email', 'work_location'],
         contract: ['hired_at', 'probation_end_date', 'contract_start', 'contract_end', 'salary_base'],
         contact:  ['address', 'emergency_contact_name', 'emergency_contact_phone', 'bank_account', 'bank_name', 'notes'],
@@ -173,76 +173,6 @@
                             @error('email')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                         </div>
 
-                        <div class="form-control">
-                            <label class="label py-0 pb-1.5">
-                                <span class="label-text font-medium">Chi nhánh <span class="text-error">*</span></span>
-                            </label>
-                            <select id="ts-branch_id" name="branch_id"
-                                    data-req="Vui lòng chọn chi nhánh"
-                                    class="select select-bordered select-sm w-full ts-init @error('branch_id') select-error @enderror"
-                                    data-ts-placeholder="— Chọn chi nhánh —"
-                                    @if(!$orgLocked)
-                                        data-org-api="{{ route('api.branches.options') }}"
-                                        data-selected-value="{{ old('branch_id') }}"
-                                    @endif>
-                                <option value="">— Chọn chi nhánh —</option>
-                                @if($orgLocked)
-                                    @foreach($branches as $b)
-                                    <option value="{{ $b->id }}" {{ old('branch_id') == $b->id ? 'selected' : '' }}>
-                                        {{ $b->name }} ({{ $b->code }})
-                                    </option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            @error('branch_id')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
-                        </div>
-
-                        <div class="form-control">
-                            <label class="label py-0 pb-1.5">
-                                <span class="label-text font-medium">Phòng ban <span class="text-error">*</span></span>
-                            </label>
-                            <select id="ts-department_id" name="department_id"
-                                    data-req="Vui lòng chọn phòng ban"
-                                    class="select select-bordered select-sm w-full ts-init @error('department_id') select-error @enderror"
-                                    data-ts-placeholder="— Chọn phòng ban —"
-                                    @if(!$orgLocked)
-                                        data-org-api="{{ route('api.departments.options') }}"
-                                        data-selected-value="{{ old('department_id') }}"
-                                    @endif>
-                                <option value="">— Chọn phòng ban —</option>
-                                @if($orgLocked)
-                                    @foreach($departments as $d)
-                                    <option value="{{ $d->id }}" {{ old('department_id') == $d->id ? 'selected' : '' }}>
-                                        {{ $d->name }} ({{ $d->code }})
-                                    </option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            @error('department_id')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
-                        </div>
-
-                        <div class="form-control">
-                            <label class="label py-0 pb-1.5">
-                                <span class="label-text font-medium">Chức danh</span>
-                            </label>
-                            <select id="ts-job_title_id" name="job_title_id"
-                                    class="select select-bordered select-sm w-full ts-init @error('job_title_id') select-error @enderror"
-                                    data-ts-placeholder="— Chưa xác định —"
-                                    @if(!$orgLocked)
-                                        data-org-api="{{ route('api.jobtitle.options') }}"
-                                        data-selected-value="{{ old('job_title_id') }}"
-                                    @endif>
-                                <option value="">— Chưa xác định —</option>
-                                @if($orgLocked)
-                                    @foreach($jobTitles as $jt)
-                                    <option value="{{ $jt->id }}" {{ old('job_title_id') == $jt->id ? 'selected' : '' }}>
-                                        {{ $jt->name }} (Lv.{{ $jt->level }})
-                                    </option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            @error('job_title_id')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
-                        </div>
 
                         <div class="form-control">
                             <label class="label py-0 pb-1.5">

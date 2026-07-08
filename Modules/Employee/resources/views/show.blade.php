@@ -77,21 +77,15 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
                     <div>
                         <p class="text-xs text-base-content/50 mb-0.5">Chi nhánh</p>
-                        <p class="font-medium">{{ $employee->branch?->name ?? '—' }}</p>
-                        @if($employee->branch?->code)
-                        <p class="text-xs font-mono text-base-content/40">{{ $employee->branch->code }}</p>
-                        @endif
+                        <p class="font-medium">{{ $employee->snap_branch_name ?? '—' }}</p>
                     </div>
                     <div>
                         <p class="text-xs text-base-content/50 mb-0.5">Phòng ban</p>
-                        <p class="font-medium">{{ $employee->department?->name ?? '—' }}</p>
-                        @if($employee->department?->code)
-                        <p class="text-xs font-mono text-base-content/40">{{ $employee->department->code }}</p>
-                        @endif
+                        <p class="font-medium">{{ $employee->snap_dept_name ?? '—' }}</p>
                     </div>
                     <div>
                         <p class="text-xs text-base-content/50 mb-0.5">Chức danh</p>
-                        <p class="font-medium">{{ $employee->jobTitle?->name ?? '—' }}</p>
+                        <p class="font-medium">{{ $employee->snap_job_title ?? '—' }}</p>
                         @if($employee->snap_job_level)
                         <p class="text-xs text-base-content/40">Level {{ $employee->snap_job_level }}</p>
                         @endif
@@ -372,12 +366,17 @@
 
         {{-- Phòng ban kiêm nhiệm --}}
         @if($employee->employeeDepartments->count() > 1)
+        @php
+            $deptNames = \Illuminate\Support\Facades\DB::table('departments')
+                ->whereIn('id', $employee->employeeDepartments->pluck('department_id')->filter())
+                ->pluck('name', 'id');
+        @endphp
         <div class="card bg-base-100 shadow-sm border border-base-200">
             <div class="card-body gap-2">
                 <h3 class="font-semibold text-sm">Phòng ban kiêm nhiệm</h3>
                 @foreach($employee->employeeDepartments->where('left_at', null) as $ed)
                 <div class="flex items-center justify-between py-1">
-                    <span class="text-sm">{{ $ed->department?->name }}</span>
+                    <span class="text-sm">{{ $deptNames[$ed->department_id] ?? '—' }}</span>
                     @if($ed->is_primary)
                     <span class="badge badge-primary badge-xs">Chính</span>
                     @else

@@ -74,17 +74,7 @@ class RolePermissionSeeder extends Seeder
 
                 P::SALES_AI_VIEW->value,
 
-                P::TASKS_VIEW_ALL->value,
-                P::TASKS_CREATE->value,
-                P::TASKS_EDIT->value,
-                P::TASKS_ASSIGN->value,
-                P::TASKS_CLOSE->value,
-
                 P::WORKFLOW_MONITOR->value,
-
-                P::PROMPT_VIEW->value,
-
-                P::AI_LOGS_VIEW->value,
 
                 P::USERS_VIEW->value,
 
@@ -95,19 +85,6 @@ class RolePermissionSeeder extends Seeder
                 // Assessment: view + results
                 P::ASSESSMENT_VIEW->value,
                 P::ASSESSMENT_RESULTS->value,
-
-                // Job Posting: full
-                P::JOB_POSTING_VIEW->value,
-                P::JOB_POSTING_CREATE->value,
-                P::JOB_POSTING_EDIT->value,
-                P::JOB_POSTING_DELETE->value,
-                P::JOB_POSTING_PUBLISH->value,
-
-                // Recruitment: view
-                P::RECRUITMENT_VIEW->value,
-
-                // Marketplace: view
-                P::MARKETPLACE_VIEW->value,
             ],
 
             // ─────────────────────────────────────────────────────────
@@ -123,9 +100,6 @@ class RolePermissionSeeder extends Seeder
                 P::CUSTOMERS_EDIT->value,
 
                 P::SALES_AI_USE->value,
-
-                P::TASKS_VIEW_ASSIGNED->value,
-                P::TASKS_CREATE->value,
 
                 P::WORKFLOW_VIEW_LIMITED->value,
 
@@ -148,16 +122,8 @@ class RolePermissionSeeder extends Seeder
                 P::CUSTOMERS_EDIT->value,
                 P::CUSTOMERS_EXPORT->value,
 
-                P::TASKS_VIEW_ALL->value,
-                P::TASKS_CREATE->value,
-                P::TASKS_EDIT->value,
-                P::TASKS_ASSIGN->value,
-                P::TASKS_CLOSE->value,
-
                 P::WORKFLOW_MONITOR->value,
                 P::WORKFLOW_EDIT->value,
-
-                P::AI_LOGS_VIEW->value,
 
                 P::REPORTS_OPS->value,
 
@@ -176,46 +142,20 @@ class RolePermissionSeeder extends Seeder
 
                 P::SALES_AI_VIEW->value,
 
-                P::TASKS_VIEW_LIMITED->value,
-                P::TASKS_CREATE->value,
-
                 P::WORKFLOW_VIEW_LIMITED->value,
 
                 P::REPORTS_MARKETING->value,
-
-                // Marketplace: view (monitor public listings)
-                P::MARKETPLACE_VIEW->value,
             ],
 
             // ─────────────────────────────────────────────────────────
             // HR / Admin Staff — Onboarding, HR SOP, HR tasks
             // ─────────────────────────────────────────────────────────
             RoleEnum::HR->value => [
-                P::TASKS_VIEW_DEPT->value,
-                P::TASKS_CREATE->value,
-
                 P::WORKFLOW_VIEW_LIMITED->value,
 
                 P::USERS_HR->value,
 
                 P::REPORTS_HR->value,
-
-                // Job Posting: full
-                P::JOB_POSTING_VIEW->value,
-                P::JOB_POSTING_CREATE->value,
-                P::JOB_POSTING_EDIT->value,
-                P::JOB_POSTING_PUBLISH->value,
-
-                // Recruitment: full
-                P::RECRUITMENT_VIEW->value,
-                P::RECRUITMENT_CREATE->value,
-                P::RECRUITMENT_EDIT->value,
-                P::RECRUITMENT_MANAGE->value,
-
-                // Marketplace: full (manage listings + review applicants)
-                P::MARKETPLACE_VIEW->value,
-                P::MARKETPLACE_CREATE->value,
-                P::MARKETPLACE_EDIT->value,
             ],
 
             // ─────────────────────────────────────────────────────────
@@ -228,16 +168,8 @@ class RolePermissionSeeder extends Seeder
 
                 P::CUSTOMERS_VIEW_ALL->value,
 
-                P::TASKS_VIEW_LIMITED->value,
-
                 P::WORKFLOW_MONITOR->value,
                 P::WORKFLOW_AI_CONFIG->value,
-
-                P::PROMPT_FULL->value,
-
-                P::AI_LOGS_FULL->value,
-
-                P::REPORTS_AI_USAGE->value,
 
                 // Assessment: full (config + reprocess)
                 P::ASSESSMENT_VIEW->value,
@@ -264,15 +196,9 @@ class RolePermissionSeeder extends Seeder
 
                 P::SALES_AI_CONFIG->value,
 
-                P::TASKS_CONFIG->value,
-
                 P::WORKFLOW_MONITOR->value,
                 P::WORKFLOW_EDIT->value,
                 P::WORKFLOW_FULL_CONFIG->value,
-
-                P::PROMPT_ADMIN_CONFIG->value,
-
-                P::AI_LOGS_FULL->value,
 
                 P::USERS_MANAGE->value,
                 P::ROLES_MANAGE->value,
@@ -289,26 +215,6 @@ class RolePermissionSeeder extends Seeder
                 P::ASSESSMENT_RESULTS->value,
                 P::ASSESSMENT_REPROCESS->value,
 
-                // Job Posting: full manage
-                P::JOB_POSTING_VIEW->value,
-                P::JOB_POSTING_CREATE->value,
-                P::JOB_POSTING_EDIT->value,
-                P::JOB_POSTING_DELETE->value,
-                P::JOB_POSTING_PUBLISH->value,
-                P::JOB_POSTING_MANAGE->value,
-
-                // Recruitment: full manage
-                P::RECRUITMENT_VIEW->value,
-                P::RECRUITMENT_CREATE->value,
-                P::RECRUITMENT_EDIT->value,
-                P::RECRUITMENT_MANAGE->value,
-
-                // Marketplace: full manage (approve orgs, global view)
-                P::MARKETPLACE_VIEW->value,
-                P::MARKETPLACE_CREATE->value,
-                P::MARKETPLACE_EDIT->value,
-                P::MARKETPLACE_MANAGE->value,
-
                 // Vertical templates: full manage (dashboard/vertical-templates — thư viện mẫu)
                 P::VERTICAL_TEMPLATES_MANAGE->value,
             ],
@@ -318,7 +224,6 @@ class RolePermissionSeeder extends Seeder
             // ─────────────────────────────────────────────────────────
             RoleEnum::VIEWER->value => [
                 P::CEO_DASH_VIEW->value,
-                P::TASKS_VIEW_LIMITED->value,
                 P::REPORTS_SHARED->value,
             ],
         ];

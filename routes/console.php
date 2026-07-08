@@ -25,40 +25,10 @@ Schedule::command('kc:expire-items')
     ->dailyAt('01:00')
     ->onOneServer();
 
-// JP: auto-close expired job posts
-Schedule::command('jp:expire-posts')
-    ->name('jp:expire-posts')
-    ->dailyAt('00:30')
-    ->onOneServer();
-
-// JP: notify owners of job posts expiring in 7/3/1 days
-Schedule::command('jp:expiry-warning')
-    ->name('jp:expiry-warning')
-    ->dailyAt('08:00')
-    ->onOneServer();
-
 // Media: cleanup Jodit orphan images older than 24h — chạy mỗi 4h
 Schedule::command('media:cleanup-orphans')
     ->name('media:cleanup-orphans')
     ->everyFourHours()
-    ->onOneServer();
-
-// Task: nhắc assignee về task đến hạn ngày mai (D-1)
-Schedule::command('notifications:task-due-soon')
-    ->name('notifications:task-due-soon')
-    ->dailyAt('08:00')
-    ->onOneServer();
-
-// Task: thông báo task quá hạn (vừa qua deadline hôm qua)
-Schedule::command('notifications:task-overdue')
-    ->name('notifications:task-overdue')
-    ->dailyAt('08:30')
-    ->onOneServer();
-
-// KPI: thông báo kpi_missed cho goals kết thúc ngày hôm qua mà chưa đạt
-Schedule::command('notifications:kpi-missed')
-    ->name('notifications:kpi-missed')
-    ->dailyAt('09:00')
     ->onOneServer();
 
 // Social Auth: xóa token đã hết hạn > 30 ngày (giảm dữ liệu nhạy cảm lưu trữ)
