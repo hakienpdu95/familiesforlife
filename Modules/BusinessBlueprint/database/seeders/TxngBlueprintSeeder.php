@@ -36,9 +36,6 @@ use Modules\BusinessBlueprint\Models\Blueprint;
 use Modules\BusinessSolution\Models\BusinessSolution;
 use Modules\KcCategory\Models\KcCategory;
 use Modules\KcItem\Models\KcItem;
-use Modules\Sop\Enums\SopStatus;
-use Modules\Sop\Enums\SopType;
-use Modules\Sop\Models\SopProcess;
 
 /**
  * Dựng Blueprint "BP-TXNG" đầy đủ 8 thành phần (Overview/Outcomes/Capabilities/
@@ -69,8 +66,7 @@ class TxngBlueprintSeeder extends Seeder
         $systemOrg   = Organization::where('slug', 'system')->firstOrFail();
         $systemUser  = User::where('email', 'admin@demo.test')->firstOrFail();
 
-        [$sopSurvey, $sopStandardize] = $this->seedSopResources($systemOrg, $systemUser);
-        $bm01Form                     = $this->seedFormResource($systemOrg, $systemUser);
+        $bm01Form = $this->seedFormResource($systemOrg, $systemUser);
 
         $blueprint = (new CreateBlueprintAction())->handle(BlueprintData::from([
             'business_solution_id' => $solution->id,
@@ -147,7 +143,7 @@ class TxngBlueprintSeeder extends Seeder
         ]));
 
         // ── Checklists (definition — không phải Task Runtime, §5.4) ──────
-        $clKhaoSat = (new UpsertChecklistAction())->handle(ChecklistData::from([
+        (new UpsertChecklistAction())->handle(ChecklistData::from([
             'phase_id' => $phKhaoSat->id, 'code' => 'CL-KS-01', 'name' => 'Khảo sát thực địa vùng trồng',
             'action_description' => 'Ghi nhận hiện trạng canh tác, diện tích, cây trồng chính.',
         ]));
@@ -182,14 +178,6 @@ class TxngBlueprintSeeder extends Seeder
         ]));
 
         // ── Resources — chỉ Reference, không copy (DP-08) ─────────────────
-        (new UpsertResourceLinkAction())->handle(ResourceLinkData::from([
-            'blueprint_version_id' => $version->id, 'checklist_id' => $clKhaoSat->id,
-            'resource_type' => 'sop', 'resource_id' => $sopSurvey->id, 'is_required' => true,
-        ]));
-        (new UpsertResourceLinkAction())->handle(ResourceLinkData::from([
-            'blueprint_version_id' => $version->id, 'checklist_id' => $clChuanHoa->id,
-            'resource_type' => 'sop', 'resource_id' => $sopStandardize->id, 'is_required' => true,
-        ]));
         (new UpsertResourceLinkAction())->handle(ResourceLinkData::from([
             'blueprint_version_id' => $version->id, 'checklist_id' => $clChuanHoa->id,
             'resource_type' => 'knowledge', 'resource_id' => $bm01Form->id, 'is_required' => true,
@@ -267,44 +255,6 @@ class TxngBlueprintSeeder extends Seeder
         ))->handle($version->fresh(), $systemUser->id);
 
         $this->command?->info('  ✓ Blueprint BP-TXNG v1.0.0 đã dựng đầy đủ & publish.');
-    }
-
-    /** @return array{0: SopProcess, 1: SopProcess} */
-    private function seedSopResources(Organization $systemOrg, User $systemUser): array
-    {
-        $survey = SopProcess::withoutTenant()->firstOrCreate(
-            ['organization_id' => $systemOrg->id, 'code' => 'SOP-KS-01'],
-            [
-                'title'          => 'Quy trình khảo sát thực địa vùng trồng',
-                'description'    => 'Hướng dẫn khảo sát hiện trạng canh tác, đo đạc ranh giới và ghi nhận GPS lô sản xuất.',
-                'type'           => SopType::Internal->value,
-                'status'         => SopStatus::Approved->value,
-                'version'        => 1,
-                'owner_id'       => $systemUser->id,
-                'approved_by'    => $systemUser->id,
-                'approved_at'    => now(),
-                'effective_date' => now()->toDateString(),
-                'created_by'     => $systemUser->id,
-            ]
-        );
-
-        $standardize = SopProcess::withoutTenant()->firstOrCreate(
-            ['organization_id' => $systemOrg->id, 'code' => 'SOP-CH-01'],
-            [
-                'title'          => 'Quy trình chuẩn hóa & số hóa hồ sơ vùng trồng',
-                'description'    => 'Hướng dẫn nhập liệu, chuẩn hóa hồ sơ khảo sát/thu thập theo biểu mẫu chuẩn trước khi AI kiểm tra.',
-                'type'           => SopType::Internal->value,
-                'status'         => SopStatus::Approved->value,
-                'version'        => 1,
-                'owner_id'       => $systemUser->id,
-                'approved_by'    => $systemUser->id,
-                'approved_at'    => now(),
-                'effective_date' => now()->toDateString(),
-                'created_by'     => $systemUser->id,
-            ]
-        );
-
-        return [$survey, $standardize];
     }
 
     private function seedFormResource(Organization $systemOrg, User $systemUser): KcItem

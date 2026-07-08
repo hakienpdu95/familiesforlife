@@ -34,9 +34,6 @@ return [
         P::TASKS_EDIT->value,
         P::TASKS_ASSIGN->value,
         P::TASKS_CLOSE->value,
-        // SOP: Approve/View — KHÔNG có create/edit
-        P::SOP_VIEW->value,
-        P::SOP_APPROVE->value,
         // Workflow: Monitor only — KHÔNG có edit
         P::WORKFLOW_MONITOR->value,
         // Prompt: View only
@@ -88,8 +85,6 @@ return [
         // Tasks: Assigned
         P::TASKS_VIEW_ASSIGNED->value,
         P::TASKS_CREATE->value,
-        // SOP: View related (dept liên quan)
-        P::SOP_VIEW_RELATED->value,
         // Workflow: Limited (visibility=public)
         P::WORKFLOW_VIEW_LIMITED->value,
         // Reports: Personal + Team
@@ -124,10 +119,6 @@ return [
         P::TASKS_EDIT->value,
         P::TASKS_ASSIGN->value,
         P::TASKS_CLOSE->value,
-        // SOP: Create/Edit
-        P::SOP_VIEW->value,
-        P::SOP_CREATE->value,
-        P::SOP_EDIT->value,
         // Workflow: Monitor/Edit
         P::WORKFLOW_MONITOR->value,
         P::WORKFLOW_EDIT->value,
@@ -162,8 +153,6 @@ return [
         P::SALES_AI_VIEW->value,
         // Tasks: Limited (visibility=public only)
         P::TASKS_VIEW_LIMITED->value,
-        // SOP: View related
-        P::SOP_VIEW_RELATED->value,
         // Workflow: Limited
         P::WORKFLOW_VIEW_LIMITED->value,
         // AI Copilot: Use
@@ -187,9 +176,6 @@ return [
         // Tasks: HR tasks (dept=hr only)
         P::TASKS_VIEW_DEPT->value,
         P::TASKS_CREATE->value,
-        // SOP: Create HR SOP (dept=hr only)
-        P::SOP_VIEW->value,
-        P::SOP_CREATE_HR->value,
         // Workflow: Limited
         P::WORKFLOW_VIEW_LIMITED->value,
         // AI Copilot: Use
@@ -229,8 +215,6 @@ return [
         P::SALES_AI_CONFIG_PROMPT->value,
         // Tasks: Limited
         P::TASKS_VIEW_LIMITED->value,
-        // SOP: AI config (cấu hình AI flow trong SOP)
-        P::SOP_AI_CONFIG->value,
         // Workflow: Monitor + AI config
         P::WORKFLOW_MONITOR->value,
         P::WORKFLOW_AI_CONFIG->value,
@@ -273,7 +257,6 @@ return [
         P::CUSTOMERS_VIEW_ALL->value,
         P::SALES_AI_CONFIG->value,
         P::TASKS_CONFIG->value,
-        P::SOP_CONFIG->value,
         P::WORKFLOW_MONITOR->value,
         P::WORKFLOW_EDIT->value,
         P::WORKFLOW_FULL_CONFIG->value,
@@ -329,8 +312,6 @@ return [
         P::CEO_DASH_VIEW->value,
         // Tasks: View limited (public only)
         P::TASKS_VIEW_LIMITED->value,
-        // SOP: View limited
-        P::SOP_VIEW->value,
         // Reports: Shared only
         P::REPORTS_SHARED->value,
         // Product: View only

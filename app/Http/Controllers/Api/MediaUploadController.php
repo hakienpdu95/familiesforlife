@@ -56,7 +56,6 @@ class MediaUploadController extends Controller
         'organization'            => \Modules\Organization\Models\Organization::class,
         'mkt_applicant'           => \Modules\Marketplace\Models\MktApplicant::class,
         'mkt_applicant_portfolio' => \Modules\Marketplace\Models\MktApplicantPortfolio::class,
-        'sop_step'                => \Modules\Sop\Models\SopStep::class,
         'kc_item'                 => \Modules\KcItem\Models\KcItem::class,
         'rc_candidate'            => \Modules\Recruitment\Models\RcCandidate::class,
     ];

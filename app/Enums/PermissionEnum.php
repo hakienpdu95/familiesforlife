@@ -53,18 +53,6 @@ enum PermissionEnum: string
     case TASKS_CLOSE         = 'tasks.close';         // CEO, Ops
     case TASKS_CONFIG        = 'tasks.config';        // System Admin
 
-    // ══ SOP ════════════════════════════════════════════════════════
-    // CEO=Approve/View | Sales=View related | Ops=Create/Edit | Marketing=View related
-    // HR=Create HR SOP | AI_OP=AI config | Admin=Config | Viewer=View limited
-    case SOP_VIEW         = 'sop.view';         // CEO, Viewer (view limited)
-    case SOP_APPROVE      = 'sop.approve';      // CEO
-    case SOP_VIEW_RELATED = 'sop.view_related'; // Sales, Marketing (dept liên quan)
-    case SOP_CREATE       = 'sop.create';       // Ops
-    case SOP_EDIT         = 'sop.edit';         // Ops
-    case SOP_CREATE_HR    = 'sop.create_hr';    // HR (chỉ dept=hr)
-    case SOP_AI_CONFIG    = 'sop.ai_config';    // AI Operator (cấu hình AI trong SOP flow)
-    case SOP_CONFIG       = 'sop.config';       // System Admin
-
     // ══ WORKFLOW ═══════════════════════════════════════════════════
     // CEO=Monitor | Sales=Limited | Ops=Monitor/Edit | Marketing=Limited | HR=Limited
     // AI_OP=AI config | Admin=Full config

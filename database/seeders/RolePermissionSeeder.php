@@ -80,9 +80,6 @@ class RolePermissionSeeder extends Seeder
                 P::TASKS_ASSIGN->value,
                 P::TASKS_CLOSE->value,
 
-                P::SOP_VIEW->value,
-                P::SOP_APPROVE->value,
-
                 P::WORKFLOW_MONITOR->value,
 
                 P::PROMPT_VIEW->value,
@@ -130,8 +127,6 @@ class RolePermissionSeeder extends Seeder
                 P::TASKS_VIEW_ASSIGNED->value,
                 P::TASKS_CREATE->value,
 
-                P::SOP_VIEW_RELATED->value,
-
                 P::WORKFLOW_VIEW_LIMITED->value,
 
                 P::REPORTS_PERSONAL->value,
@@ -159,10 +154,6 @@ class RolePermissionSeeder extends Seeder
                 P::TASKS_ASSIGN->value,
                 P::TASKS_CLOSE->value,
 
-                P::SOP_VIEW->value,
-                P::SOP_CREATE->value,
-                P::SOP_EDIT->value,
-
                 P::WORKFLOW_MONITOR->value,
                 P::WORKFLOW_EDIT->value,
 
@@ -188,8 +179,6 @@ class RolePermissionSeeder extends Seeder
                 P::TASKS_VIEW_LIMITED->value,
                 P::TASKS_CREATE->value,
 
-                P::SOP_VIEW_RELATED->value,
-
                 P::WORKFLOW_VIEW_LIMITED->value,
 
                 P::REPORTS_MARKETING->value,
@@ -204,9 +193,6 @@ class RolePermissionSeeder extends Seeder
             RoleEnum::HR->value => [
                 P::TASKS_VIEW_DEPT->value,
                 P::TASKS_CREATE->value,
-
-                P::SOP_VIEW->value,
-                P::SOP_CREATE_HR->value,
 
                 P::WORKFLOW_VIEW_LIMITED->value,
 
@@ -244,9 +230,6 @@ class RolePermissionSeeder extends Seeder
 
                 P::TASKS_VIEW_LIMITED->value,
 
-                P::SOP_VIEW->value,
-                P::SOP_AI_CONFIG->value,
-
                 P::WORKFLOW_MONITOR->value,
                 P::WORKFLOW_AI_CONFIG->value,
 
@@ -282,8 +265,6 @@ class RolePermissionSeeder extends Seeder
                 P::SALES_AI_CONFIG->value,
 
                 P::TASKS_CONFIG->value,
-
-                P::SOP_CONFIG->value,
 
                 P::WORKFLOW_MONITOR->value,
                 P::WORKFLOW_EDIT->value,
@@ -338,7 +319,6 @@ class RolePermissionSeeder extends Seeder
             RoleEnum::VIEWER->value => [
                 P::CEO_DASH_VIEW->value,
                 P::TASKS_VIEW_LIMITED->value,
-                P::SOP_VIEW->value,
                 P::REPORTS_SHARED->value,
             ],
         ];

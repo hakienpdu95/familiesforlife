@@ -523,27 +523,6 @@
         </div>
         @endcan
 
-        @if(auth()->user()?->hasAnyPermission(['sop.view','sop.view_related','sop.create','sop.create_hr','sop.edit','sop.approve','sop.config']))
-        <p class="section-title" style="margin-top:16px;">Vận hành</p>
-        <div class="nav-group">
-
-            <details {{ request()->routeIs('backend.sop.*') ? 'open' : '' }}>
-                <summary class="nav-summary {{ request()->routeIs('backend.sop.*') ? 'active' : '' }}">
-                    <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/></svg>
-                    <span class="nav-label">Quy trình SOP</span>
-                    <svg class="nav-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m9 18 6-6-6-6"/></svg>
-                </summary>
-                <div class="sub-menu">
-                    <a href="{{ route('backend.sop.index') }}" class="sub-link {{ request()->routeIs('backend.sop.index') ? 'active' : '' }}">Danh sách SOP</a>
-                    @if(auth()->user()?->hasAnyPermission(['sop.create','sop.create_hr','sop.config']))
-                    <a href="{{ route('backend.sop.create') }}" class="sub-link {{ request()->routeIs('backend.sop.create') ? 'active' : '' }}">Tạo SOP mới</a>
-                    @endif
-                </div>
-            </details>
-
-        </div>
-        @endif
-
         <p class="section-title" style="margin-top:16px;">Tài khoản</p>
         <div class="nav-group">
 

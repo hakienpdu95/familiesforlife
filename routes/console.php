@@ -25,18 +25,6 @@ Schedule::command('kc:expire-items')
     ->dailyAt('01:00')
     ->onOneServer();
 
-// SOP: auto-archive SOPs past their expired_date
-Schedule::command('sop:archive-expired')
-    ->name('sop:archive-expired')
-    ->dailyAt('01:30')
-    ->onOneServer();
-
-// SOP: warn owners of SOPs expiring within 7 days (every Monday)
-Schedule::command('sop:expiry-warning')
-    ->name('sop:expiry-warning')
-    ->weeklyOn(1, '08:00')
-    ->onOneServer();
-
 // JP: auto-close expired job posts
 Schedule::command('jp:expire-posts')
     ->name('jp:expire-posts')
