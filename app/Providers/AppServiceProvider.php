@@ -15,8 +15,6 @@ use Illuminate\Support\Facades\RateLimiter;
 use App\View\Composers\SidebarComposer;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use App\Foundation\Vertical\VerticalTemplate;
-use App\Policies\VerticalTemplatePolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -44,11 +42,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(function (User $user, string $ability): ?bool {
             return $user->hasRole('super-admin') ? true : null;
         });
-
-        // VerticalTemplate: authorize phase/checklist builder (VerticalPhaseController /
-        // VerticalChecklistItemController) — dùng chung bởi Organization vertical config,
-        // không còn admin library CRUD nữa (đã xoá dashboard/vertical-templates)
-        Gate::policy(VerticalTemplate::class, VerticalTemplatePolicy::class);
 
         // Sidebar: load active verticals for current org
         View::composer('layouts.partials.sidebar', SidebarComposer::class);

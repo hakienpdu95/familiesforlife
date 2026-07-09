@@ -214,9 +214,6 @@ class RolePermissionSeeder extends Seeder
                 P::ASSESSMENT_CONFIG->value,
                 P::ASSESSMENT_RESULTS->value,
                 P::ASSESSMENT_REPROCESS->value,
-
-                // Vertical templates: full manage (dashboard/vertical-templates — thư viện mẫu)
-                P::VERTICAL_TEMPLATES_MANAGE->value,
             ],
 
             // ─────────────────────────────────────────────────────────

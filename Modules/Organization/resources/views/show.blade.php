@@ -282,21 +282,6 @@
                 </a>
 
                 @can('update', $organization)
-                <a href="{{ route('backend.organizations.verticals.index', $organization) }}"
-                   class="flex items-center justify-between gap-2 rounded-xl px-3 py-2.5 hover:bg-base-200/70 transition-colors group">
-                    <div class="flex items-center gap-2.5">
-                        <svg class="w-4 h-4 text-base-content/40 group-hover:text-primary transition-colors shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                        </svg>
-                        <span class="text-sm font-medium">Dịch vụ triển khai</span>
-                    </div>
-                    <svg class="w-3.5 h-3.5 text-base-content/30 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </a>
-                @endcan
-
-                @can('update', $organization)
                 <a href="{{ route('backend.organizations.edit', $organization) }}"
                    class="flex items-center justify-between gap-2 rounded-xl px-3 py-2.5 hover:bg-base-200/70 transition-colors group">
                     <div class="flex items-center gap-2.5">

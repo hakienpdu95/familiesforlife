@@ -2,7 +2,6 @@
 
 namespace Modules\BusinessBlueprint\Providers;
 
-use Modules\BusinessBlueprint\Console\Commands\MigrateVerticalTemplatesToBlueprintsCommand;
 use Nwidart\Modules\Support\ModuleServiceProvider;
 
 class BusinessBlueprintServiceProvider extends ModuleServiceProvider
@@ -14,15 +13,4 @@ class BusinessBlueprintServiceProvider extends ModuleServiceProvider
         EventServiceProvider::class,
         RouteServiceProvider::class,
     ];
-
-    public function boot(): void
-    {
-        parent::boot();
-
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-                MigrateVerticalTemplatesToBlueprintsCommand::class,
-            ]);
-        }
-    }
 }

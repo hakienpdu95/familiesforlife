@@ -246,39 +246,5 @@
         "late_offboard_gap_days///unsignedSmallInteger///__///_NULL///NULL///__///Số ngày gap giữa effective_left_at và offboarded_at — 0 nếu offboard đúng hạn",
         "__index///index///__///__///__///status|om_status_index///__",
         "__index///index///__///__///__///left_at|om_left_at_index///__"
-    ],
-    [
-        "vertical_templates///add///__///",
-        "data_collection_template_slug///string///100///_NULL///NULL///__///slug survey template thu thập dữ liệu thực địa — ví dụ: data_collection_v1",
-        "export_config///json///__///_NULL///NULL///__///Optional export config JSON (sheets, columns, source mappings) for future vertical-specific export formats",
-        "organization_id///unsignedBigInteger///__///_NULL///NULL///->constrained()->onDelete('cascade')///Hợp nhất thư viện + bản instance tổ chức — null = thư viện dùng chung, có giá trị = bản của tổ chức",
-        "source_template_id///unsignedBigInteger///__///_NULL///NULL///->constrained('vertical_templates')->onDelete('set null')///Bản mẫu gốc khi nhân bản — null nếu tự tạo từ đầu",
-        "status///string///20///NOT_NULL///'active'///__///Thay vai trò bảng organization_verticals (active|inactive)",
-        "activated_at///timestamp///__///_NULL///NULL///__///Thời điểm kích hoạt cho tổ chức",
-        "activated_by///unsignedBigInteger///__///_NULL///NULL///->constrained('users')->onDelete('set null')///Người kích hoạt",
-        "__index///unique///__///__///__///organization_id,code|uq_vertical_template_org_code///Composite unique thay cho unique global trên code — cho phép mỗi organization có 1 bản activate riêng với cùng code"
-    ],
-    [
-        "vertical_templates///drop///__///Dọn cột chết — chuyển phases/checklist sang bảng con vertical_phases/vertical_checklist_items",
-        "phases///json///__///_NULL///NULL///__///__",
-        "default_checklist///json///__///_NULL///NULL///__///__",
-        "default_activity_types///json///__///_NULL///NULL///__///__",
-        "default_legal_doc_types///json///__///_NULL///NULL///__///__",
-        "default_hierarchy///json///__///_NULL///NULL///__///__",
-        "export_adapter///string///200///_NULL///NULL///__///__",
-        "__index///unique///__///__///__///vertical_templates_code_unique///Xoá unique global trên code — đã thay bằng uq_vertical_template_org_code (composite theo organization_id)"
-    ],
-    [
-        "vertical_config_items///add///sort_order///Đổi khóa từ (organization_id, vertical_code) sang vertical_template_id",
-        "vertical_template_id///unsignedBigInteger///__///NOT_NULL///__///->constrained('vertical_templates')->onDelete('cascade')///FK -> vertical_templates — thay cho (organization_id, vertical_code)",
-        "__index///unique///__///__///__///vertical_template_id,config_group,code|uq_vertical_config_item_template///Unique theo template thay vì theo org+code cũ",
-        "__index///index///__///__///__///vertical_template_id,config_group,is_active|idx_vertical_config_lookup_template///Lookup theo template thay vì theo org+code cũ"
-    ],
-    [
-        "vertical_config_items///drop///__///Xóa organization_id, vertical_code — đã thay bằng vertical_template_id",
-        "__index///unique///__///__///__///uq_vertical_config_item///Composite key cũ chứa organization_id+vertical_code — phải xoá trước khi drop cột, nếu không MySQL báo lỗi 1072",
-        "__index///index///__///__///__///idx_vertical_config_lookup///Composite index cũ chứa organization_id+vertical_code — phải xoá trước khi drop cột",
-        "organization_id///unsignedBigInteger///__///NOT_NULL///__///->constrained()->onDelete('cascade')///__",
-        "vertical_code///string///50///NOT_NULL///__///__///__"
     ]
 ]

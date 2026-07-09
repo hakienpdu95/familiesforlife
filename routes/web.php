@@ -6,8 +6,6 @@ use App\Http\Controllers\Backend\Api\DashboardChartController;
 use App\Http\Controllers\Backend\DashboardController;
 use App\Http\Controllers\Backend\NotificationCenterController;
 use App\Http\Controllers\Backend\NotificationPreferenceController;
-use App\Http\Controllers\Backend\VerticalChecklistItemController;
-use App\Http\Controllers\Backend\VerticalPhaseController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect()->route('backend.dashboard'));
@@ -68,26 +66,5 @@ Route::middleware(['auth'])->prefix('dashboard')->name('backend.')->group(functi
         Route::post('/read-all',    [NotificationCenterController::class,    'markAllRead']) ->name('read-all');
         Route::delete('/{uuid}',    [NotificationCenterController::class,    'destroy'])     ->name('destroy');
     });
-
-    // ── Vertical template builder — phase/checklist API dùng chung bởi Organization
-    //    vertical config (organizations.verticals.config); không còn admin library CRUD
-    //    (đã xoá dashboard/vertical-templates index/create/edit) ─────────────────────
-    Route::prefix('vertical-templates/{vertical_template}/phases')
-        ->name('vertical-templates.phases.')
-        ->group(function () {
-            Route::post('/',        [VerticalPhaseController::class, 'store'])->name('store');
-            Route::put('/{phase}',  [VerticalPhaseController::class, 'update'])->name('update');
-            Route::delete('/{phase}', [VerticalPhaseController::class, 'destroy'])->name('destroy');
-            Route::patch('/reorder', [VerticalPhaseController::class, 'reorder'])->name('reorder');
-
-            Route::prefix('/{phase}/checklist-items')
-                ->name('checklist-items.')
-                ->group(function () {
-                    Route::post('/',       [VerticalChecklistItemController::class, 'store'])->name('store');
-                    Route::put('/{item}',  [VerticalChecklistItemController::class, 'update'])->name('update');
-                    Route::delete('/{item}', [VerticalChecklistItemController::class, 'destroy'])->name('destroy');
-                    Route::patch('/reorder', [VerticalChecklistItemController::class, 'reorder'])->name('reorder');
-                });
-        });
 
 });

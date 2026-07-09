@@ -87,12 +87,6 @@ enum PermissionEnum: string
     case AUDIT_VIEW         = 'audit.view';
     case SYSTEM_CONFIG      = 'system.config';
 
-    // ══ VERTICAL TEMPLATES ═════════════════════════════════════════
-    // Không còn admin UI (dashboard/vertical-templates đã xoá) — case này chỉ còn được
-    // VerticalTemplatePolicy tham chiếu cho nhánh library-owned (organization_id = null),
-    // nhánh org-owned dùng $user->can('update', $organization) là chính.
-    case VERTICAL_TEMPLATES_MANAGE = 'vertical_templates.manage';
-
     // ══ PRODUCT (Danh mục Sản phẩm & Dịch vụ — catalog dùng chung cho Post CTA Box) ═
     // Marketing/Sales=Soạn thảo | CEO/Ops=Full | System Admin=Full + quản lý danh mục | còn lại=View
     case PRODUCT_CATEGORY_MANAGE = 'product_category.manage';

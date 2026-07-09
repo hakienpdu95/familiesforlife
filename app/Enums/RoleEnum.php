@@ -49,7 +49,7 @@ enum RoleEnum: string
             self::MARKETING => ['crm','sales_ai','sop','reports'],
             self::HR     => ['sop','users','reports'],
             self::AI_OP  => ['ceo_dashboard','crm','sop','workflow','reports'],
-            self::ADMIN  => ['ceo_dashboard','crm','sales_ai','sop','workflow','users','roles','reports','integrations','activity_log','vertical_templates'],
+            self::ADMIN  => ['ceo_dashboard','crm','sales_ai','sop','workflow','users','roles','reports','integrations','activity_log'],
             self::VIEWER => ['ceo_dashboard','sop','reports'],
         };
     }

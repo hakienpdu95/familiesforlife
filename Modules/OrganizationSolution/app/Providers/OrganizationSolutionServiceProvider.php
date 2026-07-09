@@ -2,7 +2,6 @@
 
 namespace Modules\OrganizationSolution\Providers;
 
-use Modules\OrganizationSolution\Console\Commands\MigrateOrgVerticalTemplatesToOrganizationSolutionsCommand;
 use Nwidart\Modules\Support\ModuleServiceProvider;
 
 class OrganizationSolutionServiceProvider extends ModuleServiceProvider
@@ -14,15 +13,4 @@ class OrganizationSolutionServiceProvider extends ModuleServiceProvider
         EventServiceProvider::class,
         RouteServiceProvider::class,
     ];
-
-    public function boot(): void
-    {
-        parent::boot();
-
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-                MigrateOrgVerticalTemplatesToOrganizationSolutionsCommand::class,
-            ]);
-        }
-    }
 }
