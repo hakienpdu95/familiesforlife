@@ -17,24 +17,6 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
 
-        @if($canHr)
-        <div class="card bg-base-100 border border-base-300 shadow-sm hover:shadow-md transition-shadow">
-            <div class="card-body">
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                        <svg class="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    </div>
-                    <h2 class="card-title text-base">Nhân sự (HR)</h2>
-                </div>
-                <p class="text-sm text-base-content/60 mb-4">Headcount, biến động nhân sự theo tổ chức</p>
-                <div class="flex flex-col gap-2">
-                    <a href="{{ route('report.hr.headcount') }}" class="btn btn-sm btn-outline btn-primary w-full">Biến động nhân sự</a>
-                    <a href="{{ route('report.hr.index') }}"     class="btn btn-sm btn-ghost w-full text-xs">Xem tất cả HR →</a>
-                </div>
-            </div>
-        </div>
-        @endif
-
         @if($canSales)
         <div class="card bg-base-100 border border-base-300 shadow-sm hover:shadow-md transition-shadow">
             <div class="card-body">

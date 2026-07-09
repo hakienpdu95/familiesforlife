@@ -16,7 +16,6 @@
     $iconPaths = [
         'approval'    => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>',
         'task_overdue'=> '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>',
-        'employees'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>',
         'leads'       => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>',
         'leads_won'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>',
         'workflow'    => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 10V3L4 14h7v7l9-11h-7z"/>',
@@ -47,7 +46,6 @@
     // Role-based chart visibility
     $showLeadFunnel     = in_array($roleName, ['ceo','system_admin','ops','ai_operator','sales','marketing']);
     $showWorkflowHealth = in_array($roleName, ['ceo','system_admin','ops','ai_operator']);
-    $showHeadcount      = in_array($roleName, ['ceo','system_admin','hr','ops']);
 
     // Shortcuts
     $shortcutIconPaths = [
@@ -128,28 +126,6 @@
             </template>
         </div>
     </div>
-
-    {{-- ── Row 1: Headcount ─────────────────────────────────────────────── --}}
-    @if($showHeadcount)
-    <div class="grid grid-cols-1 gap-5">
-
-        {{-- Headcount by Dept — Donut --}}
-        <div class="card bg-base-100 border border-base-200 shadow-sm">
-            <div class="card-body p-4">
-                <div class="mb-3">
-                    <h3 class="font-semibold text-sm text-base-content">Cơ cấu nhân sự</h3>
-                    <p class="text-xs text-base-content/40 mt-0.5">Nhân viên hoạt động theo phòng ban</p>
-                </div>
-                <div id="chart-headcount"
-                     class="w-full"
-                     style="height: 220px;"
-                     data-chart="headcount">
-                    <div class="skeleton w-full h-full rounded-xl" id="skel-headcount"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-    @endif
 
     {{-- ── Row 2: Lead Funnel + Workflow Health ────────────────────────── --}}
     @if($showLeadFunnel || $showWorkflowHealth)
@@ -331,7 +307,6 @@
         @php
         $shortcuts = [
             ['label' => 'Workflows',   'route' => route('workflows.index'),              'icon' => 'bolt'],
-            ['label' => 'Nhân viên',   'route' => route('backend.employees.index'),      'icon' => 'users'],
         ];
         if (in_array('crm', $visibleModules))
             $shortcuts[] = ['label' => 'CRM / Leads', 'route' => route('lead.index'), 'icon' => 'crm'];
@@ -401,7 +376,6 @@ document.addEventListener('alpine:init', () => {
         },
 
         _renderAll() {
-            this._renderChart('headcount',        this._headcountOptions.bind(this));
             this._renderChart('lead-funnel',      this._leadFunnelOptions.bind(this));
             this._renderChart('workflow-health',  this._workflowHealthOptions.bind(this));
         },
@@ -424,7 +398,6 @@ document.addEventListener('alpine:init', () => {
             const baseUrls  = {
                 'lead-funnel':     '{{ route("backend.dashboard.charts.lead-funnel") }}',
                 'workflow-health': '{{ route("backend.dashboard.charts.workflow-health") }}',
-                'headcount':       '{{ route("backend.dashboard.charts.headcount") }}',
             };
             const url = (baseUrls[id] ?? '') + (needsDays ? `?days=${this.days}` : '');
 
@@ -465,52 +438,6 @@ document.addEventListener('alpine:init', () => {
         },
 
         // ── Chart option builders ─────────────────────────────────────────
-
-        _headcountOptions(d) {
-            const isDark    = this._isDark();
-            const textColor = isDark ? '#94a3b8' : '#64748b';
-            const palette   = ['#6366f1','#22c55e','#f59e0b','#ef4444','#3b82f6','#8b5cf6','#06b6d4','#ec4899','#10b981','#f97316'];
-            const items     = d.departments ?? [];
-            const total     = items.reduce((s, i) => s + i.value, 0);
-
-            return {
-                backgroundColor: 'transparent',
-                tooltip: {
-                    trigger: 'item',
-                    backgroundColor: isDark ? '#1e293b' : '#fff',
-                    borderColor:     isDark ? '#334155' : '#e2e8f0',
-                    textStyle:       { color: isDark ? '#e2e8f0' : '#1e293b', fontSize: 12 },
-                    formatter: ({ name, value, percent }) =>
-                        `<div class="text-xs"><b>${name}</b><br/>${value} người · ${percent}%</div>`,
-                },
-                legend: {
-                    orient: 'vertical', right: 4, top: 'center',
-                    icon: 'circle', itemWidth: 8, itemHeight: 8, itemGap: 6,
-                    textStyle: { color: textColor, fontSize: 11 },
-                    formatter: (name) => {
-                        const item = items.find(i => i.name === name);
-                        return item ? `${name.length > 14 ? name.slice(0, 14) + '…' : name} (${item.value})` : name;
-                    },
-                },
-                graphic: [{
-                    type: 'text', left: '30%', top: 'middle', z: 100,
-                    style: {
-                        text: `${total}\nngười`,
-                        textAlign: 'center', fill: isDark ? '#e2e8f0' : '#1e293b',
-                        fontSize: 14, fontWeight: 'bold', lineHeight: 20,
-                    },
-                }],
-                series: [{
-                    type: 'pie', radius: ['52%', '75%'],
-                    center: ['32%', '50%'],
-                    data: items.map((item, i) => ({
-                        ...item, itemStyle: { color: palette[i % palette.length] },
-                    })),
-                    label: { show: false },
-                    emphasis: { scale: true, scaleSize: 4 },
-                }],
-            };
-        },
 
         _leadFunnelOptions(d) {
             const isDark    = this._isDark();

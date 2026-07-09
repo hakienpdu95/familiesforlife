@@ -52,7 +52,6 @@ class MediaUploadController extends Controller
      * Add new models as they adopt HasTenantMedia.
      */
     private const ENTITY_MAP = [
-        'employee'                => \Modules\Employee\Models\Employee::class,
         'organization'            => \Modules\Organization\Models\Organization::class,
     ];
 
@@ -67,7 +66,7 @@ class MediaUploadController extends Controller
      * Required headers:
      *   X-Collection   — avatar | logo | thumbnail | cover | attachments | attachments_private
      * Optional headers:
-     *   X-Context-Type — entity_type string (e.g. 'employee')
+     *   X-Context-Type — entity_type string (e.g. 'organization')
      *   X-Context-Id   — entity numeric ID
      */
     public function store(Request $request): JsonResponse

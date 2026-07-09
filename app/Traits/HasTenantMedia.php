@@ -14,7 +14,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * Implements HasMedia interface so Spatie recognises the model as media-attachable.
  *
  * NOTE: The model class must ALSO implement HasMedia interface:
- *   class Employee extends TenantAwareModel implements HasMedia
+ *   class Product extends TenantAwareModel implements HasMedia
  *   {
  *       use HasTenantMedia;
  *   }

@@ -577,19 +577,8 @@
                         <select name="assigned_to" id="customer-assigned"
                                 class="select select-bordered select-sm w-full ts-init"
                                 data-ts-placeholder="— Chưa phân công —"
-                                @if(!$orgLocked)
-                                    data-org-api="{{ route('api.employees.options') }}"
-                                    data-org-api-extra="&value=user_id"
-                                    data-selected-value="{{ old('assigned_to', $customer->assigned_to ?? '') }}"
-                                @endif>
+                                data-selected-value="{{ old('assigned_to', $customer->assigned_to ?? '') }}">
                             <option value="">— Chưa phân công —</option>
-                            @if($orgLocked)
-                                @foreach($assignableEmployees as $e)
-                                <option value="{{ $e->user_id }}" {{ old('assigned_to', $customer->assigned_to ?? '') == $e->user_id ? 'selected' : '' }}>
-                                    {{ $e->full_name }} ({{ $e->employee_code }})
-                                </option>
-                                @endforeach
-                            @endif
                         </select>
                     </div>
 

@@ -131,34 +131,6 @@
         "public_token///string///64///_NULL///NULL///->unique()///Token cho phép xem kết quả công khai không cần đăng nhập"
     ],
     [
-        "employees///add///__///",
-        "personal_email///string///150///_NULL///NULL///__///__",
-        "address///text///__///_NULL///NULL///__///__",
-        "national_id_issued///date///__///_NULL///NULL///__///__",
-        "bank_account///string///30///_NULL///NULL///__///__",
-        "bank_name///string///100///_NULL///NULL///__///__",
-        "probation_end_date///date///__///_NULL///NULL///__///__",
-        "contract_start///date///__///_NULL///NULL///__///__",
-        "contract_end///date///__///_NULL///NULL///__///__",
-        "salary_base///decimal///15,2///_NULL///NULL///__///__",
-        "salary_currency///char///3///NOT_NULL///'VND'///__///__",
-        "work_location///string///20///_NULL///NULL///__///__",
-        "emergency_contact_name///string///150///_NULL///NULL///__///__",
-        "emergency_contact_phone///string///20///_NULL///NULL///__///__",
-        "resigned_at///date///__///_NULL///NULL///__///__",
-        "resignation_reason///text///__///_NULL///NULL///__///__",
-        "notes///text///__///_NULL///NULL///__///__",
-        "digital_competency_score///decimal///5,2///_NULL///NULL///__///Điểm năng lực số — model đã khai báo trong $casts nhưng thiếu migration, gây MissingAttributeException khi tạo/đọc Employee",
-        "digital_maturity_level///string///64///_NULL///NULL///__///band_code/persona_code mức độ trưởng thành số — set bởi UpdateEmployeeDigitalCompetencyListener",
-        "latest_assessment_result_id///unsignedBigInteger///__///_NULL///NULL///->constrained('assessment_results')->onDelete('set null')///Kết quả assessment TDWCF gần nhất",
-        "last_assessed_at///timestamp///__///_NULL///NULL///__///__"
-    ],
-    [
-        "employee_history///add///__///",
-        "old_salary_base///decimal///15,2///_NULL///NULL///__///__",
-        "new_salary_base///decimal///15,2///_NULL///NULL///__///__"
-    ],
-    [
         "assessments///add///__///",
         "organization_id///unsignedBigInteger///__///_NULL///NULL///->constrained()->onDelete('restrict')///__",
         "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm",

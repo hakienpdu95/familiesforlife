@@ -26,7 +26,7 @@ class SubjectStateSetExecutor implements ActionExecutor
     {
         return [
             ['key' => 'model', 'label' => 'Loại đối tượng', 'type' => 'text', 'required' => true,
-             'hint' => 'VD: Lead, Invoice, Employee (tên class model)'],
+             'hint' => 'VD: Lead, Invoice, Customer (tên class model)'],
             ['key' => 'state', 'label' => 'Trạng thái đích', 'type' => 'text', 'required' => true,
              'hint' => 'VD: qualified, approved, terminated (state_key)'],
         ];

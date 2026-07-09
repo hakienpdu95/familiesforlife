@@ -48,7 +48,6 @@ Route::middleware(['auth'])->prefix('dashboard')->name('backend.')->group(functi
     Route::prefix('api/dashboard/charts')->name('dashboard.charts.')->middleware('tenant')->group(function () {
         Route::get('lead-funnel',     [DashboardChartController::class, 'leadFunnel'])    ->name('lead-funnel');
         Route::get('workflow-health', [DashboardChartController::class, 'workflowHealth'])->name('workflow-health');
-        Route::get('headcount',       [DashboardChartController::class, 'headcount'])     ->name('headcount');
     });
 
     // ── Placeholder routes (modules chưa triển khai) ──────────────────

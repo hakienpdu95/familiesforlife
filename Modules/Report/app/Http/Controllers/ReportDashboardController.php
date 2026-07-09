@@ -13,14 +13,13 @@ class ReportDashboardController extends Controller
     {
         $user = $request->user();
 
-        $canHr    = $user->hasAnyPermission(['reports.hr',   'reports.full']);
         $canSales = $user->hasAnyPermission(['reports.team', 'reports.personal', 'reports.full']);
         $canOps   = $user->hasAnyPermission(['reports.ops',  'reports.full']);
 
-        if (!$canHr && !$canSales && !$canOps && !$user->hasPermissionTo('reports.shared')) {
+        if (!$canSales && !$canOps && !$user->hasPermissionTo('reports.shared')) {
             abort(403, 'Bạn không có quyền xem báo cáo.');
         }
 
-        return view('report::index', compact('canHr', 'canSales'));
+        return view('report::index', compact('canSales'));
     }
 }

@@ -4,36 +4,6 @@
  * Laravel 13 | Vite 8 | Tailwind 4 | DaisyUI 5 | Alpine 3
  * ─────────────────────────────────────────────────────────────────────
  *
- * CHIẾN LƯỢC BUNDLE
- * ┌────────────────────────────────────────────────────────────────────┐
- * │ CORE  — tải trên MỌI trang backend                                 │
- * │  · app.css  → Tailwind 4 + DaisyUI 5 + admin shell layout          │
- * │  · app.js   → jQuery, Alpine 3, Iconify, admin-shell, form-valid.  │
- * ├────────────────────────────────────────────────────────────────────┤
- * │ WIDGET LIBS  — tải lazy theo trang (@vite trong blade)             │
- * │  · toastify    toast notification  (nhẹ, nhiều trang)              │
- * │  · tabulator   Tabulator v6        (bảng nâng cao)                 │
- * │  · filepond    FilePond + plugins  (trang upload)                  │
- * │  · flatpickr   date/time picker    (form có date)                  │
- * │  · jodit       rich-text editor    (~500 KB, lazy)                 │
- * │  · tom-select  select/autocomplete (form có select nâng cao)       │
- * │  · swiper      carousel/slider                                     │
- * │  · qrcode      QR code generator                                   │
- * ├────────────────────────────────────────────────────────────────────┤
- * │ MODULE ASSETS  — SCSS + JS riêng mỗi module, tải per-page          │
- * │                                                                    │
- * │  SCSS — @use shared partials từ resources/scss/:                   │
- * │    @use 'tokens'        → DaisyUI CSS vars → SCSS vars             │
- * │    @use 'mixins'        → mixin tái dụng                           │
- * │    @use 'form-patterns' → .color-picker-combo, .field-readonly...  │
- * │    @use 'tom-select'    → TomSelect dark/light theme               │
- * │                                                                    │
- * │  JS — import shared utils từ resources/js/shared/:                 │
- * │    import { makeFormController }   from '@shared/form-controller'  │
- * │    import { makeWizardController } from '@shared/wizard-controller'│
- * │    import { createTs }             from '@shared/tom-select-factory'│
- * └────────────────────────────────────────────────────────────────────┘
- *
  * LỆNH:
  *   npm run dev    → vite --config vite.config.backend.js
  *   npm run build  → vite build --config vite.config.backend.js
@@ -76,22 +46,7 @@ const JS_OUTPUT = {
   'assessment':           'assets/modules/assessment.[hash].js',
   'activity-log':           'assets/modules/activity-log.[hash].js',
   'workflow-automation':    'assets/modules/workflow-automation.[hash].js',
-  'branch':                 'assets/modules/branch.[hash].js',
-  'department':             'assets/modules/department.[hash].js',
-  'job-title':              'assets/modules/job-title.[hash].js',
-  'employee':               'assets/modules/employee.[hash].js',
-  'performance-review':     'assets/modules/performance-review.[hash].js',
-  'project':                'assets/modules/project.[hash].js',
-  'org-chart':              'assets/modules/org-chart.[hash].js',
-  'role-scope':             'assets/modules/role-scope.[hash].js',
-  'job-posting':            'assets/modules/job-posting.[hash].js',
-  'leave':                  'assets/modules/leave.[hash].js',
-  'kpi-goal':               'assets/modules/kpi-goal.[hash].js',
-  'marketplace':            'assets/modules/marketplace.[hash].js',
-  'recruitment':            'assets/modules/recruitment.[hash].js',
-  'task':                   'assets/modules/task.[hash].js',
   'subscription':           'assets/modules/subscription.[hash].js',
-  'ai-copilot':             'assets/modules/ai-copilot.[hash].js',
   'report':                 'assets/modules/report.[hash].js',
   'post':                   'assets/modules/post.[hash].js',
   'product':                'assets/modules/product.[hash].js',
@@ -111,7 +66,6 @@ const CSS_OUTPUT = {
   'tom-select.css':                'assets/tom-select.[hash].css',
   'swiper.css':                    'assets/swiper.[hash].css',
   // Module SCSS → CSS
-  // asset.name là tên sau khi compile: 'lead.css', không phải 'lead.scss'
   'lead.css':                 'assets/modules/lead.[hash].css',
   'user.css':                 'assets/modules/user.[hash].css',
   'organization.css':         'assets/modules/organization.[hash].css',
@@ -121,20 +75,6 @@ const CSS_OUTPUT = {
   'assessment.css':           'assets/modules/assessment.[hash].css',
   'activity-log.css':           'assets/modules/activity-log.[hash].css',
   'workflow-automation.css':    'assets/modules/workflow-automation.[hash].css',
-  'branch.css':                 'assets/modules/branch.[hash].css',
-  'department.css':             'assets/modules/department.[hash].css',
-  'job-title.css':              'assets/modules/job-title.[hash].css',
-  'employee.css':               'assets/modules/employee.[hash].css',
-  'performance-review.css':     'assets/modules/performance-review.[hash].css',
-  'project.css':                'assets/modules/project.[hash].css',
-  'org-chart.css':              'assets/modules/org-chart.[hash].css',
-  'role-scope.css':             'assets/modules/role-scope.[hash].css',
-  'job-posting.css':            'assets/modules/job-posting.[hash].css',
-  'leave.css':                  'assets/modules/leave.[hash].css',
-  'kpi-goal.css':               'assets/modules/kpi-goal.[hash].css',
-  'marketplace.css':            'assets/modules/marketplace.[hash].css',
-  'recruitment.css':            'assets/modules/recruitment.[hash].css',
-  'task.css':                   'assets/modules/task.[hash].css',
   'subscription.css':           'assets/modules/subscription.[hash].css',
   'ai-copilot.css':             'assets/modules/ai-copilot.[hash].css',
   'report.css':                 'assets/modules/report.[hash].css',
@@ -175,57 +115,12 @@ const MODULE_ENTRIES = [
   // WorkflowAutomation
   'Modules/WorkflowAutomation/resources/assets/sass/workflow-automation.scss',
   'Modules/WorkflowAutomation/resources/assets/js/workflow-automation.js',
-  // Branch
-  'Modules/Branch/resources/assets/sass/branch.scss',
-  'Modules/Branch/resources/assets/js/branch.js',
-  // Department
-  'Modules/Department/resources/assets/sass/department.scss',
-  'Modules/Department/resources/assets/js/department.js',
-  // JobTitle
-  'Modules/JobTitle/resources/assets/sass/job-title.scss',
-  'Modules/JobTitle/resources/assets/js/job-title.js',
-  // Employee
-  'Modules/Employee/resources/assets/sass/employee.scss',
-  'Modules/Employee/resources/assets/js/employee.js',
-  // PerformanceReview
-  'Modules/PerformanceReview/resources/assets/sass/performance-review.scss',
-  'Modules/PerformanceReview/resources/assets/js/performance-review.js',
-  // Project
-  'Modules/Project/resources/assets/sass/project.scss',
-  'Modules/Project/resources/assets/js/project.js',
-  // OrgChart
-  'Modules/OrgChart/resources/assets/sass/org-chart.scss',
-  'Modules/OrgChart/resources/assets/js/org-chart.js',
-  // RoleScope
-  'Modules/RoleScope/resources/assets/sass/role-scope.scss',
-  'Modules/RoleScope/resources/assets/js/role-scope.js',
-  // JobPosting
-  'Modules/JobPosting/resources/assets/sass/job-posting.scss',
-  'Modules/JobPosting/resources/assets/js/job-posting.js',
-  // Leave
-  'Modules/Leave/resources/assets/sass/leave.scss',
-  'Modules/Leave/resources/assets/js/leave.js',
-  // KpiGoal
-  'Modules/KpiGoal/resources/assets/sass/kpi-goal.scss',
-  'Modules/KpiGoal/resources/assets/js/kpi-goal.js',
-  // Marketplace
-  'Modules/Marketplace/resources/assets/sass/marketplace.scss',
-  'Modules/Marketplace/resources/assets/js/marketplace.js',
-  // Recruitment
-  'Modules/Recruitment/resources/assets/sass/recruitment.scss',
-  'Modules/Recruitment/resources/assets/js/recruitment.js',
-  // Task
-  'Modules/Task/resources/assets/sass/task.scss',
-  'Modules/Task/resources/assets/js/task.js',
   // Subscription
   'Modules/Subscription/resources/assets/sass/subscription.scss',
   'Modules/Subscription/resources/assets/js/subscription.js',
   // Customer
   'Modules/Customer/resources/assets/sass/customer.scss',
   'Modules/Customer/resources/assets/js/customer.js',
-  // AiCopilot
-  'Modules/AiCopilot/resources/assets/sass/ai-copilot.scss',
-  'Modules/AiCopilot/resources/assets/js/ai-copilot.js',
   // Report
   'Modules/Report/resources/assets/sass/report.scss',
   'Modules/Report/resources/assets/js/report.js',

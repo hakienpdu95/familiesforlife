@@ -19,7 +19,6 @@ return [
     ],
 
     'limit_models' => [
-        'limit.employees' => \Modules\Employee\Models\Employee::class,
         'limit.members'   => \App\Models\User::class,
     ],
 

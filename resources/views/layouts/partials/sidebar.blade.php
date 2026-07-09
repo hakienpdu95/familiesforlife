@@ -173,22 +173,6 @@
                 </div>
             </details>
 
-            @can('viewAny', \Modules\Employee\Models\Employee::class)
-            <details {{ request()->routeIs('backend.employees.*') ? 'open' : '' }}>
-                <summary class="nav-summary {{ request()->routeIs('backend.employees.*') ? 'active' : '' }}">
-                    <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    <span class="nav-label">Nhân viên</span>
-                    <svg class="nav-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m9 18 6-6-6-6"/></svg>
-                </summary>
-                <div class="sub-menu">
-                    <a href="{{ route('backend.employees.index') }}" class="sub-link {{ request()->routeIs('backend.employees.index') ? 'active' : '' }}">Danh sách nhân viên</a>
-                    @can('create', \Modules\Employee\Models\Employee::class)
-                    <a href="{{ route('backend.employees.create') }}" class="sub-link {{ request()->routeIs('backend.employees.create') ? 'active' : '' }}">Thêm nhân viên</a>
-                    @endcan
-                </div>
-            </details>
-            @endcan
-
         </div>
 
         <p class="section-title" style="margin-top:16px;">Tài khoản</p>
@@ -332,9 +316,6 @@
                 </summary>
                 <div class="sub-menu">
                     <a href="{{ route('report.index') }}" class="sub-link {{ request()->routeIs('report.index') ? 'active' : '' }}">Tổng quan</a>
-                    @if(auth()->user()?->hasAnyPermission(['reports.hr','reports.full']))
-                    <a href="{{ route('report.hr.headcount') }}" class="sub-link {{ request()->routeIs('report.hr.*') ? 'active' : '' }}">Nhân sự (HR)</a>
-                    @endif
                     @if(auth()->user()?->hasAnyPermission(['reports.team','reports.personal','reports.full']))
                     <a href="{{ route('report.sales.pipeline') }}" class="sub-link {{ request()->routeIs('report.sales.*') ? 'active' : '' }}">Sales & CRM</a>
                     @endif

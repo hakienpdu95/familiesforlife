@@ -178,28 +178,6 @@ return [
             ],
         ],
 
-        // ── HR ────────────────────────────────────────────────────────────
-        'employee.created' => [
-            'label'  => 'Nhân viên mới được tạo',
-            'module' => 'HR',
-            'fields' => [
-                ['key' => 'subject.id',                'label' => 'Employee ID',  'type' => 'integer'],
-                ['key' => 'subject.attr.full_name',    'label' => 'Họ tên',       'type' => 'string'],
-                ['key' => 'subject.attr.department_id','label' => 'Phòng ban',    'type' => 'integer'],
-                ['key' => 'subject.attr.position_id',  'label' => 'Chức vụ',     'type' => 'integer'],
-            ],
-        ],
-        'employee.terminated' => [
-            'label'  => 'Nhân viên nghỉ việc',
-            'module' => 'HR',
-            'fields' => [
-                ['key' => 'subject.id',                'label' => 'Employee ID',  'type' => 'integer'],
-                ['key' => 'subject.attr.full_name',    'label' => 'Họ tên',       'type' => 'string'],
-                ['key' => 'extra.termination_reason',  'label' => 'Lý do nghỉ',   'type' => 'string'],
-                ['key' => 'extra.last_working_date',   'label' => 'Ngày làm cuối','type' => 'string'],
-            ],
-        ],
-
         // ── State Machine (Mô hình B — §6) ────────────────────────────────
         'entity.state_changed' => [
             'label'  => 'Đối tượng đổi trạng thái',

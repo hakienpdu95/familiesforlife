@@ -8,8 +8,6 @@ use App\Shared\Tenancy\TenantContext;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Modules\ActivityLog\Models\ActivityLog;
-use Modules\Employee\Enums\EmployeeStatus;
-use Modules\Employee\Models\Employee;
 use Modules\Lead\Enums\LeadStatus;
 use Modules\Lead\Models\Lead;
 use Modules\WorkflowAutomation\Models\WorkflowExecution;
@@ -52,11 +50,8 @@ class DashboardService
         // ── Role-specific cards ───────────────────────────────────────────
         if ($this->isFull($role)) {
             // CEO / Admin / Ops / AI_OP
-            $cards[] = $this->cardEmployeesActive($orgId);
             $cards[] = $this->cardLeadsActive($orgId);
             $cards[] = $this->cardWorkflowToday($orgId);
-        } elseif ($role === RoleEnum::HR->value) {
-            $cards[] = $this->cardEmployeesActive($orgId);
         } elseif ($role === RoleEnum::SALES->value) {
             $cards[] = $this->cardMyLeads($user, $orgId);
             $cards[] = $this->cardLeadsConvertedThisMonth($orgId);
@@ -78,28 +73,6 @@ class DashboardService
     }
 
     // ── Card builders ─────────────────────────────────────────────────────────
-
-    private function cardEmployeesActive(?int $orgId): array
-    {
-        $count = Employee::where('organization_id', $orgId)
-            ->whereIn('status', [
-                EmployeeStatus::Active->value,
-                EmployeeStatus::Probation->value,
-                EmployeeStatus::OnLeave->value,
-            ])
-            ->count();
-
-        return [
-            'id'     => 'employees_active',
-            'label'  => 'Nhân viên hoạt động',
-            'value'  => $count,
-            'icon'   => 'employees',
-            'color'  => 'success',
-            'urgent' => false,
-            'link'   => route('backend.employees.index'),
-            'hint'   => 'Active + Thử việc + Đang nghỉ phép',
-        ];
-    }
 
     private function cardLeadsActive(?int $orgId): array
     {

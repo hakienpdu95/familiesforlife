@@ -21,8 +21,6 @@ use Modules\Customer\Models\CustomerTag;
 use Modules\Customer\Queries\GetCustomerHandler;
 use Modules\Customer\Queries\GetCustomerQuery;
 use App\Models\Province;
-use Modules\Employee\Enums\EmployeeStatus;
-use Modules\Employee\Models\Employee;
 use Modules\LeadSource\Models\LeadSource;
 
 class CustomerController extends Controller
@@ -97,25 +95,10 @@ class CustomerController extends Controller
 
         [$organizations, $defaultOrgId, $orgLocked] = $this->_resolveOrganizations();
 
-        // orgLocked (org cố định) → render sẵn danh sách nhân viên server-side, giống
-        // hệt cách EmployeeController::create() làm với $managers. Không orgLocked
-        // (super-admin) → để trống, JS cascade (_initOrgCascades) load khi chọn org.
-        $assignableEmployees = $orgLocked ? $this->_assignableEmployees($orgId) : collect();
-
         return view('customer::_form', compact(
             'customer', 'sources', 'tags', 'sizes', 'stages', 'provinces', 'fieldDefs',
-            'organizations', 'defaultOrgId', 'orgLocked', 'assignableEmployees'
+            'organizations', 'defaultOrgId', 'orgLocked'
         ));
-    }
-
-    private function _assignableEmployees(int $orgId)
-    {
-        return Employee::withoutTenant()
-            ->where('organization_id', $orgId)
-            ->where('status', EmployeeStatus::Active->value)
-            ->whereNotNull('user_id')
-            ->orderBy('full_name')
-            ->get(['id', 'user_id', 'full_name', 'employee_code']);
     }
 
     public function store(Request $request): RedirectResponse
@@ -160,13 +143,8 @@ class CustomerController extends Controller
 
         [$organizations, , $orgLocked] = $this->_resolveOrganizations();
 
-        // orgLocked → render sẵn server-side (khớp org cố định của customer).
-        // Không orgLocked → để trống, JS cascade load theo org đang chọn trên form
-        // (ban đầu là org hiện tại của customer, xem data-selected-value trong blade).
-        $assignableEmployees = $orgLocked ? $this->_assignableEmployees($orgId) : collect();
-
         return view('customer::_form', compact(
-            'customer', 'sources', 'tags', 'sizes', 'stages', 'provinces', 'fieldDefs', 'assignableEmployees',
+            'customer', 'sources', 'tags', 'sizes', 'stages', 'provinces', 'fieldDefs',
             'organizations', 'orgLocked'
         ));
     }

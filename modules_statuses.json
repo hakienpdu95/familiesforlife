@@ -9,7 +9,6 @@
     "LeadPipelineStage": true,
     "LeadSource": true,
     "Assessment": true,
-    "Employee": true,
     "Subscription": true,
     "Customer": true,
     "Report": true,

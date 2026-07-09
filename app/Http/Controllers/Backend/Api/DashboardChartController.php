@@ -8,7 +8,6 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Modules\Employee\Enums\EmployeeStatus;
 use Modules\Lead\Enums\LeadStatus;
 
 class DashboardChartController extends Controller
@@ -97,48 +96,5 @@ class DashboardChartController extends Controller
             'halted'  => array_column($spine, 'halted'),
             'waiting' => array_column($spine, 'waiting'),
         ]);
-    }
-
-    // ── Headcount by Department — donut chart ─────────────────────────────
-    public function headcount(): JsonResponse
-    {
-        $orgId = TenantContext::getOrganizationId();
-
-        $rows = DB::table('employees as e')
-            ->join('departments as d', 'd.id', '=', 'e.department_id')
-            ->where('e.organization_id', $orgId)
-            ->whereNotNull('e.department_id')
-            ->whereIn('e.status', [
-                EmployeeStatus::Active->value,
-                EmployeeStatus::Probation->value,
-                EmployeeStatus::OnLeave->value,
-            ])
-            ->select('d.name as department', DB::raw('COUNT(e.id) as count'))
-            ->groupBy('d.id', 'd.name')
-            ->orderByDesc('count')
-            ->limit(10)
-            ->get();
-
-        // Employees with no department
-        $noDept = DB::table('employees')
-            ->where('organization_id', $orgId)
-            ->whereNull('department_id')
-            ->whereIn('status', [
-                EmployeeStatus::Active->value,
-                EmployeeStatus::Probation->value,
-                EmployeeStatus::OnLeave->value,
-            ])
-            ->count();
-
-        $data = $rows->map(fn ($r) => [
-            'name'  => $r->department,
-            'value' => (int) $r->count,
-        ])->toArray();
-
-        if ($noDept > 0) {
-            $data[] = ['name' => 'Chưa phân bổ', 'value' => $noDept];
-        }
-
-        return response()->json(['departments' => $data]);
     }
 }
