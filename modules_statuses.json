@@ -12,9 +12,6 @@
     "Subscription": true,
     "Customer": true,
     "Report": true,
-    "BusinessSolution": true,
-    "BusinessBlueprint": true,
-    "OrganizationSolution": true,
     "Product": true,
     "Post": true
 }

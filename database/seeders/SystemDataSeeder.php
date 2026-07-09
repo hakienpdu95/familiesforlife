@@ -9,12 +9,9 @@ use Modules\Auth\Database\Seeders\AuthDatabaseSeeder;
 use Modules\Lead\Database\Seeders\LeadDatabaseSeeder;
 use Modules\LeadPipelineStage\Database\Seeders\LeadPipelineStageSeeder;
 use Modules\LeadSource\Database\Seeders\LeadSourceSeeder;
-use Modules\BusinessBlueprint\Database\Seeders\BusinessBlueprintDatabaseSeeder;
-use Modules\BusinessSolution\Database\Seeders\BusinessSolutionDatabaseSeeder;
 use Modules\Product\Database\Seeders\ProductDatabaseSeeder;
 use Modules\Post\Database\Seeders\PostDatabaseSeeder;
 use Modules\Organization\Database\Seeders\OrganizationRolePermissionSeeder;
-use Modules\OrganizationSolution\Database\Seeders\OrganizationSolutionDatabaseSeeder;
 use Modules\Subscription\Database\Seeders\SubscriptionDatabaseSeeder;
 use Modules\Survey\Database\Seeders\SurveyDatabaseSeeder;
 
@@ -76,15 +73,6 @@ class SystemDataSeeder extends Seeder
 
             // ── 14. Survey: permissions, AI Readiness, scoring config ──────
             SurveyDatabaseSeeder::class,
-
-            // ── 19. Business Solution: permissions + verticals + 3 solution bespoke ──
-            BusinessSolutionDatabaseSeeder::class,
-
-            // ── 20. Business Blueprint: permissions (blueprint.*) ─────────
-            BusinessBlueprintDatabaseSeeder::class,
-
-            // ── 21. Organization Solution: permissions (organization_solution.*) ──
-            OrganizationSolutionDatabaseSeeder::class,
 
             // ── 24. Product: permissions (product.*/product_category.*) — catalog cho Post CTA Box ──
             ProductDatabaseSeeder::class,

@@ -12,8 +12,6 @@ use Illuminate\Notifications\ChannelManager;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
-use App\View\Composers\SidebarComposer;
-use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -42,9 +40,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(function (User $user, string $ability): ?bool {
             return $user->hasRole('super-admin') ? true : null;
         });
-
-        // Sidebar: load active verticals for current org
-        View::composer('layouts.partials.sidebar', SidebarComposer::class);
 
         // Global API limiter — 120 req/min per authenticated user, 30/min for guests
         RateLimiter::for('api', fn (Request $request) =>
