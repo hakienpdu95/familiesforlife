@@ -44,6 +44,8 @@ return [
         // Post: View + Duyệt & publish (không tự soạn thảo — Marketing soạn)
         P::POST_ARTICLE_VIEW->value,
         P::POST_ARTICLE_PUBLISH->value,
+        // AICEM: View (full) — xem knowledge base/lịch sử, không tự chạy workflow
+        P::AICEM_VIEW->value,
     ],
 
     R::SALES->value => [
@@ -100,6 +102,8 @@ return [
         // Post: View + Duyệt & publish
         P::POST_ARTICLE_VIEW->value,
         P::POST_ARTICLE_PUBLISH->value,
+        // AICEM: View (limited) — giống cách Ops xem Sales AI
+        P::AICEM_VIEW->value,
     ],
 
     R::MARKETING->value => [
@@ -123,6 +127,8 @@ return [
         P::POST_ARTICLE_CREATE->value,
         P::POST_ARTICLE_EDIT->value,
         P::POST_ARTICLE_DELETE->value,
+        // AICEM: Use — người thực chạy workflow khi soạn bài/sản phẩm
+        P::AICEM_USE->value,
     ],
 
     R::HR->value => [
@@ -159,6 +165,8 @@ return [
         P::PRODUCT_VIEW->value,
         // Post: View only
         P::POST_ARTICLE_VIEW->value,
+        // AICEM: Config prompt — chỉnh SKILL/brand/persona/template, xem version history, rollback
+        P::AICEM_CONFIG_PROMPT->value,
     ],
 
     R::ADMIN->value => [
@@ -207,6 +215,8 @@ return [
         P::POST_ARTICLE_DELETE->value,
         P::POST_ARTICLE_PUBLISH->value,
         P::POST_CATEGORY_MANAGE->value,
+        // AICEM: Config — provider, API key, hạn mức chi phí theo Organization
+        P::AICEM_CONFIG->value,
     ],
 
     R::VIEWER->value => [

@@ -410,6 +410,16 @@
     </div>{{-- /grid --}}
 
 </form>
+
+<div class="mt-6">
+    <x-aicem::panel
+        :subject-type="'post_article'"
+        :subject-id="$article->id"
+        :allowed-fields="config('aicem_subjects.post_article.fields')"
+        :allow-block-edit="config('aicem_subjects.post_article.has_blocks')"
+        :subject-taxonomy-preview="['category_slugs' => $article->categories->pluck('slug'), 'format' => [$article->format->value], 'tag_slugs' => $article->tags->pluck('slug')]"
+    />
+</div>
 </div>
 @endsection
 

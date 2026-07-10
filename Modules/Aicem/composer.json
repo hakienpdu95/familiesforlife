@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/aicem",
+    "description": "",
+    "authors": [
+        {
+            "name": "KienDH",
+            "email": "bonhuyn@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Aicem\\": "app/",
+            "Modules\\Aicem\\Database\\Factories\\": "database/factories/",
+            "Modules\\Aicem\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Aicem\\Tests\\": "tests/"
+        }
+    }
+}

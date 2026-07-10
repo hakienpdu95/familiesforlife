@@ -39,14 +39,22 @@ class Organization extends Model
         'approved_at',
         // Phase 0 — Identity enforcement
         'email_domain',
+        // AICEM — xem spec/AICEM_Technical_Specification.md mục 5.4, 8.6, 13
+        'aicem_content_vertical',
+        'ai_provider_config',
+        'ai_monthly_budget_usd',
+        'ai_rate_limit_override',
     ];
 
     protected function casts(): array
     {
         return [
-            'status'    => OrganizationStatus::class,
-            'is_system' => 'boolean',
-            'settings'  => 'array',
+            'status'                 => OrganizationStatus::class,
+            'is_system'              => 'boolean',
+            'settings'               => 'array',
+            'ai_provider_config'     => 'encrypted:array',
+            'ai_monthly_budget_usd'  => 'float',
+            'ai_rate_limit_override' => 'array',
         ];
     }
 

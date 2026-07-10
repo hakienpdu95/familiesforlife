@@ -13,5 +13,6 @@
     "Customer": true,
     "Report": true,
     "Product": true,
-    "Post": true
+    "Post": true,
+    "Aicem": true
 }

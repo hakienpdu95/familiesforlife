@@ -420,6 +420,16 @@
     </div>{{-- /grid --}}
 
 </form>
+
+<div class="mt-6">
+    <x-aicem::panel
+        :subject-type="'product'"
+        :subject-id="$product->id"
+        :allowed-fields="config('aicem_subjects.product.fields')"
+        :allow-block-edit="config('aicem_subjects.product.has_blocks')"
+        :subject-taxonomy-preview="['category_slugs' => $product->category ? [$product->category->slug] : [], 'price_tier' => [\Modules\Aicem\Support\PriceTierBucketer::bucket($product->price !== null ? (float) $product->price : null)], 'link_types' => collect(\Modules\Product\Enums\ProductLinkType::cases())->filter(fn ($t) => filled($product->{$t->urlColumn()}))->map(fn ($t) => $t->value)->values()]"
+    />
+</div>
 </div>
 @endsection
 

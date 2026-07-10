@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 use Modules\Post\Enums\ArticleFormat;
-use Modules\Post\Enums\ContentBlockType;
 use Modules\Post\Features\ArticleAuthoring\Actions\ArchiveArticleAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\CreateArticleAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\DeleteArticleAction;
@@ -23,8 +22,7 @@ use Modules\Post\Features\ArticleAuthoring\Queries\ListArticlesForAdminQuery;
 use Modules\Post\Features\CategoryManagement\Queries\ListCategoriesForAdminHandler;
 use Modules\Post\Features\CategoryManagement\Queries\ListCategoriesForAdminQuery;
 use Modules\Post\Models\PostArticle;
-use Modules\Post\Models\PostContentBlock;
-use Modules\Product\Enums\ProductLinkType;
+use Modules\Post\Support\ArticleContentRenderer;
 
 class ArticleAdminController extends Controller
 {
@@ -77,11 +75,11 @@ class ArticleAdminController extends Controller
         return view('post::admin.articles.show', compact('article'));
     }
 
-    public function edit(PostArticle $article, ListCategoriesForAdminHandler $categoryHandler): View
+    public function edit(PostArticle $article, ListCategoriesForAdminHandler $categoryHandler, ArticleContentRenderer $renderer): View
     {
         $article->load(['categories', 'tags']);
         $categories = $categoryHandler->handle(new ListCategoriesForAdminQuery());
-        $existingBlocks = $this->blocksPayload($article);
+        $existingBlocks = $renderer->toComposerPayload($article);
 
         return view('post::admin.articles.edit', compact('article', 'categories', 'existingBlocks'));
     }
@@ -163,69 +161,5 @@ class ArticleAdminController extends Controller
         unset($validated['blocks_json']);
 
         return $validated;
-    }
-
-    /**
-     * Dựng lại dãy block theo đúng shape mà block-composer JS hiểu (giống hệt state nó tự
-     * build khi soạn) — dùng để hydrate composer khi mở trang sửa bài.
-     *
-     * @return array<int, array>
-     */
-    private function blocksPayload(PostArticle $article): array
-    {
-        $blocks = $article->contentBlocks()
-            ->with(['productBlock.items.product', 'productBlock.items.buttons', 'productBlock.buttons'])
-            ->get();
-
-        return $blocks->map(function (PostContentBlock $block) {
-            if ($block->type === ContentBlockType::Text) {
-                return ['type' => 'text', 'html' => $block->text_html];
-            }
-
-            $pb = $block->productBlock;
-            if (! $pb) {
-                return null;
-            }
-
-            return [
-                'type'          => 'product',
-                'block_uuid'    => $pb->uuid,
-                'template'      => $pb->template->value,
-                'heading'       => $pb->heading,
-                'items'         => $pb->items->map(fn ($item) => [
-                    'item_key'              => $item->item_key,
-                    'product_id'            => $item->product_id,
-                    'title_override'        => $item->title_override,
-                    'price_label_override'  => $item->price_label_override,
-                    'description_override'  => $item->description_override,
-                    'image_url_override'    => $item->image_url_override,
-                    'cached_name'           => $item->product?->name,
-                    'cached_image'          => $item->product?->cover_image_url,
-                    'cached_price'          => $item->product?->display_price,
-                    'cached_links'          => collect(ProductLinkType::cases())
-                        ->filter(fn ($type) => filled($item->product?->{$type->urlColumn()}))
-                        ->map(fn ($type) => ['type' => $type->value, 'label' => $type->label()])
-                        ->values(),
-                    'buttons'               => $item->buttons->map(fn ($btn) => [
-                        'button_key'         => $btn->button_key,
-                        'label'              => $btn->label,
-                        'url_type'           => $btn->url_type->value,
-                        'url'                => $btn->url,
-                        'product_link_type'  => $btn->product_link_type,
-                        'target'             => $btn->target->value,
-                        'style'              => $btn->style->value,
-                    ]),
-                ]),
-                'block_buttons' => $pb->buttons->map(fn ($btn) => [
-                    'button_key'         => $btn->button_key,
-                    'label'              => $btn->label,
-                    'url_type'           => $btn->url_type->value,
-                    'url'                => $btn->url,
-                    'product_link_type'  => $btn->product_link_type,
-                    'target'             => $btn->target->value,
-                    'style'              => $btn->style->value,
-                ]),
-            ];
-        })->filter()->values()->all();
     }
 }

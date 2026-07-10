@@ -4,6 +4,8 @@ namespace Modules\Post\Support;
 
 use Modules\Post\Enums\ContentBlockType;
 use Modules\Post\Models\PostArticle;
+use Modules\Post\Models\PostContentBlock;
+use Modules\Product\Enums\ProductLinkType;
 
 /**
  * Render bài viết từ dãy `post_content_blocks` (block-composer) — nguồn sự thật là các
@@ -84,5 +86,72 @@ class ArticleContentRenderer
         }
 
         return $out;
+    }
+
+    /**
+     * Dựng lại dãy block theo đúng shape mà block-composer JS hiểu (giống hệt state nó tự
+     * build khi soạn) — dùng để hydrate composer khi mở trang sửa bài (ArticleAdminController)
+     * và để AicemSubjectResolver dựng lại đủ `ArticleData::blocks` khi chỉ 1 block/field được
+     * accept, tránh SyncContentBlocksAction xoá mất các block không liên quan (nó ghi đè toàn bộ
+     * theo dãy được truyền, không phải partial — xem Modules/Aicem PostArticleSubjectResolver).
+     *
+     * @return array<int, array>
+     */
+    public function toComposerPayload(PostArticle $article): array
+    {
+        $blocks = $article->contentBlocks()
+            ->with(['productBlock.items.product', 'productBlock.items.buttons', 'productBlock.buttons'])
+            ->get();
+
+        return $blocks->map(function (PostContentBlock $block) {
+            if ($block->type === ContentBlockType::Text) {
+                return ['type' => 'text', 'html' => $block->text_html];
+            }
+
+            $pb = $block->productBlock;
+            if (! $pb) {
+                return null;
+            }
+
+            return [
+                'type'          => 'product',
+                'block_uuid'    => $pb->uuid,
+                'template'      => $pb->template->value,
+                'heading'       => $pb->heading,
+                'items'         => $pb->items->map(fn ($item) => [
+                    'item_key'              => $item->item_key,
+                    'product_id'            => $item->product_id,
+                    'title_override'        => $item->title_override,
+                    'price_label_override'  => $item->price_label_override,
+                    'description_override'  => $item->description_override,
+                    'image_url_override'    => $item->image_url_override,
+                    'cached_name'           => $item->product?->name,
+                    'cached_image'          => $item->product?->cover_image_url,
+                    'cached_price'          => $item->product?->display_price,
+                    'cached_links'          => collect(ProductLinkType::cases())
+                        ->filter(fn ($type) => filled($item->product?->{$type->urlColumn()}))
+                        ->map(fn ($type) => ['type' => $type->value, 'label' => $type->label()])
+                        ->values(),
+                    'buttons'               => $item->buttons->map(fn ($btn) => [
+                        'button_key'         => $btn->button_key,
+                        'label'              => $btn->label,
+                        'url_type'           => $btn->url_type->value,
+                        'url'                => $btn->url,
+                        'product_link_type'  => $btn->product_link_type,
+                        'target'             => $btn->target->value,
+                        'style'              => $btn->style->value,
+                    ]),
+                ]),
+                'block_buttons' => $pb->buttons->map(fn ($btn) => [
+                    'button_key'         => $btn->button_key,
+                    'label'              => $btn->label,
+                    'url_type'           => $btn->url_type->value,
+                    'url'                => $btn->url,
+                    'product_link_type'  => $btn->product_link_type,
+                    'target'             => $btn->target->value,
+                    'style'              => $btn->style->value,
+                ]),
+            ];
+        })->filter()->values()->all();
     }
 }

@@ -103,4 +103,11 @@ enum PermissionEnum: string
     case POST_ARTICLE_EDIT    = 'post_article.edit';
     case POST_ARTICLE_DELETE  = 'post_article.delete';
     case POST_ARTICLE_PUBLISH = 'post_article.publish';
+
+    // ══ AICEM (AI Context Engineering Module — trợ lý AI cho Post & Product) ═
+    // CEO=View | Marketing=Use | Ops=View limited | AI_OP=Config prompt | Admin=Config
+    case AICEM_VIEW          = 'aicem.view';           // xem knowledge base/lịch sử (read-only)
+    case AICEM_USE           = 'aicem.use';            // chạy workflow trên bài viết/sản phẩm, accept/reject suggestion
+    case AICEM_CONFIG_PROMPT = 'aicem.config_prompt';  // sửa knowledge base, template, workflow
+    case AICEM_CONFIG        = 'aicem.config';         // cấu hình provider/API key/hạn mức chi phí
 }

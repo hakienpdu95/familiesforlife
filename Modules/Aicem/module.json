@@ -1,0 +1,11 @@
+{
+    "name": "Aicem",
+    "alias": "aicem",
+    "description": "AI Context Engineering Module — trợ lý AI advisory cho biên soạn bài viết (Post) và catalog sản phẩm (Product): sinh/tối ưu headline, audit SEO/E-E-A-T, tối ưu toàn bài dựa trên knowledge base riêng theo Organization",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Aicem\\Providers\\AicemServiceProvider"
+    ],
+    "files": []
+}

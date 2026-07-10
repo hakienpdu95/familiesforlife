@@ -95,7 +95,7 @@ Reverb isn't started. Run it:
   php artisan reverb:start --port=8081
   # then update REVERB_PORT=8081 in .env
   
-# > Đọc file docs/post-module-spec.md và làm phase 0 trước, implement theo đúng spec, đọc thêm file docs/module-list-pattern.md để tuân thủ đúng cấu trúc và nguyên tắc chuẩn khi thiết kế và triển khai module theo cấu trúc Advanced Vertical Slice (AVSA) + CQRS-lite + Laravel Modules + Laravel Actions, bổ sung ra mdenu sidebar để dùng, phần views hãy kế thừa và làm chuẩn @extends('layouts.backend')
+# > Đọc file spec/AICEM_Technical_Specification.md và làm phase 1 trước, implement theo đúng spec, đọc thêm file docs/module-list-pattern.md để tuân thủ đúng cấu trúc và nguyên tắc chuẩn khi thiết kế và triển khai module theo cấu trúc Advanced Vertical Slice (AVSA) + CQRS-lite + Laravel Modules + Laravel Actions, bổ sung ra mdenu sidebar để dùng, phần views hãy kế thừa và làm chuẩn @extends('layouts.backend')
 
 # > Đọc file docs/thuchoc/02-DAC-TA-THIET-KE-5-MODULE-MOI.md và làm module đầu tiên, implement theo đúng và sát spec đó, tuân thủ quy tắc và nguyên tắc hệ thống hiện tại để build
 
@@ -108,3 +108,5 @@ Notification Thông báo in-app  + push — (thông báo trên chuông) tất c�
 # > Thêm org selector theo pattern _resolveOrganizations() vào form create/edit của  module X
 
 # > Áp dụng pattern org selector của career-pathway-admin create vào form [tên module].
+
+set AI_DEFAULT_API_KEY trong .env.

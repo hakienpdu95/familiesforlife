@@ -246,5 +246,17 @@
         "late_offboard_gap_days///unsignedSmallInteger///__///_NULL///NULL///__///Số ngày gap giữa effective_left_at và offboarded_at — 0 nếu offboard đúng hạn",
         "__index///index///__///__///__///status|om_status_index///__",
         "__index///index///__///__///__///left_at|om_left_at_index///__"
+    ],
+    [
+        "organizations///add///industry///AICEM (Modules/Aicem): content vertical seed + AI provider BYOK/budget/rate-limit",
+        "aicem_content_vertical///string///50///_NULL///NULL///__///Key tra config/aicem_content_verticals.php, NULL = dùng generic",
+        "ai_provider_config///text///__///_NULL///NULL///__///BYOK: provider + API key riêng của Organization (encrypted cast), NULL = dùng config(ai.default)",
+        "ai_monthly_budget_usd///decimal///10,2///_NULL///NULL///__///Hạn mức chi phí AI/tháng, NULL = không giới hạn",
+        "ai_rate_limit_override///json///__///_NULL///NULL///__///Override config(aicem.rate_limit) cho Organization này, NULL = dùng mặc định"
+    ],
+    [
+        "aicem_generation_runs///add///__///",
+        "cache_creation_tokens///unsignedInteger///__///_NULL///NULL///__///__",
+        "cache_read_tokens///unsignedInteger///__///_NULL///NULL///__///__"
     ]
 ]
