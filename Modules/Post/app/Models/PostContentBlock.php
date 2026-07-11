@@ -9,7 +9,7 @@ use Modules\Post\Enums\ContentBlockType;
 
 /**
  * 1 block trong composer (text hoặc product) theo đúng thứ tự hiển thị (`sort_order`).
- * Không soft-delete — vòng đời gắn chặt bài viết, xoá cứng theo cascade.
+ * Không soft-delete — vòng đời gắn chặt bản dịch bài viết, xoá cứng theo cascade.
  */
 class PostContentBlock extends Model
 {
@@ -19,7 +19,7 @@ class PostContentBlock extends Model
 
     protected $fillable = [
         'organization_id',
-        'article_id',
+        'translation_id',
         'type',
         'sort_order',
         'text_html',
@@ -31,9 +31,9 @@ class PostContentBlock extends Model
         'sort_order' => 'integer',
     ];
 
-    public function article(): BelongsTo
+    public function translation(): BelongsTo
     {
-        return $this->belongsTo(PostArticle::class, 'article_id');
+        return $this->belongsTo(PostArticleTranslation::class, 'translation_id');
     }
 
     public function productBlock(): BelongsTo

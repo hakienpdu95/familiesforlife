@@ -11,6 +11,6 @@ class GetArticleDetailForAdminHandler implements QueryHandlerInterface
     public function handle(QueryInterface $query): PostArticle
     {
         /** @var GetArticleDetailForAdminQuery $query */
-        return PostArticle::with(['categories', 'tags'])->findOrFail($query->articleId);
+        return PostArticle::with(['categories', 'tags', 'translations'])->findOrFail($query->articleId);
     }
 }

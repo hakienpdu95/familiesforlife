@@ -343,12 +343,30 @@ class SyncMigrationJson extends Command
         return implode('///', $new);
     }
 
-    /** Returns: tableName → ['index' => i, 'colNames' => [...], 'indexKeys' => [...]] */
+    /**
+     * Returns: tableName → ['index' => i, 'colNames' => [...], 'indexKeys' => [...]]
+     *
+     * CHỈ map block action=add. Một bảng có thể có nhiều block trong render_extension_file.json
+     * (vd 1 block add + 1 block drop, khi 1 bảng vừa được thêm cột mới vừa bị xoá cột cũ — post_articles
+     * là ví dụ thật). Trước đây hàm này duyệt TẤT CẢ block và ghi đè theo tableName, nên nếu block
+     * "drop" đứng sau block "add" trong mảng JSON, map cuối cùng trỏ NHẦM vào block "drop" — khiến
+     * cột mới phát hiện ở lượt sync sau bị merge lộn vào danh sách xoá thay vì danh sách thêm (bug
+     * thật đã xảy ra: main_locale/translation_id bị lẫn vào block drop của post_articles/
+     * post_content_blocks/post_product_blocks). Bỏ qua block drop ở đây đảm bảo luôn map đúng vào
+     * block add — nơi duy nhất hợp lý để merge cột mới vào.
+     */
     private function buildExtensionMap(array $json): array
     {
         $map = [];
         foreach ($json as $i => $entry) {
-            $name      = trim(explode('///', $entry[0])[0]);
+            $header = explode('///', $entry[0]);
+            $name   = trim($header[0] ?? '');
+            $action = strtolower(trim($header[1] ?? 'add'));
+
+            if ($action !== 'add') {
+                continue;
+            }
+
             $colNames  = [];
             $indexKeys = [];
             foreach (array_slice($entry, 1) as $row) {

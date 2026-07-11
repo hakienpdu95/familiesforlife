@@ -12,10 +12,13 @@ class ListArticlesForAdminHandler implements QueryHandlerInterface
     public function handle(QueryInterface $query): LengthAwarePaginator
     {
         /** @var ListArticlesForAdminQuery $query */
-        $q = PostArticle::query()->with(['categories', 'tags', 'createdBy:id,name']);
+        $q = PostArticle::query()
+            ->with(['categories', 'tags', 'createdBy:id,name'])
+            ->withMainTranslation();
 
         if ($query->search) {
-            $q->where('title', 'like', '%' . $query->search . '%');
+            $term = $query->search;
+            $q->whereHas('translations', fn ($sub) => $sub->where('title', 'like', '%' . $term . '%'));
         }
 
         if ($query->categoryId) {
@@ -27,7 +30,8 @@ class ListArticlesForAdminHandler implements QueryHandlerInterface
         }
 
         if ($query->status) {
-            $q->where('status', $query->status);
+            $status = $query->status;
+            $q->whereHas('translations', fn ($sub) => $sub->where('status', $status));
         }
 
         return $q->orderByDesc('created_at')

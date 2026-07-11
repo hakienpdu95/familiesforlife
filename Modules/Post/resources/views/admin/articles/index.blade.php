@@ -52,7 +52,7 @@
         </select>
         <select name="status" class="select select-bordered select-sm">
             <option value="">— Tất cả trạng thái —</option>
-            @foreach(\Modules\Post\Enums\ArticleStatus::cases() as $s)
+            @foreach(\Modules\Post\Enums\TranslationStatus::cases() as $s)
             <option value="{{ $s->value }}" @selected(request('status') === $s->value)>{{ $s->label() }}</option>
             @endforeach
         </select>
@@ -77,30 +77,36 @@
                 </thead>
                 <tbody>
                 @forelse ($articles as $a)
+                @php($main = $a->mainTranslation())
+                @php($canManage = auth()->user()->can('post_article.edit') && ($a->created_by === auth()->id() || auth()->user()->can('post_article.publish')))
                 <tr class="hover">
                     <td>
-                        <a href="{{ route('backend.post.articles.show', $a) }}" class="font-medium text-sm link link-hover">{{ $a->title }}</a>
+                        <a href="{{ route('backend.post.articles.show', $a) }}" class="font-medium text-sm link link-hover">
+                            {{ $main?->title ?? '(chưa có bản dịch ' . $a->main_locale . ')' }}
+                        </a>
                     </td>
                     <td class="text-sm text-base-content/60">
                         {{ $a->categories->pluck('name')->implode(', ') ?: '—' }}
                     </td>
                     <td class="text-sm text-base-content/60">{{ $a->format->label() }}</td>
                     <td class="text-center">
-                        <span class="badge badge-sm {{ $a->status->badgeClass() }}">{{ $a->status->label() }}</span>
+                        @if($main)
+                        <span class="badge badge-sm {{ $main->status->badgeClass() }}">{{ $main->status->label() }}</span>
+                        @else
+                        <span class="badge badge-sm badge-ghost">—</span>
+                        @endif
                     </td>
                     <td class="text-sm text-base-content/60">{{ $a->createdBy?->name ?? '—' }}</td>
                     <td>
                         <div class="flex gap-1">
-                            @can('update', $a)
+                            @if($canManage)
                             <a href="{{ route('backend.post.articles.edit', $a) }}" class="btn btn-ghost btn-xs btn-square" title="Sửa">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                 </svg>
                             </a>
-                            @endcan
-                            @can('delete', $a)
                             <form method="POST" action="{{ route('backend.post.articles.destroy', $a) }}"
-                                  onsubmit="return confirm('Xoá bài viết &quot;{{ $a->title }}&quot;?')">
+                                  onsubmit="return confirm('Xoá bài viết &quot;{{ $main?->title }}&quot;?')">
                                 @csrf @method('DELETE')
                                 <button class="btn btn-ghost btn-xs btn-square text-error" title="Xoá">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -108,7 +114,7 @@
                                     </svg>
                                 </button>
                             </form>
-                            @endcan
+                            @endif
                         </div>
                     </td>
                 </tr>

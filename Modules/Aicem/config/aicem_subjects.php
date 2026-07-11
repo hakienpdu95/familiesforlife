@@ -10,8 +10,13 @@
 // registry là nguồn cấu hình tĩnh, không bị lỗi khi class chưa tồn tại (chỉ lỗi khi thực sự instantiate).
 return [
 
+    // subject = PostArticleTranslation (không phải PostArticle) từ Publishing Engine Phase 13:
+    // title/excerpt/seo_*/blocks giờ per-locale, chỉ tồn tại trên bản dịch cụ thể, không còn
+    // trên PostArticle (chỉ còn format/cover/categories/tags dùng chung mọi ngôn ngữ) — xem
+    // spec/PublishingEngine_Technical_Specification.md §2/§6. subject_id ở AicemGenerationRun/
+    // AicemExampleCandidate cho subject_type=post_article vì vậy là translation_id.
     'post_article' => [
-        'model'    => \Modules\Post\Models\PostArticle::class,
+        'model'    => \Modules\Post\Models\PostArticleTranslation::class,
         'resolver' => \Modules\Aicem\Support\Resolvers\PostArticleSubjectResolver::class,
         'label'    => 'Bài viết',
         'fields'   => ['title', 'excerpt', 'seo_title', 'seo_description'],

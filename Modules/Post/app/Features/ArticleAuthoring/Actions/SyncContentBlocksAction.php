@@ -8,7 +8,7 @@ use Modules\Post\Enums\ButtonUrlType;
 use Modules\Post\Enums\ContentBlockType;
 use Modules\Post\Enums\ProductBlockTemplate;
 use Modules\Post\Features\ArticleAuthoring\Exceptions\ProductBlockValidationException;
-use Modules\Post\Models\PostArticle;
+use Modules\Post\Models\PostArticleTranslation;
 use Modules\Post\Models\PostContentBlock;
 use Modules\Post\Models\PostProductBlock;
 use Modules\Post\Models\PostProductBlockButton;
@@ -39,7 +39,7 @@ class SyncContentBlocksAction
     ) {}
 
     /** @param array<int, array> $blocks Dãy block theo đúng thứ tự hiển thị. */
-    public function handle(PostArticle $article, array $blocks): void
+    public function handle(PostArticleTranslation $translation, array $blocks): void
     {
         if (count($blocks) > self::MAX_TOTAL_BLOCKS) {
             throw new ProductBlockValidationException([
@@ -49,9 +49,9 @@ class SyncContentBlocksAction
 
         $productBlocksData = array_values(array_filter($blocks, fn ($b) => ($b['type'] ?? null) === 'product'));
 
-        $this->validateProductBlocks($article, $productBlocksData);
+        $this->validateProductBlocks($translation, $productBlocksData);
 
-        $productIdsBefore = $this->currentProductIds($article);
+        $productIdsBefore = $this->currentProductIds($translation);
 
         // ── 1. Upsert-by-key post_product_blocks/*_items/*_buttons (bảo toàn click_count) ──
         $seenUuids = [];
@@ -59,25 +59,25 @@ class SyncContentBlocksAction
 
         foreach ($productBlocksData as $sortOrder => $blockData) {
             $seenUuids[] = $blockData['block_uuid'];
-            $block = $this->upsertProductBlock($article, $blockData, $sortOrder);
+            $block = $this->upsertProductBlock($translation, $blockData, $sortOrder);
             $productBlockIdByUuid[$blockData['block_uuid']] = $block->id;
         }
 
         // Khối sản phẩm không còn xuất hiện trong bài → xoá (cascade items/buttons)
-        $article->productBlocks()->whereNotIn('uuid', $seenUuids)->get()->each->delete();
+        $translation->productBlocks()->whereNotIn('uuid', $seenUuids)->get()->each->delete();
 
         // ── 2. Ghi lại post_content_blocks — chỉ là con trỏ sắp xếp, không mang trạng thái
         // (click_count nằm ở product_blocks/items/buttons đã upsert-by-key ở trên), nên
         // xoá-tạo-lại toàn bộ ở đây an toàn và đơn giản hơn upsert-by-key thêm 1 lần nữa. ──
-        $article->contentBlocks()->delete();
+        $translation->contentBlocks()->delete();
 
         foreach ($blocks as $sortOrder => $blockData) {
             $type = $blockData['type'] ?? null;
 
             if ($type === 'text') {
                 PostContentBlock::create([
-                    'organization_id' => $article->organization_id,
-                    'article_id'      => $article->id,
+                    'organization_id' => $translation->organization_id,
+                    'translation_id'  => $translation->id,
                     'type'            => ContentBlockType::Text,
                     'sort_order'      => $sortOrder,
                     'text_html'       => $this->renderer->sanitizeTextHtml($blockData['html'] ?? ''),
@@ -87,8 +87,8 @@ class SyncContentBlocksAction
 
                 if ($productBlockId) {
                     PostContentBlock::create([
-                        'organization_id'  => $article->organization_id,
-                        'article_id'       => $article->id,
+                        'organization_id'  => $translation->organization_id,
+                        'translation_id'   => $translation->id,
                         'type'             => ContentBlockType::Product,
                         'sort_order'       => $sortOrder,
                         'product_block_id' => $productBlockId,
@@ -98,7 +98,7 @@ class SyncContentBlocksAction
         }
 
         // ── 3. Diff usage-count sang Modules\Product ──
-        $productIdsAfter = $this->currentProductIds($article);
+        $productIdsAfter = $this->currentProductIds($translation);
 
         foreach ($productIdsAfter->diff($productIdsBefore) as $productId) {
             $this->productCatalog->incrementArticleUsageCount($productId);
@@ -109,14 +109,14 @@ class SyncContentBlocksAction
         }
     }
 
-    private function currentProductIds(PostArticle $article): Collection
+    private function currentProductIds(PostArticleTranslation $translation): Collection
     {
-        return $article->productBlocks()->with('items')->get()
+        return $translation->productBlocks()->with('items')->get()
             ->pluck('items')->flatten()->pluck('product_id')->unique();
     }
 
     /** @param array<int, array> $blocksData @throws ProductBlockValidationException */
-    private function validateProductBlocks(PostArticle $article, array $blocksData): void
+    private function validateProductBlocks(PostArticleTranslation $translation, array $blocksData): void
     {
         $errors = [];
 
@@ -127,10 +127,10 @@ class SyncContentBlocksAction
         foreach ($blocksData as $i => $block) {
             $label = 'Khối sản phẩm #' . ($i + 1);
 
-            // Chặn hijack: 1 block_uuid hợp lệ nhưng đang thuộc bài viết KHÁC (vd tự chỉnh
+            // Chặn hijack: 1 block_uuid hợp lệ nhưng đang thuộc bản dịch KHÁC (vd tự chỉnh
             // request) — không cho reassign, vì `uuid` có unique constraint toàn cục.
-            if (PostProductBlock::where('uuid', $block['block_uuid'] ?? '')->where('article_id', '!=', $article->id)->exists()) {
-                $errors[] = "{$label}: block_uuid đã thuộc về 1 bài viết khác, không thể dùng lại.";
+            if (PostProductBlock::where('uuid', $block['block_uuid'] ?? '')->where('translation_id', '!=', $translation->id)->exists()) {
+                $errors[] = "{$label}: block_uuid đã thuộc về 1 bản dịch khác, không thể dùng lại.";
                 continue;
             }
 
@@ -218,12 +218,12 @@ class SyncContentBlocksAction
         };
     }
 
-    private function upsertProductBlock(PostArticle $article, array $blockData, int $sortOrder): PostProductBlock
+    private function upsertProductBlock(PostArticleTranslation $translation, array $blockData, int $sortOrder): PostProductBlock
     {
         /** @var PostProductBlock $block */
-        $block = $article->productBlocks()->firstOrNew(['uuid' => $blockData['block_uuid']]);
+        $block = $translation->productBlocks()->firstOrNew(['uuid' => $blockData['block_uuid']]);
         $block->fill([
-            'organization_id' => $article->organization_id,
+            'organization_id' => $translation->organization_id,
             'template'        => $blockData['template'],
             'heading'         => $blockData['heading'] ?? null,
             'sort_order'      => $sortOrder,

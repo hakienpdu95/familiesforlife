@@ -5,22 +5,24 @@ namespace Modules\Aicem\Support\Resolvers;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Aicem\Contracts\AicemSubjectResolver;
 use Modules\Post\Enums\ContentBlockType;
-use Modules\Post\Features\ArticleAuthoring\Actions\UpdateArticleAction;
-use Modules\Post\Features\ArticleAuthoring\Data\ArticleData;
-use Modules\Post\Models\PostArticle;
+use Modules\Post\Features\ArticleAuthoring\Actions\UpdateTranslationAction;
+use Modules\Post\Features\ArticleAuthoring\Data\TranslationData;
+use Modules\Post\Models\PostArticleTranslation;
 use Modules\Post\Support\ArticleContentRenderer;
 
 /**
  * Adapter cho subject_type=post_article — xem spec/AICEM_Technical_Specification.md mục 6.2.
  *
- * LƯU Ý quan trọng (khác giả định ban đầu của spec mục 6.2/11.1): `UpdateArticleAction` KHÔNG
- * nhận partial update — nó ghi đè toàn bộ field khai trong `ArticleData` (kể cả `blocks`, nếu để
- * mặc định `[]` thì `SyncContentBlocksAction` sẽ XOÁ SẠCH mọi block hiện có) và
- * `SyncsArticleRelations` sync lại toàn bộ categories/tags theo đúng những gì `ArticleData` khai.
- * Do đó resolver phải dựng lại ĐỦ `ArticleData` từ bản ghi TƯƠI (đọc trong transaction đã
- * `lockForUpdate` của AcceptSuggestionAction — mục 9.1), chỉ overlay đúng field/block được accept
- * — giống hệt cách xử lý Product ở mục 11.1, dù Post không có vấn đề validate toàn khối vì
- * `name`-tương-đương (`title`) luôn có sẵn giá trị hợp lệ khi đọc từ bản ghi tươi.
+ * Từ Publishing Engine Phase 13, title/excerpt/seo_title/seo_description/blocks chuyển sang PostArticleTranslation
+ * (per-locale) — subject của AICEM cho post_article giờ là PostArticleTranslation, KHÔNG phải
+ * PostArticle (chỉ còn format/categories/tags dùng chung mọi ngôn ngữ, đọc qua $subject->article).
+ *
+ * LƯU Ý quan trọng (khác giả định ban đầu của spec mục 6.2/11.1): `UpdateTranslationAction` KHÔNG
+ * nhận partial update — nó ghi đè toàn bộ field khai trong `TranslationData` (kể cả `blocks`, nếu
+ * để mặc định `[]` thì `SyncContentBlocksAction` sẽ XOÁ SẠCH mọi block hiện có). Do đó resolver
+ * phải dựng lại ĐỦ `TranslationData` từ bản ghi TƯƠI (đọc trong transaction đã `lockForUpdate` của
+ * AcceptSuggestionAction — mục 9.1), chỉ overlay đúng field/block được accept — giống hệt cách xử
+ * lý Product ở mục 11.1.
  */
 class PostArticleSubjectResolver implements AicemSubjectResolver
 {
@@ -30,7 +32,7 @@ class PostArticleSubjectResolver implements AicemSubjectResolver
 
     public function fields(Model $subject): array
     {
-        /** @var PostArticle $subject */
+        /** @var PostArticleTranslation $subject */
         return [
             'title'            => $subject->title,
             'excerpt'          => $subject->excerpt,
@@ -41,7 +43,7 @@ class PostArticleSubjectResolver implements AicemSubjectResolver
 
     public function blocks(Model $subject): array
     {
-        /** @var PostArticle $subject */
+        /** @var PostArticleTranslation $subject */
         return $subject->contentBlocks()
             ->where('type', ContentBlockType::Text)
             ->get()
@@ -55,27 +57,27 @@ class PostArticleSubjectResolver implements AicemSubjectResolver
 
     public function applyFieldSuggestion(Model $subject, string $field, string $suggestedText, int $userId): void
     {
-        /** @var PostArticle $article */
-        $article = $subject;
+        /** @var PostArticleTranslation $translation */
+        $translation = $subject;
 
-        $data = $this->buildArticleData($article, [$field => $suggestedText]);
+        $data = $this->buildTranslationData($translation, [$field => $suggestedText]);
 
-        app(UpdateArticleAction::class)->handle($article, $data);
+        app(UpdateTranslationAction::class)->handle($translation, $data);
     }
 
     public function applyBlockSuggestion(Model $subject, int $blockId, string $suggestedText, int $userId): void
     {
-        /** @var PostArticle $article */
-        $article = $subject;
+        /** @var PostArticleTranslation $translation */
+        $translation = $subject;
 
-        $currentBlocks = $article->contentBlocks()->get();
+        $currentBlocks = $translation->contentBlocks()->get();
         $targetIndex   = $currentBlocks->search(fn ($block) => $block->id === $blockId);
 
         if ($targetIndex === false) {
-            throw new \InvalidArgumentException("Block #{$blockId} không tồn tại trên bài viết này.");
+            throw new \InvalidArgumentException("Block #{$blockId} không tồn tại trên bản dịch này.");
         }
 
-        $blocksPayload = $this->renderer->toComposerPayload($article);
+        $blocksPayload = $this->renderer->toComposerPayload($translation);
 
         if (($blocksPayload[$targetIndex]['type'] ?? null) !== 'text') {
             throw new \InvalidArgumentException("Block #{$blockId} không phải block text — không thể áp dụng gợi ý AI.");
@@ -83,44 +85,39 @@ class PostArticleSubjectResolver implements AicemSubjectResolver
 
         $blocksPayload[$targetIndex]['html'] = $suggestedText;
 
-        $data = $this->buildArticleData($article, [], $blocksPayload);
+        $data = $this->buildTranslationData($translation, [], $blocksPayload);
 
-        app(UpdateArticleAction::class)->handle($article, $data);
+        app(UpdateTranslationAction::class)->handle($translation, $data);
     }
 
     public function taxonomy(Model $subject): array
     {
-        /** @var PostArticle $subject */
+        /** @var PostArticleTranslation $subject */
+        $subject->loadMissing('article.categories', 'article.tags');
+
         return [
-            'category_slugs' => $subject->categories->pluck('slug')->all(),
-            'format'         => [$subject->format->value],
-            'tag_slugs'      => $subject->tags->pluck('slug')->all(),
+            'category_slugs' => $subject->article->categories->pluck('slug')->all(),
+            'format'         => [$subject->article->format->value],
+            'tag_slugs'      => $subject->article->tags->pluck('slug')->all(),
         ];
     }
 
     /**
-     * Dựng đủ ArticleData từ trạng thái hiện tại của $article, overlay đúng field được accept
-     * (hoặc dùng $blocksOverride nếu đang áp block suggestion) — không đổi gì khác.
+     * Dựng đủ TranslationData từ trạng thái hiện tại của $translation, overlay đúng field được
+     * accept (hoặc dùng $blocksOverride nếu đang áp block suggestion) — không đổi gì khác.
      *
      * @param array<string, string> $fieldOverrides
      * @param array<int, array>|null $blocksOverride
      */
-    private function buildArticleData(PostArticle $article, array $fieldOverrides, ?array $blocksOverride = null): ArticleData
+    private function buildTranslationData(PostArticleTranslation $translation, array $fieldOverrides, ?array $blocksOverride = null): TranslationData
     {
-        $article->loadMissing(['categories', 'tags']);
-
-        return new ArticleData(
-            title:                  $fieldOverrides['title'] ?? $article->title,
-            format:                 $article->format,
-            excerpt:                $fieldOverrides['excerpt'] ?? $article->excerpt,
-            blocks:                 $blocksOverride ?? $this->renderer->toComposerPayload($article),
-            cover_image_url:        $article->cover_image_url,
-            seo_title:              $fieldOverrides['seo_title'] ?? $article->seo_title,
-            seo_description:        $fieldOverrides['seo_description'] ?? $article->seo_description,
-            is_featured:            $article->is_featured,
-            category_ids:           $article->categories->pluck('id')->all(),
-            is_primary_category_id: $article->primaryCategory()->first()?->id,
-            tags:                   $article->tags->pluck('name')->implode(','),
+        return new TranslationData(
+            title:            $fieldOverrides['title'] ?? $translation->title,
+            slug:             $translation->slug,
+            excerpt:          $fieldOverrides['excerpt'] ?? $translation->excerpt,
+            seo_title:        $fieldOverrides['seo_title'] ?? $translation->seo_title,
+            seo_description:  $fieldOverrides['seo_description'] ?? $translation->seo_description,
+            blocks:           $blocksOverride ?? $this->renderer->toComposerPayload($translation),
         );
     }
 }

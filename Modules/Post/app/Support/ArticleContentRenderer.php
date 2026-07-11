@@ -3,21 +3,22 @@
 namespace Modules\Post\Support;
 
 use Modules\Post\Enums\ContentBlockType;
-use Modules\Post\Models\PostArticle;
+use Modules\Post\Models\PostArticleTranslation;
 use Modules\Post\Models\PostContentBlock;
 use Modules\Product\Enums\ProductLinkType;
 
 /**
  * Render bài viết từ dãy `post_content_blocks` (block-composer) — nguồn sự thật là các
  * dòng quan hệ thật, KHÔNG phải HTML nhúng placeholder cần parse lại (khác thiết kế v1
- * dựa trên DOMDocument). Mỗi block hiển thị theo đúng type + sort_order.
+ * dựa trên DOMDocument). Mỗi block hiển thị theo đúng type + sort_order. Vận hành trên
+ * PostArticleTranslation (per-locale) — không phải PostArticle.
  */
 class ArticleContentRenderer
 {
     /** Render HTML cuối cùng để hiển thị (admin preview / trang công khai). */
-    public function render(PostArticle $article): string
+    public function render(PostArticleTranslation $translation): string
     {
-        $blocks = $article->contentBlocks()
+        $blocks = $translation->contentBlocks()
             ->with(['productBlock.items.product', 'productBlock.items.buttons', 'productBlock.buttons'])
             ->get();
 
@@ -97,9 +98,9 @@ class ArticleContentRenderer
      *
      * @return array<int, array>
      */
-    public function toComposerPayload(PostArticle $article): array
+    public function toComposerPayload(PostArticleTranslation $translation): array
     {
-        $blocks = $article->contentBlocks()
+        $blocks = $translation->contentBlocks()
             ->with(['productBlock.items.product', 'productBlock.items.buttons', 'productBlock.buttons'])
             ->get();
 

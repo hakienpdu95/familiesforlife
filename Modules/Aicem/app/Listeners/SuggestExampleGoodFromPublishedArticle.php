@@ -17,21 +17,24 @@ class SuggestExampleGoodFromPublishedArticle
 {
     public function handle(ArticlePublished $event): void
     {
-        $article = $event->article;
+        $translation = $event->translation;
 
-        if (! $article->is_featured) {
+        // is_featured nằm ở PostArticle (dùng chung mọi ngôn ngữ), không phải trên translation.
+        if (! $translation->article->is_featured) {
             return;
         }
 
+        // subject_id = translation_id (Publishing Engine Phase 13 — subject của post_article
+        // giờ là PostArticleTranslation, xem config/aicem_subjects.php).
         $alreadyCandidate = AicemExampleCandidate::query()
             ->where('subject_type', 'post_article')
-            ->where('subject_id', $article->id)
+            ->where('subject_id', $translation->id)
             ->exists();
 
         if ($alreadyCandidate) {
             return;
         }
 
-        app(CreateExampleCandidateFromArticleAction::class)->handle($article);
+        app(CreateExampleCandidateFromArticleAction::class)->handle($translation);
     }
 }

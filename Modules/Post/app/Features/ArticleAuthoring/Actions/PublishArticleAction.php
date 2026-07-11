@@ -3,25 +3,40 @@
 namespace Modules\Post\Features\ArticleAuthoring\Actions;
 
 use Lorisleiva\Actions\Concerns\AsAction;
-use Modules\Post\Enums\ArticleStatus;
+use Modules\Post\Enums\TranslationStatus;
+use Modules\Post\Features\ArticleAuthoring\Actions\Concerns\LogsPublishingActions;
 use Modules\Post\Features\ArticleAuthoring\Events\ArticlePublished;
-use Modules\Post\Models\PostArticle;
+use Modules\Post\Features\ArticleAuthoring\Exceptions\InvalidTransitionException;
+use Modules\Post\Models\PostArticleTranslation;
 
 class PublishArticleAction
 {
     use AsAction;
+    use LogsPublishingActions;
 
-    public function handle(PostArticle $article): PostArticle
+    public function handle(PostArticleTranslation $translation): PostArticleTranslation
     {
-        $article->update([
-            'status'       => ArticleStatus::Published,
-            'published_at' => $article->published_at ?? now(),
-            'approved_by'  => auth()->id(),
-            'approved_at'  => now(),
+        // Idempotent no-op nếu đã published — bảo vệ PublishDueTranslationsJob chạy trùng lặp
+        // (2 worker cùng lúc / job retry), tránh ghi log trùng (spec §14).
+        if ($translation->status === TranslationStatus::Published) {
+            return $translation;
+        }
+
+        if (! $translation->status->canTransitionTo(TranslationStatus::Published)) {
+            throw new InvalidTransitionException($translation->status->value, TranslationStatus::Published->value);
+        }
+
+        $translation->update([
+            'status'       => TranslationStatus::Published,
+            'published_at' => $translation->published_at ?? now(),
+            'approved_by'  => $translation->approved_by ?? auth()->id(),
+            'approved_at'  => $translation->approved_at ?? now(),
         ]);
 
-        event(new ArticlePublished($article));
+        $this->log($translation, 'publish');
 
-        return $article;
+        event(new ArticlePublished($translation));
+
+        return $translation;
     }
 }

@@ -103,6 +103,7 @@ enum PermissionEnum: string
     case POST_ARTICLE_EDIT    = 'post_article.edit';
     case POST_ARTICLE_DELETE  = 'post_article.delete';
     case POST_ARTICLE_PUBLISH = 'post_article.publish';
+    case POST_ARTICLE_UNPUBLISH = 'post_article.unpublish'; // tách riêng khỏi publish — Ops có thể publish nhưng không được gỡ bừa
 
     // ══ AICEM (AI Context Engineering Module — trợ lý AI cho Post & Product) ═
     // CEO=View | Marketing=Use | Ops=View limited | AI_OP=Config prompt | Admin=Config

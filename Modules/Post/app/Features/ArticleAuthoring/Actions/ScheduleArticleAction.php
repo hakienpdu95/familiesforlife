@@ -4,25 +4,29 @@ namespace Modules\Post\Features\ArticleAuthoring\Actions;
 
 use Carbon\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
-use Modules\Post\Enums\ArticleStatus;
-use Modules\Post\Models\PostArticle;
+use Modules\Post\Enums\TranslationStatus;
+use Modules\Post\Features\ArticleAuthoring\Actions\Concerns\LogsPublishingActions;
+use Modules\Post\Features\ArticleAuthoring\Exceptions\InvalidTransitionException;
+use Modules\Post\Models\PostArticleTranslation;
 
 class ScheduleArticleAction
 {
     use AsAction;
+    use LogsPublishingActions;
 
-    /**
-     * Đặt `published_at` trong tương lai + `status = scheduled`. Chưa có command
-     * `post:publish-due` chạy Laravel Scheduler tự động chuyển `published` khi đến giờ —
-     * việc này để ở Phase 9 (docs/post-module-spec.md §17), phải publish tay khi đến hạn.
-     */
-    public function handle(PostArticle $article, Carbon $publishAt): PostArticle
+    public function handle(PostArticleTranslation $translation, Carbon $publishAt): PostArticleTranslation
     {
-        $article->update([
-            'status'       => ArticleStatus::Scheduled,
-            'published_at' => $publishAt,
+        if (! $translation->status->canTransitionTo(TranslationStatus::Scheduled)) {
+            throw new InvalidTransitionException($translation->status->value, TranslationStatus::Scheduled->value);
+        }
+
+        $translation->update([
+            'status'       => TranslationStatus::Scheduled,
+            'scheduled_at' => $publishAt,
         ]);
 
-        return $article;
+        $this->log($translation, 'schedule');
+
+        return $translation;
     }
 }

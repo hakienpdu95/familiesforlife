@@ -20,10 +20,15 @@ use Modules\Aicem\Models\AicemKnowledgeDocument;
 use Modules\Aicem\Models\AicemMonthlyBudgetUsage;
 use Modules\Aicem\Models\AicemWorkflow;
 use Modules\Post\Enums\ArticleFormat;
+use Modules\Post\Features\ArticleAuthoring\Actions\ApproveArticleTranslationAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\CreateArticleAction;
+use Modules\Post\Features\ArticleAuthoring\Actions\CreateTranslationAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\PublishArticleAction;
+use Modules\Post\Features\ArticleAuthoring\Actions\SubmitArticleForReviewAction;
+use Modules\Post\Features\ArticleAuthoring\Actions\UpdateTranslationAction;
 use Modules\Post\Features\ArticleAuthoring\Data\ArticleData;
-use Modules\Post\Models\PostArticle;
+use Modules\Post\Features\ArticleAuthoring\Data\TranslationData;
+use Modules\Post\Models\PostArticleTranslation;
 use Modules\Post\Models\PostCategory;
 use Modules\Product\Enums\ProductStatus;
 use Modules\Product\Enums\ProductType;
@@ -39,10 +44,17 @@ use Modules\Product\Models\ProductCategory;
  * nhận knowledge base khác nhau theo scope) để thấy trực quan cơ chế resolve theo taxonomy —
  * mở workflow "headline"/"seo_audit" trên 2 bài viết demo sẽ tự thấy prompt khác nhau.
  *
- * Đi qua ĐÚNG Action thật (CreateArticleAction, PublishArticleAction, CreateKnowledgeDocumentAction,
- * Approve/RejectExampleCandidateAction...) thay vì insert thẳng DB, để dữ liệu demo phản ánh đúng
- * luồng thật (VD publish bài is_featured=true tự bắn event tạo example_candidate qua listener
- * thật của Phase 5, không phải giả lập).
+ * Đi qua ĐÚNG Action thật (CreateArticleAction, CreateTranslationAction, UpdateTranslationAction,
+ * Submit/Approve/PublishArticleAction, CreateKnowledgeDocumentAction, Approve/RejectExampleCandidateAction...)
+ * thay vì insert thẳng DB, để dữ liệu demo phản ánh đúng luồng thật (VD publish bài is_featured=true
+ * tự bắn event tạo example_candidate qua listener thật của Phase 5, không phải giả lập).
+ *
+ * Subject của AICEM cho post_article là PostArticleTranslation (Publishing Engine Phase 13 —
+ * title/excerpt/seo_title/seo_description/blocks giờ per-locale, không còn trên PostArticle) — mọi $subject_id dưới
+ * đây là translation_id, khớp config('aicem_subjects.post_article.model'). Publish giờ đi qua
+ * state machine đủ bước Draft→Submitted→Approved→Published (PublishArticleAction không còn nhận
+ * Draft trực tiếp như trước Publishing Engine) — xem createArticleWithTranslation()/
+ * createAndPublishArticle().
  *
  * Idempotent theo tiêu đề/tên — chạy lại không tạo trùng.
  *
@@ -82,9 +94,9 @@ class AicemDemoDataSeeder extends Seeder
 
             $this->seedKnowledgeBase();
             [$categorySleep, $categoryFamily] = $this->seedPostCategories();
-            [$articleSleep, $articleFamily] = $this->seedScopeExampleArticles($categorySleep, $categoryFamily);
+            [$translationSleep, $translationFamily] = $this->seedScopeExampleArticles($categorySleep, $categoryFamily);
             $this->seedDemoProducts();
-            $this->seedGenerationRunsAndSuggestions($articleSleep, $articleFamily);
+            $this->seedGenerationRunsAndSuggestions($translationSleep, $translationFamily);
             $this->seedBudget();
             $this->seedExampleCandidateStates();
 
@@ -112,10 +124,10 @@ class AicemDemoDataSeeder extends Seeder
         $base = rtrim(config('app.url', 'http://127.0.0.1:8000'), '/');
         $url  = fn (string $name, mixed $param = null) => $base . parse_url(route($name, $param, false), PHP_URL_PATH);
 
-        $articleSleep  = PostArticle::where('title', 'Cách chọn nệm an toàn cho trẻ sơ sinh')->first();
-        $articleFamily = PostArticle::where('title', '5 hoạt động vui chơi cuối tuần cho cả nhà')->first();
-        $articleFailed = PostArticle::where('title', 'Có nên cho trẻ dùng thiết bị điện tử trước 2 tuổi?')->first();
-        $productPrem   = Product::where('name', 'Nệm chống trào ngược cao cấp Babycare Premium')->first();
+        $translationSleep  = PostArticleTranslation::with('article')->where('title', 'Cách chọn nệm an toàn cho trẻ sơ sinh')->first();
+        $translationFamily = PostArticleTranslation::with('article')->where('title', '5 hoạt động vui chơi cuối tuần cho cả nhà')->first();
+        $translationFailed = PostArticleTranslation::with('article')->where('title', 'Có nên cho trẻ dùng thiết bị điện tử trước 2 tuổi?')->first();
+        $productPrem       = Product::where('name', 'Nệm chống trào ngược cao cấp Babycare Premium')->first();
 
         $line = fn (string $s = '') => $cmd->line($s);
         $hr   = fn () => $cmd->line('  ' . str_repeat('─', 74));
@@ -146,14 +158,14 @@ class AicemDemoDataSeeder extends Seeder
         $hr();
         $line('  2 bài viết cùng loại (post_article) nhưng nhận Knowledge Base KHÁC nhau theo');
         $line('  category/format — mở panel AI dưới trang sửa bài, xem dòng "bối cảnh" (taxonomy):');
-        if ($articleSleep) {
+        if ($translationSleep) {
             $line('   • Bài "nệm an toàn" (category=an-toan-giac-ngu):');
-            $line('     <fg=cyan>' . $url('backend.post.articles.edit', $articleSleep) . '</>');
+            $line('     <fg=cyan>' . $url('backend.post.articles.edit', $translationSleep->article) . '</>');
             $line('     → nhận thêm doc "E-E-A-T an toàn giấc ngủ" (cảnh báo SIDS/dẫn nguồn AAP)');
         }
-        if ($articleFamily) {
+        if ($translationFamily) {
             $line('   • Bài "5 hoạt động" (format=tip):');
-            $line('     <fg=cyan>' . $url('backend.post.articles.edit', $articleFamily) . '</>');
+            $line('     <fg=cyan>' . $url('backend.post.articles.edit', $translationFamily->article) . '</>');
             $line('     → nhận thêm doc "Văn phong Mẹo hay (tip)" thay vì doc an toàn giấc ngủ');
         }
         $line();
@@ -162,17 +174,17 @@ class AicemDemoDataSeeder extends Seeder
         $line('  <options=bold>KỊCH BẢN 2 — Accept/Reject đề xuất (Phase 3/9.1)</> · login <fg=cyan>marketing@demo.test</>');
         $hr();
         $line('  Dữ liệu suggestion đã seed sẵn đủ trạng thái để bấm thử ngay (không cần chạy AI):');
-        if ($articleSleep) {
+        if ($translationSleep) {
             $line('   • Bài "nệm an toàn" → 1 đề xuất <fg=yellow>PENDING</> (tối ưu tiêu đề): bấm Chấp nhận →');
             $line('     tiêu đề bài đổi thật; hoặc Từ chối. (đã có sẵn 1 đề xuất seo_description ACCEPTED)');
         }
-        if ($articleFamily) {
+        if ($translationFamily) {
             $line('   • Bài "5 hoạt động" → 1 đề xuất <fg=red>REJECTED</> + 1 đề xuất <fg=yellow>STALE</> (badge "Đã');
             $line('     thay đổi — chạy lại AI": mô phỏng nội dung bị sửa tay sau khi AI phân tích — mục 9.1)');
         }
-        if ($articleFailed) {
+        if ($translationFailed) {
             $line('   • Bài "thiết bị điện tử" → run <fg=red>FAILED</> (panel hiện lỗi API key rõ ràng):');
-            $line('     <fg=cyan>' . $url('backend.post.articles.edit', $articleFailed) . '</>');
+            $line('     <fg=cyan>' . $url('backend.post.articles.edit', $translationFailed->article) . '</>');
         }
         $line();
 
@@ -392,14 +404,12 @@ class AicemDemoDataSeeder extends Seeder
      * nên nhận knowledge base khác nhau khi chạy workflow (tự kiểm chứng bằng cách mở panel AI
      * trên từng bài và so sánh).
      *
-     * @return array{0: PostArticle, 1: PostArticle}
+     * @return array{0: PostArticleTranslation, 1: PostArticleTranslation}
      */
     private function seedScopeExampleArticles(PostCategory $sleep, PostCategory $family): array
     {
-        $articleSleep = PostArticle::where('title', 'Cách chọn nệm an toàn cho trẻ sơ sinh')->first();
-
-        if (! $articleSleep) {
-            $articleSleep = app(CreateArticleAction::class)->handle(new ArticleData(
+        $translationSleep = PostArticleTranslation::where('title', 'Cách chọn nệm an toàn cho trẻ sơ sinh')->first()
+            ?? $this->createAndPublishArticle(
                 title: 'Cách chọn nệm an toàn cho trẻ sơ sinh',
                 format: ArticleFormat::Article,
                 excerpt: 'Hướng dẫn chọn nệm, chăn an toàn, giảm nguy cơ SIDS cho bé sơ sinh.',
@@ -407,19 +417,14 @@ class AicemDemoDataSeeder extends Seeder
                     ['type' => 'text', 'html' => '<p>Giấc ngủ an toàn là ưu tiên hàng đầu trong những tháng đầu đời của bé.</p>'],
                     ['type' => 'text', 'html' => '<p>Mẹ nên chọn nệm có độ cứng vừa phải, không quá lún, và không đặt gối/chăn dày trong cũi.</p>'],
                 ],
-                seo_title: 'Cách chọn nệm an toàn cho trẻ sơ sinh',
-                seo_description: 'Hướng dẫn chi tiết chọn nệm, chăn an toàn cho trẻ sơ sinh, giảm nguy cơ SIDS.',
-                is_featured: true, // Phase 5 — publish sẽ tự tạo example_candidate qua listener thật
-                category_ids: [$sleep->id],
-                is_primary_category_id: $sleep->id,
-            ));
-            app(PublishArticleAction::class)->handle($articleSleep);
-        }
+                isFeatured: true, // Phase 5 — publish sẽ tự tạo example_candidate qua listener thật
+                categoryId: $sleep->id,
+                seoTitle: 'Cách chọn nệm an toàn cho trẻ sơ sinh',
+                seoDescription: 'Hướng dẫn chi tiết chọn nệm, chăn an toàn cho trẻ sơ sinh, giảm nguy cơ SIDS.',
+            );
 
-        $articleFamily = PostArticle::where('title', '5 hoạt động vui chơi cuối tuần cho cả nhà')->first();
-
-        if (! $articleFamily) {
-            $articleFamily = app(CreateArticleAction::class)->handle(new ArticleData(
+        $translationFamily = PostArticleTranslation::where('title', '5 hoạt động vui chơi cuối tuần cho cả nhà')->first()
+            ?? $this->createAndPublishArticle(
                 title: '5 hoạt động vui chơi cuối tuần cho cả nhà',
                 format: ArticleFormat::Tip,
                 excerpt: 'Gợi ý hoạt động cuối tuần gắn kết cả gia đình.',
@@ -427,13 +432,10 @@ class AicemDemoDataSeeder extends Seeder
                     ['type' => 'text', 'html' => '<p>1. Cùng nấu ăn: giao cho bé 1 nhiệm vụ đơn giản như rửa rau.</p>'],
                     ['type' => 'text', 'html' => '<p>2. Đi công viên gần nhà vào sáng sớm khi trời mát.</p>'],
                 ],
-                category_ids: [$family->id],
-                is_primary_category_id: $family->id,
-            ));
-            app(PublishArticleAction::class)->handle($articleFamily);
-        }
+                categoryId: $family->id,
+            );
 
-        return [$articleSleep, $articleFamily];
+        return [$translationSleep, $translationFamily];
     }
 
     private function seedDemoProducts(): void
@@ -474,9 +476,9 @@ class AicemDemoDataSeeder extends Seeder
      * Tạo sẵn generation run + suggestion ở đủ trạng thái để quan sát (KHÔNG gọi AI thật — chi
      * phí/token là số minh hoạ tính qua CostCalculator thật để nhất quán với công thức tính tiền).
      */
-    private function seedGenerationRunsAndSuggestions(PostArticle $articleSleep, PostArticle $articleFamily): void
+    private function seedGenerationRunsAndSuggestions(PostArticleTranslation $translationSleep, PostArticleTranslation $translationFamily): void
     {
-        if (AicemGenerationRun::where('subject_id', $articleSleep->id)->exists()) {
+        if (AicemGenerationRun::where('subject_id', $translationSleep->id)->exists()) {
             return; // đã seed trước đó
         }
 
@@ -495,7 +497,7 @@ class AicemDemoDataSeeder extends Seeder
         // subject — created_at, không phải started_at giả lập — nên thứ tự tạo ở đây quyết định
         // cái nào Panel coi là "gần nhất" khi mở trang sửa bài).
         $run1 = AicemGenerationRun::create([
-            'subject_type' => 'post_article', 'subject_id' => $articleSleep->id,
+            'subject_type' => 'post_article', 'subject_id' => $translationSleep->id,
             'workflow_id' => $seoAudit->id, 'requested_by' => $this->userId,
             'provider' => 'anthropic', 'model' => 'claude-sonnet-5',
             'status' => GenerationRunStatus::Succeeded,
@@ -506,7 +508,7 @@ class AicemDemoDataSeeder extends Seeder
         ]);
         $run1->suggestions()->create([
             'organization_id' => $this->organization->id,
-            'field' => 'seo_description', 'original_text' => $articleSleep->seo_description ?? '',
+            'field' => 'seo_description', 'original_text' => $translationSleep->seo_description ?? '',
             'suggested_text' => 'Hướng dẫn chọn nệm, chăn an toàn cho trẻ sơ sinh theo khuyến cáo AAP, giảm nguy cơ SIDS.',
             'reason' => 'Bổ sung "theo khuyến cáo AAP" tăng độ tin cậy (E-E-A-T).',
             'status' => SuggestionStatus::Accepted,
@@ -518,7 +520,7 @@ class AicemDemoDataSeeder extends Seeder
         // bài viết này — mở trang sửa bài sẽ thấy ngay suggestion PENDING này để bấm thử Chấp
         // nhận/Từ chối.
         $run2 = AicemGenerationRun::create([
-            'subject_type' => 'post_article', 'subject_id' => $articleSleep->id,
+            'subject_type' => 'post_article', 'subject_id' => $translationSleep->id,
             'workflow_id' => $headline->id, 'requested_by' => $this->userId,
             'provider' => 'anthropic', 'model' => 'claude-sonnet-5',
             'status' => GenerationRunStatus::Succeeded,
@@ -529,7 +531,7 @@ class AicemDemoDataSeeder extends Seeder
         ]);
         $run2->suggestions()->create([
             'organization_id' => $this->organization->id,
-            'field' => 'title', 'original_text' => $articleSleep->title,
+            'field' => 'title', 'original_text' => $translationSleep->title,
             'suggested_text' => 'Chọn Nệm An Toàn Cho Trẻ Sơ Sinh: Hướng Dẫn Từ A-Z',
             'reason' => "Tiêu đề gốc chưa có yếu tố hướng dẫn cụ thể, thêm 'Từ A-Z' tăng CTR.",
             'status' => SuggestionStatus::Pending,
@@ -537,10 +539,10 @@ class AicemDemoDataSeeder extends Seeder
 
         // Run 3 — full_optimization trên bài "hoạt động gia đình" — 1 suggestion bị từ chối,
         // 1 suggestion đã STALE (mô phỏng nội dung bị sửa tay sau khi AI phân tích — mục 9.1).
-        $firstBlockId = $articleFamily->contentBlocks()->orderBy('sort_order')->value('id');
+        $firstBlockId = $translationFamily->contentBlocks()->orderBy('sort_order')->value('id');
 
         $run3 = AicemGenerationRun::create([
-            'subject_type' => 'post_article', 'subject_id' => $articleFamily->id,
+            'subject_type' => 'post_article', 'subject_id' => $translationFamily->id,
             'workflow_id' => $fullOpt->id, 'requested_by' => $this->userId,
             'provider' => 'anthropic', 'model' => 'claude-sonnet-5',
             'status' => GenerationRunStatus::Succeeded,
@@ -567,20 +569,19 @@ class AicemDemoDataSeeder extends Seeder
             'status' => SuggestionStatus::Stale, // excerpt thật đã đổi sau khi run này "generate"
         ]);
 
-        // Run 4 — thất bại, đặt trên 1 bài viết RIÊNG (không phải articleFamily) để không che mất
-        // suggestion rejected/stale ở trên khi mở panel (Panel chỉ hiển thị run MỚI NHẤT/subject).
-        $articleForFailedDemo = PostArticle::where('title', 'Có nên cho trẻ dùng thiết bị điện tử trước 2 tuổi?')->first();
-        if (! $articleForFailedDemo) {
-            $articleForFailedDemo = app(CreateArticleAction::class)->handle(new ArticleData(
+        // Run 4 — thất bại, đặt trên 1 bài viết RIÊNG (không phải translationFamily) để không che
+        // mất suggestion rejected/stale ở trên khi mở panel (Panel chỉ hiển thị run MỚI NHẤT/subject).
+        // Không publish (chỉ cần tồn tại để gắn 1 generation run FAILED).
+        $translationFailed = PostArticleTranslation::where('title', 'Có nên cho trẻ dùng thiết bị điện tử trước 2 tuổi?')->first()
+            ?? $this->createArticleWithTranslation(
                 title: 'Có nên cho trẻ dùng thiết bị điện tử trước 2 tuổi?',
                 format: ArticleFormat::Article,
                 excerpt: 'Góc nhìn khoa học về màn hình và trẻ nhỏ.',
                 blocks: [['type' => 'text', 'html' => '<p>Học viện Nhi khoa Hoa Kỳ khuyến cáo hạn chế màn hình trước 18-24 tháng tuổi.</p>']],
-            ));
-        }
+            );
 
         AicemGenerationRun::create([
-            'subject_type' => 'post_article', 'subject_id' => $articleForFailedDemo->id,
+            'subject_type' => 'post_article', 'subject_id' => $translationFailed->id,
             'workflow_id' => $headline->id, 'requested_by' => $this->userId,
             'provider' => 'anthropic', 'model' => 'claude-sonnet-5',
             'status' => GenerationRunStatus::Failed,
@@ -628,23 +629,80 @@ class AicemDemoDataSeeder extends Seeder
 
     private function seedCandidateArticle(string $title, string $excerpt, \Closure $decide): void
     {
-        if (PostArticle::where('title', $title)->exists()) {
+        if (PostArticleTranslation::where('title', $title)->exists()) {
             return;
         }
 
-        $article = app(CreateArticleAction::class)->handle(new ArticleData(
+        $translation = $this->createAndPublishArticle(
             title: $title,
             format: ArticleFormat::Article,
             excerpt: $excerpt,
             blocks: [['type' => 'text', 'html' => '<p>' . e($excerpt) . '</p>']],
-            is_featured: true,
-        ));
-        app(PublishArticleAction::class)->handle($article);
+            isFeatured: true,
+        );
 
-        $candidate = AicemExampleCandidate::where('subject_id', $article->id)->first();
+        $candidate = AicemExampleCandidate::where('subject_id', $translation->id)->first();
 
         if ($candidate) {
             $decide($candidate);
         }
+    }
+
+    /**
+     * Tạo 1 PostArticle "vỏ" + bản dịch vi với đủ title/excerpt/seo/blocks — KHÔNG publish
+     * (dùng khi chỉ cần tồn tại bài viết để gắn dữ liệu demo khác, vd 1 generation run FAILED).
+     */
+    private function createArticleWithTranslation(
+        string $title,
+        ArticleFormat $format,
+        ?string $excerpt = null,
+        array $blocks = [],
+        bool $isFeatured = false,
+        ?int $categoryId = null,
+        ?string $seoTitle = null,
+        ?string $seoDescription = null,
+    ): PostArticleTranslation {
+        $article = app(CreateArticleAction::class)->handle(new ArticleData(
+            format: $format,
+            is_featured: $isFeatured,
+            category_ids: $categoryId ? [$categoryId] : [],
+            is_primary_category_id: $categoryId,
+        ));
+
+        $translation = app(CreateTranslationAction::class)->handle($article, 'vi', new TranslationData(title: $title));
+
+        return app(UpdateTranslationAction::class)->handle($translation, new TranslationData(
+            title: $title,
+            excerpt: $excerpt,
+            seo_title: $seoTitle,
+            seo_description: $seoDescription,
+            blocks: $blocks,
+        ));
+    }
+
+    /**
+     * Như createArticleWithTranslation() nhưng publish luôn qua đúng state machine thật
+     * (Draft→Submitted→Approved→Published — PublishArticleAction không còn nhận Draft trực
+     * tiếp từ Publishing Engine Phase 13).
+     */
+    private function createAndPublishArticle(
+        string $title,
+        ArticleFormat $format,
+        ?string $excerpt = null,
+        array $blocks = [],
+        bool $isFeatured = false,
+        ?int $categoryId = null,
+        ?string $seoTitle = null,
+        ?string $seoDescription = null,
+    ): PostArticleTranslation {
+        $translation = $this->createArticleWithTranslation(
+            title: $title, format: $format, excerpt: $excerpt, blocks: $blocks,
+            isFeatured: $isFeatured, categoryId: $categoryId, seoTitle: $seoTitle, seoDescription: $seoDescription,
+        );
+
+        $translation = app(SubmitArticleForReviewAction::class)->handle($translation);
+        $translation = app(ApproveArticleTranslationAction::class)->handle($translation);
+
+        return app(PublishArticleAction::class)->handle($translation);
     }
 }

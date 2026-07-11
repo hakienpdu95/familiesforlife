@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Post\Enums\ProductBlockTemplate;
 use Illuminate\Support\Str;
 
-/** Không soft-delete — vòng đời gắn chặt bài viết, xoá cứng theo cascade khi bài/khối bị xoá. */
+/** Không soft-delete — vòng đời gắn chặt bản dịch bài viết, xoá cứng theo cascade khi bản dịch/khối bị xoá. */
 class PostProductBlock extends Model
 {
     use BelongsToOrganization;
@@ -19,7 +19,7 @@ class PostProductBlock extends Model
     protected $fillable = [
         'uuid',
         'organization_id',
-        'article_id',
+        'translation_id',
         'template',
         'heading',
         'sort_order',
@@ -39,9 +39,9 @@ class PostProductBlock extends Model
         });
     }
 
-    public function article(): BelongsTo
+    public function translation(): BelongsTo
     {
-        return $this->belongsTo(PostArticle::class, 'article_id');
+        return $this->belongsTo(PostArticleTranslation::class, 'translation_id');
     }
 
     public function items(): HasMany

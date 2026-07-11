@@ -21,12 +21,14 @@ class PostPermissionSeeder extends Seeder
         'post_article.edit',
         'post_article.delete',
         'post_article.publish',
+        'post_article.unpublish',
     ];
 
     private const ROLE_MAP = [
         'ceo' => [
             'post_article.view',
             'post_article.publish',
+            'post_article.unpublish',
         ],
         'sales' => [
             'post_article.view',
@@ -56,6 +58,7 @@ class PostPermissionSeeder extends Seeder
             'post_article.edit',
             'post_article.delete',
             'post_article.publish',
+            'post_article.unpublish',
             'post_category.manage',
         ],
     ];

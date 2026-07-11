@@ -164,6 +164,22 @@ class RunAicemWorkflowJob extends TenantAwareJob
                 ]);
 
                 $this->fail($e);
+            } catch (\Throwable $e) {
+                // Bắt mọi lỗi không lường trước (vd bug thật đã gặp: workflow_id lệch Organization
+                // với subject → $run->workflow null → TypeError ở buildPrompt->handle()) — nếu
+                // không có catch-all này, exception thoát ra ngoài handle() mà KHÔNG ghi status
+                // Failed ở đây; run có thể kẹt vĩnh viễn ở "running" nếu vì lý do gì đó
+                // failed()/retry của Laravel không kịp chạy (worker bị kill giữa chừng, job biến
+                // mất khỏi cả jobs lẫn failed_jobs — đã xảy ra thật). Ghi Failed NGAY tại đây
+                // (đồng bộ, không phụ thuộc callback failed() của Laravel) rồi mới rethrow để
+                // luồng retry/failed_jobs bình thường của Laravel vẫn chạy tiếp nếu có thể.
+                $run->update([
+                    'status'        => GenerationRunStatus::Failed,
+                    'error_message' => 'Lỗi không mong đợi: ' . $e->getMessage(),
+                    'completed_at'  => now(),
+                ]);
+
+                $this->fail($e);
             }
         });
     }

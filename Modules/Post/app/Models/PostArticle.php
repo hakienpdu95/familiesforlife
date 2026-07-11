@@ -3,11 +3,11 @@
 namespace Modules\Post\Models;
 
 use App\Foundation\Models\TenantAwareModel;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Post\Enums\ArticleFormat;
-use Modules\Post\Enums\ArticleStatus;
 use Illuminate\Support\Str;
 
 class PostArticle extends TenantAwareModel
@@ -17,31 +17,19 @@ class PostArticle extends TenantAwareModel
     protected $fillable = [
         'uuid',
         'organization_id',
-        'title',
-        'slug',
-        'excerpt',
+        'main_locale',
         'format',
-        'status',
         'cover_image_url',
-        'published_at',
-        'seo_title',
-        'seo_description',
         'is_featured',
         'sort_order',
         'created_by',
         'updated_by',
-        'approved_by',
-        'approved_at',
     ];
 
     protected $casts = [
-        'format'       => ArticleFormat::class,
-        'status'       => ArticleStatus::class,
-        'published_at' => 'datetime',
-        'approved_at'  => 'datetime',
-        'view_count'   => 'integer',
-        'is_featured'  => 'boolean',
-        'sort_order'   => 'integer',
+        'format'      => ArticleFormat::class,
+        'is_featured' => 'boolean',
+        'sort_order'  => 'integer',
     ];
 
     protected static function booted(): void
@@ -86,19 +74,31 @@ class PostArticle extends TenantAwareModel
         return $this->belongsTo(\App\Models\User::class, 'updated_by');
     }
 
-    public function approvedBy(): BelongsTo
+    public function translations(): HasMany
     {
-        return $this->belongsTo(\App\Models\User::class, 'approved_by');
+        return $this->hasMany(PostArticleTranslation::class, 'article_id');
     }
 
-    public function productBlocks(): HasMany
+    public function translation(string $locale): ?PostArticleTranslation
     {
-        return $this->hasMany(PostProductBlock::class, 'article_id')->orderBy('sort_order');
+        return $this->translations->firstWhere('locale', $locale);
     }
 
-    /** Nguồn sự thật của nội dung — dãy block (text/product) theo đúng thứ tự hiển thị. */
-    public function contentBlocks(): HasMany
+    public function mainTranslation(): ?PostArticleTranslation
     {
-        return $this->hasMany(PostContentBlock::class, 'article_id')->orderBy('sort_order');
+        return $this->translation($this->main_locale);
+    }
+
+    /**
+     * Eager-load toàn bộ translations — dùng ở ListArticlesForAdminQuery để tránh N+1 khi
+     * hiển thị cột "Tiêu đề" cho mỗi dòng danh sách (qua mainTranslation()/translation()).
+     * KHÔNG lọc theo main_locale ngay trong query: `whereColumn` trong closure eager-load
+     * chạy trên 1 query riêng (`WHERE article_id IN (...)`) không có `post_articles` trong
+     * FROM/JOIN nên không thể so sánh chéo bảng — lọc đúng locale ở tầng PHP (đã đúng theo
+     * $this->translations->firstWhere() trong translation()) sau khi có đủ collection.
+     */
+    public function scopeWithMainTranslation(Builder $query): void
+    {
+        $query->with('translations');
     }
 }

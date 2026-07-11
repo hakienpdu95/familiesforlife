@@ -5,18 +5,13 @@ namespace Modules\Post\Features\ArticleAuthoring\Http;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 use Modules\Post\Enums\ArticleFormat;
-use Modules\Post\Features\ArticleAuthoring\Actions\ArchiveArticleAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\CreateArticleAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\DeleteArticleAction;
-use Modules\Post\Features\ArticleAuthoring\Actions\PublishArticleAction;
-use Modules\Post\Features\ArticleAuthoring\Actions\ScheduleArticleAction;
-use Modules\Post\Features\ArticleAuthoring\Actions\SubmitArticleForReviewAction;
+use Modules\Post\Features\ArticleAuthoring\Actions\PublishAllTranslationsAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\UpdateArticleAction;
 use Modules\Post\Features\ArticleAuthoring\Data\ArticleData;
-use Modules\Post\Features\ArticleAuthoring\Exceptions\ProductBlockValidationException;
 use Modules\Post\Features\ArticleAuthoring\Queries\ListArticlesForAdminHandler;
 use Modules\Post\Features\ArticleAuthoring\Queries\ListArticlesForAdminQuery;
 use Modules\Post\Features\CategoryManagement\Queries\ListCategoriesForAdminHandler;
@@ -24,15 +19,18 @@ use Modules\Post\Features\CategoryManagement\Queries\ListCategoriesForAdminQuery
 use Modules\Post\Models\PostArticle;
 use Modules\Post\Support\ArticleContentRenderer;
 
+/**
+ * PostArticle (§9) chỉ còn là "vỏ" dùng chung mọi ngôn ngữ (format/cover/categories/tags) —
+ * KHÔNG còn title/status nên KHÔNG dùng authorizeResource(PostArticle::class) (Policy giờ
+ * thao tác PostArticleTranslation, xem PostArticlePolicy). viewAny/create không nhận model
+ * nên vẫn map thẳng qua Policy; show/edit/update/destroy check quyền + ownership trực tiếp.
+ */
 class ArticleAdminController extends Controller
 {
-    public function __construct()
-    {
-        $this->authorizeResource(PostArticle::class, 'article');
-    }
-
     public function index(Request $request, ListArticlesForAdminHandler $handler, ListCategoriesForAdminHandler $categoryHandler): View
     {
+        $this->authorize('viewAny', PostArticle::class);
+
         $articles = $handler->handle(new ListArticlesForAdminQuery(
             page:       max(1, $request->integer('page', 1)),
             search:     $request->string('q')->value() ?: null,
@@ -48,51 +46,60 @@ class ArticleAdminController extends Controller
 
     public function create(ListCategoriesForAdminHandler $categoryHandler): View
     {
-        $categories = $categoryHandler->handle(new ListCategoriesForAdminQuery());
-        $existingBlocks = [];
+        $this->authorize('create', PostArticle::class);
 
-        return view('post::admin.articles.create', compact('categories', 'existingBlocks'));
+        $categories = $categoryHandler->handle(new ListCategoriesForAdminQuery());
+
+        return view('post::admin.articles.create', compact('categories'));
     }
 
+    /** Chỉ tạo "vỏ" PostArticle — chưa có translation nào, redirect sang edit để tạo bản dịch đầu tiên (§9). */
     public function store(Request $request, CreateArticleAction $action): RedirectResponse
     {
-        $data = ArticleData::from($this->validated($request));
+        $this->authorize('create', PostArticle::class);
 
-        try {
-            $article = $action->handle($data);
-        } catch (ProductBlockValidationException $e) {
-            return back()->withInput()->withErrors(['blocks' => $e->errors]);
-        }
+        $data = ArticleData::from($this->validated($request));
+        $article = $action->handle($data);
 
         return redirect()->route('backend.post.articles.edit', $article)
-            ->with('success', "Bài viết \"{$article->title}\" đã được tạo (nháp).");
+            ->with('success', 'Đã tạo bài viết (nháp) — tạo bản dịch đầu tiên bên dưới.');
     }
 
     public function show(PostArticle $article): View
     {
-        $article->load(['categories', 'tags', 'createdBy:id,name', 'approvedBy:id,name']);
+        $this->authorizeArticle($article, 'post_article.view');
+
+        $article->load(['categories', 'tags', 'createdBy:id,name', 'translations.approvedBy:id,name']);
 
         return view('post::admin.articles.show', compact('article'));
     }
 
-    public function edit(PostArticle $article, ListCategoriesForAdminHandler $categoryHandler, ArticleContentRenderer $renderer): View
+    public function edit(Request $request, PostArticle $article, ListCategoriesForAdminHandler $categoryHandler, ArticleContentRenderer $renderer): View
     {
-        $article->load(['categories', 'tags']);
-        $categories = $categoryHandler->handle(new ListCategoriesForAdminQuery());
-        $existingBlocks = $renderer->toComposerPayload($article);
+        $this->authorizeArticle($article, 'post_article.edit');
 
-        return view('post::admin.articles.edit', compact('article', 'categories', 'existingBlocks'));
+        $article->load(['categories', 'tags', 'translations.contentBlocks.productBlock.items.product', 'translations.contentBlocks.productBlock.items.buttons', 'translations.contentBlocks.productBlock.buttons']);
+        $categories = $categoryHandler->handle(new ListCategoriesForAdminQuery());
+
+        // Tab locale server-side (không SPA) — mỗi lần đổi tab load lại trang, tránh phải
+        // làm cho post-block-composer.js/article-form.js (vốn giả định 1 form/1 composer duy
+        // nhất mỗi trang) hỗ trợ nhiều instance cùng lúc.
+        $locales = array_keys(config('post.locales'));
+        $requestedLocale = $request->query('locale') ?? session('active_locale');
+        $activeLocale = in_array($requestedLocale, $locales, true) ? $requestedLocale : $article->main_locale;
+
+        $translation = $article->translation($activeLocale);
+        $existingBlocks = $translation ? $renderer->toComposerPayload($translation) : [];
+
+        return view('post::admin.articles.edit', compact('article', 'categories', 'activeLocale', 'translation', 'existingBlocks'));
     }
 
     public function update(Request $request, PostArticle $article, UpdateArticleAction $action): RedirectResponse
     {
-        $data = ArticleData::from($this->validated($request));
+        $this->authorizeArticle($article, 'post_article.edit');
 
-        try {
-            $action->handle($article, $data);
-        } catch (ProductBlockValidationException $e) {
-            return back()->withInput()->withErrors(['blocks' => $e->errors]);
-        }
+        $data = ArticleData::from($this->validated($request));
+        $action->handle($article, $data);
 
         return redirect()->route('backend.post.articles.edit', $article)
             ->with('success', 'Cập nhật bài viết thành công.');
@@ -100,66 +107,48 @@ class ArticleAdminController extends Controller
 
     public function destroy(PostArticle $article, DeleteArticleAction $action): RedirectResponse
     {
+        $this->authorizeArticle($article, 'post_article.delete');
+
         $action->handle($article);
 
         return redirect()->route('backend.post.articles.index')
-            ->with('success', "Đã xoá bài viết \"{$article->title}\".");
+            ->with('success', 'Đã xoá bài viết.');
     }
 
-    public function submit(PostArticle $article, SubmitArticleForReviewAction $action): RedirectResponse
+    public function publishAll(PostArticle $article, PublishAllTranslationsAction $action): RedirectResponse
     {
-        $this->authorize('submitForReview', $article);
+        $this->authorizeArticle($article, 'post_article.publish');
+
         $action->handle($article);
 
-        return back()->with('success', 'Đã gửi bài viết để chờ duyệt.');
+        return back()->with('success', 'Đã xuất bản mọi bản dịch sẵn sàng.');
     }
 
-    public function publish(PostArticle $article, PublishArticleAction $action): RedirectResponse
+    /**
+     * PostArticle không còn 1 Policy method riêng (Policy giờ thao tác PostArticleTranslation) —
+     * check quyền + ownership trực tiếp, giữ đúng logic cũ (chủ bài HOẶC có quyền publish).
+     */
+    private function authorizeArticle(PostArticle $article, string $permission): void
     {
-        $this->authorize('publish', $article);
-        $action->handle($article);
+        $user = auth()->user();
 
-        return back()->with('success', 'Đã xuất bản bài viết.');
-    }
-
-    public function schedule(Request $request, PostArticle $article, ScheduleArticleAction $action): RedirectResponse
-    {
-        $this->authorize('schedule', $article);
-        $validated = $request->validate(['published_at' => ['required', 'date', 'after:now']]);
-        $action->handle($article, Carbon::parse($validated['published_at']));
-
-        return back()->with('success', 'Đã lên lịch xuất bản bài viết.');
-    }
-
-    public function archive(PostArticle $article, ArchiveArticleAction $action): RedirectResponse
-    {
-        $this->authorize('archive', $article);
-        $action->handle($article);
-
-        return back()->with('success', 'Đã lưu trữ bài viết.');
+        abort_unless(
+            $user->can($permission) && ($article->created_by === $user->id || $user->can('post_article.publish')),
+            403,
+        );
     }
 
     private function validated(Request $request): array
     {
-        $validated = $request->validate([
-            'title'                   => ['required', 'string', 'max:300'],
+        return $request->validate([
             'format'                  => ['required', 'in:' . implode(',', array_column(ArticleFormat::cases(), 'value'))],
-            'excerpt'                 => ['nullable', 'string', 'max:500'],
-            'blocks_json'             => ['nullable', 'string'],
             'cover_image_url'         => ['nullable', 'string', 'max:500'],
-            'seo_title'               => ['nullable', 'string', 'max:200'],
-            'seo_description'        => ['nullable', 'string', 'max:300'],
             'is_featured'             => ['boolean'],
+            'main_locale'             => ['nullable', 'string', 'in:' . implode(',', array_keys(config('post.locales')))],
             'category_ids'            => ['array'],
             'category_ids.*'          => ['integer', 'exists:post_categories,id'],
             'is_primary_category_id'  => ['nullable', 'integer'],
             'tags'                    => ['nullable', 'string', 'max:500'],
         ]);
-
-        $blocks = json_decode($validated['blocks_json'] ?? '[]', true);
-        $validated['blocks'] = is_array($blocks) ? $blocks : [];
-        unset($validated['blocks_json']);
-
-        return $validated;
     }
 }
