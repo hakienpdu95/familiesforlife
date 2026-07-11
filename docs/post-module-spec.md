@@ -1,3 +1,5 @@
+> **Cập nhật 2026-07-11**: Phần **publishing lifecycle** (`ArticleStatus`, cột `status`/`published_at`/`approved_*` trên `post_articles`, các Action `Publish/Schedule/Submit/Archive`) và toàn bộ **Multi-language** đã được đặc tả lại chi tiết, thay thế, tại `spec/PublishingEngine_Technical_Specification.md` (v2.0) — bao gồm bảng `post_article_translations` mới, đổi FK `post_content_blocks`/`post_product_blocks` sang `translation_id`, enum `TranslationStatus` (7 trạng thái, per-locale) thay cho `ArticleStatus`. Các phần còn lại của tài liệu này (Category tree, Product CTA Box, sanitize, click-tracking) vẫn là nguồn tham khảo đúng, không đổi.
+
 # Post Module — Quản lý Bài viết theo Danh mục & Product CTA Box (Đặc tả kỹ thuật)
 
 > **Pattern stack:** AVSA + CQRS-lite + Laravel Modules (NWIDART 13) + Laravel Actions (lorisleiva 2.x)
