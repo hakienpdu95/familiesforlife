@@ -24,6 +24,7 @@ Route::middleware(['auth', 'tenant'])
         // title/status (đã chuyển sang PostArticleTranslation, xem TranslationController).
         Route::resource('articles', ArticleAdminController::class);
         Route::post('articles/{article}/publish-all', [ArticleAdminController::class, 'publishAll'])->name('articles.publish-all');
+        Route::post('articles/{article}/remove-sponsor', [ArticleAdminController::class, 'removeSponsor'])->name('articles.remove-sponsor');
 
         Route::post('articles/{article}/translations', [TranslationController::class, 'store'])->name('articles.translations.store');
         Route::put('translations/{translation}', [TranslationController::class, 'update'])->name('translations.update');

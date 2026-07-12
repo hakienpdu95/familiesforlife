@@ -18,5 +18,3 @@
 
 import './pages/organization-form.js';
 import './pages/organization-index.js';
-import './pages/vertical-form.js';
-import './pages/vertical-builder.js';

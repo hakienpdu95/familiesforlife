@@ -47,7 +47,7 @@ class TranslationController extends Controller
 
         abort_if($article->translation($locale), 422, "Bản dịch \"{$locale}\" đã tồn tại.");
 
-        $data = TranslationData::from($this->validated($request, null, $locale));
+        $data = TranslationData::from($this->validated($request, null, $locale, $article));
 
         try {
             $translation = $action->handle($article, $locale, $data);
@@ -64,7 +64,7 @@ class TranslationController extends Controller
     {
         $this->authorize('update', $translation);
 
-        $data = TranslationData::from($this->validated($request, $translation, $translation->locale));
+        $data = TranslationData::from($this->validated($request, $translation, $translation->locale, null));
 
         try {
             $action->handle($translation, $data);
@@ -177,7 +177,7 @@ class TranslationController extends Controller
             ->with('active_locale', $translation->locale);
     }
 
-    private function validated(Request $request, ?PostArticleTranslation $translation, string $locale): array
+    private function validated(Request $request, ?PostArticleTranslation $translation, string $locale, ?PostArticle $article): array
     {
         $organizationId = TenantContext::getOrganizationId();
 
@@ -193,6 +193,19 @@ class TranslationController extends Controller
             'blocks_json'      => ['nullable', 'string'],
             'seo_title'        => ['nullable', 'string', 'max:200'],
             'seo_description'  => ['nullable', 'string', 'max:300'],
+
+            // spec/dac-ta-ky-thuat-bai-viet-tai-tro.md §6.2 — dùng closure (không phải attribute
+            // #[RequiredIf] trên DTO) vì điều kiện nằm ở ArticleData, 1 DTO KHÁC với
+            // TranslationData đang validate; Spatie Data không hỗ trợ required-if tham chiếu
+            // chéo giữa 2 DTO. $translation->article dùng khi update (translation đã tồn tại);
+            // $article (route param truyền vào) dùng khi tạo mới translation đầu tiên — 2 nguồn
+            // loại trừ nhau (không bao giờ cả 2 cùng null hoặc cùng có giá trị).
+            'disclosure_text'  => [
+                Rule::requiredIf(fn () => ($translation?->article ?? $article)->is_sponsored),
+                'nullable', 'string', 'max:500',
+            ],
+            'cta_text'         => ['nullable', 'string', 'max:100'],
+            'cta_url'          => ['nullable', 'url', 'max:500'],
         ]);
 
         $blocks = json_decode($validated['blocks_json'] ?? '[]', true);

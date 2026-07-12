@@ -95,6 +95,11 @@
                         @else
                         <span class="badge badge-sm badge-ghost">—</span>
                         @endif
+                        {{-- §11/§13 — $a->is_sponsored đã có sẵn qua ListArticlesForAdminHandler
+                             (select toàn bộ cột PostArticle mặc định), không thêm query riêng. --}}
+                        @if($a->is_sponsored)
+                        <span class="badge badge-sm {{ $a->sponsor_label?->badgeClass() ?? 'badge-warning' }}" title="Bài viết tài trợ">🏷</span>
+                        @endif
                     </td>
                     <td class="text-sm text-base-content/60">{{ $a->createdBy?->name ?? '—' }}</td>
                     <td>

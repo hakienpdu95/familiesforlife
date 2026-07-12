@@ -18,10 +18,20 @@ class UpdateArticleAction
     {
         return DB::transaction(function () use ($article, $data) {
             $article->update([
-                'format'          => $data->format,
-                'cover_image_url' => $data->cover_image_url,
-                'is_featured'     => $data->is_featured,
-                'updated_by'      => auth()->id(),
+                'format'                 => $data->format,
+                'cover_image_url'        => $data->cover_image_url,
+                'is_featured'            => $data->is_featured,
+                'updated_by'             => auth()->id(),
+                // spec/dac-ta-ky-thuat-bai-viet-tai-tro.md §7.1 — khi is_sponsored=false, mọi
+                // field sponsor phải được clear ngay tại đây (không cần Action riêng cho trường
+                // hợp save thường; RemoveSponsorshipAction chỉ dùng cho nút bấm độc lập).
+                'is_sponsored'           => $data->is_sponsored,
+                'sponsor_name'           => $data->is_sponsored ? $data->sponsor_name : null,
+                'sponsor_logo_url'       => $data->is_sponsored ? $data->sponsor_logo_url : null,
+                'sponsor_label'          => $data->is_sponsored ? $data->sponsor_label : null,
+                'campaign_code'          => $data->is_sponsored ? $data->campaign_code : null,
+                'sponsored_start_date'   => $data->is_sponsored ? $data->sponsored_start_date : null,
+                'sponsored_end_date'     => $data->is_sponsored ? $data->sponsored_end_date : null,
             ]);
 
             $this->syncCategories($article, $data);

@@ -3,14 +3,21 @@
 namespace Modules\Post\Models;
 
 use App\Foundation\Models\TenantAwareModel;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use Modules\Post\Database\Factories\PostArticleTranslationFactory;
 use Modules\Post\Enums\TranslationStatus;
 
 class PostArticleTranslation extends TenantAwareModel
 {
     protected $table = 'post_article_translations';
+
+    protected static function newFactory(): Factory
+    {
+        return PostArticleTranslationFactory::new();
+    }
 
     protected $fillable = [
         'uuid',
@@ -28,6 +35,9 @@ class PostArticleTranslation extends TenantAwareModel
         'unpublish_reason',
         'approved_by',
         'approved_at',
+        'disclosure_text',
+        'cta_text',
+        'cta_url',
     ];
 
     protected $casts = [

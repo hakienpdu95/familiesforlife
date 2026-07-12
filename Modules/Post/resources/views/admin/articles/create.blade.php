@@ -8,7 +8,7 @@
 <div class="flex items-center justify-between mb-6">
     <div>
         <h1 class="text-2xl font-bold text-base-content">Thêm bài viết</h1>
-        <p class="text-sm text-base-content/50 mt-0.5">Tạo "vỏ" bài viết — tiêu đề/nội dung nhập ở bước tiếp theo (chọn ngôn ngữ)</p>
+        <p class="text-sm text-base-content/50 mt-0.5">Tạo bài viết và tiếp tục soạn nội dung chi tiết/SEO ngay sau khi lưu</p>
     </div>
     <a href="{{ route('backend.post.articles.index') }}" class="btn btn-ghost btn-sm gap-1.5">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -29,9 +29,25 @@
 </div>
 @endif
 
-<form method="POST" action="{{ route('backend.post.articles.store') }}" class="card bg-base-100 shadow-sm border border-base-200">
+<form method="POST" action="{{ route('backend.post.articles.store') }}" novalidate data-article-form
+      class="card bg-base-100 shadow-sm border border-base-200">
     @csrf
     <div class="card-body p-5 space-y-4">
+
+        {{-- Gộp bước tạo bản dịch đầu tiên ngay tại đây — bấm "Tạo bài viết" sẽ tạo cả vỏ
+             PostArticle lẫn bản dịch ở ngôn ngữ chính (title này) trong 1 lượt submit, sau đó
+             vào thẳng trang sửa bài với editor đầy đủ (nội dung/SEO/khối sản phẩm), khôi phục
+             đúng trải nghiệm "1 bước tạo xong" trước khi PostArticle tách vỏ đa ngôn ngữ. --}}
+        <div class="form-control">
+            <label class="label py-0 pb-1.5">
+                <span class="label-text font-medium">Tiêu đề <span class="text-error">*</span></span>
+            </label>
+            <input type="text" name="title" value="{{ old('title') }}"
+                   data-req="Vui lòng nhập tiêu đề" data-val-maxlength="300"
+                   class="input input-bordered input-sm w-full @error('title') input-error @enderror"
+                   placeholder="VD: 5 mẹo giúp bé ngủ ngon" maxlength="300" autofocus>
+            @error('title')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+        </div>
 
         <div class="form-control">
             <label class="label py-0 pb-1">
@@ -115,3 +131,16 @@
 </form>
 </div>
 @endsection
+
+@push('styles')
+    @vite(['Modules/Post/resources/assets/sass/post.scss'], 'build/backend')
+@endpush
+
+@push('scripts')
+    @vite([
+        'resources/js/modules/toastify.js',
+        'resources/js/modules/tom-select.js',
+        'resources/js/modules/jodit.js',
+        'Modules/Post/resources/assets/js/post.js',
+    ], 'build/backend')
+@endpush

@@ -8,9 +8,12 @@
  *   3. TomSelect — auto-init select.ts-init (định dạng nội dung)
  *   4. Tags — biến input thường thành TomSelect tag-input (create-on-type,
  *      vẫn submit dạng chuỗi phân tách dấu phẩy qua name="tags" — không đổi contract backend)
+ *   5. Flatpickr — auto-init input.fp-init (vd scheduled_at) trên toàn trang, KHÔNG scope theo
+ *      `form` — field lên lịch xuất bản nằm ở 1 <form> riêng trong sidebar "Trạng thái", không
+ *      lồng được trong <form data-article-form> chính (HTML không cho phép <form> lồng nhau)
  *
  * Requires globals (core bundle): initFormValidation, window.Alpine, window.Toast
- * Requires globals (lazy bundle):  window.TomSelect (tom-select.js)
+ * Requires globals (lazy bundle):  window.TomSelect (tom-select.js), initAllDatePickers (flatpickr.js)
  *
  * Không đụng tới post-block-composer.js — composer tự tìm form qua .closest('form')
  * và tự đồng bộ blocks_json khi submit, độc lập với guard này.
@@ -26,6 +29,8 @@ const RE_TAB_XSHOW = /tab\s*===\s*['"](\w+)['"]/;
 // ── Entry point ────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
+    window.initAllDatePickers?.();
+
     const form = document.querySelector(FORM_SEL);
     if (!form) return;
 

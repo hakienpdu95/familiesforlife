@@ -33,6 +33,15 @@ class PublishArticleAction
             'approved_at'  => $translation->approved_at ?? now(),
         ]);
 
+        // spec/dac-ta-ky-thuat-bai-viet-tai-tro.md §7.3 — set 1 LẦN duy nhất trên PostArticle
+        // (không phải translation), lần đầu bài được publish trong lúc is_sponsored=true. Nằm
+        // SAU đoạn early-return "đã published thì no-op" ở đầu method, nên publish trùng lặp
+        // (job retry, PublishAllTranslationsAction gọi 2 lần...) không set lại/ghi đè giá trị.
+        $article = $translation->article;
+        if ($article->is_sponsored && ! $article->sponsored_published_at) {
+            $article->update(['sponsored_published_at' => now()]);
+        }
+
         $this->log($translation, 'publish');
 
         event(new ArticlePublished($translation));

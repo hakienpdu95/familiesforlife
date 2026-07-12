@@ -5,6 +5,7 @@ namespace Modules\Post\Providers;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Gate;
 use Modules\Post\Console\Commands\BackfillPostTranslationsCommand;
+use Modules\Post\Jobs\ExpireSponsoredArticlesJob;
 use Modules\Post\Jobs\PublishDueTranslationsJob;
 use Modules\Post\Models\PostArticle;
 use Modules\Post\Models\PostArticleTranslation;
@@ -41,6 +42,12 @@ class PostServiceProvider extends ModuleServiceProvider
         // Phase 14 — tự động publish translation đã tới hạn scheduled_at (§7.3).
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->job(new PublishDueTranslationsJob())->everyMinute()->withoutOverlapping();
+
+            // spec/dac-ta-ky-thuat-bai-viet-tai-tro.md §8 — daily (không phải everyMinute như
+            // publish-due) vì hết hạn tài trợ tính theo date, không theo giờ. Queue 'low' truyền
+            // qua tham số thứ 2 của Schedule::job() (đã có sẵn trong lệnh worker chuẩn — README)
+            // để không tranh tài nguyên với PublishDueTranslationsJob (queue mặc định).
+            $schedule->job(new ExpireSponsoredArticlesJob(), 'low')->daily()->withoutOverlapping();
         });
     }
 }

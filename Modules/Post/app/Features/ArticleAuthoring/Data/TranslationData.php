@@ -19,5 +19,12 @@ class TranslationData extends Data
 
         /** @var array<int, array> Dãy block-composer — cùng shape với ArticleData::$blocks. */
         public readonly array $blocks = [],
+
+        // required-if khi article.is_sponsored — không đặt attribute ở đây vì điều kiện tham
+        // chiếu ArticleData, 1 DTO khác (spec/dac-ta-ky-thuat-bai-viet-tai-tro.md §6.2); validate
+        // thật nằm ở TranslationController::validated() bằng Rule::requiredIf().
+        public readonly ?string $disclosure_text = null,
+        public readonly ?string $cta_text = null,
+        public readonly ?string $cta_url = null,
     ) {}
 }

@@ -261,7 +261,16 @@
     ],
     [
         "post_articles///add///__///",
-        "main_locale///string///10///NOT_NULL///'vi'///__///__"
+        "main_locale///string///10///NOT_NULL///'vi'///__///__",
+        "is_sponsored///boolean///__///NOT_NULL///false///__///__",
+        "sponsor_name///string///255///_NULL///NULL///__///__",
+        "sponsor_logo_url///string///500///_NULL///NULL///__///__",
+        "sponsor_label///string///30///_NULL///NULL///__///__",
+        "campaign_code///string///50///_NULL///NULL///__///__",
+        "sponsored_start_date///date///__///_NULL///NULL///__///__",
+        "sponsored_end_date///date///__///_NULL///NULL///__///__",
+        "sponsored_published_at///timestamp///__///_NULL///NULL///__///__",
+        "__index///index///__///__///__///organization_id,is_sponsored,sponsored_end_date|idx_post_article_sponsored///__"
     ],
     [
         "post_articles///drop///__///Publishing Engine Phase 13 — field publishing chuyển sang post_article_translations",
@@ -297,5 +306,11 @@
         "post_product_blocks///drop///__///Publishing Engine Phase 13 — article_id thay bằng translation_id",
         "article_id///unsignedBigInteger///__///NOT_NULL///__///->constrained('post_articles')->onDelete('cascade')///__",
         "__index///index///__///__///__///idx_post_pb_org_article///__"
+    ],
+    [
+        "post_article_translations///add///__///",
+        "disclosure_text///string///500///_NULL///NULL///__///__",
+        "cta_text///string///100///_NULL///NULL///__///__",
+        "cta_url///string///500///_NULL///NULL///__///__"
     ]
 ]

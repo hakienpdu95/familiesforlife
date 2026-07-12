@@ -22,6 +22,7 @@ class PostPermissionSeeder extends Seeder
         'post_article.delete',
         'post_article.publish',
         'post_article.unpublish',
+        'post_article.manage_sponsorship',
     ];
 
     private const ROLE_MAP = [
@@ -29,6 +30,7 @@ class PostPermissionSeeder extends Seeder
             'post_article.view',
             'post_article.publish',
             'post_article.unpublish',
+            'post_article.manage_sponsorship',
         ],
         'sales' => [
             'post_article.view',
@@ -42,6 +44,7 @@ class PostPermissionSeeder extends Seeder
             'post_article.create',
             'post_article.edit',
             'post_article.delete',
+            'post_article.manage_sponsorship',
         ],
         'hr' => [
             'post_article.view',
@@ -60,6 +63,7 @@ class PostPermissionSeeder extends Seeder
             'post_article.publish',
             'post_article.unpublish',
             'post_category.manage',
+            'post_article.manage_sponsorship',
         ],
     ];
 

@@ -36,12 +36,22 @@ class PostArticlePolicy
 
     public function update(User $user, PostArticleTranslation $translation): bool
     {
+        // loadMissing (không phải truy cập trực tiếp $translation->article) — $translation có
+        // thể tới đây từ 1 collection đã eager-load (vd $article->translation($locale) qua
+        // $article->translations đã load()) mà KHÔNG có inverse "article" được set, khiến truy
+        // cập trực tiếp lazy-load và ném LazyLoadingViolationException thật khi
+        // Model::shouldBeStrict() bật (môi trường non-production) — đã gặp lỗi thật này khi
+        // test @can('submitForReview', $translation) trên trang edit với bài ≥2 bản dịch.
+        $translation->loadMissing('article');
+
         return $user->can('post_article.edit')
             && ($translation->article->created_by === $user->id || $user->can('post_article.publish'));
     }
 
     public function delete(User $user, PostArticleTranslation $translation): bool
     {
+        $translation->loadMissing('article');
+
         return $user->can('post_article.delete')
             && ($translation->article->created_by === $user->id || $user->can('post_article.publish'));
     }
@@ -74,5 +84,18 @@ class PostArticlePolicy
     public function unpublish(User $user, PostArticleTranslation $translation): bool
     {
         return $user->can('post_article.unpublish');
+    }
+
+    /**
+     * Dùng translation làm tham số cho nhất quán với các method khác trong Policy, dù field
+     * sponsorship thực chất nằm ở PostArticle (spec/dac-ta-ky-thuat-bai-viet-tai-tro.md §9) —
+     * check qua $translation->article nếu cần mở rộng logic sau này. Dùng ở Blade
+     * (@can('manageSponsorship', $translation)) với $translation luôn có sẵn ở trang edit;
+     * controller (ArticleAdminController::removeSponsor) check permission trực tiếp thay vì
+     * qua đây vì $article->mainTranslation() có thể null.
+     */
+    public function manageSponsorship(User $user, PostArticleTranslation $translation): bool
+    {
+        return $user->can('post_article.manage_sponsorship');
     }
 }

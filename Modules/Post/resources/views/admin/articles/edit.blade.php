@@ -42,6 +42,12 @@
             @else
                 <span class="badge badge-xs badge-ghost">Chưa có</span>
             @endif
+            @if($article->is_sponsored)
+                {{-- §11 — dùng cờ is_sponsored thô (không phải isCurrentlySponsored()) vì đây là
+                     badge quản trị nội bộ báo "bài đang cấu hình tài trợ", khác badge công khai
+                     ở §12 vốn cần tôn trọng cửa sổ start/end date. --}}
+                <span class="badge badge-xs {{ $article->sponsor_label?->badgeClass() ?? 'badge-warning' }}" title="Bài viết tài trợ">🏷</span>
+            @endif
         </a>
     @endforeach
 </div>
@@ -62,7 +68,7 @@
     {{-- ── Cột chính: form bản dịch (hoặc lời mời tạo bản dịch) ──────────── --}}
     <div x-data="{
         tab: 'noi_dung',
-        tabFields: { noi_dung: ['title', 'excerpt', 'blocks'], seo: ['seo_title', 'seo_description'] },
+        tabFields: { noi_dung: ['title', 'excerpt', 'blocks', 'disclosure_text', 'cta_text', 'cta_url'], seo: ['seo_title', 'seo_description'] },
         errs: {{ Js::from($errors->keys()) }},
         errCount(t) { return this.tabFields[t].filter(f => this.errs.some(e => e === f || e.startsWith(f + '.'))).length; },
         init() { for (const t of ['noi_dung', 'seo']) { if (this.errCount(t) > 0) { this.tab = t; break; } } }
@@ -140,6 +146,42 @@
                     <input type="hidden" name="blocks_json">
                 </div>
 
+                @if($article->is_sponsored)
+                {{-- §11 — chỉ hiện khi article.is_sponsored (đọc thẳng từ Blade, không cần JS
+                     phức tạp vì đây là server-rendered per-locale form). --}}
+                <div class="divider text-xs text-base-content/40 my-2">Thông tin tài trợ ({{ config('post.locales')[$activeLocale] }})</div>
+
+                <div class="form-control">
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="label py-0 !p-0"><span class="label-text font-medium">Nội dung công bố tài trợ <span class="text-error">*</span></span></label>
+                        <button type="button" class="btn btn-ghost btn-xs"
+                                @click="$refs.disclosureText.value = 'Nội dung tài trợ bởi {{ addslashes($article->sponsor_name) }}'">
+                            Dùng mẫu
+                        </button>
+                    </div>
+                    <textarea name="disclosure_text" rows="2" x-ref="disclosureText" data-val-maxlength="500"
+                              class="textarea textarea-bordered textarea-sm w-full @error('disclosure_text') textarea-error @enderror"
+                              maxlength="500">{{ old('disclosure_text', $translation->disclosure_text) }}</textarea>
+                    @error('disclosure_text')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                </div>
+
+                <div class="form-control">
+                    <label class="label py-0 pb-1.5"><span class="label-text font-medium">Nút CTA — nhãn</span></label>
+                    <input type="text" name="cta_text" value="{{ old('cta_text', $translation->cta_text) }}"
+                           data-val-maxlength="100"
+                           class="input input-bordered input-sm w-full @error('cta_text') input-error @enderror" maxlength="100">
+                    @error('cta_text')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                </div>
+
+                <div class="form-control">
+                    <label class="label py-0 pb-1.5"><span class="label-text font-medium">Nút CTA — liên kết</span></label>
+                    <input type="url" name="cta_url" value="{{ old('cta_url', $translation->cta_url) }}"
+                           data-val-maxlength="500"
+                           class="input input-bordered input-sm w-full @error('cta_url') input-error @enderror" maxlength="500">
+                    @error('cta_url')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                </div>
+                @endif
+
             </div>
 
             <div x-show="tab === 'seo'" data-tab-label="SEO" class="space-y-4">
@@ -212,7 +254,14 @@
     <div class="xl:sticky xl:top-4 space-y-4">
 
         {{-- Cài đặt chung (PostArticle — dùng chung mọi ngôn ngữ) --}}
-        <form method="POST" action="{{ route('backend.post.articles.update', $article) }}" class="card bg-base-100 shadow-sm border border-base-200">
+        @php
+            // Dùng dạng khối (không phải dạng 1 dòng rút gọn) cho nhất quán với chỗ khác trong
+            // cùng file — trộn 2 dạng khai báo PHP-in-Blade khác nhau trong cùng 1 file từng gây
+            // lỗi parse thật (Blade compile theo regex trên text thô, kể cả bên trong comment).
+            $canManageSponsorship = auth()->user()->can('post_article.manage_sponsorship');
+        @endphp
+        <form method="POST" action="{{ route('backend.post.articles.update', $article) }}" class="card bg-base-100 shadow-sm border border-base-200"
+              x-data="{ isSponsored: {{ old('is_sponsored', $article->is_sponsored) ? 'true' : 'false' }} }">
             @csrf
             @method('PUT')
             <div class="card-body p-4">
@@ -268,6 +317,78 @@
                            class="checkbox checkbox-sm checkbox-primary mt-0.5 shrink-0" {{ old('is_featured', $article->is_featured) ? 'checked' : '' }}>
                     <span class="text-sm font-medium group-hover:text-primary transition-colors">Bài viết nổi bật</span>
                 </label>
+
+                {{-- §11/§9 — checkbox luôn hiện nếu bài ĐANG sponsored (để không ai mất quyền xem
+                     cấu hình hiện tại), nhưng disabled khi user không có quyền
+                     post_article.manage_sponsorship — gate thật nằm ở server
+                     (ArticleAdminController::update(), test §14 mục 8), disabled ở đây chỉ là UX. --}}
+                @if($canManageSponsorship || $article->is_sponsored)
+                <label class="flex items-start gap-2.5 select-none group mb-3 {{ $canManageSponsorship ? 'cursor-pointer' : 'opacity-60' }}">
+                    <input type="hidden" name="is_sponsored" value="0">
+                    <input type="checkbox" name="is_sponsored" value="1" x-model="isSponsored"
+                           {{ $canManageSponsorship ? '' : 'disabled' }}
+                           class="checkbox checkbox-sm checkbox-warning mt-0.5 shrink-0"
+                           {{ old('is_sponsored', $article->is_sponsored) ? 'checked' : '' }}>
+                    <span class="text-sm font-medium group-hover:text-primary transition-colors">Đây là bài viết tài trợ</span>
+                </label>
+
+                <div x-show="isSponsored" x-cloak class="space-y-3 mb-3 pl-2.5 border-l-2 border-warning/30">
+                    <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide">Thông tin tài trợ</p>
+
+                    <div class="form-control">
+                        <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Tên nhãn hàng <span class="text-error">*</span></span></label>
+                        <input type="text" name="sponsor_name" value="{{ old('sponsor_name', $article->sponsor_name) }}"
+                               {{ $canManageSponsorship ? '' : 'disabled' }}
+                               class="input input-bordered input-sm w-full @error('sponsor_name') input-error @enderror" maxlength="255">
+                        @error('sponsor_name')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Logo nhãn hàng (URL)</span></label>
+                        <input type="text" name="sponsor_logo_url" value="{{ old('sponsor_logo_url', $article->sponsor_logo_url) }}"
+                               {{ $canManageSponsorship ? '' : 'disabled' }}
+                               class="input input-bordered input-sm w-full @error('sponsor_logo_url') input-error @enderror" maxlength="500">
+                        @error('sponsor_logo_url')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Loại nhãn <span class="text-error">*</span></span></label>
+                        <select name="sponsor_label" {{ $canManageSponsorship ? '' : 'disabled' }}
+                                class="select select-bordered select-sm w-full @error('sponsor_label') select-error @enderror">
+                            <option value="">— Chọn —</option>
+                            @foreach(\Modules\Post\Enums\SponsorLabel::cases() as $sl)
+                            <option value="{{ $sl->value }}" {{ old('sponsor_label', $article->sponsor_label?->value) === $sl->value ? 'selected' : '' }}>{{ $sl->label() }}</option>
+                            @endforeach
+                        </select>
+                        @error('sponsor_label')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Mã campaign</span></label>
+                        <input type="text" name="campaign_code" value="{{ old('campaign_code', $article->campaign_code) }}"
+                               {{ $canManageSponsorship ? '' : 'disabled' }}
+                               class="input input-bordered input-sm w-full @error('campaign_code') input-error @enderror" maxlength="50">
+                        @error('campaign_code')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="form-control">
+                            <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Bắt đầu</span></label>
+                            <input type="date" name="sponsored_start_date" value="{{ old('sponsored_start_date', $article->sponsored_start_date?->toDateString()) }}"
+                                   {{ $canManageSponsorship ? '' : 'disabled' }}
+                                   class="input input-bordered input-sm w-full @error('sponsored_start_date') input-error @enderror">
+                            @error('sponsored_start_date')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                        </div>
+                        <div class="form-control">
+                            <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Kết thúc</span></label>
+                            <input type="date" name="sponsored_end_date" value="{{ old('sponsored_end_date', $article->sponsored_end_date?->toDateString()) }}"
+                                   {{ $canManageSponsorship ? '' : 'disabled' }}
+                                   class="input input-bordered input-sm w-full @error('sponsored_end_date') input-error @enderror">
+                            @error('sponsored_end_date')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                        </div>
+                    </div>
+                </div>
+                @endif
 
                 <button type="submit" class="btn btn-outline btn-sm w-full">Lưu cài đặt chung</button>
             </div>
@@ -330,7 +451,9 @@
                     <div x-show="showSchedule" x-cloak x-transition class="pt-1">
                         <form method="POST" action="{{ route('backend.post.translations.schedule', $translation) }}" class="flex flex-col gap-2">
                             @csrf
-                            <input type="datetime-local" name="scheduled_at" class="input input-bordered input-sm w-full" required>
+                            <input type="text" name="scheduled_at" id="fp-scheduled-at"
+                                   class="input input-bordered input-sm w-full fp-init" data-fp-mode="datetime"
+                                   placeholder="DD/MM/YYYY HH:mm" required>
                             <button class="btn btn-primary btn-sm w-full">Xác nhận lên lịch</button>
                         </form>
                     </div>
@@ -389,6 +512,18 @@
                     </form>
                     @endcan
 
+                    {{-- §11 — chỉ hiện khi article.is_sponsored, ẩn hoàn toàn (không disabled)
+                         nếu user không có quyền manage_sponsorship — khác checkbox ở "Cài đặt
+                         chung" (vẫn hiện disabled để xem cấu hình), vì đây là nút HÀNH ĐỘNG
+                         (thay đổi dữ liệu ngay khi bấm), không phải trường xem thông tin. --}}
+                    @if($article->is_sponsored && $canManageSponsorship)
+                    <form method="POST" action="{{ route('backend.post.articles.remove-sponsor', $article) }}"
+                          onsubmit="return confirm('Gỡ tài trợ khỏi bài viết này? Toàn bộ thông tin sponsor sẽ bị xoá (không ảnh hưởng trạng thái xuất bản).')">
+                        @csrf
+                        <button class="btn btn-ghost btn-sm w-full text-warning">Gỡ tài trợ</button>
+                    </form>
+                    @endif
+
                 </div>
             </div>
         </div>
@@ -409,6 +544,7 @@
     @vite([
         'resources/js/modules/toastify.js',
         'resources/js/modules/tom-select.js',
+        'resources/js/modules/flatpickr.js',
         'resources/js/modules/jodit.js',
         'Modules/Post/resources/assets/js/post.js',
     ], 'build/backend')

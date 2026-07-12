@@ -29,7 +29,7 @@ class CreateTranslationAction
     {
         return DB::transaction(function () use ($article, $locale, $data) {
             $translation = PostArticleTranslation::create([
-                'article_id'      => $article->id,
+                'article_id'       => $article->id,
                 'organization_id' => $article->organization_id,
                 'locale'          => $locale,
                 'title'           => $data->title,
@@ -38,6 +38,11 @@ class CreateTranslationAction
                 'seo_title'       => $data->seo_title,
                 'seo_description' => $data->seo_description,
                 'status'          => TranslationStatus::Draft,
+                // spec/dac-ta-ky-thuat-bai-viet-tai-tro.md §7 — field per-locale của sponsorship,
+                // đúng như disclosure_text/cta_text/cta_url đã validate ở §6.2.
+                'disclosure_text' => $data->disclosure_text,
+                'cta_text'        => $data->cta_text,
+                'cta_url'         => $data->cta_url,
             ]);
 
             $source = $article->mainTranslation() ?? $article->translations()->first();
