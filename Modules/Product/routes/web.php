@@ -21,4 +21,11 @@ Route::middleware(['auth', 'tenant'])
         Route::put('{product}', [ProductAdminController::class, 'update'])->name('update');
         Route::delete('{product}', [ProductAdminController::class, 'destroy'])->name('destroy');
         Route::post('{product}/status', [ProductAdminController::class, 'changeStatus'])->name('change-status');
+
+        // Duyệt nội dung — spec/Workflow_Approval_Technical_Specification.md §9.4
+        Route::post('{product}/submit-approval', [ProductAdminController::class, 'submitApproval'])->name('submit-approval');
+        Route::post('{product}/approve-content', [ProductAdminController::class, 'approveContent'])->name('approve-content');
+        Route::post('{product}/reject-content', [ProductAdminController::class, 'rejectContent'])->name('reject-content');
+        Route::post('{product}/publish-content', [ProductAdminController::class, 'publishContent'])->name('publish-content');
+        Route::post('{product}/archive-content', [ProductAdminController::class, 'archiveContent'])->name('archive-content');
     });

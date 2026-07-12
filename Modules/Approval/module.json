@@ -1,0 +1,11 @@
+{
+    "name": "Approval",
+    "alias": "approval",
+    "description": "Kiểm soát thay đổi nội dung trước khi công khai (Draft/Pending/Approved/Published/Archived) — polymorphic qua trait HasApproval, dùng chung cho nhiều entity",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Approval\\Providers\\ApprovalServiceProvider"
+    ],
+    "files": []
+}

@@ -4,11 +4,13 @@ namespace Modules\Auth\Actions;
 
 use App\Enums\RoleEnum;
 use App\Models\User;
+use App\Shared\Tenancy\TenantContext;
 use Modules\ActivityLog\Core\ActivityLogger;
 use App\Shared\Tenancy\Models\Organization;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Lorisleiva\Actions\Concerns\AsAction;
+use Modules\Approval\Actions\SubmitForApprovalAction;
 use Modules\Auth\Data\RegisterOrganizationData;
 
 /**
@@ -49,6 +51,17 @@ class RegisterOrganizationAction
             setPermissionsTeamId($organization->id);
             $user->assignRole(RoleEnum::CEO->value);
             setPermissionsTeamId(null);
+
+            // 4b. Platform Approval Gateway (hệ thống nội bộ Hà Kiên) — tổ chức mới đăng ký
+            // PHẢI qua đội kiểm duyệt tập trung trước khi được duyệt chính thức. Gửi duyệt
+            // ngay tại đây (không chờ CEO tự bấm) — status kinh doanh (`status`) vẫn 'active'
+            // ngay để CEO đăng nhập/dùng hệ thống bình thường (2 trục độc lập, §2.3 của
+            // spec/Workflow_Approval_Technical_Specification.md); chỉ riêng hồ sơ doanh
+            // nghiệp (ApprovalStatus) là 'pending' chờ Hà Kiên duyệt.
+            TenantContext::runForOrganization(
+                $organization,
+                fn () => app(SubmitForApprovalAction::class)->handle($organization),
+            );
 
             // 5. Ghi audit log
             ActivityLogger::info('Auth', 'organization_registered', $organization, [

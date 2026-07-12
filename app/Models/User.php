@@ -119,6 +119,52 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->organization_id === $organizationId;
     }
 
+    /**
+     * Kiểm tra 1 role "xuyên tổ chức" (Platform Approval Gateway —
+     * spec/Workflow_Approval_Technical_Specification.md §18) — organization_id = null, giống
+     * quy ước super-admin. Dùng cho content_moderator (duyệt Doanh nghiệp/Sản phẩm),
+     * content_editor/content_head (2 cấp duyệt bài viết, §18.10).
+     *
+     * CỐ Ý KHÔNG dùng `hasRole()` (Spatie team-scoped) — verify thật cho thấy hasRole() chỉ
+     * trả đúng khi ambient Spatie team (getPermissionsTeamId()) CŨNG đang null tại thời điểm
+     * gọi; vì các tài khoản này thao tác trên dữ liệu của NHIỀU tổ chức khác nhau trong cùng 1
+     * request (mỗi request cần set TenantContext sang đúng tổ chức đang xử lý để
+     * OrganizationScope không chặn), ambient team context không ổn định qua từng bước xử lý.
+     * Query thẳng bảng pivot — không phụ thuộc getPermissionsTeamId() — để kết quả luôn đúng
+     * bất kể đang "đứng" ở tổ chức nào.
+     */
+    public function hasGlobalRole(string $role): bool
+    {
+        if ($this->organization_id !== null) {
+            return false;
+        }
+
+        return \Illuminate\Support\Facades\DB::table(config('permission.table_names.model_has_roles'))
+            ->join('roles', 'roles.id', '=', config('permission.table_names.model_has_roles') . '.role_id')
+            ->where(config('permission.table_names.model_has_roles') . '.model_id', $this->id)
+            ->where(config('permission.table_names.model_has_roles') . '.model_type', static::class)
+            ->where('roles.name', $role)
+            ->exists();
+    }
+
+    /** Đội kiểm duyệt Doanh nghiệp/Sản phẩm (Platform Approval Gateway, §18). */
+    public function isContentModerator(): bool
+    {
+        return $this->hasGlobalRole('content_moderator');
+    }
+
+    /** Biên tập viên — duyệt SƠ BỘ bài viết (Submitted → Approved), §18.10. */
+    public function isContentEditor(): bool
+    {
+        return $this->hasGlobalRole('content_editor');
+    }
+
+    /** Trưởng phòng nội dung — duyệt CUỐI CÙNG + xuất bản bài viết (Approved → Published), §18.10. */
+    public function isContentHead(): bool
+    {
+        return $this->hasGlobalRole('content_head');
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()

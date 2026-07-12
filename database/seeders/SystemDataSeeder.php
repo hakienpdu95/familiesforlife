@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Modules\ActivityLog\Database\Seeders\ActivityLogPermissionsSeeder;
+use Modules\Approval\Database\Seeders\ApprovalDatabaseSeeder;
 use Modules\Assessment\Database\Seeders\AssessmentDatabaseSeeder;
 use Modules\Auth\Database\Seeders\AuthDatabaseSeeder;
 use Modules\Lead\Database\Seeders\LeadDatabaseSeeder;
@@ -79,6 +80,9 @@ class SystemDataSeeder extends Seeder
 
             // ── 25. Post: permissions (post_article.*/post_category.*) — bài viết + Product CTA Box ──
             PostDatabaseSeeder::class,
+
+            // ── 26. Approval: permission approval.view_dashboard (duy nhất thuộc module này) ──
+            ApprovalDatabaseSeeder::class,
         ]);
 
         $this->command->newLine();

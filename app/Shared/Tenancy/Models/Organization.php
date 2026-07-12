@@ -11,11 +11,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use Laravelcm\Subscriptions\Traits\HasPlanSubscriptions;
+use Modules\Approval\Concerns\HasApproval;
 
 class Organization extends Model
 {
     use HasFactory;
     use HasPlanSubscriptions;
+    use HasApproval;
 
     /** Morph alias — ensures consistent subscriber_type regardless of subclass. */
     public function getMorphClass(): string
@@ -135,6 +137,34 @@ class Organization extends Model
     public function isActive(): bool
     {
         return $this->status === OrganizationStatus::Active;
+    }
+
+    // ── Platform Approval Gateway (Modules\Approval\Concerns\HasApproval) ─────────────
+
+    /**
+     * Organization LÀ tenant root — không có organization_id trỏ tới chính mình như các
+     * entity tenant-scoped bình thường (Product…). ApprovalSubject của chính tổ chức này vẫn
+     * cần 1 organization_id hợp lệ (FK, NOT NULL) — dùng luôn $this->id.
+     */
+    public function approvalOrganizationId(): int
+    {
+        return $this->id;
+    }
+
+    /**
+     * Trường "nội dung" hồ sơ doanh nghiệp cần Hà Kiên duyệt lại khi thay đổi — KHÔNG gồm
+     * status/settings/owner_id/is_system (vận hành nội bộ, không hiển thị công khai) hay
+     * approved_by/approved_at (cột cũ chưa từng dùng, không liên quan ApprovalSubject).
+     */
+    public function approvalWatchedAttributes(): array
+    {
+        return ['name', 'description', 'industry', 'logo_path', 'website', 'address', 'tax_code'];
+    }
+
+    /** Link "Xem & duyệt" cho dashboard Platform Approval Gateway (§12) — trang show (chỉ xem). */
+    public function getApprovalDashboardUrlAttribute(): string
+    {
+        return route('backend.organizations.show', $this);
     }
 
     public function getSetting(string $key, mixed $default = null): mixed

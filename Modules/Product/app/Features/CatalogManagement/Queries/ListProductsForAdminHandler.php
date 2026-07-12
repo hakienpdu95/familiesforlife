@@ -12,7 +12,11 @@ class ListProductsForAdminHandler implements QueryHandlerInterface
     public function handle(QueryInterface $query): LengthAwarePaginator
     {
         /** @var ListProductsForAdminQuery $query */
-        $q = Product::query()->with('category:id,name');
+        // 'approvalSubject' bắt buộc eager-load — Blade danh sách hiển thị badge duyệt nội
+        // dung cho từng dòng (spec/Workflow_Approval_Technical_Specification.md §9); thiếu
+        // dòng này sẽ ném LazyLoadingViolationException (strict mode) khi danh sách có ≥ 2
+        // sản phẩm và Blade gọi $p->approvalStatus() cho từng dòng.
+        $q = Product::query()->with(['category:id,name', 'approvalSubject']);
 
         if ($query->search) {
             $term = '%' . $query->search . '%';

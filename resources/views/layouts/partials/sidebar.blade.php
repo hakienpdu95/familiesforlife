@@ -17,6 +17,43 @@
             </a>
         </div>
 
+        {{-- @can('viewDashboard') — TÊN GATE thật (ApprovalServiceProvider::boot()), KHÔNG
+             phải chuỗi permission "approval.view_dashboard" — bug thật phát hiện: content_
+             moderator KHÔNG có permission Spatie đó (team-scoped, tài khoản organization_id=
+             null không khớp bất kỳ team nào) nên link menu không hiện dù trang vẫn truy cập
+             được bình thường nếu vào thẳng URL (Gate viewDashboard tự OR thêm isContentModerator()). --}}
+        @can('viewDashboard')
+        <div class="nav-group">
+            <a href="{{ route('backend.approval.dashboard') }}"
+               class="nav-link {{ request()->routeIs('backend.approval.dashboard') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span class="nav-label">Chờ duyệt của tôi</span>
+            </a>
+        </div>
+        @endcan
+
+        @can('viewApprovalHistory')
+        <div class="nav-group">
+            <a href="{{ route('backend.approval.history') }}"
+               class="nav-link {{ request()->routeIs('backend.approval.history') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span class="nav-label">Lịch sử duyệt</span>
+            </a>
+        </div>
+        @endcan
+
+        {{-- content_editor/content_head (§18.10) — không có permission post_article.* nào
+             (org-less) nên không dùng @can(permission) — check thẳng 2 role qua User helper. --}}
+        @if(auth()->user()?->isContentEditor() || auth()->user()?->isContentHead())
+        <div class="nav-group">
+            <a href="{{ route('backend.post.articles.pending-review') }}"
+               class="nav-link {{ request()->routeIs('backend.post.articles.pending-review') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l6 6v10a2 2 0 01-2 2z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 13h6M9 17h6M9 9h1"/></svg>
+                <span class="nav-label">Bài viết chờ duyệt</span>
+            </a>
+        </div>
+        @endif
+
         @auth
         <a href="{{ route('backend.surveys.my') }}"
            class="nav-link {{ request()->routeIs('backend.surveys.my') ? 'active' : '' }}">

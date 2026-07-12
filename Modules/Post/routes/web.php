@@ -20,6 +20,12 @@ Route::middleware(['auth', 'tenant'])
         Route::resource('categories', CategoryAdminController::class)->except(['show']);
         Route::post('categories/reorder', [CategoryAdminController::class, 'reorder'])->name('categories.reorder');
 
+        // Hàng chờ duyệt xuyên tổ chức (content_editor/content_head) — ĐẶT TRƯỚC
+        // Route::resource('articles', ...) bên dưới, vì "articles/{article}" (show) sẽ khớp
+        // nhầm "articles/pending-review" nếu resource đăng ký trước (Laravel so khớp theo thứ
+        // tự đăng ký, không tự ưu tiên path tường minh hơn wildcard).
+        Route::get('articles/pending-review', [ArticleAdminController::class, 'pendingReview'])->name('articles.pending-review');
+
         // PostArticle: chỉ "vỏ" (format/cover/is_featured/categories/tags) — không còn
         // title/status (đã chuyển sang PostArticleTranslation, xem TranslationController).
         Route::resource('articles', ArticleAdminController::class);

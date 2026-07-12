@@ -164,10 +164,25 @@ class TranslationController extends Controller
         return $this->runTransition($translation, fn () => $action->handle($translation), 'Đã lưu trữ bản dịch.');
     }
 
+    /**
+     * Platform Approval Gateway (Hà Kiên nội bộ) — approve/publish/schedule/archive/unpublish
+     * giờ do content_moderator xử lý (tài khoản organization_id=null, không có TenantContext
+     * của riêng mình khớp tổ chức của $translation). Action (PublishArticleAction…) lazy-load
+     * $translation->article — nếu chưa cache và TenantContext không khớp, PostArticle (có
+     * OrganizationScope) sẽ resolve null, gây lỗi "gọi method trên null" thật ở
+     * PublishArticleAction (đọc $article->is_sponsored). Bọc trong
+     * TenantContext::runForOrganization() để mọi lazy-load bên trong $callback() resolve đúng
+     * tổ chức của CHÍNH translation đang xử lý; loadMissing('article') ngay trong cùng block
+     * để cache lại trước khi thoát context, phục vụ redirect() dùng $translation->article bên
+     * dưới (đã ra khỏi context, không set lại được org nữa).
+     */
     private function runTransition(PostArticleTranslation $translation, \Closure $callback, string $successMessage): RedirectResponse
     {
         try {
-            $callback();
+            TenantContext::runForOrganization($translation->organization, function () use ($translation, $callback) {
+                $callback();
+                $translation->loadMissing('article');
+            });
         } catch (InvalidTransitionException $e) {
             return back()->with('error', $e->getMessage());
         }

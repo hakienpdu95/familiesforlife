@@ -80,6 +80,7 @@
                         <th>Loại</th>
                         <th class="text-right">Giá</th>
                         <th class="text-center">Trạng thái</th>
+                        <th class="text-center">Duyệt nội dung</th>
                         <th class="text-center">Bài viết dùng</th>
                         <th class="w-24"></th>
                     </tr>
@@ -96,6 +97,15 @@
                     <td class="text-right text-sm">{{ $p->display_price ?? '—' }}</td>
                     <td class="text-center">
                         <span class="badge badge-sm {{ $p->status->badgeClass() }}">{{ $p->status->label() }}</span>
+                    </td>
+                    <td class="text-center">
+                        @if ($p->approvalStatus())
+                            <span class="badge badge-sm {{ $p->approvalStatus()->badgeClass() }}" title="Trạng thái duyệt nội dung — độc lập với trạng thái kinh doanh ở cột bên trái">
+                                {{ $p->approvalStatus()->label() }}
+                            </span>
+                        @else
+                            <span class="text-base-content/30 text-xs">—</span>
+                        @endif
                     </td>
                     <td class="text-center text-sm">
                         @if($p->used_in_articles_count > 0)
@@ -129,7 +139,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="text-center py-8 text-base-content/40">Chưa có sản phẩm nào.</td>
+                    <td colspan="8" class="text-center py-8 text-base-content/40">Chưa có sản phẩm nào.</td>
                 </tr>
                 @endforelse
                 </tbody>

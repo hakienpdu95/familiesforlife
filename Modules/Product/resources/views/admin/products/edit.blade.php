@@ -29,6 +29,11 @@
         <p class="text-sm text-base-content/50 mt-0.5 flex items-center gap-2">
             {{ $product->name }}
             <span class="badge badge-sm {{ $product->status->badgeClass() }}">{{ $product->status->label() }}</span>
+            @if ($product->approvalStatus())
+                <span class="badge badge-sm {{ $product->approvalStatus()->badgeClass() }}">
+                    Duyệt: {{ $product->approvalStatus()->label() }}
+                </span>
+            @endif
         </p>
     </div>
     <a href="{{ route('backend.products.index') }}" class="btn btn-ghost btn-sm gap-1.5">
@@ -420,6 +425,75 @@
     </div>{{-- /grid --}}
 
 </form>
+
+{{-- ── Duyệt nội dung — spec/Workflow_Approval_Technical_Specification.md §9.5 ────────
+     Đặt NGOÀI <form> chính ở trên (mỗi nút là 1 form POST riêng, không lồng được vào form
+     update sản phẩm). Trục "Duyệt nội dung" độc lập với trục "Trạng thái" (kinh doanh/tồn
+     kho) ở sidebar bên trên — 2 badge khác nhau ở header, không gộp. --}}
+@if ($product->approvalStatus())
+<div class="card bg-base-100 shadow-sm border border-base-200 mt-4">
+    <div class="card-body p-4">
+        <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">Duyệt nội dung</p>
+
+        <div class="flex flex-wrap items-center gap-2">
+            @if ($product->isApprovalDraft() && auth()->user()->can('submitForApproval', $product))
+                <form method="POST" action="{{ route('backend.products.submit-approval', $product) }}">
+                    @csrf
+                    <button class="btn btn-sm btn-warning">Gửi duyệt</button>
+                </form>
+            @endif
+
+            @if ($product->isApprovalPending() && auth()->user()->can('approve', $product))
+                <form method="POST" action="{{ route('backend.products.approve-content', $product) }}">
+                    @csrf
+                    <button class="btn btn-sm btn-info">Duyệt</button>
+                </form>
+            @endif
+
+            @if ($product->isApprovalPending() && auth()->user()->can('reject', $product))
+                <button type="button" class="btn btn-sm btn-error btn-outline"
+                        onclick="document.getElementById('reject-content-modal').showModal()">
+                    Từ chối
+                </button>
+                <dialog id="reject-content-modal" class="modal">
+                    <div class="modal-box">
+                        <h3 class="font-bold text-base mb-3">Từ chối duyệt nội dung</h3>
+                        <form method="POST" action="{{ route('backend.products.reject-content', $product) }}">
+                            @csrf
+                            <textarea name="reason" required minlength="10" rows="3"
+                                      class="textarea textarea-bordered textarea-sm w-full"
+                                      placeholder="Lý do từ chối (tối thiểu 10 ký tự)"></textarea>
+                            <div class="modal-action">
+                                <button type="button" class="btn btn-ghost btn-sm"
+                                        onclick="document.getElementById('reject-content-modal').close()">Huỷ</button>
+                                <button type="submit" class="btn btn-error btn-sm">Xác nhận từ chối</button>
+                            </div>
+                        </form>
+                    </div>
+                </dialog>
+            @endif
+
+            @if ($product->isApproved() && auth()->user()->can('publishApproval', $product))
+                <form method="POST" action="{{ route('backend.products.publish-content', $product) }}">
+                    @csrf
+                    <button class="btn btn-sm btn-success">Xuất bản</button>
+                </form>
+            @endif
+
+            @if ($product->isApprovalPublished() && auth()->user()->can('archiveApproval', $product))
+                <form method="POST" action="{{ route('backend.products.archive-content', $product) }}">
+                    @csrf
+                    <button class="btn btn-sm btn-neutral btn-outline">Lưu trữ</button>
+                </form>
+            @endif
+
+            @if ($product->isApprovalArchived())
+                <span class="text-xs text-base-content/40">Đã lưu trữ — không thể sửa nội dung.</span>
+            @endif
+        </div>
+    </div>
+</div>
+@endif
 
 <div class="mt-6">
     <x-aicem::panel

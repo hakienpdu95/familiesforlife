@@ -14,5 +14,6 @@
     "Report": true,
     "Product": true,
     "Post": true,
-    "Aicem": true
+    "Aicem": true,
+    "Approval": true
 }

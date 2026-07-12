@@ -4,10 +4,17 @@ namespace Modules\Organization\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Shared\Tenancy\Enums\OrganizationStatus;
+use App\Shared\Tenancy\TenantContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Models\Province;
+use Modules\Approval\Actions\ApproveAction;
+use Modules\Approval\Actions\ArchiveAction;
+use Modules\Approval\Actions\PublishAction;
+use Modules\Approval\Actions\RejectAction;
+use Modules\Approval\Actions\SubmitForApprovalAction;
+use Modules\Approval\Exceptions\InvalidTransitionException;
 use Modules\Organization\Actions\Backend\DestroyOrganizationAction;
 use Modules\Organization\Actions\Backend\StoreOrganizationAction;
 use Modules\Organization\Actions\Backend\UpdateOrganizationAction;
@@ -104,5 +111,59 @@ class OrganizationController extends Controller
 
         return redirect()->route('backend.organizations.index')
             ->with('success', 'Đã xóa tổ chức "' . $name . '".');
+    }
+
+    // ── Approval workflow — Platform Approval Gateway (Hà Kiên nội bộ) ─────────────────
+    // approve/reject/publishApproval/archiveApproval do content_moderator xử lý (tài khoản
+    // organization_id=null) — bọc trong TenantContext::runForOrganization() để các query nội
+    // bộ (ApprovalSubject…) resolve đúng tổ chức đang xử lý, không phải tổ chức của người thao
+    // tác (xem chú thích tương tự ở Modules/Product/.../ProductAdminController).
+
+    public function submitApproval(Organization $organization, SubmitForApprovalAction $action): RedirectResponse
+    {
+        $this->authorize('submitForApproval', $organization);
+
+        return $this->runApprovalTransition($organization, fn () => $action->handle($organization), 'Đã gửi hồ sơ tổ chức để chờ duyệt.');
+    }
+
+    public function approveContent(Organization $organization, ApproveAction $action): RedirectResponse
+    {
+        $this->authorize('approve', $organization);
+
+        return $this->runApprovalTransition($organization, fn () => $action->handle($organization), 'Đã duyệt hồ sơ tổ chức.');
+    }
+
+    public function rejectContent(Request $request, Organization $organization, RejectAction $action): RedirectResponse
+    {
+        $this->authorize('reject', $organization);
+
+        $reason = $request->validate(['reason' => ['required', 'string', 'min:10']])['reason'];
+
+        return $this->runApprovalTransition($organization, fn () => $action->handle($organization, $reason), 'Đã từ chối duyệt hồ sơ tổ chức.');
+    }
+
+    public function publishContent(Organization $organization, PublishAction $action): RedirectResponse
+    {
+        $this->authorize('publishApproval', $organization);
+
+        return $this->runApprovalTransition($organization, fn () => $action->handle($organization), 'Đã duyệt xuất bản hồ sơ tổ chức.');
+    }
+
+    public function archiveContent(Organization $organization, ArchiveAction $action): RedirectResponse
+    {
+        $this->authorize('archiveApproval', $organization);
+
+        return $this->runApprovalTransition($organization, fn () => $action->handle($organization), 'Đã lưu trữ hồ sơ tổ chức.');
+    }
+
+    private function runApprovalTransition(Organization $organization, \Closure $callback, string $successMessage): RedirectResponse
+    {
+        try {
+            TenantContext::runForOrganization($organization, $callback);
+        } catch (InvalidTransitionException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', $successMessage);
     }
 }

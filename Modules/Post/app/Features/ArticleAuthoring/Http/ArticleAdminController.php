@@ -20,6 +20,8 @@ use Modules\Post\Features\ArticleAuthoring\Data\ArticleData;
 use Modules\Post\Features\ArticleAuthoring\Data\TranslationData;
 use Modules\Post\Features\ArticleAuthoring\Queries\ListArticlesForAdminHandler;
 use Modules\Post\Features\ArticleAuthoring\Queries\ListArticlesForAdminQuery;
+use Modules\Post\Features\ArticleAuthoring\Queries\ListPendingReviewTranslationsHandler;
+use Modules\Post\Features\ArticleAuthoring\Queries\ListPendingReviewTranslationsQuery;
 use Modules\Post\Features\CategoryManagement\Queries\ListCategoriesForAdminHandler;
 use Modules\Post\Features\CategoryManagement\Queries\ListCategoriesForAdminQuery;
 use Modules\Post\Models\PostArticle;
@@ -48,6 +50,20 @@ class ArticleAdminController extends Controller
         $categories = $categoryHandler->handle(new ListCategoriesForAdminQuery());
 
         return view('post::admin.articles.index', compact('articles', 'categories'));
+    }
+
+    /**
+     * Hàng chờ duyệt xuyên tổ chức cho content_editor/content_head (Platform Approval Gateway
+     * — spec/Workflow_Approval_Technical_Specification.md §18.10). Chỉ 2 role này truy cập —
+     * user thường dùng index() ở trên (đã lọc theo tổ chức của họ).
+     */
+    public function pendingReview(Request $request, ListPendingReviewTranslationsHandler $handler): View
+    {
+        abort_unless($request->user()->isContentEditor() || $request->user()->isContentHead(), 403);
+
+        $translations = $handler->handle(new ListPendingReviewTranslationsQuery($request->user()));
+
+        return view('post::admin.articles.pending-review', compact('translations'));
     }
 
     public function create(ListCategoriesForAdminHandler $categoryHandler): View
@@ -181,6 +197,14 @@ class ArticleAdminController extends Controller
     private function authorizeArticle(PostArticle $article, string $permission): void
     {
         $user = auth()->user();
+
+        // content_editor/content_head (Platform Approval Gateway — 2 tầng duyệt bài viết,
+        // Hà Kiên) không có permission post_article.* nào (tài khoản organization_id=null,
+        // permission team-scoped theo tổ chức) — nhưng cần xem/thao tác được để duyệt
+        // (PostArticlePolicy::approve/publish/…).
+        if ($user->isContentEditor() || $user->isContentHead()) {
+            return;
+        }
 
         abort_unless(
             $user->can($permission) && ($article->created_by === $user->id || $user->can('post_article.publish')),

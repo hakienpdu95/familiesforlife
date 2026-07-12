@@ -16,12 +16,17 @@ class PostArticlePolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->can('post_article.view');
+        return $user->can('post_article.view') || $user->isContentEditor() || $user->isContentHead();
     }
 
-    /** Chỉ bài `published` nếu user không có quyền edit. */
+    /** Chỉ bài `published` nếu user không có quyền edit. content_editor/content_head luôn xem
+     *  được (cần inspect nội dung trước khi duyệt). */
     public function view(User $user, PostArticleTranslation $translation): bool
     {
+        if ($user->isContentEditor() || $user->isContentHead()) {
+            return true;
+        }
+
         if (! $user->can('post_article.view')) {
             return false;
         }
@@ -61,29 +66,44 @@ class PostArticlePolicy
         return $this->update($user, $translation);
     }
 
+    // ── Approval workflow — Platform Approval Gateway, PHÂN CẤP 2 TẦNG cho bài viết ────
+    // (Hà Kiên nội bộ — "biên tập viên duyệt sơ bộ, trưởng phòng nội dung duyệt cuối trước
+    // khi hiển thị ra cổng thông tin", đúng luồng toà soạn tin tức thật). Doanh nghiệp/đội
+    // marketing (cộng tác viên) chỉ tự submitForReview (gửi duyệt) — KHÔNG tự duyệt/publish
+    // bài của chính mình nữa, dù có post_article.publish/unpublish hay không (permission đó
+    // vẫn giữ lại, chỉ còn ý nghĩa "quyền sửa bài của người khác trong cùng tổ chức" ở
+    // update()/delete(), không còn liên quan gì tới publish).
+    //
+    // 2 tầng ánh xạ ĐÚNG 2 bước đã có sẵn trong TranslationStatus (không cần đổi state
+    // machine): content_editor (biên tập viên) duyệt Submitted → Approved; content_head
+    // (trưởng phòng nội dung) duyệt CUỐI Approved → Published/Scheduled + archive/unpublish
+    // (thu hồi nội dung là quyết định cấp cao hơn). content_head làm được CẢ việc của
+    // content_editor (cấp trên thay thế được cấp dưới, không ngược lại) — giống phân cấp thật
+    // trong tổ chức, KHÔNG áp dụng ngược (content_editor không tự publish được).
+
     public function approve(User $user, PostArticleTranslation $translation): bool
     {
-        return $user->can('post_article.publish');
+        return $user->isContentEditor() || $user->isContentHead();
     }
 
     public function publish(User $user, PostArticleTranslation $translation): bool
     {
-        return $user->can('post_article.publish');
+        return $user->isContentHead();
     }
 
     public function schedule(User $user, PostArticleTranslation $translation): bool
     {
-        return $user->can('post_article.publish');
+        return $user->isContentHead();
     }
 
     public function archive(User $user, PostArticleTranslation $translation): bool
     {
-        return $user->can('post_article.publish');
+        return $user->isContentHead();
     }
 
     public function unpublish(User $user, PostArticleTranslation $translation): bool
     {
-        return $user->can('post_article.unpublish');
+        return $user->isContentHead();
     }
 
     /**

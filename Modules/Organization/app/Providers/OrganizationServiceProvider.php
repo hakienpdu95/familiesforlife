@@ -42,6 +42,13 @@ class OrganizationServiceProvider extends ModuleServiceProvider
         parent::boot();
 
         Gate::policy(Organization::class, OrganizationPolicy::class);
+        // Đăng ký thêm cho class GỐC — RegisterOrganizationAction (Modules/Auth) và
+        // config/approval.php dùng App\Shared\Tenancy\Models\Organization trực tiếp, không
+        // qua subclass này. Gate::policy() chỉ khớp CHÍNH XÁC theo class, không tự "đi lên"
+        // theo cây kế thừa — thiếu dòng này, $user->can('approve', $organization) trên 1
+        // instance class gốc luôn trả false (không tìm thấy Policy nào khớp), bug thật phát
+        // hiện khi content_moderator không duyệt được tổ chức mới đăng ký.
+        Gate::policy(\App\Shared\Tenancy\Models\Organization::class, OrganizationPolicy::class);
 
         // Enable Spatie Teams feature AFTER all providers have booted.
         // Using $this->app->booted() (Application-level) ensures this runs

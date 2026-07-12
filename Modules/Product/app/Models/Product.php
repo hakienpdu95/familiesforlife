@@ -4,12 +4,15 @@ namespace Modules\Product\Models;
 
 use App\Foundation\Models\TenantAwareModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Approval\Concerns\HasApproval;
 use Modules\Product\Enums\ProductStatus;
 use Modules\Product\Enums\ProductType;
 use Illuminate\Support\Str;
 
 class Product extends TenantAwareModel
 {
+    use HasApproval;
+
     protected $table = 'products';
 
     protected $fillable = [
@@ -81,6 +84,19 @@ class Product extends TenantAwareModel
         return $this->belongsTo(\App\Models\User::class, 'updated_by');
     }
 
+    /**
+     * Chỉ các trường NỘI DUNG hiển thị công khai — sửa 1 trong các trường này khi Product đang
+     * Approved/Published sẽ tự động bị HasApproval::bootHasApproval() chuyển về Pending và ẩn
+     * khỏi cổng thông tin cho tới khi duyệt lại. KHÔNG đưa price/status/shopee_url/tiktok_url/
+     * sort_order… vào đây — đó là trục vận hành/kinh doanh, đổi giá hay bật/tắt tồn kho không
+     * cần (và không nên) chờ duyệt lại nội dung
+     * (spec/Workflow_Approval_Technical_Specification.md §1, §2.3).
+     */
+    public function approvalWatchedAttributes(): array
+    {
+        return ['name', 'short_description', 'description', 'cover_image_url'];
+    }
+
     // ── Helpers ──────────────────────────────────────────────────────
 
     /** Nhãn giá hiển thị — ưu tiên price_label tuỳ chỉnh, fallback định dạng price. */
@@ -95,5 +111,11 @@ class Product extends TenantAwareModel
         }
 
         return null;
+    }
+
+    /** Link "Xem & duyệt" cho dashboard xuyên-entity của Approval (§12) — dùng route uuid sẵn có. */
+    public function getApprovalDashboardUrlAttribute(): string
+    {
+        return route('backend.products.edit', $this);
     }
 }
