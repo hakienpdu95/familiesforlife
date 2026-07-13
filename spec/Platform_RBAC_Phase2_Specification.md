@@ -1,6 +1,6 @@
 # Platform RBAC — Đặc tả Phase 2 (Phần còn lại ngoài phạm vi §8)
 
-**Phiên bản:** 1.1 (13/07/2026 — §2 UI Quản trị Platform ĐÃ TRIỂN KHAI XONG và verify qua HTTP thật + 5 test PHPUnit, xem "Trạng thái triển khai" ngay dưới)
+**Phiên bản:** 2.0 (13/07/2026 — SỬA HIỂU SAI CĂN BẢN ở §3: `Modules/Post` là tài sản của NỀN TẢNG, không phải của từng doanh nghiệp. 7 role toà soạn thuộc Lớp A, không phải Lớp B mới như bản 1.2 từng viết. Rà lại chỉ còn đúng 2 role thật sự mới (`platform_reporter`, `platform_media`) + 1 role chờ category-scoping (`platform_section_editor`); 3 role còn lại trùng role Platform đã có sẵn. §4 đổi từ "category theo tổ chức" sang "category dùng chung toàn nền tảng". Thêm yêu cầu thu hồi quyền Post khỏi mọi role Lớp B — còn 2 câu hỏi mở cần xác nhận (giữ `post_article.view` cho doanh nghiệp hay không; tên tổ chức placeholder cho tin tức không gắn với doanh nghiệp cụ thể).
 
 ## Trạng thái triển khai §2
 
@@ -17,6 +17,8 @@
 | Chủ đề | Quyết định | Lý do |
 |---|---|---|
 | Thứ tự ưu tiên | **UI Quản trị Platform triển khai NGAY** (§2). 4 hạng mục còn lại (§3-§6) **chỉ đặc tả, chưa code** | Đã xác nhận: hiện KHÔNG có màn hình quản trị nào cho user Platform (`organization_id=null`) — chỉ có CLI `platform:user-create` (giải pháp tạm, spec cũ §3.8/§3.9). Đây là khoảng trống vận hành thật cần lấp ngay, không thể để "luôn chỉ có CLI" |
+| Nguyên tắc kiến trúc cho MỌI bộ role (đã chốt, áp dụng xuyên suốt) | **Role của hệ thống vận hành nền tảng (Lớp A) phải tách biệt và độc lập hoàn toàn với role của tài khoản doanh nghiệp (Lớp B)** — không xung đột, không phụ thuộc lẫn nhau. Mọi bộ role mới (kể cả `org_*` ở §3) đều phải tuân theo nguyên tắc này | Đây chính xác là nguyên tắc Dual-Layer đã áp dụng và verify xong cho Lớp A (`platform_*`, `organization_id=null`, tách biệt hoàn toàn khỏi 8 role CRM `organization_id`=tổ chức — xem `spec/Platform_RBAC_Technical_Specification.md` §2). Quyết định của người dùng: áp dụng CÙNG nguyên tắc này khi mở rộng Lớp B (§3), để dễ quản lý, không lặp lại rủi ro xung đột đã tránh được ở Lớp A |
+| §3.2 câu hỏi 1 — thêm mới hay thay thế 8 role CRM? | **Đã chốt: THÊM MỚI, độc lập hoàn toàn, KHÔNG thay thế** — xem §3.2 đã cập nhật | Đúng nguyên tắc trên: 2 bộ role (CRM hiện có vs `org_*` mới) phải là 2 tập độc lập, không xung đột, 1 user có thể giữ đồng thời role ở cả 2 bộ nếu cần (Spatie hỗ trợ multi-role) mà không ảnh hưởng lẫn nhau |
 | Vị trí code UI Platform | Đặt trong `Modules/Approval` (không tạo module mới) | Nhất quán với `CreatePlatformUserCommand`/`AuditPlatformRoleScopeCommand` đã đặt ở đây — toàn bộ hạ tầng Platform Role đã tập trung 1 chỗ |
 | Không tái dùng `Modules/User/UserController` | Viết controller riêng cho Platform user | Xác nhận qua code: `UserController` gắn chặt team-scoping (`setPermissionsTeamId($organization_id)` xuyên suốt `resolveUserRole()`/`getOrganizationsFor()`) — không áp dụng được cho user `organization_id=null` |
 | `super-admin` vẫn KHÔNG tạo được qua UI mới | Giữ nguyên quyết định ở CLI (spec cũ §3.8) | UI mới chỉ là "màn hình hoá" cho đúng use case CLI đang giải quyết (5 role biên tập/vận hành), không mở rộng thêm phạm vi rủi ro |
@@ -28,7 +30,7 @@
 
 `spec/Platform_RBAC_Technical_Specification.md` đã triển khai xong Lớp A (6 Platform Role, rename, 2 role mới, test, verify). §8 của tài liệu đó liệt kê 5 hạng mục "ngoài phạm vi đợt này":
 
-1. Bộ Organization Roles mới cho toà soạn (Lớp B).
+1. Bộ Organization Roles mới cho toà soạn (Lớp B) — *đã sửa lại ở §3 v2.0: thực ra là Lớp A, xem §3.0.*
 2. Category-scoping.
 3. Độc giả VIP / subscription cá nhân (B2C).
 4. `post.legal_review` cho `platform_content_moderator`.
@@ -297,54 +299,88 @@ Thêm mục "Quản lý nhân sự Platform" trong `resources/views/layouts/part
 
 ---
 
-## 3. Bộ Organization Roles mới (Lớp B) — ĐẶC TẢ, CHƯA TRIỂN KHAI
+## 3. Đội biên tập nội dung Platform (mở rộng Lớp A) — ĐẶC TẢ, CHƯA TRIỂN KHAI
 
-### 3.1 Danh sách role dự kiến (theo tài liệu gốc `RBAC_Platform_Operator_Specification.docx`)
+### 3.0 Chẩn đoán lại — đã sửa hiểu sai so với bản v1.2
 
-| Role | Tên hiển thị | Trách nhiệm |
+**Bản v1.2 (trước đó) hiểu SAI:** coi 7 role toà soạn (Tổng biên tập, Biên tập viên, Phóng viên...) là role **Lớp B** — tức role riêng của TỪNG doanh nghiệp, mỗi tổ chức tự có đội biên tập của mình. **Đã xác nhận lại: SAI.**
+
+**Đúng theo xác nhận của người dùng:** `Modules/Post` là **tài sản của nền tảng** — do chính Hà Kiên quản lý/vận hành toàn bộ nội dung, **tài khoản doanh nghiệp không có quyền thao tác** (tạo/sửa/xoá/duyệt bài) trên module này nữa. Toàn bộ 7 role toà soạn vì vậy thuộc **Lớp A (Platform)**, mở rộng thêm cho 6 Platform Role đã có (`super-admin`, `platform_content_head`, `platform_content_editor`, `platform_content_moderator`, `platform_ops`, `platform_viewer`) — không phải 1 bộ role Lớp B mới.
+
+### 3.1 Rà lại — chỉ cần 2 role MỚI, không phải 7
+
+Đối chiếu 7 role dự kiến (từ `RBAC_Platform_Operator_Specification.docx`) với 6 Platform Role **đã có sẵn**:
+
+| Role dự kiến (docx) | Đối chiếu với Platform Role đã có | Kết luận |
 |---|---|---|
-| `org_owner` | Chủ sở hữu / CEO | Đã có tương đương (`ceo`) — KHÔNG tạo mới, dùng lại |
-| `org_editor_in_chief` | Tổng biên tập (tổ chức) | Duyệt tất cả bài trong tổ chức, quản lý biên tập viên |
-| `org_section_editor` | Biên tập viên trưởng chuyên mục | Quản lý 1-n chuyên mục được gán — **phụ thuộc §4 (category-scoping)** |
-| `org_editor` | Biên tập viên (tổ chức) | Duyệt/sửa bài trong chuyên mục được gán — **phụ thuộc §4** |
-| `org_reporter` | Phóng viên / Cộng tác viên | Tạo bài, sửa bài của mình — map gần nhất hiện có: `marketing` |
-| `org_media` | Nhiếp ảnh / Video | Chỉ upload media — permission mới `post_media.upload` |
-| `org_viewer` | Cộng tác viên xem | Chỉ xem |
+| Tổng biên tập | = `platform_content_head` (đã có, duyệt cuối + xuất bản) | Không tạo mới — dùng lại |
+| Biên tập viên | = `platform_content_editor` (đã có, duyệt sơ bộ) | Không tạo mới — dùng lại |
+| Biên tập viên trưởng chuyên mục | Gần giống `platform_content_editor` nhưng **giới hạn theo 1 vài chuyên mục** — chưa có tương đương | **Role mới**: `platform_section_editor` — phụ thuộc §4 (category dùng chung toàn nền tảng) |
+| Phóng viên | Hiện KHÔNG có role Platform nào tạo được bài viết (chỉ có role DUYỆT) — trước đây việc "tạo bài" là của `marketing` (Lớp B), giờ bị thu hồi (xem §3.2) | **Role mới**: `platform_reporter` — tạo/sửa bài, gửi duyệt |
+| Nhiếp ảnh/Video | Chưa có | **Role mới**: `platform_media` — chỉ upload media (`post_media.upload`, permission mới) |
+| Cộng tác viên xem | = `platform_viewer` (đã có, chỉ xem) | Không tạo mới — mở rộng phạm vi xem sang cả Post |
+| Chủ sở hữu/CEO | Không áp dụng — đây là khái niệm của DOANH NGHIỆP (`ceo`, Lớp B), không liên quan gì tới việc ai viết/duyệt bài trên nền tảng | **Bỏ hẳn** khỏi danh sách — nhầm lẫn từ bản đọc docx gốc trước đó |
 
-### 3.2 Câu hỏi cần chốt trước khi code (chưa có câu trả lời)
+**Tóm lại: chỉ cần dựng mới `platform_reporter` và `platform_media` ngay** (không phụ thuộc gì); `platform_section_editor` chờ §4.
 
-1. **Thêm mới hay thay thế 8 role CRM hiện có?** Quyết định trước đó (spec cũ §0): "giữ nguyên hoàn toàn". Nếu giờ thêm bộ này, cần làm rõ: 1 tổ chức có CẢ 2 bộ role song song (vd 1 user vừa `marketing` vừa `org_reporter`?), hay tổ chức tự chọn "loại hình" (CRM thường / Toà soạn) rồi chỉ dùng 1 bộ?
-2. **`org_section_editor`/`org_editor` phụ thuộc category-scoping (§4)** — nếu làm role này TRƯỚC khi có category-scoping, chúng sẽ không khác gì `org_editor_in_chief`/toàn quyền trong tổ chức — không có giá trị phân quyền thật. Khuyến nghị: làm §4 trước, hoặc làm 2 role này CÙNG LÚC với §4.
-3. Permission domain nào áp dụng — dùng lại `post_article.*` hiện có hay tạo permission mới riêng cho org roles?
+### 3.2 Permission — thu hồi quyền của Lớp B trên Post, cấp lại cho Lớp A
 
-### 3.3 Không triển khai cho tới khi có câu trả lời cho 3.2
+Xác nhận qua code (`Modules/Post/database/seeders/PostPermissionSeeder.php`): hiện **6/8 role Lớp B** đang có quyền trên `post_article.*` — `marketing` (create/edit/delete/manage_sponsorship), `ceo` (publish/unpublish/manage_sponsorship), `ops` (publish), `system_admin` (create + các quyền khác), `sales`/`hr`/`ai_operator`/`viewer` (chỉ view). Theo đúng chỉ đạo "doanh nghiệp không có quyền thao tác":
+
+- **Thu hồi toàn bộ quyền GHI** (`create/edit/delete/publish/unpublish/manage_sponsorship`) khỏi **mọi role Lớp B**, không chỉ `marketing`.
+- **`post_article.view` — cần bạn xác nhận thêm:** giữ lại cho doanh nghiệp xem bài viết (kể cả bài sponsor về chính họ), hay thu hồi luôn (doanh nghiệp không thấy Post ở dashboard nữa, chỉ xem qua cổng thông tin công khai như độc giả bình thường)? **Câu hỏi mở — chưa chốt.**
+- Cấp `post_article.create/edit/delete` cho `platform_reporter`; giữ nguyên `post_article.publish/unpublish` chỉ `platform_content_head` (đã đúng từ trước — không đổi).
+- Permission mới `post_media.upload` — cấp cho `platform_reporter` (phóng viên cũng tự upload ảnh bài mình) và `platform_media` (chuyên biệt, không có quyền sửa nội dung chữ).
+
+### 3.3 Cơ chế `organization_id` trên `PostArticle` — đổi Ý NGHĨA, KHÔNG đổi schema
+
+Xác nhận qua code: cột `organization_id` trên `post_articles` là FK bắt buộc (`->constrained()->restrictOnDelete()`, không nullable) — không có migration nào cần chạy. Chỉ đổi cách hiểu:
+
+- **Trước đây:** `organization_id` = "tổ chức nào TẠO bài viết này" (tự động gán qua `TenantContext` khi `marketing` của tổ chức đó tạo bài).
+- **Từ giờ:** `organization_id` = "bài viết này thuộc về/nói về tổ chức nào" (dùng để lọc/hiển thị/gắn nhãn sponsor) — người **thực sự viết/duyệt** là `platform_reporter`/`platform_content_editor`/`platform_content_head` (`organization_id=null`), ghi nhận qua `created_by`/`updated_by`/`approved_by` (cột trỏ `users`, vốn không ràng buộc phải cùng `organization_id` với bài viết — không cần đổi migration).
+
+**Hệ quả kỹ thuật cần làm khi code (Phase 2A):**
+1. `platform_reporter` (org-less) tạo bài **phải chọn tường minh** tổ chức mà bài viết nói về/thuộc về — hiện `CreateArticleAction` không nhận `organization_id` từ input, mà dựa vào `TenantContext` ambient (tự động đúng khi 1 nhân sự CỦA tổ chức tạo bài). Cần thêm 1 dropdown "Chọn tổ chức" trong form tạo bài + bọc `TenantContext::runForOrganization($selectedOrg, fn () => ...)` khi gọi Action — đúng pattern đã dùng cho mọi Platform Role thao tác xuyên tổ chức trong Phase 1-6.
+2. **Bài viết KHÔNG nói riêng về 1 doanh nghiệp nào** (tin tức chung của nền tảng) — cần 1 tổ chức placeholder vì cột `organization_id` không nullable. Đề xuất: seed 1 `Organization` đặc biệt "Hà Kiên / Cổng thông tin chung" (giống quy ước `super-admin`/Platform Role đã dùng `organization_id=null` cho **User**, nhưng **Organization** không có khái niệm "null" vì chính nó là gốc — nên phải là 1 record thật, không phải `null`). **Cần bạn xác nhận tên/cách đặt tổ chức này trước khi seed.**
+
+### 3.4 Thứ tự triển khai — giữ nguyên "Phase 2A", gộp chung với §4
+
+`platform_section_editor` vẫn phụ thuộc category dùng chung toàn nền tảng (§4). Quyết định giữ nguyên: §3 + §4 làm chung 1 đợt (Phase 2A). `platform_reporter`/`platform_media` không phụ thuộc §4, có thể code trước nếu muốn tách nhỏ hơn nữa — nhưng khuyến nghị vẫn gộp 1 đợt để tránh 2 lần rà soát permission Post riêng lẻ.
 
 ---
 
-## 4. Category-scoping — ĐẶC TẢ, CHƯA TRIỂN KHAI
+## 4. Category dùng chung toàn nền tảng (Platform-wide category-scoping) — ĐẶC TẢ, CHƯA TRIỂN KHAI
 
-### 4.1 Thiết kế dự kiến
+### 4.1 Đổi hướng so với bản v1.2
 
+Bản trước giả định category vẫn theo từng tổ chức (`post_categories.organization_id`) là "đã đúng sẵn" cho Lớp B — giả định đó **hết hiệu lực** vì Post giờ là tài sản nền tảng, không phải của từng doanh nghiệp. Cần **chuyên mục dùng chung toàn nền tảng** (1 bộ chuyên mục duy nhất, do đội biên tập Platform tự quản lý, không phụ thuộc tổ chức nào) — đúng khoảng trống kiến trúc đã phát hiện từ đầu dự án (`RBAC_NewsPortal_Gap_Analysis.md` §2.4).
+
+### 4.2 Thiết kế dự kiến
+
+**Lựa chọn A (khuyến nghị) — thêm cột `organization_id` nullable trên `post_categories`:**
+```php
+Schema::table('post_categories', function (Blueprint $table) {
+    $table->foreignId('organization_id')->nullable()->change();
+});
+```
+Chuyên mục do Platform tạo (`organization_id = null`) dùng chung cho MỌI bài viết bất kể `post_articles.organization_id` là tổ chức nào. Không xoá cơ chế category theo tổ chức cũ (nếu còn dữ liệu cũ) — chỉ thêm khả năng tạo category dùng chung.
+
+**Bảng gán biên tập viên theo chuyên mục:**
 ```php
 Schema::create('post_category_editors', function (Blueprint $table) {
     $table->id();
-    $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
     $table->foreignId('post_category_id')->constrained()->cascadeOnDelete();
     $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-    $table->string('role_in_category', 20); // 'section_editor' | 'editor'
     $table->timestamps();
 
     $table->unique(['post_category_id', 'user_id']);
 });
 ```
+(Bỏ cột `organization_id` khỏi bảng này so với bản v1.2 — vì user ở đây luôn là `platform_section_editor`, `organization_id=null`, gán theo category không theo tổ chức nào.)
 
-`PostArticlePolicy::approve()`/`update()` cần thêm điều kiện: nếu user có role `org_section_editor`/`org_editor`, chỉ đúng khi bài viết thuộc 1 category mà user được gán trong `post_category_editors` (JOIN qua `post_article_categories` — bảng pivot bài viết ↔ category đã có sẵn).
+`PostArticlePolicy::approve()`/`update()` thêm điều kiện: `platform_section_editor` chỉ đúng khi bài viết thuộc 1 category mà user được gán trong `post_category_editors`.
 
-### 4.2 Rủi ro đã ghi nhận trước đó (từ `RBAC_NewsPortal_Gap_Analysis.md`)
-
-`post_categories` hiện là `organization_id`-scoped (mỗi tổ chức có bộ chuyên mục riêng) — điều này thực ra **phù hợp** với category-scoping ở mức Lớp B (biên tập viên của 1 tổ chức chỉ quản category của tổ chức đó), khác với lo ngại trước đây (lúc đó đang lẫn giữa Lớp A xuyên tổ chức và Lớp B trong 1 tổ chức). Ở mức Lớp B, không cần category dùng chung toàn nền tảng — chỉ cần dùng chung TRONG 1 tổ chức, đã đúng sẵn.
-
-### 4.3 Không triển khai cho tới khi có §3 (cần role `org_section_editor`/`org_editor` tồn tại trước)
+### 4.3 Không triển khai — gộp chung Phase 2A với §3, chờ lệnh triển khai
 
 ---
 
@@ -390,7 +426,11 @@ Xác nhận qua nghiên cứu: `PostArticleTranslation` hiện KHÔNG có cột 
 
 ## 7. Kế hoạch triển khai tổng thể
 
-1. **Ngay bây giờ:** §2 (UI Quản trị Platform) — code + test + verify theo đúng flow đã dùng cho Lớp A (Prepare → Test → Verify).
-2. **Khi có câu trả lời cho §3.2:** §3 (Organization Roles Lớp B) — làm cùng lúc với §4 nếu cần `org_section_editor`/`org_editor` có giá trị thật.
-3. **Khi có kế hoạch kinh doanh xác nhận:** §5 (Độc giả VIP).
-4. **Khi có nhu cầu pháp lý cụ thể phát sinh:** §6 (`post.legal_review`).
+| Phase | Nội dung | Điều kiện bắt đầu | Trạng thái |
+|---|---|---|---|
+| Phase 2 | §2 UI Quản trị Platform | — | ✅ Đã xong |
+| **Phase 2A** | §3 (đội biên tập Platform: `platform_reporter`, `platform_media`, `platform_section_editor`) + §4 (category dùng chung toàn nền tảng) — làm chung 1 đợt | Cần bạn trả lời 2 câu hỏi mở ở §3.2/§3.3 trước khi bắt đầu code: (1) giữ `post_article.view` cho Lớp B hay thu hồi luôn, (2) tên tổ chức placeholder cho tin tức không gắn 1 doanh nghiệp cụ thể | ⏳ Chờ xác nhận |
+| Phase 2B | §5 Độc giả VIP | Có kế hoạch kinh doanh xác nhận bán gói cá nhân | ⏳ Chưa có lịch |
+| Phase 2C | §6 `post.legal_review` | Có nhu cầu pháp lý cụ thể phát sinh | ⏳ Chưa có lịch |
+
+Chưa gán mốc thời gian cụ thể (tuần/tháng) cho Phase 2A vì còn phụ thuộc 2 câu hỏi mở — sẽ chốt ngay khi có câu trả lời, không ước lượng trước để tránh cam kết sai.
