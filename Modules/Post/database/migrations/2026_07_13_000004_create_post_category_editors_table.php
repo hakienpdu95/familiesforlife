@@ -14,6 +14,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('post_category_editors')) {
+            return;
+        }
+
         Schema::create('post_category_editors', function (Blueprint $table) {
             $table->id();
             $table->foreignId('post_category_id')->constrained()->cascadeOnDelete();

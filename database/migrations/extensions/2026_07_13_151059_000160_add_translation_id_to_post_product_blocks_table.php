@@ -14,7 +14,7 @@ return new class extends Migration {
             if (!Schema::hasColumn('post_product_blocks', 'translation_id')) {
                 $table->unsignedBigInteger('translation_id')->nullable();
             }
-            if (!Schema::hasIndex('post_product_blocks', 'idx_post_pb_org_translation')) {
+            if (!Schema::hasIndex('post_product_blocks', 'idx_post_pb_org_translation') && Schema::hasColumn('post_product_blocks', 'organization_id')) {
                 $table->index(['organization_id', 'translation_id'], 'idx_post_pb_org_translation');
             }
             if (!Schema::hasIndex('post_product_blocks', 'idx_post_pb_translation')) {
