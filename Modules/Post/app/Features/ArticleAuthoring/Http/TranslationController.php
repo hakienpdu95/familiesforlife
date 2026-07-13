@@ -166,7 +166,7 @@ class TranslationController extends Controller
 
     /**
      * Platform Approval Gateway (Hà Kiên nội bộ) — approve/publish/schedule/archive/unpublish
-     * giờ do content_moderator xử lý (tài khoản organization_id=null, không có TenantContext
+     * giờ do platform_content_moderator xử lý (tài khoản organization_id=null, không có TenantContext
      * của riêng mình khớp tổ chức của $translation). Action (PublishArticleAction…) lazy-load
      * $translation->article — nếu chưa cache và TenantContext không khớp, PostArticle (có
      * OrganizationScope) sẽ resolve null, gây lỗi "gọi method trên null" thật ở

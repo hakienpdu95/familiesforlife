@@ -12,7 +12,7 @@ use Spatie\Permission\PermissionRegistrar;
  * product_category.manage và gán vào role phù hợp (docs/product-catalog-spec.md §8).
  *
  * KHÔNG có product.publish — duyệt/xuất bản nội dung sản phẩm giờ do đội kiểm duyệt tập
- * trung của Hà Kiên xử lý (role content_moderator, xem ProductPolicy::approve/reject/
+ * trung của Hà Kiên xử lý (role platform_content_moderator, xem ProductPolicy::approve/reject/
  * publishApproval/archiveApproval), không phải permission của tài khoản doanh nghiệp.
  *
  * Chạy: php artisan db:seed --class="Modules\Product\Database\Seeders\ProductPermissionSeeder"

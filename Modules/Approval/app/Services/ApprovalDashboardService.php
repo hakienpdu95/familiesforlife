@@ -43,9 +43,9 @@ class ApprovalDashboardService
     }
 
     /**
-     * Platform Approval Gateway (hệ thống nội bộ Hà Kiên) — dùng cho tài khoản
-     * content_moderator (organization_id=null), thấy pending item của TẤT CẢ tổ chức, không
-     * giới hạn 1 organization_id như pendingFor() ở trên.
+     * Platform Approval Gateway (hệ thống nội bộ Hà Kiên) — dùng cho MỌI tài khoản Platform
+     * (organization_id=null: content_moderator, super-admin, platform_viewer...), thấy pending
+     * item của TẤT CẢ tổ chức, không giới hạn 1 organization_id như pendingFor() ở trên.
      *
      * KHÔNG dùng `with('subject')` (eager-load morphTo mặc định) — Laravel tự query RIÊNG
      * theo từng model type bên trong morphTo, và query đó VẪN áp OrganizationScope của chính
@@ -56,7 +56,7 @@ class ApprovalDashboardService
      */
     public function pendingForModerator(User $user): Collection
     {
-        if (! $user->isContentModerator()) {
+        if ($user->organization_id !== null) {
             return collect();
         }
 
@@ -92,7 +92,14 @@ class ApprovalDashboardService
 
                 return $subjects
                     ->each(fn (ApprovalSubject $s) => $s->setRelation('subject', $entities->get($s->subject_id)))
-                    ->filter(fn (ApprovalSubject $s) => $s->subject && Gate::forUser($user)->allows('approve', $s->subject));
+                    ->filter(fn (ApprovalSubject $s) => $s->subject && (
+                        // platform_viewer (Lớp A, read-only — §3.3) thấy TOÀN BỘ hàng đợi để
+                        // giám sát, không lọc theo ability 'approve' như content_moderator/
+                        // super-admin — vì họ vốn không có (và không nên có) quyền approve nào,
+                        // lọc theo ability sẽ khiến dashboard của họ luôn trống rỗng vô nghĩa.
+                        // Nút Duyệt/Từ chối vẫn ẩn đúng ở Blade (gate riêng theo @can('approve')).
+                        $user->isPlatformViewer() || Gate::forUser($user)->allows('approve', $s->subject)
+                    ));
             })
             ->groupBy(fn (ApprovalSubject $s) => $s->subject_type)
             ->flatten(1);

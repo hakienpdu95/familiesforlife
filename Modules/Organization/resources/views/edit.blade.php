@@ -360,7 +360,7 @@
 {{-- ── Duyệt nội dung (Platform Approval Gateway) — spec/Workflow_Approval_Technical_Specification.md §9.5/§18 ──
      Đặt NGOÀI <form> chính ở trên (mỗi nút là 1 form POST riêng, không lồng được vào form
      update tổ chức). Trục "Duyệt nội dung" độc lập với trục "Trạng thái" (hoạt động/tạm khoá) ở
-     sidebar bên trên — 2 badge khác nhau ở header, không gộp. Chỉ content_moderator mới
+     sidebar bên trên — 2 badge khác nhau ở header, không gộp. Chỉ platform_content_moderator mới
      approve/reject/publishApproval/archiveApproval được (§18.6) — CEO/owner chỉ submitForApproval. --}}
 @if ($organization->approvalStatus())
 <div class="card bg-base-100 shadow-sm border border-base-200 mt-4">

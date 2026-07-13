@@ -5,7 +5,9 @@ namespace Modules\Approval\Providers;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Gate;
+use Modules\Approval\Console\Commands\AuditPlatformRoleScopeCommand;
 use Modules\Approval\Console\Commands\BackfillApprovalSubjectsCommand;
+use Modules\Approval\Console\Commands\CreatePlatformUserCommand;
 use Nwidart\Modules\Support\ModuleServiceProvider;
 
 class ApprovalServiceProvider extends ModuleServiceProvider
@@ -27,6 +29,8 @@ class ApprovalServiceProvider extends ModuleServiceProvider
      */
     protected array $commands = [
         BackfillApprovalSubjectsCommand::class,
+        CreatePlatformUserCommand::class,
+        AuditPlatformRoleScopeCommand::class,
     ];
 
     /**
@@ -64,13 +68,18 @@ class ApprovalServiceProvider extends ModuleServiceProvider
         // Gate riêng cho dashboard xuyên-entity (§11, §12) — không gắn Policy vì không có
         // model cụ thể nào để resolve (khác các ability submitForApproval/approve/… gate trên
         // từng entity ở Modules/Product). content_moderator (Platform Approval Gateway) LUÔN
-        // được xem dashboard — dùng isContentModerator() (không team-scoped) thay vì
+        // được xem dashboard — dùng isPlatformContentModerator() (không team-scoped) thay vì
         // $user->can(...) (Spatie permission team-scoped, không đáng tin cho tài khoản
-        // organization_id=null — xem User::isContentModerator()).
-        Gate::define('viewDashboard', fn (User $user) => $user->can('approval.view_dashboard') || $user->isContentModerator());
+        // organization_id=null — xem User::isPlatformContentModerator()).
+        // platform_viewer (Lớp A, role read-only — spec/Platform_RBAC_Technical_Specification.md
+        // §3.3) được OR thêm vào đây, giống isPlatformContentModerator() — chỉ xem, không có ability
+        // approve/reject/publishApproval/archiveApproval nào (Policy của Product/Organization/
+        // Post không cấp cho isPlatformViewer(), nên nút hành động tự ẩn đúng mà không cần sửa gì
+        // thêm ở Blade).
+        Gate::define('viewDashboard', fn (User $user) => $user->can('approval.view_dashboard') || $user->isPlatformContentModerator() || $user->isPlatformViewer());
 
         // Gate riêng cho trang Lịch sử duyệt đầy đủ (§11 mở rộng) — rộng hơn viewDashboard
         // (thấy MỌI log, không chỉ pending item user tự duyệt được), dành cho vai trò giám sát.
-        Gate::define('viewApprovalHistory', fn (User $user) => $user->can('approval.view_history') || $user->isContentModerator());
+        Gate::define('viewApprovalHistory', fn (User $user) => $user->can('approval.view_history') || $user->isPlatformContentModerator() || $user->isPlatformViewer());
     }
 }

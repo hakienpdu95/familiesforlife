@@ -28,15 +28,19 @@ class ContentReviewHierarchySeeder extends Seeder
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         setPermissionsTeamId(null);
-        $editorRole = Role::firstOrCreate(['name' => 'content_editor', 'guard_name' => 'web']);
-        $headRole   = Role::firstOrCreate(['name' => 'content_head', 'guard_name' => 'web']);
+        // Đổi tên platform_content_editor/platform_content_head (từ content_editor/
+        // content_head) — spec/Platform_RBAC_Technical_Specification.md §3.2/§3.5. Dùng tên
+        // MỚI ở đây để không tạo lại role cũ nếu seeder chạy lại trên môi trường chưa từng có
+        // role cũ (vd cài mới từ đầu).
+        $editorRole = Role::firstOrCreate(['name' => 'platform_content_editor', 'guard_name' => 'web']);
+        $headRole   = Role::firstOrCreate(['name' => 'platform_content_head', 'guard_name' => 'web']);
 
         $this->createAccount('editor@system.local', 'Content Editor', $editorRole);
         $this->createAccount('content-head@system.local', 'Content Department Head', $headRole);
 
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $this->command->info('  ✓ content_editor + content_head roles seeded (editor@system.local, content-head@system.local).');
+        $this->command->info('  ✓ platform_content_editor + platform_content_head roles seeded (editor@system.local, content-head@system.local).');
     }
 
     private function createAccount(string $email, string $name, Role $role): void

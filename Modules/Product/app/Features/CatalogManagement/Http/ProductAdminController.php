@@ -69,11 +69,11 @@ class ProductAdminController extends Controller
     {
         $categories = $categoryHandler->handle(new ListCategoriesForAdminQuery());
 
-        // content_moderator (organization_id=null) không có TenantContext trỏ tới tổ chức của
+        // platform_content_moderator (organization_id=null) không có TenantContext trỏ tới tổ chức của
         // $product — nếu không bọc, $product->approvalSubject (OrganizationScope, §7.1) resolve
         // null khi render Blade, ẩn mất toàn bộ badge/nút "Duyệt nội dung" dù moderator vẫn xem
         // được trang (Product route binding không tenant-scope). Bug thật phát hiện khi kiểm thử
-        // dashboard "Xem & duyệt" bằng tài khoản content_moderator — cùng nguyên nhân với
+        // dashboard "Xem & duyệt" bằng tài khoản platform_content_moderator — cùng nguyên nhân với
         // runApprovalTransition() ở dưới, chỉ khác là ở đây cần bọc luôn cho GET, không chỉ POST.
         // PHẢI gọi ->render() NGAY TRONG closure — view() chỉ build đối tượng View (lazy), Blade
         // thật sự chạy khi Laravel gọi render() sau khi controller return; nếu trả thẳng View
@@ -89,6 +89,13 @@ class ProductAdminController extends Controller
 
     public function update(Request $request, Product $product, UpdateProductAction $action): RedirectResponse
     {
+        // Product không có route "show" riêng nên edit()/update() dùng CHUNG ability `update`
+        // qua authorizeResource() — platform_viewer được nới quyền `update` chỉ để XEM được
+        // trang edit (giám sát dashboard), KHÔNG được phép submit thay đổi thật (§3.3, role
+        // read-only). Chặn tường minh ở đây thay vì tách riêng ability view/update cho Product
+        // (đổi route convention hiện có, tốn công hơn cần thiết cho 1 role).
+        abort_if($request->user()?->isPlatformViewer(), 403);
+
         $data = ProductData::from($this->validated($request, $product->id));
 
         try {
@@ -134,7 +141,7 @@ class ProductAdminController extends Controller
     // ── Approval workflow — Platform Approval Gateway (Hà Kiên nội bộ) ─────────────────
     // Trạng thái duyệt nội dung — độc lập với changeStatus() ở trên (trục vận hành/kinh
     // doanh, §2.3). Action không tự check quyền, controller tự authorize trước khi gọi.
-    // approve/reject/publishApproval/archiveApproval do content_moderator xử lý — tài khoản
+    // approve/reject/publishApproval/archiveApproval do platform_content_moderator xử lý — tài khoản
     // này KHÔNG thuộc tổ chức nào (organization_id=null) nên TenantContext của chính họ không
     // trỏ tới tổ chức của $product; runApprovalTransition() bọc lệnh gọi Action trong
     // TenantContext::runForOrganization($product->organization, ...) để các query nội bộ

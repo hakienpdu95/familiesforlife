@@ -326,7 +326,7 @@
      (Organization::getApprovalDashboardUrlAttribute() → route show, không phải edit) — content_
      moderator PHẢI thao tác được ngay tại đây, không cần vào trang edit. Trục "Duyệt nội dung"
      độc lập với trục "Trạng thái" (hoạt động/tạm khoá) ở khối "Thông tin hệ thống" bên dưới — 2
-     badge khác nhau, không gộp. Chỉ content_moderator mới approve/reject/publishApproval/
+     badge khác nhau, không gộp. Chỉ platform_content_moderator mới approve/reject/publishApproval/
      archiveApproval được (§18.6) — CEO/owner chỉ submitForApproval. --}}
 @if ($organization->approvalStatus())
 <div class="card bg-base-100 shadow-sm border border-base-200 mt-5">

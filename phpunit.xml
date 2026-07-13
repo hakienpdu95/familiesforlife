@@ -27,6 +27,7 @@
             <directory>Modules/OrganizationSolution/tests/Feature</directory>
             <directory>Modules/Deployment/tests/Feature</directory>
             <directory>Modules/SolutionCatalog/tests/Feature</directory>
+            <directory>Modules/Approval/tests/Feature</directory>
         </testsuite>
     </testsuites>
     <source>
@@ -45,7 +46,7 @@
         <env name="DB_PORT" value="3306"/>
         <env name="DB_DATABASE" value="minhan"/>
         <env name="DB_USERNAME" value="root"/>
-        <env name="DB_PASSWORD" value="3333"/>
+        <env name="DB_PASSWORD" value="Checkvn@123!"/>
         <env name="DB_URL" value=""/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>

@@ -19,9 +19,9 @@ use Modules\Post\Models\PostArticle;
 use Modules\Post\Models\PostArticleTranslation;
 
 /**
- * Demo dữ liệu minh hoạ 2 tầng duyệt bài viết (content_editor → content_head — Platform
+ * Demo dữ liệu minh hoạ 2 tầng duyệt bài viết (platform_content_editor → platform_content_head — Platform
  * Approval Gateway, spec/Workflow_Approval_Technical_Specification.md §18.10). Chạy Action
- * THẬT (không insert thẳng DB) do đúng vai (marketing tạo/gửi, editor duyệt sơ bộ, content_head
+ * THẬT (không insert thẳng DB) do đúng vai (marketing tạo/gửi, editor duyệt sơ bộ, platform_content_head
  * duyệt cuối) để log/timestamp sinh ra thực tế.
  *
  * KHÔNG nằm trong SystemDataSeeder (demo-only, giống ProductApprovalDemoSeeder) — chạy thủ công:

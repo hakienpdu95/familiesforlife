@@ -89,6 +89,16 @@ class AuthDatabaseSeeder extends Seeder
                 ])->save();
             }
 
+            // Guard tường minh (spec/Platform_RBAC_Technical_Specification.md §3.6) — super-admin
+            // bypass TOÀN BỘ Gate check (AppServiceProvider::Gate::before) mà không tự kiểm tra
+            // organization_id === null ở tầng đó; chặn ngay tại đây để không lỡ gán role này cho
+            // 1 user thuộc tổ chức (vd nếu email trùng với 1 tài khoản tenant có sẵn).
+            abort_if(
+                $user->organization_id !== null,
+                500,
+                "Không gán role super-admin cho user #{$user->id} ({$data['email']}) vì organization_id không null.",
+            );
+
             $user->syncRoles($role);
         }
     }

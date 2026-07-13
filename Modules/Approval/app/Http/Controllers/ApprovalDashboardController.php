@@ -20,9 +20,14 @@ class ApprovalDashboardController extends Controller
 
         $user = $request->user();
 
-        // content_moderator (Platform Approval Gateway) không thuộc tổ chức nào — thấy pending
-        // item của TẤT CẢ tổ chức, không phải chỉ 1 organization_id như user thường.
-        $items = $user->isContentModerator()
+        // BẤT KỲ tài khoản Platform nào (organization_id=null — content_moderator, super-admin,
+        // và giờ có thêm platform_viewer) đều không thuộc tổ chức nào — thấy pending item của
+        // TẤT CẢ tổ chức, không phải chỉ 1 organization_id như user thường. Bug thật phát hiện
+        // khi thêm platform_viewer: điều kiện cũ chỉ check isContentModerator() nên mọi role
+        // organization_id=null KHÁC (kể cả super-admin, vốn bypass Gate::before) rơi vào nhánh
+        // pendingFor(TenantContext::getOrganizationId()) — trả về null, ném TypeError vì
+        // pendingFor() khai báo tham số int không nullable.
+        $items = $user->organization_id === null
             ? $service->pendingForModerator($user)
             : $service->pendingFor($user, TenantContext::getOrganizationId());
 

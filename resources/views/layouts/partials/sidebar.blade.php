@@ -21,7 +21,7 @@
              phải chuỗi permission "approval.view_dashboard" — bug thật phát hiện: content_
              moderator KHÔNG có permission Spatie đó (team-scoped, tài khoản organization_id=
              null không khớp bất kỳ team nào) nên link menu không hiện dù trang vẫn truy cập
-             được bình thường nếu vào thẳng URL (Gate viewDashboard tự OR thêm isContentModerator()). --}}
+             được bình thường nếu vào thẳng URL (Gate viewDashboard tự OR thêm isPlatformContentModerator()). --}}
         @can('viewDashboard')
         <div class="nav-group">
             <a href="{{ route('backend.approval.dashboard') }}"
@@ -44,12 +44,23 @@
 
         {{-- content_editor/content_head (§18.10) — không có permission post_article.* nào
              (org-less) nên không dùng @can(permission) — check thẳng 2 role qua User helper. --}}
-        @if(auth()->user()?->isContentEditor() || auth()->user()?->isContentHead())
+        @if(auth()->user()?->isPlatformContentEditor() || auth()->user()?->isPlatformContentHead())
         <div class="nav-group">
             <a href="{{ route('backend.post.articles.pending-review') }}"
                class="nav-link {{ request()->routeIs('backend.post.articles.pending-review') ? 'active' : '' }}">
                 <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l6 6v10a2 2 0 01-2 2z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 13h6M9 17h6M9 9h1"/></svg>
                 <span class="nav-label">Bài viết chờ duyệt</span>
+            </a>
+        </div>
+        @endif
+
+        {{-- Chỉ super-admin — spec/Platform_RBAC_Phase2_Specification.md §2.7 --}}
+        @if(auth()->user()?->hasRole('super-admin'))
+        <div class="nav-group">
+            <a href="{{ route('backend.platform-users.index') }}"
+               class="nav-link {{ request()->routeIs('backend.platform-users.*') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <span class="nav-label">Quản lý nhân sự Platform</span>
             </a>
         </div>
         @endif

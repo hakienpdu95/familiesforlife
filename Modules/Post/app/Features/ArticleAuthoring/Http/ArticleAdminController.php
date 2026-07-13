@@ -59,7 +59,7 @@ class ArticleAdminController extends Controller
      */
     public function pendingReview(Request $request, ListPendingReviewTranslationsHandler $handler): View
     {
-        abort_unless($request->user()->isContentEditor() || $request->user()->isContentHead(), 403);
+        abort_unless($request->user()->isPlatformContentEditor() || $request->user()->isPlatformContentHead(), 403);
 
         $translations = $handler->handle(new ListPendingReviewTranslationsQuery($request->user()));
 
@@ -202,7 +202,7 @@ class ArticleAdminController extends Controller
         // Hà Kiên) không có permission post_article.* nào (tài khoản organization_id=null,
         // permission team-scoped theo tổ chức) — nhưng cần xem/thao tác được để duyệt
         // (PostArticlePolicy::approve/publish/…).
-        if ($user->isContentEditor() || $user->isContentHead()) {
+        if ($user->isPlatformContentEditor() || $user->isPlatformContentHead()) {
             return;
         }
 

@@ -81,7 +81,7 @@ class OrganizationController extends Controller
         $organization = $handler->handle(new GetOrganizationQuery($organization));
         $members = $organization->latestMembers;
 
-        // content_moderator (organization_id=null) không có TenantContext trỏ tới CHÍNH tổ chức
+        // platform_content_moderator (organization_id=null) không có TenantContext trỏ tới CHÍNH tổ chức
         // đang xem — nếu không bọc, $organization->approvalSubject (OrganizationScope, §7.1)
         // resolve null khi render Blade, ẩn mất badge/nút "Duyệt nội dung" dù trang vẫn tải được
         // bình thường (Organization::withoutTenant() cho route binding). Đây chính là trang mà
@@ -135,7 +135,7 @@ class OrganizationController extends Controller
     }
 
     // ── Approval workflow — Platform Approval Gateway (Hà Kiên nội bộ) ─────────────────
-    // approve/reject/publishApproval/archiveApproval do content_moderator xử lý (tài khoản
+    // approve/reject/publishApproval/archiveApproval do platform_content_moderator xử lý (tài khoản
     // organization_id=null) — bọc trong TenantContext::runForOrganization() để các query nội
     // bộ (ApprovalSubject…) resolve đúng tổ chức đang xử lý, không phải tổ chức của người thao
     // tác (xem chú thích tương tự ở Modules/Product/.../ProductAdminController).

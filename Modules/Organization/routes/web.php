@@ -16,7 +16,7 @@ use Modules\Organization\Http\Controllers\OrganizationController;
 Route::middleware(['auth'])->prefix('dashboard')->name('backend.')->group(function () {
     Route::resource('organizations', OrganizationController::class);
 
-    // Platform Approval Gateway — content_moderator duyệt hồ sơ tổ chức
+    // Platform Approval Gateway — platform_content_moderator duyệt hồ sơ tổ chức
     // (spec/Workflow_Approval_Technical_Specification.md — Case study kiểm duyệt xuyên tổ chức)
     Route::post('organizations/{organization}/submit-approval', [OrganizationController::class, 'submitApproval'])->name('organizations.submit-approval');
     Route::post('organizations/{organization}/approve-content', [OrganizationController::class, 'approveContent'])->name('organizations.approve-content');

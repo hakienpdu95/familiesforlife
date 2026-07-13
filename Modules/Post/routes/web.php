@@ -20,7 +20,7 @@ Route::middleware(['auth', 'tenant'])
         Route::resource('categories', CategoryAdminController::class)->except(['show']);
         Route::post('categories/reorder', [CategoryAdminController::class, 'reorder'])->name('categories.reorder');
 
-        // Hàng chờ duyệt xuyên tổ chức (content_editor/content_head) — ĐẶT TRƯỚC
+        // Hàng chờ duyệt xuyên tổ chức (platform_content_editor/platform_content_head) — ĐẶT TRƯỚC
         // Route::resource('articles', ...) bên dưới, vì "articles/{article}" (show) sẽ khớp
         // nhầm "articles/pending-review" nếu resource đăng ký trước (Laravel so khớp theo thứ
         // tự đăng ký, không tự ưu tiên path tường minh hơn wildcard).

@@ -14,7 +14,7 @@ use Modules\Approval\Models\ApprovalLog;
  * ApprovalDashboardController (chỉ hiển thị pending item mà user hiện tại có quyền duyệt).
  * Dành cho vai trò cần giám sát toàn bộ (system_admin/ceo — 1 tổ chức) hoặc content_moderator
  * (Platform Approval Gateway — xuyên MỌI tổ chức), gate bằng permission `approval.view_history`
- * hoặc `isContentModerator()` (§11 mở rộng).
+ * hoặc `isPlatformContentModerator()` (§11 mở rộng).
  */
 class ApprovalHistoryController extends Controller
 {
@@ -24,7 +24,7 @@ class ApprovalHistoryController extends Controller
 
         $subjectTypeFilter = $request->string('subject_type')->value() ?: null;
         $actionFilter = $request->string('action')->value() ?: null;
-        $isModerator = $request->user()->isContentModerator();
+        $isModerator = $request->user()->isPlatformContentModerator();
 
         $query = ApprovalLog::query()
             ->when(

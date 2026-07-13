@@ -14,7 +14,10 @@ class ProductPolicy
 
     public function view(User $user, Product $product): bool
     {
-        return $user->can('product.view') || $user->isContentModerator();
+        // platform_viewer (Lớp A, read-only — spec/Platform_RBAC_Technical_Specification.md
+        // §3.3) cần xem được trang edit để giám sát dashboard "Chờ duyệt của tôi" dẫn tới, dù
+        // không có ability approve/reject/publishApproval/archiveApproval nào.
+        return $user->can('product.view') || $user->isPlatformContentModerator() || $user->isPlatformViewer();
     }
 
     public function create(User $user): bool
@@ -31,7 +34,10 @@ class ProductPolicy
      */
     public function update(User $user, Product $product): bool
     {
-        return $user->can('product.edit') || $user->isContentModerator();
+        // authorizeResource() map route edit() -> ability update() (quy ước Laravel), nên
+        // platform_viewer cần ở đây (không phải view()) để xem được trang edit — dashboard
+        // "Chờ duyệt của tôi" dẫn thẳng tới route edit, không phải 1 trang show riêng.
+        return $user->can('product.edit') || $user->isPlatformContentModerator() || $user->isPlatformViewer();
     }
 
     public function delete(User $user, Product $product): bool
@@ -54,21 +60,21 @@ class ProductPolicy
 
     public function approve(User $user, Product $product): bool
     {
-        return $user->isContentModerator();
+        return $user->isPlatformContentModerator();
     }
 
     public function reject(User $user, Product $product): bool
     {
-        return $user->isContentModerator();
+        return $user->isPlatformContentModerator();
     }
 
     public function publishApproval(User $user, Product $product): bool
     {
-        return $user->isContentModerator();
+        return $user->isPlatformContentModerator();
     }
 
     public function archiveApproval(User $user, Product $product): bool
     {
-        return $user->isContentModerator();
+        return $user->isPlatformContentModerator();
     }
 }

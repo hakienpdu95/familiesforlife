@@ -60,6 +60,13 @@ class Product extends TenantAwareModel
                 $model->uuid = (string) Str::uuid();
             }
         });
+
+        // Dọn ApprovalSubject mồ côi khi Product bị xoá cứng — forceDelete() bỏ qua SoftDeletes
+        // nên không có cơ hội nào khác để dọn dẹp bản ghi polymorphic này (không có FK thật vì
+        // quan hệ là morphOne). Xem spec/Workflow_Approval_Technical_Specification.md §17.2.
+        static::forceDeleted(function (self $model): void {
+            $model->approvalSubject?->forceDelete();
+        });
     }
 
     public function getRouteKeyName(): string

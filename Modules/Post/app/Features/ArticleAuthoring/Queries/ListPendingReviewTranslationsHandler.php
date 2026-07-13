@@ -12,14 +12,14 @@ use Modules\Post\Models\PostArticle;
 use Modules\Post\Models\PostArticleTranslation;
 
 /**
- * Hàng chờ duyệt bài viết XUYÊN TỔ CHỨC cho content_editor/content_head (Platform Approval
+ * Hàng chờ duyệt bài viết XUYÊN TỔ CHỨC cho platform_content_editor/platform_content_head (Platform Approval
  * Gateway — spec/Workflow_Approval_Technical_Specification.md §18.10). Khác
  * ListArticlesForAdminHandler (lọc theo 1 tổ chức qua TenantContext) — handler này CỐ Ý bỏ
  * OrganizationScope để thấy bản dịch đang chờ duyệt của MỌI tổ chức.
  *
- * Lấy cả Submitted (chờ content_editor) VÀ Approved (chờ content_head) — mỗi item lọc lại
- * bằng Gate theo đúng ability tương ứng, để content_editor chỉ thấy việc của mình,
- * content_head thấy cả 2 (làm được việc của content_editor, §18.10).
+ * Lấy cả Submitted (chờ platform_content_editor) VÀ Approved (chờ platform_content_head) — mỗi item lọc lại
+ * bằng Gate theo đúng ability tương ứng, để platform_content_editor chỉ thấy việc của mình,
+ * platform_content_head thấy cả 2 (làm được việc của platform_content_editor, §18.10).
  */
 class ListPendingReviewTranslationsHandler implements QueryHandlerInterface
 {

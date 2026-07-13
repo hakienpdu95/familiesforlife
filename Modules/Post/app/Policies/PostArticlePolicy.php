@@ -16,14 +16,14 @@ class PostArticlePolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->can('post_article.view') || $user->isContentEditor() || $user->isContentHead();
+        return $user->can('post_article.view') || $user->isPlatformContentEditor() || $user->isPlatformContentHead();
     }
 
     /** Chỉ bài `published` nếu user không có quyền edit. content_editor/content_head luôn xem
      *  được (cần inspect nội dung trước khi duyệt). */
     public function view(User $user, PostArticleTranslation $translation): bool
     {
-        if ($user->isContentEditor() || $user->isContentHead()) {
+        if ($user->isPlatformContentEditor() || $user->isPlatformContentHead()) {
             return true;
         }
 
@@ -83,27 +83,27 @@ class PostArticlePolicy
 
     public function approve(User $user, PostArticleTranslation $translation): bool
     {
-        return $user->isContentEditor() || $user->isContentHead();
+        return $user->isPlatformContentEditor() || $user->isPlatformContentHead();
     }
 
     public function publish(User $user, PostArticleTranslation $translation): bool
     {
-        return $user->isContentHead();
+        return $user->isPlatformContentHead();
     }
 
     public function schedule(User $user, PostArticleTranslation $translation): bool
     {
-        return $user->isContentHead();
+        return $user->isPlatformContentHead();
     }
 
     public function archive(User $user, PostArticleTranslation $translation): bool
     {
-        return $user->isContentHead();
+        return $user->isPlatformContentHead();
     }
 
     public function unpublish(User $user, PostArticleTranslation $translation): bool
     {
-        return $user->isContentHead();
+        return $user->isPlatformContentHead();
     }
 
     /**

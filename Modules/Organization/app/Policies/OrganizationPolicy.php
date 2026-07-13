@@ -34,7 +34,10 @@ class OrganizationPolicy
 
     public function view(User $user, Organization $organization): bool
     {
-        if ($user->hasRole(['super-admin', 'System_Admin']) || $user->isContentModerator()) {
+        // platform_viewer (Lớp A, read-only — spec/Platform_RBAC_Technical_Specification.md
+        // §3.3) cần xem được trang show để giám sát dashboard "Chờ duyệt của tôi" dẫn tới, dù
+        // không có ability approve/reject/publishApproval/archiveApproval nào.
+        if ($user->hasRole(['super-admin', 'System_Admin']) || $user->isPlatformContentModerator() || $user->isPlatformViewer()) {
             return true;
         }
 
@@ -74,21 +77,21 @@ class OrganizationPolicy
 
     public function approve(User $user, Organization $organization): bool
     {
-        return $user->isContentModerator();
+        return $user->isPlatformContentModerator();
     }
 
     public function reject(User $user, Organization $organization): bool
     {
-        return $user->isContentModerator();
+        return $user->isPlatformContentModerator();
     }
 
     public function publishApproval(User $user, Organization $organization): bool
     {
-        return $user->isContentModerator();
+        return $user->isPlatformContentModerator();
     }
 
     public function archiveApproval(User $user, Organization $organization): bool
     {
-        return $user->isContentModerator();
+        return $user->isPlatformContentModerator();
     }
 }

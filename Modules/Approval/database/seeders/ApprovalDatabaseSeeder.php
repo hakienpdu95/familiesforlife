@@ -15,6 +15,7 @@ class ApprovalDatabaseSeeder extends Seeder
             ApprovalPermissionSeeder::class,
             ContentModeratorSeeder::class,
             ContentReviewHierarchySeeder::class,
+            PlatformOpsViewerSeeder::class,
         ]);
     }
 }

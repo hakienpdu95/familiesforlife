@@ -31,8 +31,13 @@ class ContentModeratorSeeder extends Seeder
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         setPermissionsTeamId(null);
+        // Đổi tên platform_content_moderator (từ content_moderator) —
+        // spec/Platform_RBAC_Technical_Specification.md §3.2/§3.5. Migration
+        // 2026_07_13_000003_rename_platform_content_roles đã đổi tên role đã tồn tại trong DB;
+        // firstOrCreate() ở đây dùng tên MỚI để không tạo lại role cũ nếu seeder chạy lại
+        // (vd cài mới từ đầu, chưa từng có role content_moderator để migration đổi tên).
         $role = Role::firstOrCreate([
-            'name'       => 'content_moderator',
+            'name'       => 'platform_content_moderator',
             'guard_name' => 'web',
         ]);
 
@@ -52,6 +57,6 @@ class ContentModeratorSeeder extends Seeder
 
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $this->command->info('  ✓ content_moderator role + moderator@system.local seeded.');
+        $this->command->info('  ✓ platform_content_moderator role + moderator@system.local seeded.');
     }
 }

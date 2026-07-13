@@ -147,22 +147,71 @@ class User extends Authenticatable implements MustVerifyEmail
             ->exists();
     }
 
-    /** Đội kiểm duyệt Doanh nghiệp/Sản phẩm (Platform Approval Gateway, §18). */
-    public function isContentModerator(): bool
+    /**
+     * Đội kiểm duyệt Doanh nghiệp/Sản phẩm (Platform Approval Gateway, §18). Đổi tên từ
+     * isContentModerator()/role content_moderator — spec/Platform_RBAC_Technical_Specification.md
+     * §0/§3.2 (tiền tố platform_ nhất quán với platform_ops/platform_viewer).
+     */
+    public function isPlatformContentModerator(): bool
     {
-        return $this->hasGlobalRole('content_moderator');
+        return $this->hasGlobalRole('platform_content_moderator');
     }
 
-    /** Biên tập viên — duyệt SƠ BỘ bài viết (Submitted → Approved), §18.10. */
-    public function isContentEditor(): bool
+    /**
+     * Biên tập viên — duyệt SƠ BỘ bài viết (Submitted → Approved), §18.10. Đổi tên từ
+     * isContentEditor()/role content_editor — spec/Platform_RBAC_Technical_Specification.md §3.2.
+     */
+    public function isPlatformContentEditor(): bool
     {
-        return $this->hasGlobalRole('content_editor');
+        return $this->hasGlobalRole('platform_content_editor');
     }
 
-    /** Trưởng phòng nội dung — duyệt CUỐI CÙNG + xuất bản bài viết (Approved → Published), §18.10. */
-    public function isContentHead(): bool
+    /**
+     * Trưởng phòng nội dung — duyệt CUỐI CÙNG + xuất bản bài viết (Approved → Published),
+     * §18.10. Đổi tên từ isContentHead()/role content_head —
+     * spec/Platform_RBAC_Technical_Specification.md §3.2.
+     */
+    public function isPlatformContentHead(): bool
     {
-        return $this->hasGlobalRole('content_head');
+        return $this->hasGlobalRole('platform_content_head');
+    }
+
+    /**
+     * Vận hành Platform — quản lý subscription tổ chức, hỗ trợ kỹ thuật, xem log hệ thống.
+     * KHÔNG có ability nào trên approve/reject/publishApproval/archiveApproval của
+     * Organization/Product/Post (spec/Platform_RBAC_Technical_Specification.md §3.3).
+     */
+    public function isPlatformOps(): bool
+    {
+        return $this->hasGlobalRole('platform_ops');
+    }
+
+    /**
+     * Giám sát / Viewer — role read-only đầu tiên ở Lớp A, chỉ xem dashboard/báo cáo, không
+     * có ability ghi nào (spec/Platform_RBAC_Technical_Specification.md §3.3).
+     */
+    public function isPlatformViewer(): bool
+    {
+        return $this->hasGlobalRole('platform_viewer');
+    }
+
+    /**
+     * Tên hiển thị tiếng Việt cho 6 Platform Role (Lớp A) —
+     * spec/Platform_RBAC_Technical_Specification.md §3.1. Chưa có màn hình quản trị nào hiển
+     * thị role Platform ra UI (xem §3.9 — chỉ có CLI `platform:user-create`), nên map này dùng
+     * ngay cho output CLI hiện tại và sẵn sàng tái sử dụng khi có màn hình "Quản lý nhân sự
+     * Platform" (Phase sau).
+     */
+    public static function platformRoleLabels(): array
+    {
+        return [
+            'super-admin'                => 'Super Admin',
+            'platform_content_head'      => 'Tổng biên tập',
+            'platform_content_editor'    => 'Biên tập viên',
+            'platform_content_moderator' => 'Kiểm duyệt viên (Legal)',
+            'platform_ops'               => 'Vận hành Platform',
+            'platform_viewer'            => 'Giám sát / Viewer',
+        ];
     }
 
     public function getActivitylogOptions(): LogOptions
