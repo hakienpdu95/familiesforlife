@@ -300,7 +300,8 @@
     [
         "post_product_blocks///add///__///",
         "translation_id///unsignedBigInteger///__///_NULL///NULL///__///__",
-        "__index///index///__///__///__///organization_id,translation_id|idx_post_pb_org_translation///__"
+        "__index///index///__///__///__///organization_id,translation_id|idx_post_pb_org_translation///__",
+        "__index///index///__///__///__///translation_id|idx_post_pb_translation///__"
     ],
     [
         "post_product_blocks///drop///__///Publishing Engine Phase 13 — article_id thay bằng translation_id",
@@ -311,6 +312,12 @@
         "post_article_translations///add///__///",
         "disclosure_text///string///500///_NULL///NULL///__///__",
         "cta_text///string///100///_NULL///NULL///__///__",
-        "cta_url///string///500///_NULL///NULL///__///__"
+        "cta_url///string///500///_NULL///NULL///__///__",
+        "__index///unique///__///__///__///locale,slug|uq_post_trans_locale_slug///__",
+        "__index///index///__///__///__///locale,status,published_at|idx_post_trans_status_pub///__"
+    ],
+    [
+        "post_categories///add///__///",
+        "__index///unique///__///__///__///slug|uq_post_cat_slug///__"
     ]
 ]

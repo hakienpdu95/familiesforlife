@@ -17,7 +17,7 @@ use Modules\Post\Models\PostProductBlockButton;
 /**
  * Tạo bản dịch mới cho 1 article ở locale chưa có — luôn status=draft (kể cả nguồn copy
  * đang published, vì bản dịch mới chưa qua duyệt riêng). Slug bắt buộc auto-generate từ
- * title nếu không truyền, unique theo (organization_id, locale, slug). Content/product
+ * title nếu không truyền, unique theo (locale, slug). Content/product
  * blocks copy làm bản nháp khởi điểm từ mainTranslation() (hoặc translation khác nếu
  * main_locale cũng chưa có nội dung) — deep-copy độc lập, sửa bản copy không ảnh hưởng gốc.
  */
@@ -30,10 +30,9 @@ class CreateTranslationAction
         return DB::transaction(function () use ($article, $locale, $data) {
             $translation = PostArticleTranslation::create([
                 'article_id'       => $article->id,
-                'organization_id' => $article->organization_id,
                 'locale'          => $locale,
                 'title'           => $data->title,
-                'slug'            => $data->slug ?: $this->uniqueSlug($article->organization_id, $locale, $data->title),
+                'slug'            => $data->slug ?: $this->uniqueSlug($locale, $data->title),
                 'excerpt'         => $data->excerpt,
                 'seo_title'       => $data->seo_title,
                 'seo_description' => $data->seo_description,
@@ -55,15 +54,14 @@ class CreateTranslationAction
         });
     }
 
-    private function uniqueSlug(int $organizationId, string $locale, string $title): string
+    private function uniqueSlug(string $locale, string $title): string
     {
         $base = Str::slug($title);
         $slug = $base;
         $i    = 2;
 
         while (
-            PostArticleTranslation::where('organization_id', $organizationId)
-                ->where('locale', $locale)
+            PostArticleTranslation::where('locale', $locale)
                 ->where('slug', $slug)
                 ->exists()
         ) {
@@ -79,7 +77,6 @@ class CreateTranslationAction
         foreach ($source->contentBlocks()->get() as $block) {
             if ($block->type === ContentBlockType::Text) {
                 PostContentBlock::create([
-                    'organization_id' => $target->organization_id,
                     'translation_id'  => $target->id,
                     'type'            => ContentBlockType::Text,
                     'sort_order'      => $block->sort_order,
@@ -95,7 +92,6 @@ class CreateTranslationAction
                 $newProductBlock = $this->copyProductBlock($block->productBlock, $target);
 
                 PostContentBlock::create([
-                    'organization_id'  => $target->organization_id,
                     'translation_id'   => $target->id,
                     'type'             => ContentBlockType::Product,
                     'sort_order'       => $block->sort_order,
@@ -109,7 +105,6 @@ class CreateTranslationAction
     {
         $new = PostProductBlock::create([
             'uuid'            => (string) Str::uuid(),
-            'organization_id' => $target->organization_id,
             'translation_id'  => $target->id,
             'template'        => $source->template,
             'heading'         => $source->heading,

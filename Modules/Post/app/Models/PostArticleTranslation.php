@@ -2,16 +2,28 @@
 
 namespace Modules\Post\Models;
 
-use App\Foundation\Models\TenantAwareModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use Modules\Post\Database\Factories\PostArticleTranslationFactory;
 use Modules\Post\Enums\TranslationStatus;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
-class PostArticleTranslation extends TenantAwareModel
+/**
+ * spec/Platform_RBAC_Phase2_Specification.md §3.3 (v3.0) — không extends TenantAwareModel
+ * nữa, Post không thuộc tenant/Organization nào.
+ */
+class PostArticleTranslation extends Model
 {
+    use HasFactory;
+    use SoftDeletes;
+    use LogsActivity;
+
     protected $table = 'post_article_translations';
 
     protected static function newFactory(): Factory
@@ -19,10 +31,17 @@ class PostArticleTranslation extends TenantAwareModel
         return PostArticleTranslationFactory::new();
     }
 
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
+
     protected $fillable = [
         'uuid',
         'article_id',
-        'organization_id',
         'locale',
         'title',
         'slug',
@@ -64,11 +83,12 @@ class PostArticleTranslation extends TenantAwareModel
 
     /**
      * §11.1 — route công khai `{locale}/bai-viet/{translation:slug}` cần locale làm điều
-     * kiện lọc thêm (2 locale khác nhau ĐƯỢC PHÉP trùng slug, unique theo (org, locale,
-     * slug)) — Laravel implicit binding chỉ truyền `slug` làm giá trị, không tự biết phải
-     * lọc thêm locale, nên đọc trực tiếp từ route segment `locale` (đã resolve trước đó).
-     * CHỈ áp dụng khi binding qua field `slug` — route admin dùng field mặc định (uuid) đi
-     * qua nhánh parent (BelongsToOrganization::resolveRouteBinding), không bị đụng.
+     * kiện lọc thêm (2 locale khác nhau ĐƯỢC PHÉP trùng slug, unique theo (locale, slug) —
+     * không còn theo tổ chức từ v3.0) — Laravel implicit binding chỉ truyền `slug` làm giá
+     * trị, không tự biết phải lọc thêm locale, nên đọc trực tiếp từ route segment `locale`
+     * (đã resolve trước đó). CHỈ áp dụng khi binding qua field `slug` — route admin dùng
+     * field mặc định (uuid) đi qua nhánh parent (`Model::resolveRouteBinding` mặc định của
+     * Eloquent, không còn org-scoping nào để bypass từ v3.0).
      */
     public function resolveRouteBinding($value, $field = null): ?static
     {

@@ -21,11 +21,6 @@ class PostArticleFactory extends Factory
     {
         return [
             'uuid'            => (string) Str::uuid(),
-            // organization_id KHÔNG có default qua Organization::factory() — App\Shared\Tenancy\Models\Organization
-            // không có newFactory() override và namespace của nó không khớp quy ước đoán mặc định
-            // của Laravel (Database\Factories\{App-namespace-trừ-App\}), nên Organization::factory()
-            // throw "Class not found" ngay khi được gọi (bug tồn tại sẵn, ngoài phạm vi module
-            // Post) — luôn truyền organization_id tường minh khi gọi PostArticle::factory()->create([...]).
             'main_locale'     => 'vi',
             'format'          => ArticleFormat::Article,
             'cover_image_url' => null,
@@ -55,8 +50,7 @@ class PostArticleFactory extends Factory
             PostArticleTranslation::factory()
                 ->for($article, 'article')
                 ->create(array_merge([
-                    'organization_id' => $article->organization_id,
-                    'locale'          => $article->main_locale,
+                    'locale' => $article->main_locale,
                 ], $translationAttributes));
         });
     }

@@ -76,7 +76,6 @@ class SyncContentBlocksAction
 
             if ($type === 'text') {
                 PostContentBlock::create([
-                    'organization_id' => $translation->organization_id,
                     'translation_id'  => $translation->id,
                     'type'            => ContentBlockType::Text,
                     'sort_order'      => $sortOrder,
@@ -87,7 +86,6 @@ class SyncContentBlocksAction
 
                 if ($productBlockId) {
                     PostContentBlock::create([
-                        'organization_id'  => $translation->organization_id,
                         'translation_id'   => $translation->id,
                         'type'             => ContentBlockType::Product,
                         'sort_order'       => $sortOrder,
@@ -223,7 +221,6 @@ class SyncContentBlocksAction
         /** @var PostProductBlock $block */
         $block = $translation->productBlocks()->firstOrNew(['uuid' => $blockData['block_uuid']]);
         $block->fill([
-            'organization_id' => $translation->organization_id,
             'template'        => $blockData['template'],
             'heading'         => $blockData['heading'] ?? null,
             'sort_order'      => $sortOrder,

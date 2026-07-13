@@ -6,6 +6,7 @@ enum AccountType: string
 {
     case Free      = 'free';
     case OrgMember = 'org_member';
+    case Platform  = 'platform';
     case Suspended = 'suspended';
 
     public function label(): string
@@ -13,6 +14,7 @@ enum AccountType: string
         return match ($this) {
             self::Free      => 'Tự do',
             self::OrgMember => 'Thành viên tổ chức',
+            self::Platform  => 'Nhân sự nền tảng',
             self::Suspended => 'Bị khóa',
         };
     }

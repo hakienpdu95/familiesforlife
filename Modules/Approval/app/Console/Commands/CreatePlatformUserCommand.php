@@ -27,7 +27,7 @@ class CreatePlatformUserCommand extends Command
     protected $signature = 'platform:user-create
         {email : Email đăng nhập}
         {name : Họ và tên hiển thị}
-        {role : platform_content_head|platform_content_editor|platform_content_moderator|platform_ops|platform_viewer}
+        {role : platform_content_head|platform_content_editor|platform_content_creator|platform_section_editor|platform_content_moderator|platform_ops|platform_viewer}
         {--password= : Mật khẩu — bỏ trống sẽ tự sinh ngẫu nhiên và in ra màn hình}';
 
     protected $description = 'Tạo tài khoản nhân sự biên tập/vận hành Platform (organization_id=null) — không tạo được super-admin';
@@ -35,6 +35,8 @@ class CreatePlatformUserCommand extends Command
     private const ALLOWED_ROLES = [
         'platform_content_head',
         'platform_content_editor',
+        'platform_content_creator',
+        'platform_section_editor',
         'platform_content_moderator',
         'platform_ops',
         'platform_viewer',

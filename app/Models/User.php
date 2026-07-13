@@ -54,6 +54,12 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsTo(Organization::class);
     }
 
+    /** Category mà platform_section_editor này được gán phụ trách (spec/Platform_RBAC_Phase2_Specification.md §4.2). */
+    public function postCategoryEditorships(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(\Modules\Post\Models\PostCategory::class, 'post_category_editors', 'user_id', 'post_category_id');
+    }
+
     public function organizationMembership(): HasOne
     {
         return $this->hasOne(OrganizationMember::class);
@@ -89,6 +95,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isOrgMember(): bool
     {
         return $this->account_type === AccountType::OrgMember;
+    }
+
+    public function isPlatform(): bool
+    {
+        return $this->account_type === AccountType::Platform;
     }
 
     public function isSuspended(): bool
@@ -148,6 +159,29 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Lấy TẤT CẢ user đang giữ ≥1 trong các role Platform (organization_id=null) truyền vào —
+     * dùng cho các nơi cần tìm danh sách nhân sự nền tảng để gửi thông báo (vd
+     * ExpireSponsoredArticlesJob, TakeDownArticleTranslationAction —
+     * spec/Platform_RBAC_Phase2_Specification.md §3.3). CỐ Ý không dùng `User::role([...])`
+     * (Spatie team-scoped `whereHas('roles', ...)`) — cùng lý do đã tài liệu ở
+     * `hasGlobalRole()`: kết quả phụ thuộc ambient `getPermissionsTeamId()` tại thời điểm gọi,
+     * không ổn định trong queue worker chạy nhiều job liên tiếp. Query thẳng pivot để luôn đúng.
+     *
+     * @param  array<int, string>  $roleNames
+     * @return \Illuminate\Support\Collection<int, static>
+     */
+    public static function withGlobalRole(array $roleNames): \Illuminate\Support\Collection
+    {
+        $userIds = \Illuminate\Support\Facades\DB::table(config('permission.table_names.model_has_roles'))
+            ->join('roles', 'roles.id', '=', config('permission.table_names.model_has_roles') . '.role_id')
+            ->where(config('permission.table_names.model_has_roles') . '.model_type', static::class)
+            ->whereIn('roles.name', $roleNames)
+            ->pluck(config('permission.table_names.model_has_roles') . '.model_id');
+
+        return static::whereNull('organization_id')->whereIn('id', $userIds)->get();
+    }
+
+    /**
      * Đội kiểm duyệt Doanh nghiệp/Sản phẩm (Platform Approval Gateway, §18). Đổi tên từ
      * isContentModerator()/role content_moderator — spec/Platform_RBAC_Technical_Specification.md
      * §0/§3.2 (tiền tố platform_ nhất quán với platform_ops/platform_viewer).
@@ -167,6 +201,16 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Viết/sửa bài + upload media (spec/Platform_RBAC_Phase2_Specification.md §3.1, v3.0) —
+     * gộp 2 role dự kiến ban đầu (`platform_reporter`/`platform_media`) thành 1. KHÔNG có
+     * quyền publish/duyệt — tách biệt viết vs duyệt để tránh tự duyệt bài của chính mình.
+     */
+    public function isPlatformContentCreator(): bool
+    {
+        return $this->hasGlobalRole('platform_content_creator');
+    }
+
+    /**
      * Trưởng phòng nội dung — duyệt CUỐI CÙNG + xuất bản bài viết (Approved → Published),
      * §18.10. Đổi tên từ isContentHead()/role content_head —
      * spec/Platform_RBAC_Technical_Specification.md §3.2.
@@ -181,6 +225,16 @@ class User extends Authenticatable implements MustVerifyEmail
      * KHÔNG có ability nào trên approve/reject/publishApproval/archiveApproval của
      * Organization/Product/Post (spec/Platform_RBAC_Technical_Specification.md §3.3).
      */
+    /**
+     * Biên tập viên trưởng chuyên mục — duyệt sơ bộ (Submitted → Approved) NHƯNG chỉ giới hạn
+     * trong các category được gán qua `post_category_editors` (spec/Platform_RBAC_Phase2_Specification.md
+     * §4, v3.0) — xem `PostArticlePolicy::approve()`.
+     */
+    public function isPlatformSectionEditor(): bool
+    {
+        return $this->hasGlobalRole('platform_section_editor');
+    }
+
     public function isPlatformOps(): bool
     {
         return $this->hasGlobalRole('platform_ops');
@@ -208,6 +262,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'super-admin'                => 'Super Admin',
             'platform_content_head'      => 'Tổng biên tập',
             'platform_content_editor'    => 'Biên tập viên',
+            'platform_content_creator'   => 'Phóng viên / Biên tập viết bài',
+            'platform_section_editor'    => 'Biên tập viên trưởng chuyên mục',
             'platform_content_moderator' => 'Kiểm duyệt viên (Legal)',
             'platform_ops'               => 'Vận hành Platform',
             'platform_viewer'            => 'Giám sát / Viewer',

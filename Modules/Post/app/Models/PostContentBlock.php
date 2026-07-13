@@ -2,7 +2,6 @@
 
 namespace Modules\Post\Models;
 
-use App\Shared\Tenancy\Traits\BelongsToOrganization;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Post\Enums\ContentBlockType;
@@ -10,15 +9,13 @@ use Modules\Post\Enums\ContentBlockType;
 /**
  * 1 block trong composer (text hoặc product) theo đúng thứ tự hiển thị (`sort_order`).
  * Không soft-delete — vòng đời gắn chặt bản dịch bài viết, xoá cứng theo cascade.
+ * Không tenant-scoped — Post là tài sản của nền tảng (spec Phase2 §3.3 v3.0).
  */
 class PostContentBlock extends Model
 {
-    use BelongsToOrganization;
-
     protected $table = 'post_content_blocks';
 
     protected $fillable = [
-        'organization_id',
         'translation_id',
         'type',
         'sort_order',

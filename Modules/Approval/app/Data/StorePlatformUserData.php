@@ -20,6 +20,8 @@ class StorePlatformUserData extends Data
     private const ALLOWED_ROLES = [
         'platform_content_head',
         'platform_content_editor',
+        'platform_content_creator',
+        'platform_section_editor',
         'platform_content_moderator',
         'platform_ops',
         'platform_viewer',

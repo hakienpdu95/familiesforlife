@@ -57,7 +57,6 @@ class BackfillPostTranslationsCommand extends Command
                     $translationId = DB::table('post_article_translations')->insertGetId([
                         'uuid'            => (string) Str::uuid(),
                         'article_id'      => $a->id,
-                        'organization_id' => $a->organization_id,
                         'locale'          => $a->main_locale ?? 'vi',
                         'title'           => $a->title,
                         'slug'            => $a->slug,

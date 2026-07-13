@@ -3,8 +3,6 @@
 namespace Modules\Post\Jobs;
 
 use App\Models\User;
-use App\Shared\Tenancy\Models\Organization;
-use App\Shared\Tenancy\TenantContext;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -16,10 +14,10 @@ use Modules\Post\Features\ArticleAuthoring\Notifications\SponsorshipExpiredNotif
 use Modules\Post\Models\PostArticle;
 
 /**
- * spec/dac-ta-ky-thuat-bai-viet-tai-tro.md §8 — đúng pattern PublishDueTranslationsJob (Phase 14):
- * job hệ thống, không thuộc 1 tenant cụ thể, withoutTenant() khi đọc + restore đúng TenantContext
- * từng dòng trước khi ghi/gửi notification. Chạy daily (không cần everyMinute như publish-due) —
- * hết hạn tài trợ tính theo date, không theo giờ (§13).
+ * Chạy daily (không cần everyMinute như publish-due) — hết hạn tài trợ tính theo date, không
+ * theo giờ. Post không còn tenant-scoped (spec/Platform_RBAC_Phase2_Specification.md §3.3
+ * v3.0) nên job này đọc/ghi PostArticle bình thường, không cần withoutTenant()/TenantContext
+ * nào — người nhận thông báo cũng không còn theo tổ chức, xem notifyExpired().
  */
 class ExpireSponsoredArticlesJob implements ShouldQueue
 {
@@ -32,33 +30,22 @@ class ExpireSponsoredArticlesJob implements ShouldQueue
     // the same property... definition differs and is considered incompatible").
     public function handle(): void
     {
-        PostArticle::withoutTenant()
-            ->where('is_sponsored', true)
+        PostArticle::where('is_sponsored', true)
             ->whereNotNull('sponsored_end_date')
             ->where('sponsored_end_date', '<', now()->toDateString())
             ->chunkById(100, function ($articles) {
                 foreach ($articles as $article) {
-                    // Cô lập lỗi TỪNG bài — 1 tổ chức/bài lỗi (vd Organization vừa bị xoá cứng
-                    // giữa lúc job chạy, notification gửi thất bại...) không được làm hỏng cả
-                    // chunk/job, các bài còn lại vẫn phải được xử lý.
+                    // Cô lập lỗi TỪNG bài — 1 bài lỗi (vd notification gửi thất bại...) không
+                    // được làm hỏng cả chunk/job, các bài còn lại vẫn phải được xử lý.
                     try {
-                        $org = Organization::withoutGlobalScopes()->find($article->organization_id);
+                        // §0 — CHỈ tắt is_sponsored, KHÔNG đổi TranslationStatus/unpublish.
+                        $article->update(['is_sponsored' => false]);
 
-                        if (! $org) {
-                            continue;
-                        }
-
-                        TenantContext::runForOrganization($org, function () use ($article) {
-                            // §0 — CHỈ tắt is_sponsored, KHÔNG đổi TranslationStatus/unpublish.
-                            $article->update(['is_sponsored' => false]);
-
-                            $this->notifyExpired($article);
-                        });
+                        $this->notifyExpired($article);
                     } catch (\Throwable $e) {
                         Log::error('ExpireSponsoredArticlesJob: lỗi xử lý article', [
-                            'article_id'      => $article->id,
-                            'organization_id' => $article->organization_id,
-                            'exception'       => $e->getMessage(),
+                            'article_id' => $article->id,
+                            'exception'  => $e->getMessage(),
                         ]);
                         // Không rethrow — tiếp tục với bài tiếp theo trong chunk. Bài lỗi vẫn còn
                         // is_sponsored=true + sponsored_end_date cũ nên lần chạy job KẾ TIẾP (ngày
@@ -68,14 +55,19 @@ class ExpireSponsoredArticlesJob implements ShouldQueue
             });
     }
 
+    /**
+     * spec/Platform_RBAC_Phase2_Specification.md §3.3 mục 3 (v3.0) — bài viết không còn gắn
+     * với Organization nào (kể cả tổ chức tài trợ — không có UI để chọn, xem lý do đầy đủ ở
+     * spec) nên không thể tự động tìm đúng user của doanh nghiệp tài trợ để báo. Báo cho nhân
+     * sự nền tảng (platform_content_head/platform_ops) kèm sponsor_name để họ tự liên hệ lại
+     * đúng doanh nghiệp qua kênh sales/CRM riêng, ngoài phạm vi hệ thống này.
+     */
     private function notifyExpired(PostArticle $article): void
     {
-        $editors = User::where('organization_id', $article->organization_id)
-            ->role(['marketing', 'ceo'])
-            ->get();
+        $recipients = User::withGlobalRole(['platform_content_head', 'platform_ops']);
 
-        if ($editors->isNotEmpty()) {
-            Notification::send($editors, new SponsorshipExpiredNotification($article));
+        if ($recipients->isNotEmpty()) {
+            Notification::send($recipients, new SponsorshipExpiredNotification($article));
         }
     }
 }

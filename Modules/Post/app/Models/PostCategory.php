@@ -2,15 +2,37 @@
 
 namespace Modules\Post\Models;
 
-use App\Foundation\Models\TenantAwareModel;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
-class PostCategory extends TenantAwareModel
+/**
+ * spec/Platform_RBAC_Phase2_Specification.md §4 (v3.0) — category dùng chung toàn nền tảng,
+ * không extends TenantAwareModel nữa (organization_id vẫn còn cột, nhưng nullable/không còn
+ * global-scope — xem migration 2026_07_13_000003). Biên tập viên phụ trách theo category qua
+ * bảng post_category_editors (§4.2), không theo tổ chức.
+ */
+class PostCategory extends Model
 {
+    use HasFactory;
+    use SoftDeletes;
+    use LogsActivity;
+
     protected $table = 'post_categories';
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
 
     protected $fillable = [
         'uuid',
@@ -72,6 +94,12 @@ class PostCategory extends TenantAwareModel
     public function updatedBy(): BelongsTo
     {
         return $this->belongsTo(\App\Models\User::class, 'updated_by');
+    }
+
+    /** platform_section_editor được gán phụ trách category này (§4.2). */
+    public function editors(): BelongsToMany
+    {
+        return $this->belongsToMany(\App\Models\User::class, 'post_category_editors', 'post_category_id', 'user_id');
     }
 
     // ── Scopes ───────────────────────────────────────────────────────

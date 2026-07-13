@@ -2,6 +2,7 @@
 
 namespace Modules\Approval\Database\Seeders;
 
+use App\Enums\AccountType;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -53,8 +54,13 @@ class ContentReviewHierarchySeeder extends Seeder
                 'organization_id'   => null,
                 'email_verified_at' => now(),
                 'trust_level'       => 2,
+                'account_type'      => AccountType::Platform,
             ]
         );
+
+        if (! $user->wasRecentlyCreated) {
+            $user->forceFill(['account_type' => AccountType::Platform])->save();
+        }
 
         setPermissionsTeamId(null);
         $user->syncRoles($role);

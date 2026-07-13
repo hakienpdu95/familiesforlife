@@ -2,23 +2,22 @@
 
 namespace Modules\Post\Models;
 
-use App\Shared\Tenancy\Traits\BelongsToOrganization;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Post\Enums\ProductBlockTemplate;
 use Illuminate\Support\Str;
 
-/** Không soft-delete — vòng đời gắn chặt bản dịch bài viết, xoá cứng theo cascade khi bản dịch/khối bị xoá. */
+/**
+ * Không soft-delete — vòng đời gắn chặt bản dịch bài viết, xoá cứng theo cascade khi bản dịch/khối bị xoá.
+ * Không tenant-scoped — Post là tài sản của nền tảng (spec Phase2 §3.3 v3.0).
+ */
 class PostProductBlock extends Model
 {
-    use BelongsToOrganization;
-
     protected $table = 'post_product_blocks';
 
     protected $fillable = [
         'uuid',
-        'organization_id',
         'translation_id',
         'template',
         'heading',

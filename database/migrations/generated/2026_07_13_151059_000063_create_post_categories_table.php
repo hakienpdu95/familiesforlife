@@ -19,7 +19,7 @@ return new class extends Migration
             $table->id();
             $table->uuid()->nullable()->unique()->comment('Public UUID — expose ra ngoài, không phải PK');
             $table->unsignedInteger('order_column')->nullable()->index()->comment('Thứ tự sắp xếp — Spatie Sortable / ORDER BY');
-            $table->foreignId('organization_id')->constrained()->restrictOnDelete();
+            $table->foreignId('organization_id')->nullable()->constrained()->restrictOnDelete();
             $table->foreignId('parent_id')->nullable()->constrained('post_categories')->restrictOnDelete();
             $table->string('name', 150);
             $table->string('slug', 160);

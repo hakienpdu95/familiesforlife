@@ -3,7 +3,6 @@
 namespace Modules\Post\Features\ArticleAuthoring\Http;
 
 use App\Http\Controllers\Controller;
-use App\Shared\Tenancy\TenantContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -165,24 +164,19 @@ class TranslationController extends Controller
     }
 
     /**
-     * Platform Approval Gateway (Hà Kiên nội bộ) — approve/publish/schedule/archive/unpublish
-     * giờ do platform_content_moderator xử lý (tài khoản organization_id=null, không có TenantContext
-     * của riêng mình khớp tổ chức của $translation). Action (PublishArticleAction…) lazy-load
-     * $translation->article — nếu chưa cache và TenantContext không khớp, PostArticle (có
-     * OrganizationScope) sẽ resolve null, gây lỗi "gọi method trên null" thật ở
-     * PublishArticleAction (đọc $article->is_sponsored). Bọc trong
-     * TenantContext::runForOrganization() để mọi lazy-load bên trong $callback() resolve đúng
-     * tổ chức của CHÍNH translation đang xử lý; loadMissing('article') ngay trong cùng block
-     * để cache lại trước khi thoát context, phục vụ redirect() dùng $translation->article bên
-     * dưới (đã ra khỏi context, không set lại được org nữa).
+     * spec/Platform_RBAC_Phase2_Specification.md §3.3 mục 7 (v3.0) — trước đây bọc trong
+     * TenantContext::runForOrganization() vì PostArticle/PostArticleTranslation tenant-scoped
+     * (OrganizationScope) nên tài khoản organization_id=null lazy-load $translation->article
+     * có thể resolve null nếu TenantContext ambient không khớp tổ chức của translation. Từ
+     * v3.0, Post không còn tenant-scoped nữa (không organization_id nào để scope theo) nên
+     * lazy-load luôn resolve đúng, không cần wrapper này nữa — xoá tận gốc lớp bug đã tài
+     * liệu hoá ở spec/Workflow_Approval_Technical_Specification.md §18.10 thay vì tiếp tục vá.
      */
     private function runTransition(PostArticleTranslation $translation, \Closure $callback, string $successMessage): RedirectResponse
     {
         try {
-            TenantContext::runForOrganization($translation->organization, function () use ($translation, $callback) {
-                $callback();
-                $translation->loadMissing('article');
-            });
+            $callback();
+            $translation->loadMissing('article');
         } catch (InvalidTransitionException $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -194,14 +188,12 @@ class TranslationController extends Controller
 
     private function validated(Request $request, ?PostArticleTranslation $translation, string $locale, ?PostArticle $article): array
     {
-        $organizationId = TenantContext::getOrganizationId();
-
         $validated = $request->validate([
             'title'            => ['required', 'string', 'max:300'],
             'slug'             => [
                 'nullable', 'string', 'max:320', 'regex:/^[a-z0-9\-]+$/',
                 Rule::unique('post_article_translations', 'slug')
-                    ->where(fn ($q) => $q->where('organization_id', $organizationId)->where('locale', $locale))
+                    ->where(fn ($q) => $q->where('locale', $locale))
                     ->ignore($translation?->id),
             ],
             'excerpt'          => ['nullable', 'string', 'max:500'],

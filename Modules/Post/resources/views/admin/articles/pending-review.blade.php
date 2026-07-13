@@ -17,7 +17,7 @@
     <div class="mb-5">
         <h1 class="text-2xl font-bold text-base-content">Bài viết chờ duyệt</h1>
         <p class="text-sm text-base-content/50 mt-0.5">
-            Bài viết đang chờ bạn duyệt — của tất cả tổ chức trên nền tảng
+            Bài viết đang chờ bạn duyệt trên toàn nền tảng
             (spec/Workflow_Approval_Technical_Specification.md §18.10).
         </p>
     </div>
@@ -28,7 +28,7 @@
                 <thead class="bg-base-200/60 text-xs uppercase tracking-wide">
                     <tr>
                         <th>Bài viết</th>
-                        <th>Tổ chức</th>
+                        <th>Tài trợ</th>
                         <th class="text-center">Trạng thái</th>
                         <th class="text-center">Gửi lúc</th>
                         <th class="w-32"></th>
@@ -42,7 +42,7 @@
                             <div class="text-xs text-base-content/40">{{ strtoupper($translation->locale) }}</div>
                         </td>
                         <td class="text-sm text-base-content/60">
-                            {{ $translation->article->organization->name ?? '—' }}
+                            {{ $translation->article->is_sponsored ? $translation->article->sponsor_name : '—' }}
                         </td>
                         <td class="text-center">
                             <span class="badge badge-sm {{ $translation->status->badgeClass() }}">{{ $translation->status->label() }}</span>

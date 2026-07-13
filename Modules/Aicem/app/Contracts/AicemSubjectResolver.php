@@ -30,4 +30,13 @@ interface AicemSubjectResolver
 
     /** Thuộc tính phân loại của CHÍNH instance này, dùng để resolve knowledge document theo scope (mục 6.7). Keyed theo taxonomy_keys khai trong registry. */
     public function taxonomy(Model $subject): array;
+
+    /**
+     * Tổ chức mà workflow/knowledge-base/ngân sách AI của subject này áp dụng theo
+     * (spec/Platform_RBAC_Phase2_Specification.md §3.4, v3.0) — KHÔNG phải lúc nào cũng bằng
+     * `$subject->organization_id` (Post không còn cột này — trả về hằng số tổ chức biên tập
+     * nền tảng cố định). Gộp về đúng 1 chỗ thay vì lặp lại logic này ở
+     * `ListRunnableWorkflowsHandler`/`AicemGenerationController`/`StartGenerationRunAction`.
+     */
+    public function organizationId(Model $subject): int;
 }

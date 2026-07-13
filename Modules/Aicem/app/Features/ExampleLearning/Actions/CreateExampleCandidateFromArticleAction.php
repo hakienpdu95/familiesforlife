@@ -5,6 +5,7 @@ namespace Modules\Aicem\Features\ExampleLearning\Actions;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Modules\Aicem\Enums\ExampleCandidateStatus;
 use Modules\Aicem\Models\AicemExampleCandidate;
+use Modules\Aicem\Support\PlatformEditorialOrganization;
 use Modules\Post\Models\PostArticleTranslation;
 use Modules\Post\Support\ArticleContentRenderer;
 
@@ -40,6 +41,11 @@ class CreateExampleCandidateFromArticleAction
             . $textContent;
 
         return AicemExampleCandidate::create([
+            // spec/Platform_RBAC_Phase2_Specification.md §3.4 mục 5 (v3.0) — set tường minh,
+            // KHÔNG dựa vào TenantContext ambient: translation không còn organization_id/tenant
+            // nào để "ambient" theo, và cùng pattern AicemGenerationRun/AicemSuggestion đã dùng
+            // (override tường minh khi tạo, không phụ thuộc auto-assign của BelongsToOrganization).
+            'organization_id'   => PlatformEditorialOrganization::id(),
             'subject_type'      => 'post_article',
             'subject_id'        => $translation->id,
             'suggested_title'   => "Ví dụ bài viết tốt: {$translation->title}",

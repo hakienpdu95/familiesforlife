@@ -20,6 +20,12 @@ return new class extends Migration {
             if (!Schema::hasColumn('post_article_translations', 'cta_url')) {
                 $table->string('cta_url', 500)->nullable()->after('cta_text');
             }
+            if (!Schema::hasIndex('post_article_translations', 'uq_post_trans_locale_slug')) {
+                $table->unique(['locale', 'slug'], 'uq_post_trans_locale_slug');
+            }
+            if (!Schema::hasIndex('post_article_translations', 'idx_post_trans_status_pub')) {
+                $table->index(['locale', 'status', 'published_at'], 'idx_post_trans_status_pub');
+            }
         });
     }
 

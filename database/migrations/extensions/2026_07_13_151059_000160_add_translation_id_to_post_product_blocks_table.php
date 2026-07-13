@@ -17,6 +17,9 @@ return new class extends Migration {
             if (!Schema::hasIndex('post_product_blocks', 'idx_post_pb_org_translation')) {
                 $table->index(['organization_id', 'translation_id'], 'idx_post_pb_org_translation');
             }
+            if (!Schema::hasIndex('post_product_blocks', 'idx_post_pb_translation')) {
+                $table->index('translation_id', 'idx_post_pb_translation');
+            }
         });
     }
 

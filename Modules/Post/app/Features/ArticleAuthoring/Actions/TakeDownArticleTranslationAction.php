@@ -15,8 +15,11 @@ use Modules\Post\Models\PostArticleTranslation;
 
 /**
  * "Hard take down" (spec/PublishingEngine_Technical_Specification.md §7.2) — đích thẳng
- * archived (khác Unpublish chỉ gỡ tạm), bắt buộc reason. Gửi notification tới ceo/ai_operator
- * + người publish gần nhất trong cùng tổ chức (§7.6), dispatch sau khi transaction DB commit.
+ * archived (khác Unpublish chỉ gỡ tạm), bắt buộc reason. Gửi notification tới nhân sự nền
+ * tảng (platform_content_head/platform_ops) + người publish gần nhất — không còn báo
+ * ceo/ai_operator của tổ chức nào nữa vì Post không thuộc tổ chức nào
+ * (spec/Platform_RBAC_Phase2_Specification.md §3.3 mục 4, v3.0). Dispatch sau khi transaction
+ * DB commit.
  */
 class TakeDownArticleTranslationAction
 {
@@ -45,14 +48,12 @@ class TakeDownArticleTranslationAction
 
     private function notifyTakedown(PostArticleTranslation $translation, string $reason): void
     {
-        $recipients = User::where('organization_id', $translation->organization_id)
-            ->role(['ceo', 'ai_operator'])
-            ->get();
+        $recipients = User::withGlobalRole(['platform_content_head', 'platform_ops']);
 
         $lastPublisherId = $translation->latestPublishLog()?->performed_by;
 
         if ($lastPublisherId && ! $recipients->contains('id', $lastPublisherId)) {
-            $publisher = User::where('organization_id', $translation->organization_id)->find($lastPublisherId);
+            $publisher = User::find($lastPublisherId);
 
             if ($publisher) {
                 $recipients->push($publisher);

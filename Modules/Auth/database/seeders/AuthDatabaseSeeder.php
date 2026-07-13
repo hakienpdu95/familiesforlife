@@ -2,6 +2,7 @@
 
 namespace Modules\Auth\Database\Seeders;
 
+use App\Enums\AccountType;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -78,6 +79,7 @@ class AuthDatabaseSeeder extends Seeder
                     // Email pre-verified, trust_level = 2 (bypass toàn bộ eKYC)
                     'email_verified_at' => $now,
                     'trust_level'       => 2,
+                    'account_type'      => AccountType::Platform,
                 ]
             );
 
@@ -86,6 +88,7 @@ class AuthDatabaseSeeder extends Seeder
                 $user->forceFill([
                     'email_verified_at' => $user->email_verified_at ?? $now,
                     'trust_level'       => max($user->trust_level, 2),
+                    'account_type'      => AccountType::Platform,
                 ])->save();
             }
 

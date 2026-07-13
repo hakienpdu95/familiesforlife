@@ -8,8 +8,13 @@ use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
 /**
- * Seed các permission post_article.view/create/edit/delete/publish + post_category.manage
- * và gán vào role phù hợp (docs/post-module-spec.md §10).
+ * spec/Platform_RBAC_Phase2_Specification.md §3.2 (v3.0) — Post là tài sản của nền tảng.
+ * Thu hồi TOÀN BỘ permission Post (kể cả view) khỏi 8 role Lớp B (doanh nghiệp không còn
+ * thao tác/xem Post ở dashboard nữa). Cấp create/edit/delete + post_media.upload (permission
+ * mới) cho role Platform mới `platform_content_creator`; publish/unpublish vẫn chỉ
+ * `platform_content_head` — xác định qua `isPlatformContentHead()` (global role), KHÔNG qua
+ * Spatie permission, nên không role nào cần permission `post_article.publish`/`unpublish` nữa.
+ *
  * Chạy: php artisan db:seed --class="Modules\Post\Database\Seeders\PostPermissionSeeder"
  */
 class PostPermissionSeeder extends Seeder
@@ -23,48 +28,32 @@ class PostPermissionSeeder extends Seeder
         'post_article.publish',
         'post_article.unpublish',
         'post_article.manage_sponsorship',
+        'post_media.upload',
     ];
 
-    private const ROLE_MAP = [
-        'ceo' => [
-            'post_article.view',
-            'post_article.publish',
-            'post_article.unpublish',
-            'post_article.manage_sponsorship',
-        ],
-        'sales' => [
-            'post_article.view',
-        ],
-        'ops' => [
-            'post_article.view',
-            'post_article.publish',
-        ],
-        'marketing' => [
-            'post_article.view',
-            'post_article.create',
-            'post_article.edit',
-            'post_article.delete',
-            'post_article.manage_sponsorship',
-        ],
-        'hr' => [
-            'post_article.view',
-        ],
-        'ai_operator' => [
-            'post_article.view',
-        ],
-        'viewer' => [
-            'post_article.view',
-        ],
-        'system_admin' => [
-            'post_article.view',
-            'post_article.create',
-            'post_article.edit',
-            'post_article.delete',
-            'post_article.publish',
-            'post_article.unpublish',
-            'post_category.manage',
-            'post_article.manage_sponsorship',
-        ],
+    /** 8 role Lớp B — thu hồi toàn bộ permission Post đã cấp trước đây (không chỉ ngừng cấp mới, mà revoke tường minh permission cũ). */
+    private const LOP_B_ROLES = [
+        'ceo', 'sales', 'ops', 'marketing', 'hr', 'ai_operator', 'viewer', 'system_admin',
+    ];
+
+    private const LOP_B_POST_PERMISSIONS = [
+        'post_category.manage',
+        'post_article.view',
+        'post_article.create',
+        'post_article.edit',
+        'post_article.delete',
+        'post_article.publish',
+        'post_article.unpublish',
+        'post_article.manage_sponsorship',
+    ];
+
+    /** `platform_content_creator` — viết/sửa bài + upload media + tự set sponsor khi viết bài tài trợ. KHÔNG publish/unpublish. */
+    private const PLATFORM_CONTENT_CREATOR_PERMISSIONS = [
+        'post_article.create',
+        'post_article.edit',
+        'post_article.delete',
+        'post_article.manage_sponsorship',
+        'post_media.upload',
     ];
 
     public function run(): void
@@ -78,11 +67,16 @@ class PostPermissionSeeder extends Seeder
             ]);
         }
 
-        foreach (self::ROLE_MAP as $roleName => $perms) {
+        foreach (self::LOP_B_ROLES as $roleName) {
             $role = Role::where('name', $roleName)->where('guard_name', 'web')->first();
             if ($role) {
-                $role->givePermissionTo($perms);
+                $role->revokePermissionTo(self::LOP_B_POST_PERMISSIONS);
             }
+        }
+
+        $contentCreator = Role::where('name', 'platform_content_creator')->where('guard_name', 'web')->first();
+        if ($contentCreator) {
+            $contentCreator->givePermissionTo(self::PLATFORM_CONTENT_CREATOR_PERMISSIONS);
         }
 
         // super-admin: sync toàn bộ permissions (bao gồm permissions mới)
@@ -93,6 +87,6 @@ class PostPermissionSeeder extends Seeder
 
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $this->command->info('  ✓ Post permissions seeded.');
+        $this->command->info('  ✓ Post permissions seeded — thu hồi khỏi Lớp B, cấp cho platform_content_creator.');
     }
 }

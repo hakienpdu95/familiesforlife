@@ -11,7 +11,11 @@ use Modules\Post\Features\PublicReading\Http\SitemapController;
 
 // ── Quản trị Bài viết + Danh mục (đa ngôn ngữ — Publishing Engine Phase 15,
 // xem spec/PublishingEngine_Technical_Specification.md §9) ─────────────────
-Route::middleware(['auth', 'tenant'])
+// KHÔNG còn 'tenant' middleware (spec/Platform_RBAC_Phase2_Specification.md §3.5/§4, v3.0) —
+// Post (bài viết + category) không còn organization_id nào cần TenantContext để scope; nhân
+// sự nền tảng (organization_id=null) thao tác mọi route ở đây, đúng pattern đã dùng cho
+// `dashboard/platform-users` (chỉ 'auth', không 'tenant' — xem PlatformUserController).
+Route::middleware(['auth'])
     ->prefix('dashboard/posts')
     ->name('backend.post.')
     ->group(function (): void {
@@ -50,18 +54,18 @@ Route::middleware(['auth', 'tenant'])
 Route::get('posts/cta/{button}', [ProductBlockClickController::class, 'redirect'])->name('post.cta.redirect');
 
 // ── PublicReading — Phase 16 (spec/PublishingEngine_Technical_Specification.md §11) ────
-// 'tenant' (không có 'auth') — IdentifyOrganization resolve tổ chức qua subdomain cho
-// khách vãng lai; nếu không resolve được, OrganizationScope tự trả rỗng (an toàn, không
-// leak chéo tổ chức) thay vì 500. Không ràng buộc {locale} bằng regex ở route (đọc
+// KHÔNG còn middleware 'tenant' (spec/Platform_RBAC_Phase2_Specification.md §3.5, v3.0) —
+// Post không còn organization_id (§3.3), nên resolve tổ chức theo subdomain không còn ý
+// nghĩa gì cho các route này: bài viết phục vụ đồng nhất cho mọi domain/subdomain, không cần
+// biết đang "đứng" ở tổ chức nào trước khi trả nội dung. Bỏ 'auth' vẫn giữ (route công khai,
+// không yêu cầu đăng nhập). Không ràng buộc {locale} bằng regex ở route (đọc
 // config('post.locales') tại thời điểm nạp route file không đáng tin cậy — có thể chạy
 // trước khi module config merge xong, tuỳ context boot) — mỗi controller tự
 // abort_unless(array_key_exists($locale, config('post.locales')), 404) khi xử lý request.
-Route::middleware(['tenant'])->group(function (): void {
-    Route::get('post-sitemap.xml', [SitemapController::class, 'index'])->name('post.public.sitemap');
+Route::get('post-sitemap.xml', [SitemapController::class, 'index'])->name('post.public.sitemap');
 
-    Route::prefix('{locale}/bai-viet')->name('post.public.')->group(function (): void {
-        Route::get('/', [PublicCategoryController::class, 'index'])->name('home');
-        Route::get('danh-muc/{category:slug}', [PublicCategoryController::class, 'show'])->name('category');
-        Route::get('{slug}', [PublicArticleController::class, 'show'])->name('article');
-    });
+Route::prefix('{locale}/bai-viet')->name('post.public.')->group(function (): void {
+    Route::get('/', [PublicCategoryController::class, 'index'])->name('home');
+    Route::get('danh-muc/{category:slug}', [PublicCategoryController::class, 'show'])->name('category');
+    Route::get('{slug}', [PublicArticleController::class, 'show'])->name('article');
 });

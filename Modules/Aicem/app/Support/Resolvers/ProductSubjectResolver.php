@@ -103,4 +103,11 @@ class ProductSubjectResolver implements AicemSubjectResolver
                 ->all(),
         ];
     }
+
+    /** Product vẫn thuộc đúng tổ chức của nó — không đổi gì (spec/Platform_RBAC_Phase2_Specification.md §3.4). */
+    public function organizationId(Model $subject): int
+    {
+        /** @var Product $subject */
+        return $subject->organization_id;
+    }
 }

@@ -10,7 +10,6 @@ trait LogsPublishingActions
     private function log(PostArticleTranslation $translation, string $action, ?string $reason = null): void
     {
         PostPublishingLog::create([
-            'organization_id' => $translation->organization_id,
             'translation_id'  => $translation->id,
             'action'          => $action,
             'reason'          => $reason,

@@ -2,6 +2,7 @@
 
 namespace Modules\Approval\Http\Controllers;
 
+use App\Enums\AccountType;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -70,6 +71,7 @@ class PlatformUserController extends Controller
             'password'          => Hash::make($data->password),
             'organization_id'   => null,
             'email_verified_at' => now(),
+            'account_type'      => AccountType::Platform,
         ])->save();
 
         setPermissionsTeamId(null);

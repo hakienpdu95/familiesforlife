@@ -4,6 +4,7 @@ namespace Modules\Aicem\Support\Resolvers;
 
 use Illuminate\Database\Eloquent\Model;
 use Modules\Aicem\Contracts\AicemSubjectResolver;
+use Modules\Aicem\Support\PlatformEditorialOrganization;
 use Modules\Post\Enums\ContentBlockType;
 use Modules\Post\Features\ArticleAuthoring\Actions\UpdateTranslationAction;
 use Modules\Post\Features\ArticleAuthoring\Data\TranslationData;
@@ -100,6 +101,19 @@ class PostArticleSubjectResolver implements AicemSubjectResolver
             'format'         => [$subject->article->format->value],
             'tag_slugs'      => $subject->article->tags->pluck('slug')->all(),
         ];
+    }
+
+    /**
+     * Post không còn `organization_id` (spec/Platform_RBAC_Phase2_Specification.md §3.3,
+     * v3.0) — bài viết luôn do nhân sự nền tảng viết/duyệt, không thuộc doanh nghiệp nào.
+     * Trả về tổ chức biên tập nền tảng cố định (seed riêng, xem
+     * PlatformEditorialOrganizationSeeder) để Aicem vẫn có đúng 1 Organization thật cho
+     * workflow/knowledge-base/ngân sách AI — bất kể bài có tài trợ hay không (sponsor không
+     * liên quan gì tới cấu hình AI dùng để viết bài).
+     */
+    public function organizationId(Model $subject): int
+    {
+        return PlatformEditorialOrganization::id();
     }
 
     /**

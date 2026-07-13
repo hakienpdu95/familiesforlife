@@ -14,9 +14,19 @@ use Modules\Post\Models\PostArticleTranslation;
  */
 class PostArticlePolicy
 {
+    /**
+     * spec/Platform_RBAC_Phase2_Specification.md §3.2 (v3.0) — `post_article.view` bị thu hồi
+     * khỏi mọi role Lớp B và KHÔNG được cấp cho `platform_content_creator` (chỉ có
+     * create/edit/delete). Vẫn phải cho phép `platform_content_creator` xem danh sách/bài viết
+     * — thêm điều kiện `can('post_article.create')` (ai viết được bài thì phải xem được danh
+     * sách/nội dung bài, kể cả bài chưa publish để tự sửa).
+     */
     public function viewAny(User $user): bool
     {
-        return $user->can('post_article.view') || $user->isPlatformContentEditor() || $user->isPlatformContentHead();
+        return $user->can('post_article.view')
+            || $user->can('post_article.create')
+            || $user->isPlatformContentEditor()
+            || $user->isPlatformContentHead();
     }
 
     /** Chỉ bài `published` nếu user không có quyền edit. content_editor/content_head luôn xem
@@ -24,6 +34,10 @@ class PostArticlePolicy
     public function view(User $user, PostArticleTranslation $translation): bool
     {
         if ($user->isPlatformContentEditor() || $user->isPlatformContentHead()) {
+            return true;
+        }
+
+        if ($user->can('post_article.create')) {
             return true;
         }
 
@@ -83,7 +97,25 @@ class PostArticlePolicy
 
     public function approve(User $user, PostArticleTranslation $translation): bool
     {
-        return $user->isPlatformContentEditor() || $user->isPlatformContentHead();
+        if ($user->isPlatformContentEditor() || $user->isPlatformContentHead()) {
+            return true;
+        }
+
+        // platform_section_editor (§4, v3.0) — chỉ duyệt được nếu bài viết thuộc ÍT NHẤT 1
+        // category mà user được gán qua post_category_editors. Không cấp quyền publish/schedule/
+        // archive/unpublish — vẫn chỉ platform_content_head (giữ nguyên phía trên).
+        if ($user->isPlatformSectionEditor()) {
+            $translation->loadMissing('article.categories');
+
+            $editorCategoryIds = $user->postCategoryEditorships()->pluck('post_categories.id');
+
+            return $translation->article->categories
+                ->pluck('id')
+                ->intersect($editorCategoryIds)
+                ->isNotEmpty();
+        }
+
+        return false;
     }
 
     public function publish(User $user, PostArticleTranslation $translation): bool

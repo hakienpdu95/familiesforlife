@@ -36,16 +36,20 @@ class ListRunnableWorkflowsHandler implements QueryHandlerInterface
             $subject->loadMissing('article');
         }
 
-        // Lọc CỨNG theo $subject->organization_id — KHÔNG dựa vào TenantContext ambient (cùng lý
-        // do đã ghi trong StartGenerationRunAction/RunAicemWorkflowJob): super-admin bypass hoàn
-        // toàn OrganizationScope, nên nếu để AicemWorkflow::query() tự lọc theo scope mặc định,
-        // panel sẽ hiện luôn workflow của MỌI Organization (mỗi org có bản sao riêng 3 workflow
-        // mặc định cùng tên) — vừa hiện nút trùng lặp, vừa cho phép chọn nhầm workflow khác
-        // Organization với subject, tạo ra run có organization_id/workflow_id lệch nhau khiến
-        // RunAicemWorkflowJob throw TypeError (subject->workflow không tìm thấy do lệch tenant)
-        // và bị kẹt mãi ở status=running (bug thật đã xảy ra, xem lịch sử).
+        // Lọc CỨNG theo tổ chức của subject (qua resolver — spec/Platform_RBAC_Phase2_Specification.md
+        // §3.4, v3.0: Post không còn organization_id nên không thể đọc trực tiếp từ $subject nữa,
+        // resolver trả về đúng 1 tổ chức cho mọi subject_type) — KHÔNG dựa vào TenantContext
+        // ambient (cùng lý do đã ghi trong StartGenerationRunAction/RunAicemWorkflowJob):
+        // super-admin bypass hoàn toàn OrganizationScope, nên nếu để AicemWorkflow::query() tự lọc
+        // theo scope mặc định, panel sẽ hiện luôn workflow của MỌI Organization (mỗi org có bản sao
+        // riêng 3 workflow mặc định cùng tên) — vừa hiện nút trùng lặp, vừa cho phép chọn nhầm
+        // workflow khác Organization với subject, tạo ra run có organization_id/workflow_id lệch
+        // nhau khiến RunAicemWorkflowJob throw TypeError (subject->workflow không tìm thấy do lệch
+        // tenant) và bị kẹt mãi ở status=running (bug thật đã xảy ra, xem lịch sử).
+        $resolver = app(config("aicem_subjects.{$query->subjectType}.resolver"));
+
         return AicemWorkflow::withoutTenant()
-            ->where('organization_id', $subject->organization_id)
+            ->where('organization_id', $resolver->organizationId($subject))
             ->where('subject_type', $query->subjectType)
             ->where('is_active', true)
             ->get()

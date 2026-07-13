@@ -10,6 +10,7 @@ class AicemDatabaseSeeder extends Seeder
     {
         $this->call([
             AicemPermissionSeeder::class,
+            PlatformEditorialOrganizationSeeder::class,
             AicemDefaultWorkflowSeeder::class,
         ]);
     }

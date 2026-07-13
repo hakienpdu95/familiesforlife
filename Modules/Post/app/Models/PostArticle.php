@@ -2,19 +2,32 @@
 
 namespace Modules\Post\Models;
 
-use App\Foundation\Models\TenantAwareModel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Post\Database\Factories\PostArticleFactory;
 use Modules\Post\Enums\ArticleFormat;
 use Modules\Post\Enums\SponsorLabel;
 use Illuminate\Support\Str;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
-class PostArticle extends TenantAwareModel
+/**
+ * spec/Platform_RBAC_Phase2_Specification.md §3.3 (v3.0) — Post là tài sản của nền tảng,
+ * không thuộc tenant/Organization nào — KHÔNG extends TenantAwareModel (không có
+ * organization_id, không global-scope theo tổ chức).
+ */
+class PostArticle extends Model
 {
+    use HasFactory;
+    use SoftDeletes;
+    use LogsActivity;
+
     protected $table = 'post_articles';
 
     protected static function newFactory(): Factory
@@ -22,9 +35,16 @@ class PostArticle extends TenantAwareModel
         return PostArticleFactory::new();
     }
 
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
+
     protected $fillable = [
         'uuid',
-        'organization_id',
         'main_locale',
         'format',
         'cover_image_url',
