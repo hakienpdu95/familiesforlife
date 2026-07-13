@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Modules\Approval\Actions\SubmitForApprovalAction;
 use Modules\Auth\Data\RegisterOrganizationData;
+use Modules\Subscription\Features\Subscribe\Actions\SubscribeOrganizationAction;
 
 /**
  * CQRS Command: Tạo Organization + owner User + gán role CEO.
@@ -51,6 +52,17 @@ class RegisterOrganizationAction
             setPermissionsTeamId($organization->id);
             $user->assignRole(RoleEnum::CEO->value);
             setPermissionsTeamId(null);
+
+            // 4a. Gán gói subscription mặc định (config('subscription.default_plan')) ngay khi
+            // đăng ký — tổ chức tạo qua đây KHÔNG đi qua Modules\Organization\Actions\
+            // StoreOrganizationAction/CreateOrganizationAction nên event OrganizationCreated
+            // (nghe bởi AutoSubscribeOnOrgCreated) không tự bắn; thiếu bước này, CheckSubscription
+            // middleware (Modules/Subscription) sẽ redirect CEO sang /billing ngay từ request đầu
+            // tiên vì tổ chức chưa có Subscription nào — khoá luôn toàn bộ /dashboard, kể cả các
+            // trang không liên quan billing (bug thật phát hiện khi kiểm thử luồng đăng ký).
+            // subscribeToDefaultPlan() vốn được viết sẵn (Modules/Subscription) đúng cho các nơi
+            // tạo Organization "tắt" như thế này — chỉ cần gọi, không cần logic mới.
+            SubscribeOrganizationAction::subscribeToDefaultPlan($organization);
 
             // 4b. Platform Approval Gateway (hệ thống nội bộ Hà Kiên) — tổ chức mới đăng ký
             // PHẢI qua đội kiểm duyệt tập trung trước khi được duyệt chính thức. Gửi duyệt

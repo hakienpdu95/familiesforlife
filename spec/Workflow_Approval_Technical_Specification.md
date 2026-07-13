@@ -1,11 +1,13 @@
 # Approval Module (trước đây gọi "Workflow & Approval")
 **Đặc tả Kỹ thuật Chi tiết – Sẵn sàng Triển khai**
 
-**Phiên bản:** 4.2 (cập nhật ngày 12/07/2026 — thay thế toàn bộ v4.1; thêm §18.11 — dashboard "Bài viết chờ duyệt" xuyên tổ chức + sửa bug Gate name mismatch ở sidebar)
-**Ngày:** 12/07/2026
+**Phiên bản:** 4.3 (cập nhật ngày 13/07/2026 — thay thế toàn bộ v4.2; đối chiếu lại toàn bộ đặc tả với codebase thực tế, sửa §17.2 — hook dọn `ApprovalSubject` mồ côi vẫn CHƯA được áp dụng vào `Product::booted()`, chỉ là khuyến nghị)
+**Ngày:** 13/07/2026
 **Framework:** Laravel 13 (PHP 8.4) + NWIDART Modules + Lorisleiva Actions
 **Hệ thống:** Nền tảng multi-tenant (Organization-scoped)
 **Module tham chiếu để đối chiếu codebase:** `Modules/Post` (Publishing Engine v2.0 — `spec/PublishingEngine_Technical_Specification.md`), `Modules/WorkflowAutomation` (automation engine hiện có), `Modules/Product`
+
+**Đổi so với v4.1 → v4.2:** thêm §18.11 — dashboard "Bài viết chờ duyệt" xuyên tổ chức + sửa bug Gate name mismatch ở sidebar.
 
 **Đổi so với v3.2 (làm chặt hơn để dễ implement, không đổi hành vi cốt lõi):** thêm xác nhận idempotent tường minh cho `approval:backfill-subjects` (§4.1) + ghi chú cân nhắc index cho `public_snapshot` (không cam kết ngay, theo nguyên tắc §17.3); helper `approvalLogs()` mới trong `HasApproval` (§7.1); `ApprovalDashboardService::pendingFor()` dùng `Gate::forUser()->allows()` tường minh + thêm `ApprovalDashboardController`/route mẫu đầy đủ (§12); ghi chú rõ vì sao KHÔNG cache `publicContent()` ở mức entity (§7.1) và khi nào mới cần cache/materialize kết quả `publiclyVisible()` ở quy mô lớn (§17.3); làm rõ trong comment `ReviseContentAction` rằng chỉ 2 nhánh Approved/Published tạo `ApprovalLog`, Draft/Pending/Archived không bao giờ tạo log rác (§8.4); comment `initial_status_resolver` là optional, mặc định `Draft` (§5).
 
@@ -1248,11 +1250,13 @@ Route: `GET dashboard/approvals/history` → `backend.approval.history` (cùng f
 
 Đã xử lý bằng `lockForUpdate()` trong `LogsApprovalActions::transition()` (§8.1) — mọi transition chạy trong `DB::transaction()`, khoá row trước khi kiểm tra `canTransitionTo()`. Cần đảm bảo **mọi** Action mới viết sau này đều đi qua `transition()`, không tự ý `update()` thẳng lên `ApprovalSubject` (nếu không sẽ bypass lock).
 
-### 17.2 Soft-delete cascade — `ApprovalSubject` mồ côi
+### 17.2 Soft-delete cascade — `ApprovalSubject` mồ côi (⚠️ CHƯA áp dụng vào code — vẫn chỉ là khuyến nghị)
 
 `ApprovalSubject` có `softDeletes` nhưng **không có FK ngược** tới entity chủ (polymorphic không tạo được FK thật). Nếu entity gốc (`Product`) bị `forceDelete()` (xoá cứng, bỏ qua soft-delete), `ApprovalSubject` tương ứng sẽ mồ côi (không lỗi FK vì không có constraint, nhưng dữ liệu vô nghĩa còn lại). Khuyến nghị: thêm hook nhẹ ở module tiêu thụ khi tích hợp (Phase 4), KHÔNG đặt sẵn trong `Approval` (vì `Approval` không biết trước entity nào sẽ `forceDelete`).
 
-Ví dụ copy-paste được cho `Product` — đặt ngay trong `booted()` đã có sẵn của `Product` (§9.1 đã thêm `use HasApproval;`/`approvalWatchedAttributes()` vào đúng chỗ này, cùng chỗ model đã tự set `uuid` khi `creating`), theo đúng convention hiện tại của model này (không dùng Observer class riêng — `Product` vốn đã xử lý sự kiện ngay trong `booted()`):
+**Xác nhận lại khi rà soát v4.3 (13/07/2026): hook này CHƯA được thêm vào code.** `Modules/Product/app/Models/Product.php::booted()` hiện tại (đã tích hợp `HasApproval` đầy đủ, §9.1) chỉ có đúng 1 hook `creating` (gán `uuid`), KHÔNG có `forceDeleted`. `grep -rn "forceDeleted" Modules/Product/` không ra kết quả nào. Rủi ro mô tả ở đoạn trên (mồ côi `ApprovalSubject` khi `forceDelete()` Product) vẫn còn tồn tại thật trong code hiện tại — đây là nợ kỹ thuật nhỏ, chưa gây sự cố vì `Product` trong thực tế chưa có chỗ nào gọi `forceDelete()` (chỉ dùng `delete()` mềm qua `SoftDeletes`), nhưng nếu sau này có thao tác xoá cứng (vd lệnh dọn dữ liệu, GDPR xoá vĩnh viễn) thì cần thêm đoạn code dưới đây trước khi dùng.
+
+Ví dụ copy-paste được cho `Product` (**vẫn là đề xuất, chưa merge**) — đặt ngay trong `booted()` đã có sẵn của `Product`, cùng chỗ model đã tự set `uuid` khi `creating`, theo đúng convention hiện tại của model này (không dùng Observer class riêng — `Product` vốn đã xử lý sự kiện ngay trong `booted()`):
 
 ```php
 // Modules/Product/app/Models/Product.php
@@ -1266,6 +1270,7 @@ protected static function booted(): void
 
     // Dọn ApprovalSubject mồ côi khi Product bị xoá cứng — forceDelete() bỏ qua SoftDeletes
     // nên không có cơ hội nào khác để dọn dẹp bản ghi polymorphic này (§17.2).
+    // TODO: chưa thêm vào code thật — xem ghi chú xác nhận ở trên.
     static::forceDeleted(function (self $model): void {
         $model->approvalSubject?->forceDelete();
     });

@@ -35,6 +35,11 @@
             @else
                 <span class="badge badge-ghost badge-sm">Không hoạt động</span>
             @endif
+            @if ($organization->approvalStatus())
+                <span class="badge badge-sm {{ $organization->approvalStatus()->badgeClass() }}">
+                    Duyệt: {{ $organization->approvalStatus()->label() }}
+                </span>
+            @endif
         </p>
     </div>
     <a href="{{ route('backend.organizations.show', $organization) }}" class="btn btn-ghost btn-sm gap-1.5">
@@ -351,6 +356,77 @@
     </div>{{-- /grid --}}
 
 </form>
+
+{{-- ── Duyệt nội dung (Platform Approval Gateway) — spec/Workflow_Approval_Technical_Specification.md §9.5/§18 ──
+     Đặt NGOÀI <form> chính ở trên (mỗi nút là 1 form POST riêng, không lồng được vào form
+     update tổ chức). Trục "Duyệt nội dung" độc lập với trục "Trạng thái" (hoạt động/tạm khoá) ở
+     sidebar bên trên — 2 badge khác nhau ở header, không gộp. Chỉ content_moderator mới
+     approve/reject/publishApproval/archiveApproval được (§18.6) — CEO/owner chỉ submitForApproval. --}}
+@if ($organization->approvalStatus())
+<div class="card bg-base-100 shadow-sm border border-base-200 mt-4">
+    <div class="card-body p-4">
+        <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">Duyệt nội dung</p>
+
+        <div class="flex flex-wrap items-center gap-2">
+            @if ($organization->isApprovalDraft() && auth()->user()->can('submitForApproval', $organization))
+                <form method="POST" action="{{ route('backend.organizations.submit-approval', $organization) }}">
+                    @csrf
+                    <button class="btn btn-sm btn-warning">Gửi duyệt</button>
+                </form>
+            @endif
+
+            @if ($organization->isApprovalPending() && auth()->user()->can('approve', $organization))
+                <form method="POST" action="{{ route('backend.organizations.approve-content', $organization) }}">
+                    @csrf
+                    <button class="btn btn-sm btn-info">Duyệt</button>
+                </form>
+            @endif
+
+            @if ($organization->isApprovalPending() && auth()->user()->can('reject', $organization))
+                <button type="button" class="btn btn-sm btn-error btn-outline"
+                        onclick="document.getElementById('reject-content-modal').showModal()">
+                    Từ chối
+                </button>
+                <dialog id="reject-content-modal" class="modal">
+                    <div class="modal-box">
+                        <h3 class="font-bold text-base mb-3">Từ chối duyệt nội dung</h3>
+                        <form method="POST" action="{{ route('backend.organizations.reject-content', $organization) }}">
+                            @csrf
+                            <textarea name="reason" required minlength="10" rows="3"
+                                      class="textarea textarea-bordered textarea-sm w-full"
+                                      placeholder="Lý do từ chối (tối thiểu 10 ký tự)"></textarea>
+                            <div class="modal-action">
+                                <button type="button" class="btn btn-ghost btn-sm"
+                                        onclick="document.getElementById('reject-content-modal').close()">Huỷ</button>
+                                <button type="submit" class="btn btn-error btn-sm">Xác nhận từ chối</button>
+                            </div>
+                        </form>
+                    </div>
+                </dialog>
+            @endif
+
+            @if ($organization->isApproved() && auth()->user()->can('publishApproval', $organization))
+                <form method="POST" action="{{ route('backend.organizations.publish-content', $organization) }}">
+                    @csrf
+                    <button class="btn btn-sm btn-success">Xuất bản</button>
+                </form>
+            @endif
+
+            @if ($organization->isApprovalPublished() && auth()->user()->can('archiveApproval', $organization))
+                <form method="POST" action="{{ route('backend.organizations.archive-content', $organization) }}">
+                    @csrf
+                    <button class="btn btn-sm btn-neutral btn-outline">Lưu trữ</button>
+                </form>
+            @endif
+
+            @if ($organization->isApprovalArchived())
+                <span class="text-xs text-base-content/40">Đã lưu trữ — không thể sửa nội dung.</span>
+            @endif
+        </div>
+    </div>
+</div>
+@endif
+
 </div>
 @endsection
 

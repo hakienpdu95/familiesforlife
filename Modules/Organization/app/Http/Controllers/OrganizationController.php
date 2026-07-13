@@ -76,19 +76,40 @@ class OrganizationController extends Controller
             ->with('success', 'Tổ chức "' . $organization->name . '" đã được tạo thành công.');
     }
 
-    public function show(Organization $organization, GetOrganizationHandler $handler)
+    public function show(Organization $organization, GetOrganizationHandler $handler): string
     {
         $organization = $handler->handle(new GetOrganizationQuery($organization));
         $members = $organization->latestMembers;
 
-        return view('organization::show', compact('organization', 'members'));
+        // content_moderator (organization_id=null) không có TenantContext trỏ tới CHÍNH tổ chức
+        // đang xem — nếu không bọc, $organization->approvalSubject (OrganizationScope, §7.1)
+        // resolve null khi render Blade, ẩn mất badge/nút "Duyệt nội dung" dù trang vẫn tải được
+        // bình thường (Organization::withoutTenant() cho route binding). Đây chính là trang mà
+        // dashboard "Chờ duyệt của tôi" trỏ tới (getApprovalDashboardUrlAttribute() → show), nên
+        // bug này khiến moderator vào tới nơi mà không thấy nút nào để thao tác — cùng nguyên
+        // nhân với ProductAdminController::edit()/runApprovalTransition(). PHẢI gọi ->render()
+        // NGAY TRONG closure (không trả thẳng View chưa render) — xem ghi chú đầy đủ ở
+        // ProductAdminController::edit().
+        return TenantContext::runForOrganization(
+            $organization,
+            // compact() không tự "auto-capture" được vào arrow function (fn() chỉ bắt biến được
+            // THAM CHIẾU TRỰC TIẾP bằng tên trong biểu thức, còn compact('organization') chỉ
+            // truyền chuỗi — PHP không thấy $organization ở đây) — dùng mảng literal để
+            // $organization/$members được tham chiếu trực tiếp, đảm bảo auto-capture đúng.
+            fn () => view('organization::show', ['organization' => $organization, 'members' => $members])->render(),
+        );
     }
 
-    public function edit(Organization $organization)
+    public function edit(Organization $organization): string
     {
         $organization->loadCount('members');
 
-        return view('organization::edit', compact('organization'));
+        // Xem ghi chú ở show() — cùng lý do (compact() không auto-capture trong fn()), áp dụng
+        // cho trang edit.
+        return TenantContext::runForOrganization(
+            $organization,
+            fn () => view('organization::edit', ['organization' => $organization])->render(),
+        );
     }
 
     public function update(Request $request, Organization $organization, UpdateOrganizationAction $action): RedirectResponse

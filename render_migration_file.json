@@ -1735,5 +1735,34 @@
         "performed_by///unsignedBigInteger///__///_NULL///NULL///->constrained('users')->onDelete('set null')///__",
         "created_at///timestamp///__///NOT_NULL///__///__///__",
         "__index///index///__///__///__///translation_id,created_at|idx_post_pub_log_translation///__"
+    ],
+    [
+        "approval_subjects///__///__///",
+        "subject_type///string///__///NOT_NULL///__///__///__",
+        "subject_id///unsignedBigInteger///__///NOT_NULL///__///__///__",
+        "__index///index///__///__///__///subject_type,subject_id///__",
+        "organization_id///unsignedBigInteger///__///NOT_NULL///__///->constrained()->onDelete('restrict')///__",
+        "status///string///20///NOT_NULL///'draft'///__///__",
+        "approved_by///unsignedBigInteger///__///_NULL///NULL///->constrained('users')->onDelete('set null')///__",
+        "approved_at///timestamp///__///_NULL///NULL///__///__",
+        "public_snapshot///json///__///_NULL///NULL///__///__",
+        "__index///unique///__///__///__///subject_type,subject_id|uq_approval_subject///__",
+        "__index///index///__///__///__///organization_id,status|idx_approval_org_status///__",
+        "__index///index///__///__///__///organization_id,subject_type,status|idx_approval_org_type_status///__",
+        "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
+        "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật",
+        "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm"
+    ],
+    [
+        "approval_logs///__///__///",
+        "organization_id///unsignedBigInteger///__///NOT_NULL///__///->constrained()->onDelete('restrict')///__",
+        "approval_subject_id///unsignedBigInteger///__///NOT_NULL///__///->constrained()->onDelete('cascade')///__",
+        "action///string///20///NOT_NULL///__///__///__",
+        "from_status///string///20///_NULL///NULL///__///__",
+        "to_status///string///20///NOT_NULL///__///__///__",
+        "reason///string///500///_NULL///NULL///__///__",
+        "performed_by///unsignedBigInteger///__///_NULL///NULL///->constrained('users')->onDelete('set null')///__",
+        "created_at///timestamp///__///NOT_NULL///__///__///__",
+        "__index///index///__///__///__///approval_subject_id,created_at|idx_approval_log_subject///__"
     ]
 ]

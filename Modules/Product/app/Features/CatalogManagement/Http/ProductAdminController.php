@@ -65,11 +65,26 @@ class ProductAdminController extends Controller
             ->with('success', "Sản phẩm \"{$product->name}\" đã được tạo.");
     }
 
-    public function edit(Product $product, ListCategoriesForAdminHandler $categoryHandler): View
+    public function edit(Product $product, ListCategoriesForAdminHandler $categoryHandler): string
     {
         $categories = $categoryHandler->handle(new ListCategoriesForAdminQuery());
 
-        return view('product::admin.products.edit', compact('product', 'categories'));
+        // content_moderator (organization_id=null) không có TenantContext trỏ tới tổ chức của
+        // $product — nếu không bọc, $product->approvalSubject (OrganizationScope, §7.1) resolve
+        // null khi render Blade, ẩn mất toàn bộ badge/nút "Duyệt nội dung" dù moderator vẫn xem
+        // được trang (Product route binding không tenant-scope). Bug thật phát hiện khi kiểm thử
+        // dashboard "Xem & duyệt" bằng tài khoản content_moderator — cùng nguyên nhân với
+        // runApprovalTransition() ở dưới, chỉ khác là ở đây cần bọc luôn cho GET, không chỉ POST.
+        // PHẢI gọi ->render() NGAY TRONG closure — view() chỉ build đối tượng View (lazy), Blade
+        // thật sự chạy khi Laravel gọi render() sau khi controller return; nếu trả thẳng View
+        // chưa render, finally của runForOrganization() đã phục hồi TenantContext CŨ trước khi
+        // Blade kịp đọc $product->approvalSubject, khiến bug vẫn y nguyên dù có bọc.
+        // Dùng mảng literal, KHÔNG compact() — fn() chỉ auto-capture biến được tham chiếu trực
+        // tiếp bằng tên; compact('product') chỉ truyền chuỗi nên PHP không tự bắt được.
+        return TenantContext::runForOrganization(
+            $product->organization,
+            fn () => view('product::admin.products.edit', ['product' => $product, 'categories' => $categories])->render(),
+        );
     }
 
     public function update(Request $request, Product $product, UpdateProductAction $action): RedirectResponse
