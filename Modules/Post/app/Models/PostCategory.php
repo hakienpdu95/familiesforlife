@@ -115,9 +115,11 @@ class PostCategory extends Model
     }
 
     /**
-     * Cây danh mục gốc + con (active) dùng cho nav/drawer cổng thông tin
-     * (resources/views/layouts/partials/frontend-*.blade.php) — 1 query dùng chung cho cả
-     * home/category/article thay vì lặp lại ở từng controller.
+     * Cây danh mục gốc + con (active) — KHÔNG còn dùng cho nav/drawer nữa (từ
+     * spec/Menu_Navigation_Technical_Specification.md Phase 3, nav đọc MenuItem::tree() qua
+     * View Composer ở Modules/Menu). Vẫn được PublicCategoryController::index() dùng cho
+     * home.blade.php (x-frontend.promo-bar/cta-band) — 2 section trang chủ độc lập với nav,
+     * xem spec §2/§9.
      */
     public static function navTree(): \Illuminate\Support\Collection
     {

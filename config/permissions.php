@@ -215,6 +215,8 @@ return [
         P::POST_ARTICLE_DELETE->value,
         P::POST_ARTICLE_PUBLISH->value,
         P::POST_CATEGORY_MANAGE->value,
+        // Menu: Full manage (điều hướng header/footer)
+        P::MENU_MANAGE->value,
         // AICEM: Config — provider, API key, hạn mức chi phí theo Organization
         P::AICEM_CONFIG->value,
     ],

@@ -79,8 +79,9 @@ class PublicCategoryController extends Controller
             $node = $node->parent;
         }
 
-        $categories = PostCategory::navTree();
-
-        return view('post::public.category', compact('articles', 'category', 'breadcrumb', 'categories', 'locale', 'search'));
+        // Không còn truyền 'categories' — Phase 3 chuyển nav sang MenuItem::tree() qua View
+        // Composer (MenuServiceProvider), public.category.blade.php không tự dùng $categories
+        // cho việc gì khác (xem spec/Menu_Navigation_Technical_Specification.md §8 Phase 4).
+        return view('post::public.category', compact('articles', 'category', 'breadcrumb', 'locale', 'search'));
     }
 }

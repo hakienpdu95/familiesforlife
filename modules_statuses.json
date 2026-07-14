@@ -16,5 +16,6 @@
     "Post": true,
     "Aicem": true,
     "Approval": true,
-    "Event": true
+    "Event": true,
+    "Menu": true
 }

@@ -126,4 +126,9 @@ enum PermissionEnum: string
     case AICEM_USE           = 'aicem.use';            // chạy workflow trên bài viết/sản phẩm, accept/reject suggestion
     case AICEM_CONFIG_PROMPT = 'aicem.config_prompt';  // sửa knowledge base, template, workflow
     case AICEM_CONFIG        = 'aicem.config';         // cấu hình provider/API key/hạn mức chi phí
+
+    // ══ MENU (Điều hướng menu — header/footer, decoupled khỏi PostCategory) ══
+    // spec/Menu_Navigation_Technical_Specification.md §6.3 — chỉ System_Admin quản lý,
+    // cùng nguyên tắc POST_CATEGORY_MANAGE (cấu trúc điều hướng là việc của Admin).
+    case MENU_MANAGE = 'menu.manage';
 }

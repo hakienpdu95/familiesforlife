@@ -19,15 +19,24 @@ window.Alpine = Alpine;
  * frontendNav — trạng thái tương tác dùng chung bởi header/drawer
  * (resources/views/layouts/partials/frontend-*.blade.php).
  *
- * Danh mục (categories) KHÔNG nằm trong state này — chúng được render
+ * Mục menu (MenuItem) KHÔNG nằm trong state này — chúng được render
  * server-side bằng @foreach (Blade), không phải Alpine x-for, để nội
  * dung nav luôn có mặt trong HTML gửi về (SEO/crawler) thay vì phải đợi
  * JS chạy xong mới thấy. Alpine ở đây chỉ quản lý phần "mở/đóng" (UI).
+ *
+ * spec/Menu_Navigation_Technical_Specification.md §7.3/§7.4 — mega-menu 3 cấp cần thêm 1
+ * chiều state cho flyout/accordion cấp 3, độc lập với cấp 2 (subOpen/mobileSub):
+ *   - flyOpen:     desktop, hover-triggered flyout cấp 3 — khoá "{level1Index}_{level2Index}"
+ *   - mobileFlySub: mobile, click accordion cấp 3 — cùng quy ước khoá, khác biến vì desktop/
+ *                    mobile tồn tại song song trong DOM (ẩn/hiện bằng CSS breakpoint, không
+ *                    phải điều kiện PHP), không dùng chung 1 state được.
  */
 document.addEventListener('alpine:init', () => {
     Alpine.data('frontendNav', () => ({
         subOpen: null,
+        flyOpen: null,
         mobileSub: null,
+        mobileFlySub: null,
         search: false,
     }));
 });

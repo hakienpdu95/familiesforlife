@@ -214,6 +214,9 @@ class RolePermissionSeeder extends Seeder
                 P::ASSESSMENT_CONFIG->value,
                 P::ASSESSMENT_RESULTS->value,
                 P::ASSESSMENT_REPROCESS->value,
+
+                // Menu: Full manage (điều hướng header/footer)
+                P::MENU_MANAGE->value,
             ],
 
             // ─────────────────────────────────────────────────────────

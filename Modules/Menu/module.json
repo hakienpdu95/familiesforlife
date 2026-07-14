@@ -1,0 +1,11 @@
+{
+    "name": "Menu",
+    "alias": "menu",
+    "description": "Quản lý điều hướng menu (header/footer) — spec/Menu_Navigation_Technical_Specification.md. Tách khỏi PostCategory: cây menu tự quản lý thứ tự/nhãn/độ sâu hiển thị, có thể trỏ tới 1 category hoặc 1 URL tuỳ ý.",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Menu\\Providers\\MenuServiceProvider"
+    ],
+    "files": []
+}

@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\View\View;
 use Modules\Post\Features\PublicReading\Actions\IncrementArticleViewCountAction;
 use Modules\Post\Models\PostArticleTranslation;
-use Modules\Post\Models\PostCategory;
 use Modules\Post\Support\ArticleContentRenderer;
 
 /**
@@ -32,12 +31,14 @@ class PublicArticleController extends Controller
 
         $viewAction->handle($translation);
 
+        // Không còn truyền 'categories' — Phase 3 chuyển nav sang MenuItem::tree() qua View
+        // Composer (MenuServiceProvider), public.article.blade.php không tự dùng $categories
+        // cho việc gì khác (xem spec/Menu_Navigation_Technical_Specification.md §8 Phase 4).
         return view('post::public.article', [
             'translation' => $translation,
             'article'     => $translation->article,
             'locale'      => $translation->locale,
             'content'     => $renderer->render($translation),
-            'categories'  => PostCategory::navTree(),
         ]);
     }
 }

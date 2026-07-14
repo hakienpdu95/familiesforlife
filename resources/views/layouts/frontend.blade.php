@@ -9,6 +9,25 @@
     @endif
     @stack('meta')
 
+    {{-- spec/Menu_Navigation_Technical_Specification.md §7.2.1 — chỉ khai báo cấp 1, KHÔNG
+         lặp lại toàn bộ 3 cấp mega-menu vào JSON-LD (crawler tự theo <a href> thật, không cần
+         structured data lặp lại từng flyout item). --}}
+    @if(($menuTree ?? collect())->isNotEmpty())
+    @php
+        // Viết "@context" ngoài khối PHP thô này sẽ bị Blade compile nhầm thành directive
+        // Context của framework, ra HTML rác — bên trong khối PHP thô thì an toàn.
+        $navJsonLd = json_encode([
+            '@context' => 'https://schema.org',
+            '@graph'   => $menuTree->map(fn ($item) => [
+                '@type' => 'SiteNavigationElement',
+                'name'  => $item->label,
+                'url'   => $item->resolveUrl() ?? url('/'),
+            ])->values(),
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    @endphp
+    <script type="application/ld+json">{!! $navJsonLd !!}</script>
+    @endif
+
     @vite(['resources/css/frontend.css', 'resources/js/frontend.js'], 'build/frontend')
     @stack('styles')
 </head>

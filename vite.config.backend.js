@@ -51,6 +51,7 @@ const JS_OUTPUT = {
   'post':                   'assets/modules/post.[hash].js',
   'product':                'assets/modules/product.[hash].js',
   'event':                  'assets/modules/event.[hash].js',
+  'menu':                   'assets/modules/menu.[hash].js',
 };
 
 /** CSS asset name → output path.
@@ -82,6 +83,7 @@ const CSS_OUTPUT = {
   'post.css':                   'assets/modules/post.[hash].css',
   'product.css':                'assets/modules/product.[hash].css',
   'event.css':                  'assets/modules/event.[hash].css',
+  'menu.css':                   'assets/modules/menu.[hash].css',
 };
 
 // ─── Module input entries ─────────────────────────────────────────────
@@ -135,6 +137,9 @@ const MODULE_ENTRIES = [
   // Event
   'Modules/Event/resources/assets/sass/event.scss',
   'Modules/Event/resources/assets/js/event.js',
+  // Menu
+  'Modules/Menu/resources/assets/sass/menu.scss',
+  'Modules/Menu/resources/assets/js/menu.js',
 ];
 
 // ─────────────────────────────────────────────────────────────────────
