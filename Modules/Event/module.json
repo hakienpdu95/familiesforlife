@@ -1,0 +1,11 @@
+{
+    "name": "Event",
+    "alias": "event",
+    "description": "Quản lý Sự kiện — độc giả nộp công khai (spec/Event_Management_Technical_Specification.md), toà soạn duyệt trước khi hiển thị lên cổng thông tin",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Event\\Providers\\EventServiceProvider"
+    ],
+    "files": []
+}

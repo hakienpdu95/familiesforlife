@@ -5,6 +5,7 @@ namespace Modules\Post\Features\PublicReading\Http;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Modules\Event\Models\Event;
 use Modules\Post\Features\PublicReading\Queries\ListPublishedArticlesHandler;
 use Modules\Post\Features\PublicReading\Queries\ListPublishedArticlesQuery;
 use Modules\Post\Models\PostArticleTranslation;
@@ -34,20 +35,19 @@ class PublicCategoryController extends Controller
             excludeArticleId: $featured?->article_id,
         ));
 
-        // Bài viết tài trợ (is_sponsored) — dùng cho block "Đối Tác Đồng Hành"
-        // (x-frontend.sponsor-spotlight), thay thế "Sự Kiện Cho Bé" của bản mẫu tĩnh vì
-        // module Post chưa có domain "sự kiện" — đây là dữ liệu thật gần nhất tương đương.
-        $sponsored = $search ? collect() : PostArticleTranslation::published()
-            ->where('locale', $locale)
-            ->whereHas('article', fn ($q) => $q->where('is_sponsored', true))
-            ->with('article')
-            ->orderByDesc('published_at')
+        // spec/Event_Management_Technical_Specification.md §12 — thay chỗ dùng
+        // post_articles.is_sponsored làm placeholder "Sự Kiện Cho Bé" bằng dữ liệu Event thật,
+        // giờ Modules\Event đã có domain "sự kiện" thật (Phase 3).
+        $upcomingEvents = $search ? collect() : Event::published()
+            ->upcoming()
+            ->with('category')
+            ->orderBy('start_date')
             ->take(5)
             ->get();
 
         $categories = PostCategory::navTree();
 
-        return view('post::public.home', compact('articles', 'categories', 'locale', 'featured', 'sponsored', 'search'));
+        return view('post::public.home', compact('articles', 'categories', 'locale', 'featured', 'upcomingEvents', 'search'));
     }
 
     private function featuredArticle(string $locale): ?PostArticleTranslation

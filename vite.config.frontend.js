@@ -34,16 +34,26 @@ export default defineConfig(({ mode }) => {
         input: [
           'resources/css/frontend.css',
           'resources/js/frontend.js',
+
+          // Widget libs — lazy per-page (spec/Event_Management_Technical_Specification.md
+          // §10.6: chỉ load ở trang submit-event, không load site-wide).
+          'resources/js/modules/tom-select.js',
+          'resources/js/modules/flatpickr.js',
+
+          // Event public submission form
+          'Modules/Event/resources/assets/js/event-public.js',
         ],
 
         refresh: [
           'Modules/Post/resources/views/public/**/*.blade.php',
+          'Modules/Event/resources/views/public/**/*.blade.php',
           'resources/views/layouts/frontend.blade.php',
           'resources/views/layouts/partials/frontend-*.blade.php',
           'resources/views/components/frontend/**/*.blade.php',
           'resources/css/frontend.css',
           'resources/js/frontend.js',
           'Modules/Post/routes/**/*.php',
+          'Modules/Event/routes/**/*.php',
         ],
 
         buildDirectory: 'build/frontend',
@@ -56,6 +66,7 @@ export default defineConfig(({ mode }) => {
         '@':        path.resolve(__dirname, 'resources'),
         '@css':     path.resolve(__dirname, 'resources/css'),
         '@js':      path.resolve(__dirname, 'resources/js'),
+        '@shared':  path.resolve(__dirname, 'resources/js/shared'),
       },
     },
 

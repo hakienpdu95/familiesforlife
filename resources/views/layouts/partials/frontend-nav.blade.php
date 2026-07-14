@@ -33,6 +33,13 @@
                 @endif
             </li>
             @endforeach
+
+            {{-- spec/Event_Management_Technical_Specification.md §12 — mục "Sự Kiện" trỏ sang
+                 domain nội dung riêng của Modules\Event, song song danh mục Post ở trên, không
+                 trộn chung cây danh mục (2 domain độc lập — xem §3.3). --}}
+            <li>
+                <a href="{{ route('event.public.home') }}" class="rounded-none py-4 text-primary-content">Sự Kiện</a>
+            </li>
         </ul>
     </div>
 </nav>

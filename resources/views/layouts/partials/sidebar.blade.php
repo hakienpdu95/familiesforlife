@@ -160,6 +160,26 @@
         </details>
         @endcan
 
+        {{-- spec/Event_Management_Technical_Specification.md §9 — event.view cấp cho
+             platform_content_editor/head/ops (Modules\Event\Database\Seeders\EventPermissionSeeder). --}}
+        @can(\App\Enums\PermissionEnum::EVENT_VIEW->value)
+        <details {{ request()->routeIs('backend.event.*') ? 'open' : '' }}>
+            <summary class="nav-summary {{ request()->routeIs('backend.event.*') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 7V3m8 4V3M3 11h18M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"/></svg>
+                <span class="nav-label">Sự kiện</span>
+                <svg class="nav-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m9 18 6-6-6-6"/></svg>
+            </summary>
+            <div class="sub-menu">
+                <a href="{{ route('backend.event.index') }}"
+                   class="sub-link {{ request()->routeIs('backend.event.index') ? 'active' : '' }}">Danh sách sự kiện</a>
+                @can('event_category.manage')
+                <a href="{{ route('backend.event.categories.index') }}"
+                   class="sub-link {{ request()->routeIs('backend.event.categories.*') ? 'active' : '' }}">Danh mục sự kiện</a>
+                @endcan
+            </div>
+        </details>
+        @endcan
+
         @canany(['aicem.view', 'aicem.config_prompt'])
         <details {{ request()->routeIs('backend.aicem.*') ? 'open' : '' }}>
             <summary class="nav-summary {{ request()->routeIs('backend.aicem.*') ? 'active' : '' }}">

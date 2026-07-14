@@ -31,7 +31,7 @@
     @endforeach
 </div>
 
-<x-frontend.sponsor-spotlight :sponsored="$sponsored" />
+<x-frontend.event-spotlight :events="$upcomingEvents" />
 <x-frontend.cta-band :categories="$categories" />
 @endif
 

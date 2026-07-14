@@ -106,6 +106,20 @@ enum PermissionEnum: string
     case POST_ARTICLE_UNPUBLISH = 'post_article.unpublish'; // tách riêng khỏi publish — Ops có thể publish nhưng không được gỡ bừa
     case POST_ARTICLE_MANAGE_SPONSORSHIP = 'post_article.manage_sponsorship'; // bật/tắt is_sponsored — tách khỏi post_article.edit thường
 
+    // ══ EVENT (Quản lý sự kiện — độc giả nộp công khai, toà soạn duyệt) ═════
+    // spec/Event_Management_Technical_Specification.md §9 — approve/reject/publish/archive
+    // dùng role-helper (isPlatformContentEditor/Head) ở EventPolicy, KHÔNG qua permission
+    // string (cùng nguyên tắc PostArticlePolicy) — EVENT_MODERATE/EVENT_PUBLISH/EVENT_UNPUBLISH
+    // giữ lại để tài liệu hoá đầy đủ hành động tồn tại, cùng cách post_article.publish/
+    // unpublish vẫn còn dù không role nào được cấp qua Spatie nữa.
+    case EVENT_CATEGORY_MANAGE = 'event_category.manage';
+    case EVENT_VIEW            = 'event.view';
+    case EVENT_EDIT            = 'event.edit';           // sửa nội dung trước Approve (§6.1)
+    case EVENT_MODERATE        = 'event.moderate';       // Approve/Reject
+    case EVENT_PUBLISH         = 'event.publish';
+    case EVENT_UNPUBLISH       = 'event.unpublish';
+    case EVENT_DELETE          = 'event.delete';
+
     // ══ AICEM (AI Context Engineering Module — trợ lý AI cho Post & Product) ═
     // CEO=View | Marketing=Use | Ops=View limited | AI_OP=Config prompt | Admin=Config
     case AICEM_VIEW          = 'aicem.view';           // xem knowledge base/lịch sử (read-only)

@@ -15,5 +15,6 @@
     "Product": true,
     "Post": true,
     "Aicem": true,
-    "Approval": true
+    "Approval": true,
+    "Event": true
 }
