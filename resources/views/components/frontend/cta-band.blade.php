@@ -1,5 +1,4 @@
 @props([
-    'locale',
     'categories', // Collection<PostCategory> — dùng link danh mục đầu tiên làm điểm đến CTA
 ])
 
@@ -19,7 +18,7 @@
         <h2 class="font-black text-2xl text-secondary">Khám Phá Thêm Bài Viết</h2>
         <p class="mt-2 text-sm text-base-content/60">Cẩm nang nuôi dạy con, trường học và trải nghiệm gia đình — cập nhật liên tục.</p>
         @if($categories->isNotEmpty())
-        <a href="{{ route('post.public.category', ['locale' => $locale, 'category' => $categories->first()->slug]) }}"
+        <a href="{{ route('post.public.category', ['category' => $categories->first()->slug]) }}"
            class="btn mt-5 border-none bg-secondary text-white hover:bg-secondary/90 px-8">Xem Ngay</a>
         @endif
     </div>

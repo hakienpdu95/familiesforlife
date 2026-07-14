@@ -6,13 +6,7 @@
 @endif
 
 @push('meta')
-{{-- §11.2 — canonical trỏ chính URL này (kể cả sau khi được redirect fallback tới đây) --}}
-<link rel="canonical" href="{{ route('post.public.article', ['locale' => $locale, 'slug' => $translation->slug]) }}">
-
-{{-- §11.2 — hreflang cho mọi locale đang published của cùng article --}}
-@foreach($hreflangs as $h)
-<link rel="alternate" hreflang="{{ $h->locale }}" href="{{ route('post.public.article', ['locale' => $h->locale, 'slug' => $h->slug]) }}">
-@endforeach
+<link rel="canonical" href="{{ route('post.public.article', ['slug' => $translation->slug]) }}">
 @endpush
 
 @section('content')
@@ -20,9 +14,9 @@
 
     <div class="text-xs breadcrumbs mb-4">
         <ul>
-            <li><a href="{{ route('post.public.home', ['locale' => $locale]) }}">Trang Chủ</a></li>
+            <li><a href="{{ route('post.public.home') }}">Trang Chủ</a></li>
             @if($article->categories->isNotEmpty())
-            <li><a href="{{ route('post.public.category', ['locale' => $locale, 'category' => $article->categories->first()->slug]) }}">{{ $article->categories->first()->name }}</a></li>
+            <li><a href="{{ route('post.public.category', ['category' => $article->categories->first()->slug]) }}">{{ $article->categories->first()->name }}</a></li>
             @endif
         </ul>
     </div>
@@ -54,7 +48,7 @@
     @if($article->categories->isNotEmpty())
     <div class="flex flex-wrap gap-1.5 mb-4">
         @foreach($article->categories as $cat)
-        <a href="{{ route('post.public.category', ['locale' => $locale, 'category' => $cat->slug]) }}" class="badge badge-sm badge-ghost hover:badge-primary">{{ $cat->name }}</a>
+        <a href="{{ route('post.public.category', ['category' => $cat->slug]) }}" class="badge badge-sm badge-ghost hover:badge-primary">{{ $cat->name }}</a>
         @endforeach
     </div>
     @endif
@@ -86,15 +80,6 @@
     <div class="flex flex-wrap gap-1.5 mt-4">
         @foreach($article->tags as $tag)
         <span class="badge badge-sm badge-outline">#{{ $tag->name }}</span>
-        @endforeach
-    </div>
-    @endif
-
-    @if($hreflangs->count() > 1)
-    <div class="mt-6 flex gap-2">
-        @foreach($hreflangs as $h)
-        <a href="{{ route('post.public.article', ['locale' => $h->locale, 'slug' => $h->slug]) }}"
-           class="btn btn-xs {{ $h->locale === $locale ? 'btn-primary' : 'btn-ghost' }}">{{ config('post.locales')[$h->locale] ?? $h->locale }}</a>
         @endforeach
     </div>
     @endif

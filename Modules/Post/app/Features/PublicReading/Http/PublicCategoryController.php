@@ -10,12 +10,17 @@ use Modules\Post\Features\PublicReading\Queries\ListPublishedArticlesQuery;
 use Modules\Post\Models\PostArticleTranslation;
 use Modules\Post\Models\PostCategory;
 
+/**
+ * Cổng thông tin công khai chỉ phục vụ 1 locale (config('post.default_locale')) — không còn
+ * {locale} trong URL (trước đây /{locale}/bai-viet, đổi vì mọi nội dung thực tế chỉ có tiếng
+ * Việt và ghép "/en/bai-viet" không hợp lý). Bản dịch locale khác (nếu biên tập viên có tạo)
+ * vẫn tồn tại trong DB cho quản trị nội bộ, chỉ không có route công khai nào trỏ tới.
+ */
 class PublicCategoryController extends Controller
 {
-    public function index(Request $request, string $locale, ListPublishedArticlesHandler $handler): View
+    public function index(Request $request, ListPublishedArticlesHandler $handler): View
     {
-        abort_unless(array_key_exists($locale, config('post.locales')), 404);
-
+        $locale = config('post.default_locale');
         $search = $request->string('q')->trim()->value() ?: null;
 
         // Bài viết ghim làm hero (x-frontend.hero) — không tìm kiếm thì loại khỏi lưới bên
@@ -55,10 +60,9 @@ class PublicCategoryController extends Controller
             ->first();
     }
 
-    public function show(Request $request, string $locale, PostCategory $category, ListPublishedArticlesHandler $handler): View
+    public function show(Request $request, PostCategory $category, ListPublishedArticlesHandler $handler): View
     {
-        abort_unless(array_key_exists($locale, config('post.locales')), 404);
-
+        $locale = config('post.default_locale');
         $search = $request->string('q')->trim()->value() ?: null;
 
         $articles = $handler->handle(new ListPublishedArticlesQuery(

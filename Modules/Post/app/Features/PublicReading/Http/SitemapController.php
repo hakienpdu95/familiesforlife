@@ -8,10 +8,14 @@ use Modules\Post\Models\PostArticleTranslation;
 
 class SitemapController extends Controller
 {
-    /** Chỉ liệt kê translation status=published, route theo đúng {locale}/bai-viet/{slug} (§11.2). */
+    /**
+     * Chỉ liệt kê bản dịch published CỦA LOCALE MẶC ĐỊNH — route công khai /bai-viet/{slug}
+     * không còn {locale}, nên bản dịch ở locale khác (nếu có) không có URL public nào để liệt kê.
+     */
     public function index(): Response
     {
         $translations = PostArticleTranslation::published()
+            ->where('locale', config('post.default_locale'))
             ->orderBy('updated_at', 'desc')
             ->get(['locale', 'slug', 'updated_at']);
 

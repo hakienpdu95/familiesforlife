@@ -58,25 +58,18 @@ Route::get('posts/cta/{button}', [ProductBlockClickController::class, 'redirect'
 // Post không còn organization_id (§3.3), nên resolve tổ chức theo subdomain không còn ý
 // nghĩa gì cho các route này: bài viết phục vụ đồng nhất cho mọi domain/subdomain, không cần
 // biết đang "đứng" ở tổ chức nào trước khi trả nội dung. Bỏ 'auth' vẫn giữ (route công khai,
-// không yêu cầu đăng nhập). Không ràng buộc {locale} bằng regex ở route (đọc
-// config('post.locales') tại thời điểm nạp route file không đáng tin cậy — có thể chạy
-// trước khi module config merge xong, tuỳ context boot) — mỗi controller tự
-// abort_unless(array_key_exists($locale, config('post.locales')), 404) khi xử lý request.
+// không yêu cầu đăng nhập).
+//
+// KHÔNG còn {locale} trong URL (trước là /{locale}/bai-viet, vd /en/bai-viet) — toàn bộ nội
+// dung thực tế chỉ có tiếng Việt nên phần locale trên URL chỉ gây rối, không phục vụ mục đích
+// gì; PublicCategoryController/PublicArticleController tự dùng config('post.default_locale')
+// nội bộ. Trang chủ đăng ký thẳng tại domain gốc ('/'), không phải '/bai-viet' — tránh 2 URL
+// cùng phục vụ 1 nội dung (trùng lặp SEO).
 Route::get('post-sitemap.xml', [SitemapController::class, 'index'])->name('post.public.sitemap');
 
-Route::prefix('{locale}/bai-viet')->name('post.public.')->group(function (): void {
-    Route::get('/', [PublicCategoryController::class, 'index'])->name('home');
+Route::get('/', [PublicCategoryController::class, 'index'])->name('post.public.home');
+
+Route::prefix('bai-viet')->name('post.public.')->group(function (): void {
     Route::get('danh-muc/{category:slug}', [PublicCategoryController::class, 'show'])->name('category');
     Route::get('{slug}', [PublicArticleController::class, 'show'])->name('article');
 });
-
-// Trang chủ đăng ký ngay tại domain gốc ('/') — render trực tiếp (không redirect sang
-// /{locale}/bai-viet). ->defaults('locale', ...) KHÔNG dùng được ở đây: route này không có
-// segment {locale} nào trong URI nên Laravel không merge default vào parametersWithoutNulls()
-// (defaults() chỉ lấp giá trị cho segment {locale?} có thật nhưng vắng mặt trên URL, không tự
-// "chèn thêm" 1 tham số không tồn tại trong path) — resolveMethodDependencies() vì vậy shift
-// nhầm instance ListPublishedArticlesHandler (được container resolve) vào đúng vị trí đang
-// chờ $locale, ném TypeError. Gọi thẳng action qua closure, truyền locale mặc định bằng tay.
-Route::get('/', function (\Illuminate\Http\Request $request, \Modules\Post\Features\PublicReading\Queries\ListPublishedArticlesHandler $handler) {
-    return app(PublicCategoryController::class)->index($request, config('post.default_locale'), $handler);
-})->name('post.public.root');

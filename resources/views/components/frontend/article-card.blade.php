@@ -1,6 +1,5 @@
 @props([
     'translation', // PostArticleTranslation (with article.categories loaded)
-    'locale',
     'size' => 'md', // lg | md | sm
 ])
 
@@ -14,7 +13,7 @@
     };
 @endphp
 
-<a href="{{ route('post.public.article', ['locale' => $locale, 'slug' => $translation->slug]) }}"
+<a href="{{ route('post.public.article', ['slug' => $translation->slug]) }}"
    class="group flex flex-col {{ $styles['gap'] }}">
     <div class="{{ $styles['ratio'] }} rounded-xl overflow-hidden bg-base-200">
         @if($article?->cover_image_url)

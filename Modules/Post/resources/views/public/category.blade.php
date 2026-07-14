@@ -8,9 +8,9 @@
 
     <div class="text-xs breadcrumbs mb-4">
         <ul>
-            <li><a href="{{ route('post.public.home', ['locale' => $locale]) }}">Trang Chủ</a></li>
+            <li><a href="{{ route('post.public.home') }}">Trang Chủ</a></li>
             @foreach($breadcrumb as $node)
-            <li><a href="{{ route('post.public.category', ['locale' => $locale, 'category' => $node->slug]) }}">{{ $node->name }}</a></li>
+            <li><a href="{{ route('post.public.category', ['category' => $node->slug]) }}">{{ $node->name }}</a></li>
             @endforeach
         </ul>
     </div>
@@ -19,7 +19,7 @@
         {{ $search ? "Kết quả tìm kiếm trong “{$category->name}”: {$search}" : $category->name }}
     </h1>
 
-    <x-frontend.article-grid :articles="$articles" :locale="$locale" />
+    <x-frontend.article-grid :articles="$articles" />
 
 </div>
 @endsection
