@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+/**
+ * resources/css/frontend.css
+ * ────────────────────────────────────────────────────────────────────
+ * Bundle riêng cho CỔNG THÔNG TIN công khai (Post::public.* — trang chủ,
+ * danh mục, bài viết). KHÔNG dùng chung app.css/vite.config.backend.js:
+ * portal không cần sidebar admin, jQuery, echarts, jodit... — tách riêng
+ * để bundle nhẹ và theme màu khác hẳn giao diện quản trị.
+ *
+ * Build: vite.config.frontend.js → public/build/frontend/
+ * Blade: @vite(['resources/css/frontend.css','resources/js/frontend.js'], 'build/frontend')
+ */
+
+@plugin "daisyui" {
+    themes: portal --default;
+    base:   true;
+    styled: true;
+    utils:  true;
+    logs:   false;
+}
+
+/* Theme "portal" — bảng màu lấy từ spec/honeykids/honeykids-home.html,
+ * ánh xạ vào token DaisyUI 5 để mọi component (btn, badge, card...) tự
+ * nhất quán theo màu thương hiệu portal thay vì phải tô tay từng nơi. */
+@plugin "daisyui/theme" {
+    name: "portal";
+    default: true;
+    prefersdark: false;
+    color-scheme: light;
+
+    --color-base-100: #fbfaf7;
+    --color-base-200: #f3f1ea;
+    --color-base-300: #e7e3d8;
+    --color-base-content: #292524;
+
+    --color-primary: #ea1d76;
+    --color-primary-content: #ffffff;
+
+    --color-secondary: #304497;
+    --color-secondary-content: #ffffff;
+
+    --color-accent: #2ec4b6;
+    --color-accent-content: #062824;
+
+    --color-neutral: #161616;
+    --color-neutral-content: #ffffff;
+
+    --color-info: #2ec4b6;
+    --color-success: #16a34a;
+    --color-warning: #eab02d;
+    --color-error: #dc2626;
+
+    --radius-box: 0.75rem;
+    --radius-field: 0.5rem;
+    --radius-selector: 1rem;
+}
+
+@theme {
+    --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+[x-cloak] { display: none !important; }
+
+/* ── Portal placeholder / decor helpers ──────────────────────────────
+ * .ph  — khối placeholder ảnh bìa khi article chưa có cover_image_url
+ * .blob — hình tròn trang trí cho hero/newsletter (xem x-frontend.hero) */
+.ph {
+    background: repeating-linear-gradient(45deg, #e9e4f5, #e9e4f5 10px, #ded6ef 10px, #ded6ef 20px);
+}
+
+.blob {
+    position: absolute;
+    border-radius: 9999px;
+    opacity: .55;
+    pointer-events: none;
+}

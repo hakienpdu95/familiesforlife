@@ -5,6 +5,9 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite --config vite.config.backend.js",
+        "build:backend": "vite build --config vite.config.backend.js",
+        "dev:frontend": "vite --config vite.config.frontend.js",
+        "build:frontend": "vite build --config vite.config.frontend.js",
         "dev:reverb": "php artisan reverb:start --port=8080",
         "dev:queue": "php artisan queue:listen"
     },

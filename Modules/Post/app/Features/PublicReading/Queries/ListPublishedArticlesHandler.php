@@ -22,6 +22,16 @@ class ListPublishedArticlesHandler implements QueryHandlerInterface
             $q->whereHas('article.categories', fn ($sub) => $sub->where('post_categories.id', $categoryId));
         }
 
+        if ($query->search) {
+            $search = $query->search;
+            $q->where(fn ($sub) => $sub->where('title', 'like', "%{$search}%")
+                ->orWhere('excerpt', 'like', "%{$search}%"));
+        }
+
+        if ($query->excludeArticleId) {
+            $q->where('article_id', '!=', $query->excludeArticleId);
+        }
+
         return $q->orderByDesc('published_at')
             ->paginate($query->perPage, ['*'], 'page', $query->page)
             ->withQueryString();

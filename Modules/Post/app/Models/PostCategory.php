@@ -113,4 +113,17 @@ class PostCategory extends Model
     {
         return $query->whereNull('parent_id');
     }
+
+    /**
+     * Cây danh mục gốc + con (active) dùng cho nav/drawer cổng thông tin
+     * (resources/views/layouts/partials/frontend-*.blade.php) — 1 query dùng chung cho cả
+     * home/category/article thay vì lặp lại ở từng controller.
+     */
+    public static function navTree(): \Illuminate\Support\Collection
+    {
+        return static::active()->root()
+            ->with(['children' => fn ($q) => $q->active()->orderBy('sort_order')])
+            ->orderBy('sort_order')
+            ->get();
+    }
 }

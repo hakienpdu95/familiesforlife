@@ -11,5 +11,7 @@ class ListPublishedArticlesQuery implements QueryInterface
         public readonly int $page = 1,
         public readonly int $perPage = 12,
         public readonly ?int $categoryId = null,
+        public readonly ?string $search = null,
+        public readonly ?int $excludeArticleId = null,
     ) {}
 }

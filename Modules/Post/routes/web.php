@@ -69,3 +69,14 @@ Route::prefix('{locale}/bai-viet')->name('post.public.')->group(function (): voi
     Route::get('danh-muc/{category:slug}', [PublicCategoryController::class, 'show'])->name('category');
     Route::get('{slug}', [PublicArticleController::class, 'show'])->name('article');
 });
+
+// Trang chủ đăng ký ngay tại domain gốc ('/') — render trực tiếp (không redirect sang
+// /{locale}/bai-viet). ->defaults('locale', ...) KHÔNG dùng được ở đây: route này không có
+// segment {locale} nào trong URI nên Laravel không merge default vào parametersWithoutNulls()
+// (defaults() chỉ lấp giá trị cho segment {locale?} có thật nhưng vắng mặt trên URL, không tự
+// "chèn thêm" 1 tham số không tồn tại trong path) — resolveMethodDependencies() vì vậy shift
+// nhầm instance ListPublishedArticlesHandler (được container resolve) vào đúng vị trí đang
+// chờ $locale, ném TypeError. Gọi thẳng action qua closure, truyền locale mặc định bằng tay.
+Route::get('/', function (\Illuminate\Http\Request $request, \Modules\Post\Features\PublicReading\Queries\ListPublishedArticlesHandler $handler) {
+    return app(PublicCategoryController::class)->index($request, config('post.default_locale'), $handler);
+})->name('post.public.root');

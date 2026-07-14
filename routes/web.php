@@ -8,7 +8,8 @@ use App\Http\Controllers\Backend\NotificationCenterController;
 use App\Http\Controllers\Backend\NotificationPreferenceController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn () => redirect()->route('backend.dashboard'));
+// Trang chủ công khai '/' đăng ký trong Modules/Post/routes/web.php (cùng chỗ với
+// post.public.home) — render thẳng tại '/', không redirect sang /{locale}/bai-viet.
 
 /*
 |--------------------------------------------------------------------------

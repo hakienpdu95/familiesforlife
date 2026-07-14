@@ -9,6 +9,7 @@ use Modules\Post\Enums\TranslationStatus;
 use Modules\Post\Features\PublicReading\Actions\IncrementArticleViewCountAction;
 use Modules\Post\Models\PostArticle;
 use Modules\Post\Models\PostArticleTranslation;
+use Modules\Post\Models\PostCategory;
 use Modules\Post\Support\ArticleContentRenderer;
 
 /**
@@ -45,6 +46,7 @@ class PublicArticleController extends Controller
                 'hreflangs'   => $hreflangs,
                 'locale'      => $locale,
                 'content'     => $renderer->render($translation),
+                'categories'  => PostCategory::navTree(),
             ]);
         }
 
