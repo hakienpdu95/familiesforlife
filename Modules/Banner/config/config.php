@@ -37,6 +37,10 @@ return [
             'label'            => 'Chi tiết sự kiện — đầu trang',
             'recommended_size' => '728×90',
         ],
+        'province_top' => [
+            'label'            => 'Banner đầu trang chuyên đề tỉnh',
+            'recommended_size' => '1200×150',
+        ],
     ],
 
     // Loại targeting hợp lệ (v1.1) — dùng cho dropdown target_type ở form admin và validate.
@@ -46,6 +50,7 @@ return [
     'target_types' => [
         'global'   => 'Toàn site (Global)',
         'category' => 'Theo danh mục bài viết',
+        'province' => 'Theo tỉnh/thành',
     ],
 
     // Resize ảnh gốc xuống tối đa chiều rộng này nếu lớn hơn (giảm dung lượng file — banner

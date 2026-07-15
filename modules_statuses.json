@@ -18,5 +18,7 @@
     "Approval": true,
     "Event": true,
     "Menu": true,
-    "Banner": true
+    "Banner": true,
+    "Ocop": true,
+    "ProvinceShowcase": true
 }

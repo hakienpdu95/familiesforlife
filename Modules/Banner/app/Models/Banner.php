@@ -93,36 +93,50 @@ class Banner extends Model
     // ── Placement / targeting ────────────────────────────────────────
 
     /**
+     * $context key → BannerTargetType tương ứng — spec/Province_Showcase_Technical_
+     * Specification.md §4.1: THÊM 1 DÒNG MỚI Ở ĐÂY khi có target_type mới (vd 'page'), không
+     * cần sửa gì khác trong forPlacement(). 1 trang chỉ truyền 1 context key thực tế có ý
+     * nghĩa (trang category truyền category_slug, trang tỉnh truyền province_code) nên không
+     * xảy ra xung đột giữa 2 chiều trong thực tế v1.
+     */
+    private const CONTEXT_DIMENSIONS = [
+        'category_slug' => BannerTargetType::Category,
+        'province_code' => BannerTargetType::Province,
+    ];
+
+    /**
      * Dùng bởi <x-frontend.banner-slot> — cùng tinh thần MenuItem::tree()/PostCategory::navTree().
      *
-     * $context — dữ liệu ngữ cảnh trang đang gọi, hiện chỉ đọc key 'category_slug'. Không có
-     * key này (hoặc $context rỗng) → chỉ trả banner global, không lỗi, không cần nơi gọi kiểm
-     * tra trước — những placement không có ngữ cảnh category cứ gọi
+     * $context — dữ liệu ngữ cảnh trang đang gọi (vd ['category_slug' => ...] hoặc
+     * ['province_code' => ...], xem CONTEXT_DIMENSIONS). Thiếu key nào → bỏ qua chiều đó, không
+     * lỗi, không cần nơi gọi kiểm tra trước — những placement không có ngữ cảnh nào cứ gọi
      * forPlacement($placement, limit: $n) như bình thường, không đổi cách gọi.
      *
-     * Ưu tiên: banner target_type='category' khớp target_value === category_slug trước, banner
+     * Ưu tiên: banner có targeting khớp trước (theo thứ tự khai báo CONTEXT_DIMENSIONS), banner
      * global (target_type NULL) lấp phần còn lại của $limit — xem spec §7.5 để biết lý do thứ
-     * tự này (banner theo category thường là cam kết cụ thể hơn với 1 đối tác/chiến dịch).
+     * tự này (banner theo targeting thường là cam kết cụ thể hơn với 1 đối tác/chiến dịch).
      *
      * @return Collection<int, self>
      */
     public static function forPlacement(string $placement, array $context = [], ?int $limit = null): Collection
     {
-        $categorySlug = $context['category_slug'] ?? null;
-
         $targeted = collect();
 
-        if ($categorySlug) {
-            $targeted = static::active()
-                ->where('placement', $placement)
-                ->where('target_type', BannerTargetType::Category)
-                ->where('target_value', $categorySlug)
-                ->orderBy('sort_order')
-                ->get();
+        foreach (self::CONTEXT_DIMENSIONS as $contextKey => $targetType) {
+            $value = $context[$contextKey] ?? null;
+            if (! $value) {
+                continue;
+            }
+
+            $targeted = $targeted->concat(
+                static::active()
+                    ->where('placement', $placement)
+                    ->where('target_type', $targetType)
+                    ->where('target_value', $value)
+                    ->orderBy('sort_order')
+                    ->get()
+            );
         }
-        // else ($categorySlug === null, vd forPlacement('header_ad') không truyền $context):
-        // bỏ qua hẳn khối if trên, $targeted giữ nguyên collect() rỗng — 2 bước dưới tự nhiên
-        // rơi vào query global lấy đủ $limit, không cần nhánh riêng cho "không có context".
 
         if ($limit !== null && $targeted->count() >= $limit) {
             return $targeted->take($limit)->values();

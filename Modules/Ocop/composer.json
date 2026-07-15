@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/ocop",
+    "description": "",
+    "authors": [
+        {
+            "name": "KienDH",
+            "email": "bonhuyn@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Ocop\\": "app/",
+            "Modules\\Ocop\\Database\\Factories\\": "database/factories/",
+            "Modules\\Ocop\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Ocop\\Tests\\": "tests/"
+        }
+    }
+}

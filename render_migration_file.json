@@ -1880,5 +1880,33 @@
         "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
         "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật",
         "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm"
+    ],
+    [
+        "banners///__///__///",
+        "placement///string///60///NOT_NULL///__///__///__",
+        "target_type///string///30///_NULL///NULL///__///__",
+        "target_value///string///255///_NULL///NULL///__///__",
+        "title///string///150///_NULL///NULL///__///__",
+        "image_path///string///255///NOT_NULL///__///__///__",
+        "image_width///unsignedInteger///__///_NULL///NULL///__///__",
+        "image_height///unsignedInteger///__///_NULL///NULL///__///__",
+        "image_size_bytes///unsignedInteger///__///_NULL///NULL///__///__",
+        "alt_text///string///255///_NULL///NULL///__///__",
+        "link_url///string///2048///_NULL///NULL///__///__",
+        "open_in_new_tab///boolean///__///NOT_NULL///false///__///__",
+        "badge_label///string///40///_NULL///NULL///__///__",
+        "start_date///date///__///_NULL///NULL///__///__",
+        "end_date///date///__///_NULL///NULL///__///__",
+        "sort_order///unsignedSmallInteger///__///NOT_NULL///0///__///__",
+        "is_active///boolean///__///NOT_NULL///true///__///__",
+        "click_count///unsignedInteger///__///NOT_NULL///0///__///__",
+        "created_by///unsignedBigInteger///__///NOT_NULL///__///->constrained('users')->onDelete('restrict')///__",
+        "updated_by///unsignedBigInteger///__///_NULL///NULL///->constrained('users')->onDelete('set null')///__",
+        "__index///index///__///__///__///placement,is_active,sort_order|idx_banner_placement_active///__",
+        "__index///index///__///__///__///placement,start_date,end_date|idx_banner_placement_schedule///__",
+        "__index///index///__///__///__///placement,target_type,target_value|idx_banner_targeting///__",
+        "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
+        "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật",
+        "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm"
     ]
 ]

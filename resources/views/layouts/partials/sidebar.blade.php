@@ -185,6 +185,19 @@
         </div>
         @endcan
 
+        {{-- spec/Province_Showcase_Technical_Specification.md §6.1 — ocop.manage cấp cho
+             platform_ops/platform_content_head (Modules\Ocop\Database\Seeders\OcopPermissionSeeder).
+             Single nav-link (không dropdown) — quản lý danh mục truy cập từ trong trang sản phẩm. --}}
+        @can(\App\Enums\PermissionEnum::OCOP_MANAGE->value)
+        <div class="nav-group">
+            <a href="{{ route('backend.ocop.products.index') }}"
+               class="nav-link {{ request()->routeIs('backend.ocop.*') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20.59 13.41 13.42 20.58a2 2 0 01-2.83 0L3 13V3h10l7.59 7.59a2 2 0 010 2.82z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 7h.01"/></svg>
+                <span class="nav-label">OCOP</span>
+            </a>
+        </div>
+        @endcan
+
         {{-- spec/Event_Management_Technical_Specification.md §9 — event.view cấp cho
              platform_content_editor/head/ops (Modules\Event\Database\Seeders\EventPermissionSeeder). --}}
         @can(\App\Enums\PermissionEnum::EVENT_VIEW->value)

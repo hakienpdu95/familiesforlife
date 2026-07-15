@@ -40,4 +40,14 @@ trait SyncsArticleRelations
 
         $article->tags()->sync($tagIds);
     }
+
+    /**
+     * spec/Province_Showcase_Technical_Specification.md §3.4.1 — chỉ gọi từ UpdateArticleAction
+     * (form sửa bài viết), KHÔNG gọi từ CreateArticleAction (create form không có multi-select
+     * này) — không bắt buộc, bài viết không gắn OCOP nào vẫn publish bình thường.
+     */
+    private function syncOcopProducts(PostArticle $article, ArticleData $data): void
+    {
+        $article->ocopProducts()->sync($data->ocop_product_ids);
+    }
 }

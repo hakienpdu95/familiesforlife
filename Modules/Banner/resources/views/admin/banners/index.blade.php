@@ -71,8 +71,11 @@
                         $isRunning = $banner->is_active
                             && (! $banner->start_date || $banner->start_date->lte(now()))
                             && (! $banner->end_date || $banner->end_date->gte(now()));
-                        $categoryName = $banner->target_value
+                        $categoryName = $banner->target_type?->value === 'category' && $banner->target_value
                             ? \Modules\Post\Models\PostCategory::where('slug', $banner->target_value)->value('name')
+                            : null;
+                        $provinceName = $banner->target_type?->value === 'province' && $banner->target_value
+                            ? \App\Models\Province::where('province_code', $banner->target_value)->value('name')
                             : null;
                     @endphp
                     <tr>
@@ -89,10 +92,18 @@
                         <td>
                             @if($banner->target_type === null)
                             <span class="badge badge-ghost badge-sm">Toàn site</span>
-                            @elseif($categoryName)
-                            <span class="badge badge-info badge-sm">Danh mục: {{ $categoryName }}</span>
-                            @else
-                            <span class="badge badge-warning badge-sm">Danh mục: (đã xoá)</span>
+                            @elseif($banner->target_type->value === 'category')
+                                @if($categoryName)
+                                <span class="badge badge-info badge-sm">Danh mục: {{ $categoryName }}</span>
+                                @else
+                                <span class="badge badge-warning badge-sm">Danh mục: (đã xoá)</span>
+                                @endif
+                            @elseif($banner->target_type->value === 'province')
+                                @if($provinceName)
+                                <span class="badge badge-info badge-sm">Tỉnh/thành: {{ $provinceName }}</span>
+                                @else
+                                <span class="badge badge-warning badge-sm">Tỉnh/thành: (không rõ)</span>
+                                @endif
                             @endif
                         </td>
                         <td class="text-xs text-base-content/60">

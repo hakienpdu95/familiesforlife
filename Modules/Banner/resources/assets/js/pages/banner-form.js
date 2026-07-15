@@ -18,8 +18,12 @@ document.addEventListener('alpine:init', () => {
         get needsCategory() {
             return this.targetType === 'category';
         },
+        // spec/Province_Showcase_Technical_Specification.md §3.5 — cùng cơ chế needsCategory.
+        get needsProvince() {
+            return this.targetType === 'province';
+        },
         get isValid() {
-            return ! this.needsCategory || this.targetValue !== '';
+            return (! this.needsCategory && ! this.needsProvince) || this.targetValue !== '';
         },
     }));
 });

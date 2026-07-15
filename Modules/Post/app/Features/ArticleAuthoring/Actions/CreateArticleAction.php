@@ -2,6 +2,7 @@
 
 namespace Modules\Post\Features\ArticleAuthoring\Actions;
 
+use App\Models\Province;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\Concerns\SyncsArticleRelations;
@@ -17,11 +18,19 @@ class CreateArticleAction
     public function handle(ArticleData $data): PostArticle
     {
         return DB::transaction(function () use ($data) {
+            // spec/Province_Showcase_Technical_Specification.md §3.2.1 — LUÔN tra lại tên thật
+            // từ bảng provinces ở tầng Action, không tin tên gửi từ client.
+            $provinceName = $data->province_code
+                ? Province::where('province_code', $data->province_code)->value('name')
+                : null;
+
             $article = PostArticle::create([
                 'main_locale'            => $data->main_locale ?: config('post.default_locale'),
                 'format'                 => $data->format,
                 'cover_image_url'        => $data->cover_image_url,
                 'is_featured'            => $data->is_featured,
+                'province_code'          => $data->province_code,
+                'province_name'          => $provinceName,
                 'created_by'             => auth()->id(),
                 // spec/dac-ta-ky-thuat-bai-viet-tai-tro.md §7.1 — khi is_sponsored=false, mọi
                 // field sponsor phải NULL (kể cả nếu request gửi kèm rác do UI/JS lỗi).

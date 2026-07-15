@@ -1,0 +1,11 @@
+{
+    "name": "Ocop",
+    "alias": "ocop",
+    "description": "Danh mục sản phẩm OCOP (hạng sao, nhà sản xuất, ngành hàng) theo tỉnh — dữ liệu có cấu trúc, khác bài viết Post (spec/Province_Showcase_Technical_Specification.md §3.4).",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Ocop\\Providers\\OcopServiceProvider"
+    ],
+    "files": []
+}

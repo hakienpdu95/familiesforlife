@@ -50,6 +50,10 @@ class PostArticle extends Model
         'cover_image_url',
         'is_featured',
         'sort_order',
+        'province_code',
+        'province_name',
+        'ward_code',
+        'ward_name',
         'created_by',
         'updated_by',
         'is_sponsored',
@@ -103,6 +107,16 @@ class PostArticle extends Model
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(PostTag::class, 'post_article_tag', 'article_id', 'tag_id');
+    }
+
+    /**
+     * spec/Province_Showcase_Technical_Specification.md §3.4.1 — sản phẩm OCOP liên quan
+     * (many-to-many, tuỳ chọn) — bảng pivot post_article_ocop_products thuộc Modules/Ocop
+     * (module phụ thuộc biết về Post, không ngược lại), Post chỉ định nghĩa quan hệ đọc.
+     */
+    public function ocopProducts(): BelongsToMany
+    {
+        return $this->belongsToMany(\Modules\Ocop\Models\OcopProduct::class, 'post_article_ocop_products', 'article_id', 'ocop_product_id');
     }
 
     public function createdBy(): BelongsTo

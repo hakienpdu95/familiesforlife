@@ -137,4 +137,10 @@ enum PermissionEnum: string
     // platform_content_head (BannerPermissionSeeder), KHÔNG qua config/permissions.php (Lớp B)
     // — cùng nguyên tắc EVENT_VIEW/EVENT_CATEGORY_MANAGE.
     case BANNER_MANAGE = 'banner.manage';
+
+    // ══ OCOP (Sản phẩm đặc trưng OCOP theo tỉnh — hạng sao, nhà sản xuất) ═══
+    // spec/Province_Showcase_Technical_Specification.md §6.1 — gán cho platform_ops +
+    // platform_content_head (OcopPermissionSeeder), KHÔNG qua config/permissions.php (Lớp B)
+    // — cùng nguyên tắc BANNER_MANAGE.
+    case OCOP_MANAGE = 'ocop.manage';
 }

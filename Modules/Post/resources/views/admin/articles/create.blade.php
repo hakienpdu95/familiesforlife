@@ -83,6 +83,22 @@
             @error('cover_image_url')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
         </div>
 
+        {{-- spec/Province_Showcase_Technical_Specification.md §6.3 — tuỳ chọn, không bắt buộc. --}}
+        <div class="form-control">
+            <label class="label py-0 pb-1">
+                <span class="label-text text-xs font-medium">Tỉnh/thành liên quan</span>
+            </label>
+            <select name="province_code" class="select select-bordered select-sm w-full @error('province_code') select-error @enderror">
+                <option value="">— Không gắn tỉnh —</option>
+                @foreach($provinces as $p)
+                <option value="{{ $p->province_code }}" {{ old('province_code') === $p->province_code ? 'selected' : '' }}>
+                    {{ $p->name }}
+                </option>
+                @endforeach
+            </select>
+            @error('province_code')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+        </div>
+
         <div class="form-control">
             <label class="label py-0 pb-1.5">
                 <span class="label-text font-medium">Danh mục</span>

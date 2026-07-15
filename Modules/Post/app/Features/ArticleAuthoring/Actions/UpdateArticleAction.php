@@ -2,6 +2,7 @@
 
 namespace Modules\Post\Features\ArticleAuthoring\Actions;
 
+use App\Models\Province;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\Concerns\SyncsArticleRelations;
@@ -17,10 +18,16 @@ class UpdateArticleAction
     public function handle(PostArticle $article, ArticleData $data): PostArticle
     {
         return DB::transaction(function () use ($article, $data) {
+            $provinceName = $data->province_code
+                ? Province::where('province_code', $data->province_code)->value('name')
+                : null;
+
             $article->update([
                 'format'                 => $data->format,
                 'cover_image_url'        => $data->cover_image_url,
                 'is_featured'            => $data->is_featured,
+                'province_code'          => $data->province_code,
+                'province_name'          => $provinceName,
                 'updated_by'             => auth()->id(),
                 // spec/dac-ta-ky-thuat-bai-viet-tai-tro.md §7.1 — khi is_sponsored=false, mọi
                 // field sponsor phải được clear ngay tại đây (không cần Action riêng cho trường
@@ -36,6 +43,7 @@ class UpdateArticleAction
 
             $this->syncCategories($article, $data);
             $this->syncTags($article, $data);
+            $this->syncOcopProducts($article, $data);
 
             return $article;
         });

@@ -104,11 +104,14 @@
                         @error('target_type')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                     </div>
 
+                    {{-- needsCategory/needsProvince select đều name="target_value" — :disabled trên
+                         select đang ẩn để KHÔNG bị submit đè lên select đang hiện (form HTML tự
+                         loại field disabled khỏi payload, tránh 2 select cùng tên ghi đè nhau). --}}
                     <div class="form-control" x-show="needsCategory" x-cloak>
                         <label class="label py-0 pb-1.5">
                             <span class="label-text font-medium">Danh mục bài viết <span class="text-error">*</span></span>
                         </label>
-                        <select name="target_value" x-model="targetValue"
+                        <select name="target_value" x-model="targetValue" :disabled="!needsCategory"
                                 class="select select-bordered select-sm w-full @error('target_value') select-error @enderror">
                             <option value="">— Chọn danh mục —</option>
                             @foreach($categories as $category)
@@ -118,6 +121,24 @@
                         @error('target_value')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                         <p class="text-xs text-warning mt-1.5" x-show="needsCategory && !isValid" x-cloak>
                             Vui lòng chọn danh mục khi hiển thị theo danh mục.
+                        </p>
+                    </div>
+
+                    {{-- spec/Province_Showcase_Technical_Specification.md §3.5 — cùng cơ chế khối category ở trên. --}}
+                    <div class="form-control" x-show="needsProvince" x-cloak>
+                        <label class="label py-0 pb-1.5">
+                            <span class="label-text font-medium">Tỉnh/thành <span class="text-error">*</span></span>
+                        </label>
+                        <select name="target_value" x-model="targetValue" :disabled="!needsProvince"
+                                class="select select-bordered select-sm w-full @error('target_value') select-error @enderror">
+                            <option value="">— Chọn tỉnh/thành —</option>
+                            @foreach($provinces as $province)
+                            <option value="{{ $province->province_code }}">{{ $province->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('target_value')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                        <p class="text-xs text-warning mt-1.5" x-show="needsProvince && !isValid" x-cloak>
+                            Vui lòng chọn tỉnh/thành khi hiển thị theo tỉnh/thành.
                         </p>
                     </div>
 

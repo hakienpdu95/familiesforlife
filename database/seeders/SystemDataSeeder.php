@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Artisan;
 use Modules\ActivityLog\Database\Seeders\ActivityLogPermissionsSeeder;
 use Modules\Approval\Database\Seeders\ApprovalDatabaseSeeder;
 use Modules\Assessment\Database\Seeders\AssessmentDatabaseSeeder;
@@ -18,6 +19,10 @@ use Modules\Menu\Database\Seeders\MenuDatabaseSeeder;
 use Modules\Product\Database\Seeders\ProductDatabaseSeeder;
 use Modules\Post\Database\Seeders\PostDatabaseSeeder;
 use Modules\Post\Database\Seeders\PostDemoSeeder;
+use Modules\Post\Database\Seeders\ProvinceShowcaseCategorySeeder;
+use Modules\Ocop\Database\Seeders\OcopDatabaseSeeder;
+use Modules\ProvinceShowcase\Database\Seeders\ProvinceShowcaseDemoSeeder;
+use Modules\ProvinceShowcase\Database\Seeders\ProvinceSlugBackfillSeeder;
 use Modules\Organization\Database\Seeders\OrganizationRolePermissionSeeder;
 use Modules\Subscription\Database\Seeders\SubscriptionDatabaseSeeder;
 use Modules\Survey\Database\Seeders\SurveyDatabaseSeeder;
@@ -43,7 +48,21 @@ class SystemDataSeeder extends Seeder
         $this->command->info('└──────────────────────────────────────────┘');
         $this->command->newLine();
 
+        // ── 0. Dữ liệu hành chính (regions/provinces/wards) — command riêng (không phải
+        // Seeder class) vì đọc trực tiếp datafiles/provinces.json, đã tồn tại từ trước cho
+        // Customer/Lead/Event. PHẢI chạy TRƯỚC mọi seeder demo dùng province_code (Event, Post,
+        // Ocop, ProvinceShowcase) — trên fresh DB (migrate:fresh xoá sạch bảng), không chạy lại
+        // lệnh này thì provinces/wards rỗng, mọi denormalize province_name/ward_name sẽ null im
+        // lặng (không lỗi) — xem spec/Province_Showcase_Technical_Specification.md §8 Phase 1.
+        // Idempotent (Model::upsert theo khoá tự nhiên), an toàn chạy lại trên DB đã có dữ liệu.
+        Artisan::call('import:provinces-wards');
+        $this->command->info('  ✓ ' . trim(Artisan::output()));
+
         $this->call([
+            // ── 0b. spec/Province_Showcase_Technical_Specification.md §3.1 — backfill
+            // provinces.slug ngay sau khi import xong (route công khai /{type}/{slug}) ──
+            ProvinceSlugBackfillSeeder::class,
+
             // ── 1. IAM: 8 tenant roles + 40+ permissions ─────────────────
             RolePermissionSeeder::class,
 
@@ -107,6 +126,14 @@ class SystemDataSeeder extends Seeder
             // ── 28. Demo content: bài viết + sự kiện mẫu đã xuất bản (đọc cho trang public) ──
             PostDemoSeeder::class,
             EventDemoSeeder::class,
+
+            // ── 28b. Province Showcase: 2 category con "du-lich-gia-dinh" (PHẢI đứng sau
+            // PostDemoSeeder — cần category cha tồn tại), rồi permission ocop.manage, rồi demo
+            // nội dung Huế/Cà Mau (bài viết/OCOP/sự kiện/banner) — spec/Province_Showcase_
+            // Technical_Specification.md §8 ──
+            ProvinceShowcaseCategorySeeder::class,
+            OcopDatabaseSeeder::class,
+            ProvinceShowcaseDemoSeeder::class,
 
             // ── 29. Menu (header): mega-menu công khai — cần category_id thật (bước 28) ──
             MenuDatabaseSeeder::class,

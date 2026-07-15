@@ -4,8 +4,10 @@ namespace App\Console\Commands;
 
 use App\Console\Commands\Concerns\MigrationHelpers;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
@@ -173,22 +175,39 @@ class GenerateMigration extends Command
                 $this->line('<fg=yellow>  Đã xóa schema dump để tránh duplicate table.</> ');
             }
 
-            $seedOption = $this->option('seed') ? ['--seed' => true] : [];
-            $exitCode   = $this->call('migrate:fresh', array_merge(
+            $exitCode = $this->call('migrate:fresh', array_merge(
                 ['--path' => [
                     'database/migrations/' . self::DIR_VENDOR,
                     'database/migrations/' . self::DIR_GENERATED,
                     'database/migrations/' . self::DIR_EXTENSIONS,
                 ]],
-                $seedOption,
                 $this->option('force') ? ['--force' => true] : []
             ));
 
-            if ($exitCode === 0) {
-                $this->info('migrate:fresh thành công — DB đã được tạo lại hoàn toàn.');
-            } else {
+            if ($exitCode !== 0) {
                 $this->error('migrate:fresh thất bại. Kiểm tra lỗi bên trên.');
                 return self::FAILURE;
+            }
+
+            $this->info('migrate:fresh thành công — DB đã được tạo lại hoàn toàn.');
+
+            // --path ở trên chỉ chạy vendor+generated+extensions, không đụng tới
+            // Modules/*/database/migrations/ — nên các migration "Trường hợp 3"
+            // (drop cột, CHECK constraint, backfill dữ liệu... không biểu diễn được
+            // qua JSON, xem docs/migration-guide.md) luôn còn Pending sau --fresh và
+            // KHÔNG được áp dụng nếu không làm bước này (từng gây lỗi thật: cột
+            // organization_id bị xoá theo JSON nhưng DB tạo bởi --fresh vẫn còn NOT
+            // NULL, insert từ seeder fail).
+            $exitCode = $this->applyModuleExceptionMigrations();
+            if ($exitCode !== 0) {
+                return self::FAILURE;
+            }
+
+            if ($this->option('seed')) {
+                $exitCode = $this->call('db:seed', $this->option('force') ? ['--force' => true] : []);
+                if ($exitCode !== 0) {
+                    return self::FAILURE;
+                }
             }
         } else {
             // Không --fresh → hướng dẫn bước tiếp theo
@@ -199,6 +218,80 @@ class GenerateMigration extends Command
         }
 
         return self::SUCCESS;
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // MODULE EXCEPTION MIGRATIONS (Trường hợp 3 — xem docs/migration-guide.md)
+    // ──────────────────────────────────────────────────────────────
+
+    /**
+     * MySQL error codes cho "hiệu ứng này đã tồn tại rồi" — 1050 table exists, 1060
+     * duplicate column, 1061 duplicate key name, 1826 duplicate FK constraint name.
+     */
+    private const ALREADY_EXISTS_ERROR_CODES = ['1050', '1060', '1061', '1826'];
+
+    /**
+     * Áp dụng các migration nằm trong Modules/*\/database/migrations/ mà --path ở
+     * migrate:fresh (vendor+generated+extensions) bỏ qua. Nhiều file cũ ở đây là bản
+     * gốc trước khi được sync vào JSON (tạo bảng/thêm cột đã tồn tại qua generated/
+     * extensions) — chạy lại sẽ lỗi "already exists"/"duplicate column", trường hợp
+     * này coi như đã áp dụng, chỉ ghi nhận vào bảng migrations chứ không chặn cả quy
+     * trình. Các migration thật sự chưa áp dụng (drop cột, CHECK constraint, backfill
+     * dữ liệu...) luôn tự guard bằng hasColumn/hasIndex/hasTable theo quy ước của dự
+     * án nên chạy trực tiếp là an toàn. Lỗi nào KHÔNG thuộc nhóm "already exists" ở
+     * trên được coi là lỗi thật và dừng ngay để không che giấu bug.
+     */
+    private function applyModuleExceptionMigrations(): int
+    {
+        $files = collect(File::glob(base_path('Modules/*/database/migrations/*.php')))->sort()->values();
+        if ($files->isEmpty()) {
+            return self::SUCCESS;
+        }
+
+        $this->newLine();
+        $this->line('<fg=cyan>Áp dụng Module migrations (Trường hợp 3)...</>');
+
+        foreach ($files as $file) {
+            $relativePath = Str::after($file, base_path() . '/');
+            $name         = pathinfo($relativePath, PATHINFO_FILENAME);
+
+            if (DB::table('migrations')->where('migration', $name)->exists()) {
+                continue;
+            }
+
+            try {
+                $exitCode = $this->call('migrate', ['--path' => $relativePath, '--force' => true]);
+            } catch (\Illuminate\Database\QueryException $e) {
+                // getCode() trả về SQLSTATE ('42S01'...), không phải mã lỗi MySQL —
+                // mã lỗi thật nằm ở errorInfo[1] (vd 1050 table exists, 1060 duplicate column).
+                if (!in_array((string) ($e->errorInfo[1] ?? null), self::ALREADY_EXISTS_ERROR_CODES, true)) {
+                    throw $e;
+                }
+
+                $this->line("  <fg=yellow>bỏ qua (đã áp dụng qua generated/extensions):</> {$relativePath}");
+                $this->markMigrationAsRun($relativePath);
+                continue;
+            }
+
+            if ($exitCode !== 0) {
+                $this->error("Migration lỗi thật: {$relativePath}");
+                return self::FAILURE;
+            }
+        }
+
+        return self::SUCCESS;
+    }
+
+    private function markMigrationAsRun(string $relativePath): void
+    {
+        $name = pathinfo($relativePath, PATHINFO_FILENAME);
+
+        if (DB::table('migrations')->where('migration', $name)->exists()) {
+            return;
+        }
+
+        $batch = (int) DB::table('migrations')->max('batch') + 1;
+        DB::table('migrations')->insert(['migration' => $name, 'batch' => $batch]);
     }
 
     // ──────────────────────────────────────────────────────────────

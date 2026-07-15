@@ -1,0 +1,11 @@
+{
+    "name": "ProvinceShowcase",
+    "alias": "provinceshowcase",
+    "description": "Trang chuyên đề nội dung theo tỉnh/thành (di sản – văn hóa – ẩm thực – OCOP – sự kiện) tại /tinh/{slug} (spec/Province_Showcase_Technical_Specification.md). Không có admin CRUD — chỉ config + route công khai + view, tái dùng App\\Models\\Province/Ward hiện có.",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\ProvinceShowcase\\Providers\\ProvinceShowcaseServiceProvider"
+    ],
+    "files": []
+}

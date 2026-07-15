@@ -3,6 +3,7 @@
 namespace Modules\Post\Features\ArticleAuthoring\Http;
 
 use App\Http\Controllers\Controller;
+use App\Models\Province;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -26,6 +27,7 @@ use Modules\Post\Features\CategoryManagement\Queries\ListCategoriesForAdminHandl
 use Modules\Post\Features\CategoryManagement\Queries\ListCategoriesForAdminQuery;
 use Modules\Post\Models\PostArticle;
 use Modules\Post\Support\ArticleContentRenderer;
+use Modules\Ocop\Models\OcopProduct;
 
 /**
  * PostArticle (§9) chỉ còn là "vỏ" dùng chung mọi ngôn ngữ (format/cover/categories/tags) —
@@ -71,8 +73,9 @@ class ArticleAdminController extends Controller
         $this->authorize('create', PostArticle::class);
 
         $categories = $categoryHandler->handle(new ListCategoriesForAdminQuery());
+        $provinces  = Province::orderBy('name')->get(['province_code', 'name']);
 
-        return view('post::admin.articles.create', compact('categories'));
+        return view('post::admin.articles.create', compact('categories', 'provinces'));
     }
 
     /**
@@ -121,8 +124,16 @@ class ArticleAdminController extends Controller
     {
         $this->authorizeArticle($article, 'post_article.edit');
 
-        $article->load(['categories', 'tags', 'translations.contentBlocks.productBlock.items.product', 'translations.contentBlocks.productBlock.items.buttons', 'translations.contentBlocks.productBlock.buttons']);
+        $article->load(['categories', 'tags', 'ocopProducts', 'translations.contentBlocks.productBlock.items.product', 'translations.contentBlocks.productBlock.items.buttons', 'translations.contentBlocks.productBlock.buttons']);
         $categories = $categoryHandler->handle(new ListCategoriesForAdminQuery());
+        $provinces  = Province::orderBy('name')->get(['province_code', 'name']);
+
+        // spec/Province_Showcase_Technical_Specification.md §3.4.1 — lọc theo province_code của
+        // bài nếu bài đã gắn tỉnh (tránh danh sách quá dài), không bắt buộc.
+        $ocopProducts = OcopProduct::published()
+            ->when($article->province_code, fn ($q) => $q->where('province_code', $article->province_code))
+            ->orderBy('name')
+            ->get(['id', 'name', 'province_name']);
 
         // Tab locale server-side (không SPA) — mỗi lần đổi tab load lại trang, tránh phải
         // làm cho post-block-composer.js/article-form.js (vốn giả định 1 form/1 composer duy
@@ -134,7 +145,7 @@ class ArticleAdminController extends Controller
         $translation = $article->translation($activeLocale);
         $existingBlocks = $translation ? $renderer->toComposerPayload($translation) : [];
 
-        return view('post::admin.articles.edit', compact('article', 'categories', 'activeLocale', 'translation', 'existingBlocks'));
+        return view('post::admin.articles.edit', compact('article', 'categories', 'activeLocale', 'translation', 'existingBlocks', 'provinces', 'ocopProducts'));
     }
 
     public function update(Request $request, PostArticle $article, UpdateArticleAction $action): RedirectResponse
@@ -223,6 +234,13 @@ class ArticleAdminController extends Controller
             'category_ids.*'          => ['integer', 'exists:post_categories,id'],
             'is_primary_category_id'  => ['nullable', 'integer'],
             'tags'                    => ['nullable', 'string', 'max:500'],
+
+            // spec/Province_Showcase_Technical_Specification.md §3.2/§6.3 — tuỳ chọn, không bắt
+            // buộc (§0 mục 4) — không phá luồng viết bài hiện tại khi tác giả chưa chọn tỉnh.
+            'province_code'           => ['nullable', 'string', 'size:2', 'exists:provinces,province_code'],
+            // §3.4.1 — chỉ có ở form sửa bài viết, create form không gửi field này (mảng rỗng mặc định).
+            'ocop_product_ids'        => ['array'],
+            'ocop_product_ids.*'      => ['integer', 'exists:ocop_products,id'],
 
             // spec/dac-ta-ky-thuat-bai-viet-tai-tro.md §6.1/§10 — rule string thuần, KHÔNG dựa
             // vào attribute Spatie Data trên ArticleData (không có tác dụng validate thật ở đây).

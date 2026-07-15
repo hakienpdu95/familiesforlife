@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/provinceshowcase",
+    "description": "",
+    "authors": [
+        {
+            "name": "KienDH",
+            "email": "bonhuyn@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\ProvinceShowcase\\": "app/",
+            "Modules\\ProvinceShowcase\\Database\\Factories\\": "database/factories/",
+            "Modules\\ProvinceShowcase\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\ProvinceShowcase\\Tests\\": "tests/"
+        }
+    }
+}

@@ -3,6 +3,7 @@
 namespace Modules\Banner\Features\BannerManagement\Http;
 
 use App\Http\Controllers\Controller;
+use App\Models\Province;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -47,8 +48,9 @@ class BannerAdminController extends Controller
         $placements = config('banner.placements');
         $targetTypes = config('banner.target_types');
         $categories = PostCategory::active()->orderBy('name')->get(['id', 'slug', 'name']);
+        $provinces = Province::orderBy('name')->get(['province_code', 'name']);
 
-        return view('banner::admin.banners.create', compact('placements', 'targetTypes', 'categories'));
+        return view('banner::admin.banners.create', compact('placements', 'targetTypes', 'categories', 'provinces'));
     }
 
     public function store(Request $request, StoreBannerImageAction $storeImage, CreateBannerAction $action): RedirectResponse
@@ -69,8 +71,9 @@ class BannerAdminController extends Controller
         $placements = config('banner.placements');
         $targetTypes = config('banner.target_types');
         $categories = PostCategory::active()->orderBy('name')->get(['id', 'slug', 'name']);
+        $provinces = Province::orderBy('name')->get(['province_code', 'name']);
 
-        return view('banner::admin.banners.edit', compact('banner', 'placements', 'targetTypes', 'categories'));
+        return view('banner::admin.banners.edit', compact('banner', 'placements', 'targetTypes', 'categories', 'provinces'));
     }
 
     public function update(Request $request, Banner $banner, StoreBannerImageAction $storeImage): RedirectResponse
@@ -101,10 +104,15 @@ class BannerAdminController extends Controller
         $validated = $request->validate([
             'placement'       => ['required', Rule::in(Banner::validPlacementKeys())],
             'target_type'     => ['required', Rule::in(array_keys(config('banner.target_types')))],
+            // spec/Province_Showcase_Technical_Specification.md §3.5 — target_value validate
+            // theo đúng target_type: 'category' tra post_categories.slug, 'province' tra
+            // provinces.province_code (KHÔNG dùng chung 1 rule như trước khi chỉ có category).
             'target_value'    => [
-                Rule::requiredIf(fn () => $request->input('target_type') === 'category'),
+                Rule::requiredIf(fn () => in_array($request->input('target_type'), ['category', 'province'], true)),
                 'nullable', 'string',
-                Rule::exists('post_categories', 'slug')->where('is_active', true),
+                $request->input('target_type') === 'province'
+                    ? Rule::exists('provinces', 'province_code')
+                    : Rule::exists('post_categories', 'slug')->where('is_active', true),
             ],
             'title'           => ['nullable', 'string', 'max:150'],
             'image'           => [$imageRequired ? 'required' : 'nullable', 'image', 'max:2048'],

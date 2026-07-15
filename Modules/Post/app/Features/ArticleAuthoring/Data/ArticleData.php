@@ -30,6 +30,22 @@ class ArticleData extends Data
         /** Tên tag, phân tách bởi dấu phẩy — tự tạo tag chưa tồn tại (cross-cutting, không cần UI quản lý riêng). */
         public readonly ?string $tags = null,
 
+        /**
+         * spec/Province_Showcase_Technical_Specification.md §3.2.1/§6.3 — tuỳ chọn, không bắt
+         * buộc validate — không phá luồng viết bài hiện tại khi tác giả chưa chọn tỉnh.
+         * province_name tự tra lại ở tầng Action (CreateArticleAction/UpdateArticleAction),
+         * KHÔNG nhận trực tiếp từ form.
+         */
+        public readonly ?string $province_code = null,
+
+        /**
+         * spec/Province_Showcase_Technical_Specification.md §3.4.1 — sản phẩm OCOP liên quan,
+         * chỉ có ở form sửa bài viết (create form không có multi-select này).
+         *
+         * @var int[]
+         */
+        public readonly array $ocop_product_ids = [],
+
         public readonly bool $is_sponsored = false,
         public readonly ?string $sponsor_name = null,
         public readonly ?string $sponsor_logo_url = null,
