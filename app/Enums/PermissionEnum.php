@@ -131,4 +131,10 @@ enum PermissionEnum: string
     // spec/Menu_Navigation_Technical_Specification.md §6.3 — chỉ System_Admin quản lý,
     // cùng nguyên tắc POST_CATEGORY_MANAGE (cấu trúc điều hướng là việc của Admin).
     case MENU_MANAGE = 'menu.manage';
+
+    // ══ BANNER (Banner quảng cáo/thông báo — nhiều placement, targeting theo category) ═══
+    // spec/Banner_Management_Technical_Specification.md §6.3 — gán cho platform_ops +
+    // platform_content_head (BannerPermissionSeeder), KHÔNG qua config/permissions.php (Lớp B)
+    // — cùng nguyên tắc EVENT_VIEW/EVENT_CATEGORY_MANAGE.
+    case BANNER_MANAGE = 'banner.manage';
 }

@@ -140,6 +140,8 @@ const MODULE_ENTRIES = [
   // Menu
   'Modules/Menu/resources/assets/sass/menu.scss',
   'Modules/Menu/resources/assets/js/menu.js',
+  // Banner
+  'Modules/Banner/resources/assets/js/banner.js',
 ];
 
 // ─────────────────────────────────────────────────────────────────────

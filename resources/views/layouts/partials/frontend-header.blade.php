@@ -58,7 +58,10 @@
 
                 <div class="col-12 col-lg-9">
                     <div class="text-right m-none">
-                        <p class="tagline">Cẩm nang gia đình — hoạt động, trường học, nuôi dạy con và trải nghiệm cho cả nhà.</p>
+                        {{-- spec/Banner_Management_Technical_Specification.md §7.2 — ô quảng cáo cạnh
+                             logo (header_ad), quản lý qua dashboard/banners. Không có ngữ cảnh category
+                             ở đây (§2) nên không truyền :context — luôn chỉ nhận banner "Toàn site". --}}
+                        <x-frontend.banner-slot placement="header_ad" />
                     </div>
                 </div>
             </div>

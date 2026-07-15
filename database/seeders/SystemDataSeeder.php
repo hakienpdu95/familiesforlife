@@ -11,6 +11,7 @@ use Modules\Lead\Database\Seeders\LeadDatabaseSeeder;
 use Modules\LeadPipelineStage\Database\Seeders\LeadPipelineStageSeeder;
 use Modules\LeadSource\Database\Seeders\LeadSourceSeeder;
 use Modules\Aicem\Database\Seeders\AicemDatabaseSeeder;
+use Modules\Banner\Database\Seeders\BannerDatabaseSeeder;
 use Modules\Event\Database\Seeders\EventDatabaseSeeder;
 use Modules\Event\Database\Seeders\EventDemoSeeder;
 use Modules\Menu\Database\Seeders\MenuDatabaseSeeder;
@@ -98,6 +99,10 @@ class SystemDataSeeder extends Seeder
             // (content-creator/editor/content-head@system.local) — PostDemoSeeder/EventDemoSeeder
             // cần các tài khoản này để chạy Action create→submit→approve→publish thật ──
             ApprovalDatabaseSeeder::class,
+
+            // ── 27b. Banner: permission banner.manage — gán cho platform_ops/platform_content_head
+            // (role do ApprovalDatabaseSeeder tạo ở bước 27), nên PHẢI đứng sau bước đó ──
+            BannerDatabaseSeeder::class,
 
             // ── 28. Demo content: bài viết + sự kiện mẫu đã xuất bản (đọc cho trang public) ──
             PostDemoSeeder::class,

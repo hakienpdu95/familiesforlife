@@ -27,9 +27,11 @@ class PublicCategoryController extends Controller
         $locale = config('post.default_locale');
         $search = $request->string('q')->trim()->value() ?: null;
 
-        // Bài viết ghim làm hero (x-frontend.hero) — không tìm kiếm thì loại khỏi lưới bên
-        // dưới để tránh hiển thị trùng lặp cùng 1 bài ở cả hero lẫn grid.
+        // Hero 5 tin (x-frontend.hero, cấu trúc theo spec/hero.html) — 1 bài ghim (is_featured)
+        // làm "col-middle" (to, giữa) + 4 bài mới nhất kế tiếp làm "col-left"/"col-right" (2 mỗi
+        // bên). Không tìm kiếm thì loại cả 5 khỏi lưới bên dưới để tránh trùng lặp.
         $featured = $search ? null : $this->featuredArticle($locale);
+        $heroSide = ($featured && ! $search) ? $this->heroSideArticles($locale, $featured->article_id) : collect();
         $page     = max(1, $request->integer('page', 1));
 
         // Trang chủ (không tìm kiếm, trang 1) dựng bố cục "tạp chí": 6 bài đầu vào feature
@@ -38,12 +40,16 @@ class PublicCategoryController extends Controller
         // ngay từ lần tải đầu. Trang sau/tìm kiếm giữ nguyên phân trang cổ điển (perPage mặc định).
         $perPage = (! $search && $page === 1) ? 14 : 12;
 
+        $heroArticleIds = $featured
+            ? $heroSide->pluck('article_id')->push($featured->article_id)->all()
+            : [];
+
         $articles = $handler->handle(new ListPublishedArticlesQuery(
             locale: $locale,
             page: $page,
             perPage: $perPage,
             search: $search,
-            excludeArticleIds: $featured ? [$featured->article_id] : [],
+            excludeArticleIds: $heroArticleIds,
         ));
 
         // spec/Event_Management_Technical_Specification.md §12 — thay chỗ dùng
@@ -58,7 +64,7 @@ class PublicCategoryController extends Controller
 
         $categories = PostCategory::navTree();
 
-        return view('post::public.home', compact('articles', 'categories', 'locale', 'featured', 'upcomingEvents', 'search'));
+        return view('post::public.home', compact('articles', 'categories', 'locale', 'featured', 'heroSide', 'upcomingEvents', 'search'));
     }
 
     /**
@@ -120,6 +126,20 @@ class PublicCategoryController extends Controller
             ->with('article.categories')
             ->orderByDesc('published_at')
             ->first();
+    }
+
+    /** 4 bài mới nhất kế tiếp (sau bài ghim) cho col-left/col-right của x-frontend.hero. */
+    private function heroSideArticles(string $locale, int $excludeArticleId): \Illuminate\Support\Collection
+    {
+        return PostArticleTranslation::published()
+            ->where('locale', $locale)
+            ->where('article_id', '!=', $excludeArticleId)
+            ->with('article.categories')
+            ->whereHas('article')
+            ->orderByDesc('published_at')
+            ->orderByDesc('id')
+            ->take(4)
+            ->get();
     }
 
     public function show(Request $request, PostCategory $category, ListPublishedArticlesHandler $handler): View

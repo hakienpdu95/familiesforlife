@@ -16,13 +16,14 @@
     $remaining        = $isMagazineLayout ? $collection->slice(6)->values() : $collection;
 
     // "Xem thêm bài viết" (Alpine, resources/js/frontend.js loadMoreArticles) chỉ áp dụng cho
-    // bố cục tạp chí. exclude = mọi article_id đã hiển thị (hero + feature chunks + lưới) —
-    // CỐ ĐỊNH, chỉ tính 1 lần ở đây, không phình theo số lần bấm "Xem thêm" (xem
+    // bố cục tạp chí. exclude = mọi article_id đã hiển thị (hero 5 tin + feature chunks + lưới)
+    // — CỐ ĐỊNH, chỉ tính 1 lần ở đây, không phình theo số lần bấm "Xem thêm" (xem
     // LoadMoreArticlesQuery — các lần sau tiếp tục bằng cursor published_at/id của bài cuối
     // lưới, không cần thêm gì vào exclude vì đã nằm sau cursor).
     if ($isMagazineLayout) {
         $shownArticleIds = $collection->pluck('article_id')
             ->when($featured, fn ($ids) => $ids->push($featured->article_id))
+            ->merge($heroSide->pluck('article_id'))
             ->unique()
             ->values();
 
@@ -33,7 +34,7 @@
 @section('content')
 
 @if($featured)
-<x-frontend.hero :featured="$featured" />
+<x-frontend.hero :featured="$featured" :side="$heroSide" />
 @endif
 
 <x-frontend.promo-bar :categories="$categories" />

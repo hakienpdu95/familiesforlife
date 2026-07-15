@@ -17,5 +17,6 @@
     "Aicem": true,
     "Approval": true,
     "Event": true,
-    "Menu": true
+    "Menu": true,
+    "Banner": true
 }

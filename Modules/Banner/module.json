@@ -1,0 +1,11 @@
+{
+    "name": "Banner",
+    "alias": "banner",
+    "description": "Quản lý banner quảng cáo/thông báo hiển thị ở nhiều vị trí trên cổng thông tin (spec/Banner_Management_Technical_Specification.md) — placement linh hoạt theo config, targeting theo danh mục bài viết (v1.1).",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Banner\\Providers\\BannerServiceProvider"
+    ],
+    "files": []
+}

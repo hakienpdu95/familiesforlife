@@ -173,6 +173,18 @@
         </div>
         @endcan
 
+        {{-- spec/Banner_Management_Technical_Specification.md §6.3 — banner.manage cấp cho
+             platform_ops/platform_content_head (Modules\Banner\Database\Seeders\BannerPermissionSeeder). --}}
+        @can(\App\Enums\PermissionEnum::BANNER_MANAGE->value)
+        <div class="nav-group">
+            <a href="{{ route('backend.banner.items.index') }}"
+               class="nav-link {{ request()->routeIs('backend.banner.items.*') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 5h16v10H4z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 19h16"/></svg>
+                <span class="nav-label">Banner</span>
+            </a>
+        </div>
+        @endcan
+
         {{-- spec/Event_Management_Technical_Specification.md §9 — event.view cấp cho
              platform_content_editor/head/ops (Modules\Event\Database\Seeders\EventPermissionSeeder). --}}
         @can(\App\Enums\PermissionEnum::EVENT_VIEW->value)

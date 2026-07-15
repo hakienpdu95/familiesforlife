@@ -19,6 +19,12 @@
         {{ $search ? "Kết quả tìm kiếm trong “{$category->name}”: {$search}" : $category->name }}
     </h1>
 
+    {{-- spec/Banner_Management_Technical_Specification.md §7.2/§7.5 — có ngữ cảnh category, banner
+         gắn đúng danh mục này ưu tiên hiển thị trước banner "Toàn site". --}}
+    <div class="mb-6">
+        <x-frontend.banner-slot placement="category_top" :context="['category_slug' => $category->slug]" />
+    </div>
+
     <x-frontend.article-grid :articles="$articles" />
 
 </div>
