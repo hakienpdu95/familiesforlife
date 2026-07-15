@@ -71,5 +71,10 @@ Route::get('/', [PublicCategoryController::class, 'index'])->name('post.public.h
 
 Route::prefix('bai-viet')->name('post.public.')->group(function (): void {
     Route::get('danh-muc/{category:slug}', [PublicCategoryController::class, 'show'])->name('category');
+
+    // 'tai-them' (Xem thêm — trang chủ) là path tường minh, phải đăng ký TRƯỚC '{slug}'
+    // (wildcard) — cùng lý do 'danh-muc' ở trên.
+    Route::get('tai-them', [PublicCategoryController::class, 'loadMore'])->name('load-more');
+
     Route::get('{slug}', [PublicArticleController::class, 'show'])->name('article');
 });

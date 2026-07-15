@@ -77,6 +77,23 @@
 }
 
 /* ══════════════════════════════════════════════════════════════════
+ * .container — khối căn giữa nội dung DÙNG CHUNG cho toàn bộ cổng thông
+ * tin (trước đây mỗi nơi tự trộn `max-w-6xl mx-auto px-4` (Tailwind
+ * utility, home/category/footer/event-spotlight...) với `.container`
+ * kiểu Bootstrap riêng của site-header (max-width scale dần tới
+ * 1140px) — 2 chuẩn khác nhau, độ rộng khác nhau. Nay thống nhất
+ * DUY NHẤT 1 chuẩn: max-width 1200px, căn giữa, gutter 1rem 2 bên —
+ * áp dụng mọi nơi kể cả site-header (xem `.site-header .container`
+ * bên dưới chỉ còn override `position`, không override lại width/
+ * padding/margin nữa). ══════════════════════════════════════════════ */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin-inline: auto;
+    padding-inline: 1rem;
+}
+
+/* ══════════════════════════════════════════════════════════════════
  * site-header — copy 1:1 từ spec/main.css (theme gốc site tham khảo),
  * ghép cùng resources/views/layouts/partials/frontend-header.blade.php
  * (cấu trúc DOM cũng copy 1:1 từ spec/header.html). Nội dung/link bên
@@ -93,34 +110,14 @@
  *      này, còn phần JS gắn/gỡ class do site gốc tự viết, không có sẵn.
  * ══════════════════════════════════════════════════════════════════ */
 
-/* ── Bootstrap grid con (chỉ những class site-header dùng: container/
- * row/col-12/col-lg-3/col-lg-9) — copy nguyên văn spec/main.css §grid. ── */
-.site-header .container {
-    width: 100%;
-    padding-right: 15px;
-    padding-left: 15px;
-    margin-right: auto;
-    margin-left: auto;
-    position: relative;
-}
-
-@media (min-width: 576px) {
-    .site-header .container { max-width: 540px; }
-}
+/* ── Bootstrap grid con (chỉ những class site-header dùng: row/col-12/
+ * col-lg-3/col-lg-9) — copy nguyên văn spec/main.css §grid. .container
+ * dùng chung 1 chuẩn duy nhất ở trên (1200px) — ở đây chỉ còn override
+ * `position` riêng cho site-header (làm mốc absolute cho .m-btn mobile). ── */
+.site-header .container { position: relative; }
 
 @media (min-width: 594px) {
-    .site-header .container {
-        max-width: 720px;
-        position: static;
-    }
-}
-
-@media (min-width: 992px) {
-    .site-header .container { max-width: 960px; }
-}
-
-@media (min-width: 1200px) {
-    .site-header .container { max-width: 1140px; }
+    .site-header .container { position: static; }
 }
 
 .site-header .row {
@@ -432,16 +429,6 @@
         position: static;
         bottom: initial;
         overflow: initial;
-    }
-
-    .site-header .nav::after {
-        content: '';
-        display: block;
-        position: relative;
-        bottom: -.5rem;
-        background-color: #212121;
-        height: 1px;
-        width: 100%;
     }
 
     .site-header .nav .nav-search { display: none; }

@@ -5,7 +5,7 @@
      bản quyền như trước; Admin thêm mục → tự thành cột/link phẳng tuỳ mục đó có children hay
      không, KHÔNG cần field/cấu hình riêng để phân biệt "chế độ"). --}}
 <footer class="bg-neutral text-neutral-content/80 mt-auto">
-    <div class="max-w-6xl mx-auto px-4 py-6">
+    <div class="container py-6">
         @if(($footerMenuTree ?? collect())->isNotEmpty())
         <div class="grid grid-cols-1 sm:grid-cols-{{ min($footerMenuTree->count() + 1, 4) }} gap-6 mb-4 text-xs">
             <div>

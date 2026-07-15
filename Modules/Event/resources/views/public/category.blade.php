@@ -8,7 +8,7 @@
 @endpush
 
 @section('content')
-<div class="max-w-6xl mx-auto px-4 py-10">
+<div class="container py-10">
 
     <div class="text-xs breadcrumbs mb-4">
         <ul>

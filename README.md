@@ -68,6 +68,7 @@ php artisan migration:sync --dry-run
 php artisan migration:sync
 
 npx vite build --config vite.config.backend.js
+npx vite build --config vite.config.frontend.js
 
 php artisan queue:work --queue=high,default,low,workflows,webhooks,ai,actlog,passport
 

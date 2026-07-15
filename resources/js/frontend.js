@@ -66,6 +66,105 @@ document.addEventListener('alpine:init', () => {
             evaluate();
         },
     }));
+
+    /**
+     * loadMoreArticles — nút "Xem thêm bài viết" (khối lưới cuối trang chủ, trước footer —
+     * Modules/Post/resources/views/public/home.blade.php). Nội dung mục menu/bài viết vẫn
+     * render server-side ở lần tải đầu (SEO); mỗi lần bấm chỉ fetch JSON (html đã render sẵn +
+     * has_more + next_cursor) từ PublicCategoryController::loadMore() rồi nối thêm vào cuối
+     * lưới — không điều hướng trang, không dùng Previous/Next nữa.
+     *
+     * Hiệu năng:
+     *   - Cursor (afterPublishedAt/afterId) thay offset/exclude phình dần — xem
+     *     LoadMoreArticlesQuery (docblock PHP) để biết lý do (tránh OFFSET quét bỏ N dòng đầu
+     *     và whereNotIn với mảng ngày càng lớn).
+     *   - maxTotal chặn cứng ở CẢ 2 phía: client dừng gọi thêm khi đã đạt (đỡ hẳn request thừa),
+     *     server (loadMore()) vẫn tự chặn lại nếu client bị sửa/bypass.
+     *   - AbortController: bấm nhanh nhiều lần (hoặc rời trang giữa chừng) huỷ request cũ thay
+     *     vì để nó âm thầm resolve muộn và ghi đè lên cursor/hasMore mới hơn.
+     *   - appendCards(): chèn 1 lần bằng <template>/DocumentFragment (1 lần reflow) thay vì
+     *     insertAdjacentHTML lặp lại nhiều lần; thẻ mới fade+slide-in nhẹ qua Web Animations API
+     *     (rẻ hơn CSS animation toàn cục, không cần thêm class vào article-card.blade.php) để
+     *     cảm giác mượt thay vì bài mới "đập" thẳng vào khung hình.
+     */
+    Alpine.data('loadMoreArticles', (config) => ({
+        endpoint: config.endpoint,
+        exclude: config.exclude,
+        afterPublishedAt: config.afterPublishedAt,
+        afterId: config.afterId,
+        loaded: config.loaded,
+        maxTotal: config.maxTotal,
+        hasMore: config.hasMore,
+        loading: false,
+        abortController: null,
+
+        async loadMore() {
+            if (this.loading || !this.hasMore || this.loaded >= this.maxTotal) {
+                return;
+            }
+
+            this.loading = true;
+            this.abortController?.abort();
+            this.abortController = new AbortController();
+
+            try {
+                const url = new URL(this.endpoint, window.location.origin);
+                url.searchParams.set('loaded', this.loaded);
+                url.searchParams.set('exclude', this.exclude);
+                if (this.afterPublishedAt) url.searchParams.set('after_published_at', this.afterPublishedAt);
+                if (this.afterId) url.searchParams.set('after_id', this.afterId);
+
+                const response = await fetch(url, {
+                    headers: { Accept: 'application/json' },
+                    signal: this.abortController.signal,
+                });
+
+                if (! response.ok) {
+                    throw new Error(`load-more failed: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                this.appendCards(data.html);
+
+                this.loaded += data.count ?? 0;
+                if (data.next_cursor) {
+                    this.afterPublishedAt = data.next_cursor.published_at;
+                    this.afterId = data.next_cursor.id;
+                }
+                this.hasMore = data.has_more && this.loaded < this.maxTotal;
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    // Dừng hẳn thay vì lặp lỗi vô hạn nếu người dùng bấm lại — họ vẫn xem được
+                    // các bài đã tải trước đó, chỉ mất nút "Xem thêm".
+                    this.hasMore = false;
+                }
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        appendCards(html) {
+            const template = document.createElement('template');
+            template.innerHTML = html.trim();
+            const nodes = Array.from(template.content.children);
+
+            nodes.forEach((node) => { node.style.opacity = '0'; });
+            this.$refs.grid.append(template.content);
+
+            requestAnimationFrame(() => {
+                nodes.forEach((node, i) => {
+                    node.animate(
+                        [
+                            { opacity: 0, transform: 'translateY(8px)' },
+                            { opacity: 1, transform: 'translateY(0)' },
+                        ],
+                        { duration: 220, delay: i * 30, easing: 'ease-out', fill: 'forwards' },
+                    );
+                });
+            });
+        },
+    }));
 });
 
 document.addEventListener('DOMContentLoaded', () => {

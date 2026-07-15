@@ -14,7 +14,7 @@ class ListPublishedArticlesHandler implements QueryHandlerInterface
         /** @var ListPublishedArticlesQuery $query */
         $q = PostArticleTranslation::published()
             ->where('locale', $query->locale)
-            ->with(['article.categories'])
+            ->with(['article.categories', 'article.createdBy'])
             ->whereHas('article');
 
         if ($query->categoryId) {
@@ -28,11 +28,15 @@ class ListPublishedArticlesHandler implements QueryHandlerInterface
                 ->orWhere('excerpt', 'like', "%{$search}%"));
         }
 
-        if ($query->excludeArticleId) {
-            $q->where('article_id', '!=', $query->excludeArticleId);
+        if ($query->excludeArticleIds) {
+            $q->whereNotIn('article_id', $query->excludeArticleIds);
         }
 
+        // orderByDesc('id') phá thế hoà giữa các bài trùng published_at — cùng thứ tự
+        // LoadMoreArticlesHandler dùng để nối tiếp bằng cursor (id, published_at) của dòng
+        // cuối trang này, nên "Xem thêm" ở trang chủ không lặp/bỏ sót bài nào.
         return $q->orderByDesc('published_at')
+            ->orderByDesc('id')
             ->paginate($query->perPage, ['*'], 'page', $query->page)
             ->withQueryString();
     }

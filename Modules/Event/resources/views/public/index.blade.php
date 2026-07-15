@@ -19,7 +19,7 @@
 </div>
 @endif
 
-<div class="max-w-6xl mx-auto px-4">
+<div class="container">
     <div class="py-10">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
             <h1 class="text-2xl font-bold text-base-content">

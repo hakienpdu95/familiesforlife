@@ -13,7 +13,7 @@
     $rest = $events->slice(1);
 @endphp
 <section class="bg-neutral text-neutral-content pt-12 pb-10">
-    <div class="max-w-6xl mx-auto px-4">
+    <div class="container">
         <div class="flex items-center justify-between mb-10">
             <h2 class="font-normal text-3xl tracking-wide">Sự Kiện Sắp Diễn Ra</h2>
             <a href="{{ route('event.public.home') }}" class="text-sm font-bold uppercase tracking-wide text-primary hover:underline">Xem Tất Cả</a>
