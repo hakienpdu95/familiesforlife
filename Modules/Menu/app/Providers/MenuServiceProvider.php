@@ -32,11 +32,14 @@ class MenuServiceProvider extends ModuleServiceProvider
         // MenuItem::tree() qua composer dùng chung, thay vì mỗi controller Post/Event tự gọi
         // PostCategory::navTree(). $categories (PostCategory) vẫn được các controller truyền
         // riêng cho mục đích KHÁC nav (vd promo-bar/cta-band ở trang chủ) — không đụng tới.
-        // once(): 'layouts.frontend' (JSON-LD §7.2.1) + 'frontend-nav' + 'frontend-drawer' cùng
-        // render trên 1 trang → composer này chạy 3 lần/request cho cùng 1 callback — memoize
-        // để chỉ 1 query MenuItem::tree().
+        // once(): 'layouts.frontend' (JSON-LD §7.2.1) + 'frontend-header' (đã gộp topbar/
+        // toolbar/nav — cấu trúc/CSS copy 1:1 spec/header.html+main.css, xem resources/views/
+        // layouts/partials/frontend-header.blade.php — không còn drawer riêng, mobile dùng
+        // chung 1 <ul class="nav"> với desktop, ẩn/hiện qua class .is-open) cùng render trên 1
+        // trang → composer này chạy 2 lần/request cho cùng 1 callback — memoize để chỉ 1 query
+        // MenuItem::tree().
         View::composer(
-            ['layouts.frontend', 'layouts.partials.frontend-nav', 'layouts.partials.frontend-drawer'],
+            ['layouts.frontend', 'layouts.partials.frontend-header'],
             fn ($view) => $view->with('menuTree', once(fn () => MenuItem::tree('header')))
         );
 

@@ -16,6 +16,13 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Guard — thứ tự chạy migration trong môi trường dùng snapshot đã consolidate
+        // (database/migrations/generated + extensions) có thể đưa migration này lên TRƯỚC
+        // migration tạo bảng `events`. Bảng chưa tồn tại thì không có gì để thêm CHECK.
+        if (! Schema::hasTable('events')) {
+            return;
+        }
+
         if (! $this->constraintExists('chk_events_physical_fields')) {
             DB::statement("
                 ALTER TABLE events ADD CONSTRAINT chk_events_physical_fields CHECK (

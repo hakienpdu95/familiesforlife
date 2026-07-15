@@ -33,22 +33,17 @@
 </head>
 <body class="bg-base-100 text-base-content">
 
-<div class="drawer" x-data="frontendNav">
-    <input id="portal-drawer" type="checkbox" class="drawer-toggle" />
+<div x-data="frontendNav" class="flex flex-col min-h-screen">
+    @include('layouts.partials.frontend-header')
 
-    <div class="drawer-content flex flex-col min-h-screen">
-        @include('layouts.partials.frontend-topbar')
-        @include('layouts.partials.frontend-header')
-        @include('layouts.partials.frontend-nav')
+    {{-- .site-content — spec/main.css bù margin-top khi .site-header.is-pinned (mobile, header
+         rời khỏi flow do position:fixed — xem ".site-header.is-pinned+.site-content" trong
+         resources/css/frontend.css). --}}
+    <main class="site-content flex-1">
+        @yield('content')
+    </main>
 
-        <main class="flex-1">
-            @yield('content')
-        </main>
-
-        @include('layouts.partials.frontend-footer')
-    </div>
-
-    @include('layouts.partials.frontend-drawer')
+    @include('layouts.partials.frontend-footer')
 </div>
 
 @stack('scripts')

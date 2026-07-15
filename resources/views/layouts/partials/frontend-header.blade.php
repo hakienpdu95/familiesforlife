@@ -1,13 +1,117 @@
-@php($brand = config('app.name', 'Laravel') === 'Laravel' ? 'Cổng Thông Tin' : config('app.name'))
-<header class="bg-base-100">
-    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-        <label for="portal-drawer" class="btn btn-ghost btn-square lg:hidden" aria-label="Mở menu">
-            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
-        </label>
-        <a href="{{ route('post.public.home') }}" class="mx-auto lg:mx-0 flex items-center gap-2">
-            <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-content font-black">{{ \Illuminate\Support\Str::of($brand)->substr(0, 2)->upper() }}</span>
-            <span class="font-black text-2xl tracking-tight text-primary">{{ \Illuminate\Support\Str::upper($brand) }}</span>
-        </a>
-        <div class="w-10 lg:hidden"></div>
+{{-- site-header — cấu trúc DOM + CSS copy 1:1 từ spec/header.html + spec/main.css (site tham
+     khảo). Nội dung/thương hiệu bên trong là của familiesforlife: $menuTree (Modules/Menu, view
+     composer ở MenuServiceProvider) thay cho danh mục/link của site tham khảo — xem
+     Modules\Menu\Database\Seeders\MenuDatabaseSeeder.
+     3 phần spec KHÔNG cung cấp (chỉ HTML+CSS tĩnh, không có JS/font gốc):
+       - glyph icon-* thật (spec chỉ @import 1 file fontello.css không kèm theo) → CSS mask tự vẽ.
+       - JS gắn .is-active/.is-open/.is-pinned khi bấm nút/cuộn trang → thay bằng Alpine (state
+         dùng chung frontendNav, resources/js/frontend.js — initHeaderPin() port lại 1:1
+         windowScroll() ở spec/app.js) — phần CSS phản ứng các class này đã copy y hệt
+         spec/main.css trong resources/css/frontend.css. --}}
+@php($brand = config('app.name', 'Laravel') === 'Laravel' ? 'Vì Gia Đình' : config('app.name'))
+<header class="site-header" id="site-header"
+        :class="pinned ? 'is-pinned' : ''"
+        :style="pinned ? ('height: ' + headerHeight + 'px') : ''"
+        x-init="initHeaderPin($el)">
+    <div class="container">
+        <div class="site-header__topbar">
+            <div class="links" :class="search ? 'is-active' : ''" @click.outside="search = false">
+                <a href="#" title="Theo dõi chúng tôi trên Facebook" rel="nofollow">
+                    <i class="icon-facebook"></i>
+                </a>
+                <a href="{{ route('post.public.sitemap') }}" title="RSS">
+                    <i class="icon-rss"></i>
+                </a>
+                <a href="#" title="Tìm kiếm" id="searchDesktop" :class="search ? 'is-active' : ''" @click.prevent="search = !search">
+                    <i class="icon-search"></i>
+                    <i class="icon-times"></i>
+                </a>
+                <div class="input-wrap">
+                    <form method="GET" action="{{ url()->current() }}">
+                        <input type="text" class="form-control" placeholder="Tìm kiếm ..." id="txtSearchTwo" name="q" value="{{ $search ?? '' }}">
+                        <button type="submit" class="icon-search btnSearch" style="border: 0; background: transparent;" aria-label="Tìm kiếm"></button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="site-header__toolbar">
+            <span class="btn-search m-btn" role="button" tabindex="0" aria-label="Tìm kiếm" @click="search = !search">
+                <i class="icon-search"></i>
+            </span>
+            <span class="btn-expand m-btn" role="button" tabindex="0" aria-label="Mở menu" :class="mobileNavOpen ? 'is-active' : ''" @click="mobileNavOpen = !mobileNavOpen">
+                <i class="icon-bars"></i>
+                <i class="icon-times"></i>
+            </span>
+        </div>
+
+        <div class="site-header__content">
+            <div class="row">
+                <div class="col-12 col-lg-3">
+                    <h3 class="logo">
+                        <a href="{{ route('post.public.home') }}" title="{{ $brand }}">
+                            <span class="logo__mark">{{ \Illuminate\Support\Str::of($brand)->substr(0, 2)->upper() }}</span>
+                            <span class="logo__text">{{ \Illuminate\Support\Str::upper($brand) }}</span>
+                        </a>
+                    </h3>
+                </div>
+
+                <div class="col-12 col-lg-9">
+                    <div class="text-right m-none">
+                        <p class="tagline">Cẩm nang gia đình — hoạt động, trường học, nuôi dạy con và trải nghiệm cho cả nhà.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <nav>
+            <ul class="nav" :class="mobileNavOpen ? 'is-open' : ''">
+                <li class="nav-item nav-search">
+                    <form method="GET" action="{{ url()->current() }}" class="input-wrap">
+                        <input id="txtSearchOne" type="text" name="q" class="form-control" placeholder="Từ khóa" value="{{ $search ?? '' }}">
+                        <button type="submit" style="border: 0; background: transparent;" class="icon icon-search btnSearch" aria-label="Tìm kiếm"></button>
+                    </form>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('post.public.home') }}" title="Trang chủ">
+                        <i class="icon icon-home mr-1"></i>
+                    </a>
+                </li>
+                @foreach($menuTree ?? [] as $item)
+                @php($hasChildren = $item->children->isNotEmpty())
+                @php($url = $item->resolveUrl())
+                <li class="nav-item{{ $url && $url === url()->current() ? ' active' : '' }}">
+                    <a class="nav-link"
+                       href="{{ $url ?? 'javascript:;' }}"
+                       title="{{ $item->label }}"
+                       @if($item->open_in_new_tab) target="_blank" @endif
+                       @if($item->open_in_new_tab || $item->isExternalUrl())
+                       rel="{{ trim(($item->open_in_new_tab ? 'noopener ' : '') . ($item->isExternalUrl() ? 'nofollow' : '')) }}"
+                       @endif
+                    >
+                        @if($item->icon)<i class="{{ $item->icon }} mr-1"></i>@endif{{ $item->label }}
+                    </a>
+
+                    @if($hasChildren)
+                    <ul class="nav-sub">
+                        @foreach($item->children as $child)
+                        @php($childUrl = $child->resolveUrl())
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ $childUrl ?? '#' }}" title="{{ $child->label }}"
+                               @if($child->open_in_new_tab) target="_blank" @endif
+                               @if($child->open_in_new_tab || $child->isExternalUrl())
+                               rel="{{ trim(($child->open_in_new_tab ? 'noopener ' : '') . ($child->isExternalUrl() ? 'nofollow' : '')) }}"
+                               @endif
+                            >
+                                @if($child->icon)<i class="{{ $child->icon }} mr-1"></i>@endif{{ $child->label }}
+                            </a>
+                        </li>
+                        @endforeach
+                    </ul>
+                    @endif
+                </li>
+                @endforeach
+            </ul>
+        </nav>
     </div>
 </header>

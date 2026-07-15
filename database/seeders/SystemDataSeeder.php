@@ -10,8 +10,13 @@ use Modules\Auth\Database\Seeders\AuthDatabaseSeeder;
 use Modules\Lead\Database\Seeders\LeadDatabaseSeeder;
 use Modules\LeadPipelineStage\Database\Seeders\LeadPipelineStageSeeder;
 use Modules\LeadSource\Database\Seeders\LeadSourceSeeder;
+use Modules\Aicem\Database\Seeders\AicemDatabaseSeeder;
+use Modules\Event\Database\Seeders\EventDatabaseSeeder;
+use Modules\Event\Database\Seeders\EventDemoSeeder;
+use Modules\Menu\Database\Seeders\MenuDatabaseSeeder;
 use Modules\Product\Database\Seeders\ProductDatabaseSeeder;
 use Modules\Post\Database\Seeders\PostDatabaseSeeder;
+use Modules\Post\Database\Seeders\PostDemoSeeder;
 use Modules\Organization\Database\Seeders\OrganizationRolePermissionSeeder;
 use Modules\Subscription\Database\Seeders\SubscriptionDatabaseSeeder;
 use Modules\Survey\Database\Seeders\SurveyDatabaseSeeder;
@@ -78,11 +83,28 @@ class SystemDataSeeder extends Seeder
             // ── 24. Product: permissions (product.*/product_category.*) — catalog cho Post CTA Box ──
             ProductDatabaseSeeder::class,
 
+            // ── 24b. Aicem: permissions + platform-editorial org + default AI workflow — bắt buộc
+            // TRƯỚC Post, vì PublishArticleAction bắn event ArticlePublished mà
+            // SuggestExampleGoodFromPublishedArticle (listener của Aicem) cần org này tồn tại ──
+            AicemDatabaseSeeder::class,
+
             // ── 25. Post: permissions (post_article.*/post_category.*) — bài viết + Product CTA Box ──
             PostDatabaseSeeder::class,
 
-            // ── 26. Approval: permission approval.view_dashboard (duy nhất thuộc module này) ──
+            // ── 26. Event: permissions (event.*/event_category.*) — sự kiện nền tảng ──
+            EventDatabaseSeeder::class,
+
+            // ── 27. Approval: permission approval.view_dashboard + 3 tài khoản platform
+            // (content-creator/editor/content-head@system.local) — PostDemoSeeder/EventDemoSeeder
+            // cần các tài khoản này để chạy Action create→submit→approve→publish thật ──
             ApprovalDatabaseSeeder::class,
+
+            // ── 28. Demo content: bài viết + sự kiện mẫu đã xuất bản (đọc cho trang public) ──
+            PostDemoSeeder::class,
+            EventDemoSeeder::class,
+
+            // ── 29. Menu (header): mega-menu công khai — cần category_id thật (bước 28) ──
+            MenuDatabaseSeeder::class,
         ]);
 
         $this->command->newLine();

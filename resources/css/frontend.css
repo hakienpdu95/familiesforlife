@@ -75,3 +75,598 @@
     opacity: .55;
     pointer-events: none;
 }
+
+/* ══════════════════════════════════════════════════════════════════
+ * site-header — copy 1:1 từ spec/main.css (theme gốc site tham khảo),
+ * ghép cùng resources/views/layouts/partials/frontend-header.blade.php
+ * (cấu trúc DOM cũng copy 1:1 từ spec/header.html). Nội dung/link bên
+ * trong là của familiesforlife (Post/Event category, thương hiệu riêng)
+ * — CSS/màu sắc/kích thước giữ NGUYÊN giá trị gốc, không đổi theo theme
+ * "portal" (--color-primary...) ở trên.
+ *
+ * 2 phần KHÔNG có trong spec/main.css (chỉ CSS tĩnh, không có JS gốc
+ * đi kèm) nên phải tự bổ sung, đánh dấu rõ trong từng khối:
+ *   1. Glyph icon-* thật (spec chỉ @import 1 file fontello.css KHÔNG
+ *      được cung cấp) — thay bằng CSS mask tự vẽ.
+ *   2. Class bật/tắt tương tác (.is-active cho .btn-expand, .is-open
+ *      cho .nav ở mobile) — spec chỉ có phần CSS phản ứng với các class
+ *      này, còn phần JS gắn/gỡ class do site gốc tự viết, không có sẵn.
+ * ══════════════════════════════════════════════════════════════════ */
+
+/* ── Bootstrap grid con (chỉ những class site-header dùng: container/
+ * row/col-12/col-lg-3/col-lg-9) — copy nguyên văn spec/main.css §grid. ── */
+.site-header .container {
+    width: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto;
+    position: relative;
+}
+
+@media (min-width: 576px) {
+    .site-header .container { max-width: 540px; }
+}
+
+@media (min-width: 594px) {
+    .site-header .container {
+        max-width: 720px;
+        position: static;
+    }
+}
+
+@media (min-width: 992px) {
+    .site-header .container { max-width: 960px; }
+}
+
+@media (min-width: 1200px) {
+    .site-header .container { max-width: 1140px; }
+}
+
+.site-header .row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -15px;
+    margin-left: -15px;
+}
+
+.site-header [class^="col-"] {
+    position: relative;
+    width: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+.site-header .col-12 { flex: 0 0 100%; max-width: 100%; }
+
+@media (min-width: 992px) {
+    .site-header .col-lg-3 { flex: 0 0 25%; max-width: 25%; }
+    .site-header .col-lg-9 { flex: 0 0 75%; max-width: 75%; }
+}
+
+/* ── .form-control (Bootstrap base) — copy nguyên văn spec/main.css. ──── */
+.site-header .form-control {
+    display: block;
+    width: 100%;
+    height: calc(1.5em + .75rem + 2px);
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #616161;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #bdbdbd;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+.site-header .form-control:focus {
+    color: #616161;
+    background-color: #fff;
+    border-color: #f69397;
+    outline: 0;
+    box-shadow: 0 0 0 .2rem rgba(237, 29, 38, .25);
+}
+
+.site-header .form-control::placeholder { color: #757575; opacity: 1; }
+
+/* ── .site-header — copy nguyên văn spec/main.css (dòng 13205-14027). ─── */
+.site-header {
+    z-index: 20;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #ddd;
+    padding: .5rem 0;
+}
+
+@media (min-width: 594px) {
+    .site-header { border-bottom: none; padding: 0; }
+}
+
+.site-header__topbar {
+    display: none;
+    font-family: 'Be Vietnam', sans-serif;
+    padding: .5rem 0;
+}
+
+.site-header__topbar::after { display: block; content: ""; clear: both; }
+
+@media (min-width: 594px) {
+    .site-header__topbar {
+        font-size: .625rem;
+        display: flex;
+        border-bottom: 1px solid #000;
+        align-items: center;
+    }
+}
+
+@media (min-width: 992px) {
+    .site-header__topbar { font-size: .75rem; }
+}
+
+.site-header__topbar .links {
+    margin-left: auto;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.site-header__topbar .links a {
+    text-transform: uppercase;
+    font-size: .75rem;
+    font-weight: bold;
+    letter-spacing: -1px;
+}
+
+.site-header__topbar .links a:hover { text-decoration: underline; }
+.site-header__topbar .links a + a { margin-left: 1rem; }
+
+@media (min-width: 1200px) {
+    .site-header__topbar .links a { letter-spacing: 0; }
+}
+
+.site-header__topbar .links a [class^="icon-"] { font-size: 1rem; }
+.site-header__topbar .links #searchDesktop .icon-times { display: none; }
+.site-header__topbar .links #searchDesktop.is-active .icon-search { display: none; }
+.site-header__topbar .links #searchDesktop.is-active .icon-times { display: inline-block; }
+
+.site-header__topbar .links .input-wrap {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: calc(.5rem + 1px);
+    display: none;
+    z-index: 2;
+    background: white;
+}
+
+.site-header__content::after { display: block; content: ""; clear: both; }
+
+.site-header__content .logo {
+    height: 3.6rem;
+    margin: 0 auto;
+    font-size: 0;
+    text-align: center;
+}
+
+.site-header__content .logo .img-fluid {
+    height: 100%;
+    width: auto;
+    object-fit: scale-down;
+}
+
+@media (min-width: 594px) {
+    .site-header__content .logo { height: 132px; padding: 1rem 0; }
+    .site-header__content { position: relative; }
+    .site-header__content .logo { text-align: center; }
+    .site-header__content .date,
+    .site-header__content .links { display: block; }
+}
+
+.site-header__content .date {
+    display: none;
+    font-weight: bold;
+    font-size: .75rem;
+    letter-spacing: -.5px;
+}
+
+@media (min-width: 992px) {
+    .site-header__content .date { letter-spacing: 0; }
+}
+
+.site-header__content .links {
+    display: none;
+    text-align: center;
+    font-size: 0;
+}
+
+.site-header__toolbar time { display: none; }
+
+.site-header__toolbar .input-wrap { width: 16%; margin-left: auto; }
+
+@media (min-width: 594px) {
+    .site-header__toolbar {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0;
+        position: static;
+    }
+
+    .site-header__toolbar .btn-subscribe { display: none; }
+
+    .site-header__toolbar time {
+        display: block;
+        font-size: .75rem;
+        font-weight: bold;
+    }
+}
+
+.site-header .m-btn {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    cursor: pointer;
+}
+
+.site-header .m-btn.btn-search { right: auto; left: 1rem; }
+
+@media (min-width: 594px) {
+    .site-header .m-btn { display: none; }
+}
+
+.site-header .m-btn [class^="icon-"] { line-height: 32px; }
+.site-header .m-btn .icon-bars { font-size: 1.25rem; }
+.site-header .m-btn .icon-search { font-size: 1.5rem; }
+.site-header .m-btn .icon-times { font-size: 1.125rem; display: none; }
+
+.site-header .input-wrap { position: relative; display: none; }
+.site-header .input-wrap:hover { border-bottom-color: #aaa; }
+
+.site-header .input-wrap .icon-search {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9b9b9b;
+    font-size: 1rem;
+}
+
+@media (min-width: 594px) {
+    .site-header .input-wrap .icon-search { color: #212121; }
+}
+
+.site-header .input-wrap .form-control {
+    background-color: transparent;
+    border-radius: 0;
+    border: none;
+    font-size: .875rem;
+    height: 40px;
+    width: 210px;
+    padding: 0 10px;
+    color: #333;
+}
+
+.site-header .input-wrap .form-control:hover,
+.site-header .input-wrap .form-control:active,
+.site-header .input-wrap .form-control:focus {
+    border: none;
+    box-shadow: none;
+}
+
+@media (min-width: 594px) {
+    .site-header .input-wrap { display: block; border-bottom: 1px solid #bdbdbd; }
+    .site-header .input-wrap .form-control { color: #424242; }
+}
+
+.site-header .nav {
+    display: none;
+    background-color: #f0f0f0;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    position: fixed;
+    top: 73px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: auto;
+    z-index: 9;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.site-header .nav-item {
+    font-size: 1rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    border-bottom: 1px solid #e4e4e4;
+}
+
+.site-header .nav-item:first-child,
+.site-header .nav-item:last-child { border-bottom: none; }
+
+.site-header .nav-search { background-color: #fff; }
+
+.site-header .nav-link {
+    padding: .75rem 1rem;
+    display: block;
+    transition: .2s all ease-in-out;
+}
+
+.site-header .nav-sub {
+    list-style-type: none;
+    padding-left: 2rem;
+    z-index: 3;
+    margin: 0;
+}
+
+.site-header .nav-sub .nav-item { border-bottom: none; text-transform: none; }
+
+/* content/font-family gốc là glyph fontello '\e80c' (file font không có trong spec) — thay
+ * bằng dấu chấm tròn thường, giữ nguyên margin/size/vertical-align gốc. */
+.site-header .nav-sub .nav-link::before {
+    content: '•';
+    margin-right: .5rem;
+    font-size: .25em;
+    vertical-align: middle;
+}
+
+@media (min-width: 594px) {
+    .site-header .nav-sub .nav-link::before { display: none; }
+}
+
+.site-header .nav .input-wrap { display: block; margin: 0 1rem; }
+.site-header .nav .icon-home { color: #ED1D26; }
+
+@media (min-width: 594px) {
+    .site-header .nav {
+        display: flex;
+        margin: 0;
+        border-top: 1px solid #011831;
+        border-bottom: 4px solid #000;
+        background-color: transparent;
+        justify-content: start;
+        padding: 0;
+        position: static;
+        bottom: initial;
+        overflow: initial;
+    }
+
+    .site-header .nav::after {
+        content: '';
+        display: block;
+        position: relative;
+        bottom: -.5rem;
+        background-color: #212121;
+        height: 1px;
+        width: 100%;
+    }
+
+    .site-header .nav .nav-search { display: none; }
+
+    .site-header .nav .nav-item {
+        text-transform: uppercase;
+        font-size: .75rem;
+        border-bottom: none;
+        position: relative;
+    }
+
+    .site-header .nav .nav-item:hover .nav-sub {
+        display: block;
+        transition: .25s all ease-out;
+        visibility: visible;
+        opacity: 1;
+        transform: translateY(0);
+        transition-delay: .1s;
+    }
+
+    .site-header .nav .nav-item:hover .nav-link { background-color: #f5f5f5; }
+
+    .site-header .nav .nav-item.is-active > .nav-link {
+        background-color: #f5f5f5;
+        color: #ED1D26;
+    }
+
+    .site-header .nav .nav-item + .nav-item { margin-left: 1px; }
+    .site-header .nav .nav-item + .nav-item.active a { color: #c71018; }
+
+    .site-header .nav .nav-link { padding: .75rem .25rem; letter-spacing: -1px; }
+
+    .site-header .nav .nav-sub {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: auto;
+        width: 250px;
+        padding-left: 0;
+        background-color: #f5f5f5;
+        transform: translateY(1rem);
+        visibility: hidden;
+        opacity: 0;
+    }
+
+    .site-header .nav .nav-sub .nav-link:hover { text-decoration: underline; }
+    .site-header .nav .input-wrap { display: none; }
+}
+
+@media (min-width: 992px) {
+    .site-header .nav .nav-link { padding: .75rem .5rem; }
+}
+
+@media (min-width: 1200px) {
+    .site-header .nav .nav-item { font-size: .875rem; }
+    .site-header .nav .nav-link { padding: .625rem .775rem; letter-spacing: -.75px; }
+}
+
+@media (min-width: 1440px) {
+    .site-header .nav .nav-link { letter-spacing: 0; }
+}
+
+@media (max-width: 767px) {
+    .m-none { display: none; }
+
+    .site-header.is-pinned {
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: 0;
+        background-color: #fff;
+    }
+
+    .site-header.is-pinned time { display: none; }
+
+    .site-header.is-pinned .nav {
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        overflow: auto;
+        margin: 0;
+    }
+
+    .site-header.is-pinned + .site-content { margin-top: 89px; }
+}
+
+@media (min-width: 594px) {
+    .site-header.is-pinned { border-bottom: none; }
+
+    .site-header.is-pinned .nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        z-index: 4;
+        padding: 0 15px;
+        display: flex;
+        justify-content: center;
+        background-color: #f5f5f5;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .site-header.is-pinned .nav::after { display: none; }
+    .site-header.is-pinned .nav .nav-expand { margin-left: 1rem !important; }
+    .site-header.is-pinned .nav .nav-home { margin: 0 1rem 0 0 !important; }
+    .site-header.is-pinned .nav .nav-item { margin: 0 1px; }
+    .site-header.is-pinned .nav .nav-item.is-active > .nav-link { background-color: #eee; }
+    .site-header.is-pinned .nav .nav-item:hover .nav-link { background-color: #eee; }
+}
+
+@media (min-width: 1200px) {
+    .site-header.is-pinned .nav .nav-link { padding: .625rem .75rem; }
+    .site-header.is-pinned .nav .nav-expand { margin-left: 0 !important; }
+    .site-header.is-pinned .nav .nav-home { margin: 0 0 0 0 !important; }
+}
+
+@media (min-width: 1440px) {
+    .site-header.is-pinned .nav { padding: 0; }
+    .site-header.is-pinned .nav .nav-expand { margin-left: 2rem !important; }
+    .site-header.is-pinned .nav .nav-home { margin: 0 2rem 0 0 !important; }
+}
+
+/* ── Bổ sung 1/2 — glyph icon-* thật (spec chỉ @import 1 file
+ * fontello.css KHÔNG được cung cấp cùng spec/header.html/main.css) —
+ * thay bằng CSS mask tự vẽ, giữ nguyên <i class="icon-x"></i> rỗng
+ * như spec, phần hiển thị hoàn toàn do mask đảm nhận. ─────────────── */
+.icon,
+[class^="icon-"],
+[class*=" icon-"] {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: -.125em;
+}
+
+[class^="icon-"],
+[class*=" icon-"] {
+    background-color: currentColor;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+}
+
+.icon-search {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='10' cy='10' r='7'/%3E%3Cpath d='M21 21l-5.8-5.8'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='10' cy='10' r='7'/%3E%3Cpath d='M21 21l-5.8-5.8'/%3E%3C/svg%3E");
+}
+
+.icon-times {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M5 5l14 14M19 5L5 19'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M5 5l14 14M19 5L5 19'/%3E%3C/svg%3E");
+}
+
+.icon-bars {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M3 6h18M3 12h18M3 18h18'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M3 6h18M3 12h18M3 18h18'/%3E%3C/svg%3E");
+}
+
+.icon-home {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 11l9-7 9 7'/%3E%3Cpath d='M5 10v10h14V10'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 11l9-7 9 7'/%3E%3Cpath d='M5 10v10h14V10'/%3E%3C/svg%3E");
+}
+
+.icon-facebook {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000'%3E%3Ccircle cx='12' cy='12' r='11' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3Cpath d='M14 8.5h-1.3c-.5 0-.7.2-.7.7v1.3h2l-.3 2h-1.7V19h-2v-6.5H8.5v-2H10V9c0-1.7 1-2.7 2.6-2.7H14v2.2z'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000'%3E%3Ccircle cx='12' cy='12' r='11' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3Cpath d='M14 8.5h-1.3c-.5 0-.7.2-.7.7v1.3h2l-.3 2h-1.7V19h-2v-6.5H8.5v-2H10V9c0-1.7 1-2.7 2.6-2.7H14v2.2z'/%3E%3C/svg%3E");
+}
+
+.icon-rss {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 11a9 9 0 019 9'/%3E%3Cpath d='M4 4a16 16 0 0116 16'/%3E%3Ccircle cx='5' cy='19' r='1'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 11a9 9 0 019 9'/%3E%3Cpath d='M4 4a16 16 0 0116 16'/%3E%3Ccircle cx='5' cy='19' r='1'/%3E%3C/svg%3E");
+}
+
+/* ── Bổ sung 2/2 — bật/tắt mobile nav + toggle icon .btn-expand: spec/
+ * main.css chỉ có phần CSS phản ứng với .is-active/.is-open, phần JS gắn
+ * class (site gốc tự viết, không kèm theo spec) được thay bằng Alpine
+ * (:class trong frontend-header.blade.php, state dùng chung frontendNav
+ * — resources/js/frontend.js). ─────────────────────────────────────── */
+.site-header .m-btn.btn-expand.is-active .icon-bars { display: none; }
+.site-header .m-btn.btn-expand.is-active .icon-times { display: inline-block; }
+
+/* spec/main.css chỉ ẩn .input-wrap mặc định (display:none), không có rule hiện lại theo
+ * .is-active (JS gốc set trực tiếp qua $(...).slideToggle(), không dùng class) — bổ sung
+ * đúng 1 rule hiện lại khi .links (cha #searchDesktop) có .is-active. */
+.site-header__topbar .links.is-active .input-wrap { display: block; }
+
+/* ── Bổ sung 3/3 — spec/main.css đặt .logo{font-size:0} vì site gốc dùng 1 thẻ <img> thật
+ * (spec/header.html trỏ tới logo của site tham khảo — KHÔNG dùng vì không phải thương hiệu
+ * familiesforlife, xem frontend-header.blade.php). Không có ảnh logo thật để thay thế nên
+ * dùng logo chữ (mark tròn + tên thương hiệu) — cần font-size riêng vì kế thừa font-size:0
+ * từ .logo sẽ làm chữ biến mất hoàn toàn. ─────────────────────────────────────────────── */
+.site-header .logo a {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    height: 100%;
+}
+
+.site-header .logo__mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    background: #ED1D26;
+    color: #fff;
+    font-weight: 900;
+    font-size: 1rem;
+}
+
+.site-header .logo__text {
+    font-weight: 900;
+    font-size: 1.25rem;
+    letter-spacing: -.01em;
+    color: #212121;
+    text-transform: uppercase;
+}
+
+@media (max-width: 593.98px) {
+    .site-header .nav.is-open { display: flex; flex-direction: column; }
+}
