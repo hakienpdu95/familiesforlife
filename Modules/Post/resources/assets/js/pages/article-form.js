@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     _setupTabGuard(form);
     initAllTomSelects(form);
     _setupTagsInput(form);
+    _setupCategoryPicker();
     _setupOcopProductPicker();
 });
 
@@ -126,6 +127,57 @@ function _setupTagsInput(form) {
         hidePlaceholder: true,
         plugins:         ['remove_button'],
         placeholder:     'Gõ tag rồi Enter — VD: ngủ, sơ sinh, mẹo hay',
+    });
+}
+
+// ── Danh mục — cây phân cấp + ★ đặt danh mục chính ──────────────────────────
+
+/**
+ * Picker danh mục render bởi post::admin.articles._category-picker (đệ quy cha/con/cháu...).
+ * 2 hành vi:
+ *   1. Bấm ★ (button[data-cat-star]) → ghi id vào hidden input is_primary_category_id, cập
+ *      nhật màu ★ (chỉ 1 nút đang active), tự tick checkbox tương ứng nếu chưa tick (danh mục
+ *      chính bắt buộc phải nằm trong category_ids[]).
+ *   2. Bỏ tick checkbox[data-cat-check] của danh mục đang là "chính" → tự gỡ trạng thái chính,
+ *      tránh submit is_primary_category_id trỏ tới 1 danh mục không được chọn.
+ *
+ * Tra bằng document, KHÔNG scope theo `form` (FORM_SEL) — trang edit có nhiều <form> độc lập
+ * (nội dung bản dịch riêng, "Cài đặt chung" sidebar riêng — HTML không cho <form> lồng nhau) và
+ * picker danh mục nằm trong form sidebar, không phải form nội dung [data-article-form].
+ */
+function _setupCategoryPicker() {
+    const container = document.querySelector('[data-cat-picker]');
+    const primaryInput = document.querySelector('[data-cat-primary-input]');
+    if (!container || !primaryInput) return;
+
+    container.addEventListener('click', (e) => {
+        const star = e.target.closest('[data-cat-star]');
+        if (!star) return;
+
+        const id = star.dataset.catStar;
+        primaryInput.value = id;
+        _paintStars(container, id);
+
+        const checkbox = container.querySelector(`[data-cat-check="${id}"]`);
+        if (checkbox && !checkbox.checked) checkbox.checked = true;
+    });
+
+    container.addEventListener('change', (e) => {
+        const checkbox = e.target.closest('[data-cat-check]');
+        if (!checkbox || checkbox.checked) return;
+        if (primaryInput.value !== checkbox.dataset.catCheck) return;
+
+        primaryInput.value = '';
+        _paintStars(container, null);
+    });
+}
+
+function _paintStars(container, activeId) {
+    container.querySelectorAll('[data-cat-star]').forEach((btn) => {
+        const active = activeId !== null && btn.dataset.catStar === activeId;
+        btn.classList.toggle('text-warning', active);
+        btn.classList.toggle('text-base-content/20', !active);
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
     });
 }
 

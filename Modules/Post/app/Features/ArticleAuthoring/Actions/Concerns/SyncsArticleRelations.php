@@ -16,7 +16,11 @@ trait SyncsArticleRelations
 
         $sync = [];
         foreach ($categoryIds as $categoryId) {
-            $sync[$categoryId] = ['is_primary' => $categoryId === $primaryId];
+            // So sánh ép về string — $categoryId luôn là string (giá trị thô từ request), còn
+            // $data->is_primary_category_id được Spatie Data cast thành int theo type-hint của
+            // ArticleData. So sánh === giữa 2 kiểu khác nhau (vd "5" === 5) luôn false, khiến
+            // is_primary không bao giờ được lưu đúng khi người dùng chủ động chọn danh mục chính.
+            $sync[$categoryId] = ['is_primary' => (string) $categoryId === (string) $primaryId];
         }
 
         $article->categories()->sync($sync);

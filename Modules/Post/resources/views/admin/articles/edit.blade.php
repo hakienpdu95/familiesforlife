@@ -333,24 +333,17 @@
                 </div>
 
                 <div class="form-control mb-3">
-                    <label class="label py-0 pb-1.5"><span class="label-text text-xs font-medium">Danh mục</span></label>
-                    @php
-                        $selectedCategoryIds = old('category_ids', $article->categories->pluck('id')->all());
-                        $primaryCategoryId   = old('is_primary_category_id', $article->categories->firstWhere('pivot.is_primary', true)?->id);
-                    @endphp
-                    <div class="max-h-40 overflow-y-auto flex flex-col gap-1 border border-base-200 rounded-lg p-2">
-                        @forelse($categories as $c)
-                        <label class="flex items-center gap-2 cursor-pointer text-xs py-0.5">
-                            <input type="checkbox" name="category_ids[]" value="{{ $c->id }}"
-                                   class="checkbox checkbox-xs shrink-0" {{ in_array($c->id, $selectedCategoryIds) ? 'checked' : '' }}>
-                            <span class="flex-1">{{ $c->name }}</span>
-                            <input type="radio" name="is_primary_category_id" value="{{ $c->id }}"
-                                   class="radio radio-xs radio-warning" {{ (string) $primaryCategoryId === (string) $c->id ? 'checked' : '' }}>
-                        </label>
-                        @empty
-                        <p class="text-xs text-base-content/30 py-1">Chưa có danh mục.</p>
-                        @endforelse
-                    </div>
+                    <label class="label py-0 pb-1.5">
+                        <span class="label-text text-xs font-medium">Danh mục</span>
+                        <span class="label-text-alt text-xs text-base-content/40">Bấm ★ để đặt danh mục chính</span>
+                    </label>
+                    @include('post::admin.articles._category-picker', [
+                        'categoryTree' => $categoryTree,
+                        'selectedCategoryIds' => old('category_ids', $article->categories->pluck('id')->all()),
+                        'primaryCategoryId' => old('is_primary_category_id', $article->categories->firstWhere('pivot.is_primary', true)?->id),
+                        'maxHeightClass' => 'max-h-40',
+                        'size' => 'xs',
+                    ])
                 </div>
 
                 <div class="form-control mb-3">

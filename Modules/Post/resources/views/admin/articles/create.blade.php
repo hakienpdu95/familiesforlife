@@ -98,21 +98,11 @@
                 <span class="label-text font-medium">Danh mục</span>
                 <span class="label-text-alt text-xs text-base-content/40">Bấm ★ để đặt danh mục chính</span>
             </label>
-            <div class="max-h-56 overflow-y-auto flex flex-col gap-1 border border-base-200 rounded-lg p-3">
-                @forelse($categories as $c)
-                <label class="flex items-center gap-2.5 cursor-pointer text-sm py-1 px-1 rounded hover:bg-base-200/60 transition-colors">
-                    <input type="checkbox" name="category_ids[]" value="{{ $c->id }}"
-                           class="checkbox checkbox-sm shrink-0" {{ in_array($c->id, old('category_ids', [])) ? 'checked' : '' }}>
-                    <span class="flex-1">{{ $c->parent ? $c->parent->name . ' › ' : '' }}{{ $c->name }}</span>
-                    <label class="flex items-center gap-1 cursor-pointer shrink-0" title="Đặt làm danh mục chính">
-                        <input type="radio" name="is_primary_category_id" value="{{ $c->id }}"
-                               class="radio radio-xs radio-warning" {{ (string) old('is_primary_category_id') === (string) $c->id ? 'checked' : '' }}>
-                    </label>
-                </label>
-                @empty
-                <p class="text-xs text-base-content/30 py-2">Chưa có danh mục nào.</p>
-                @endforelse
-            </div>
+            @include('post::admin.articles._category-picker', [
+                'categoryTree' => $categoryTree,
+                'selectedCategoryIds' => old('category_ids', []),
+                'primaryCategoryId' => old('is_primary_category_id'),
+            ])
         </div>
 
         <div class="form-control">

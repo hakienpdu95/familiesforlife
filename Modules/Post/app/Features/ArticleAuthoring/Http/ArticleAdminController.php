@@ -22,6 +22,8 @@ use Modules\Post\Features\ArticleAuthoring\Queries\ListArticlesForAdminHandler;
 use Modules\Post\Features\ArticleAuthoring\Queries\ListArticlesForAdminQuery;
 use Modules\Post\Features\ArticleAuthoring\Queries\ListPendingReviewTranslationsHandler;
 use Modules\Post\Features\ArticleAuthoring\Queries\ListPendingReviewTranslationsQuery;
+use Modules\Post\Features\CategoryManagement\Queries\GetCategoryTreeHandler;
+use Modules\Post\Features\CategoryManagement\Queries\GetCategoryTreeQuery;
 use Modules\Post\Features\CategoryManagement\Queries\ListCategoriesForAdminHandler;
 use Modules\Post\Features\CategoryManagement\Queries\ListCategoriesForAdminQuery;
 use Modules\Post\Models\PostArticle;
@@ -67,13 +69,15 @@ class ArticleAdminController extends Controller
         return view('post::admin.articles.pending-review', compact('translations'));
     }
 
-    public function create(ListCategoriesForAdminHandler $categoryHandler): View
+    public function create(GetCategoryTreeHandler $categoryTreeHandler): View
     {
         $this->authorize('create', PostArticle::class);
 
-        $categories = $categoryHandler->handle(new ListCategoriesForAdminQuery());
+        // Cây danh mục thật (cha/con/cháu...) thay vì danh sách phẳng — picker "Danh mục" cần
+        // hiển thị đúng cấp bậc phân cấp thay vì chỉ 1 dòng "cha › con".
+        $categoryTree = $categoryTreeHandler->handle(new GetCategoryTreeQuery());
 
-        return view('post::admin.articles.create', compact('categories'));
+        return view('post::admin.articles.create', compact('categoryTree'));
     }
 
     /**
@@ -118,12 +122,14 @@ class ArticleAdminController extends Controller
         return view('post::admin.articles.show', compact('article'));
     }
 
-    public function edit(Request $request, PostArticle $article, ListCategoriesForAdminHandler $categoryHandler, ArticleContentRenderer $renderer): View
+    public function edit(Request $request, PostArticle $article, GetCategoryTreeHandler $categoryTreeHandler, ArticleContentRenderer $renderer): View
     {
         $this->authorizeArticle($article, 'post_article.edit');
 
         $article->load(['categories', 'tags', 'ocopProducts', 'translations.contentBlocks.productBlock.items.product', 'translations.contentBlocks.productBlock.items.buttons', 'translations.contentBlocks.productBlock.buttons']);
-        $categories = $categoryHandler->handle(new ListCategoriesForAdminQuery());
+
+        // Cây danh mục thật (cha/con/cháu...) — cùng lý do create() ở trên.
+        $categoryTree = $categoryTreeHandler->handle(new GetCategoryTreeQuery());
 
         // spec/Province_Showcase_Technical_Specification.md §3.4.1 — lọc theo ward_code của bài
         // nếu có (chuyên sâu hơn), fallback province_code; bài chưa gắn tỉnh/phường nào → không
@@ -156,7 +162,7 @@ class ArticleAdminController extends Controller
         $translation = $article->translation($activeLocale);
         $existingBlocks = $translation ? $renderer->toComposerPayload($translation) : [];
 
-        return view('post::admin.articles.edit', compact('article', 'categories', 'activeLocale', 'translation', 'existingBlocks', 'ocopProducts'));
+        return view('post::admin.articles.edit', compact('article', 'categoryTree', 'activeLocale', 'translation', 'existingBlocks', 'ocopProducts'));
     }
 
     public function update(Request $request, PostArticle $article, UpdateArticleAction $action): RedirectResponse
