@@ -19,7 +19,7 @@ class SectionEvents extends Component
         $this->events = Event::published()
             ->upcoming()
             ->where('province_code', $province->province_code)
-            ->with('category')
+            ->with(['category', 'province', 'ward'])
             ->orderBy('start_date')
             ->limit(config('provinceshowcase.section_limit'))
             ->get();

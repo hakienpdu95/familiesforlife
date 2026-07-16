@@ -12,7 +12,7 @@ class ListPublishedEventsHandler implements QueryHandlerInterface
     public function handle(QueryInterface $query): LengthAwarePaginator
     {
         /** @var ListPublishedEventsQuery $query */
-        $q = Event::published()->with('category');
+        $q = Event::published()->with(['category', 'province', 'ward']);
 
         if ($query->upcomingOnly) {
             $q->upcoming();
