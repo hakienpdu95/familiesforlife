@@ -27,7 +27,8 @@
         </label>
         <select id="ts-ward-{{ $instanceId }}" name="{{ $nameWard }}"
                 class="select select-bordered select-sm w-full @error($nameWard) select-error @enderror"
-                @if($required) data-req="Vui lòng chọn phường / xã" @endif>
+                @if($required) data-req="Vui lòng chọn phường / xã" @endif
+                {{ !$provinceValue ? 'disabled' : '' }}>
             <option value=""></option>
         </select>
         @error($nameWard)<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror

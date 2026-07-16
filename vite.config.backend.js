@@ -52,6 +52,7 @@ const JS_OUTPUT = {
   'product':                'assets/modules/product.[hash].js',
   'event':                  'assets/modules/event.[hash].js',
   'menu':                   'assets/modules/menu.[hash].js',
+  'ocop':                   'assets/modules/ocop.[hash].js',
 };
 
 /** CSS asset name → output path.
@@ -84,6 +85,7 @@ const CSS_OUTPUT = {
   'product.css':                'assets/modules/product.[hash].css',
   'event.css':                  'assets/modules/event.[hash].css',
   'menu.css':                   'assets/modules/menu.[hash].css',
+  'ocop.css':                   'assets/modules/ocop.[hash].css',
 };
 
 // ─── Module input entries ─────────────────────────────────────────────
@@ -142,6 +144,9 @@ const MODULE_ENTRIES = [
   'Modules/Menu/resources/assets/js/menu.js',
   // Banner
   'Modules/Banner/resources/assets/js/banner.js',
+  // Ocop
+  'Modules/Ocop/resources/assets/sass/ocop.scss',
+  'Modules/Ocop/resources/assets/js/ocop.js',
 ];
 
 // ─────────────────────────────────────────────────────────────────────

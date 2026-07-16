@@ -18,7 +18,8 @@ class AddressPicker extends Component
         public string  $nameProvince  = 'province_code',
         public string  $nameWard      = 'ward_code',
     ) {
-        $this->provinces = Province::orderBy('name')
+        $this->provinces = Province::where('is_active', true)
+            ->orderBy('name')
             ->get(['province_code', 'name', 'place_type']);
     }
 

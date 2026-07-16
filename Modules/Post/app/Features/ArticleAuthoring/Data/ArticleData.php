@@ -33,10 +33,11 @@ class ArticleData extends Data
         /**
          * spec/Province_Showcase_Technical_Specification.md §3.2.1/§6.3 — tuỳ chọn, không bắt
          * buộc validate — không phá luồng viết bài hiện tại khi tác giả chưa chọn tỉnh.
-         * province_name tự tra lại ở tầng Action (CreateArticleAction/UpdateArticleAction),
-         * KHÔNG nhận trực tiếp từ form.
+         * Chỉ lưu mã, không denormalize tên (province_name/ward_name đã bỏ khỏi post_articles) —
+         * tên tra trực tiếp từ Province/Ward lúc hiển thị.
          */
         public readonly ?string $province_code = null,
+        public readonly ?string $ward_code = null,
 
         /**
          * spec/Province_Showcase_Technical_Specification.md §3.4.1 — sản phẩm OCOP liên quan,

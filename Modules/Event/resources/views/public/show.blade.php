@@ -57,7 +57,7 @@
             @else
             <p class="text-sm mt-1">
                 {{ $event->venue_name }}<br>
-                <span class="text-base-content/60">{{ $event->full_address ?: trim($event->venue_address.', '.$event->ward_name.', '.$event->province_name, ', ') }}</span>
+                <span class="text-base-content/60">{{ $event->full_address ?: trim($event->venue_address.', '.$event->ward?->name.', '.$event->province?->name, ', ') }}</span>
             </p>
             @endif
         </div>

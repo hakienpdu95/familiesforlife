@@ -27,9 +27,21 @@
 </div>
 @endif
 
-<form method="POST" action="{{ route('backend.ocop.products.store') }}" enctype="multipart/form-data" novalidate>
+<form method="POST" action="{{ route('backend.ocop.products.store') }}" enctype="multipart/form-data" novalidate data-ocop-product-form>
     @csrf
     @include('ocop::admin.products._form', ['product' => null])
 </form>
 
 @endsection
+
+@push('styles')
+    @vite(['Modules/Ocop/resources/assets/sass/ocop.scss'], 'build/backend')
+@endpush
+
+@push('scripts')
+    @vite([
+        'resources/js/modules/toastify.js',
+        'resources/js/modules/tom-select.js',
+        'Modules/Ocop/resources/assets/js/ocop.js',
+    ], 'build/backend')
+@endpush

@@ -51,9 +51,7 @@ class Event extends Model
         'venue_name',
         'venue_address',
         'province_code',
-        'province_name',
         'ward_code',
-        'ward_name',
         'full_address',
         'latitude',
         'longitude',
@@ -124,6 +122,16 @@ class Event extends Model
         return $this->belongsTo(EventCategory::class, 'category_id');
     }
 
+    public function province(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Province::class, 'province_code', 'province_code');
+    }
+
+    public function ward(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Ward::class, 'ward_code', 'ward_code');
+    }
+
     /** PII người nộp — KHÔNG bao giờ load ở query/route công khai (spec §5.3/§10.5). */
     public function submission(): HasOne
     {
@@ -179,6 +187,6 @@ class Event extends Model
     {
         return $this->location_type === \Modules\Event\Enums\EventLocationType::Online
             ? 'Trực tuyến'
-            : trim(($this->venue_name ?? '').($this->ward_name ? ", {$this->ward_name}" : '').($this->province_name ? ", {$this->province_name}" : ''), ', ');
+            : trim(($this->venue_name ?? '').($this->ward?->name ? ", {$this->ward->name}" : '').($this->province?->name ? ", {$this->province->name}" : ''), ', ');
     }
 }

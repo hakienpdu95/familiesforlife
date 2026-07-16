@@ -111,6 +111,25 @@ class OcopProductAdminController extends Controller
             'status'             => ['required', Rule::in(array_column(OcopProductStatus::cases(), 'value'))],
             'is_featured'        => ['boolean'],
             'sort_order'         => ['integer', 'min:0'],
+        ], [
+            'category_id.required'     => 'Vui lòng chọn danh mục.',
+            'category_id.exists'       => 'Danh mục được chọn không hợp lệ.',
+            'name.required'            => 'Vui lòng nhập tên sản phẩm.',
+            'name.max'                 => 'Tên sản phẩm không được vượt quá :max ký tự.',
+            'star_rating.required'     => 'Vui lòng chọn hạng sao.',
+            'star_rating.in'           => 'Hạng sao không hợp lệ — chỉ chấp nhận 3, 4 hoặc 5 sao.',
+            'province_code.exists'     => 'Tỉnh/thành được chọn không hợp lệ.',
+            'ward_code.exists'         => 'Phường/xã được chọn không hợp lệ.',
+            'producer_name.max'       => 'Tên nhà sản xuất không được vượt quá :max ký tự.',
+            'producer_address.max'    => 'Địa chỉ nhà sản xuất không được vượt quá :max ký tự.',
+            'image.image'              => 'File phải là hình ảnh.',
+            'image.max'                => 'Ảnh không được vượt quá :max KB.',
+            'purchase_url.url'         => 'URL không hợp lệ — phải bắt đầu bằng https://',
+            'purchase_url.max'        => 'URL không được vượt quá :max ký tự.',
+            'status.required'          => 'Vui lòng chọn trạng thái.',
+            'status.in'                => 'Trạng thái không hợp lệ.',
+            'sort_order.integer'      => 'Thứ tự hiển thị phải là số nguyên.',
+            'sort_order.min'          => 'Thứ tự hiển thị không được âm.',
         ]);
     }
 }

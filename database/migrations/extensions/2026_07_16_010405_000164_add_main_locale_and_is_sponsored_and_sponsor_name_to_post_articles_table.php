@@ -41,13 +41,28 @@ return new class extends Migration {
             if (!Schema::hasIndex('post_articles', 'idx_post_article_sponsored')) {
                 $table->index(['organization_id', 'is_sponsored', 'sponsored_end_date'], 'idx_post_article_sponsored');
             }
+            if (!Schema::hasColumn('post_articles', 'province_code')) {
+                $table->char('province_code', 2)->nullable()->after('sponsored_published_at')->comment('Mã tỉnh/thành — không FK cứng, cùng pattern events.province_code');
+            }
+            if (!Schema::hasColumn('post_articles', 'province_name')) {
+                $table->string('province_name', 255)->nullable()->after('province_code')->comment('Tên tỉnh denormalized');
+            }
+            if (!Schema::hasColumn('post_articles', 'ward_code')) {
+                $table->char('ward_code', 5)->nullable()->after('province_name')->comment('Mã phường/xã — tuỳ chọn, chỉ điền khi bài gắn 1 địa điểm cụ thể');
+            }
+            if (!Schema::hasColumn('post_articles', 'ward_name')) {
+                $table->string('ward_name', 255)->nullable()->after('ward_code');
+            }
+            if (!Schema::hasIndex('post_articles', 'idx_post_article_province')) {
+                $table->index('province_code', 'idx_post_article_province');
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('post_articles', function (Blueprint $table) {
-            $cols = array_filter(['main_locale', 'is_sponsored', 'sponsor_name', 'sponsor_logo_url', 'sponsor_label', 'campaign_code', 'sponsored_start_date', 'sponsored_end_date', 'sponsored_published_at'], fn($c) => Schema::hasColumn('post_articles', $c));
+            $cols = array_filter(['main_locale', 'is_sponsored', 'sponsor_name', 'sponsor_logo_url', 'sponsor_label', 'campaign_code', 'sponsored_start_date', 'sponsored_end_date', 'sponsored_published_at', 'province_code', 'province_name', 'ward_code', 'ward_name'], fn($c) => Schema::hasColumn('post_articles', $c));
             if (!empty($cols)) $table->dropColumn(array_values($cols));
         });
     }

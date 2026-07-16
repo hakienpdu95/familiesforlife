@@ -285,17 +285,15 @@
                 </div>
 
                 {{-- spec/Province_Showcase_Technical_Specification.md §6.3 — tuỳ chọn, không bắt buộc. --}}
-                <div class="form-control mb-3">
-                    <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Tỉnh/thành liên quan</span></label>
-                    <select name="province_code" class="select select-bordered select-sm w-full @error('province_code') select-error @enderror">
-                        <option value="">— Không gắn tỉnh —</option>
-                        @foreach($provinces as $p)
-                        <option value="{{ $p->province_code }}" {{ old('province_code', $article->province_code ?? '') === $p->province_code ? 'selected' : '' }}>
-                            {{ $p->name }}
-                        </option>
-                        @endforeach
-                    </select>
-                    @error('province_code')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                <div class="mb-3">
+                    <x-address-picker
+                        :required="false"
+                        instance-id="article-edit"
+                        name-province="province_code"
+                        name-ward="ward_code"
+                        :province-value="old('province_code', $article->province_code)"
+                        :ward-value="old('ward_code', $article->ward_code)"
+                    />
                 </div>
 
                 {{-- spec/Province_Showcase_Technical_Specification.md §3.4.1 — không bắt buộc,
