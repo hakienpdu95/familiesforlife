@@ -14,6 +14,7 @@ class GetCategoryTreeHandler implements QueryHandlerInterface
     {
         /** @var GetCategoryTreeQuery $query */
         $all = PostCategory::query()
+            ->withCount('articles')
             ->when($query->activeOnly, fn ($q) => $q->where('is_active', true))
             ->orderBy('sort_order')
             ->get();

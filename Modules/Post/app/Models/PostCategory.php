@@ -128,4 +128,53 @@ class PostCategory extends Model
             ->orderBy('sort_order')
             ->get();
     }
+
+    /**
+     * Cây phẳng (pre-order, depth-annotated) từ 1 cây đã dựng sẵn (vd
+     * Features\CategoryManagement\Queries\GetCategoryTreeHandler) — dùng cho <select> đơn
+     * (parent_id), không lồng được HTML như cây thật. $excludeSubtreeRootId loại bỏ node đó VÀ
+     * toàn bộ hậu duệ của nó — dùng khi sửa 1 category, tránh chọn con/cháu làm cha của chính nó
+     * (cycle).
+     *
+     * @param \Illuminate\Support\Collection<int, self> $tree
+     * @return array<int, array{category: self, depth: int}>
+     */
+    public static function flatten(\Illuminate\Support\Collection $tree, ?int $excludeSubtreeRootId = null): array
+    {
+        $flat = [];
+
+        $walk = function (\Illuminate\Support\Collection $nodes, int $depth) use (&$walk, &$flat, $excludeSubtreeRootId): void {
+            foreach ($nodes as $node) {
+                if ($node->id === $excludeSubtreeRootId) {
+                    continue; // bỏ cả node này VÀ mọi hậu duệ (không đệ quy tiếp vào $node->children)
+                }
+                $flat[] = ['category' => $node, 'depth' => $depth];
+                $walk($node->children, $depth + 1);
+            }
+        };
+
+        $walk($tree, 0);
+
+        return $flat;
+    }
+
+    /** Id của node $id và toàn bộ hậu duệ — dùng để chặn cycle ở validation (parent_id). */
+    public static function subtreeIds(\Illuminate\Support\Collection $tree, int $id): array
+    {
+        $ids = [];
+
+        $walk = function (\Illuminate\Support\Collection $nodes, bool $collecting) use (&$walk, &$ids, $id): void {
+            foreach ($nodes as $node) {
+                $inSubtree = $collecting || $node->id === $id;
+                if ($inSubtree) {
+                    $ids[] = $node->id;
+                }
+                $walk($node->children, $inSubtree);
+            }
+        };
+
+        $walk($tree, false);
+
+        return $ids;
+    }
 }

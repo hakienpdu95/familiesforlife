@@ -11,6 +11,8 @@ use Modules\Post\Features\CategoryManagement\Actions\DeleteCategoryAction;
 use Modules\Post\Features\CategoryManagement\Actions\ReorderCategoriesAction;
 use Modules\Post\Features\CategoryManagement\Actions\UpdateCategoryAction;
 use Modules\Post\Features\CategoryManagement\Data\CategoryData;
+use Modules\Post\Features\CategoryManagement\Queries\GetCategoryTreeHandler;
+use Modules\Post\Features\CategoryManagement\Queries\GetCategoryTreeQuery;
 use Modules\Post\Features\CategoryManagement\Queries\ListCategoriesForAdminHandler;
 use Modules\Post\Features\CategoryManagement\Queries\ListCategoriesForAdminQuery;
 use Modules\Post\Models\PostCategory;
@@ -22,20 +24,26 @@ class CategoryAdminController extends Controller
         $this->authorizeResource(PostCategory::class, 'category');
     }
 
-    public function index(Request $request, ListCategoriesForAdminHandler $handler): View
+    /**
+     * Có tìm kiếm → danh sách phẳng (kết quả khớp có thể không giữ được ngữ cảnh cây, hiển thị
+     * cây một phần sẽ gây hiểu lầm). Không tìm kiếm → cây đầy đủ (GetCategoryTreeHandler) để
+     * đúng cấp bậc cha/con/cháu.
+     */
+    public function index(Request $request, ListCategoriesForAdminHandler $flatHandler, GetCategoryTreeHandler $treeHandler): View
     {
-        $categories = $handler->handle(new ListCategoriesForAdminQuery(
-            search: $request->string('q')->value() ?: null,
-        ));
+        $search = $request->string('q')->value() ?: null;
 
-        return view('post::admin.categories.index', compact('categories'));
+        $categories   = $search ? $flatHandler->handle(new ListCategoriesForAdminQuery(search: $search)) : null;
+        $categoryTree = $search ? null : $treeHandler->handle(new GetCategoryTreeQuery());
+
+        return view('post::admin.categories.index', compact('categories', 'categoryTree', 'search'));
     }
 
-    public function create(ListCategoriesForAdminHandler $handler): View
+    public function create(GetCategoryTreeHandler $handler): View
     {
-        $categories = $handler->handle(new ListCategoriesForAdminQuery());
+        $categoryTree = PostCategory::flatten($handler->handle(new GetCategoryTreeQuery()));
 
-        return view('post::admin.categories.create', compact('categories'));
+        return view('post::admin.categories.create', compact('categoryTree'));
     }
 
     public function store(Request $request, CreateCategoryAction $action): RedirectResponse
@@ -47,16 +55,18 @@ class CategoryAdminController extends Controller
             ->with('success', "Danh mục \"{$category->name}\" đã được tạo.");
     }
 
-    public function edit(PostCategory $category, ListCategoriesForAdminHandler $handler): View
+    public function edit(PostCategory $category, GetCategoryTreeHandler $handler): View
     {
-        $categories = $handler->handle(new ListCategoriesForAdminQuery());
+        // Loại chính category này VÀ toàn bộ hậu duệ khỏi dropdown "Danh mục cha" — chọn 1 danh
+        // mục con/cháu làm cha của chính tổ tiên nó sẽ tạo vòng lặp (cycle) trong cây.
+        $categoryTree = PostCategory::flatten($handler->handle(new GetCategoryTreeQuery()), excludeSubtreeRootId: $category->id);
 
-        return view('post::admin.categories.edit', compact('category', 'categories'));
+        return view('post::admin.categories.edit', compact('category', 'categoryTree'));
     }
 
-    public function update(Request $request, PostCategory $category, UpdateCategoryAction $action): RedirectResponse
+    public function update(Request $request, PostCategory $category, GetCategoryTreeHandler $handler, UpdateCategoryAction $action): RedirectResponse
     {
-        $data = CategoryData::from($this->validated($request, $category->id));
+        $data = CategoryData::from($this->validated($request, $category->id, $handler));
         $action->handle($category, $data);
 
         return redirect()->route('backend.post.categories.index')
@@ -84,10 +94,24 @@ class CategoryAdminController extends Controller
         return back()->with('success', 'Đã cập nhật thứ tự danh mục.');
     }
 
-    private function validated(Request $request, ?int $ignoreId = null): array
+    private function validated(Request $request, ?int $ignoreId = null, ?GetCategoryTreeHandler $treeHandler = null): array
     {
         return $request->validate([
-            'parent_id'   => ['nullable', 'integer', 'exists:post_categories,id'],
+            'parent_id' => [
+                'nullable', 'integer', 'exists:post_categories,id',
+                // Chặn cycle: không cho chọn chính danh mục đang sửa hoặc bất kỳ hậu duệ nào của
+                // nó làm cha (vd A → B → C, không thể đổi cha của A thành C).
+                function (string $attribute, mixed $value, \Closure $fail) use ($ignoreId, $treeHandler): void {
+                    if (! $ignoreId || ! $value || ! $treeHandler) {
+                        return;
+                    }
+
+                    $tree = $treeHandler->handle(new GetCategoryTreeQuery());
+                    if (in_array((int) $value, PostCategory::subtreeIds($tree, $ignoreId), true)) {
+                        $fail('Không thể chọn chính danh mục này hoặc danh mục con/cháu của nó làm cha (tạo vòng lặp).');
+                    }
+                },
+            ],
             'name'        => ['required', 'string', 'max:150'],
             'description' => ['nullable', 'string'],
             'icon'        => ['nullable', 'string', 'max:80'],

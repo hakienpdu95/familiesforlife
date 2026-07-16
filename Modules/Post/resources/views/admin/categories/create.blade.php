@@ -73,9 +73,10 @@
                                     class="select select-bordered select-sm w-full ts-init @error('parent_id') select-error @enderror"
                                     data-ts-placeholder="— Danh mục gốc —">
                                 <option value="">— Danh mục gốc —</option>
-                                @foreach($categories as $c)
+                                @foreach($categoryTree as $row)
+                                @php($c = $row['category'])
                                 <option value="{{ $c->id }}" {{ old('parent_id') == $c->id ? 'selected' : '' }}>
-                                    {{ $c->name }}
+                                    {{ str_repeat('　', $row['depth']) }}{{ $row['depth'] > 0 ? '– ' : '' }}{{ $c->name }}
                                 </option>
                                 @endforeach
                             </select>

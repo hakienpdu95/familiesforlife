@@ -79,14 +79,14 @@
                                     class="select select-bordered select-sm w-full ts-init @error('parent_id') select-error @enderror"
                                     data-ts-placeholder="— Danh mục gốc —">
                                 <option value="">— Danh mục gốc —</option>
-                                @foreach($categories as $c)
-                                    @continue($c->id === $category->id)
-                                    <option value="{{ $c->id }}" {{ old('parent_id', $category->parent_id) == $c->id ? 'selected' : '' }}>
-                                        {{ $c->name }}
-                                    </option>
+                                @foreach($categoryTree as $row)
+                                @php($c = $row['category'])
+                                <option value="{{ $c->id }}" {{ old('parent_id', $category->parent_id) == $c->id ? 'selected' : '' }}>
+                                    {{ str_repeat('　', $row['depth']) }}{{ $row['depth'] > 0 ? '– ' : '' }}{{ $c->name }}
+                                </option>
                                 @endforeach
                             </select>
-                            <p class="mt-1 text-xs text-base-content/40">Không thể chọn chính danh mục này làm cha</p>
+                            <p class="mt-1 text-xs text-base-content/40">Không thể chọn chính danh mục này hoặc danh mục con/cháu của nó làm cha</p>
                             @error('parent_id')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                         </div>
 

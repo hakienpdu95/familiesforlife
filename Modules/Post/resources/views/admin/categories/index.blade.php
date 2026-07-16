@@ -56,55 +56,67 @@
                 <thead class="bg-base-200/60 text-xs uppercase tracking-wide">
                     <tr>
                         <th>Tên danh mục</th>
-                        <th>Danh mục cha</th>
+                        @if($search)<th>Danh mục cha</th>@endif
                         <th class="text-center">Số bài viết</th>
                         <th class="text-center">Trạng thái</th>
                         <th class="w-24"></th>
                     </tr>
                 </thead>
                 <tbody>
-                @forelse ($categories as $cat)
-                <tr class="hover">
-                    <td>
-                        <span class="inline-block size-2.5 rounded-full mr-1.5 align-middle" style="background:{{ $cat->color_hex ?? '#94a3b8' }}"></span>
-                        <span class="font-medium text-sm">{{ $cat->name }}</span>
-                        <div class="text-xs text-base-content/40 font-mono ml-4">{{ $cat->slug }}</div>
-                    </td>
-                    <td class="text-sm text-base-content/60">{{ $cat->parent?->name ?? '—' }}</td>
-                    <td class="text-center text-sm">{{ $cat->articles_count }}</td>
-                    <td class="text-center">
-                        <span class="badge badge-sm {{ $cat->is_active ? 'badge-success' : 'badge-ghost' }}">
-                            {{ $cat->is_active ? 'Hiện' : 'Ẩn' }}
-                        </span>
-                    </td>
-                    <td>
-                        <div class="flex gap-1">
-                            @can('update', $cat)
-                            <a href="{{ route('backend.post.categories.edit', $cat) }}" class="btn btn-ghost btn-xs btn-square" title="Sửa">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                </svg>
-                            </a>
-                            @endcan
-                            @can('delete', $cat)
-                            <form method="POST" action="{{ route('backend.post.categories.destroy', $cat) }}"
-                                  onsubmit="return confirm('Xoá danh mục &quot;{{ $cat->name }}&quot;?')">
-                                @csrf @method('DELETE')
-                                <button class="btn btn-ghost btn-xs btn-square text-error" title="Xoá">
+                @if($search)
+                    {{-- Có tìm kiếm — danh sách phẳng (kết quả khớp không giữ được ngữ cảnh cây). --}}
+                    @forelse ($categories as $cat)
+                    <tr class="hover">
+                        <td>
+                            <span class="inline-block size-2.5 rounded-full mr-1.5 align-middle" style="background:{{ $cat->color_hex ?? '#94a3b8' }}"></span>
+                            <span class="font-medium text-sm">{{ $cat->name }}</span>
+                            <div class="text-xs text-base-content/40 font-mono ml-4">{{ $cat->slug }}</div>
+                        </td>
+                        <td class="text-sm text-base-content/60">{{ $cat->parent?->name ?? '—' }}</td>
+                        <td class="text-center text-sm">{{ $cat->articles_count }}</td>
+                        <td class="text-center">
+                            <span class="badge badge-sm {{ $cat->is_active ? 'badge-success' : 'badge-ghost' }}">
+                                {{ $cat->is_active ? 'Hiện' : 'Ẩn' }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="flex gap-1">
+                                @can('update', $cat)
+                                <a href="{{ route('backend.post.categories.edit', $cat) }}" class="btn btn-ghost btn-xs btn-square" title="Sửa">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                     </svg>
-                                </button>
-                            </form>
-                            @endcan
-                        </div>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="5" class="text-center py-8 text-base-content/40">Chưa có danh mục nào.</td>
-                </tr>
-                @endforelse
+                                </a>
+                                @endcan
+                                @can('delete', $cat)
+                                <form method="POST" action="{{ route('backend.post.categories.destroy', $cat) }}"
+                                      onsubmit="return confirm('Xoá danh mục &quot;{{ $cat->name }}&quot;?')">
+                                    @csrf @method('DELETE')
+                                    <button class="btn btn-ghost btn-xs btn-square text-error" title="Xoá">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
+                                </form>
+                                @endcan
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="text-center py-8 text-base-content/40">Không tìm thấy danh mục nào khớp "{{ $search }}".</td>
+                    </tr>
+                    @endforelse
+                @else
+                    {{-- Không tìm kiếm — cây đầy đủ cha/con/cháu. --}}
+                    @forelse ($categoryTree as $root)
+                        @include('post::admin.categories._category-tree-row', ['item' => $root, 'depth' => 0])
+                    @empty
+                    <tr>
+                        <td colspan="4" class="text-center py-8 text-base-content/40">Chưa có danh mục nào.</td>
+                    </tr>
+                    @endforelse
+                @endif
                 </tbody>
             </table>
         </div>
