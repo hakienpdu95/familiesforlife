@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     _setupTabGuard(form);
     initAllTomSelects(form);
     _setupTagsInput(form);
+    _setupOcopProductPicker();
 });
 
 // ── Tab-aware submit guard ─────────────────────────────────────────────────
@@ -126,4 +127,103 @@ function _setupTagsInput(form) {
         plugins:         ['remove_button'],
         placeholder:     'Gõ tag rồi Enter — VD: ngủ, sơ sinh, mẹo hay',
     });
+}
+
+// ── Sản phẩm OCOP liên quan — load động theo province_code/ward_code ───────
+
+/**
+ * spec/Province_Showcase_Technical_Specification.md §3.4.1 — chỉ có ở form sửa bài viết
+ * (#ocop-product-picker không tồn tại ở create form). Lắng nghe "address-picker:change" (phát
+ * bởi resources/views/components/address-picker.blade.php) khớp đúng instance-id của
+ * <x-address-picker> trong form này, rồi gọi GET /api/ocop-products/picker để load lại danh
+ * sách — ưu tiên ward_code (chuyên sâu hơn), fallback province_code. Sản phẩm đã tick vẫn được
+ * giữ lại dù không còn khớp bộ lọc mới (tránh mất liên kết cũ ngoài ý muốn khi lưu).
+ */
+function _setupOcopProductPicker() {
+    const container = document.getElementById('ocop-product-picker');
+    if (!container) return;
+
+    const instanceId = container.dataset.instanceId;
+    const list = container.querySelector('[data-ocop-picker-list]');
+    if (!list) return;
+
+    /** @type {Map<string, {name: string, place: string}>} id (string) → nhãn hiển thị */
+    const checked = new Map();
+    _syncCheckedState();
+
+    document.addEventListener('address-picker:change', (e) => {
+        if (e.detail.instanceId !== instanceId) return;
+        _loadProducts(e.detail.provinceCode, e.detail.wardCode);
+    });
+
+    function _syncCheckedState() {
+        list.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+            if (cb.checked) {
+                checked.set(cb.value, { name: cb.dataset.name ?? '', place: cb.dataset.place ?? '' });
+            } else {
+                checked.delete(cb.value);
+            }
+        });
+    }
+
+    async function _loadProducts(provinceCode, wardCode) {
+        _syncCheckedState();
+
+        if (!provinceCode && !wardCode) {
+            _render([]);
+            return;
+        }
+
+        list.innerHTML = '<p class="text-xs text-base-content/30 py-1">Đang tải...</p>';
+
+        const params = new URLSearchParams();
+        if (wardCode) params.set('ward_code', wardCode);
+        else params.set('province_code', provinceCode);
+
+        try {
+            const res = await fetch('/api/ocop-products/picker?' + params.toString());
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            _render(await res.json());
+        } catch (err) {
+            console.error('[ocopPicker] Lỗi tải sản phẩm OCOP:', err);
+            list.innerHTML = '<p class="text-xs text-error py-1">Lỗi tải danh sách sản phẩm OCOP.</p>';
+        }
+    }
+
+    function _render(products) {
+        const seen = new Set();
+        const rows = [];
+
+        for (const p of products) {
+            const id = String(p.id);
+            seen.add(id);
+            rows.push(_row(id, p.name, p.ward_name || p.province_name || '', checked.has(id)));
+        }
+
+        // Giữ sản phẩm đã tick nhưng không còn khớp bộ lọc mới — không âm thầm bỏ liên kết cũ.
+        for (const [id, info] of checked) {
+            if (seen.has(id)) continue;
+            rows.push(_row(id, info.name, info.place, true));
+        }
+
+        list.innerHTML = rows.length
+            ? rows.join('')
+            : '<p class="text-xs text-base-content/30 py-1">Không có sản phẩm OCOP nào khớp tỉnh/phường đã chọn.</p>';
+    }
+
+    function _row(id, name, place, isChecked) {
+        return `<label class="flex items-center gap-2 cursor-pointer text-xs py-0.5">
+            <input type="checkbox" name="ocop_product_ids[]" value="${id}"
+                   data-name="${_esc(name)}" data-place="${_esc(place)}"
+                   class="checkbox checkbox-xs shrink-0" ${isChecked ? 'checked' : ''}>
+            <span class="flex-1">${_esc(name)}</span>
+            ${place ? `<span class="text-base-content/40">${_esc(place)}</span>` : ''}
+        </label>`;
+    }
+
+    function _esc(str) {
+        return String(str ?? '').replace(/[&<>"']/g, (c) => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+        }[c]));
+    }
 }

@@ -102,4 +102,9 @@ class OcopProduct extends Model
     {
         $query->where('province_code', $provinceCode);
     }
+
+    public function scopeForWard(Builder $query, string $wardCode): void
+    {
+        $query->where('ward_code', $wardCode);
+    }
 }

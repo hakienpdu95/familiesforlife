@@ -296,25 +296,38 @@
                     />
                 </div>
 
-                {{-- spec/Province_Showcase_Technical_Specification.md §3.4.1 — không bắt buộc,
-                     $ocopProducts đã lọc theo province_code của bài (nếu có) ở controller. --}}
-                <div class="form-control mb-3">
+                {{-- spec/Province_Showcase_Technical_Specification.md §3.4.1 — không bắt buộc.
+                     $ocopProducts render sẵn theo ward_code/province_code hiện tại của bài (nếu
+                     có) — article-form.js (_setupOcopProductPicker) lắng nghe sự kiện
+                     "address-picker:change" (instanceId=article-edit) từ <x-address-picker> phía
+                     trên và tự gọi lại GET /api/ocop-products/picker để load lại danh sách mỗi
+                     khi người dùng đổi tỉnh/phường — ưu tiên ward_code (chuyên sâu hơn), fallback
+                     province_code. Sản phẩm đã tick vẫn được giữ lại dù không còn khớp bộ lọc mới
+                     (tránh mất liên kết cũ ngoài ý muốn). --}}
+                <div class="form-control mb-3" id="ocop-product-picker" data-instance-id="article-edit">
                     <label class="label py-0 pb-1.5"><span class="label-text text-xs font-medium">Sản phẩm OCOP liên quan</span></label>
                     @php
                         $selectedOcopIds = old('ocop_product_ids', $article->ocopProducts->pluck('id')->all());
                     @endphp
-                    <div class="max-h-40 overflow-y-auto flex flex-col gap-1 border border-base-200 rounded-lg p-2">
+                    <div class="max-h-40 overflow-y-auto flex flex-col gap-1 border border-base-200 rounded-lg p-2" data-ocop-picker-list>
                         @forelse($ocopProducts as $p)
                         <label class="flex items-center gap-2 cursor-pointer text-xs py-0.5">
                             <input type="checkbox" name="ocop_product_ids[]" value="{{ $p->id }}"
+                                   data-name="{{ $p->name }}" data-place="{{ $p->ward_name ?: $p->province_name }}"
                                    class="checkbox checkbox-xs shrink-0" {{ in_array($p->id, $selectedOcopIds) ? 'checked' : '' }}>
                             <span class="flex-1">{{ $p->name }}</span>
-                            @if($p->province_name)
-                            <span class="text-base-content/40">{{ $p->province_name }}</span>
+                            @if($p->ward_name || $p->province_name)
+                            <span class="text-base-content/40">{{ $p->ward_name ?: $p->province_name }}</span>
                             @endif
                         </label>
                         @empty
-                        <p class="text-xs text-base-content/30 py-1">Chưa có sản phẩm OCOP nào.</p>
+                        <p class="text-xs text-base-content/30 py-1" data-ocop-picker-empty>
+                            @if($article->ward_code || $article->province_code)
+                            Không có sản phẩm OCOP nào khớp tỉnh/phường đã chọn.
+                            @else
+                            Chọn tỉnh/thành hoặc phường/xã ở trên để xem sản phẩm OCOP tương ứng.
+                            @endif
+                        </p>
                         @endforelse
                     </div>
                 </div>

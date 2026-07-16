@@ -49,7 +49,14 @@ document.addEventListener('DOMContentLoaded', function () {
         'ts-prov-{{ $instanceId }}',
         'ts-ward-{{ $instanceId }}',
         @json($provinceValue ?? ''),
-        @json($wardValue ?? '')
+        @json($wardValue ?? ''),
+        function (provinceCode, wardCode) {
+            // Cho phép trang cha lắng nghe lựa chọn tỉnh/phường thay đổi (vd load động 1 danh
+            // sách phụ thuộc địa chỉ) mà không cần biết instance-id trước — filter bằng detail.
+            document.dispatchEvent(new CustomEvent('address-picker:change', {
+                detail: { instanceId: '{{ $instanceId }}', provinceCode, wardCode },
+            }));
+        }
     );
 });
 </script>

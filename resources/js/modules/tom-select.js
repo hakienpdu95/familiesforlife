@@ -60,8 +60,12 @@ window.TomSelect      = TomSelect;
  * @param {string} wardId     - ID of the ward <select>
  * @param {string} initProv   - pre-selected province_code (edit form / old())
  * @param {string} initWard   - pre-selected ward_code (edit form / old())
+ * @param {Function} [onChange] - (provinceCode|null, wardCode|null) => void — gọi mỗi khi lựa
+ *   chọn tỉnh/phường thay đổi (kể cả lần đầu nếu có initProv). KHÔNG gọi khi cả 2 đều rỗng lúc
+ *   khởi tạo — dùng cho các picker phụ thuộc địa chỉ (vd sản phẩm OCOP liên quan ở form bài
+ *   viết) muốn chỉ hiển thị SAU KHI đã có tỉnh/phường được chọn.
  */
-function initOrgAddress(provId, wardId, initProv, initWard) {
+function initOrgAddress(provId, wardId, initProv, initWard, onChange) {
     const provEl = document.getElementById(provId);
     const wardEl = document.getElementById(wardId);
     if (!provEl || !wardEl) return;
@@ -74,9 +78,10 @@ function initOrgAddress(provId, wardId, initProv, initWard) {
         placeholder: 'Chọn tỉnh / TP trước',
         maxOptions: null,
         plugins: ['clear_button'],
-        onChange() {
+        onChange(val) {
             // Dispatch native change so form-validation.js có thể clear/re-validate
             wardEl.dispatchEvent(new Event('change', { bubbles: true }));
+            onChange?.(provEl.value || null, val || null);
         },
     });
     wardTs.disable();
@@ -105,6 +110,7 @@ function initOrgAddress(provId, wardId, initProv, initWard) {
 
         if (!code) {
             setWardPlaceholder('Chọn tỉnh / TP trước');
+            onChange?.(null, null);
             return;
         }
 
@@ -119,13 +125,18 @@ function initOrgAddress(provId, wardId, initProv, initWard) {
             wardTs.enable();
 
             if (pendingWard) {
+                // setValue(.., true) = silent, không tự bắn onChange của wardTs → gọi tay 1 lần
                 wardTs.setValue(pendingWard, true);
+                onChange?.(code, pendingWard);
                 pendingWard = null;
+            } else {
+                onChange?.(code, null);
             }
         } catch (err) {
             console.error('[orgAddress] Lỗi tải phường/xã:', err);
             setWardPlaceholder('Lỗi tải dữ liệu');
             wardTs.enable();
+            onChange?.(code, null);
         }
     }
 

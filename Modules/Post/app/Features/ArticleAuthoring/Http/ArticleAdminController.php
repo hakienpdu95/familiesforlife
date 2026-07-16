@@ -125,12 +125,26 @@ class ArticleAdminController extends Controller
         $article->load(['categories', 'tags', 'ocopProducts', 'translations.contentBlocks.productBlock.items.product', 'translations.contentBlocks.productBlock.items.buttons', 'translations.contentBlocks.productBlock.buttons']);
         $categories = $categoryHandler->handle(new ListCategoriesForAdminQuery());
 
-        // spec/Province_Showcase_Technical_Specification.md §3.4.1 — lọc theo province_code của
-        // bài nếu bài đã gắn tỉnh (tránh danh sách quá dài), không bắt buộc.
-        $ocopProducts = OcopProduct::published()
-            ->when($article->province_code, fn ($q) => $q->where('province_code', $article->province_code))
-            ->orderBy('name')
-            ->get(['id', 'name', 'province_name']);
+        // spec/Province_Showcase_Technical_Specification.md §3.4.1 — lọc theo ward_code của bài
+        // nếu có (chuyên sâu hơn), fallback province_code; bài chưa gắn tỉnh/phường nào → không
+        // gợi ý sản phẩm nào cả (tránh danh sách toàn bộ sản phẩm quá dài). Đây chỉ là danh sách
+        // hiển thị ban đầu — article-form.js gọi lại api/ocop-products/picker để load động mỗi
+        // khi người dùng đổi lựa chọn tỉnh/phường trên <x-address-picker>.
+        $ocopProducts = $article->ward_code || $article->province_code
+            ? OcopProduct::published()
+                ->when($article->ward_code, fn ($q) => $q->forWard($article->ward_code))
+                ->when(! $article->ward_code && $article->province_code, fn ($q) => $q->forProvince($article->province_code))
+                ->orderBy('name')
+                ->get(['id', 'name', 'province_name', 'ward_name'])
+            : collect();
+
+        // Sản phẩm đã liên kết sẵn PHẢI luôn có mặt trong danh sách render (checked), kể cả khi
+        // không khớp bộ lọc trên hoặc bài chưa gắn địa phương nào — nếu không, checkbox tương
+        // ứng sẽ không tồn tại trong form và bị âm thầm xoá liên kết khi lưu lại.
+        $ocopProducts = $ocopProducts
+            ->concat($article->ocopProducts->whereNotIn('id', $ocopProducts->pluck('id')))
+            ->sortBy('name')
+            ->values();
 
         // Tab locale server-side (không SPA) — mỗi lần đổi tab load lại trang, tránh phải
         // làm cho post-block-composer.js/article-form.js (vốn giả định 1 form/1 composer duy
