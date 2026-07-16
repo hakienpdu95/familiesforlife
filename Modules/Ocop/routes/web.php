@@ -5,11 +5,14 @@ use Modules\Ocop\Features\OcopCategoryManagement\Http\OcopCategoryAdminControlle
 use Modules\Ocop\Features\OcopProductManagement\Http\OcopProductAdminController;
 use Modules\Ocop\Features\PublicReading\Http\PublicOcopController;
 
-// spec/Province_Showcase_Technical_Specification.md §6.1 — dashboard/ocop/categories +
-// dashboard/ocop/products (resource, except show), cùng convention CategoryAdminController/
-// BannerAdminController.
+// spec/Province_Showcase_Technical_Specification.md §6.1 — dashboard/ocop/products (resource,
+// except show), cùng convention CategoryAdminController/BannerAdminController.
+//
+// dashboard/ocop/categories chỉ còn index (đọc) — spec/danhmuc.html là bảng phân loại sản phẩm
+// OCOP chính thức (nhà nước quy định, thống nhất toàn quốc), đã chuẩn hóa qua OcopCategorySeeder,
+// KHÔNG còn create/store/edit/update/destroy.
 Route::middleware(['auth'])->prefix('dashboard/ocop')->name('backend.ocop.')->group(function (): void {
-    Route::resource('categories', OcopCategoryAdminController::class)->except(['show']);
+    Route::get('categories', [OcopCategoryAdminController::class, 'index'])->name('categories.index');
     Route::resource('products', OcopProductAdminController::class)->except(['show']);
 });
 

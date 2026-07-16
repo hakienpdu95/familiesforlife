@@ -42,10 +42,12 @@ class OcopProductAdminController extends Controller
 
     public function create(): View
     {
-        $categories = OcopCategory::active()->orderBy('name')->get(['id', 'name']);
-        $statuses   = OcopProductStatus::cases();
+        // Cây danh mục OCOP chính thức (spec/danhmuc.html) dạng phẳng kèm depth — <select> hiển
+        // thị thụt lề đúng cấp bậc I → Nhóm → Phân nhóm, thay vì liệt kê phẳng theo tên.
+        $categoryTree = OcopCategory::flatTree();
+        $statuses     = OcopProductStatus::cases();
 
-        return view('ocop::admin.products.create', compact('categories', 'statuses'));
+        return view('ocop::admin.products.create', compact('categoryTree', 'statuses'));
     }
 
     public function store(Request $request, StoreOcopProductImageAction $storeImage, CreateOcopProductAction $action): RedirectResponse
@@ -65,10 +67,11 @@ class OcopProductAdminController extends Controller
 
     public function edit(OcopProduct $product): View
     {
-        $categories = OcopCategory::active()->orderBy('name')->get(['id', 'name']);
-        $statuses   = OcopProductStatus::cases();
+        // Cùng lý do create() ở trên.
+        $categoryTree = OcopCategory::flatTree();
+        $statuses     = OcopProductStatus::cases();
 
-        return view('ocop::admin.products.edit', compact('product', 'categories', 'statuses'));
+        return view('ocop::admin.products.edit', compact('product', 'categoryTree', 'statuses'));
     }
 
     public function update(Request $request, OcopProduct $product, StoreOcopProductImageAction $storeImage, UpdateOcopProductAction $action): RedirectResponse

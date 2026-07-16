@@ -74,13 +74,23 @@
                         <label class="label py-0 pb-1.5">
                             <span class="label-text font-medium">Danh mục <span class="text-error">*</span></span>
                         </label>
+                        {{-- spec/danhmuc.html — danh mục OCOP chính thức 3 cấp (Nhóm lớn → Nhóm →
+                             Phân nhóm), $categoryTree đã phẳng hóa kèm depth (OcopCategory::flatTree()),
+                             thụt lề bằng ideographic space (không bị trình duyệt gộp khoảng trắng
+                             như space thường). Nhóm còn "con" (không phải cấp sâu nhất của nhánh)
+                             bị disable — sản phẩm chỉ được gán vào đúng phân nhóm cụ thể nhất. --}}
                         <select id="ts-category_id" name="category_id"
                                 data-req="Vui lòng chọn danh mục"
                                 class="select select-bordered select-sm w-full ts-init @error('category_id') select-error @enderror"
                                 data-ts-placeholder="— Chọn danh mục —">
                             <option value="">— Chọn danh mục —</option>
-                            @foreach($categories as $c)
-                            <option value="{{ $c->id }}" {{ (string) old('category_id', $product?->category_id) === (string) $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
+                            @foreach($categoryTree as $row)
+                            @php($cat = $row['category'])
+                            <option value="{{ $cat->id }}"
+                                    {{ (string) old('category_id', $product?->category_id) === (string) $cat->id ? 'selected' : '' }}
+                                    {{ $cat->children->isNotEmpty() ? 'disabled' : '' }}>
+                                {{ str_repeat('　', $row['depth']) }}{{ $row['depth'] > 0 ? '– ' : '' }}{{ $cat->name }}
+                            </option>
                             @endforeach
                         </select>
                         @error('category_id')<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror

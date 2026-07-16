@@ -10,6 +10,7 @@ class OcopDatabaseSeeder extends Seeder
     {
         $this->call([
             OcopPermissionSeeder::class,
+            OcopCategorySeeder::class,
         ]);
     }
 }

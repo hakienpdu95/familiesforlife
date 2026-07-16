@@ -14,8 +14,6 @@ use Modules\Event\Features\EventModeration\Actions\PublishEventAction;
 use Modules\Event\Features\EventModeration\Data\EventData;
 use Modules\Event\Models\Event;
 use Modules\Event\Models\EventCategory;
-use Modules\Ocop\Features\OcopCategoryManagement\Actions\CreateOcopCategoryAction;
-use Modules\Ocop\Features\OcopCategoryManagement\Data\OcopCategoryData;
 use Modules\Ocop\Features\OcopProductManagement\Actions\CreateOcopProductAction;
 use Modules\Ocop\Features\OcopProductManagement\Data\OcopProductData;
 use Modules\Ocop\Models\OcopCategory;
@@ -154,19 +152,33 @@ class ProvinceShowcaseDemoSeeder extends Seeder
         ],
     ];
 
-    /** @var array<int, array{province: string, category: string, name: string, star: int, description: string, producer_name: string, ward_code: string}> */
+    /**
+     * 'category' = slug danh mục OCOP CHÍNH THỨC (spec/danhmuc.html, seed bởi OcopCategorySeeder)
+     * — trước đây trỏ vào 2 danh mục tự chế "food"/"craft" (đã xoá), giờ map đúng phân nhóm nhà
+     * nước quy định. @var array<int, array{province: string, category: string, name: string, star: int, description: string, producer_name: string, ward_code: string}>
+     */
     private const OCOP_PRODUCTS = [
-        ['province' => 'hue', 'category' => 'food', 'name' => 'Mè xửng Huế', 'star' => 4, 'description' => 'Kẹo mè xửng dẻo thơm, đặc sản truyền thống lâu đời của xứ Huế.', 'producer_name' => 'Cơ sở mè xửng Thiên Hương', 'ward_code' => '19753'],
-        ['province' => 'hue', 'category' => 'food', 'name' => 'Tôm chua Huế', 'star' => 3, 'description' => 'Tôm chua lên men chua ngọt, ăn kèm thịt luộc hoặc bún — món quà đặc trưng của Cố đô.', 'producer_name' => 'Cơ sở tôm chua Bà Duệ', 'ward_code' => '19774'],
-        ['province' => 'hue', 'category' => 'food', 'name' => 'Trà cung đình Huế', 'star' => 3, 'description' => 'Trà thảo mộc pha chế theo bí quyết cung đình triều Nguyễn, thanh mát và bổ dưỡng.', 'producer_name' => 'Hợp tác xã trà cung đình Huế', 'ward_code' => '19777'],
-        ['province' => 'hue', 'category' => 'craft', 'name' => 'Nón lá bài thơ Huế', 'star' => 4, 'description' => 'Nón lá mỏng nhẹ, soi dưới ánh sáng hiện rõ hình ảnh và câu thơ ẩn trong lòng nón.', 'producer_name' => 'Làng nghề nón lá Phú Cam', 'ward_code' => '19789'],
-        ['province' => 'hue', 'category' => 'food', 'name' => 'Dầu tràm Huế', 'star' => 3, 'description' => 'Dầu tràm nguyên chất chưng cất thủ công, dùng giữ ấm và chăm sóc sức khỏe cho trẻ nhỏ.', 'producer_name' => 'Cơ sở dầu tràm Lộc Thủy', 'ward_code' => '19753'],
+        // Mè xửng: kẹo chế biến từ hạt vừng (mè) → I.3.c Chế biến từ rau, củ, quả, hạt
+        ['province' => 'hue', 'category' => 'c-phan-nhom-che-bien-tu-rau-cu-qua-hat', 'name' => 'Mè xửng Huế', 'star' => 4, 'description' => 'Kẹo mè xửng dẻo thơm, đặc sản truyền thống lâu đời của xứ Huế.', 'producer_name' => 'Cơ sở mè xửng Thiên Hương', 'ward_code' => '19753'],
+        // Tôm chua: thủy sản lên men/chế biến → I.3.d
+        ['province' => 'hue', 'category' => 'd-phan-nhom-che-bien-tu-thit-trung-sua-thuy-san-cac-san-pham-tu-mat-ong-mat-khac-va-nong-san-thuc-pham-khac', 'name' => 'Tôm chua Huế', 'star' => 3, 'description' => 'Tôm chua lên men chua ngọt, ăn kèm thịt luộc hoặc bún — món quà đặc trưng của Cố đô.', 'producer_name' => 'Cơ sở tôm chua Bà Duệ', 'ward_code' => '19774'],
+        // Trà cung đình: trà thảo mộc (không phải chè thật) → I.5.b Sản phẩm chè từ thực vật khác
+        ['province' => 'hue', 'category' => 'b-phan-nhom-san-pham-che-tu-thuc-vat-khac', 'name' => 'Trà cung đình Huế', 'star' => 3, 'description' => 'Trà thảo mộc pha chế theo bí quyết cung đình triều Nguyễn, thanh mát và bổ dưỡng.', 'producer_name' => 'Hợp tác xã trà cung đình Huế', 'ward_code' => '19777'],
+        // Nón lá: thủ công mỹ nghệ gia dụng → IV.1
+        ['province' => 'hue', 'category' => '1-nhom-thu-cong-my-nghe-gia-dung-trang-tri', 'name' => 'Nón lá bài thơ Huế', 'star' => 4, 'description' => 'Nón lá mỏng nhẹ, soi dưới ánh sáng hiện rõ hình ảnh và câu thơ ẩn trong lòng nón.', 'producer_name' => 'Làng nghề nón lá Phú Cam', 'ward_code' => '19789'],
+        // Dầu tràm: tinh dầu dược liệu → III.3
+        ['province' => 'hue', 'category' => '3-nhom-tinh-dau-va-duoc-lieu-khac', 'name' => 'Dầu tràm Huế', 'star' => 3, 'description' => 'Dầu tràm nguyên chất chưng cất thủ công, dùng giữ ấm và chăm sóc sức khỏe cho trẻ nhỏ.', 'producer_name' => 'Cơ sở dầu tràm Lộc Thủy', 'ward_code' => '19753'],
 
-        ['province' => 'ca-mau', 'category' => 'food', 'name' => 'Tôm khô Cà Mau', 'star' => 4, 'description' => 'Tôm khô đất Mũi thịt chắc, ngọt tự nhiên, phơi nắng thủ công theo cách truyền thống.', 'producer_name' => 'Cơ sở tôm khô Đất Mũi', 'ward_code' => '31825'],
-        ['province' => 'ca-mau', 'category' => 'food', 'name' => 'Cua Cà Mau', 'star' => 5, 'description' => 'Cua biển Cà Mau gạch đầy thịt chắc, đặc sản trứ danh vùng rừng ngập mặn.', 'producer_name' => 'Hợp tác xã nuôi cua Cà Mau', 'ward_code' => '31834'],
-        ['province' => 'ca-mau', 'category' => 'food', 'name' => 'Mắm cá đồng Cà Mau', 'star' => 3, 'description' => 'Mắm cá đồng lên men tự nhiên, nguyên liệu chính làm nên món lẩu mắm trứ danh.', 'producer_name' => 'Cơ sở mắm Út Sáu', 'ward_code' => '31840'],
-        ['province' => 'ca-mau', 'category' => 'food', 'name' => 'Muối Cà Mau', 'star' => 3, 'description' => 'Muối biển kết tinh tự nhiên từ vùng ven biển Cà Mau, hạt to, vị mặn thanh.', 'producer_name' => 'Hợp tác xã diêm dân Cà Mau', 'ward_code' => '31843'],
-        ['province' => 'ca-mau', 'category' => 'food', 'name' => 'Khô cá kèo Cà Mau', 'star' => 3, 'description' => 'Cá kèo phơi khô nguyên con, nướng hoặc chiên đều giữ được vị ngọt đặc trưng.', 'producer_name' => 'Cơ sở khô Bảy Đông', 'ward_code' => '31825'],
+        // Tôm khô: thủy sản phơi khô/chế biến → I.3.d
+        ['province' => 'ca-mau', 'category' => 'd-phan-nhom-che-bien-tu-thit-trung-sua-thuy-san-cac-san-pham-tu-mat-ong-mat-khac-va-nong-san-thuc-pham-khac', 'name' => 'Tôm khô Cà Mau', 'star' => 4, 'description' => 'Tôm khô đất Mũi thịt chắc, ngọt tự nhiên, phơi nắng thủ công theo cách truyền thống.', 'producer_name' => 'Cơ sở tôm khô Đất Mũi', 'ward_code' => '31825'],
+        // Cua tươi/sống → I.1.b Thịt, thủy sản, trứng, sữa tươi
+        ['province' => 'ca-mau', 'category' => 'b-phan-nhom-thit-thuy-san-trung-sua-tuoi', 'name' => 'Cua Cà Mau', 'star' => 5, 'description' => 'Cua biển Cà Mau gạch đầy thịt chắc, đặc sản trứ danh vùng rừng ngập mặn.', 'producer_name' => 'Hợp tác xã nuôi cua Cà Mau', 'ward_code' => '31834'],
+        // Mắm cá: thủy sản lên men/chế biến → I.3.d
+        ['province' => 'ca-mau', 'category' => 'd-phan-nhom-che-bien-tu-thit-trung-sua-thuy-san-cac-san-pham-tu-mat-ong-mat-khac-va-nong-san-thuc-pham-khac', 'name' => 'Mắm cá đồng Cà Mau', 'star' => 3, 'description' => 'Mắm cá đồng lên men tự nhiên, nguyên liệu chính làm nên món lẩu mắm trứ danh.', 'producer_name' => 'Cơ sở mắm Út Sáu', 'ward_code' => '31840'],
+        // Muối: gia vị khác → I.4.b
+        ['province' => 'ca-mau', 'category' => 'b-phan-nhom-gia-vi-khac', 'name' => 'Muối Cà Mau', 'star' => 3, 'description' => 'Muối biển kết tinh tự nhiên từ vùng ven biển Cà Mau, hạt to, vị mặn thanh.', 'producer_name' => 'Hợp tác xã diêm dân Cà Mau', 'ward_code' => '31843'],
+        // Khô cá kèo: thủy sản phơi khô/chế biến → I.3.d
+        ['province' => 'ca-mau', 'category' => 'd-phan-nhom-che-bien-tu-thit-trung-sua-thuy-san-cac-san-pham-tu-mat-ong-mat-khac-va-nong-san-thuc-pham-khac', 'name' => 'Khô cá kèo Cà Mau', 'star' => 3, 'description' => 'Cá kèo phơi khô nguyên con, nướng hoặc chiên đều giữ được vị ngọt đặc trưng.', 'producer_name' => 'Cơ sở khô Bảy Đông', 'ward_code' => '31825'],
     ];
 
     /** @var array<int, array<string, mixed>> */
@@ -285,17 +297,15 @@ class ProvinceShowcaseDemoSeeder extends Seeder
     {
         Auth::login($creator);
 
-        $categories = [
-            'food'  => 'Đặc sản ẩm thực',
-            'craft' => 'Thủ công mỹ nghệ',
-        ];
-        $categoryIds = [];
-        foreach ($categories as $key => $name) {
-            $category = OcopCategory::where('slug', Str::slug($name))->first();
-            if (! $category) {
-                $category = app(CreateOcopCategoryAction::class)->handle(OcopCategoryData::from(['name' => $name]));
-            }
-            $categoryIds[$key] = $category->id;
+        // Danh mục OCOP chính thức (spec/danhmuc.html) — seed bởi OcopCategorySeeder, KHÔNG còn
+        // tự tạo danh mục tùy tiện ở đây (bảng phân loại đã cố định theo quy định pháp luật).
+        $categorySlugs = array_unique(array_column(self::OCOP_PRODUCTS, 'category'));
+        $categoryIds   = OcopCategory::whereIn('slug', $categorySlugs)->pluck('id', 'slug');
+
+        if ($categoryIds->count() < count($categorySlugs)) {
+            $this->command->warn('  ⚠ Thiếu danh mục OCOP chính thức — chạy OcopCategorySeeder trước.');
+
+            return 0;
         }
 
         $created = 0;
