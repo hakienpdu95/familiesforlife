@@ -55,7 +55,7 @@ return [
     |
     */
 
-    'after_commit' => false,
+    'after_commit' => env('SCOUT_AFTER_COMMIT', true),
 
     /*
     |--------------------------------------------------------------------------
@@ -140,9 +140,12 @@ return [
         'host' => env('MEILISEARCH_HOST', 'http://localhost:7700'),
         'key' => env('MEILISEARCH_KEY'),
         'index-settings' => [
-            // 'users' => [
-            //     'filterableAttributes'=> ['id', 'name', 'email'],
-            // ],
+            \Modules\Post\Models\PostArticleTranslation::class => [
+                'searchableAttributes' => ['title', 'category_names', 'tag_names', 'excerpt', 'body_text'],
+                'filterableAttributes' => ['locale', 'status', 'category_slugs', 'province_code', 'format', 'is_featured'],
+                'sortableAttributes'   => ['published_at'],
+                'rankingRules'         => ['words', 'typo', 'proximity', 'attribute', 'sort', 'exactness'],
+            ],
         ],
     ],
 

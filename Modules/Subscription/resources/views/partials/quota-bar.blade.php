@@ -3,10 +3,10 @@
 
   Usage:
     @include('subscription::partials.quota-bar', [
-        'label'   => 'Nhân viên',
+        'label'   => 'Người dùng',
         'used'    => $current,
-        'limit'   => org_limit('limit.employees'),   // 0 = unlimited
-        'slug'    => 'limit.employees',
+        'limit'   => org_limit('limit.members'),   // 0 = unlimited
+        'slug'    => 'limit.members',
     ])
 
   Props:

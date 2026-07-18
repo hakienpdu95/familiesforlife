@@ -9,7 +9,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Laravel\Scout\Searchable;
 use Modules\Post\Database\Factories\PostArticleTranslationFactory;
+use Modules\Post\Enums\ContentBlockType;
 use Modules\Post\Enums\TranslationStatus;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
@@ -23,6 +25,7 @@ class PostArticleTranslation extends Model
     use HasFactory;
     use SoftDeletes;
     use LogsActivity;
+    use Searchable;
 
     protected $table = 'post_article_translations';
 
@@ -148,5 +151,84 @@ class PostArticleTranslation extends Model
     public function latestPublishLog(): ?PostPublishingLog
     {
         return $this->publishingLogs()->where('action', 'publish')->latest('created_at')->first();
+    }
+
+    // ── Scout / Meilisearch (spec/PostSearch_Meilisearch_Technical_Specification.md) ──
+
+    /**
+     * Tên index Meilisearch — tường minh, không để Scout tự suy ra từ table name để tránh vỡ
+     * khi đổi $table. PHẢI tự áp `config('scout.prefix')` ở đây — override `searchableAs()`
+     * thay thế hoàn toàn implementation mặc định của trait (`config('scout.prefix').$this->
+     * getTable()`), và `MeilisearchEngine` dùng thẳng giá trị trả về của hàm này, không tự
+     * cộng thêm prefix lần nữa (`vendor/laravel/scout/src/Engines/MeilisearchEngine.php`)
+     * — bỏ dòng `config('scout.prefix')` ở đây sẽ tạo nhầm index KHÔNG prefix, đụng tên với
+     * `kc_items`/instance dùng chung khác (§5 "Lưu ý vận hành").
+     */
+    public function searchableAs(): string
+    {
+        return config('scout.prefix').'post_article_translations';
+    }
+
+    /**
+     * Chỉ đẩy vào Meilisearch bản dịch ĐANG published CỦA 1 article CHƯA bị soft-delete.
+     * `$this->article` đi qua BelongsTo::article() — PostArticle có SoftDeletes nên global
+     * scope của quan hệ này đã tự loại record đã xoá, `$this->article` trả null nếu cha bị
+     * xoá → điều kiện dưới tự đúng KHI shouldBeSearchable() được Scout gọi lại (vd translation
+     * tự được save/touch lần sau). Đây là lớp phòng thủ thứ 2 — lớp thứ 1 (chính) là gọi
+     * unsearchable() tường minh ở DeleteArticleAction, vì xoá article không tự đụng gì tới
+     * translation nên shouldBeSearchable() không tự được Scout gọi lại ngay lúc đó.
+     */
+    public function shouldBeSearchable(): bool
+    {
+        return $this->status === TranslationStatus::Published
+            && $this->article !== null;
+    }
+
+    /**
+     * Payload đẩy lên Meilisearch. QUERY LẠI quan hệ (contentBlocks()->get(), không phải
+     * property $this->contentBlocks) — bắt buộc, vì SyncContentBlocksAction xoá-tạo-lại toàn
+     * bộ post_content_blocks TRONG CÙNG transaction với $translation->update(); nếu dùng
+     * property đã cache trước đó có thể dính bản cũ.
+     */
+    public function toSearchableArray(): array
+    {
+        $article = $this->article; // BelongsTo — 1 query, đã lọc soft-delete
+
+        $bodyText = $this->contentBlocks()
+            ->where('type', ContentBlockType::Text)
+            ->orderBy('sort_order')
+            ->pluck('text_html')
+            ->map(fn ($html) => trim(strip_tags((string) $html)))
+            ->filter()
+            ->implode(' ');
+
+        return [
+            'id'               => $this->id,
+            'uuid'             => $this->uuid,
+            'locale'           => $this->locale,
+            'title'            => $this->title,
+            'excerpt'          => (string) $this->excerpt,
+            'body_text'        => Str::limit($bodyText, 5000, ''),
+            'slug'             => $this->slug,
+            'status'           => $this->status->value,
+            'published_at'     => $this->published_at?->timestamp,
+            'article_id'       => $this->article_id,
+            'format'           => $article?->format?->value,
+            'is_featured'      => (bool) $article?->is_featured,
+            'province_code'    => $article?->province_code,
+            'category_names'   => $article?->categories->pluck('name')->all() ?? [],
+            'category_slugs'   => $article?->categories->pluck('slug')->all() ?? [],
+            'tag_names'        => $article?->tags->pluck('name')->all() ?? [],
+        ];
+    }
+
+    /**
+     * §3.1 — chỉ ảnh hưởng đường `scout:import`/`makeAllSearchable()`, KHÔNG ảnh hưởng đường
+     * queue 1-record khi user publish/sửa 1 bài (đường đó đã tự eager-load đủ trong
+     * toSearchableArray() vì chỉ chạy 1 lần).
+     */
+    protected function makeAllSearchableUsing($query)
+    {
+        return $query->with(['article.categories', 'article.tags']);
     }
 }

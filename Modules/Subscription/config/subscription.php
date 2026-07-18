@@ -5,44 +5,30 @@ return [
     'subscription_slug' => 'main',
     'default_plan'      => env('SUBSCRIPTION_DEFAULT_PLAN', 'starter'),
 
+    // Chỉ 4 module THẬT SỰ đang được `feature:module.x` middleware gate — xem
+    // `Modules/Lead|Customer|Assessment|WorkflowAutomation/routes/web.php`. Trước đây có thêm
+    // 'crm'/'sop'/'hr'/'recruitment'/'project'/'kc'/'marketplace'/'ai' nhưng không module nào
+    // tên như vậy được gate bởi feature này trong codebase.
     'module_features' => [
-        'crm'         => 'module.crm',
-        'workflow'    => 'module.workflow',
-        'sop'         => 'module.sop',
-        'hr'          => 'module.hr',
-        'recruitment' => 'module.recruitment',
-        'assessment'  => 'module.assessment',
-        'project'     => 'module.project',
-        'kc'          => 'module.kc',
-        'marketplace' => 'module.marketplace',
-        'ai'          => 'module.ai',
+        'lead'       => 'module.lead',
+        'customer'   => 'module.customer',
+        'workflow'   => 'module.workflow',
+        'assessment' => 'module.assessment',
     ],
 
     'limit_models' => [
         'limit.members'   => \App\Models\User::class,
     ],
 
+    // `limit.members` là limit DUY NHẤT đang thực sự được enforce (đếm User::where('organization_id',...)
+    // rồi so sánh — xem `Modules/User/app/Http/Controllers/UserController.php`). Trước đây còn có
+    // 'limit.employees' (trùng khái niệm, không có mapping/enforce riêng), 'limit.workflows',
+    // 'limit.projects', 'limit.storage_gb', 'limit.ai_agents' — hoặc không tồn tại khái niệm
+    // tương ứng nào (projects/ai_agents), hoặc có hạ tầng thật (Workflow, Media storage) nhưng
+    // chưa từng được dây nối vào Subscription để enforce — đã bỏ để tránh gói "hứa" giới hạn
+    // không có tác dụng gì trên thực tế.
     'limit_labels' => [
-        'limit.employees'  => 'Nhân viên',
-        'limit.members'    => 'Người dùng',
-        'limit.workflows'  => 'Workflow',
-        'limit.projects'   => 'Dự án',
-        'limit.storage_gb' => 'Dung lượng (GB)',
-        'limit.ai_agents'  => 'AI Agents',
-    ],
-
-    'quota_slugs' => [
-        'quota.ai_requests',
-        'quota.ai_tokens',
-        'quota.workflow_runs',
-        'quota.email_notifications',
-    ],
-
-    'quota_labels' => [
-        'quota.ai_requests'         => 'AI requests / tháng',
-        'quota.ai_tokens'           => 'AI tokens / tháng',
-        'quota.workflow_runs'       => 'Workflow executions / tháng',
-        'quota.email_notifications' => 'Email notifications / tháng',
+        'limit.members' => 'Người dùng',
     ],
 
     'on_expire'             => 'restrict',

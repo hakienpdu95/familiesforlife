@@ -123,15 +123,18 @@ class PlanController extends Controller
         ]);
     }
 
+    /**
+     * Chỉ feature-slug ĐANG THỰC SỰ ĐƯỢC ENFORCE — xem comment chi tiết ở
+     * `Modules/Subscription/database/seeders/FeatureSeeder.php`. Trước đây hàm này còn liệt kê
+     * thêm `limit.employees/workflows/projects/storage_gb`, toàn bộ `flag.*`,
+     * `quota.ai_requests/workflow_runs/email_notifications` — không slug nào trong số đó có
+     * enforcement thật ngoài Subscription module.
+     */
     private function featureSlugs(): array
     {
         return array_merge(
-            array_keys(config('subscription.module_features', [])),
-            array_map(fn ($k) => str_replace('module.', '', $k),
-                array_keys(config('subscription.module_features', []))),
-            ['limit.employees', 'limit.members', 'limit.workflows', 'limit.projects', 'limit.storage_gb'],
-            ['flag.api_access', 'flag.audit_log', 'flag.advanced_reports', 'flag.sso', 'flag.white_label', 'flag.custom_domain'],
-            ['quota.ai_requests', 'quota.workflow_runs', 'quota.email_notifications'],
+            array_values(config('subscription.module_features', [])),
+            array_keys(config('subscription.limit_labels', [])),
         );
     }
 }

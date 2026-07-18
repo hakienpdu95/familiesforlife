@@ -15,33 +15,21 @@ use Modules\Subscription\Models\OrganizationFeatureOverride;
 
 class AdminSubscriptionController extends Controller
 {
-    /** Danh sách tất cả feature slugs để dùng trong override modal. */
+    /**
+     * Danh sách feature slugs để dùng trong override modal — chỉ liệt kê slug ĐANG THỰC SỰ
+     * ĐƯỢC ENFORCE trong codebase (xem comment chi tiết ở
+     * `Modules/Subscription/database/seeders/FeatureSeeder.php`). Trước đây danh sách này còn
+     * có `module.task/sop/hr/crm/ai/recruitment/project/kc/marketplace`,
+     * `limit.employees/workflows/projects/storage_gb`, toàn bộ `flag.*`,
+     * `quota.ai_requests/workflow_runs/email_notifications` — không slug nào trong số đó có
+     * enforcement thật, tạo override cho chúng không có tác dụng gì.
+     */
     private static array $featureNames = [
-        'module.task'               => 'Module: Công việc',
-        'module.sop'                => 'Module: SOP',
-        'module.hr'                 => 'Module: Nhân sự',
-        'module.crm'                => 'Module: CRM / Lead',
-        'module.workflow'           => 'Module: Workflow',
-        'module.ai'                 => 'Module: AI',
-        'module.recruitment'        => 'Module: Tuyển dụng',
-        'module.assessment'         => 'Module: Assessment',
-        'module.project'            => 'Module: Dự án',
-        'module.kc'                 => 'Module: Kho tri thức',
-        'module.marketplace'        => 'Module: Marketplace',
-        'limit.employees'           => 'Giới hạn: Nhân viên',
-        'limit.members'             => 'Giới hạn: Người dùng',
-        'limit.workflows'           => 'Giới hạn: Workflow',
-        'limit.projects'            => 'Giới hạn: Dự án',
-        'limit.storage_gb'          => 'Giới hạn: Dung lượng (GB)',
-        'flag.api_access'           => 'Flag: API Access',
-        'flag.audit_log'            => 'Flag: Audit Log',
-        'flag.advanced_reports'     => 'Flag: Báo cáo nâng cao',
-        'flag.sso'                  => 'Flag: SSO',
-        'flag.white_label'          => 'Flag: White Label',
-        'flag.custom_domain'        => 'Flag: Custom Domain',
-        'quota.ai_requests'         => 'Quota: AI requests / tháng',
-        'quota.workflow_runs'       => 'Quota: Workflow runs / tháng',
-        'quota.email_notifications' => 'Quota: Email notifications / tháng',
+        'module.lead'       => 'Module: Lead (CRM)',
+        'module.customer'   => 'Module: Khách hàng (CRM)',
+        'module.workflow'   => 'Module: Workflow',
+        'module.assessment' => 'Module: Assessment',
+        'limit.members'     => 'Giới hạn: Người dùng',
     ];
 
     public function index(Request $request)

@@ -40,6 +40,11 @@ class UpdateArticleAction
             $this->syncTags($article, $data);
             $this->syncOcopProducts($article, $data);
 
+            // spec/PostSearch_Meilisearch_Technical_Specification.md §6.1 — category/tag/
+            // format/province đổi trên PostArticle, KHÔNG tự fire event lên translations, nên
+            // Scout không tự biết để re-index nếu không gọi tường minh.
+            $article->translations()->searchable();
+
             return $article;
         });
     }

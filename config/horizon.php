@@ -251,4 +251,23 @@ return [
         'composer.json',
         '.env',
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Alert routing (custom — không phải key gốc của package Horizon)
+    |--------------------------------------------------------------------------
+    |
+    | spec/PostSearch_Meilisearch_Technical_Specification.md §11/§13 bước 6 — bắt buộc có
+    | alert khi job hàng đợi fail hẳn (Horizon retry hết `tries` rồi mới bắn notification này),
+    | bao gồm cả `Laravel\Scout\Jobs\MakeSearchable`/`RemoveFromSearch` — đọc trong
+    | HorizonServiceProvider::boot(). Để trống (chưa có env) thì KHÔNG gọi route*NotificationsTo(),
+    | tránh Horizon lỗi vì thiếu địa chỉ/webhook hợp lệ.
+    |
+    */
+
+    'alerts' => [
+        'mail_to'       => env('HORIZON_ALERT_MAIL_TO'),
+        'slack_webhook' => env('HORIZON_ALERT_SLACK_WEBHOOK'),
+        'slack_channel' => env('HORIZON_ALERT_SLACK_CHANNEL', '#alerts'),
+    ],
 ];

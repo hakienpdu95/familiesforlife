@@ -104,10 +104,29 @@ Reverb isn't started. Run it:
 
 Notification Thông báo in-app  + push — (thông báo trên chuông) tất cả module đều cần
 
-Đọc file spec/Province_Showcase_Technical_Specification.md và implement theo đúng spec đó, tuân thủ đúng cấu trúc và nguyên tắc chuẩn khi thiết kế và triển khai module theo cấu trúc Advanced Vertical Slice (AVSA) + CQRS-lite + Laravel Modules + Laravel Actions, bổ sung ra mdenu sidebar để dùng, phần views hãy kế thừa và làm chuẩn @extends('layouts.backend')
+Đọc file spec/PostSearch_Meilisearch_Technical_Specification.md và implement theo đúng spec đó, tuân thủ đúng cấu trúc và nguyên tắc chuẩn khi thiết kế và triển khai module theo cấu trúc Advanced Vertical Slice (AVSA) + CQRS-lite + Laravel Modules + Laravel Actions, bổ sung ra mdenu sidebar để dùng, phần views hãy kế thừa và làm chuẩn @extends('layouts.backend')
 
 # > Thêm org selector theo pattern _resolveOrganizations() vào form create/edit của  module X
 
 # > Áp dụng pattern org selector của career-pathway-admin create vào form [tên module].
 
 set AI_DEFAULT_API_KEY trong .env.
+-------------------------------------------------
+
+Thêm — config/horizon.php: mục alerts (mail_to/slack_webhook/slack_channel), đọc từ 3 biến env mới. app/Providers/HorizonServiceProvider.php::boot(): gọi
+  Horizon::routeMailNotificationsTo()/routeSlackNotificationsTo() có điều kiện — chỉ bật khi env có giá trị thật, tránh Horizon lỗi vì thiếu địa chỉ/webhook.
+
+  .env/.env.example — thêm HORIZON_ALERT_MAIL_TO, HORIZON_ALERT_SLACK_WEBHOOK, HORIZON_ALERT_SLACK_CHANNEL (để trống, sẵn sàng điền khi có kênh thật). Đã kiểm tra: config load đúng, boot() chạy không lỗi
+  khi để trống.
+
+  Bạn cần làm gì tiếp (phần hạ tầng, không phải code):
+  1. Khi có kênh thật, điền vào .env production (không phải file local này):
+    - Email: HORIZON_ALERT_MAIL_TO=ai-do@congty.com
+    - hoặc Slack: HORIZON_ALERT_SLACK_WEBHOOK=https://hooks.slack.com/services/... (tạo Incoming Webhook trong Slack workspace) + HORIZON_ALERT_SLACK_CHANNEL="#ten-kenh"
+  2. Chạy lại php artisan config:cache (nếu production có cache config) và sudo supervisorctl restart minhan-horizon (theo deploy.sh hiện có) để Horizon áp dụng route notification mới.
+  3. Lưu ý: alert này bắn cho mọi job Horizon fail hẳn (không riêng job Scout) — vì hiện job Scout dùng chung queue default với các job khác. Muốn xem riêng job Scout, vào dashboard Horizon (/horizon → tab
+  Failed) và lọc theo tên job Laravel\Scout\Jobs\MakeSearchable/RemoveFromSearch.
+
+  Việc còn lại (tự điền webhook/email thật, restart Supervisor trên production) là quyết định/thao tác hạ tầng của bạn — mình không có quyền truy cập Slack/mail/server production nên không thể tự làm thay.
+
+  -------------------------------------------------
