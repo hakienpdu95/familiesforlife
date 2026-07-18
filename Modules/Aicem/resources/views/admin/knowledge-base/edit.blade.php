@@ -89,10 +89,23 @@
                                 <span class="label-text font-medium">Scope (JSON)</span>
                                 <span class="label-text-alt text-xs text-base-content/40">Để trống = áp dụng mọi bài/sản phẩm</span>
                             </label>
+                            @php
+                                $docSchema = $taxonomySchema[$document->subject_type] ?? null;
+                            @endphp
                             <textarea name="scope_json" rows="3"
-                                      class="textarea textarea-bordered textarea-sm w-full font-mono @error('scope_json') textarea-error @enderror"
-                                      placeholder='{"category_slugs": ["an-toan-giac-ngu"], "format": ["tip"]}'>{{ old('scope_json', $document->scope ? json_encode($document->scope, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) : '') }}</textarea>
+                                      @disabled(! $docSchema)
+                                      class="textarea textarea-bordered textarea-sm w-full font-mono @error('scope_json') textarea-error @enderror">{{ old('scope_json', $document->scope ? json_encode($document->scope, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) : '') }}</textarea>
                             @error('scope_json')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                            @if($docSchema)
+                            <p class="text-xs text-base-content/40 mt-1">
+                                Key phải khớp taxonomy_keys của <span class="font-mono">{{ $document->subject_type }}</span>:
+                                <span class="font-mono">{{ implode(', ', $docSchema) }}</span>.
+                            </p>
+                            @else
+                            <p class="text-xs text-warning mt-1">
+                                Tài liệu này là DNA chung toàn tổ chức (không gắn subject_type) — KHÔNG được đặt scope, để trống ô này (đã tự khoá).
+                            </p>
+                            @endif
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

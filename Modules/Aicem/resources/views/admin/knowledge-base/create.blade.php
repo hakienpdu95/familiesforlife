@@ -30,7 +30,8 @@
 </div>
 @endif
 
-<form method="POST" action="{{ route('backend.aicem.knowledge-documents.store') }}">
+<form method="POST" action="{{ route('backend.aicem.knowledge-documents.store') }}"
+      x-data="{ subjectType: '{{ old('subject_type', '') }}', taxonomy: @js($taxonomySchema) }">
     @csrf
 
     <div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-6 items-start">
@@ -45,7 +46,8 @@
                             <label class="label py-0 pb-1.5">
                                 <span class="label-text font-medium">Subject_type</span>
                             </label>
-                            <select name="subject_type" class="select select-bordered select-sm w-full @error('subject_type') select-error @enderror">
+                            <select name="subject_type" x-model="subjectType"
+                                    class="select select-bordered select-sm w-full @error('subject_type') select-error @enderror">
                                 <option value="">— DNA chung toàn tổ chức (không gắn subject) —</option>
                                 @foreach($subjectTypes as $st)
                                 <option value="{{ $st['key'] }}" {{ old('subject_type') === $st['key'] ? 'selected' : '' }}>{{ $st['label'] }} ({{ $st['key'] }})</option>
@@ -120,12 +122,21 @@
                                 <span class="label-text-alt text-xs text-base-content/40">Không bắt buộc — để trống = áp dụng mọi bài/sản phẩm</span>
                             </label>
                             <textarea name="scope_json" rows="3"
-                                      class="textarea textarea-bordered textarea-sm w-full font-mono @error('scope_json') textarea-error @enderror"
-                                      placeholder='{"category_slugs": ["an-toan-giac-ngu"], "format": ["tip"]}'>{{ old('scope_json') }}</textarea>
+                                      x-bind:disabled="!subjectType"
+                                      class="textarea textarea-bordered textarea-sm w-full font-mono @error('scope_json') textarea-error @enderror">{{ old('scope_json') }}</textarea>
                             @error('scope_json')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
-                            <p class="text-xs text-base-content/40 mt-1">
-                                Key phải khớp taxonomy_keys của subject_type đã chọn (VD post_article: category_slugs, format, tag_slugs).
-                            </p>
+                            <template x-if="subjectType">
+                                <p class="text-xs text-base-content/40 mt-1">
+                                    Key phải khớp taxonomy_keys của <span class="font-mono" x-text="subjectType"></span>:
+                                    <span class="font-mono" x-text="(taxonomy[subjectType] ?? []).join(', ')"></span>.
+                                </p>
+                            </template>
+                            <template x-if="!subjectType">
+                                <p class="text-xs text-warning mt-1">
+                                    Chưa chọn subject_type ở trên (đang là "DNA chung toàn tổ chức") — tri thức DNA
+                                    KHÔNG được đặt scope, để trống ô này (đã tự khoá).
+                                </p>
+                            </template>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

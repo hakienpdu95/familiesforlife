@@ -44,8 +44,9 @@ class KnowledgeDocumentAdminController extends Controller
     public function create(): View
     {
         return view('aicem::admin.knowledge-base.create', [
-            'slotDefinitions' => config('aicem_subjects.knowledge_slot_definitions'),
-            'subjectTypes'    => $this->subjectTypeOptions(),
+            'slotDefinitions'  => config('aicem_subjects.knowledge_slot_definitions'),
+            'subjectTypes'     => $this->subjectTypeOptions(),
+            'taxonomySchema'   => $this->taxonomySchema(),
         ]);
     }
 
@@ -67,7 +68,10 @@ class KnowledgeDocumentAdminController extends Controller
     {
         $document->load(['versions' => fn ($q) => $q->orderByDesc('version')->with('changer:id,name')]);
 
-        return view('aicem::admin.knowledge-base.edit', compact('document'));
+        return view('aicem::admin.knowledge-base.edit', [
+            'document'       => $document,
+            'taxonomySchema' => $this->taxonomySchema(),
+        ]);
     }
 
     public function update(Request $request, AicemKnowledgeDocument $document, UpdateKnowledgeDocumentAction $action): RedirectResponse
@@ -107,6 +111,22 @@ class KnowledgeDocumentAdminController extends Controller
 
         return redirect()->route('backend.aicem.knowledge-documents.edit', $document)
             ->with('success', "Đã khôi phục về phiên bản #{$version->version}.");
+    }
+
+    /**
+     * Map subject_type => taxonomy_keys hợp lệ — dùng để hint ở ô "Scope (JSON)" tự đổi theo
+     * subject_type đang chọn (Modules/Aicem/config/aicem_subjects.php::taxonomy_keys là nguồn
+     * sự thật duy nhất, KHÔNG lặp lại danh sách key tĩnh trong Blade — trước đây hint luôn ghi
+     * cứng ví dụ của post_article dù chọn subject_type nào, sai với product).
+     *
+     * @return array<string, array<int, string>>
+     */
+    private function taxonomySchema(): array
+    {
+        return collect(config('aicem_subjects'))
+            ->except('knowledge_slot_definitions')
+            ->map(fn (array $cfg): array => $cfg['taxonomy_keys'] ?? [])
+            ->all();
     }
 
     /** @return array<int, array{key: string, label: string}> */
