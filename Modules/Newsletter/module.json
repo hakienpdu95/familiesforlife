@@ -1,0 +1,11 @@
+{
+    "name": "Newsletter",
+    "alias": "newsletter",
+    "description": "Bản tin nền tảng — thu thập subscriber (full_name/email), đồng bộ Resend Contacts, gửi hàng loạt qua Resend Broadcasts (spec/Newsletter_Technical_Specification.md)",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Newsletter\\Providers\\NewsletterServiceProvider"
+    ],
+    "files": []
+}

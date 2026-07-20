@@ -29,13 +29,21 @@ class ArticleVersionController extends Controller
             ->with(['createdBy:id,name', 'restoredFrom:id,version_number'])
             ->paginate($perPage);
 
-        $data = $versions->getCollection()->map(function (PostArticleVersion $version) use ($translation) {
-            // §13.3 — char_delta/block_delta so với version liền trước (version_number - 1),
-            // tính ở tầng Query (không lưu sẵn), tránh phải update lại version cũ khi có version
-            // mới chèn vào.
-            $previous = $translation->versions()
-                ->where('version_number', $version->version_number - 1)
-                ->first(['char_count', 'block_count']);
+        // §13.3 — char_delta/block_delta so với version liền trước (version_number - 1), tính ở
+        // tầng Query (không lưu sẵn). Gộp thành 1 query `whereIn` duy nhất cho CẢ TRANG thay vì
+        // 1 query "liền trước" cho từng dòng (N+1 — với per_page=20 là 20 query thừa/lần load).
+        $previousNumbers = $versions->getCollection()
+            ->pluck('version_number')
+            ->map(fn ($n) => $n - 1)
+            ->filter(fn ($n) => $n > 0);
+
+        $previousByNumber = $translation->versions()
+            ->whereIn('version_number', $previousNumbers)
+            ->get(['version_number', 'char_count', 'block_count'])
+            ->keyBy('version_number');
+
+        $data = $versions->getCollection()->map(function (PostArticleVersion $version) use ($previousByNumber) {
+            $previous = $previousByNumber->get($version->version_number - 1);
 
             return [
                 'id'                            => $version->id,

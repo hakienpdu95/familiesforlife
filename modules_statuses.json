@@ -20,5 +20,6 @@
     "Menu": true,
     "Banner": true,
     "Ocop": true,
-    "ProvinceShowcase": true
+    "ProvinceShowcase": true,
+    "Newsletter": true
 }

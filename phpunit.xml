@@ -28,6 +28,7 @@
             <directory>Modules/Deployment/tests/Feature</directory>
             <directory>Modules/SolutionCatalog/tests/Feature</directory>
             <directory>Modules/Approval/tests/Feature</directory>
+            <directory>Modules/Post/tests/Feature</directory>
         </testsuite>
     </testsuites>
     <source>

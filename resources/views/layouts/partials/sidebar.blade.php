@@ -160,6 +160,32 @@
         </details>
         @endcan
 
+        {{-- spec/Newsletter_Technical_Specification.md §12 — platform-wide, không permission
+             Spatie riêng (§0 mục 10). Dùng @can('viewAny', ...) đi qua NewsletterPolicy/Gate
+             (KHÔNG gọi thẳng auth()->user()->isPlatformContentEditor() như mục "Bài viết chờ
+             duyệt" ở trên) — vì gọi thẳng method là raw PHP, không đi qua Gate nên KHÔNG tự
+             hưởng bypass super-admin của Gate::before() (app/Providers/AppServiceProvider.php),
+             khiến chính super-admin lại không thấy menu của module do chính mình tạo. --}}
+        @can('viewAny', \Modules\Newsletter\Models\NewsletterSubscriber::class)
+        <details {{ request()->routeIs('backend.newsletter.*') ? 'open' : '' }}>
+            <summary class="nav-summary {{ request()->routeIs('backend.newsletter.*') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                <span class="nav-label">Bản tin</span>
+                <svg class="nav-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m9 18 6-6-6-6"/></svg>
+            </summary>
+            <div class="sub-menu">
+                <a href="{{ route('backend.newsletter.subscribers.index') }}"
+                   class="sub-link {{ request()->routeIs('backend.newsletter.subscribers.*') ? 'active' : '' }}">Người đăng ký</a>
+                @can('sendBroadcast', \Modules\Newsletter\Models\NewsletterBroadcastLog::class)
+                <a href="{{ route('backend.newsletter.broadcast.create') }}"
+                   class="sub-link {{ request()->routeIs('backend.newsletter.broadcast.create') ? 'active' : '' }}">Soạn bản tin</a>
+                @endcan
+                <a href="{{ route('backend.newsletter.broadcast.logs') }}"
+                   class="sub-link {{ request()->routeIs('backend.newsletter.broadcast.logs') ? 'active' : '' }}">Lịch sử gửi</a>
+            </div>
+        </details>
+        @endcan
+
         {{-- spec/Menu_Navigation_Technical_Specification.md §1 — MenuItem decoupled khỏi
              PostCategory (điều hướng ≠ phân loại nội dung), nên là mục sidebar riêng,
              không lồng trong "Bài viết". Phase 1: chỉ CRUD quản trị, chưa render công khai. --}}
