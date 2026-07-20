@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Notifications\ChannelManager;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
@@ -34,6 +35,16 @@ class AppServiceProvider extends ServiceProvider
 
         if (app()->isProduction()) {
             DB::disableQueryLog();
+        }
+
+        // spec/SiteSearch_Activation_Expansion_Technical_Specification.md §4.5 — giải pháp TẠM
+        // THỜI (log critical, không chặn hẳn) vì repo chưa có pipeline CI/CD nào để chèn
+        // `php artisan scout:verify-driver` (app/Console/Commands/VerifyScoutDriverCommand.php)
+        // làm bước chặn deploy. Nâng cấp lên chặn deploy ở CI/CD ngay khi có pipeline — đây
+        // KHÔNG phải giải pháp cuối cùng.
+        if (app()->environment('production', 'staging') && config('scout.driver') !== 'meilisearch') {
+            Log::critical('[Scout] SCOUT_DRIVER cấu hình sai cho môi trường '.app()->environment().
+                " (hiện là '".config('scout.driver')."', cần 'meilisearch') — search sẽ âm thầm chạy driver 'collection', mất typo-tolerance/relevance-ranking. Xem spec/SiteSearch_Activation_Expansion_Technical_Specification.md §4.5.");
         }
 
         // super-admin bypass toàn bộ Gate checks

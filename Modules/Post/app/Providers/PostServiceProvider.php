@@ -5,6 +5,7 @@ namespace Modules\Post\Providers;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Gate;
 use Modules\Post\Console\Commands\BackfillPostTranslationsCommand;
+use Modules\Post\Console\Commands\MonitorScoutFailedJobsCommand;
 use Modules\Post\Console\Commands\PruneArticleVersionsCommand;
 use Modules\Post\Jobs\ExpireSponsoredArticlesJob;
 use Modules\Post\Jobs\PublishDueTranslationsJob;
@@ -39,6 +40,7 @@ class PostServiceProvider extends ModuleServiceProvider
         $this->commands([
             BackfillPostTranslationsCommand::class,
             PruneArticleVersionsCommand::class,
+            MonitorScoutFailedJobsCommand::class,
         ]);
 
         // Phase 14 — tự động publish translation đã tới hạn scheduled_at (§7.3).
@@ -50,6 +52,10 @@ class PostServiceProvider extends ModuleServiceProvider
             // qua tham số thứ 2 của Schedule::job() (đã có sẵn trong lệnh worker chuẩn — README)
             // để không tranh tài nguyên với PublishDueTranslationsJob (queue mặc định).
             $schedule->job(new ExpireSponsoredArticlesJob(), 'low')->daily()->withoutOverlapping();
+
+            // spec/SiteSearch_Activation_Expansion_Technical_Specification.md §4.3 — giám sát
+            // failed_jobs cho job Scout (MakeSearchable/RemoveFromSearch), 15 phút/lần.
+            $schedule->command(MonitorScoutFailedJobsCommand::class)->everyFifteenMinutes()->withoutOverlapping();
         });
     }
 }
