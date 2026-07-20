@@ -4,15 +4,21 @@ namespace Modules\Post\Features\ArticleAuthoring\Actions;
 
 use Lorisleiva\Actions\Concerns\AsAction;
 use Modules\Post\Enums\TranslationStatus;
+use Modules\Post\Enums\VersionTrigger;
 use Modules\Post\Features\ArticleAuthoring\Actions\Concerns\LogsPublishingActions;
 use Modules\Post\Features\ArticleAuthoring\Events\ArticlePublished;
 use Modules\Post\Features\ArticleAuthoring\Exceptions\InvalidTransitionException;
+use Modules\Post\Features\VersionHistory\Actions\CreateArticleVersionAction;
 use Modules\Post\Models\PostArticleTranslation;
 
 class PublishArticleAction
 {
     use AsAction;
     use LogsPublishingActions;
+
+    public function __construct(
+        private readonly CreateArticleVersionAction $createVersion,
+    ) {}
 
     public function handle(PostArticleTranslation $translation): PostArticleTranslation
     {
@@ -43,6 +49,10 @@ class PublishArticleAction
         }
 
         $this->log($translation, 'publish');
+
+        // spec/Post_VersionHistory_Technical_Specification.md §9.4 — chốt "bản đang public",
+        // LUÔN ghi (không dedup theo content_hash như trigger=save, xem PersistArticleVersionJob).
+        $this->createVersion->handle($translation, VersionTrigger::Publish, auth()->id());
 
         event(new ArticlePublished($translation));
 

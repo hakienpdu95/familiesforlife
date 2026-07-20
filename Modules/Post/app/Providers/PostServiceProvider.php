@@ -5,6 +5,7 @@ namespace Modules\Post\Providers;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Gate;
 use Modules\Post\Console\Commands\BackfillPostTranslationsCommand;
+use Modules\Post\Console\Commands\PruneArticleVersionsCommand;
 use Modules\Post\Jobs\ExpireSponsoredArticlesJob;
 use Modules\Post\Jobs\PublishDueTranslationsJob;
 use Modules\Post\Models\PostArticle;
@@ -37,6 +38,7 @@ class PostServiceProvider extends ModuleServiceProvider
 
         $this->commands([
             BackfillPostTranslationsCommand::class,
+            PruneArticleVersionsCommand::class,
         ]);
 
         // Phase 14 — tự động publish translation đã tới hạn scheduled_at (§7.3).

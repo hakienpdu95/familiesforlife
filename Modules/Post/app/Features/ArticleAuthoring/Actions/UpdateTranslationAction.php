@@ -4,7 +4,9 @@ namespace Modules\Post\Features\ArticleAuthoring\Actions;
 
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
+use Modules\Post\Enums\VersionTrigger;
 use Modules\Post\Features\ArticleAuthoring\Data\TranslationData;
+use Modules\Post\Features\VersionHistory\Actions\CreateArticleVersionAction;
 use Modules\Post\Models\PostArticleTranslation;
 
 class UpdateTranslationAction
@@ -13,6 +15,7 @@ class UpdateTranslationAction
 
     public function __construct(
         private readonly SyncContentBlocksAction $syncContentBlocks,
+        private readonly CreateArticleVersionAction $createVersion,
     ) {}
 
     /** Slug giữ nguyên sau khi tạo (tránh vỡ link đã chia sẻ) nếu không truyền slug mới tường minh. */
@@ -32,6 +35,10 @@ class UpdateTranslationAction
             ]);
 
             $this->syncContentBlocks->handle($translation, $data->blocks);
+
+            // spec/Post_VersionHistory_Technical_Specification.md §9.4 — snapshot đóng gói
+            // đồng bộ ngay đây (đọc lại dữ liệu vừa ghi), ghi DB thật sự bất đồng bộ qua queue.
+            $this->createVersion->handle($translation, VersionTrigger::Save, auth()->id());
 
             return $translation;
         });

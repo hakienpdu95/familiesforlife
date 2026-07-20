@@ -134,6 +134,17 @@ class PostArticleTranslation extends Model
         return $this->hasMany(PostPublishingLog::class, 'translation_id');
     }
 
+    /** spec/Post_VersionHistory_Technical_Specification.md §8. */
+    public function versions(): HasMany
+    {
+        return $this->hasMany(PostArticleVersion::class, 'translation_id')->orderByDesc('version_number');
+    }
+
+    public function latestVersion(): ?PostArticleVersion
+    {
+        return $this->versions()->first();
+    }
+
     // ── Scopes & helpers ─────────────────────────────────────────────
 
     public function scopePublished($query): void

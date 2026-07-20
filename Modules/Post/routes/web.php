@@ -8,6 +8,7 @@ use Modules\Post\Features\PublicReading\Http\ProductBlockClickController;
 use Modules\Post\Features\PublicReading\Http\PublicArticleController;
 use Modules\Post\Features\PublicReading\Http\PublicCategoryController;
 use Modules\Post\Features\PublicReading\Http\SitemapController;
+use Modules\Post\Features\VersionHistory\Http\ArticleVersionController;
 
 // ── Quản trị Bài viết + Danh mục (đa ngôn ngữ — Publishing Engine Phase 15,
 // xem spec/PublishingEngine_Technical_Specification.md §9) ─────────────────
@@ -39,6 +40,15 @@ Route::middleware(['auth'])
         Route::post('articles/{article}/translations', [TranslationController::class, 'store'])->name('articles.translations.store');
         Route::put('translations/{translation}', [TranslationController::class, 'update'])->name('translations.update');
         Route::delete('translations/{translation}', [TranslationController::class, 'destroy'])->name('translations.destroy');
+
+        // spec/Post_VersionHistory_Technical_Specification.md §13.2 — 'versions/compare' PHẢI
+        // đăng ký TRƯỚC 'versions/{version}' (show): cùng lý do 'articles/pending-review' đặt
+        // trước Route::resource('articles', ...) ở trên — nếu không, "compare" sẽ bị model-bind
+        // nhầm thành {version} (ném ModelNotFoundException) trước khi khớp được route compare.
+        Route::get('translations/{translation}/versions', [ArticleVersionController::class, 'index'])->name('translations.versions.index');
+        Route::get('translations/{translation}/versions/compare', [ArticleVersionController::class, 'compare'])->name('translations.versions.compare');
+        Route::get('translations/{translation}/versions/{version}', [ArticleVersionController::class, 'show'])->name('translations.versions.show');
+        Route::post('translations/{translation}/versions/{version}/restore', [ArticleVersionController::class, 'restore'])->name('translations.versions.restore');
 
         Route::post('translations/{translation}/submit', [TranslationController::class, 'submit'])->name('translations.submit');
         Route::post('translations/{translation}/approve', [TranslationController::class, 'approve'])->name('translations.approve');

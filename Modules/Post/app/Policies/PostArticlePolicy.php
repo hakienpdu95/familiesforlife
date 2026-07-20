@@ -150,4 +150,18 @@ class PostArticlePolicy
     {
         return $user->can('post_article.manage_sponsorship');
     }
+
+    // ── Version History (spec/Post_VersionHistory_Technical_Specification.md §0/§13.1) ──
+    // Không thêm permission mới — tái dùng post_article.view (xem lịch sử/so sánh) và
+    // post_article.edit (khôi phục).
+
+    public function viewHistory(User $user, PostArticleTranslation $translation): bool
+    {
+        return $this->view($user, $translation);
+    }
+
+    public function restoreVersion(User $user, PostArticleTranslation $translation): bool
+    {
+        return $this->update($user, $translation);
+    }
 }

@@ -328,5 +328,14 @@
     [
         "provinces///add///__///",
         "slug///string///255///_NULL///NULL///->unique()///__"
+    ],
+    [
+        "ocop_categories///add///__///",
+        "parent_id///unsignedBigInteger///__///_NULL///NULL///->constrained('ocop_categories')->onDelete('cascade')///__",
+        "depth///unsignedTinyInteger///__///NOT_NULL///0///__///0=nhóm lớn (I-VI), 1=nhóm, 2=phân nhóm — cache lại, không tính đệ quy",
+        "code///string///10///_NULL///NULL///__///STT chính thức theo spec/danhmuc.html — vd I, 1, a",
+        "authority///string///255///_NULL///NULL///__///Cơ quan chủ trì quản lý — chỉ có ở cấp sâu nhất của mỗi nhánh",
+        "__index///index///__///__///__///parent_id,sort_order|idx_ocop_category_tree///__",
+        "__index///index///__///__///__///depth,sort_order|idx_ocop_category_depth///__"
     ]
 ]

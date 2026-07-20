@@ -1956,5 +1956,22 @@
         "post_article_ocop_products///__///__///",
         "article_id///unsignedBigInteger///__///NOT_NULL///__///->constrained('post_articles')->onDelete('cascade')///__",
         "ocop_product_id///unsignedBigInteger///__///NOT_NULL///__///->constrained('ocop_products')->onDelete('cascade')///__"
+    ],
+    [
+        "post_article_versions///__///__///",
+        "translation_id///unsignedBigInteger///__///NOT_NULL///__///->constrained('post_article_translations')->onDelete('cascade')///__",
+        "version_number///unsignedInteger///__///NOT_NULL///__///__///__",
+        "trigger///string///20///NOT_NULL///__///__///__",
+        "snapshot///json///__///NOT_NULL///__///__///__",
+        "title_snapshot///string///300///NOT_NULL///__///__///__",
+        "content_hash///char///64///NOT_NULL///__///__///__",
+        "char_count///unsignedInteger///__///NOT_NULL///0///__///__",
+        "block_count///unsignedSmallInteger///__///NOT_NULL///0///__///__",
+        "restored_from_version_id///unsignedBigInteger///__///_NULL///NULL///->constrained('post_article_versions')->onDelete('set null')///__",
+        "created_by///unsignedBigInteger///__///_NULL///NULL///->constrained('users')->onDelete('set null')///__",
+        "created_at///timestamp///__///NOT_NULL///__///__///__",
+        "__index///unique///__///__///__///translation_id,version_number|uq_post_version_translation_number///__",
+        "__index///index///__///__///__///translation_id,created_at|idx_post_version_translation_created///__",
+        "__index///index///__///__///__///translation_id,content_hash|idx_post_version_translation_hash///__"
     ]
 ]
