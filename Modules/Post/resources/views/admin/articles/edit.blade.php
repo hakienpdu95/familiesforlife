@@ -99,6 +99,19 @@ function postVersionHistory(indexUrl, translationStatus, knownLatestId, canResto
             }
         },
 
+        // Bấm vào 1 phiên bản trong danh sách → mặc định so sánh NGAY với bản liền trước
+        // (version_number - 1) để thấy highlight thêm/xoá/thay đổi, thay vì chỉ xem nội dung
+        // thô không có gì để đối chiếu. Nếu không tìm thấy bản liền trước trong trang hiện tại
+        // (bản đầu tiên, hoặc bản trước nằm ở trang phân trang khác) → rơi về xem nội dung thô.
+        viewVersion(version) {
+            const previous = this.versions.find((v) => v.version_number === version.version_number - 1);
+            if (previous) {
+                this.compareTwo(previous, version);
+                return;
+            }
+            this.viewPreview(version.id);
+        },
+
         async compareSelected() {
             if (this.selected.length !== 2) return;
             // Luôn so "cũ → mới" theo version_number, KHÔNG theo thứ tự người dùng tick chọn —
@@ -108,6 +121,10 @@ function postVersionHistory(indexUrl, translationStatus, knownLatestId, canResto
                 .sort((v1, v2) => v1.version_number - v2.version_number);
             if (ordered.length !== 2) return;
             const [from, to] = ordered;
+            await this.compareTwo(from, to);
+        },
+
+        async compareTwo(from, to) {
             this.view = 'compare';
             this.loading = true;
             this.error = null;
@@ -783,7 +800,9 @@ function postVersionHistory(indexUrl, translationStatus, knownLatestId, canResto
 @if($canViewHistory)
 {{-- ── Modal: Lịch sử phiên bản (list / preview / compare) ────────────────── --}}
 <div class="modal" :class="open ? 'modal-open' : ''">
-    <div class="modal-box max-w-3xl">
+    {{-- w-[90vw] max-w-[90vw] — nội dung so sánh (diff block cạnh nhau, bảng field before/after)
+         cần bề ngang rộng để đọc thoải mái, modal-box mặc định (max-w-3xl ~ 48rem) quá chật. --}}
+    <div class="modal-box w-[90vw] max-w-[90vw] max-h-[90vh]">
         <div class="flex items-center justify-between mb-4">
             <h3 class="font-bold text-lg"
                 x-text="view === 'list' ? 'Lịch sử phiên bản' : (view === 'preview' ? 'Xem phiên bản' : 'So sánh phiên bản')"></h3>
@@ -821,7 +840,7 @@ function postVersionHistory(indexUrl, translationStatus, knownLatestId, canResto
                                     <input type="checkbox" class="checkbox checkbox-xs"
                                            :checked="selected.includes(version.id)" @change="toggleSelect(version.id)">
                                 </td>
-                                <td class="cursor-pointer font-medium" @click="viewPreview(version.id)">
+                                <td class="cursor-pointer font-medium" @click="viewVersion(version)">
                                     #<span x-text="version.version_number"></span>
                                 </td>
                                 <td>
@@ -839,7 +858,8 @@ function postVersionHistory(indexUrl, translationStatus, knownLatestId, canResto
                                           x-text="(version.char_delta > 0 ? '+' : '') + version.char_delta"></span>
                                 </td>
                                 <td class="text-right whitespace-nowrap">
-                                    <button type="button" class="btn btn-ghost btn-xs" @click="viewPreview(version.id)">Xem</button>
+                                    <button type="button" class="btn btn-ghost btn-xs" @click="viewVersion(version)">Xem</button>
+                                    <button type="button" class="btn btn-ghost btn-xs" @click="viewPreview(version.id)" title="Xem nguyên văn phiên bản này, không so sánh">Nội dung gốc</button>
                                     <template x-if="!isLatest(version) && canRestore">
                                         <button type="button" class="btn btn-warning btn-xs" @click="confirmRestore(version)">Khôi phục</button>
                                     </template>
@@ -915,7 +935,13 @@ function postVersionHistory(indexUrl, translationStatus, knownLatestId, canResto
                                     <span class="badge badge-xs" x-text="bc.status"></span>
                                     <span class="text-base-content/50">Khối #<span x-text="bc.index + 1"></span> (<span x-text="bc.type"></span>)</span>
                                 </div>
-                                <template x-if="bc.type === 'text' && bc.status === 'changed'">
+                                <template x-if="bc.type === 'text' && bc.status === 'changed' && bc.diff_html">
+                                    <div x-html="bc.diff_html"></div>
+                                </template>
+                                <template x-if="bc.type === 'text' && bc.status === 'changed' && !bc.diff_html">
+                                    {{-- Đoạn quá dài để diff từng từ (an toàn hiệu năng, xem
+                                         CompareArticleVersionsAction::MAX_WORD_DIFF_CELLS) — hiện
+                                         nguyên khối cũ/mới cạnh nhau như trước. --}}
                                     <div class="grid grid-cols-2 gap-2">
                                         <div class="line-through opacity-60" x-html="bc.before_html"></div>
                                         <div x-html="bc.after_html"></div>
