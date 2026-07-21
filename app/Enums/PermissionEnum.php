@@ -144,4 +144,10 @@ enum PermissionEnum: string
     // platform_content_head (OcopPermissionSeeder), KHÔNG qua config/permissions.php (Lớp B)
     // — cùng nguyên tắc BANNER_MANAGE.
     case OCOP_MANAGE = 'ocop.manage';
+
+    // ══ PAGE (Trang tĩnh — Giới thiệu/Liên hệ/Điều khoản..., tài sản nền tảng) ═══
+    // spec/Page_Static_Pages_Technical_Specification.md §7 — gán cho platform_ops +
+    // platform_content_head (PagePermissionSeeder), KHÔNG qua config/permissions.php (Lớp B)
+    // — cùng nguyên tắc BANNER_MANAGE/OCOP_MANAGE.
+    case PAGE_MANAGE = 'page.manage';
 }

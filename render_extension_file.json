@@ -306,7 +306,8 @@
     [
         "post_product_blocks///add///__///",
         "translation_id///unsignedBigInteger///__///_NULL///NULL///__///__",
-        "__index///index///__///__///__///translation_id|idx_post_pb_translation///__"
+        "__index///index///__///__///__///translation_id|idx_post_pb_translation///__",
+        "__index///index///__///__///__///organization_id,translation_id|idx_post_pb_org_translation///__"
     ],
     [
         "post_product_blocks///drop///__///Publishing Engine Phase 13 — article_id thay bằng translation_id",

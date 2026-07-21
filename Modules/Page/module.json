@@ -1,0 +1,11 @@
+{
+    "name": "Page",
+    "alias": "page",
+    "description": "Trang tĩnh nền tảng (Giới thiệu, Liên hệ, Điều khoản, Chính sách...) — spec/Page_Static_Pages_Technical_Specification.md. Không tổ chức hoá (organization_id), URL gốc qua Route::fallback(), hỗ trợ template riêng (developer-authored view) cho các trang cần thiết kế khác WYSIWYG mặc định.",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Page\\Providers\\PageServiceProvider"
+    ],
+    "files": []
+}

@@ -21,5 +21,6 @@
     "Banner": true,
     "Ocop": true,
     "ProvinceShowcase": true,
-    "Newsletter": true
+    "Newsletter": true,
+    "Page": true
 }

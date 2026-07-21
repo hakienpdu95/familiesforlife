@@ -16,6 +16,7 @@ use Modules\Banner\Database\Seeders\BannerDatabaseSeeder;
 use Modules\Event\Database\Seeders\EventDatabaseSeeder;
 use Modules\Event\Database\Seeders\EventDemoSeeder;
 use Modules\Menu\Database\Seeders\MenuDatabaseSeeder;
+use Modules\Page\Database\Seeders\PageDatabaseSeeder;
 use Modules\Product\Database\Seeders\ProductDatabaseSeeder;
 use Modules\Post\Database\Seeders\PostDatabaseSeeder;
 use Modules\Post\Database\Seeders\PostDemoSeeder;
@@ -122,6 +123,11 @@ class SystemDataSeeder extends Seeder
             // ── 27b. Banner: permission banner.manage — gán cho platform_ops/platform_content_head
             // (role do ApprovalDatabaseSeeder tạo ở bước 27), nên PHẢI đứng sau bước đó ──
             BannerDatabaseSeeder::class,
+
+            // ── 27c. Page: permission page.manage (cùng nguyên tắc Banner, PHẢI đứng sau bước 27)
+            // + 4 trang tĩnh mặc định (draft, is_system=true) — spec/Page_Static_Pages_Technical_
+            // Specification.md §6/§7 ──
+            PageDatabaseSeeder::class,
 
             // ── 28. Demo content: bài viết + sự kiện mẫu đã xuất bản (đọc cho trang public) ──
             PostDemoSeeder::class,

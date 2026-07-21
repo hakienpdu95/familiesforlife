@@ -215,6 +215,18 @@
         </div>
         @endcan
 
+        {{-- spec/Page_Static_Pages_Technical_Specification.md §7 — page.manage cấp cho
+             platform_ops/platform_content_head (Modules\Page\Database\Seeders\PagePermissionSeeder). --}}
+        @can(\App\Enums\PermissionEnum::PAGE_MANAGE->value)
+        <div class="nav-group">
+            <a href="{{ route('backend.page.items.index') }}"
+               class="nav-link {{ request()->routeIs('backend.page.items.*') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <span class="nav-label">Trang tĩnh</span>
+            </a>
+        </div>
+        @endcan
+
         {{-- spec/Province_Showcase_Technical_Specification.md §6.1 — ocop.manage cấp cho
              platform_ops/platform_content_head (Modules\Ocop\Database\Seeders\OcopPermissionSeeder).
              Single nav-link (không dropdown) — quản lý danh mục truy cập từ trong trang sản phẩm. --}}

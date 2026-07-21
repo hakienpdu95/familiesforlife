@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('name', 120);
             $table->string('slug', 140);
             $table->timestamps();
-
+            
 
             // Indexes
             $table->unique('slug', 'uq_post_tag_slug');
