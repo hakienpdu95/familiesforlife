@@ -8,6 +8,7 @@ use Modules\Post\Features\PublicReading\Http\ProductBlockClickController;
 use Modules\Post\Features\PublicReading\Http\PublicArticleController;
 use Modules\Post\Features\PublicReading\Http\PublicCategoryController;
 use Modules\Post\Features\PublicReading\Http\SitemapController;
+use Modules\Post\Features\TagManagement\Http\TagAdminController;
 use Modules\Post\Features\VersionHistory\Http\ArticleVersionController;
 
 // ── Quản trị Bài viết + Danh mục (đa ngôn ngữ — Publishing Engine Phase 15,
@@ -24,6 +25,12 @@ Route::middleware(['auth'])
         // trang xem chi tiết 1 danh mục riêng (khác spec §12 gốc, khớp cách Product xử lý)
         Route::resource('categories', CategoryAdminController::class)->except(['show']);
         Route::post('categories/reorder', [CategoryAdminController::class, 'reorder'])->name('categories.reorder');
+
+        // spec/PostTag_Management_Technical_Specification.md §3.1/§3.2 — TagAdminController
+        // không có show() (chưa có yêu cầu trang xem chi tiết 1 tag riêng, cùng lý do
+        // 'categories' ở trên); 'merge' là action riêng ngoài 7 method chuẩn REST.
+        Route::resource('tags', TagAdminController::class)->except(['show']);
+        Route::post('tags/{tag}/merge', [TagAdminController::class, 'merge'])->name('tags.merge');
 
         // Hàng chờ duyệt xuyên tổ chức (platform_content_editor/platform_content_head) — ĐẶT TRƯỚC
         // Route::resource('articles', ...) bên dưới, vì "articles/{article}" (show) sẽ khớp

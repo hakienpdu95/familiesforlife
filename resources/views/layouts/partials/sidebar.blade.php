@@ -156,6 +156,10 @@
                 <a href="{{ route('backend.post.categories.index') }}"
                    class="sub-link {{ request()->routeIs('backend.post.categories.*') ? 'active' : '' }}">Danh mục bài viết</a>
                 @endcan
+                @can(\App\Enums\PermissionEnum::POST_TAG_MANAGE->value)
+                <a href="{{ route('backend.post.tags.index') }}"
+                   class="sub-link {{ request()->routeIs('backend.post.tags.*') ? 'active' : '' }}">Quản lý tag</a>
+                @endcan
             </div>
         </details>
         @endcan

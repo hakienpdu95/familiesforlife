@@ -98,6 +98,7 @@ enum PermissionEnum: string
     // ══ POST (Bài viết theo danh mục + Product CTA Box) ═════════════
     // Marketing=Soạn thảo | CEO/Ops=Duyệt & publish | System_Admin=Full + quản lý danh mục | còn lại=View (bài đã published)
     case POST_CATEGORY_MANAGE = 'post_category.manage';
+    case POST_TAG_MANAGE      = 'post_tag.manage';
     case POST_ARTICLE_VIEW    = 'post_article.view';
     case POST_ARTICLE_CREATE  = 'post_article.create';
     case POST_ARTICLE_EDIT    = 'post_article.edit';

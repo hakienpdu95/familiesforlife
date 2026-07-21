@@ -12,8 +12,10 @@ use Modules\Post\Jobs\PublishDueTranslationsJob;
 use Modules\Post\Models\PostArticle;
 use Modules\Post\Models\PostArticleTranslation;
 use Modules\Post\Models\PostCategory;
+use Modules\Post\Models\PostTag;
 use Modules\Post\Policies\PostArticlePolicy;
 use Modules\Post\Policies\PostCategoryPolicy;
+use Modules\Post\Policies\PostTagPolicy;
 use Nwidart\Modules\Support\ModuleServiceProvider;
 
 class PostServiceProvider extends ModuleServiceProvider
@@ -31,6 +33,7 @@ class PostServiceProvider extends ModuleServiceProvider
         parent::boot();
 
         Gate::policy(PostCategory::class, PostCategoryPolicy::class);
+        Gate::policy(PostTag::class, PostTagPolicy::class);
         // viewAny/create không nhận model instance nên áp dụng được qua registration này;
         // view/update/delete/publish/... đăng ký thêm cho PostArticleTranslation::class bên
         // dưới vì các method đó giờ nhận PostArticleTranslation (spec §8).

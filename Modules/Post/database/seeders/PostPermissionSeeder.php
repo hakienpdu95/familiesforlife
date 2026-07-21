@@ -21,6 +21,7 @@ class PostPermissionSeeder extends Seeder
 {
     private const PERMISSIONS = [
         'post_category.manage',
+        'post_tag.manage',
         'post_article.view',
         'post_article.create',
         'post_article.edit',
@@ -56,6 +57,21 @@ class PostPermissionSeeder extends Seeder
         'post_media.upload',
     ];
 
+    /**
+     * `platform_content_head` — trước đây KHÔNG có bất kỳ Spatie permission nào từ seeder này
+     * (publish/unpublish kiểm tra qua isPlatformContentHead() trực tiếp trong code, không qua
+     * Spatie permission — xem comment đầu file). Nhưng PostCategoryPolicy/PostTagPolicy dùng
+     * chuẩn $user->can('post_category.manage'|'post_tag.manage'), nên CẦN permission Spatie
+     * thật ở đây — spec/PostTag_Management_Technical_Specification.md §5.1: đổi tên/gộp/xoá
+     * tag-category ảnh hưởng nhiều bài viết cùng lúc, cùng cấp độ với quyền publish/unpublish
+     * đã thuộc platform_content_head. Đồng thời sửa gap cũ: post_category.manage trước đây
+     * chỉ super-admin có (§4 spec trên), chưa role Platform nào quản lý được category qua UI.
+     */
+    private const PLATFORM_CONTENT_HEAD_PERMISSIONS = [
+        'post_category.manage',
+        'post_tag.manage',
+    ];
+
     public function run(): void
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
@@ -79,6 +95,11 @@ class PostPermissionSeeder extends Seeder
             $contentCreator->givePermissionTo(self::PLATFORM_CONTENT_CREATOR_PERMISSIONS);
         }
 
+        $contentHead = Role::where('name', 'platform_content_head')->where('guard_name', 'web')->first();
+        if ($contentHead) {
+            $contentHead->givePermissionTo(self::PLATFORM_CONTENT_HEAD_PERMISSIONS);
+        }
+
         // super-admin: sync toàn bộ permissions (bao gồm permissions mới)
         $superAdmin = Role::where('name', 'super-admin')->where('guard_name', 'web')->first();
         if ($superAdmin) {
@@ -87,6 +108,6 @@ class PostPermissionSeeder extends Seeder
 
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $this->command->info('  ✓ Post permissions seeded — thu hồi khỏi Lớp B, cấp cho platform_content_creator.');
+        $this->command->info('  ✓ Post permissions seeded — thu hồi khỏi Lớp B, cấp cho platform_content_creator/platform_content_head.');
     }
 }

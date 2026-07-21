@@ -10,12 +10,11 @@ return new class extends Migration
     {
         Schema::create('post_tags', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('organization_id')->constrained()->restrictOnDelete();
             $table->string('name', 120);
             $table->string('slug', 140);
             $table->timestamps();
 
-            $table->unique(['organization_id', 'slug'], 'uq_post_tag_org_slug');
+            $table->unique('slug', 'uq_post_tag_slug');
         });
 
         Schema::create('post_article_tag', function (Blueprint $table) {

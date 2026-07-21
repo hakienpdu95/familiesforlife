@@ -1507,10 +1507,9 @@
     ],
     [
         "post_tags///__///__///",
-        "organization_id///unsignedBigInteger///__///NOT_NULL///__///->constrained()->onDelete('restrict')///__",
         "name///string///120///NOT_NULL///__///__///__",
         "slug///string///140///NOT_NULL///__///__///__",
-        "__index///unique///__///__///__///organization_id,slug|uq_post_tag_org_slug///__",
+        "__index///unique///__///__///__///slug|uq_post_tag_slug///__",
         "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
         "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật"
     ],
