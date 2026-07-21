@@ -22,5 +22,6 @@
     "Ocop": true,
     "ProvinceShowcase": true,
     "Newsletter": true,
-    "Page": true
+    "Page": true,
+    "ContentBrief": true
 }

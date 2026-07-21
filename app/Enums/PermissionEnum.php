@@ -150,4 +150,12 @@ enum PermissionEnum: string
     // platform_content_head (PagePermissionSeeder), KHÔNG qua config/permissions.php (Lớp B)
     // — cùng nguyên tắc BANNER_MANAGE/OCOP_MANAGE.
     case PAGE_MANAGE = 'page.manage';
+
+    // ══ CONTENT BRIEF (Gói nghiên cứu + chỉ dẫn viết bài — input có kiểm soát trước khi sinh
+    // nội dung, tenant-scoped) ═══ spec/ContentBrief_Technical_Specification.md §5 — Lớp A qua
+    // config/permissions.php (cùng nguyên tắc POST_ARTICLE_*), KHÔNG qua seeder Lớp B — Content
+    // Brief gắn với quy trình biên tập nội bộ 1 tổ chức, không phải tài sản nền tảng dùng chung.
+    case CONTENT_BRIEF_VIEW    = 'content_brief.view';
+    case CONTENT_BRIEF_MANAGE  = 'content_brief.manage';   // create/edit/submit/archive/delete/generate
+    case CONTENT_BRIEF_APPROVE = 'content_brief.approve';  // approve/reject
 }

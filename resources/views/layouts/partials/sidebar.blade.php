@@ -227,6 +227,19 @@
         </div>
         @endcan
 
+        {{-- spec/ContentBrief_Technical_Specification.md §5 — content_brief.view Lớp A qua
+             config/permissions.php (CEO/Ops/Marketing/System_Admin) — tenant-scoped, khác Page/
+             Menu/Banner/Ocop (platform-wide, Lớp B). --}}
+        @can(\App\Enums\PermissionEnum::CONTENT_BRIEF_VIEW->value)
+        <div class="nav-group">
+            <a href="{{ route('backend.content_brief.items.index') }}"
+               class="nav-link {{ request()->routeIs('backend.content_brief.*') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 17v-2a4 4 0 014-4h4M9 7h6m-6 4h3m5 8H6a2 2 0 01-2-2V5a2 2 0 012-2h8l4 4v10a2 2 0 01-2 2z"/></svg>
+                <span class="nav-label">Content Brief</span>
+            </a>
+        </div>
+        @endcan
+
         {{-- spec/Province_Showcase_Technical_Specification.md §6.1 — ocop.manage cấp cho
              platform_ops/platform_content_head (Modules\Ocop\Database\Seeders\OcopPermissionSeeder).
              Single nav-link (không dropdown) — quản lý danh mục truy cập từ trong trang sản phẩm. --}}
