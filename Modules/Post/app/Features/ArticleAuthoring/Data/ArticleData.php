@@ -19,7 +19,13 @@ class ArticleData extends Data
 {
     public function __construct(
         public readonly ArticleFormat $format = ArticleFormat::Article,
-        public readonly ?string $cover_image_url = null,
+        /**
+         * spec/Media_Library_Technical_Specification.md §8 — UUID media FilePond (collection
+         * `cover`) chờ gắn vào article vừa tạo — CHỈ dùng ở luồng tạo mới (create form, chưa có
+         * article.id để attach trực tiếp). Form sửa gắn ảnh thẳng qua context header, không qua
+         * field này (xem CreateArticleAction/UpdateArticleAction).
+         */
+        public readonly ?string $cover_media_uuid = null,
         public readonly bool $is_featured = false,
         public readonly ?string $main_locale = null,
 

@@ -19,7 +19,6 @@ class UpdateArticleAction
         return DB::transaction(function () use ($article, $data) {
             $article->update([
                 'format'                 => $data->format,
-                'cover_image_url'        => $data->cover_image_url,
                 'is_featured'            => $data->is_featured,
                 'province_code'          => $data->province_code,
                 'ward_code'              => $data->ward_code,

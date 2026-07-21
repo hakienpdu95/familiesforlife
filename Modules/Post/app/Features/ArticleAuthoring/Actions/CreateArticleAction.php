@@ -2,6 +2,7 @@
 
 namespace Modules\Post\Features\ArticleAuthoring\Actions;
 
+use App\Services\Media\MediaUploadService;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\Concerns\SyncsArticleRelations;
@@ -14,13 +15,14 @@ class CreateArticleAction
     use AsAction;
     use SyncsArticleRelations;
 
+    public function __construct(private readonly MediaUploadService $mediaUpload) {}
+
     public function handle(ArticleData $data): PostArticle
     {
         return DB::transaction(function () use ($data) {
             $article = PostArticle::create([
                 'main_locale'            => $data->main_locale ?: config('post.default_locale'),
                 'format'                 => $data->format,
-                'cover_image_url'        => $data->cover_image_url,
                 'is_featured'            => $data->is_featured,
                 'province_code'          => $data->province_code,
                 'ward_code'              => $data->ward_code,
@@ -38,6 +40,13 @@ class CreateArticleAction
 
             $this->syncCategories($article, $data);
             $this->syncTags($article, $data);
+
+            // spec/Media_Library_Technical_Specification.md §8 — form tạo mới chưa có article.id
+            // lúc FilePond upload, ảnh cover tạm gắn ở FilePondDraft — "nhận" vào article thật
+            // vừa tạo ngay đây.
+            if ($data->cover_media_uuid) {
+                $this->mediaUpload->reassociateFilePondDrafts($article, [$data->cover_media_uuid], 'cover');
+            }
 
             return $article;
         });

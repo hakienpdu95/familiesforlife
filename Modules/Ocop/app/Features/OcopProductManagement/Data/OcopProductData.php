@@ -6,8 +6,7 @@ use Spatie\LaravelData\Data;
 
 /**
  * Validate thật nằm ở OcopProductAdminController::validated() — DTO chỉ hydrate, cùng nguyên
- * tắc BannerData/ArticleData. image_* chỉ khác null khi request thực sự có ảnh mới (xem
- * StoreOcopProductImageAction + OcopProductAdminController::update()).
+ * tắc BannerData/ArticleData.
  */
 class OcopProductData extends Data
 {
@@ -22,10 +21,12 @@ class OcopProductData extends Data
         public readonly ?string $producer_name = null,
         public readonly ?string $producer_address = null,
 
-        public readonly ?string $image_path = null,
-        public readonly ?int $image_width = null,
-        public readonly ?int $image_height = null,
-        public readonly ?int $image_size_bytes = null,
+        /**
+         * spec/Media_Library_Technical_Specification.md §8 — UUID media FilePond (collection
+         * `cover`) chờ gắn vào sản phẩm vừa tạo — CHỈ dùng ở luồng tạo mới (create form, chưa có
+         * product.id để attach trực tiếp). Form sửa gắn ảnh thẳng qua context header.
+         */
+        public readonly ?string $cover_media_uuid = null,
 
         public readonly ?string $purchase_url = null,
         public readonly string $status = 'draft',

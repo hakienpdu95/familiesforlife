@@ -469,10 +469,14 @@ function postVersionHistory(indexUrl, translationStatus, knownLatestId, canResto
                 </div>
 
                 <div class="form-control mb-3">
-                    <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Ảnh đại diện (URL)</span></label>
-                    <input type="text" name="cover_image_url" value="{{ old('cover_image_url', $article->cover_image_url) }}"
-                           class="input input-bordered input-sm w-full @error('cover_image_url') input-error @enderror">
-                    @error('cover_image_url')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                    <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Ảnh đại diện</span></label>
+                    @if($article->cover_image_url)
+                    <div class="mb-2 aspect-video w-full max-w-xs rounded-lg overflow-hidden bg-base-200">
+                        <img src="{{ $article->cover_image_url }}" alt="Ảnh đại diện hiện tại" class="h-full w-full object-cover">
+                    </div>
+                    @endif
+                    <div id="cover-filepond" data-context-type="post_article" data-context-id="{{ $article->id }}"></div>
+                    <p class="mt-1 text-xs text-base-content/50">Tải ảnh mới sẽ tự động thay ảnh hiện tại.</p>
                 </div>
 
                 {{-- spec/Province_Showcase_Technical_Specification.md §6.3 — tuỳ chọn, không bắt buộc. --}}
@@ -974,6 +978,20 @@ function postVersionHistory(indexUrl, translationStatus, knownLatestId, canResto
         'resources/js/modules/tom-select.js',
         'resources/js/modules/flatpickr.js',
         'resources/js/modules/jodit.js',
+        'resources/js/modules/filepond.js',
         'Modules/Post/resources/assets/js/post.js',
     ], 'build/backend')
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const coverEl = document.getElementById('cover-filepond');
+        if (window.initFilePondUpload && coverEl) {
+            initFilePondUpload(coverEl, {
+                collection: 'cover',
+                contextType: coverEl.dataset.contextType,
+                contextId: coverEl.dataset.contextId,
+                allowRevert: true,
+            });
+        }
+    });
+    </script>
 @endpush

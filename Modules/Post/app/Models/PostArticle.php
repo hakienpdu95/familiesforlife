@@ -2,6 +2,7 @@
 
 namespace Modules\Post\Models;
 
+use App\Traits\HasTenantMedia;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,17 +17,22 @@ use Modules\Post\Enums\SponsorLabel;
 use Illuminate\Support\Str;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
+use Spatie\MediaLibrary\HasMedia;
 
 /**
  * spec/Platform_RBAC_Phase2_Specification.md §3.3 (v3.0) — Post là tài sản của nền tảng,
  * không thuộc tenant/Organization nào — KHÔNG extends TenantAwareModel (không có
  * organization_id, không global-scope theo tổ chức).
+ *
+ * spec/Media_Library_Technical_Specification.md §8 — cover image qua Media (collection `cover`),
+ * thay cho cột `cover_image_url` cũ.
  */
-class PostArticle extends Model
+class PostArticle extends Model implements HasMedia
 {
     use HasFactory;
     use SoftDeletes;
     use LogsActivity;
+    use HasTenantMedia;
 
     protected $table = 'post_articles';
 
@@ -47,7 +53,6 @@ class PostArticle extends Model
         'uuid',
         'main_locale',
         'format',
-        'cover_image_url',
         'is_featured',
         'sort_order',
         'province_code',
@@ -87,6 +92,17 @@ class PostArticle extends Model
     public function getRouteKeyName(): string
     {
         return 'uuid';
+    }
+
+    /**
+     * spec/Media_Library_Technical_Specification.md §8 — thay cho cột `cover_image_url` cũ (đã
+     * xoá). Backward-compat: mọi nơi đọc `$article->cover_image_url` (article-card.blade.php,
+     * hero.blade.php, hero-story.blade.php) tiếp tục hoạt động không cần sửa gì — accessor này
+     * được ưu tiên trước khi Eloquent tìm cột DB cùng tên (đã không còn tồn tại).
+     */
+    public function getCoverImageUrlAttribute(): string
+    {
+        return $this->getFirstMediaUrl('cover', 'medium');
     }
 
     // ── Relationships ────────────────────────────────────────────────

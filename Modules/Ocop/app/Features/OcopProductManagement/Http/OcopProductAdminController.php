@@ -10,7 +10,6 @@ use Illuminate\View\View;
 use Modules\Ocop\Enums\OcopProductStatus;
 use Modules\Ocop\Features\OcopProductManagement\Actions\CreateOcopProductAction;
 use Modules\Ocop\Features\OcopProductManagement\Actions\DeleteOcopProductAction;
-use Modules\Ocop\Features\OcopProductManagement\Actions\StoreOcopProductImageAction;
 use Modules\Ocop\Features\OcopProductManagement\Actions\UpdateOcopProductAction;
 use Modules\Ocop\Features\OcopProductManagement\Data\OcopProductData;
 use Modules\Ocop\Features\OcopProductManagement\Queries\ListOcopProductsForAdminHandler;
@@ -50,15 +49,9 @@ class OcopProductAdminController extends Controller
         return view('ocop::admin.products.create', compact('categoryTree', 'statuses'));
     }
 
-    public function store(Request $request, StoreOcopProductImageAction $storeImage, CreateOcopProductAction $action): RedirectResponse
+    public function store(Request $request, CreateOcopProductAction $action): RedirectResponse
     {
-        $validated = $this->validated($request);
-        unset($validated['image']);
-        $image = $request->hasFile('image')
-            ? $storeImage->handle($request->file('image'))
-            : ['image_path' => null, 'image_width' => null, 'image_height' => null, 'image_size_bytes' => null];
-
-        $data    = OcopProductData::from([...$validated, ...$image]);
+        $data    = OcopProductData::from($this->validated($request));
         $product = $action->handle($data);
 
         return redirect()->route('backend.ocop.products.index')
@@ -74,15 +67,9 @@ class OcopProductAdminController extends Controller
         return view('ocop::admin.products.edit', compact('product', 'categoryTree', 'statuses'));
     }
 
-    public function update(Request $request, OcopProduct $product, StoreOcopProductImageAction $storeImage, UpdateOcopProductAction $action): RedirectResponse
+    public function update(Request $request, OcopProduct $product, UpdateOcopProductAction $action): RedirectResponse
     {
-        $validated = $this->validated($request);
-        unset($validated['image']);
-        $image = $request->hasFile('image')
-            ? $storeImage->handle($request->file('image'))
-            : ['image_path' => null, 'image_width' => null, 'image_height' => null, 'image_size_bytes' => null];
-
-        $data = OcopProductData::from([...$validated, ...$image]);
+        $data = OcopProductData::from($this->validated($request));
         $action->handle($product, $data);
 
         return redirect()->route('backend.ocop.products.index')
@@ -109,7 +96,8 @@ class OcopProductAdminController extends Controller
             'ward_code'          => ['nullable', 'string', 'exists:wards,ward_code'],
             'producer_name'      => ['nullable', 'string', 'max:150'],
             'producer_address'   => ['nullable', 'string', 'max:255'],
-            'image'              => ['nullable', 'image', 'max:2048'],
+            // spec/Media_Library_Technical_Specification.md §8 — chỉ dùng ở create form.
+            'cover_media_uuid'   => ['nullable', 'string'],
             'purchase_url'       => ['nullable', 'url', 'max:500'],
             'status'             => ['required', Rule::in(array_column(OcopProductStatus::cases(), 'value'))],
             'is_featured'        => ['boolean'],
@@ -125,8 +113,6 @@ class OcopProductAdminController extends Controller
             'ward_code.exists'         => 'Phường/xã được chọn không hợp lệ.',
             'producer_name.max'       => 'Tên nhà sản xuất không được vượt quá :max ký tự.',
             'producer_address.max'    => 'Địa chỉ nhà sản xuất không được vượt quá :max ký tự.',
-            'image.image'              => 'File phải là hình ảnh.',
-            'image.max'                => 'Ảnh không được vượt quá :max KB.',
             'purchase_url.url'         => 'URL không hợp lệ — phải bắt đầu bằng https://',
             'purchase_url.max'        => 'URL không được vượt quá :max ký tự.',
             'status.required'          => 'Vui lòng chọn trạng thái.',

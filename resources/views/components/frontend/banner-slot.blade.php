@@ -15,7 +15,7 @@
        rel="{{ trim(($banner->open_in_new_tab ? 'noopener ' : '') . ($banner->isExternalUrl() ? 'nofollow' : '')) }}"
        @endif
        class="banner-slot__link">
-        <img src="{{ Illuminate\Support\Facades\Storage::url($banner->image_path) }}"
+        <img src="{{ $banner->getFirstMediaUrl('banner', 'medium') }}"
              alt="{{ $banner->alt_text ?? '' }}"
              class="banner-slot__img" loading="lazy">
         @if($banner->badge_label)

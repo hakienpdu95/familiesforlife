@@ -35,7 +35,7 @@ class MediaUploadController extends Controller
      * jodit_content is exclusively managed by MediaJoditUploadController.
      */
     private const ALLOWED_COLLECTIONS = [
-        'avatar', 'logo', 'thumbnail', 'cover',
+        'avatar', 'logo', 'thumbnail', 'cover', 'banner',
         'attachments', 'attachments_private',
     ];
 
@@ -44,7 +44,7 @@ class MediaUploadController extends Controller
      * When a new file is uploaded directly to a real entity, old files in the same
      * collection are deleted automatically after the new upload succeeds.
      */
-    private const SINGLE_FILE_COLLECTIONS = ['avatar', 'logo', 'thumbnail', 'cover'];
+    private const SINGLE_FILE_COLLECTIONS = ['avatar', 'logo', 'thumbnail', 'cover', 'banner'];
 
     /**
      * entity_type (X-Context-Type header) → fully-qualified model class.
@@ -53,6 +53,9 @@ class MediaUploadController extends Controller
      */
     private const ENTITY_MAP = [
         'organization'            => \Modules\Organization\Models\Organization::class,
+        'post_article'            => \Modules\Post\Models\PostArticle::class,
+        'ocop_product'            => \Modules\Ocop\Models\OcopProduct::class,
+        'banner'                  => \Modules\Banner\Models\Banner::class,
     ];
 
     public function __construct(

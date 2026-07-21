@@ -43,6 +43,20 @@
     @vite([
         'resources/js/modules/toastify.js',
         'resources/js/modules/tom-select.js',
+        'resources/js/modules/filepond.js',
         'Modules/Ocop/resources/assets/js/ocop.js',
     ], 'build/backend')
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const coverEl = document.getElementById('cover-filepond');
+        if (window.initFilePondUpload && coverEl) {
+            initFilePondUpload(coverEl, {
+                collection: 'cover',
+                contextType: coverEl.dataset.contextType,
+                contextId: coverEl.dataset.contextId,
+                allowRevert: true,
+            });
+        }
+    });
+    </script>
 @endpush

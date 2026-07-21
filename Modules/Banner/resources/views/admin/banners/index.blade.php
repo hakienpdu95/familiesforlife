@@ -80,7 +80,7 @@
                     @endphp
                     <tr>
                         <td>
-                            <img src="{{ Illuminate\Support\Facades\Storage::url($banner->image_path) }}" alt=""
+                            <img src="{{ $banner->getFirstMediaUrl('banner', 'medium') }}" alt=""
                                  class="h-10 w-auto rounded border border-base-300 object-cover">
                         </td>
                         <td>

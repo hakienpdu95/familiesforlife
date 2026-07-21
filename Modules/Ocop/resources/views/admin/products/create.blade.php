@@ -42,6 +42,17 @@
     @vite([
         'resources/js/modules/toastify.js',
         'resources/js/modules/tom-select.js',
+        'resources/js/modules/filepond.js',
         'Modules/Ocop/resources/assets/js/ocop.js',
     ], 'build/backend')
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.initFilePondUpload) {
+            initFilePondUpload('#cover-filepond', {
+                collection: 'cover',
+                bindTo: '#cover-media-uuid',
+            });
+        }
+    });
+    </script>
 @endpush

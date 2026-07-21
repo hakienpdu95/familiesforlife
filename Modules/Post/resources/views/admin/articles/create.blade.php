@@ -75,12 +75,11 @@
 
         <div class="form-control">
             <label class="label py-0 pb-1">
-                <span class="label-text text-xs font-medium">Ảnh đại diện (URL)</span>
+                <span class="label-text text-xs font-medium">Ảnh đại diện</span>
             </label>
-            <input type="text" name="cover_image_url" value="{{ old('cover_image_url') }}"
-                   class="input input-bordered input-sm w-full @error('cover_image_url') input-error @enderror"
-                   placeholder="https://...">
-            @error('cover_image_url')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+            <div id="cover-filepond"></div>
+            <input type="hidden" name="cover_media_uuid" id="cover-media-uuid" value="{{ old('cover_media_uuid') }}">
+            @error('cover_media_uuid')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
         </div>
 
         {{-- spec/Province_Showcase_Technical_Specification.md §6.3 — tuỳ chọn, không bắt buộc. --}}
@@ -141,6 +140,17 @@
         'resources/js/modules/toastify.js',
         'resources/js/modules/tom-select.js',
         'resources/js/modules/jodit.js',
+        'resources/js/modules/filepond.js',
         'Modules/Post/resources/assets/js/post.js',
     ], 'build/backend')
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.initFilePondUpload) {
+            initFilePondUpload('#cover-filepond', {
+                collection: 'cover',
+                bindTo: '#cover-media-uuid',
+            });
+        }
+    });
+    </script>
 @endpush

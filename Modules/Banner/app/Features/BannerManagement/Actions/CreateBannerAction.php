@@ -2,6 +2,7 @@
 
 namespace Modules\Banner\Features\BannerManagement\Actions;
 
+use App\Services\Media\MediaUploadService;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Modules\Banner\Features\BannerManagement\Data\BannerData;
 use Modules\Banner\Models\Banner;
@@ -10,17 +11,15 @@ class CreateBannerAction
 {
     use AsAction;
 
+    public function __construct(private readonly MediaUploadService $mediaUpload) {}
+
     public function handle(BannerData $data): Banner
     {
-        return Banner::create([
+        $banner = Banner::create([
             'placement'         => $data->placement,
             'target_type'       => $data->target_type,
             'target_value'      => $data->target_value,
             'title'             => $data->title,
-            'image_path'        => $data->image_path,
-            'image_width'       => $data->image_width,
-            'image_height'      => $data->image_height,
-            'image_size_bytes'  => $data->image_size_bytes,
             'alt_text'          => $data->alt_text,
             'link_url'          => $data->link_url,
             'open_in_new_tab'   => $data->open_in_new_tab,
@@ -31,5 +30,13 @@ class CreateBannerAction
             'is_active'         => $data->is_active,
             'created_by'        => auth()->id(),
         ]);
+
+        // spec/Media_Library_Technical_Specification.md §8 — form tạo mới chưa có banner.id lúc
+        // FilePond upload, ảnh tạm gắn ở FilePondDraft — "nhận" vào banner thật vừa tạo.
+        if ($data->cover_media_uuid) {
+            $this->mediaUpload->reassociateFilePondDrafts($banner, [$data->cover_media_uuid], 'banner');
+        }
+
+        return $banner;
     }
 }

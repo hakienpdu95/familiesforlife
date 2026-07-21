@@ -38,5 +38,15 @@
 @endsection
 
 @push('scripts')
-    @vite(['Modules/Banner/resources/assets/js/banner.js'], 'build/backend')
+    @vite(['resources/js/modules/filepond.js', 'Modules/Banner/resources/assets/js/banner.js'], 'build/backend')
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.initFilePondUpload) {
+            initFilePondUpload('#cover-filepond', {
+                collection: 'banner',
+                bindTo: '#cover-media-uuid',
+            });
+        }
+    });
+    </script>
 @endpush

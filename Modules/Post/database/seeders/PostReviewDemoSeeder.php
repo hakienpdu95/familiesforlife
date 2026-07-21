@@ -75,7 +75,6 @@ class PostReviewDemoSeeder extends Seeder
 
         $article = app(CreateArticleAction::class)->handle(ArticleData::from([
             'format'          => 'article',
-            'cover_image_url' => null,
             'is_featured'     => false,
             'category_ids'    => [],
             'is_sponsored'    => false,

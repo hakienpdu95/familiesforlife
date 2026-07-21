@@ -2,7 +2,6 @@
 
 namespace Modules\Banner\Features\BannerManagement\Actions;
 
-use Illuminate\Support\Facades\Storage;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Modules\Banner\Models\Banner;
 
@@ -10,12 +9,13 @@ class DeleteBannerAction
 {
     use AsAction;
 
+    /**
+     * spec/Media_Library_Technical_Specification.md §7.4 — ảnh banner nay qua Media, đi theo
+     * hành vi mặc định của Spatie: soft-delete (đây) giữ nguyên ảnh, chỉ `forceDelete()` mới
+     * thật sự xoá file. Đổi khác hành vi cũ (trước đây xoá file ảnh ngay cả khi chỉ soft-delete).
+     */
     public function handle(Banner $banner): void
     {
         $banner->delete();
-
-        // Soft delete bản ghi, nhưng file ảnh vật lý xoá luôn — banner xoá rồi không có màn
-        // "khôi phục" nào cần ảnh cũ (khác Media module có thùng rác riêng).
-        Storage::disk('public')->delete($banner->image_path);
     }
 }

@@ -4,6 +4,7 @@ namespace Modules\Ocop\Features\OcopProductManagement\Actions;
 
 use App\Models\Province;
 use App\Models\Ward;
+use App\Services\Media\MediaUploadService;
 use Illuminate\Support\Str;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Modules\Ocop\Features\OcopProductManagement\Data\OcopProductData;
@@ -18,6 +19,8 @@ class CreateOcopProductAction
 {
     use AsAction;
 
+    public function __construct(private readonly MediaUploadService $mediaUpload) {}
+
     public function handle(OcopProductData $data): OcopProduct
     {
         $provinceName = $data->province_code
@@ -27,7 +30,7 @@ class CreateOcopProductAction
             ? Ward::where('ward_code', $data->ward_code)->value('name')
             : null;
 
-        return OcopProduct::create([
+        $product = OcopProduct::create([
             'category_id'       => $data->category_id,
             'name'              => $data->name,
             'slug'              => $this->uniqueSlug($data->name),
@@ -39,16 +42,20 @@ class CreateOcopProductAction
             'ward_name'         => $wardName,
             'producer_name'     => $data->producer_name,
             'producer_address'  => $data->producer_address,
-            'image_path'        => $data->image_path,
-            'image_width'       => $data->image_width,
-            'image_height'      => $data->image_height,
-            'image_size_bytes'  => $data->image_size_bytes,
             'purchase_url'      => $data->purchase_url,
             'status'            => $data->status,
             'is_featured'       => $data->is_featured,
             'sort_order'        => $data->sort_order,
             'created_by'        => auth()->id(),
         ]);
+
+        // spec/Media_Library_Technical_Specification.md §8 — form tạo mới chưa có product.id
+        // lúc FilePond upload, ảnh tạm gắn ở FilePondDraft — "nhận" vào sản phẩm thật vừa tạo.
+        if ($data->cover_media_uuid) {
+            $this->mediaUpload->reassociateFilePondDrafts($product, [$data->cover_media_uuid], 'cover');
+        }
+
+        return $product;
     }
 
     private function uniqueSlug(string $name): string

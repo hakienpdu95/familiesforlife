@@ -8,6 +8,7 @@ use App\Models\Media;
 use App\Services\Media\MediaUploadService;
 use App\Shared\Tenancy\OrganizationScope;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -52,7 +53,7 @@ class MediaCleanupOrphansCommand extends Command
 
         $this->info("[Jodit] Checking orphans older than {$ttlHours}h" . ($isDryRun ? ' [DRY RUN]' : '') . '...');
 
-        $orphans = Media::withoutTenant()
+        $candidates = Media::withoutTenant()
             ->where('collection_name', 'jodit_content')
             ->where('model_type', JoditDraft::class)
             ->where(function ($q) use ($cutoff) {
@@ -61,10 +62,26 @@ class MediaCleanupOrphansCommand extends Command
             })
             ->get();
 
+        // spec/Media_Library_Technical_Specification.md §5.2/§7.2 — lớp phòng thủ thứ 2: dù
+        // reassociateOrphans() (touch-point chính, UpdateTranslationAction) đã "nhận" ảnh vào
+        // translation thật khi lưu bài, vẫn kiểm tra lại UUID có còn được nhắc tới trong bất kỳ
+        // post_content_blocks.text_html nào trước khi xoá — phòng trường hợp touch-point chính
+        // bị bỏ sót ở 1 luồng lưu khác sau này. TẠM THỜI dùng LIKE trên toàn bảng — chấp nhận
+        // được ở quy mô hiện tại, xem ghi chú hướng cải thiện dài hạn trong spec §7.2.
+        $orphans = $candidates->reject(
+            fn (Media $media) => $this->isUuidStillReferencedInContent($media->uuid)
+        );
+
+        $skipped = $candidates->count() - $orphans->count();
+
         if ($orphans->isEmpty()) {
             $this->line('[Jodit] No orphan media found.');
         } else {
             $this->info("[Jodit] Found {$orphans->count()} orphan media.");
+        }
+
+        if ($skipped > 0) {
+            $this->line("[Jodit] Skipped {$skipped} media still referenced in a translation's content.");
         }
 
         $deleted = 0;
@@ -102,6 +119,21 @@ class MediaCleanupOrphansCommand extends Command
             $pruned = $emptyQuery->delete();
             if ($pruned > 0) $this->info("[Jodit] Pruned {$pruned} empty JoditDraft record(s).");
         }
+    }
+
+    /**
+     * Lớp phòng thủ thứ 2 (§7.2) — kiểm tra UUID còn xuất hiện trong bất kỳ
+     * `post_content_blocks.text_html` nào (không giới hạn theo translation/article cụ thể, vì
+     * ảnh có thể được dùng lại giữa nhiều bản dịch khi copy nội dung — xem
+     * `CreateTranslationAction::copyBlocks()`). Tra trực tiếp qua `DB::table()`, không qua
+     * Eloquent `PostContentBlock` — command này ở tầng `App\`, dùng chung cho mọi module có thể
+     * dùng Jodit sau này, không riêng Post.
+     */
+    private function isUuidStillReferencedInContent(string $uuid): bool
+    {
+        return DB::table('post_content_blocks')
+            ->where('text_html', 'like', '%'.$uuid.'%')
+            ->exists();
     }
 
     // ── FilePond ───────────────────────────────────────────────────────────

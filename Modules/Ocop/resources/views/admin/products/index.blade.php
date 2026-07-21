@@ -71,8 +71,8 @@
                 @forelse ($products as $product)
                 <tr class="hover">
                     <td>
-                        @if($product->image_path)
-                        <img src="{{ Illuminate\Support\Facades\Storage::url($product->image_path) }}" alt=""
+                        @if($product->getFirstMediaUrl('cover'))
+                        <img src="{{ $product->getFirstMediaUrl('cover', 'thumb') }}" alt=""
                              class="h-10 w-10 rounded border border-base-300 object-cover">
                         @else
                         <div class="h-10 w-10 rounded border border-base-300 bg-base-200"></div>

@@ -60,6 +60,16 @@ return [
             'is_public'    => true,
             'conversions'  => ['thumb', 'medium', 'preview'],
         ],
+        // spec/Media_Library_Technical_Specification.md §7.5 — collection riêng cho Banner,
+        // KHÔNG dùng chung `cover`: `.banner-slot__img { width:100%; height:auto }` không ép
+        // aspect ratio cố định, trong khi `cover.thumb` crop cứng 150×150 vuông sẽ làm méo/cắt
+        // sai bố cục banner ngang. Không có `thumb` — chỉ scale giữ nguyên tỷ lệ.
+        'banner' => [
+            'max_size_kb'  => 10240,
+            'allowed_mime' => ['image/jpeg', 'image/png', 'image/webp'],
+            'is_public'    => true,
+            'conversions'  => ['medium', 'preview'],
+        ],
         'attachments' => [
             'max_size_kb'  => 51200,
             'allowed_mime' => [

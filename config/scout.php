@@ -146,6 +146,12 @@ return [
                 'sortableAttributes'   => ['published_at'],
                 'rankingRules'         => ['words', 'typo', 'proximity', 'attribute', 'sort', 'exactness'],
             ],
+            \Modules\Ocop\Models\OcopProduct::class => [
+                'searchableAttributes' => ['name', 'category_name', 'producer_name', 'description'],
+                'filterableAttributes' => ['status', 'province_code', 'category_id', 'is_featured'],
+                'sortableAttributes'   => ['star_rating'],
+                'rankingRules'         => ['words', 'typo', 'proximity', 'attribute', 'sort', 'exactness'],
+            ],
         ],
     ],
 

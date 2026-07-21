@@ -69,6 +69,7 @@ const COLLECTION_MAX_SIZE = {
     logo:                 '5MB',
     thumbnail:            '5MB',
     cover:                '10MB',
+    banner:               '10MB',
     jodit_content:        '10MB',
     attachments:          '50MB',
     attachments_private:  '50MB',
@@ -80,12 +81,13 @@ const COLLECTION_MIME = {
     logo:                'image/jpeg, image/png, image/webp',
     thumbnail:           'image/jpeg, image/png, image/webp',
     cover:               'image/jpeg, image/png, image/webp',
+    banner:              'image/jpeg, image/png, image/webp',
     attachments:         null,  // any
     attachments_private: null,  // any
 };
 
 // Single-file collections — UI shows 1 file max, replaces on new upload
-const SINGLE_FILE_COLLECTIONS = new Set(['avatar', 'logo', 'thumbnail', 'cover']);
+const SINGLE_FILE_COLLECTIONS = new Set(['avatar', 'logo', 'thumbnail', 'cover', 'banner']);
 
 const FilePondInstances = new Map();
 window.FilePondInstances = FilePondInstances;

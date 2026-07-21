@@ -17,10 +17,12 @@ class BannerData extends Data
         public readonly ?string $target_value = null,
         public readonly ?string $title = null,
 
-        public readonly ?string $image_path = null,
-        public readonly ?int $image_width = null,
-        public readonly ?int $image_height = null,
-        public readonly ?int $image_size_bytes = null,
+        /**
+         * spec/Media_Library_Technical_Specification.md §8 — UUID media FilePond (collection
+         * `banner`) chờ gắn vào banner vừa tạo — CHỈ dùng ở luồng tạo mới. Form sửa gắn ảnh
+         * thẳng qua context header.
+         */
+        public readonly ?string $cover_media_uuid = null,
         public readonly ?string $alt_text = null,
 
         public readonly ?string $link_url = null,

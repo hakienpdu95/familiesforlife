@@ -2,6 +2,7 @@
 
 namespace Modules\Post\Models;
 
+use App\Traits\HasTenantMedia;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,17 +16,23 @@ use Modules\Post\Enums\ContentBlockType;
 use Modules\Post\Enums\TranslationStatus;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
+use Spatie\MediaLibrary\HasMedia;
 
 /**
  * spec/Platform_RBAC_Phase2_Specification.md §3.3 (v3.0) — không extends TenantAwareModel
  * nữa, Post không thuộc tenant/Organization nào.
+ *
+ * spec/Media_Library_Technical_Specification.md §5.2/§7.2 — ảnh chèn qua Jodit vào content
+ * block gắn vào chính translation (collection `jodit_content`), qua
+ * `UpdateTranslationAction::reassociateOrphans()`.
  */
-class PostArticleTranslation extends Model
+class PostArticleTranslation extends Model implements HasMedia
 {
     use HasFactory;
     use SoftDeletes;
     use LogsActivity;
     use Searchable;
+    use HasTenantMedia;
 
     protected $table = 'post_article_translations';
 
@@ -200,10 +207,20 @@ class PostArticleTranslation extends Model
      * property $this->contentBlocks) — bắt buộc, vì SyncContentBlocksAction xoá-tạo-lại toàn
      * bộ post_content_blocks TRONG CÙNG transaction với $translation->update(); nếu dùng
      * property đã cache trước đó có thể dính bản cũ.
+     *
+     * `loadMissing()` bắt buộc — đường đồng bộ 1 record (touch-point `translations()->searchable()`
+     * ở UpdateArticleAction, hay Scout tự fire qua "saved" event khi publish 1 bài) KHÔNG đi qua
+     * `makeAllSearchableUsing()` (chỉ áp dụng cho `scout:import`/`makeAllSearchable()`), nên
+     * `article`/`article.categories`/`article.tags` chưa chắc đã eager-load. `Model::shouldBeStrict()`
+     * (app/Providers/AppServiceProvider.php) chặn lazy-load ở non-production — thiếu dòng này,
+     * mọi lần publish/sửa 1 bài ở local/staging sẽ ném `LazyLoadingViolationException` ngay khi
+     * Scout gọi hàm này (phát hiện qua test tự động, không phải suy đoán).
      */
     public function toSearchableArray(): array
     {
-        $article = $this->article; // BelongsTo — 1 query, đã lọc soft-delete
+        $this->loadMissing(['article.categories', 'article.tags']);
+
+        $article = $this->article; // BelongsTo — đã eager-load ở trên, không còn lazy-load
 
         $bodyText = $this->contentBlocks()
             ->where('type', ContentBlockType::Text)

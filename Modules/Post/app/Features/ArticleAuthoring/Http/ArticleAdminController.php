@@ -244,7 +244,9 @@ class ArticleAdminController extends Controller
     {
         return $request->validate([
             'format'                  => ['required', 'in:' . implode(',', array_column(ArticleFormat::cases(), 'value'))],
-            'cover_image_url'         => ['nullable', 'string', 'max:500'],
+            // spec/Media_Library_Technical_Specification.md §8 — chỉ dùng ở create form (form
+            // sửa gắn ảnh trực tiếp qua FilePond context header, không qua field này).
+            'cover_media_uuid'        => ['nullable', 'string'],
             'is_featured'             => ['boolean'],
             'main_locale'             => ['nullable', 'string', 'in:' . implode(',', array_keys(config('post.locales')))],
             'category_ids'            => ['array'],

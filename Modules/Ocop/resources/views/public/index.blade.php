@@ -37,8 +37,8 @@
         @forelse($products as $product)
         <a href="{{ route('ocop.public.show', ['slug' => $product->slug]) }}" class="group flex flex-col gap-3">
             <div class="aspect-square rounded-xl overflow-hidden bg-base-200">
-                @if($product->image_path)
-                <img src="{{ Illuminate\Support\Facades\Storage::url($product->image_path) }}" alt="{{ $product->name }}" class="h-full w-full object-cover" loading="lazy">
+                @if($product->getFirstMediaUrl('cover'))
+                <img src="{{ $product->getFirstMediaUrl('cover', 'medium') }}" alt="{{ $product->name }}" class="h-full w-full object-cover" loading="lazy">
                 @else
                 <div class="ph h-full w-full"></div>
                 @endif

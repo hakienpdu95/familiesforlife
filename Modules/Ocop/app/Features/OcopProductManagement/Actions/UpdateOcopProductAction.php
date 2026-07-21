@@ -21,6 +21,9 @@ class UpdateOcopProductAction
             ? Ward::where('ward_code', $data->ward_code)->value('name')
             : null;
 
+        // Ảnh KHÔNG cần xử lý ở đây — form sửa gắn thẳng qua FilePond context header
+        // (X-Context-Type=ocop_product, X-Context-Id=$product->id), upload đi thẳng vào Media
+        // của chính sản phẩm này, không qua OcopProductData/action này (spec §8).
         $product->update([
             'category_id'       => $data->category_id,
             'name'              => $data->name,
@@ -32,11 +35,6 @@ class UpdateOcopProductAction
             'ward_name'         => $wardName,
             'producer_name'     => $data->producer_name,
             'producer_address'  => $data->producer_address,
-            // Ảnh giữ nguyên nếu form không upload ảnh mới — cùng pattern UpdateBannerAction.
-            'image_path'        => $data->image_path ?? $product->image_path,
-            'image_width'       => $data->image_path ? $data->image_width : $product->image_width,
-            'image_height'      => $data->image_path ? $data->image_height : $product->image_height,
-            'image_size_bytes'  => $data->image_path ? $data->image_size_bytes : $product->image_size_bytes,
             'purchase_url'      => $data->purchase_url,
             'status'            => $data->status,
             'is_featured'       => $data->is_featured,

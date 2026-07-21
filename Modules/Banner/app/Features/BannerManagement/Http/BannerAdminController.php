@@ -10,7 +10,6 @@ use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Modules\Banner\Features\BannerManagement\Actions\CreateBannerAction;
 use Modules\Banner\Features\BannerManagement\Actions\DeleteBannerAction;
-use Modules\Banner\Features\BannerManagement\Actions\StoreBannerImageAction;
 use Modules\Banner\Features\BannerManagement\Actions\UpdateBannerAction;
 use Modules\Banner\Features\BannerManagement\Data\BannerData;
 use Modules\Banner\Features\BannerManagement\Queries\ListBannersForAdminHandler;
@@ -53,13 +52,9 @@ class BannerAdminController extends Controller
         return view('banner::admin.banners.create', compact('placements', 'targetTypes', 'categories', 'provinces'));
     }
 
-    public function store(Request $request, StoreBannerImageAction $storeImage, CreateBannerAction $action): RedirectResponse
+    public function store(Request $request, CreateBannerAction $action): RedirectResponse
     {
-        $validated = $this->validated($request, imageRequired: true);
-        unset($validated['image']);
-        $image = $storeImage->handle($request->file('image'));
-
-        $data   = BannerData::from([...$validated, ...$image]);
+        $data   = BannerData::from($this->validated($request, imageRequired: true));
         $banner = $action->handle($data);
 
         return redirect()->route('backend.banner.items.index')
@@ -76,15 +71,9 @@ class BannerAdminController extends Controller
         return view('banner::admin.banners.edit', compact('banner', 'placements', 'targetTypes', 'categories', 'provinces'));
     }
 
-    public function update(Request $request, Banner $banner, StoreBannerImageAction $storeImage): RedirectResponse
+    public function update(Request $request, Banner $banner): RedirectResponse
     {
-        $validated = $this->validated($request, imageRequired: false);
-        unset($validated['image']);
-        $image = $request->hasFile('image')
-            ? $storeImage->handle($request->file('image'))
-            : ['image_path' => null, 'image_width' => null, 'image_height' => null, 'image_size_bytes' => null];
-
-        $data = BannerData::from([...$validated, ...$image]);
+        $data = BannerData::from($this->validated($request, imageRequired: false));
         app(UpdateBannerAction::class)->handle($banner, $data);
 
         return redirect()->route('backend.banner.items.index')
@@ -115,7 +104,9 @@ class BannerAdminController extends Controller
                     : Rule::exists('post_categories', 'slug')->where('is_active', true),
             ],
             'title'           => ['nullable', 'string', 'max:150'],
-            'image'           => [$imageRequired ? 'required' : 'nullable', 'image', 'max:2048'],
+            // spec/Media_Library_Technical_Specification.md §8 — chỉ dùng ở create form (form
+            // sửa gắn ảnh trực tiếp qua FilePond context header, không qua field này).
+            'cover_media_uuid' => [$imageRequired ? 'required' : 'nullable', 'string'],
             'alt_text'        => ['nullable', 'string', 'max:255'],
             'link_url'        => ['nullable', 'url', 'max:2048'],
             'open_in_new_tab' => ['boolean'],

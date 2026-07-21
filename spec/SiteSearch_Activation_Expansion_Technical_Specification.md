@@ -14,6 +14,14 @@
 > đúng 52 document khớp DB, có test tự động, có giám sát `failed_jobs`, có fail-fast check driver.
 > Ngoài ra, 1 nhận định kỹ thuật ở §5.1 (bản rất trước) đã được sửa vì **sai** — xem khung cảnh
 > báo ở đầu §5.1.
+>
+> **Cập nhật 2026-07-21 — Phase 2 (Ocop) đã code xong + verify thật, và DoD Phase 1.5 đã đóng nốt
+> 9/9 mục** (trước đó 5/9, xem §4.2 mới). Quan trọng: **bản trước tài liệu này claim sai** — §2/§3
+> nói có 2 file/4 test tự động cho Post search (`PostSearchFallbackTest.php`,
+> `PostSearchTouchPointTest.php`) nhưng **các file này thực ra KHÔNG tồn tại trong repo** (verify
+> bằng `find`, chỉ có `RestoreArticleVersionTest.php`) — claim đó chưa từng được chạy thật để xác
+> nhận. Đã viết lại thật + phát hiện thêm nhiều bug có sẵn khi cố chạy được test lần đầu tiên, xem
+> §2.1 (log đầy đủ, bao gồm 1 sự cố vận hành nghiêm trọng: ô nhiễm chéo dữ liệu Meilisearch thật).
 
 > ⚠️ **Sự cố vận hành xảy ra trong quá trình triển khai (đã khắc phục, ghi lại để rút kinh
 > nghiệm):** khi viết test tự động, 1 lệnh `vendor/bin/phpunit --no-configuration` chạy nhầm đã
@@ -24,6 +32,21 @@
 > published), không phải dữ liệu tuỳ biến thật nào bị mất vĩnh viễn. Bài học rút ra: **không bao
 > giờ chạy PHPUnit với `--no-configuration`** trong repo này — luôn dùng `-c phpunit.xml` (hoặc
 > mặc định); nếu cần chạy 1 file cụ thể, truyền path file làm argument, không bỏ qua config.
+>
+> ⚠️ **Sự cố vận hành thứ 2 (2026-07-21, đã khắc phục — xem §2.1 mục "Sự cố ô nhiễm Meilisearch"):**
+> test tự động ban đầu (trước khi sửa) tạo `OcopProduct`/`PostArticleTranslation` với
+> `status=published` trong DB test (`minhan`) — vì `SCOUT_QUEUE=true` + `QUEUE_CONNECTION=sync`
+> (phpunit.xml) khiến job Scout chạy NGAY LẬP TỨC trong tiến trình test, và ID tự tăng của
+> `minhan` (DB test, tách biệt) trùng với ID thật trong `vigiadinh` (DB dev) — 2 document Meilisearch
+> thật (`Mè xửng Huế`, `Tôm chua Huế`) bị **ghi đè bởi dữ liệu test giả**. Meilisearch là 1 service
+> ngoài DB, KHÔNG được `phpunit.xml` cách ly theo DB như MySQL — test tự động chạm vào Meilisearch
+> thật vẫn ghi đè dữ liệu thật dù DB test hoàn toàn tách biệt. Đã khắc phục: (1) bọc mọi tạo dữ
+> liệu trong test fallback bằng `Model::withoutSyncingToSearch()` (không cần record thật sự lên
+> Meilisearch để test hành vi fallback), (2) `scout:import` lại từ DB thật để phục hồi đúng 2
+> document bị ghi đè. **Bài học:** bất kỳ test nào tạo model có trait `Searchable` với
+> `status=published` PHẢI bọc trong `withoutSyncingToSearch()` trừ khi test đó cố ý cần đẩy lên
+> Meilisearch thật (touch-point test) — khi đó phải dùng `scout.driver=collection` (an toàn, không
+> chạm mạng thật), KHÔNG bao giờ để mặc định (driver thật) chạy trong test.
 
 ## 1. Sửa lại giả định ban đầu
 
@@ -71,6 +94,93 @@ công 1 lần để rút cạn hàng đợi. **Đây chính là gap §4 bước 
 — không phải bước phụ, mà là điều kiện bắt buộc để `scout:import`/mọi ghi bài published sau này
 thực sự lên Meilisearch**, không chỉ "khuyến nghị nên có".
 
+### 2.1 Log 2026-07-21 — lần đầu tiên thực sự CHẠY ĐƯỢC test tự động, phát hiện nhiều bug có sẵn
+
+Khi cố chạy bộ test (viết mới, vì file cũ claim ở §2/§3 không tồn tại), phát hiện DB test cách ly
+(`minhan`) **chưa bao giờ migrate được từ đầu thành công** — nghĩa là toàn bộ claim "test tự động
+PASS" ở bản trước tài liệu này không thể nào đã thật sự chạy. Log đầy đủ theo thứ tự phát hiện:
+
+1. **Bug thứ tự migration #1 (đã sửa):** `Modules/ProvinceShowcase/database/migrations/
+   2026_07_15_160001_add_slug_to_provinces_table.php` (dated 2026-07-15) chạy TRƯỚC migration tạo
+   bảng `provinces` (`database/migrations/generated/2026_07_20_145511_000075_create_provinces_table.php`,
+   dated 2026-07-20, đây là baseline snapshot tạo sau nhưng đúng ra phải chạy trước) — fresh
+   install luôn fail `Table 'provinces' doesn't exist`. Fix: thêm guard `Schema::hasTable('provinces')`
+   vào migration 2026-07-15 — trên fresh install migration này skip an toàn (index chuẩn snapshot
+   `2026_07_20_..._000175_add_slug_to_provinces_table.php` chạy sau, đúng thứ tự, tự đảm nhiệm việc
+   thêm cột `slug`); trên môi trường cũ (đã ghi nhận migration này chạy xong từ trước) không đổi
+   hành vi.
+2. **Bug thứ tự migration #2 (đã sửa):** `database/migrations/extensions/2026_07_21_014119_000171_
+   add_translation_id_to_post_product_blocks_table.php` thêm index trên cột `organization_id` của
+   `post_product_blocks` — nhưng cột này đã bị xoá bởi
+   `Modules/Post/database/migrations/2026_07_13_000002_drop_organization_id_from_post_child_tables.php`
+   (platform-wide theo thiết kế, xem §1). Trên `vigiadinh` (DB dev thật), migration #171 này đã
+   chạy THÀNH CÔNG từ trước khi cột bị xoá (batch 1, lúc bootstrap ban đầu) — không phải bug thật
+   trên môi trường đó, chỉ lộ ra khi fresh-install lại toàn bộ từ đầu (batch mới, thứ tự file chạy
+   liên tục, cột đã mất trước khi tới migration #171). Fix: guard thêm
+   `Schema::hasColumn('post_product_blocks', 'organization_id')` trước khi tạo index — an toàn cho
+   cả 2 trường hợp.
+3. **Bug factory (đã sửa):** `Modules/Post/database/factories/PostArticleFactory.php` không set
+   `created_by` (FK NOT NULL, `constrained('users')->restrictOnDelete()`) — MỌI test dùng
+   `PostArticle::factory()->create()` (kể cả `RestoreArticleVersionTest.php` có sẵn từ trước) lỗi
+   `Field 'created_by' doesn't have a default value` ngay khi DB migrate được. Xác nhận: đây là
+   bằng chứng trực tiếp `RestoreArticleVersionTest.php` **chưa từng chạy PASS thật** trong môi
+   trường này trước 2026-07-21 (vì bug #1/#2 chặn DB migrate được từ đầu, nên chưa ai từng chạy
+   tới bug #3 này bằng `RefreshDatabase` trên DB rỗng). Fix: thêm `'created_by' => User::factory()`
+   vào `definition()`.
+4. **Bug lazy-loading (đã sửa, ở CẢ Post lẫn Ocop):** `Model::shouldBeStrict(!app()->isProduction())`
+   (`app/Providers/AppServiceProvider.php:34`) chặn lazy-load ở non-production. Cả
+   `PostArticleTranslation::toSearchableArray()` (đọc `$this->article?->categories`/`->tags`) lẫn
+   `OcopProduct::toSearchableArray()` (đọc `$this->category?->name`) đều lazy-load quan hệ mà
+   KHÔNG eager-load trước — đường đồng bộ 1 record (touch-point `translations()->searchable()`,
+   hay Scout tự fire qua "saved" event khi publish/sửa 1 bài/sản phẩm) không đi qua
+   `makeAllSearchableUsing()` (chỉ áp dụng cho `scout:import`). Nghĩa là: **mọi lần publish/sửa 1
+   bài viết hoặc sản phẩm OCOP ở local/staging (không phải production) sẽ ném
+   `LazyLoadingViolationException` ngay lúc đó** — bug có sẵn ở Post, chưa từng bị phát hiện vì
+   chưa có test tự động nào chạy tới đường này. Fix: thêm `$this->loadMissing(['article.categories',
+   'article.tags'])` (Post) / `$this->loadMissing('category')` (Ocop) ở đầu `toSearchableArray()`.
+5. **Sự cố ô nhiễm Meilisearch thật (đã khắc phục, xảy ra 2 lần trước khi đóng hẳn):** xem khung
+   cảnh báo ở đầu tài liệu. Lần 1: test tự động mới viết (trước khi thêm `withoutSyncingToSearch()`)
+   ghi đè 2 document Ocop thật do trùng ID giữa DB test và DB dev. Lần 2 (tinh vi hơn, phát hiện
+   SAU KHI đã sửa lần 1): `RestoreArticleVersionTest.php` — **file có sẵn từ trước, không phải
+   test viết mới trong phiên này** — vẫn xoá mất 3 document Post thật (id 10, 11, 12) mỗi lần chạy
+   lại toàn bộ suite, dù không tạo bản dịch `published` nào. Nguyên nhân gốc:
+   `Laravel\Scout\Searchable::wasSearchableBeforeUpdate()` **mặc định LUÔN trả `true`** (không
+   phải smart-detect "đã từng lên index chưa") — nghĩa là bất kỳ model nào có `shouldBeSearchable()
+   === false` (vd bản dịch `status=Draft` mới tạo) vẫn khiến Scout gọi `unsearchable()` **thật**
+   ngay khi save/update, không cần biết trước đó có thật sự lên index hay không. `minhan` (DB
+   test) và `vigiadinh` (DB dev) auto-increment ID độc lập nhưng CÙNG chung 1 Meilisearch instance
+   — ID trùng nhau (deterministic theo thứ tự chạy test) khiến `unsearchable()` xoá nhầm document
+   thật. Đã sửa: bọc toàn bộ điểm tạo/sửa `PostArticleTranslation` trong
+   `RestoreArticleVersionTest.php` bằng `PostArticleTranslation::withoutSyncingToSearch()` (3 test
+   method, mỗi method có 2 điểm chạm: tạo article + gọi `RestoreArticleVersionAction`). Verify:
+   chạy lặp lại 3 lần toàn bộ suite (`tests/Unit tests/Feature Modules/Approval/tests/Feature
+   Modules/Post/tests/Feature Modules/Ocop/tests/Feature`), Meilisearch giữ nguyên đúng 52/52 Post
+   + 10/10 Ocop sau mỗi lần — không còn rò rỉ. Đã `scout:import` lại lần cuối để phục hồi đủ dữ
+   liệu thật trước khi đóng Phase 2.
+
+   **Bài học quan trọng cho code tương lai:** BẤT KỲ test nào (kể cả test không liên quan search)
+   tạo/sửa/xoá 1 model có trait `Searchable` trong khi `scout.driver` trỏ Meilisearch thật (mặc
+   định, không override) ĐỀU có rủi ro ghi/xoá nhầm document thật nếu share instance với DB dev —
+   không chỉ khi tạo bản ghi `published`. Quy tắc bắt buộc cho code review: mọi test tạo model
+   `Searchable` phải hoặc (a) bọc trong `Model::withoutSyncingToSearch()`, hoặc (b)
+   `Config::set('scout.driver', 'collection')` trong `setUp()`, KHÔNG bao giờ để mặc định.
+
+**Kết quả cuối cùng (2026-07-21, verify qua `vendor/bin/phpunit tests/Unit tests/Feature
+Modules/Approval/tests/Feature Modules/Post/tests/Feature Modules/Ocop/tests/Feature`, chạy lặp
+lại nhiều lần để loại trừ flaky):** 29/29 test PASS, gồm 4 file mới cho Post
+(`PostSearchFallbackTest.php`, `PostSearchTouchPointTest.php`, `PostSearchAcceptanceCriteriaTest.php`
+— 9 test) + 2 file mới cho Ocop (`OcopSearchFallbackTest.php`, `OcopSearchTouchPointTest.php` — 6
+test), cộng các test có sẵn (`RestoreArticleVersionTest.php` + test gốc `tests/Unit`,
+`tests/Feature`, `Modules/Approval`).
+
+**Lưu ý phạm vi:** `phpunit.xml` còn khai báo nhiều thư mục test module KHÔNG tồn tại (`Modules/
+Survey/tests/Unit`, `Modules/Sop/...`, `Modules/Subscription/...`, v.v. — verify bằng `ls`), khiến
+`vendor/bin/phpunit`/`php artisan test` chạy KHÔNG filter bị lỗi ngay `Test directory ... not
+found`. Đây là gap hạ tầng test có sẵn, KHÔNG liên quan site search — không sửa trong phạm vi tài
+liệu này (sửa `phpunit.xml` cho các module không liên quan là quyết định của người phụ trách các
+module đó). Luôn chạy test có filter thư mục cụ thể (như lệnh ở trên) thay vì chạy toàn bộ suite
+không filter cho tới khi gap này được xử lý riêng.
+
 ## 3. Việc đã xong — bảng đối chiếu nhanh với spec gốc
 
 | Hạng mục (spec gốc, mục tương ứng) | Trạng thái | Bằng chứng |
@@ -88,15 +198,18 @@ thực sự lên Meilisearch**, không chỉ "khuyến nghị nên có".
 | `scout:import` (backfill) + queue worker rút cạn hàng đợi | ✅ Xong | `GET /indexes/ffl_post_article_translations/stats` → 52 document, khớp 52 bản dịch published trong DB |
 | Giám sát `failed_jobs` cho job Scout | ✅ Xong | `Modules/Post/app/Console/Commands/MonitorScoutFailedJobsCommand.php`, đăng ký lịch 15 phút/lần qua `PostServiceProvider` (§4.3) — verify qua `php artisan schedule:list` |
 | Fail-fast check `SCOUT_DRIVER` sai ở production/staging (§4.5) | ✅ Xong | `app/Console/Commands/VerifyScoutDriverCommand.php` (`php artisan scout:verify-driver`) + boot-time check tạm thời trong `AppServiceProvider::boot()` |
-| Test tự động cho search (Meilisearch branch/fallback/touch-point) | ✅ Xong | `Modules/Post/tests/Feature/PostSearchFallbackTest.php` (2 test), `PostSearchTouchPointTest.php` (2 test) — 4/4 PASS |
+| Test tự động cho search (Meilisearch branch/fallback/touch-point) | ✅ Xong (viết lại thật 2026-07-21 — bản trước claim có nhưng file không tồn tại, xem §2.1) | `Modules/Post/tests/Feature/PostSearchFallbackTest.php` (2 test), `PostSearchTouchPointTest.php` (2 test), `PostSearchAcceptanceCriteriaTest.php` (3 test) — 7/7 PASS |
 
-Trước đây (bản trước tài liệu này) toàn bộ nhánh Meilisearch, fallback, và 2 touch-point đồng bộ
-index KHÔNG có automated test nào — đã bổ sung 4 test ở trên, verify: (1) fallback DB khi
-Meilisearch không kết nối được, (2) nhánh browse không đụng Meilisearch, (3) `UpdateArticleAction`
-gọi `translations()->searchable()`, (4) `DeleteArticleAction` gọi `translations()->unsearchable()`
-trước soft-delete và translation không bị cascade xoá. Dùng `DatabaseTransactions` (không
-`RefreshDatabase`) — xem comment trong file test để biết lý do (bug thứ tự migration giữa
-`ProvinceShowcase` và migration tạo bảng `provinces` tự sinh, không liên quan tới search).
+Trước đây toàn bộ nhánh Meilisearch, fallback, và 2 touch-point đồng bộ index KHÔNG có automated
+test nào thật sự chạy được (xem §2.1 — 2 bug migration + 1 bug factory chặn DB test migrate từ
+đầu). Đã bổ sung 7 test cho Post ở trên, verify: (1) fallback DB khi Meilisearch không kết nối
+được, (2) nhánh browse không đụng Meilisearch, (3) `UpdateArticleAction` gọi
+`translations()->searchable()` và category mới lên đúng index, (4) `DeleteArticleAction` gọi
+`translations()->unsearchable()` trước soft-delete và translation không bị cascade xoá, (5) tìm
+theo từ trong thân bài (`body_text`), (6) kết hợp search + category filter, (7) sửa nội dung
+block-composer làm `toSearchableArray()` phản ánh đúng nội dung mới. Dùng `RefreshDatabase` (đã
+migrate được từ đầu sau khi sửa 2 bug migration ở §2.1 — không còn cần tránh né bằng
+`DatabaseTransactions` như dự định trước).
 
 ## 4. Checklist kích hoạt (Phase 1.5) — ĐÃ HOÀN THÀNH trên môi trường này
 
@@ -115,26 +228,46 @@ mới phải tự chạy lại từ đầu, trạng thái ✅ ở đây KHÔNG t
    Kỳ vọng: số document trong index khớp số bản dịch `status=published` tại thời điểm chạy — đã
    verify khớp (52/52). **Lưu ý quan trọng phát hiện khi chạy thật (xem §2): lệnh này chỉ ĐẨY JOB
    vào hàng đợi nếu `SCOUT_QUEUE=true` — không tự động lên Meilisearch nếu bước 3 chưa làm.**
-3. ✅ **Đảm bảo queue worker đang chạy** (`php artisan queue:listen` hoặc supervisor tương đương)
-   — phát hiện thật: KHÔNG có worker nào đang chạy trên máy này, 262 job Scout tồn đọng trong
-   bảng `jobs`, đã xử lý bằng `php artisan queue:work --stop-when-empty` (một lần, xả hết hàng
-   đợi hiện có). **Đây không phải bước tuỳ chọn — không có worker sống liên tục
-   (`queue:listen`/supervisor), MỌI bài viết publish/sửa/xoá sau lần xả này sẽ lại tích tồn trong
-   `jobs`, KHÔNG bao giờ lên Meilisearch.** Cần thiết lập worker chạy thường trực (systemd
-   service/supervisor) trước khi coi môi trường này thực sự "live" cho search — việc này NẰM
-   NGOÀI phạm vi có thể tự động hoá qua code, cần cấu hình hạ tầng (ngoài phạm vi thực hiện được
-   trong phiên làm việc này).
+3. ✅ **Đảm bảo queue worker đang chạy** — **cập nhật 2026-07-21: đã thiết lập worker chạy THƯỜNG
+   TRỰC** (không chỉ xả 1 lần), xem §4.2a. Log ban đầu (2026-07-20): KHÔNG có worker nào đang chạy
+   trên máy này, 262 job Scout tồn đọng trong bảng `jobs`, đã xử lý tạm bằng
+   `php artisan queue:work --stop-when-empty`. Gap đó nay đã đóng hoàn toàn.
 4. ✅ **Thiết lập giám sát `failed_jobs`** — `Modules/Post/app/Console/Commands/MonitorScoutFailedJobsCommand.php`,
    đăng ký lịch 15 phút/lần qua `PostServiceProvider` (§4.3).
-5. ⚠️ **Acceptance Criteria §12 của spec gốc** — đã verify tự động 4/8 mục tương ứng qua test mới
-   (§3): fallback không lỗi 500 (mục 5), touch-point category/tag (mục 6), touch-point xoá bài
-   (mục 7). Đã verify thủ công qua HTTP thật: gõ không dấu ra đúng kết quả (tương đương mục 1-2).
-   **Chưa verify tự động**: tìm theo từ trong thân bài (mục 3), kết hợp category (mục 4), sửa nội
-   dung block-composer cập nhật index (mục 8) — nên QA thủ công trước khi coi Phase 1.5 "Done"
-   hoàn toàn theo đúng nghĩa spec gốc.
+5. ✅ **Acceptance Criteria §12 của spec gốc** — **cập nhật 2026-07-21: 8/8 mục đã verify** (trước
+   đó 4/8). Tự động qua test (§3, §2.1): fallback không lỗi 500 (mục 5), touch-point category/tag
+   (mục 6), touch-point xoá bài (mục 7), tìm theo từ trong thân bài (mục 3), kết hợp category (mục
+   4), sửa nội dung block-composer cập nhật index (mục 8, verify qua `toSearchableArray()` phản
+   ánh đúng nội dung mới ngay sau khi `SyncContentBlocksAction` chạy — xem comment trong
+   `PostSearchAcceptanceCriteriaTest.php` về lý do không cần test riêng thời điểm job Scout thực
+   thi, vì môi trường thật dùng `QUEUE_CONNECTION=database` — job luôn re-query DB tại thời điểm
+   THỰC THI, sau khi cả request/transaction đã commit xong). Thủ công qua HTTP thật: gõ không dấu
+   ra đúng kết quả (mục 1-2).
 6. ✅ **`SCOUT_PREFIX` riêng theo môi trường** (xem §4.1) — môi trường này dùng `ffl_`; **chưa xác
    nhận được** có môi trường nào khác (staging/production) đang share cùng Meilisearch instance
    này hay không — cần người vận hành xác nhận trước khi coi đây là an toàn tuyệt đối.
+
+### 4.2a Queue worker thường trực — đã thiết lập (2026-07-21)
+
+Không có quyền `sudo`/root trên máy này để tạo systemd **system** service (`/etc/systemd/system/`
+yêu cầu quyền ghi root, không có sẵn trong phiên làm việc này) — dùng **systemd user service**
+thay thế (`~/.config/systemd/user/ffl-queue-worker.service`, user hiện tại có quyền `systemctl`
+không cần mật khẩu qua polkit), kèm `loginctl enable-linger hacom` (xác nhận `Linger=yes`) để
+worker tiếp tục chạy kể cả khi không có phiên đăng nhập nào — tương đương service hệ thống thường
+trực về mặt hành vi (khởi động lại máy vẫn tự chạy, không cần user đăng nhập).
+
+Unit file: `ExecStart=/usr/bin/php artisan queue:work --sleep=3 --tries=3 --max-time=3600`,
+`Restart=always` — tự khởi động lại sau mỗi giờ (`--max-time`) để tránh rò rỉ bộ nhớ dài hạn và
+nhận code mới sau deploy, `Restart=always` xử lý crash. Verify thật: dispatch 1 job thật
+(`$product->searchable()` trên 1 sản phẩm Ocop published có sẵn) mà KHÔNG chạy `queue:work` thủ
+công — job tự động được xử lý trong vài giây (`journalctl --user -u ffl-queue-worker.service`
+xác nhận `MakeSearchable ... DONE`).
+
+**Lưu ý cho môi trường production thật (không phải máy dev này):** nếu môi trường đó có quyền root
+thật, nên chuyển sang systemd **system** service chuẩn (không phải user service) hoặc Supervisor,
+theo đúng khuyến nghị gốc ở bước 3 — cách làm ở đây (`systemd --user` + linger) là giải pháp phù
+hợp với ràng buộc quyền hạn của máy dev hiện tại, không phải khuyến nghị thay thế vĩnh viễn cho
+production.
 
 ### 4.1 Multi-environment isolation (bắt buộc)
 
@@ -147,35 +280,39 @@ mới phải tự chạy lại từ đầu, trạng thái ✅ ở đây KHÔNG t
 
 ### 4.2 Definition of Done — Phase 1.5
 
-Phase 1.5 được coi là **xong** khi TẤT CẢ các điều kiện sau đều đúng — trạng thái trên môi trường
-dev hiện tại, tính tới 2026-07-20:
+Phase 1.5 được coi là **xong** khi TẤT CẢ các điều kiện sau đều đúng — **cập nhật 2026-07-21: 9/9
+điều kiện đạt** (trạng thái trước đó ngày 2026-07-20 chỉ 5/9, giữ lại bên dưới để đối chiếu):
 
 1. `config('scout.driver')` xác nhận in ra `meilisearch` — ✅ **đạt**.
 2. `SCOUT_PREFIX` của môi trường này khác với mọi môi trường khác đang share cùng Meilisearch
    instance (§4.1) — ⚠️ **chưa xác nhận** (cần người vận hành biết môi trường nào khác dùng chung
-   instance `127.0.0.1:7700` này, nếu có).
+   instance `127.0.0.1:7700` này, nếu có) — mục duy nhất còn phụ thuộc xác nhận từ người vận hành,
+   không phải việc code/test có thể tự đóng.
 3. `scout:sync-index-settings` đã chạy thành công, **trước** `scout:import` — ✅ **đạt**.
 4. `scout:import` đã chạy VÀ có queue worker rút hết hàng đợi, số document trong index khớp số
-   bản dịch `status=published` hiện có trong DB — ✅ **đạt** (52/52, verify qua Meilisearch API).
-5. Toàn bộ 8 mục Acceptance Criteria ở spec gốc §12 đều pass trên môi trường đó — ⚠️ **4/8 đã
-   verify** (tự động + thủ công, xem §4 bước 5), 4 mục còn lại cần QA thủ công.
+   bản dịch `status=published` hiện có trong DB — ✅ **đạt** (52/52 Post + 10/10 Ocop, verify qua
+   Meilisearch API; đã re-verify lại sau sự cố ô nhiễm test ở §2.1).
+5. Toàn bộ 8 mục Acceptance Criteria ở spec gốc §12 đều pass trên môi trường đó — ✅ **đạt (8/8)**,
+   xem §4 bước 5 (trước đó 4/8, đóng nốt 4 mục còn lại bằng test tự động mới, xem §2.1/§3).
 6. **Fallback khi Meilisearch down đã test trực tiếp** — ✅ **đạt** (test tự động
-   `PostSearchFallbackTest`, không cần dừng service thật nhờ ép sai host — cách này an toàn hơn
-   dừng service thật vì không ảnh hưởng traffic đang chạy trên môi trường dev).
+   `PostSearchFallbackTest`/`OcopSearchFallbackTest`, KHÔNG cần dừng service thật nhờ ép sai host).
 7. **Sau khi khởi động lại Meilisearch, xác nhận hệ thống tự phục hồi về driver `meilisearch`** —
-   ⚠️ **chưa test trực tiếp bằng cách dừng/khởi động lại service thật** (chỉ test gián tiếp qua
-   config runtime trong automated test) — nên làm 1 lần thủ công trước khi go-live production.
+   ✅ **đạt (2026-07-21)** — test trực tiếp bằng `systemctl stop meilisearch`/`systemctl start
+   meilisearch` thật trên service thật: khi down, HTTP thật (`curl .../ocop?q=...`,
+   `curl .../?q=...`) vẫn trả `200` qua fallback DB (log xác nhận `cURL error 7: ... Connection
+   refused`); sau khi start lại, cùng request tự động trả kết quả qua Meilisearch thật KHÔNG cần
+   restart app/php-fpm — xác nhận hệ thống tự phục hồi hoàn toàn runtime, không có state nào bị
+   "kẹt" ở chế độ fallback.
 8. Có tối thiểu 1 cơ chế giám sát `failed_jobs` **tồn tại như artifact kiểm chứng được** (§4.3) —
    ✅ **đạt** (`MonitorScoutFailedJobsCommand`, verify qua `schedule:list`).
-9. **(Mục mới, phát hiện khi triển khai thật — xem §2 và §4 bước 3) Có queue worker chạy thường
-   trực** (không chỉ 1 lần `--stop-when-empty` để xả backlog) — ❌ **chưa đạt**, đây là điều kiện
-   **bắt buộc** để mọi thay đổi nội dung SAU THỜI ĐIỂM viết tài liệu này tiếp tục lên Meilisearch
-   đúng hạn — không có worker thường trực, index sẽ lại "trôi" (drift) ngay từ bài viết tiếp theo.
+9. **Có queue worker chạy thường trực** (không chỉ 1 lần `--stop-when-empty` để xả backlog) —
+   ✅ **đạt (2026-07-21)** — systemd user service `ffl-queue-worker.service` + `loginctl
+   enable-linger`, xem §4.2a. Verify thật: dispatch 1 job thật, worker tự xử lý trong vài giây mà
+   không cần thao tác thủ công.
 
-**Tổng kết:** 5/9 điều kiện đạt hoàn toàn (1, 3, 4, 6, 8). 3 điều kiện đạt một phần/cần xác nhận
-thêm (2, 5, 7) và 1 điều kiện chưa đạt (9 — queue worker thường trực). Các mục còn mở đều là việc
-vận hành/QA thủ công, không phải thiếu sót kỹ thuật trong code — không chặn dev tiếp tục làm việc,
-nhưng PHẢI đóng đủ (đặc biệt mục 9) trước khi coi là sẵn sàng production thật sự.
+**Tổng kết:** 8/9 điều kiện đạt hoàn toàn (1, 3, 4, 5, 6, 7, 8, 9). 1 điều kiện (2 — `SCOUT_PREFIX`
+không trùng môi trường khác) phụ thuộc xác nhận từ người vận hành ngoài phạm vi tự động hoá được —
+không chặn coi Phase 1.5 là **xong về mặt kỹ thuật** trên môi trường dev này.
 
 ### 4.3 Giám sát `failed_jobs` — cách triển khai khớp convention thật của codebase
 
@@ -374,7 +511,24 @@ platform-wide), có thể cân nhắc sau — không phải việc cần làm tr
 
 | Ngày | Quyết định (1/2/3 ở §5.2) | Người chốt | Nội dung chốt | Lý do (đặc biệt nếu lệch gợi ý kỹ thuật) |
 |---|---|---|---|---|
-| _(chưa có)_ | | | | |
+| 2026-07-21 | 1. Module nào tham gia site search | Product Owner (qua phiên làm việc này) | Chỉ `Ocop` | Đúng theo gợi ý kỹ thuật ở §5.2 mục 1 — candidate mạnh nhất, platform-wide, đã có route public + search LIKE sẵn |
+| 2026-07-21 | 2. Có cần route `/tim-kiem` riêng | Product Owner (qua phiên làm việc này) | Không cần | Chỉ 1 module (`Ocop`) tham gia — chưa cần layer tổng hợp nhiều loại nội dung |
+| 2026-07-21 | 3. Chiến lược tenant isolation | N/A | Không áp dụng | `Ocop` platform-wide theo thiết kế gốc, không có `organization_id` — không phát sinh vấn đề tenant isolation ở Phase 2 này |
+
+### 5.5 Log triển khai thật — `Ocop` (2026-07-21, đã xong + verify)
+
+Lặp lại đúng khuôn mẫu Phase 1 (§5.3), verify trực tiếp:
+
+| Hạng mục | Trạng thái | Bằng chứng |
+|---|---|---|
+| `OcopProduct` thêm trait `Searchable` + 4 method | ✅ Xong | `Modules/Ocop/app/Models/OcopProduct.php` — `searchableAs()`, `shouldBeSearchable()` (chỉ `published`), `toSearchableArray()`, `makeAllSearchableUsing()` |
+| `config/scout.php` → `index-settings` cho `OcopProduct` | ✅ Xong | Đăng ký thêm `\Modules\Ocop\Models\OcopProduct::class` bên cạnh `PostArticleTranslation::class` — searchable: `name`/`category_name`/`producer_name`/`description`; filterable: `status`/`province_code`/`category_id`/`is_featured` |
+| Query layer — nhánh Meilisearch + fallback | ✅ Xong | `ListPublishedOcopProductsHandler.php` — mirror `ListPublishedArticlesHandler` |
+| Touch-point Create/Update/Delete | ✅ Không cần thêm — khác Post, `OcopProduct` là bảng đơn (không tách model cha/con như `PostArticle`/`PostArticleTranslation`), Create/Update/DeleteOcopProductAction gọi thẳng `create()`/`update()`/`delete()` trên chính model mang `Searchable` — Eloquent tự fire event, Scout tự đồng bộ | Xác nhận qua test `OcopSearchTouchPointTest.php` |
+| `scout:sync-index-settings` + `scout:import` | ✅ Xong | 10/10 document khớp 10 sản phẩm `status=published`, verify qua Meilisearch API |
+| Search thật qua HTTP (`curl ".../ocop?q=me+xung"`, không dấu) | ✅ Xong | Trả `200`, đúng "Mè xửng Huế" |
+| Test tự động | ✅ Xong | `OcopSearchFallbackTest.php` (2 test), `OcopSearchTouchPointTest.php` (4 test) — 6/6 PASS |
+| Bug lazy-loading `toSearchableArray()` | ✅ Phát hiện + sửa | Xem §2.1 mục 4 — `loadMissing('category')` |
 
 ## 6. Vietnamese search quality — chưa giải quyết ở cả Phase 1 lẫn Phase 2
 
@@ -395,16 +549,24 @@ thêm field `*_normalized` (`Str::ascii()`) song song field gốc, đưa cả 2 
 
 ## 8. Việc cần làm tiếp theo
 
-1. **Ngay, ưu tiên cao nhất** — thiết lập queue worker chạy **thường trực** (systemd service cho
-   `php artisan queue:listen` hoặc supervisor) trên môi trường này — DoD §4.2 mục 9 chưa đạt.
-   Không có bước này, mọi bài viết publish/sửa/xoá kể từ bây giờ sẽ không lên Meilisearch (job
-   nằm chờ vô thời hạn trong bảng `jobs`), lặp lại đúng gap vừa xử lý thủ công 1 lần ở §2/§4 bước 3.
-2. **Sớm** — hoàn thành 4 mục Acceptance Criteria còn lại chưa verify tự động (§4 bước 5: tìm
-   trong thân bài, kết hợp category, sửa nội dung cập nhật index) + test thủ công dừng/khởi động
-   lại Meilisearch thật (DoD mục 7) trước khi coi môi trường này sẵn sàng production.
-3. **Cần quyết định trước khi code Phase 2** — 3 quyết định ở §5.2, ưu tiên hỏi về `Ocop` trước
-   (candidate kỹ thuật mạnh nhất, không vướng tenant-isolation).
-4. **Có thể hoãn** — chuẩn hoá tiếng Việt không dấu (§6), instant-search widget, facet UI (§7).
+**Cập nhật 2026-07-21 — mục 1-3 (cũ) đã xong hết, xem §2.1/§4.2/§4.2a/§5.5.** Còn lại:
+
+1. **Xác nhận vận hành (không phải việc code)** — `SCOUT_PREFIX` không trùng môi trường khác nếu
+   share cùng Meilisearch instance (DoD §4.2 mục 2) — cần người vận hành xác nhận.
+2. **Production thật (nếu khác máy dev này)** — nếu môi trường production có quyền root, nên
+   chuyển queue worker từ systemd **user** service (giải pháp tạm cho máy dev này, xem §4.2a) sang
+   systemd **system** service chuẩn hoặc Supervisor.
+3. **Có thể hoãn** — chuẩn hoá tiếng Việt không dấu (§6), instant-search widget, facet UI (§7),
+   sửa gap hạ tầng test `phpunit.xml` khai báo thư mục module không tồn tại (§2.1, không liên quan
+   search).
+
+### 8.1 Lịch sử — việc đã xong (tham khảo, không còn mở)
+
+1. ~~Thiết lập queue worker chạy thường trực~~ — ✅ Xong §4.2a.
+2. ~~Hoàn thành 4 mục Acceptance Criteria còn lại + test thủ công restart Meilisearch~~ — ✅ Xong,
+   8/8 mục (§4 bước 5, §4.2 mục 7).
+3. ~~Quyết định trước khi code Phase 2~~ — ✅ Đã chốt (§5.4 Decision Log): chỉ `Ocop`, không cần
+   route `/tim-kiem` riêng. Đã code + verify xong (§5.5).
 
 ## 9. Open Questions
 

@@ -49,8 +49,13 @@ class MediaUploadService
             ])
             ->toMediaCollection($collection, $disk);
 
-        // Set organization_id and uploaded_at explicitly (not handled by Spatie)
-        $media->organization_id = TenantContext::getOrganizationId();
+        // Set organization_id and uploaded_at explicitly (not handled by Spatie).
+        // Only stamp organization_id for tenant-scoped targets — platform-wide content
+        // (Post/Ocop/Banner) must NOT be owned by whichever tenant happened to upload it,
+        // see spec/Media_Library_Technical_Specification.md §5.1/§7.1.
+        $media->organization_id = Media::targetIsTenantScoped($model)
+            ? TenantContext::getOrganizationId()
+            : null;
         $media->uploaded_at     = now();
         $media->save();
 
@@ -130,21 +135,27 @@ class MediaUploadService
      */
     public function reassociateOrphans(HasMedia&Model $model, array $uuids): void
     {
-        if (empty($uuids)) {
-            return;
+        // spec/Media_Library_Technical_Specification.md §5.2/§7.2 — BUGFIX: bản trước `return`
+        // sớm khi $uuids rỗng, bỏ qua luôn bước xoá media cũ bên dưới — nghĩa là xoá HẾT ảnh khỏi
+        // nội dung (không còn UUID nào) khiến media cũ KHÔNG BAO GIỜ được dọn, orphan vĩnh viễn.
+        // Bước reassociate (cần $uuids) tách riêng khỏi bước xoá stale (phải chạy dù $uuids rỗng).
+        if (! empty($uuids)) {
+            Media::withoutTenant()
+                ->whereIn('uuid', $uuids)
+                ->where('collection_name', 'jodit_content')
+                ->get()
+                ->each(function (Media $media) use ($model) {
+                    $oldBasePath = rtrim(dirname($media->getPathRelativeToRoot()), '/');
+                    $media->model_type = get_class($model);
+                    $media->model_id   = $model->getKey();
+                    $media->save();
+                    $this->moveMediaFiles($media, $oldBasePath);
+                });
         }
 
-        Media::withoutTenant()
-            ->whereIn('uuid', $uuids)
-            ->where('collection_name', 'jodit_content')
-            ->get()
-            ->each(function (Media $media) use ($model) {
-                $media->model_type = get_class($model);
-                $media->model_id   = $model->getKey();
-                $media->save();
-            });
-
-        // Delete stale jodit_content media for this entity not referenced by current content
+        // Delete stale jodit_content media for this entity not referenced by current content.
+        // whereNotIn() với $uuids rỗng tự động khớp TẤT CẢ (đúng ý muốn: không còn UUID nào cần
+        // giữ lại thì mọi media cũ của entity này đều là rác).
         Media::withoutTenant()
             ->where('model_type', get_class($model))
             ->where('model_id', $model->getKey())
@@ -174,9 +185,11 @@ class MediaUploadService
             ->where('collection_name', $collection)
             ->get()
             ->each(function (Media $media) use ($model) {
+                $oldBasePath = rtrim(dirname($media->getPathRelativeToRoot()), '/');
                 $media->model_type = get_class($model);
                 $media->model_id   = $model->getKey();
                 $media->save();
+                $this->moveMediaFiles($media, $oldBasePath);
             });
 
         // Delete stale media for this entity in the same collection not in the new UUID list
@@ -187,6 +200,34 @@ class MediaUploadService
             ->whereNotIn('uuid', $uuids)
             ->get()
             ->each(fn (Media $m) => $this->delete($m));
+    }
+
+    /**
+     * spec/Media_Library_Technical_Specification.md §5.2/§8 — BUGFIX phát hiện qua verify sống:
+     * `MediaPathGenerator` tính path DỰA TRÊN `model_type`/`model_id` HIỆN TẠI của record
+     * (`media/{org}/{module}/{entity_type}/{entity_id}/{uuid}`), không phải path đã lưu cố định.
+     * Sau khi `reassociateOrphans()`/`reassociateFilePondDrafts()` đổi `model_type`/`model_id`
+     * (JoditDraft/FilePondDraft → entity thật), path TÍNH LẠI đổi theo — nhưng file vật lý vẫn
+     * nằm ở path CŨ (`moves_media_on_update=false`, Spatie không tự di chuyển). Kết quả:
+     * `getFirstMediaUrl()` trả URL trỏ tới file KHÔNG TỒN TẠI (404) — ảnh cover/banner tạo qua
+     * form "tạo mới" (FilePondDraft) bị vỡ ngay sau khi lưu, dù DB đã đúng. Phải tự di chuyển
+     * file (+ mọi conversion) sang path mới ngay sau khi đổi model_type/model_id.
+     */
+    private function moveMediaFiles(Media $media, string $oldBasePath): void
+    {
+        $disk        = $media->disk;
+        $newBasePath = rtrim(dirname($media->getPathRelativeToRoot()), '/');
+
+        if ($newBasePath === $oldBasePath || ! Storage::disk($disk)->exists($oldBasePath)) {
+            return;
+        }
+
+        foreach (Storage::disk($disk)->allFiles($oldBasePath) as $oldFile) {
+            $relative = ltrim(substr($oldFile, strlen($oldBasePath)), '/');
+            Storage::disk($disk)->move($oldFile, $newBasePath . '/' . $relative);
+        }
+
+        $this->pruneEmptyAncestors($disk, $oldBasePath);
     }
 
     /**

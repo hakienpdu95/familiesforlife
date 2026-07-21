@@ -39,5 +39,18 @@
 @endsection
 
 @push('scripts')
-    @vite(['Modules/Banner/resources/assets/js/banner.js'], 'build/backend')
+    @vite(['resources/js/modules/filepond.js', 'Modules/Banner/resources/assets/js/banner.js'], 'build/backend')
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const coverEl = document.getElementById('cover-filepond');
+        if (window.initFilePondUpload && coverEl) {
+            initFilePondUpload(coverEl, {
+                collection: 'banner',
+                contextType: coverEl.dataset.contextType,
+                contextId: coverEl.dataset.contextId,
+                allowRevert: true,
+            });
+        }
+    });
+    </script>
 @endpush

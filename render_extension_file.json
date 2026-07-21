@@ -144,7 +144,8 @@
         "last_touched_at///timestamp///__///_NULL///NULL///__///Jodit orphan TTL: update mỗi khi session active; NULL = không phải jodit orphan",
         "__index///index///__///__///__///model_type,model_id,collection_name|idx_media_polymorphic///__",
         "__index///index///__///__///__///disk,created_at|idx_media_disk///__",
-        "__index///index///__///__///__///collection_name,model_type,last_touched_at|idx_media_orphan///__"
+        "__index///index///__///__///__///collection_name,model_type,last_touched_at|idx_media_orphan///__",
+        "__index///index///__///__///__///organization_id|idx_media_organization///__"
     ],
     [
         "workflows///add///__///",
@@ -305,7 +306,6 @@
     [
         "post_product_blocks///add///__///",
         "translation_id///unsignedBigInteger///__///_NULL///NULL///__///__",
-        "__index///index///__///__///__///organization_id,translation_id|idx_post_pb_org_translation///__",
         "__index///index///__///__///__///translation_id|idx_post_pb_translation///__"
     ],
     [

@@ -3,6 +3,7 @@
 namespace Modules\Banner\Models;
 
 use App\Models\User;
+use App\Traits\HasTenantMedia;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,21 +13,26 @@ use Illuminate\Support\Str;
 use Modules\Banner\Enums\BannerTargetType;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
+use Spatie\MediaLibrary\HasMedia;
 
 /**
  * spec/Banner_Management_Technical_Specification.md §3/§4 — banner là tài sản nền tảng
  * (platform), không organization_id, không phân cấp (khác MenuItem/PostCategory).
+ *
+ * spec/Media_Library_Technical_Specification.md §7.5/§8 — ảnh banner qua Media, collection
+ * `banner` RIÊNG (không dùng chung `cover` — banner không ép aspect ratio, `cover.thumb` sẽ crop
+ * vuông làm méo bố cục), thay 4 cột phẳng cũ (đã xoá).
  */
-class Banner extends Model
+class Banner extends Model implements HasMedia
 {
     use SoftDeletes;
     use LogsActivity;
+    use HasTenantMedia;
 
     protected $table = 'banners';
 
     protected $fillable = [
-        'uuid', 'placement', 'target_type', 'target_value', 'title',
-        'image_path', 'image_width', 'image_height', 'image_size_bytes', 'alt_text',
+        'uuid', 'placement', 'target_type', 'target_value', 'title', 'alt_text',
         'link_url', 'open_in_new_tab', 'badge_label',
         'start_date', 'end_date', 'sort_order', 'is_active', 'click_count',
         'created_by', 'updated_by',

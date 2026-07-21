@@ -48,20 +48,22 @@
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
                             <span class="label-text font-medium">
-                                {{ $banner?->image_path ? 'Đổi ảnh banner' : 'Ảnh banner' }}
-                                @if(! $banner?->image_path)<span class="text-error">*</span>@endif
+                                Ảnh banner
+                                @if(! $banner?->getFirstMediaUrl('banner'))<span class="text-error">*</span>@endif
                             </span>
                         </label>
-                        @if($banner?->image_path)
-                        <img src="{{ Illuminate\Support\Facades\Storage::url($banner->image_path) }}" alt=""
+                        @if($banner?->getFirstMediaUrl('banner'))
+                        <img src="{{ $banner->getFirstMediaUrl('banner', 'medium') }}" alt=""
                              class="h-16 w-auto rounded border border-base-300 mb-2 object-cover">
                         @endif
-                        <input type="file" name="image" accept="image/*"
-                               class="file-input file-input-bordered file-input-sm w-full @error('image') file-input-error @enderror">
-                        @error('image')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
-                        @if($banner?->image_path)
-                        <p class="text-xs text-base-content/40 mt-1.5">Để trống nếu muốn giữ ảnh hiện tại.</p>
+                        @if($banner)
+                        <div id="cover-filepond" data-context-type="banner" data-context-id="{{ $banner->id }}"></div>
+                        <p class="text-xs text-base-content/40 mt-1.5">Tải ảnh mới sẽ tự động thay ảnh hiện tại.</p>
+                        @else
+                        <div id="cover-filepond"></div>
+                        <input type="hidden" name="cover_media_uuid" id="cover-media-uuid" value="{{ old('cover_media_uuid') }}">
                         @endif
+                        @error('cover_media_uuid')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                     </div>
 
                     <div class="form-control">

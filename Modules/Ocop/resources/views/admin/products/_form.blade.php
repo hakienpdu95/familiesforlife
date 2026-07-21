@@ -126,20 +126,20 @@
 
                 <div class="form-control">
                     <label class="label py-0 pb-1.5">
-                        <span class="label-text font-medium">
-                            {{ $product?->image_path ? 'Đổi ảnh sản phẩm' : 'Ảnh sản phẩm' }}
-                        </span>
+                        <span class="label-text font-medium">Ảnh sản phẩm</span>
                     </label>
-                    @if($product?->image_path)
-                    <img src="{{ Illuminate\Support\Facades\Storage::url($product->image_path) }}" alt=""
+                    @if($product?->getFirstMediaUrl('cover'))
+                    <img src="{{ $product->getFirstMediaUrl('cover', 'thumb') }}" alt=""
                          class="h-20 w-auto rounded border border-base-300 mb-2 object-cover">
                     @endif
-                    <input type="file" name="image" accept="image/*"
-                           class="file-input file-input-bordered file-input-sm w-full @error('image') file-input-error @enderror">
-                    @error('image')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
-                    @if($product?->image_path)
-                    <p class="text-xs text-base-content/40 mt-1.5">Để trống nếu muốn giữ ảnh hiện tại.</p>
+                    @if($product)
+                    <div id="cover-filepond" data-context-type="ocop_product" data-context-id="{{ $product->id }}"></div>
+                    <p class="text-xs text-base-content/40 mt-1.5">Tải ảnh mới sẽ tự động thay ảnh hiện tại.</p>
+                    @else
+                    <div id="cover-filepond"></div>
+                    <input type="hidden" name="cover_media_uuid" id="cover-media-uuid" value="{{ old('cover_media_uuid') }}">
                     @endif
+                    @error('cover_media_uuid')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                 </div>
 
                 {{-- Tab footer: next --}}

@@ -29,6 +29,9 @@ return new class extends Migration {
             if (!Schema::hasIndex('media', 'idx_media_orphan')) {
                 $table->index(['collection_name', 'model_type', 'last_touched_at'], 'idx_media_orphan');
             }
+            if (!Schema::hasIndex('media', 'idx_media_organization')) {
+                $table->index('organization_id', 'idx_media_organization');
+            }
         });
     }
 

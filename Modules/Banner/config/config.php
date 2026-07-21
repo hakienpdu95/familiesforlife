@@ -52,9 +52,4 @@ return [
         'category' => 'Theo danh mục bài viết',
         'province' => 'Theo tỉnh/thành',
     ],
-
-    // Resize ảnh gốc xuống tối đa chiều rộng này nếu lớn hơn (giảm dung lượng file — banner
-    // nặng làm chậm mọi trang có banner đó, kể cả header_ad xuất hiện trên toàn site) —
-    // spec §5.1.
-    'max_image_width' => 1200,
 ];
