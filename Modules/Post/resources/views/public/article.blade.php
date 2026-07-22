@@ -6,7 +6,7 @@
 @endif
 
 @push('meta')
-<link rel="canonical" href="{{ route('post.public.article', ['slug' => $translation->slug]) }}">
+<link rel="canonical" href="{{ route('post.public.article', ['slug' => $translation->slug, 'id' => $translation->id]) }}">
 @endpush
 
 @section('content')

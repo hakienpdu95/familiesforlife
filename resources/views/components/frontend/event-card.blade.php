@@ -12,7 +12,7 @@
     $sameDay = $event->start_date?->isSameDay($event->end_date);
 @endphp
 
-<a href="{{ route('event.public.show', ['slug' => $event->slug]) }}"
+<a href="{{ route('event.public.show', ['slug' => $event->slug, 'id' => $event->id]) }}"
    class="group flex flex-col {{ $styles['gap'] }}">
     <div class="{{ $styles['ratio'] }} rounded-xl overflow-hidden bg-base-200 relative">
         <img src="{{ $event->poster_path ? \Illuminate\Support\Facades\Storage::url($event->poster_path) : asset('images/post-cover-placeholder.svg') }}"

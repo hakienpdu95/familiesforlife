@@ -10,7 +10,7 @@ use Modules\Post\Models\PostArticleTranslation;
 class SitemapController extends Controller
 {
     /**
-     * Chỉ liệt kê bản dịch published CỦA LOCALE MẶC ĐỊNH — route công khai /bai-viet/{slug}
+     * Chỉ liệt kê bản dịch published CỦA LOCALE MẶC ĐỊNH — route công khai /{slug}-d{id}.html
      * không còn {locale}, nên bản dịch ở locale khác (nếu có) không có URL public nào để liệt kê.
      *
      * format=redirect bị loại — URL này chỉ bounce (302) ra domain khác, không có nội dung
@@ -22,7 +22,7 @@ class SitemapController extends Controller
             ->where('locale', config('post.default_locale'))
             ->whereHas('article', fn ($q) => $q->where('format', '!=', ArticleFormat::Redirect))
             ->orderBy('updated_at', 'desc')
-            ->get(['locale', 'slug', 'updated_at']);
+            ->get(['id', 'locale', 'slug', 'updated_at']);
 
         return response()
             ->view('post::public.sitemap', compact('translations'))

@@ -31,7 +31,7 @@
             <div class="col-middle pos-rel">
                 <article class="vgd-news-hightl-big-h mar-b-20">
                     <figure class="vgd-news-hightl-big-h__bg pos-rel mar-b-20">
-                        <a href="{{ route('post.public.article', ['slug' => $featured->slug]) }}">
+                        <a href="{{ route('post.public.article', ['slug' => $featured->slug, 'id' => $featured->id]) }}">
                             <img src="{{ $featured->article?->cover_image_url ?: asset('images/post-cover-placeholder.svg') }}"
                                  alt="{{ $featured->title }}"
                                  class="img-fluid img-cover" loading="lazy">
@@ -39,7 +39,7 @@
                     </figure>
                     <header class="vgd-news-hightl-big-h__tit mar-t-10 text-trun line-cl-3">
                         <h3>
-                            <a href="{{ route('post.public.article', ['slug' => $featured->slug]) }}" class="fw-bold hover-color-link">{{ $featured->title }}</a>
+                            <a href="{{ route('post.public.article', ['slug' => $featured->slug, 'id' => $featured->id]) }}" class="fw-bold hover-color-link">{{ $featured->title }}</a>
                         </h3>
                     </header>
                 </article>

@@ -24,9 +24,14 @@ Route::middleware(['auth'])->prefix('backend/api/ocop')->name('backend.api.ocop.
 });
 
 // ── Cổng thông tin công khai (spec §8 DoD #5 — trang chi tiết sản phẩm OCOP) ────────────────
-// KHÔNG yêu cầu đăng nhập, cùng convention Post/Event PublicReading. 'san-pham' (path tường
-// minh) phải đăng ký TRƯỚC '{slug}' (wildcard) — cùng lý do đã áp dụng ở Post/Event routes.
-Route::prefix('ocop')->name('ocop.public.')->group(function (): void {
-    Route::get('/', [PublicOcopController::class, 'index'])->name('index');
-    Route::get('{slug}', [PublicOcopController::class, 'show'])->name('show');
-});
+// KHÔNG yêu cầu đăng nhập, cùng convention Post/Event PublicReading.
+Route::get('ocop', [PublicOcopController::class, 'index'])->name('ocop.public.index');
+
+// Chi tiết sản phẩm: bỏ prefix 'ocop', ra root '{slug}-op{id}.html' — cùng cơ chế hậu tố '.html'
+// đã áp dụng cho Post ('{slug}-d{id}.html') và Event ('{slug}-sk{id}.html'). Marker '-op' (OCOP
+// Product) PHẢI khác 2 marker trên — nếu trùng, route đăng ký trước sẽ nuốt hết request khớp
+// mẫu, route đăng ký sau (module này) sẽ không bao giờ được gọi tới. {id} chỉ để phân biệt
+// path, KHÔNG dùng để tra cứu — show() vẫn tra theo 'slug' như cũ, không cần sửa controller.
+Route::get('{slug}-op{id}.html', [PublicOcopController::class, 'show'])
+    ->where(['slug' => '[a-z0-9\-]+', 'id' => '[0-9]+'])
+    ->name('ocop.public.show');

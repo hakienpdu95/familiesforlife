@@ -20,7 +20,7 @@
         </div>
 
         <div class="grid lg:grid-cols-[5fr_7fr] gap-6 items-stretch">
-            <a href="{{ route('event.public.show', ['slug' => $lead->slug]) }}" class="group flex flex-col h-full">
+            <a href="{{ route('event.public.show', ['slug' => $lead->slug, 'id' => $lead->id]) }}" class="group flex flex-col h-full">
                 <div class="flex-1 min-h-[220px] bg-base-200">
                     <img src="{{ $lead->poster_path ? \Illuminate\Support\Facades\Storage::url($lead->poster_path) : asset('images/post-cover-placeholder.svg') }}"
                          alt="{{ $lead->poster_alt ?? $lead->title }}" class="h-full w-full object-cover">
@@ -38,7 +38,7 @@
                 <ul class="flex flex-col gap-1 flex-1 justify-between">
                     @foreach($rest as $event)
                     <li>
-                        <a href="{{ route('event.public.show', ['slug' => $event->slug]) }}" class="group flex bg-base-100 text-base-content">
+                        <a href="{{ route('event.public.show', ['slug' => $event->slug, 'id' => $event->id]) }}" class="group flex bg-base-100 text-base-content">
                             <span class="flex-none w-1.5 bg-primary"></span>
                             <div class="px-4 py-3">
                                 <div class="text-[11px] font-black uppercase tracking-wide text-secondary">{{ $event->start_date?->format('d/m/Y') }}</div>

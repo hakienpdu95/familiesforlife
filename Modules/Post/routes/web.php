@@ -99,12 +99,30 @@ Route::get('post-sitemap.xml', [SitemapController::class, 'index'])->name('post.
 
 Route::get('/', [PublicCategoryController::class, 'index'])->name('post.public.home');
 
-Route::prefix('bai-viet')->name('post.public.')->group(function (): void {
+// Bỏ hẳn prefix 'bai-viet' (trước: /bai-viet/danh-muc/{slug}, /bai-viet/{slug}) — URL gọn hơn,
+// theo đúng convention báo VN (vd treemvietnam.net.vn: /{category-slug}, /{slug}-d{id}.html).
+// Route::name(...) KHÔNG kèm URI prefix — tên route (post.public.category/load-more/article)
+// giữ nguyên, chỉ đổi URI, nên toàn bộ route()/href hiện có ở view khác không cần sửa TÊN,
+// chỉ những nơi build URL bài viết cần thêm tham số 'id' (xem bên dưới).
+Route::name('post.public.')->group(function (): void {
+    // 'danh-muc/{slug}' vẫn giữ 1 segment tiền tố riêng (không đưa category thẳng ra root như
+    // ví dụ treemvietnam) — tránh phải né toàn bộ route root-level của CẢ APP (login, dashboard,
+    // su-kien, ocop, ...) mỗi khi có route mới; rủi ro trùng slug chỉ còn khoanh trong
+    // 'danh-muc/*', không lan sang toàn hệ thống.
     Route::get('danh-muc/{category:slug}', [PublicCategoryController::class, 'show'])->name('category');
 
-    // 'tai-them' (Xem thêm — trang chủ) là path tường minh, phải đăng ký TRƯỚC '{slug}'
-    // (wildcard) — cùng lý do 'danh-muc' ở trên.
+    // 'tai-them' (Xem thêm — trang chủ) không có tham số wildcard nên đặt ở root không rủi ro
+    // đụng độ (không khớp mẫu 'danh-muc/*' cũng không khớp '{slug}-d{id}.html' — mẫu bài viết
+    // bên dưới LUÔN đòi hỏi đuôi '.html' + id số nên không bao giờ trùng path tĩnh này).
     Route::get('tai-them', [PublicCategoryController::class, 'loadMore'])->name('load-more');
 
-    Route::get('{slug}', [PublicArticleController::class, 'show'])->name('article');
+    // '{slug}-d{id}.html' — hậu tố '-d{id}.html' (id số, KHÔNG dùng để tra cứu, chỉ để phân
+    // biệt path với 'danh-muc/*'/'tai-them' ở root) là cơ chế tách bạch tuyệt đối bằng regex,
+    // không phụ thuộc thứ tự đăng ký route như '{slug}' wildcard trần trước đây. Controller vẫn
+    // tra theo 'slug' như cũ (Rule::unique('post_article_translations','slug') đã đảm bảo duy
+    // nhất toàn hệ thống) — {id} không khai báo trong tham số PublicArticleController::show(),
+    // Laravel tự bỏ qua route-param không có trong signature, không cần đọc.
+    Route::get('{slug}-d{id}.html', [PublicArticleController::class, 'show'])
+        ->where(['slug' => '[a-z0-9\-]+', 'id' => '[0-9]+'])
+        ->name('article');
 });

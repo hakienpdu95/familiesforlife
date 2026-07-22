@@ -4,7 +4,7 @@
 @section('meta_description', \Illuminate\Support\Str::limit(strip_tags($event->description), 160))
 
 @push('meta')
-<link rel="canonical" href="{{ route('event.public.show', ['slug' => $event->slug]) }}">
+<link rel="canonical" href="{{ route('event.public.show', ['slug' => $event->slug, 'id' => $event->id]) }}">
 <meta property="og:type" content="event">
 <meta property="og:title" content="{{ $event->title }}">
 <meta property="og:description" content="{{ \Illuminate\Support\Str::limit(strip_tags($event->description), 160) }}">

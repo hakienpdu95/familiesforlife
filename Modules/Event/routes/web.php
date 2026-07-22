@@ -47,6 +47,12 @@ Route::middleware(['auth'])->prefix('backend/api/events')->name('backend.api.eve
 // Post routes/web.php: articles/pending-review trước articles/{article}).
 Route::get('event-sitemap.xml', [EventSitemapController::class, 'index'])->name('event.public.sitemap');
 
+// URL rút gọn cùng kiểu đã áp dụng cho Post (routes/web.php module Post) — RIÊNG danh mục sự
+// kiện KHÔNG bỏ được prefix 'su-kien' như Post đã làm với 'danh-muc': Post đã chiếm mất
+// 'danh-muc/{slug}' ở root rồi, nếu Event cũng đăng ký y nguyên URI đó ở root thì 2 route trùng
+// hệt nhau — route đăng ký sau sẽ không bao giờ được gọi tới (danh mục sự kiện "biến mất" âm
+// thầm). Giữ 'su-kien/danh-muc/{slug}' là cách duy nhất tránh đụng độ mà không phải đổi cấu
+// trúc Post đã làm trước.
 Route::prefix('su-kien')->group(function (): void {
     Route::get('/', [PublicEventController::class, 'index'])->name('event.public.home');
     Route::get('danh-muc/{category:slug}', [PublicEventController::class, 'category'])->name('event.public.category');
@@ -58,6 +64,14 @@ Route::prefix('su-kien')->group(function (): void {
             ->name('store');
         Route::get('thanh-cong', [EventSubmissionController::class, 'success'])->name('success');
     });
-
-    Route::get('{slug}', [PublicEventController::class, 'show'])->name('event.public.show');
 });
+
+// Chi tiết sự kiện: bỏ prefix 'su-kien', ra root '{slug}-sk{id}.html' — cùng cơ chế hậu tố
+// '.html' để tách bạch path khỏi mọi route khác đã dùng cho Post ('{slug}-d{id}.html'), NHƯNG
+// marker PHẢI khác ('-sk' thay vì '-d') — nếu dùng chung 'd' thì 2 route (Post/Event) có URI
+// pattern giống nhau 100%, route đăng ký trước sẽ "nuốt" toàn bộ request khớp mẫu, phía sau
+// không bao giờ tới được. {id} chỉ để phân biệt path, KHÔNG dùng để tra cứu — show() vẫn tra
+// theo 'slug' như cũ, không cần sửa controller.
+Route::get('{slug}-sk{id}.html', [PublicEventController::class, 'show'])
+    ->where(['slug' => '[a-z0-9\-]+', 'id' => '[0-9]+'])
+    ->name('event.public.show');

@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 @foreach($translations as $t)
     <url>
-        <loc>{{ route('post.public.article', ['slug' => $t->slug]) }}</loc>
+        <loc>{{ route('post.public.article', ['slug' => $t->slug, 'id' => $t->id]) }}</loc>
         <lastmod>{{ $t->updated_at->toAtomString() }}</lastmod>
     </url>
 @endforeach

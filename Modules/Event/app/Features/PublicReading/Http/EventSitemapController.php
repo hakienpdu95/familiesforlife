@@ -13,7 +13,7 @@ class EventSitemapController extends Controller
     {
         $events = Event::where('status', EventStatus::Published)
             ->orderBy('updated_at', 'desc')
-            ->get(['slug', 'updated_at']);
+            ->get(['id', 'slug', 'updated_at']);
 
         return response()
             ->view('event::public.sitemap', compact('events'))

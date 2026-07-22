@@ -15,7 +15,7 @@
 @if($size === 'lg')
 {{-- spec/tinto.png — tin to: ảnh bìa bên trái (~60%) ghép ngang panel nền trắng bên phải
      (category/tiêu đề/tác giả), không bo góc, khác hẳn thẻ ảnh-trên-chữ-dưới của md/sm. --}}
-<a href="{{ route('post.public.article', ['slug' => $translation->slug]) }}"
+<a href="{{ route('post.public.article', ['slug' => $translation->slug, 'id' => $translation->id]) }}"
    class="group grid grid-cols-1 sm:grid-cols-5 sm:items-stretch overflow-hidden bg-base-100 border border-base-300">
     <div class="sm:col-span-3 aspect-[16/10] sm:aspect-auto bg-base-200">
         <img src="{{ $article?->cover_image_url ?: asset('images/post-cover-placeholder.svg') }}"
@@ -30,7 +30,7 @@
     </div>
 </a>
 @else
-<a href="{{ route('post.public.article', ['slug' => $translation->slug]) }}"
+<a href="{{ route('post.public.article', ['slug' => $translation->slug, 'id' => $translation->id]) }}"
    class="group flex flex-col {{ $styles['gap'] }}">
     <div class="{{ $styles['ratio'] }} overflow-hidden bg-base-200">
         <img src="{{ $article?->cover_image_url ?: asset('images/post-cover-placeholder.svg') }}"
