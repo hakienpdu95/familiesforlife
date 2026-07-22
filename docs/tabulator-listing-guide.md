@@ -602,7 +602,7 @@ Thay vì copy-paste CSS vào mỗi Blade view, tạo **1 Blade component** dùng
 
 {{-- Table wrapper phải có class "tabulator-daisy" --}}
 <div class="card bg-base-100 shadow-sm border border-base-200">
-    <div class="card-body p-0 overflow-hidden rounded-2xl tabulator-daisy">
+    <div class="card-body p-0 overflow-hidden tabulator-daisy">
         <div id="{module}-table"></div>
     </div>
 </div>
@@ -670,7 +670,7 @@ Thay vì copy-paste CSS vào mỗi Blade view, tạo **1 Blade component** dùng
 
     {{-- ── Table ──────────────────────────────────────────────────────────── --}}
     <div class="card bg-base-100 shadow-sm border border-base-200">
-        <div class="card-body p-0 overflow-hidden rounded-2xl tabulator-daisy">
+        <div class="card-body p-0 overflow-hidden tabulator-daisy">
             <div id="{module}-table"></div>
         </div>
     </div>

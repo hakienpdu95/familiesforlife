@@ -70,7 +70,7 @@
 
     {{-- ── Tabulator table ──────────────────────────────────────────────────── --}}
     <div class="card bg-base-100 shadow-sm border border-base-200">
-        <div class="card-body p-0 overflow-hidden rounded-2xl tabulator-daisy">
+        <div class="card-body p-0 overflow-hidden tabulator-daisy">
             <div id="wf-table"></div>
         </div>
     </div>

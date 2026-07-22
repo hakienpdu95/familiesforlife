@@ -3,6 +3,7 @@
 namespace Modules\Post\Features\ArticleAuthoring\Http;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -20,8 +21,6 @@ use Modules\Post\Features\ArticleAuthoring\Data\ArticleData;
 use Modules\Post\Features\ArticleAuthoring\Data\TranslationData;
 use Modules\Post\Features\ArticleAuthoring\Queries\GetArticleRedirectClickStatsHandler;
 use Modules\Post\Features\ArticleAuthoring\Queries\GetArticleRedirectClickStatsQuery;
-use Modules\Post\Features\ArticleAuthoring\Queries\ListArticlesForAdminHandler;
-use Modules\Post\Features\ArticleAuthoring\Queries\ListArticlesForAdminQuery;
 use Modules\Post\Features\ArticleAuthoring\Queries\ListPendingReviewTranslationsHandler;
 use Modules\Post\Features\ArticleAuthoring\Queries\ListPendingReviewTranslationsQuery;
 use Modules\Post\Features\CategoryManagement\Queries\GetCategoryTreeHandler;
@@ -40,21 +39,14 @@ use Modules\Ocop\Models\OcopProduct;
  */
 class ArticleAdminController extends Controller
 {
-    public function index(Request $request, ListArticlesForAdminHandler $handler, ListCategoriesForAdminHandler $categoryHandler): View
+    /** Dữ liệu bảng lấy qua ArticleApiController (Tabulator, remote pagination/sort/filter) — chỉ truyền categories cho dropdown lọc. */
+    public function index(ListCategoriesForAdminHandler $categoryHandler): View
     {
         $this->authorize('viewAny', PostArticle::class);
 
-        $articles = $handler->handle(new ListArticlesForAdminQuery(
-            page:       max(1, $request->integer('page', 1)),
-            search:     $request->string('q')->value() ?: null,
-            categoryId: $request->integer('category_id') ?: null,
-            format:     $request->string('format')->value() ?: null,
-            status:     $request->string('status')->value() ?: null,
-        ));
-
         $categories = $categoryHandler->handle(new ListCategoriesForAdminQuery());
 
-        return view('post::admin.articles.index', compact('articles', 'categories'));
+        return view('post::admin.articles.index', compact('categories'));
     }
 
     /**
@@ -201,11 +193,19 @@ class ArticleAdminController extends Controller
         ]);
     }
 
-    public function destroy(PostArticle $article, DeleteArticleAction $action): RedirectResponse
+    public function destroy(Request $request, PostArticle $article, DeleteArticleAction $action): RedirectResponse|JsonResponse
     {
         $this->authorizeArticle($article, 'post_article.delete');
 
+        $title = $article->mainTranslation()?->title;
+
         $action->handle($article);
+
+        // dashboard/posts/articles xoá qua AJAX (Tabulator, xem article-index.js) — cùng
+        // pattern OrganizationController::destroy (Modules/Organization).
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Đã xoá bài viết "' . $title . '".']);
+        }
 
         return redirect()->route('backend.post.articles.index')
             ->with('success', 'Đã xoá bài viết.');

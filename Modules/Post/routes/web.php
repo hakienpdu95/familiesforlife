@@ -2,13 +2,16 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Post\Features\ArticleAuthoring\Http\ArticleAdminController;
+use Modules\Post\Features\ArticleAuthoring\Http\ArticleApiController;
 use Modules\Post\Features\ArticleAuthoring\Http\TranslationController;
 use Modules\Post\Features\CategoryManagement\Http\CategoryAdminController;
+use Modules\Post\Features\CategoryManagement\Http\CategoryApiController;
 use Modules\Post\Features\PublicReading\Http\ProductBlockClickController;
 use Modules\Post\Features\PublicReading\Http\PublicArticleController;
 use Modules\Post\Features\PublicReading\Http\PublicCategoryController;
 use Modules\Post\Features\PublicReading\Http\SitemapController;
 use Modules\Post\Features\TagManagement\Http\TagAdminController;
+use Modules\Post\Features\TagManagement\Http\TagApiController;
 use Modules\Post\Features\VersionHistory\Http\ArticleVersionController;
 
 // ── Quản trị Bài viết + Danh mục (đa ngôn ngữ — Publishing Engine Phase 15,
@@ -68,6 +71,14 @@ Route::middleware(['auth'])
         Route::post('translations/{translation}/takedown', [TranslationController::class, 'takedown'])->name('translations.takedown');
         Route::post('translations/{translation}/archive', [TranslationController::class, 'archive'])->name('translations.archive');
     });
+
+// ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị) —
+// tham chiếu Modules/Organization/routes/web.php (backend.api.organizations) ───────────────
+Route::middleware(['auth'])->prefix('backend/api/post')->name('backend.api.post.')->group(function (): void {
+    Route::get('articles', [ArticleApiController::class, 'index'])->name('articles');
+    Route::get('categories', [CategoryApiController::class, 'index'])->name('categories');
+    Route::get('tags', [TagApiController::class, 'index'])->name('tags');
+});
 
 // ── Click tracking CTA (public — không yêu cầu đăng nhập) ──────────────────
 Route::get('posts/cta/{button}', [ProductBlockClickController::class, 'redirect'])->name('post.cta.redirect');

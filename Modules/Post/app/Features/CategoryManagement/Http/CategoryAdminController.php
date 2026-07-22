@@ -3,6 +3,7 @@
 namespace Modules\Post\Features\CategoryManagement\Http;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -13,8 +14,6 @@ use Modules\Post\Features\CategoryManagement\Actions\UpdateCategoryAction;
 use Modules\Post\Features\CategoryManagement\Data\CategoryData;
 use Modules\Post\Features\CategoryManagement\Queries\GetCategoryTreeHandler;
 use Modules\Post\Features\CategoryManagement\Queries\GetCategoryTreeQuery;
-use Modules\Post\Features\CategoryManagement\Queries\ListCategoriesForAdminHandler;
-use Modules\Post\Features\CategoryManagement\Queries\ListCategoriesForAdminQuery;
 use Modules\Post\Models\PostCategory;
 
 class CategoryAdminController extends Controller
@@ -24,19 +23,10 @@ class CategoryAdminController extends Controller
         $this->authorizeResource(PostCategory::class, 'category');
     }
 
-    /**
-     * Có tìm kiếm → danh sách phẳng (kết quả khớp có thể không giữ được ngữ cảnh cây, hiển thị
-     * cây một phần sẽ gây hiểu lầm). Không tìm kiếm → cây đầy đủ (GetCategoryTreeHandler) để
-     * đúng cấp bậc cha/con/cháu.
-     */
-    public function index(Request $request, ListCategoriesForAdminHandler $flatHandler, GetCategoryTreeHandler $treeHandler): View
+    /** Dữ liệu bảng lấy qua CategoryApiController (Tabulator dataTree, xem §CategoryApiController). */
+    public function index(): View
     {
-        $search = $request->string('q')->value() ?: null;
-
-        $categories   = $search ? $flatHandler->handle(new ListCategoriesForAdminQuery(search: $search)) : null;
-        $categoryTree = $search ? null : $treeHandler->handle(new GetCategoryTreeQuery());
-
-        return view('post::admin.categories.index', compact('categories', 'categoryTree', 'search'));
+        return view('post::admin.categories.index');
     }
 
     public function create(GetCategoryTreeHandler $handler): View
@@ -73,16 +63,26 @@ class CategoryAdminController extends Controller
             ->with('success', 'Cập nhật danh mục thành công.');
     }
 
-    public function destroy(PostCategory $category, DeleteCategoryAction $action): RedirectResponse
+    public function destroy(Request $request, PostCategory $category, DeleteCategoryAction $action): RedirectResponse|JsonResponse
     {
+        $name = $category->name;
+
         try {
             $action->handle($category);
         } catch (\RuntimeException $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $e->getMessage()], 422);
+            }
+
             return back()->withErrors(['category' => $e->getMessage()]);
         }
 
+        if ($request->expectsJson()) {
+            return response()->json(['message' => "Đã xoá danh mục \"{$name}\"."]);
+        }
+
         return redirect()->route('backend.post.categories.index')
-            ->with('success', "Đã xoá danh mục \"{$category->name}\".");
+            ->with('success', "Đã xoá danh mục \"{$name}\".");
     }
 
     public function reorder(Request $request, ReorderCategoriesAction $action): RedirectResponse
