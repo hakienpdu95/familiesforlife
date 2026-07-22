@@ -13,3 +13,5 @@
 
 import './pages/category-form.js';
 import './pages/event-form.js';
+import './pages/event-index.js';
+import './pages/event-category-index.js';

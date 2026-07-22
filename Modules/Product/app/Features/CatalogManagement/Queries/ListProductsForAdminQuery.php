@@ -13,5 +13,7 @@ class ListProductsForAdminQuery implements QueryInterface
         public readonly ?int $categoryId = null,
         public readonly ?string $status = null,
         public readonly ?string $type = null,
+        public readonly string $sortField = 'sort_order',
+        public readonly string $sortDir = 'asc',
     ) {}
 }

@@ -3,6 +3,7 @@
 namespace Modules\Product\Features\CategoryManagement\Http;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -22,13 +23,10 @@ class CategoryAdminController extends Controller
         $this->authorizeResource(ProductCategory::class, 'category');
     }
 
-    public function index(Request $request, ListCategoriesForAdminHandler $handler): View
+    /** Dữ liệu bảng lấy qua CategoryApiController (Tabulator dataTree). */
+    public function index(): View
     {
-        $categories = $handler->handle(new ListCategoriesForAdminQuery(
-            search: $request->string('q')->value() ?: null,
-        ));
-
-        return view('product::admin.categories.index', compact('categories'));
+        return view('product::admin.categories.index');
     }
 
     public function create(ListCategoriesForAdminHandler $handler): View
@@ -63,16 +61,26 @@ class CategoryAdminController extends Controller
             ->with('success', 'Cập nhật danh mục thành công.');
     }
 
-    public function destroy(ProductCategory $category, DeleteCategoryAction $action): RedirectResponse
+    public function destroy(Request $request, ProductCategory $category, DeleteCategoryAction $action): RedirectResponse|JsonResponse
     {
+        $name = $category->name;
+
         try {
             $action->handle($category);
         } catch (\RuntimeException $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $e->getMessage()], 422);
+            }
+
             return back()->withErrors(['category' => $e->getMessage()]);
         }
 
+        if ($request->expectsJson()) {
+            return response()->json(['message' => "Đã xoá danh mục \"{$name}\"."]);
+        }
+
         return redirect()->route('backend.products.categories.index')
-            ->with('success', "Đã xoá danh mục \"{$category->name}\".");
+            ->with('success', "Đã xoá danh mục \"{$name}\".");
     }
 
     public function reorder(Request $request, ReorderCategoriesAction $action): RedirectResponse

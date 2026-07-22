@@ -3,6 +3,7 @@
 namespace Modules\Aicem\Features\KnowledgeBase\Http;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -14,8 +15,6 @@ use Modules\Aicem\Features\KnowledgeBase\Actions\RestoreKnowledgeDocumentVersion
 use Modules\Aicem\Features\KnowledgeBase\Actions\UpdateKnowledgeDocumentAction;
 use Modules\Aicem\Features\KnowledgeBase\Data\KnowledgeDocumentData;
 use Modules\Aicem\Features\KnowledgeBase\Exceptions\InvalidKnowledgeDocumentException;
-use Modules\Aicem\Features\KnowledgeBase\Queries\ListKnowledgeDocumentsHandler;
-use Modules\Aicem\Features\KnowledgeBase\Queries\ListKnowledgeDocumentsQuery;
 use Modules\Aicem\Models\AicemKnowledgeDocument;
 use Modules\Aicem\Models\AicemKnowledgeDocumentVersion;
 
@@ -26,17 +25,10 @@ class KnowledgeDocumentAdminController extends Controller
         $this->authorizeResource(AicemKnowledgeDocument::class, 'document');
     }
 
-    public function index(Request $request, ListKnowledgeDocumentsHandler $handler): View
+    /** Dữ liệu bảng lấy qua KnowledgeDocumentApiController (Tabulator, remote pagination/sort/filter). */
+    public function index(): View
     {
-        $documents = $handler->handle(new ListKnowledgeDocumentsQuery(
-            page:        max(1, $request->integer('page', 1)),
-            search:      $request->string('q')->value() ?: null,
-            type:        $request->string('type')->value() ?: null,
-            subjectType: $request->string('subject_type')->value() ?: null,
-        ));
-
         return view('aicem::admin.knowledge-base.index', [
-            'documents'    => $documents,
             'subjectTypes' => $this->subjectTypeOptions(),
         ]);
     }
@@ -88,12 +80,18 @@ class KnowledgeDocumentAdminController extends Controller
             ->with('success', 'Cập nhật tri thức thành công.');
     }
 
-    public function destroy(AicemKnowledgeDocument $document, DeleteKnowledgeDocumentAction $action): RedirectResponse
+    public function destroy(Request $request, AicemKnowledgeDocument $document, DeleteKnowledgeDocumentAction $action): RedirectResponse|JsonResponse
     {
+        $title = $document->title;
+
         $action->handle($document);
 
+        if ($request->expectsJson()) {
+            return response()->json(['message' => "Đã xoá tri thức \"{$title}\"."]);
+        }
+
         return redirect()->route('backend.aicem.knowledge-documents.index')
-            ->with('success', "Đã xoá tri thức \"{$document->title}\".");
+            ->with('success', "Đã xoá tri thức \"{$title}\".");
     }
 
     public function restoreVersion(

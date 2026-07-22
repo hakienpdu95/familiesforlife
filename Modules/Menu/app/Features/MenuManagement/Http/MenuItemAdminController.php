@@ -3,6 +3,7 @@
 namespace Modules\Menu\Features\MenuManagement\Http;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -13,8 +14,6 @@ use Modules\Menu\Features\MenuManagement\Actions\DeleteMenuItemAction;
 use Modules\Menu\Features\MenuManagement\Actions\ReorderMenuItemsAction;
 use Modules\Menu\Features\MenuManagement\Actions\UpdateMenuItemAction;
 use Modules\Menu\Features\MenuManagement\Data\MenuItemData;
-use Modules\Menu\Features\MenuManagement\Queries\GetMenuTreeForAdminHandler;
-use Modules\Menu\Features\MenuManagement\Queries\GetMenuTreeForAdminQuery;
 use Modules\Menu\Models\MenuItem;
 use Modules\Post\Models\PostCategory;
 
@@ -25,14 +24,10 @@ class MenuItemAdminController extends Controller
         $this->authorizeResource(MenuItem::class, 'menuItem');
     }
 
-    public function index(Request $request, GetMenuTreeForAdminHandler $handler): View
+    /** Dữ liệu bảng lấy qua MenuItemApiController (Tabulator dataTree). */
+    public function index(): View
     {
-        $tree = $handler->handle(new GetMenuTreeForAdminQuery(
-            location: $request->string('location')->value() ?: null,
-            search: $request->string('q')->trim()->value() ?: null,
-        ));
-
-        return view('menu::admin.menu-items.index', compact('tree'));
+        return view('menu::admin.menu-items.index');
     }
 
     public function create(): View
@@ -70,23 +65,37 @@ class MenuItemAdminController extends Controller
             ->with('success', 'Cập nhật mục menu thành công.');
     }
 
-    public function destroy(MenuItem $menuItem, DeleteMenuItemAction $action): RedirectResponse
+    public function destroy(Request $request, MenuItem $menuItem, DeleteMenuItemAction $action): RedirectResponse|JsonResponse
     {
+        $label = $menuItem->label;
+
         try {
             $action->handle($menuItem);
         } catch (\RuntimeException $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $e->getMessage()], 422);
+            }
+
             return back()->withErrors(['menu_item' => $e->getMessage()]);
         }
 
+        if ($request->expectsJson()) {
+            return response()->json(['message' => "Đã xoá mục menu \"{$label}\"."]);
+        }
+
         return redirect()->route('backend.menu.items.index')
-            ->with('success', "Đã xoá mục menu \"{$menuItem->label}\".");
+            ->with('success', "Đã xoá mục menu \"{$label}\".");
     }
 
-    public function reorder(Request $request, ReorderMenuItemsAction $action): RedirectResponse
+    public function reorder(Request $request, ReorderMenuItemsAction $action): RedirectResponse|JsonResponse
     {
         $this->authorize('update', MenuItem::class);
 
         $action->handle($request->array('order'));
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Đã cập nhật thứ tự menu.']);
+        }
 
         return back()->with('success', 'Đã cập nhật thứ tự menu.');
     }

@@ -14,6 +14,7 @@ class GetCategoryTreeHandler implements QueryHandlerInterface
     {
         /** @var GetCategoryTreeQuery $query */
         $all = ProductCategory::query()
+            ->withCount('products')
             ->when($query->activeOnly, fn ($q) => $q->where('is_active', true))
             ->orderBy('sort_order')
             ->get();

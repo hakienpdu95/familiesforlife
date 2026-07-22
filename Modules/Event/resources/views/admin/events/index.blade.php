@@ -2,7 +2,9 @@
 @section('title', 'Sự kiện')
 
 @section('content')
-<div x-data="{ rejectOpen: false, rejectAction: '', rejectTitle: '' }">
+<div x-data="eventListPage({{ Js::from([
+    'apiUrl' => route('backend.api.events.items'),
+]) }})">
 
     @foreach(['success','error'] as $type)
         @if(session($type))
@@ -35,139 +37,107 @@
         </div>
     </div>
 
-    <form method="GET" class="flex flex-wrap gap-2 mb-5">
-        <input type="text" name="q" value="{{ request('q') }}" placeholder="Tìm tiêu đề sự kiện..."
-               class="input input-bordered input-sm w-56">
-        <select name="status" class="select select-bordered select-sm" onchange="this.form.submit()">
-            <option value="">Tất cả trạng thái</option>
-            @foreach($statuses as $s)
-            <option value="{{ $s->value }}" {{ request('status') === $s->value ? 'selected' : '' }}>{{ $s->label() }}</option>
-            @endforeach
-        </select>
-        <button class="btn btn-sm btn-neutral">Lọc</button>
-        @if(request('q') || request('status'))
-        <a href="{{ route('backend.event.index') }}" class="btn btn-sm btn-ghost">Xoá lọc</a>
-        @endif
-    </form>
+    {{-- ── Filter bar ───────────────────────────────────────────────────── --}}
+    <div class="card bg-base-100 shadow-sm border border-base-200 mb-4">
+        <div class="card-body py-3 px-4">
+            <div class="flex flex-wrap gap-3 items-end">
 
-    <div class="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="table table-sm">
-                <thead class="bg-base-200/60 text-xs uppercase tracking-wide">
-                    <tr>
-                        <th>Sự kiện</th>
-                        <th>Danh mục</th>
-                        <th>Thời gian</th>
-                        <th class="text-center">Trạng thái</th>
-                        <th class="w-72"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                @forelse ($events as $event)
-                <tr class="hover">
-                    <td>
-                        <span class="font-medium text-sm">{{ $event->title }}</span>
-                        <div class="text-xs text-base-content/40 font-mono">{{ $event->slug }}</div>
-                    </td>
-                    <td class="text-sm text-base-content/60">
-                        <span class="inline-block size-2.5 rounded-full mr-1.5 align-middle" style="background:{{ $event->category?->color_hex ?? '#94a3b8' }}"></span>
-                        {{ $event->category?->name ?? '—' }}
-                    </td>
-                    <td class="text-sm text-base-content/60">
-                        {{ $event->start_date?->format('d/m/Y') }} – {{ $event->end_date?->format('d/m/Y') }}
-                    </td>
-                    <td class="text-center">
-                        <span class="badge badge-sm {{ $event->status->badgeClass() }}">{{ $event->status->label() }}</span>
-                    </td>
-                    <td>
-                        @php
-                            $canApprove = $event->status->canTransitionTo(\Modules\Event\Enums\EventStatus::Approved);
-                            $canReject  = $event->status->canTransitionTo(\Modules\Event\Enums\EventStatus::Rejected);
-                            $canPublish = $event->status->canTransitionTo(\Modules\Event\Enums\EventStatus::Published);
-                            $canArchive = $event->status->canTransitionTo(\Modules\Event\Enums\EventStatus::Archived);
-                        @endphp
-                        <div class="flex justify-end gap-1.5">
-                            @can('approve', $event)
-                            @if($canApprove)
-                            <form method="POST" action="{{ route('backend.event.approve', $event) }}">
-                                @csrf
-                                <button class="btn btn-success btn-xs">Duyệt</button>
-                            </form>
-                            @endif
-                            @endcan
-                            @can('reject', $event)
-                            @if($canReject)
-                            <button type="button" class="btn btn-error btn-outline btn-xs"
-                                    @click="rejectOpen = true; rejectAction = '{{ route('backend.event.reject', $event) }}'; rejectTitle = @js($event->title)">
-                                Từ chối
-                            </button>
-                            @endif
-                            @endcan
-                            @can('publish', $event)
-                            @if($canPublish)
-                            <form method="POST" action="{{ route('backend.event.publish', $event) }}">
-                                @csrf
-                                <button class="btn btn-primary btn-xs">Xuất bản</button>
-                            </form>
-                            @endif
-                            @endcan
-                            @can('archive', $event)
-                            @if($canArchive)
-                            <form method="POST" action="{{ route('backend.event.archive', $event) }}"
-                                  onsubmit="return confirm('Lưu trữ sự kiện &quot;{{ $event->title }}&quot;? Sự kiện sẽ không còn hiển thị công khai.')">
-                                @csrf
-                                <button class="btn btn-ghost btn-xs">Lưu trữ</button>
-                            </form>
-                            @endif
-                            @endcan
-                            @can('update', $event)
-                            <a href="{{ route('backend.event.edit', $event) }}" class="btn btn-ghost btn-xs btn-square" title="Sửa">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                </svg>
-                            </a>
-                            @endcan
-                        </div>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="5" class="text-center py-10 text-base-content/40">
-                        Chưa có sự kiện nào.
-                        <p class="text-xs mt-1">Bấm "Thêm sự kiện" để tự nhập, hoặc chờ độc giả nộp qua cổng thông tin.</p>
-                    </td>
-                </tr>
-                @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
+                <div class="form-control flex-1 min-w-52">
+                    <label class="label py-0.5"><span class="label-text text-xs font-medium">Tìm kiếm</span></label>
+                    <div class="input input-sm input-bordered flex items-center gap-2 bg-base-100">
+                        <svg class="w-3.5 h-3.5 text-base-content/40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        <input type="text" x-model="filters.search" @input.debounce.350ms="onFilterChange()"
+                               placeholder="Nhập tiêu đề sự kiện..." class="grow bg-transparent outline-none text-sm">
+                        <button x-show="filters.search" @click="clearSearch()"
+                                class="text-base-content/30 hover:text-base-content transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
 
-    @if($events->hasPages())
-    <div class="mt-4">{{ $events->onEachSide(1)->links() }}</div>
-    @endif
+                <div class="form-control w-52">
+                    <label class="label py-0.5"><span class="label-text text-xs font-medium">Trạng thái</span></label>
+                    <select x-model="filters.status" @change="onFilterChange()" class="select select-sm select-bordered w-full">
+                        <option value="">— Tất cả trạng thái —</option>
+                        @foreach(\Modules\Event\Enums\EventStatus::cases() as $s)
+                        <option value="{{ $s->value }}">{{ $s->label() }}</option>
+                        @endforeach
+                    </select>
+                </div>
 
-    {{-- ── Modal từ chối — dùng chung 1 modal cho mọi hàng, đổi action/tiêu đề qua Alpine ── --}}
-    <div class="modal" :class="rejectOpen ? 'modal-open' : ''" x-cloak>
-        <div class="modal-box">
-            <h3 class="font-bold text-lg">Từ chối sự kiện</h3>
-            <p class="text-sm text-base-content/60 mt-1" x-text="'\"' + rejectTitle + '\"'"></p>
-            <form method="POST" :action="rejectAction" class="mt-4">
-                @csrf
                 <div class="form-control">
-                    <label class="label py-0 pb-1.5"><span class="label-text font-medium">Lý do từ chối <span class="text-error">*</span></span></label>
-                    <textarea name="rejected_reason" rows="3" required maxlength="255"
-                              class="textarea textarea-bordered textarea-sm w-full"
-                              placeholder="VD: Thiếu thông tin địa điểm, thông tin chưa chính xác..."></textarea>
-                    <p class="text-xs text-base-content/40 mt-1">Lý do này sẽ được gửi qua email cho người nộp.</p>
+                    <button @click="reset()" x-show="hasFilters" x-transition
+                            class="btn btn-ghost btn-sm gap-1.5 text-error">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        Đặt lại
+                    </button>
                 </div>
-                <div class="modal-action">
-                    <button type="button" class="btn btn-ghost btn-sm" @click="rejectOpen = false">Huỷ</button>
-                    <button type="submit" class="btn btn-error btn-sm">Từ chối sự kiện</button>
-                </div>
-            </form>
+
+            </div>
         </div>
-        <div class="modal-backdrop" @click="rejectOpen = false"></div>
     </div>
+
+    {{-- ── Tabulator table ──────────────────────────────────────────────── --}}
+    <div class="card bg-base-100 shadow-sm border border-base-200">
+        <div class="card-body p-0 overflow-hidden tabulator-daisy">
+            <div id="event-table"></div>
+        </div>
+    </div>
+
 </div>
+
+{{-- ── Modal Từ chối — dùng chung 1 modal cho mọi hàng (window.eventRejectConfirm) ────── --}}
+<dialog id="eventRejectModal" class="modal">
+    <div class="modal-box">
+        <h3 class="font-bold text-lg">Từ chối sự kiện</h3>
+        <p class="text-sm text-base-content/60 mt-1" id="eventRejectTitle"></p>
+        <div class="form-control mt-4">
+            <label class="label py-0 pb-1.5"><span class="label-text font-medium">Lý do từ chối <span class="text-error">*</span></span></label>
+            <textarea id="eventRejectReason" rows="3" maxlength="255"
+                      class="textarea textarea-bordered textarea-sm w-full"
+                      placeholder="VD: Thiếu thông tin địa điểm, thông tin chưa chính xác..."></textarea>
+            <p class="text-xs text-base-content/40 mt-1">Lý do này sẽ được gửi qua email cho người nộp.</p>
+        </div>
+        <div class="modal-action mt-4">
+            <button id="eventConfirmRejectBtn" class="btn btn-error btn-sm">Từ chối sự kiện</button>
+            <button class="btn btn-ghost btn-sm" onclick="eventRejectModal.close()">Huỷ</button>
+        </div>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button>close</button></form>
+</dialog>
+
+{{-- ── Modal Lưu trữ — thay window.confirm() bằng modal chung ─────────────────────── --}}
+<dialog id="eventArchiveModal" class="modal">
+    <div class="modal-box max-w-sm">
+        <h3 class="font-bold text-lg">Lưu trữ sự kiện</h3>
+        <p class="py-3 text-sm text-base-content/70">
+            Lưu trữ <strong id="eventArchiveTitle" class="text-base-content"></strong>?
+            Sự kiện sẽ không còn hiển thị công khai.
+        </p>
+        <div class="modal-action mt-4">
+            <button id="eventConfirmArchiveBtn" class="btn btn-error btn-sm">Lưu trữ sự kiện</button>
+            <button class="btn btn-ghost btn-sm" onclick="eventArchiveModal.close()">Huỷ</button>
+        </div>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button>close</button></form>
+</dialog>
 @endsection
+
+@push('styles')
+    <x-tabulator-theme />
+    @vite(['Modules/Event/resources/assets/sass/event.scss'], 'build/backend')
+@endpush
+
+@push('scripts')
+    @vite([
+        'resources/js/modules/tabulator.js',
+        'Modules/Event/resources/assets/js/event.js',
+    ], 'build/backend')
+@endpush

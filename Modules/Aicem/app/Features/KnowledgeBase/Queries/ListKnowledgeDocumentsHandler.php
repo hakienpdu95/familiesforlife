@@ -9,6 +9,8 @@ use Modules\Aicem\Models\AicemKnowledgeDocument;
 
 class ListKnowledgeDocumentsHandler implements QueryHandlerInterface
 {
+    private const SORTABLE = ['title', 'type', 'priority', 'current_version', 'created_at'];
+
     public function handle(QueryInterface $query): LengthAwarePaginator
     {
         /** @var ListKnowledgeDocumentsQuery $query */
@@ -26,8 +28,17 @@ class ListKnowledgeDocumentsHandler implements QueryHandlerInterface
             $q->where('subject_type', $query->subjectType);
         }
 
-        return $q->orderBy('type')->orderBy('priority')->orderByDesc('created_at')
-            ->paginate($query->perPage, ['*'], 'page', $query->page)
+        $sortField = in_array($query->sortField, self::SORTABLE, true) ? $query->sortField : 'created_at';
+        $sortDir   = $query->sortDir === 'asc' ? 'asc' : 'desc';
+
+        if ($sortField === 'created_at') {
+            // Mặc định — giữ nguyên hành vi cũ: nhóm theo loại rồi ưu tiên (priority) trước khi mới nhất.
+            $q->orderBy('type')->orderBy('priority')->orderByDesc('created_at');
+        } else {
+            $q->orderBy($sortField, $sortDir)->orderBy('id');
+        }
+
+        return $q->paginate($query->perPage, ['*'], 'page', $query->page)
             ->withQueryString();
     }
 }

@@ -2,7 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Event\Features\EventCategoryManagement\Http\EventCategoryAdminController;
+use Modules\Event\Features\EventCategoryManagement\Http\EventCategoryApiController;
 use Modules\Event\Features\EventModeration\Http\EventAdminController;
+use Modules\Event\Features\EventModeration\Http\EventApiController;
 use Modules\Event\Features\PublicReading\Http\EventSitemapController;
 use Modules\Event\Features\PublicReading\Http\PublicEventController;
 use Modules\Event\Features\PublicSubmission\Http\EventSubmissionController;
@@ -30,6 +32,13 @@ Route::middleware(['auth'])
         Route::post('{event}/publish', [EventAdminController::class, 'publish'])->name('publish');
         Route::post('{event}/archive', [EventAdminController::class, 'archive'])->name('archive');
     });
+
+// ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị) —
+// tham chiếu Modules/Organization/routes/web.php (backend.api.organizations) ───────────────
+Route::middleware(['auth'])->prefix('backend/api/events')->name('backend.api.events.')->group(function () {
+    Route::get('items', [EventApiController::class, 'index'])->name('items');
+    Route::get('categories', [EventCategoryApiController::class, 'index'])->name('categories');
+});
 
 // ── Cổng thông tin công khai (spec §8/§13 Phase 3) — không {locale}, cùng quyết định đã áp
 // dụng cho Post. THỨ TỰ quan trọng: 'gui-su-kien' (nộp sự kiện) và 'danh-muc/{category:slug}'

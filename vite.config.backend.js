@@ -147,6 +147,12 @@ const MODULE_ENTRIES = [
   // Ocop
   'Modules/Ocop/resources/assets/sass/ocop.scss',
   'Modules/Ocop/resources/assets/js/ocop.js',
+  // Newsletter
+  'Modules/Newsletter/resources/assets/js/newsletter.js',
+  // Page
+  'Modules/Page/resources/assets/js/page.js',
+  // Aicem
+  'Modules/Aicem/resources/assets/js/aicem.js',
 ];
 
 // ─────────────────────────────────────────────────────────────────────

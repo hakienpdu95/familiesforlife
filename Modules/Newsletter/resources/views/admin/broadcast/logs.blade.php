@@ -2,7 +2,9 @@
 @section('title', 'Lịch sử gửi bản tin')
 
 @section('content')
-<div>
+<div x-data="broadcastLogListPage({{ Js::from([
+    'apiUrl' => route('backend.api.newsletter.broadcast-logs'),
+]) }})">
 
 @foreach(['success','error'] as $type)
     @if(session($type))
@@ -26,45 +28,45 @@
     @endcan
 </div>
 
+{{-- ── Search ───────────────────────────────────────────────────────── --}}
+<div class="card bg-base-100 shadow-sm border border-base-200 mb-4">
+    <div class="card-body py-3 px-4">
+        <div class="form-control max-w-sm">
+            <label class="label py-0.5"><span class="label-text text-xs font-medium">Tìm kiếm</span></label>
+            <div class="input input-sm input-bordered flex items-center gap-2 bg-base-100">
+                <svg class="w-3.5 h-3.5 text-base-content/40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <input type="text" x-model="filters.search" @input.debounce.350ms="onFilterChange()"
+                       placeholder="Nhập chủ đề bản tin..." class="grow bg-transparent outline-none text-sm">
+                <button x-show="filters.search" @click="clearSearch()"
+                        class="text-base-content/30 hover:text-base-content transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- ── Tabulator table ──────────────────────────────────────────────── --}}
 <div class="card bg-base-100 shadow-sm border border-base-200">
-    <div class="overflow-x-auto">
-        <table class="table table-sm">
-            <thead>
-                <tr>
-                    <th>Chủ đề</th>
-                    <th>Thời điểm gửi/lên lịch</th>
-                    <th>Người gửi</th>
-                    <th>Resend Broadcast ID</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($logs as $log)
-                <tr>
-                    <td class="font-medium">{{ $log->subject }}</td>
-                    <td class="text-xs text-base-content/60">
-                        @if($log->scheduled_at)
-                            Lên lịch: {{ $log->scheduled_at->format('d/m/Y H:i') }}
-                        @else
-                            {{ $log->created_at->format('d/m/Y H:i') }}
-                        @endif
-                    </td>
-                    <td class="text-xs">{{ $log->sentBy?->name ?? 'Hệ thống' }}</td>
-                    <td class="text-xs text-base-content/40 font-mono">{{ $log->resend_broadcast_id ?? '—' }}</td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="4" class="text-center text-xs text-base-content/40 py-6">Chưa gửi bản tin nào.</td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
+    <div class="card-body p-0 overflow-hidden tabulator-daisy">
+        <div id="broadcast-log-table"></div>
     </div>
-    @if($logs->hasPages())
-    <div class="p-4 border-t border-base-200">
-        {{ $logs->links() }}
-    </div>
-    @endif
 </div>
 
 </div>
 @endsection
+
+@push('styles')
+    <x-tabulator-theme />
+@endpush
+
+@push('scripts')
+    @vite([
+        'resources/js/modules/tabulator.js',
+        'Modules/Newsletter/resources/assets/js/newsletter.js',
+    ], 'build/backend')
+@endpush

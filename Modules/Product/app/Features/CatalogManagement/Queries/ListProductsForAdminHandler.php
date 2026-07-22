@@ -9,6 +9,8 @@ use Modules\Product\Models\Product;
 
 class ListProductsForAdminHandler implements QueryHandlerInterface
 {
+    private const SORTABLE = ['name', 'price', 'sort_order', 'created_at'];
+
     public function handle(QueryInterface $query): LengthAwarePaginator
     {
         /** @var ListProductsForAdminQuery $query */
@@ -38,7 +40,10 @@ class ListProductsForAdminHandler implements QueryHandlerInterface
             $q->where('type', $query->type);
         }
 
-        return $q->orderBy('sort_order')
+        $sortField = in_array($query->sortField, self::SORTABLE, true) ? $query->sortField : 'sort_order';
+        $sortDir   = $query->sortDir === 'desc' ? 'desc' : 'asc';
+
+        return $q->orderBy($sortField, $sortDir)
             ->orderByDesc('created_at')
             ->paginate($query->perPage, ['*'], 'page', $query->page)
             ->withQueryString();

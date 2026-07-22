@@ -8,8 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\Newsletter\Features\BroadcastSending\Actions\SendBroadcastAction;
 use Modules\Newsletter\Features\BroadcastSending\Data\BroadcastData;
-use Modules\Newsletter\Features\BroadcastSending\Queries\ListBroadcastLogsForAdminHandler;
-use Modules\Newsletter\Features\BroadcastSending\Queries\ListBroadcastLogsForAdminQuery;
 use Modules\Newsletter\Models\NewsletterBroadcastLog;
 use Modules\Newsletter\Models\NewsletterSubscriber;
 
@@ -47,14 +45,11 @@ class BroadcastAdminController extends Controller
             ->with('success', $data->scheduled_at ? 'Đã lên lịch gửi bản tin.' : 'Đã gửi bản tin.');
     }
 
-    public function logs(Request $request, ListBroadcastLogsForAdminHandler $handler): View
+    /** Dữ liệu bảng lấy qua BroadcastLogApiController (Tabulator, remote pagination/sort/filter). */
+    public function logs(): View
     {
         $this->authorize('viewAny', NewsletterSubscriber::class);
 
-        $logs = $handler->handle(new ListBroadcastLogsForAdminQuery(
-            page: max(1, $request->integer('page', 1)),
-        ));
-
-        return view('newsletter::admin.broadcast.logs', compact('logs'));
+        return view('newsletter::admin.broadcast.logs');
     }
 }

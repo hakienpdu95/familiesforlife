@@ -4,3 +4,4 @@
  * Build: vite.config.backend.js → public/build/backend/assets/modules/menu.[hash].js
  */
 import './pages/menu-item-form.js';
+import './pages/menu-item-index.js';

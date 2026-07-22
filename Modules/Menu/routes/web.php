@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Menu\Features\MenuManagement\Http\MenuItemAdminController;
+use Modules\Menu\Features\MenuManagement\Http\MenuItemApiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,4 +16,10 @@ Route::middleware(['auth'])->prefix('dashboard/menu')->name('backend.menu.')->gr
     // Modules/Post CategoryAdminController — sửa/xoá đủ dùng, không cần trang show).
     Route::resource('items', MenuItemAdminController::class)->except(['show'])->parameters(['items' => 'menuItem']);
     Route::post('items/reorder', [MenuItemAdminController::class, 'reorder'])->name('items.reorder');
+});
+
+// ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị) —
+// tham chiếu Modules/Organization/routes/web.php (backend.api.organizations) ───────────────
+Route::middleware(['auth'])->prefix('backend/api/menu')->name('backend.api.menu.')->group(function () {
+    Route::get('items', [MenuItemApiController::class, 'index'])->name('items');
 });

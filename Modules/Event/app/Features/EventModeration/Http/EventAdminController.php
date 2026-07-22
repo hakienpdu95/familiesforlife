@@ -3,13 +3,13 @@
 namespace Modules\Event\Features\EventModeration\Http;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Modules\Event\Enums\EventLocationType;
 use Modules\Event\Enums\EventPriceType;
-use Modules\Event\Enums\EventStatus;
 use Modules\Event\Features\EventCategoryManagement\Queries\ListEventCategoriesForAdminHandler;
 use Modules\Event\Features\EventCategoryManagement\Queries\ListEventCategoriesForAdminQuery;
 use Modules\Event\Features\EventModeration\Actions\ArchiveEventAction;
@@ -21,8 +21,6 @@ use Modules\Event\Features\EventModeration\Actions\RejectEventAction;
 use Modules\Event\Features\EventModeration\Actions\StoreEventPosterAction;
 use Modules\Event\Features\EventModeration\Actions\UpdateEventAction;
 use Modules\Event\Features\EventModeration\Data\EventData;
-use Modules\Event\Features\EventModeration\Queries\ListEventsForAdminHandler;
-use Modules\Event\Features\EventModeration\Queries\ListEventsForAdminQuery;
 use Modules\Event\Models\Event;
 
 /**
@@ -32,19 +30,12 @@ use Modules\Event\Models\Event;
  */
 class EventAdminController extends Controller
 {
-    public function index(Request $request, ListEventsForAdminHandler $handler): View
+    /** Dữ liệu bảng lấy qua EventApiController (Tabulator, remote pagination/sort/filter). */
+    public function index(): View
     {
         $this->authorize('viewAny', Event::class);
 
-        $events = $handler->handle(new ListEventsForAdminQuery(
-            search: $request->string('q')->value() ?: null,
-            status: $request->string('status')->value() ?: null,
-            page: max(1, $request->integer('page', 1)),
-        ));
-
-        $statuses = EventStatus::cases();
-
-        return view('event::admin.events.index', compact('events', 'statuses'));
+        return view('event::admin.events.index');
     }
 
     public function create(ListEventCategoriesForAdminHandler $handler): View
@@ -97,17 +88,23 @@ class EventAdminController extends Controller
             ->with('success', 'Cập nhật sự kiện thành công.');
     }
 
-    public function approve(Event $event, ApproveEventAction $action, NotifyEventApprovalResultAction $notify): RedirectResponse
+    public function approve(Request $request, Event $event, ApproveEventAction $action, NotifyEventApprovalResultAction $notify): RedirectResponse|JsonResponse
     {
         $this->authorize('approve', $event);
 
         $action->handle($event);
         $notify->handle($event);
 
-        return back()->with('success', "Đã duyệt sự kiện \"{$event->title}\" — chờ platform_content_head xuất bản.");
+        $message = "Đã duyệt sự kiện \"{$event->title}\" — chờ platform_content_head xuất bản.";
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => $message]);
+        }
+
+        return back()->with('success', $message);
     }
 
-    public function reject(Request $request, Event $event, RejectEventAction $action, NotifyEventApprovalResultAction $notify): RedirectResponse
+    public function reject(Request $request, Event $event, RejectEventAction $action, NotifyEventApprovalResultAction $notify): RedirectResponse|JsonResponse
     {
         $this->authorize('reject', $event);
 
@@ -118,11 +115,16 @@ class EventAdminController extends Controller
         $action->handle($event, $validated['rejected_reason']);
         $notify->handle($event);
 
-        return redirect()->route('backend.event.index')
-            ->with('success', "Đã từ chối sự kiện \"{$event->title}\".");
+        $message = "Đã từ chối sự kiện \"{$event->title}\".";
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => $message]);
+        }
+
+        return redirect()->route('backend.event.index')->with('success', $message);
     }
 
-    public function publish(Event $event, PublishEventAction $action): RedirectResponse
+    public function publish(Request $request, Event $event, PublishEventAction $action): RedirectResponse|JsonResponse
     {
         $this->authorize('publish', $event);
 
@@ -130,16 +132,28 @@ class EventAdminController extends Controller
         // tài khoản để "thấy" thêm 1 thông báo khác khi sự kiện thật sự lên cổng thông tin.
         $action->handle($event);
 
-        return back()->with('success', "Đã xuất bản sự kiện \"{$event->title}\".");
+        $message = "Đã xuất bản sự kiện \"{$event->title}\".";
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => $message]);
+        }
+
+        return back()->with('success', $message);
     }
 
-    public function archive(Event $event, ArchiveEventAction $action): RedirectResponse
+    public function archive(Request $request, Event $event, ArchiveEventAction $action): RedirectResponse|JsonResponse
     {
         $this->authorize('archive', $event);
 
         $action->handle($event);
 
-        return back()->with('success', "Đã lưu trữ sự kiện \"{$event->title}\".");
+        $message = "Đã lưu trữ sự kiện \"{$event->title}\".";
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => $message]);
+        }
+
+        return back()->with('success', $message);
     }
 
     private function validated(Request $request, bool $posterRequired): array

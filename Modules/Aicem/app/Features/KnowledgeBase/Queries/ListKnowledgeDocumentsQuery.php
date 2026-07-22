@@ -12,5 +12,7 @@ class ListKnowledgeDocumentsQuery implements QueryInterface
         public readonly ?string $search = null,
         public readonly ?string $type = null,
         public readonly ?string $subjectType = null,
+        public readonly string $sortField = 'created_at',
+        public readonly string $sortDir = 'desc',
     ) {}
 }

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Ocop\Features\OcopCategoryManagement\Http\OcopCategoryAdminController;
 use Modules\Ocop\Features\OcopProductManagement\Http\OcopProductAdminController;
+use Modules\Ocop\Features\OcopProductManagement\Http\OcopProductApiController;
 use Modules\Ocop\Features\PublicReading\Http\PublicOcopController;
 
 // spec/Province_Showcase_Technical_Specification.md §6.1 — dashboard/ocop/products (resource,
@@ -14,6 +15,12 @@ use Modules\Ocop\Features\PublicReading\Http\PublicOcopController;
 Route::middleware(['auth'])->prefix('dashboard/ocop')->name('backend.ocop.')->group(function (): void {
     Route::get('categories', [OcopCategoryAdminController::class, 'index'])->name('categories.index');
     Route::resource('products', OcopProductAdminController::class)->except(['show']);
+});
+
+// ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị) —
+// tham chiếu Modules/Organization/routes/web.php (backend.api.organizations) ───────────────
+Route::middleware(['auth'])->prefix('backend/api/ocop')->name('backend.api.ocop.')->group(function () {
+    Route::get('products', [OcopProductApiController::class, 'index'])->name('products');
 });
 
 // ── Cổng thông tin công khai (spec §8 DoD #5 — trang chi tiết sản phẩm OCOP) ────────────────

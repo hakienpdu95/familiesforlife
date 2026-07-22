@@ -3,6 +3,7 @@
 namespace Modules\Page\Features\PageManagement\Http;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -14,8 +15,6 @@ use Modules\Page\Features\PageManagement\Actions\UnpublishPageAction;
 use Modules\Page\Features\PageManagement\Actions\UpdatePageAction;
 use Modules\Page\Features\PageManagement\Data\PageData;
 use Modules\Page\Features\PageManagement\PageTemplate;
-use Modules\Page\Features\PageManagement\Queries\ListPagesForAdminHandler;
-use Modules\Page\Features\PageManagement\Queries\ListPagesForAdminQuery;
 use Modules\Page\Models\Page;
 
 class PageAdminController extends Controller
@@ -25,14 +24,10 @@ class PageAdminController extends Controller
         $this->authorizeResource(Page::class, 'page');
     }
 
-    public function index(Request $request, ListPagesForAdminHandler $handler): View
+    /** Dữ liệu bảng lấy qua PageApiController (Tabulator, remote pagination/sort/filter). */
+    public function index(): View
     {
-        $pages = $handler->handle(new ListPagesForAdminQuery(
-            search: $request->string('q')->trim()->value() ?: null,
-            status: $request->string('status')->value() ?: null,
-        ));
-
-        return view('page::admin.pages.index', compact('pages'));
+        return view('page::admin.pages.index');
     }
 
     public function create(): View
@@ -68,28 +63,58 @@ class PageAdminController extends Controller
             ->with('success', 'Cập nhật trang thành công.');
     }
 
-    public function destroy(Page $page, DeletePageAction $action): RedirectResponse
+    public function destroy(Request $request, Page $page, DeletePageAction $action): RedirectResponse|JsonResponse
     {
-        $action->handle($page);
+        $title = $page->title;
+
+        try {
+            $action->handle($page);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => collect($e->errors())->flatten()->first() ?? $e->getMessage()], 422);
+            }
+
+            throw $e;
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => "Đã xoá trang \"{$title}\"."]);
+        }
 
         return redirect()->route('backend.page.items.index')
-            ->with('success', "Đã xoá trang \"{$page->title}\".");
+            ->with('success', "Đã xoá trang \"{$title}\".");
     }
 
-    public function publish(Page $page, PublishPageAction $action): RedirectResponse
+    public function publish(Request $request, Page $page, PublishPageAction $action): RedirectResponse|JsonResponse
     {
         $this->authorize('update', $page);
 
-        $action->handle($page);
+        try {
+            $action->handle($page);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => collect($e->errors())->flatten()->first() ?? $e->getMessage()], 422);
+            }
+
+            throw $e;
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => "Đã xuất bản trang \"{$page->title}\"."]);
+        }
 
         return back()->with('success', "Đã xuất bản trang \"{$page->title}\".");
     }
 
-    public function unpublish(Page $page, UnpublishPageAction $action): RedirectResponse
+    public function unpublish(Request $request, Page $page, UnpublishPageAction $action): RedirectResponse|JsonResponse
     {
         $this->authorize('update', $page);
 
         $action->handle($page);
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => "Đã chuyển trang \"{$page->title}\" về Nháp."]);
+        }
 
         return back()->with('success', "Đã chuyển trang \"{$page->title}\" về Nháp.");
     }

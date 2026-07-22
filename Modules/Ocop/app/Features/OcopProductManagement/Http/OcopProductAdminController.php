@@ -3,6 +3,7 @@
 namespace Modules\Ocop\Features\OcopProductManagement\Http;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -12,8 +13,6 @@ use Modules\Ocop\Features\OcopProductManagement\Actions\CreateOcopProductAction;
 use Modules\Ocop\Features\OcopProductManagement\Actions\DeleteOcopProductAction;
 use Modules\Ocop\Features\OcopProductManagement\Actions\UpdateOcopProductAction;
 use Modules\Ocop\Features\OcopProductManagement\Data\OcopProductData;
-use Modules\Ocop\Features\OcopProductManagement\Queries\ListOcopProductsForAdminHandler;
-use Modules\Ocop\Features\OcopProductManagement\Queries\ListOcopProductsForAdminQuery;
 use Modules\Ocop\Models\OcopCategory;
 use Modules\Ocop\Models\OcopProduct;
 
@@ -25,18 +24,12 @@ class OcopProductAdminController extends Controller
         $this->authorizeResource(OcopProduct::class, 'product');
     }
 
-    public function index(Request $request, ListOcopProductsForAdminHandler $handler): View
+    /** Dữ liệu bảng lấy qua OcopProductApiController (Tabulator, remote pagination/sort/filter). */
+    public function index(): View
     {
-        $products = $handler->handle(new ListOcopProductsForAdminQuery(
-            search: $request->string('q')->value() ?: null,
-            categoryId: $request->integer('category_id') ?: null,
-            status: $request->string('status')->value() ?: null,
-            page: max(1, $request->integer('page', 1)),
-        ));
-
         $categories = OcopCategory::active()->orderBy('name')->get(['id', 'name']);
 
-        return view('ocop::admin.products.index', compact('products', 'categories'));
+        return view('ocop::admin.products.index', compact('categories'));
     }
 
     public function create(): View
@@ -76,9 +69,13 @@ class OcopProductAdminController extends Controller
             ->with('success', 'Cập nhật sản phẩm thành công.');
     }
 
-    public function destroy(OcopProduct $product, DeleteOcopProductAction $action): RedirectResponse
+    public function destroy(Request $request, OcopProduct $product, DeleteOcopProductAction $action): RedirectResponse|JsonResponse
     {
         $action->handle($product);
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Đã xoá sản phẩm.']);
+        }
 
         return redirect()->route('backend.ocop.products.index')
             ->with('success', 'Đã xoá sản phẩm.');

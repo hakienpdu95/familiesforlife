@@ -13,5 +13,7 @@ class ListOcopProductsForAdminQuery implements QueryInterface
         public readonly ?string $provinceCode = null,
         public readonly int $page = 1,
         public readonly int $perPage = 20,
+        public readonly string $sortField = 'created_at',
+        public readonly string $sortDir = 'desc',
     ) {}
 }

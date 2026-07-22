@@ -14,3 +14,4 @@
  */
 
 import './pages/ocop-product-form.js';
+import './pages/ocop-product-index.js';

@@ -4,6 +4,7 @@ namespace Modules\Banner\Features\BannerManagement\Http;
 
 use App\Http\Controllers\Controller;
 use App\Models\Province;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -12,8 +13,6 @@ use Modules\Banner\Features\BannerManagement\Actions\CreateBannerAction;
 use Modules\Banner\Features\BannerManagement\Actions\DeleteBannerAction;
 use Modules\Banner\Features\BannerManagement\Actions\UpdateBannerAction;
 use Modules\Banner\Features\BannerManagement\Data\BannerData;
-use Modules\Banner\Features\BannerManagement\Queries\ListBannersForAdminHandler;
-use Modules\Banner\Features\BannerManagement\Queries\ListBannersForAdminQuery;
 use Modules\Banner\Models\Banner;
 use Modules\Post\Models\PostCategory;
 
@@ -28,18 +27,13 @@ class BannerAdminController extends Controller
         $this->authorizeResource(Banner::class, 'banner');
     }
 
-    public function index(Request $request, ListBannersForAdminHandler $handler): View
+    /** Dữ liệu bảng lấy qua BannerApiController (Tabulator, remote pagination/sort/filter). */
+    public function index(): View
     {
-        $banners = $handler->handle(new ListBannersForAdminQuery(
-            placement: $request->string('placement')->value() ?: null,
-            targetType: $request->string('target_type')->value() ?: null,
-            page: max(1, $request->integer('page', 1)),
-        ));
-
         $placements = config('banner.placements');
         $targetTypes = config('banner.target_types');
 
-        return view('banner::admin.banners.index', compact('banners', 'placements', 'targetTypes'));
+        return view('banner::admin.banners.index', compact('placements', 'targetTypes'));
     }
 
     public function create(): View
@@ -80,9 +74,13 @@ class BannerAdminController extends Controller
             ->with('success', 'Cập nhật banner thành công.');
     }
 
-    public function destroy(Banner $banner, DeleteBannerAction $action): RedirectResponse
+    public function destroy(Request $request, Banner $banner, DeleteBannerAction $action): RedirectResponse|JsonResponse
     {
         $action->handle($banner);
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Đã xoá banner.']);
+        }
 
         return redirect()->route('backend.banner.items.index')
             ->with('success', 'Đã xoá banner.');

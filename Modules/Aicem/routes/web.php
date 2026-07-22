@@ -5,6 +5,7 @@ use Modules\Aicem\Features\Dashboard\Http\AicemDashboardController;
 use Modules\Aicem\Features\ExampleLearning\Http\ExampleCandidateAdminController;
 use Modules\Aicem\Features\Generation\Http\AicemGenerationController;
 use Modules\Aicem\Features\KnowledgeBase\Http\KnowledgeDocumentAdminController;
+use Modules\Aicem\Features\KnowledgeBase\Http\KnowledgeDocumentApiController;
 
 Route::middleware(['auth', 'tenant'])
     ->prefix('dashboard/aicem')
@@ -38,3 +39,10 @@ Route::middleware(['auth', 'tenant'])
         Route::post('example-candidates/{candidate}/approve', [ExampleCandidateAdminController::class, 'approve'])->name('example-candidates.approve');
         Route::post('example-candidates/{candidate}/reject', [ExampleCandidateAdminController::class, 'reject'])->name('example-candidates.reject');
     });
+
+// ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị,
+// tenant-scoped tự động qua TenantAwareModel) — tham chiếu Modules/Organization/routes/web.php
+// (backend.api.organizations) ────────────────────────────────────────────────────────────
+Route::middleware(['auth', 'tenant'])->prefix('backend/api/aicem')->name('backend.api.aicem.')->group(function () {
+    Route::get('knowledge-documents', [KnowledgeDocumentApiController::class, 'index'])->name('knowledge-documents');
+});

@@ -3,6 +3,7 @@
 namespace Modules\Event\Features\EventCategoryManagement\Http;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -22,13 +23,10 @@ class EventCategoryAdminController extends Controller
         $this->authorizeResource(EventCategory::class, 'category');
     }
 
-    public function index(Request $request, ListEventCategoriesForAdminHandler $handler): View
+    /** Dữ liệu bảng lấy qua EventCategoryApiController (Tabulator dataTree). */
+    public function index(): View
     {
-        $categories = $handler->handle(new ListEventCategoriesForAdminQuery(
-            search: $request->string('q')->value() ?: null,
-        ));
-
-        return view('event::admin.categories.index', compact('categories'));
+        return view('event::admin.categories.index');
     }
 
     public function create(ListEventCategoriesForAdminHandler $handler): View
@@ -63,16 +61,26 @@ class EventCategoryAdminController extends Controller
             ->with('success', 'Cập nhật danh mục thành công.');
     }
 
-    public function destroy(EventCategory $category, DeleteEventCategoryAction $action): RedirectResponse
+    public function destroy(Request $request, EventCategory $category, DeleteEventCategoryAction $action): RedirectResponse|JsonResponse
     {
+        $name = $category->name;
+
         try {
             $action->handle($category);
         } catch (\RuntimeException $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $e->getMessage()], 422);
+            }
+
             return back()->withErrors(['category' => $e->getMessage()]);
         }
 
+        if ($request->expectsJson()) {
+            return response()->json(['message' => "Đã xoá danh mục \"{$name}\"."]);
+        }
+
         return redirect()->route('backend.event.categories.index')
-            ->with('success', "Đã xoá danh mục \"{$category->name}\".");
+            ->with('success', "Đã xoá danh mục \"{$name}\".");
     }
 
     public function reorder(Request $request, ReorderEventCategoriesAction $action): RedirectResponse

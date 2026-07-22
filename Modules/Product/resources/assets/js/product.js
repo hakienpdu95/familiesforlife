@@ -15,4 +15,6 @@
  */
 
 import './pages/product-form.js';
+import './pages/product-index.js';
 import './pages/category-form.js';
+import './pages/category-index.js';

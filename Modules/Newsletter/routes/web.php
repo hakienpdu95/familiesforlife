@@ -2,8 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Newsletter\Features\BroadcastSending\Http\BroadcastAdminController;
+use Modules\Newsletter\Features\BroadcastSending\Http\BroadcastLogApiController;
 use Modules\Newsletter\Features\PublicSubscription\Http\PublicSubscriptionController;
 use Modules\Newsletter\Features\SubscriberManagement\Http\SubscriberAdminController;
+use Modules\Newsletter\Features\SubscriberManagement\Http\SubscriberApiController;
 
 // spec/Newsletter_Technical_Specification.md §10 — công khai, không auth.
 Route::post('newsletter/subscribe', [PublicSubscriptionController::class, 'subscribe'])
@@ -25,4 +27,11 @@ Route::middleware(['auth'])->prefix('dashboard/newsletter')->name('backend.newsl
     Route::get('broadcast', [BroadcastAdminController::class, 'create'])->name('broadcast.create');
     Route::post('broadcast', [BroadcastAdminController::class, 'send'])->name('broadcast.send');
     Route::get('broadcast/logs', [BroadcastAdminController::class, 'logs'])->name('broadcast.logs');
+});
+
+// ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị) —
+// tham chiếu Modules/Organization/routes/web.php (backend.api.organizations) ───────────────
+Route::middleware(['auth'])->prefix('backend/api/newsletter')->name('backend.api.newsletter.')->group(function () {
+    Route::get('subscribers', [SubscriberApiController::class, 'index'])->name('subscribers');
+    Route::get('broadcast-logs', [BroadcastLogApiController::class, 'index'])->name('broadcast-logs');
 });

@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Modules\Page\Features\PageManagement\Http\PageAdminController;
+use Modules\Page\Features\PageManagement\Http\PageApiController;
 use Modules\Page\Features\PublicReading\Http\PagePublicController;
 use Modules\Page\Models\Page;
 
@@ -17,6 +18,12 @@ Route::middleware(['auth'])->prefix('dashboard/pages')->name('backend.page.')->g
     Route::resource('items', PageAdminController::class)->except(['show'])->parameters(['items' => 'page']);
     Route::patch('items/{page}/publish', [PageAdminController::class, 'publish'])->name('items.publish');
     Route::patch('items/{page}/unpublish', [PageAdminController::class, 'unpublish'])->name('items.unpublish');
+});
+
+// ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị) —
+// tham chiếu Modules/Organization/routes/web.php (backend.api.organizations) ───────────────
+Route::middleware(['auth'])->prefix('backend/api/pages')->name('backend.api.pages.')->group(function () {
+    Route::get('items', [PageApiController::class, 'index'])->name('items');
 });
 
 /*
