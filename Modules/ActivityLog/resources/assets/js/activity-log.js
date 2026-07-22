@@ -55,11 +55,19 @@ function actorHtml(row) {
 }
 
 function subjectHtml(row) {
-    const label = row.display_subject;
-    if (!label) return '<span class="opacity-30">—</span>';
-    return `<div class="actlog-subject">
-        <span class="text-sm" title="${esc(label)}">${esc(label)}</span>
-    </div>`;
+    const module = row.subject_module;
+    const id     = row.subject_id;
+    const name   = row.subject_name;
+
+    if (!module) return '<span class="opacity-30">—</span>';
+
+    const idTag = id ? `#${id}` : '';
+
+    if (name) {
+        return `<div class="text-sm font-medium" title="${esc(name)}">${esc(name)}</div>`
+             + `<div class="actlog-props">${esc(module)} ${esc(idTag)}</div>`;
+    }
+    return `<div class="text-sm">${esc(module)} ${esc(idTag)}</div>`;
 }
 
 function descHtml(row) {

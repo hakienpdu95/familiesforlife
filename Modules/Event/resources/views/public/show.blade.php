@@ -26,7 +26,7 @@
     </div>
 
     @if($event->poster_path)
-    <div class="aspect-[16/9] rounded-xl overflow-hidden bg-base-200 mb-6">
+    <div class="aspect-[16/9] overflow-hidden bg-base-200 mb-6">
         <img src="{{ \Illuminate\Support\Facades\Storage::url($event->poster_path) }}" alt="{{ $event->poster_alt ?? $event->title }}" class="h-full w-full object-cover">
     </div>
     @endif

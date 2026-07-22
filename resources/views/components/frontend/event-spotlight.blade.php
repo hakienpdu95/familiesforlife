@@ -22,11 +22,8 @@
         <div class="grid lg:grid-cols-[5fr_7fr] gap-6 items-stretch">
             <a href="{{ route('event.public.show', ['slug' => $lead->slug]) }}" class="group flex flex-col h-full">
                 <div class="flex-1 min-h-[220px] bg-base-200">
-                    @if($lead->poster_path)
-                    <img src="{{ \Illuminate\Support\Facades\Storage::url($lead->poster_path) }}" alt="{{ $lead->poster_alt ?? $lead->title }}" class="h-full w-full object-cover">
-                    @else
-                    <div class="ph h-full w-full"></div>
-                    @endif
+                    <img src="{{ $lead->poster_path ? \Illuminate\Support\Facades\Storage::url($lead->poster_path) : asset('images/post-cover-placeholder.svg') }}"
+                         alt="{{ $lead->poster_alt ?? $lead->title }}" class="h-full w-full object-cover">
                 </div>
                 <div class="flex bg-base-100 text-base-content flex-none">
                     <span class="flex-none w-1.5 bg-primary"></span>

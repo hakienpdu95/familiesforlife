@@ -861,7 +861,6 @@
 .vgd-news-hightl-big-h__bg {
     aspect-ratio: 4 / 3;
     overflow: hidden;
-    border-radius: var(--radius-box, .75rem);
     background: var(--color-base-200);
 }
 

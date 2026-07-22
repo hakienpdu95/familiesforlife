@@ -16,11 +16,8 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
         <div class="aspect-square rounded-xl overflow-hidden bg-base-200">
-            @if($product->getFirstMediaUrl('cover'))
-            <img src="{{ $product->getFirstMediaUrl('cover', 'preview') }}" alt="{{ $product->name }}" class="h-full w-full object-cover">
-            @else
-            <div class="ph h-full w-full"></div>
-            @endif
+            <img src="{{ $product->getFirstMediaUrl('cover') ? $product->getFirstMediaUrl('cover', 'preview') : asset('images/post-cover-placeholder.svg') }}"
+                 alt="{{ $product->name }}" class="h-full w-full object-cover">
         </div>
 
         <div>

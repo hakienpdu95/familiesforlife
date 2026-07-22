@@ -32,13 +32,9 @@
                 <article class="vgd-news-hightl-big-h mar-b-20">
                     <figure class="vgd-news-hightl-big-h__bg pos-rel mar-b-20">
                         <a href="{{ route('post.public.article', ['slug' => $featured->slug]) }}">
-                            @if($featured->article?->cover_image_url)
-                            <img src="{{ $featured->article->cover_image_url }}"
+                            <img src="{{ $featured->article?->cover_image_url ?: asset('images/post-cover-placeholder.svg') }}"
                                  alt="{{ $featured->title }}"
                                  class="img-fluid img-cover" loading="lazy">
-                            @else
-                            <div class="ph img-fluid img-cover"></div>
-                            @endif
                         </a>
                     </figure>
                     <header class="vgd-news-hightl-big-h__tit mar-t-10 text-trun line-cl-3">

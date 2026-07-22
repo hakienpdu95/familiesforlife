@@ -11,6 +11,32 @@ use App\Shared\Tenancy\TenantContext;
 
 class ActivityLogApiController extends Controller
 {
+    /** Field key → nhãn tiếng Việt, dùng để dịch tên cột DB thành câu mô tả đọc được. */
+    private const FIELD_LABELS = [
+        'title' => 'tiêu đề', 'name' => 'tên', 'label' => 'nhãn', 'slug' => 'đường dẫn',
+        'content' => 'nội dung', 'excerpt' => 'tóm tắt', 'description' => 'mô tả',
+        'status' => 'trạng thái', 'published_at' => 'thời điểm xuất bản',
+        'is_system' => 'cờ hệ thống', 'seo_title' => 'SEO title', 'seo_description' => 'SEO description',
+        'seo_noindex' => 'noindex', 'sort_order' => 'thứ tự', 'order_column' => 'thứ tự',
+        'view_count' => 'lượt xem', 'click_count' => 'lượt click', 'email' => 'email',
+        'phone' => 'số điện thoại', 'price' => 'giá', 'is_active' => 'trạng thái hoạt động',
+        'active' => 'trạng thái hoạt động', 'template' => 'thiết kế (template)', 'url' => 'đường dẫn URL',
+        'link_url' => 'đường dẫn liên kết', 'placement' => 'vị trí hiển thị', 'target_type' => 'loại đối tượng liên kết',
+        'link_type' => 'loại liên kết', 'parent_id' => 'mục cha', 'category_id' => 'danh mục',
+        'note' => 'ghi chú', 'address' => 'địa chỉ', 'password' => 'mật khẩu', 'role' => 'vai trò',
+        'permission' => 'quyền', 'image' => 'hình ảnh', 'avatar' => 'ảnh đại diện',
+        'assigned_to' => 'người được giao', 'stage_id' => 'giai đoạn', 'start_date' => 'ngày bắt đầu',
+        'end_date' => 'ngày kết thúc', 'alt_text' => 'văn bản thay thế', 'badge_label' => 'nhãn badge',
+        'open_in_new_tab' => 'mở tab mới', 'icon' => 'icon', 'depth' => 'cấp độ',
+    ];
+
+    /** Cột kỹ thuật/audit — không đưa vào câu mô tả "đã đổi trường nào". */
+    private const NOISE_KEYS = [
+        'id', 'uuid', 'created_at', 'updated_at', 'deleted_at',
+        'created_by', 'updated_by', 'organization_id',
+    ];
+
+
     public function index(Request $request): JsonResponse
     {
         $v = $request->validate([
@@ -85,7 +111,7 @@ class ActivityLogApiController extends Controller
             ->get([
                 'id', 'log_name', 'description', 'subject_type', 'subject_id', 'subject_label',
                 'causer_id', 'causer_type', 'event', 'level', 'module', 'action', 'request_id',
-                'actor_name', 'actor_ip', 'created_at', 'properties',
+                'actor_name', 'actor_ip', 'created_at', 'attribute_changes',
             ]);
 
         // Batch-load names for rows where actor_name is null but causer_id exists
@@ -123,30 +149,31 @@ class ActivityLogApiController extends Controller
         // Action: custom value → Spatie event → description → '-'
         $displayAction = $log->action ?: ($log->event ?: ($log->description ?: '-'));
 
-        // Subject
-        $subjectShort   = $log->subject_type ? class_basename($log->subject_type) : null;
-        $displaySubject = $log->subject_label
-            ?: ($subjectShort && $log->subject_id ? "{$subjectShort} #{$log->subject_id}" : null)
-            ?: $subjectShort
-            ?: null;
+        // attribute_changes (Spatie LogsActivity, cột riêng từ v4 — KHÔNG còn nằm trong
+        // 'properties'): {"attributes": {...trạng thái mới}, "old": {...trạng thái cũ}}. Rỗng
+        // đối với log ghi qua ActivityLogger/WriteActivityLogAction (module tự quản context riêng
+        // qua bảng activity_log_contexts).
+        $changes    = $log->attribute_changes;
+        $attributes = is_array($changes?->get('attributes')) ? $changes->get('attributes') : [];
+        $old        = is_array($changes?->get('old')) ? $changes->get('old') : [];
 
-        // Properties preview — flatten non-array keys, skip Spatie internal nested keys
-        $props = json_decode($log->getRawOriginal('properties') ?? '{}', true) ?? [];
-        $flat  = collect($props)
-            ->reject(fn ($v) => is_array($v))  // skip attributes/old nested objects
-            ->map(function ($v, $k) {
-                if (is_bool($v)) return "{$k}: " . ($v ? 'true' : 'false');
-                if (is_null($v)) return null;
-                $str = (string) $v;
-                return "{$k}: " . (mb_strlen($str) > 40 ? mb_substr($str, 0, 40) . '…' : $str);
-            })
-            ->filter()
-            ->take(4)
-            ->values()
-            ->implode(' · ');
+        $event = $log->event ?: $log->action ?: '';
 
-        // Enhanced description: merge description + props preview
-        $description = $log->description ?: null;
+        // Subject: "{Module} - #{ID} - {Tên/Tiêu đề}" — tên lấy từ subject_label (log ghi qua
+        // ActivityLogger, đã resolve qua getActivityLabel()/name/title) hoặc từ chính properties
+        // (log tự động của Spatie LogsActivity, không có subject_label).
+        $subjectShort = $log->subject_type ? class_basename($log->subject_type) : null;
+        $subjectName  = $log->subject_label
+            ?: ($attributes['title'] ?? $attributes['name'] ?? $attributes['label'] ?? $attributes['email'] ?? null);
+
+        $displaySubject = implode(' - ', array_filter([
+            $subjectShort,
+            $log->subject_id ? "#{$log->subject_id}" : null,
+            $subjectName,
+        ])) ?: null;
+
+        $description   = $this->buildDescription($log->description, $event, $attributes, $subjectName);
+        $propsPreview  = $this->buildPropsPreview($attributes, $old, $event);
 
         return [
             'id'              => $log->id,
@@ -158,12 +185,86 @@ class ActivityLogApiController extends Controller
             'actor_type'      => $actorIsUser ? 'user' : ($log->causer_type ? 'system' : 'anonymous'),
             'actor_ip'        => $log->actor_ip,
             'display_subject' => $displaySubject,
+            'subject_module'  => $subjectShort,
+            'subject_name'    => $subjectName,
             'subject_type'    => $log->subject_type,
             'subject_id'      => $log->subject_id,
             'description'     => $description,
-            'props_preview'   => $flat ?: null,
+            'props_preview'   => $propsPreview,
             'request_id'      => $log->request_id,
         ];
+    }
+
+    /**
+     * Sinh mô tả có ý nghĩa. Log ghi qua ActivityLogger với $description tường minh (không rỗng,
+     * không phải tên event thô) được giữ nguyên — coder gọi nơi đó đã chủ động viết câu rõ nghĩa.
+     * Ngược lại (log tự động của Spatie LogsActivity, description chỉ là 'created'/'updated'/
+     * 'deleted', hoặc log qua BaseModelObserver có description dạng "resource.updated") — suy ra
+     * câu mô tả từ event + danh sách field đã đổi (properties.attributes).
+     */
+    private function buildDescription(?string $rawDescription, string $event, array $attributes, ?string $subjectName): ?string
+    {
+        $isGeneric = $rawDescription === null
+            || $rawDescription === ''
+            || $rawDescription === $event
+            || preg_match('/^[a-z0-9_]*\.?(created|updated|deleted)$/i', $rawDescription) === 1;
+
+        if (!$isGeneric) {
+            return $rawDescription;
+        }
+
+        $changedFields = collect(array_keys($attributes))
+            ->reject(fn ($key) => in_array($key, self::NOISE_KEYS, true))
+            ->map(fn ($key) => self::FIELD_LABELS[$key] ?? str_replace('_', ' ', $key))
+            ->values();
+
+        $quotedName = $subjectName ? " \"{$subjectName}\"" : '';
+
+        return match (true) {
+            str_contains($event, 'delete') => "Xoá{$quotedName}",
+            str_contains($event, 'create') => "Tạo mới{$quotedName}",
+            str_contains($event, 'update') && $changedFields->isNotEmpty() =>
+                'Cập nhật ' . $changedFields->implode(', '),
+            str_contains($event, 'update') => "Cập nhật thông tin{$quotedName}",
+            $event !== '' => ucfirst(str_replace(['_', '.'], [' ', ' — '], $event)),
+            default => null,
+        };
+    }
+
+    /**
+     * "field: cũ → mới" cho các field đã đổi (dựa vào properties.old của Spatie khi có), hoặc
+     * "field: giá trị" khi không có state cũ (created, hoặc log không phải Spatie auto-log).
+     */
+    private function buildPropsPreview(array $attributes, array $old, string $event): ?string
+    {
+        $keys = collect(array_keys($attributes))->reject(fn ($key) => in_array($key, self::NOISE_KEYS, true));
+        if ($keys->isEmpty()) {
+            return null;
+        }
+
+        $isUpdate = str_contains($event, 'update') && !empty($old);
+
+        $preview = $keys->take(4)->map(function ($key) use ($attributes, $old, $isUpdate) {
+            $new = $this->scalarPreview($attributes[$key] ?? null);
+            if ($isUpdate && array_key_exists($key, $old)) {
+                return "{$key}: " . $this->scalarPreview($old[$key] ?? null) . " → {$new}";
+            }
+
+            return "{$key}: {$new}";
+        })->implode(' · ');
+
+        return $preview ?: null;
+    }
+
+    private function scalarPreview(mixed $value): string
+    {
+        if (is_bool($value))  return $value ? 'true' : 'false';
+        if (is_null($value))  return '∅';
+        if (is_array($value)) return '[...]';
+
+        $str = (string) $value;
+
+        return mb_strlen($str) > 40 ? mb_substr($str, 0, 40) . '…' : $str;
     }
 
     public function stats(Request $request): JsonResponse

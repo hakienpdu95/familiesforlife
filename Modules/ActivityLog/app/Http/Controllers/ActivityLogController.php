@@ -20,7 +20,11 @@ class ActivityLogController extends Controller
 
     public function show(ActivityLog $log): \Illuminate\View\View
     {
-        if (TenantContext::isSet() && $log->organization_id !== TenantContext::getOrganizationId()) {
+        // Cùng logic với ActivityLog::scopeForOrganization() dùng ở trang danh sách — cho xem
+        // log không gắn tổ chức (organization_id = null, log hệ thống/nền tảng), chỉ chặn khi
+        // log thuộc RÕ 1 tổ chức khác với tổ chức hiện tại.
+        if (TenantContext::isSet() && $log->organization_id !== null
+            && $log->organization_id !== TenantContext::getOrganizationId()) {
             abort(403);
         }
 

@@ -15,11 +15,8 @@
 <a href="{{ route('event.public.show', ['slug' => $event->slug]) }}"
    class="group flex flex-col {{ $styles['gap'] }}">
     <div class="{{ $styles['ratio'] }} rounded-xl overflow-hidden bg-base-200 relative">
-        @if($event->poster_path)
-        <img src="{{ \Illuminate\Support\Facades\Storage::url($event->poster_path) }}" alt="{{ $event->poster_alt ?? $event->title }}" class="h-full w-full object-cover" loading="lazy">
-        @else
-        <div class="ph h-full w-full"></div>
-        @endif
+        <img src="{{ $event->poster_path ? \Illuminate\Support\Facades\Storage::url($event->poster_path) : asset('images/post-cover-placeholder.svg') }}"
+             alt="{{ $event->poster_alt ?? $event->title }}" class="h-full w-full object-cover" loading="lazy">
         <span class="absolute top-2 left-2 rounded-md bg-base-100/90 px-2 py-1 text-[11px] font-black uppercase tracking-wide text-secondary">
             {{ $event->start_date?->format('d/m') }}{{ ! $sameDay ? ' – '.$event->end_date?->format('d/m') : '' }}
         </span>

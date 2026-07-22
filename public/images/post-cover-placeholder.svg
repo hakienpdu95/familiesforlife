@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <pattern id="stripes" width="28.28" height="28.28" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+      <rect width="28.28" height="14.14" fill="#e9e4f5"></rect>
+      <rect y="14.14" width="28.28" height="14.14" fill="#ded6ef"></rect>
+    </pattern>
+  </defs>
+  <rect width="800" height="600" fill="url(#stripes)"></rect>
+  <g transform="translate(400 300)" fill="none" stroke="#b9acd9" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity="0.65">
+    <rect x="-70" y="-52" width="140" height="104" rx="10"></rect>
+    <circle cx="-30" cy="-16" r="14"></circle>
+    <path d="M-70 32 L-18 -6 L20 22 L46 2 L70 20 L70 52 L-70 52 Z"></path>
+  </g>
+</svg>

@@ -18,11 +18,8 @@
 <a href="{{ route('post.public.article', ['slug' => $translation->slug]) }}"
    class="group grid grid-cols-1 sm:grid-cols-5 sm:items-stretch overflow-hidden bg-base-100 border border-base-300">
     <div class="sm:col-span-3 aspect-[16/10] sm:aspect-auto bg-base-200">
-        @if($article?->cover_image_url)
-        <img src="{{ $article->cover_image_url }}" alt="{{ $translation->title }}" class="h-full w-full object-cover" loading="lazy">
-        @else
-        <div class="ph h-full w-full"></div>
-        @endif
+        <img src="{{ $article?->cover_image_url ?: asset('images/post-cover-placeholder.svg') }}"
+             alt="{{ $translation->title }}" class="h-full w-full object-cover" loading="lazy">
     </div>
     <div class="sm:col-span-2 flex flex-col justify-center p-6 sm:p-10">
         @if($category)
@@ -35,12 +32,9 @@
 @else
 <a href="{{ route('post.public.article', ['slug' => $translation->slug]) }}"
    class="group flex flex-col {{ $styles['gap'] }}">
-    <div class="{{ $styles['ratio'] }} rounded-xl overflow-hidden bg-base-200">
-        @if($article?->cover_image_url)
-        <img src="{{ $article->cover_image_url }}" alt="{{ $translation->title }}" class="h-full w-full object-cover" loading="lazy">
-        @else
-        <div class="ph h-full w-full"></div>
-        @endif
+    <div class="{{ $styles['ratio'] }} overflow-hidden bg-base-200">
+        <img src="{{ $article?->cover_image_url ?: asset('images/post-cover-placeholder.svg') }}"
+             alt="{{ $translation->title }}" class="h-full w-full object-cover" loading="lazy">
     </div>
     <div>
         @if($category)
