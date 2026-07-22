@@ -18,6 +18,8 @@ use Modules\Post\Features\ArticleAuthoring\Actions\RemoveSponsorshipAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\UpdateArticleAction;
 use Modules\Post\Features\ArticleAuthoring\Data\ArticleData;
 use Modules\Post\Features\ArticleAuthoring\Data\TranslationData;
+use Modules\Post\Features\ArticleAuthoring\Queries\GetArticleRedirectClickStatsHandler;
+use Modules\Post\Features\ArticleAuthoring\Queries\GetArticleRedirectClickStatsQuery;
 use Modules\Post\Features\ArticleAuthoring\Queries\ListArticlesForAdminHandler;
 use Modules\Post\Features\ArticleAuthoring\Queries\ListArticlesForAdminQuery;
 use Modules\Post\Features\ArticleAuthoring\Queries\ListPendingReviewTranslationsHandler;
@@ -183,6 +185,22 @@ class ArticleAdminController extends Controller
             ->with('success', 'Cập nhật bài viết thành công.');
     }
 
+    /** format=redirect — trang "Thống kê click": tổng, xu hướng 30 ngày, top referrer. */
+    public function clicks(PostArticle $article, GetArticleRedirectClickStatsHandler $handler): View
+    {
+        $this->authorizeArticle($article, 'post_article.view');
+
+        abort_unless($article->isRedirect(), 404);
+
+        $stats = $handler->handle(new GetArticleRedirectClickStatsQuery(articleId: $article->id));
+
+        return view('post::admin.articles.clicks', [
+            'article'  => $article,
+            'stats'    => $stats,
+            'title'    => $article->mainTranslation()?->title ?? "Bài viết #{$article->id}",
+        ]);
+    }
+
     public function destroy(PostArticle $article, DeleteArticleAction $action): RedirectResponse
     {
         $this->authorizeArticle($article, 'post_article.delete');
@@ -244,6 +262,8 @@ class ArticleAdminController extends Controller
     {
         return $request->validate([
             'format'                  => ['required', 'in:' . implode(',', array_column(ArticleFormat::cases(), 'value'))],
+            // format=redirect — bài không có nội dung riêng, chỉ dẫn link ra nguồn khác.
+            'redirect_url'            => ['required_if:format,redirect', 'nullable', 'url', 'max:500'],
             // spec/Media_Library_Technical_Specification.md §8 — chỉ dùng ở create form (form
             // sửa gắn ảnh trực tiếp qua FilePond context header, không qua field này).
             'cover_media_uuid'        => ['nullable', 'string'],

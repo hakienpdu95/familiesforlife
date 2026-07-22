@@ -4,6 +4,7 @@ namespace Modules\Post\Features\ArticleAuthoring\Actions;
 
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
+use Modules\Post\Enums\ArticleFormat;
 use Modules\Post\Features\ArticleAuthoring\Actions\Concerns\SyncsArticleRelations;
 use Modules\Post\Features\ArticleAuthoring\Data\ArticleData;
 use Modules\Post\Models\PostArticle;
@@ -19,6 +20,7 @@ class UpdateArticleAction
         return DB::transaction(function () use ($article, $data) {
             $article->update([
                 'format'                 => $data->format,
+                'redirect_url'           => $data->format === ArticleFormat::Redirect ? $data->redirect_url : null,
                 'is_featured'            => $data->is_featured,
                 'province_code'          => $data->province_code,
                 'ward_code'              => $data->ward_code,

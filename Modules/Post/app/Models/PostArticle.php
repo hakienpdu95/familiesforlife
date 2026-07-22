@@ -53,6 +53,7 @@ class PostArticle extends Model implements HasMedia
         'uuid',
         'main_locale',
         'format',
+        'redirect_url',
         'is_featured',
         'sort_order',
         'province_code',
@@ -148,6 +149,12 @@ class PostArticle extends Model implements HasMedia
         return $this->hasMany(PostArticleTranslation::class, 'article_id');
     }
 
+    /** format=redirect — lịch sử từng lượt click, xem RecordArticleRedirectClickAction. */
+    public function redirectClicks(): HasMany
+    {
+        return $this->hasMany(PostArticleRedirectClick::class, 'article_id');
+    }
+
     public function translation(string $locale): ?PostArticleTranslation
     {
         return $this->translations->firstWhere('locale', $locale);
@@ -191,6 +198,12 @@ class PostArticle extends Model implements HasMedia
      * job chạy — job vẫn cần thiết để dọn is_sponsored về false cho báo cáo/danh sách lọc, nhưng
      * không còn là nguồn sự thật DUY NHẤT cho hiển thị (spec §5).
      */
+    /** format=redirect — bài không có nội dung riêng, PublicArticleController redirect thẳng ra redirect_url. */
+    public function isRedirect(): bool
+    {
+        return $this->format === ArticleFormat::Redirect;
+    }
+
     public function isCurrentlySponsored(): bool
     {
         if (! $this->is_sponsored) {

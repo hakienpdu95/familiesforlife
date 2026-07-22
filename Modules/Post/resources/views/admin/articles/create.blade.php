@@ -61,16 +61,27 @@
             @error('main_locale')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
         </div>
 
-        <div class="form-control">
+        <div class="form-control" x-data="{ format: '{{ old('format', 'article') }}' }">
             <label class="label py-0 pb-1">
                 <span class="label-text text-xs font-medium">Định dạng nội dung</span>
             </label>
-            <select name="format" class="select select-bordered select-sm w-full @error('format') select-error @enderror">
+            <select name="format" x-model="format" class="select select-bordered select-sm w-full @error('format') select-error @enderror">
                 @foreach(\Modules\Post\Enums\ArticleFormat::cases() as $f)
                 <option value="{{ $f->value }}" {{ old('format', 'article') === $f->value ? 'selected' : '' }}>{{ $f->label() }}</option>
                 @endforeach
             </select>
             @error('format')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+
+            <div x-show="format === 'redirect'" x-cloak class="mt-3">
+                <label class="label py-0 pb-1.5">
+                    <span class="label-text font-medium">URL đích <span class="text-error">*</span></span>
+                </label>
+                <input type="url" name="redirect_url" value="{{ old('redirect_url') }}"
+                       class="input input-bordered input-sm w-full @error('redirect_url') input-error @enderror"
+                       placeholder="https://nguon-khac.vn/bai-viet-goc">
+                @error('redirect_url')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                <p class="mt-1 text-xs text-base-content/50">Bài viết dạng "Liên kết ngoài" không có nội dung riêng — khi người dùng bấm vào sẽ được chuyển thẳng ra URL này.</p>
+            </div>
         </div>
 
         <div class="form-control">

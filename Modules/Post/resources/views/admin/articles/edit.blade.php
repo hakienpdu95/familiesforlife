@@ -469,7 +469,7 @@ function postVersionHistory(indexUrl, translationStatus, knownLatestId, canResto
             $canManageSponsorship = auth()->user()->can('post_article.manage_sponsorship');
         @endphp
         <form method="POST" action="{{ route('backend.post.articles.update', $article) }}" class="card bg-base-100 shadow-sm border border-base-200"
-              x-data="{ isSponsored: {{ old('is_sponsored', $article->is_sponsored) ? 'true' : 'false' }} }">
+              x-data="{ isSponsored: {{ old('is_sponsored', $article->is_sponsored) ? 'true' : 'false' }}, format: '{{ old('format', $article->format->value) }}' }">
             @csrf
             @method('PUT')
             <div class="card-body p-4">
@@ -477,12 +477,31 @@ function postVersionHistory(indexUrl, translationStatus, knownLatestId, canResto
 
                 <div class="form-control mb-3">
                     <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Định dạng nội dung</span></label>
-                    <select name="format" class="select select-bordered select-sm w-full @error('format') select-error @enderror">
+                    <select name="format" x-model="format" class="select select-bordered select-sm w-full @error('format') select-error @enderror">
                         @foreach(\Modules\Post\Enums\ArticleFormat::cases() as $f)
                         <option value="{{ $f->value }}" {{ old('format', $article->format->value) === $f->value ? 'selected' : '' }}>{{ $f->label() }}</option>
                         @endforeach
                     </select>
                     @error('format')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+
+                    <div x-show="format === 'redirect'" x-cloak class="mt-3">
+                        <label class="label py-0 pb-1.5">
+                            <span class="label-text font-medium">URL đích <span class="text-error">*</span></span>
+                        </label>
+                        <input type="url" name="redirect_url" value="{{ old('redirect_url', $article->redirect_url) }}"
+                               class="input input-bordered input-sm w-full @error('redirect_url') input-error @enderror"
+                               placeholder="https://nguon-khac.vn/bai-viet-goc">
+                        @error('redirect_url')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                        <p class="mt-1 text-xs text-base-content/50">Nội dung soạn bên dưới (nếu có) sẽ không hiển thị công khai — bấm vào bài viết sẽ chuyển thẳng ra URL này.</p>
+                        @if($article->isRedirect())
+                        <a href="{{ route('backend.post.articles.clicks', $article) }}" class="mt-1.5 inline-flex items-center gap-1 text-xs text-primary hover:underline">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                            </svg>
+                            Xem thống kê click ({{ number_format($article->redirectClicks()->count()) }})
+                        </a>
+                        @endif
+                    </div>
                 </div>
 
                 <div class="form-control mb-3">

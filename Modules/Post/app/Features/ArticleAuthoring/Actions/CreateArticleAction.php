@@ -5,6 +5,7 @@ namespace Modules\Post\Features\ArticleAuthoring\Actions;
 use App\Services\Media\MediaUploadService;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
+use Modules\Post\Enums\ArticleFormat;
 use Modules\Post\Features\ArticleAuthoring\Actions\Concerns\SyncsArticleRelations;
 use Modules\Post\Features\ArticleAuthoring\Data\ArticleData;
 use Modules\Post\Models\PostArticle;
@@ -23,6 +24,7 @@ class CreateArticleAction
             $article = PostArticle::create([
                 'main_locale'            => $data->main_locale ?: config('post.default_locale'),
                 'format'                 => $data->format,
+                'redirect_url'           => $data->format === ArticleFormat::Redirect ? $data->redirect_url : null,
                 'is_featured'            => $data->is_featured,
                 'province_code'          => $data->province_code,
                 'ward_code'              => $data->ward_code,

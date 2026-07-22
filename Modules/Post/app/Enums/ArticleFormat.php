@@ -9,6 +9,8 @@ enum ArticleFormat: string
     case Activity   = 'activity';
     case Tip        = 'tip';
     case StepByStep = 'step_by_step';
+    /** Không có nội dung riêng — chỉ dẫn link, click vào là redirect thẳng ra redirect_url. */
+    case Redirect   = 'redirect';
 
     public function label(): string
     {
@@ -18,6 +20,7 @@ enum ArticleFormat: string
             self::Activity   => 'Hoạt động',
             self::Tip        => 'Mẹo hay',
             self::StepByStep => 'Hướng dẫn từng bước',
+            self::Redirect   => 'Liên kết ngoài (redirect)',
         };
     }
 }

@@ -3,8 +3,10 @@
 namespace Modules\Post\Features\PublicReading\Http;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Modules\Post\Features\PublicReading\Actions\IncrementArticleViewCountAction;
+use Modules\Post\Features\PublicReading\Actions\RecordArticleRedirectClickAction;
 use Modules\Post\Models\PostArticleTranslation;
 use Modules\Post\Support\ArticleContentRenderer;
 
@@ -16,8 +18,12 @@ use Modules\Post\Support\ArticleContentRenderer;
  */
 class PublicArticleController extends Controller
 {
-    public function show(string $slug, IncrementArticleViewCountAction $viewAction, ArticleContentRenderer $renderer): View
-    {
+    public function show(
+        string $slug,
+        IncrementArticleViewCountAction $viewAction,
+        RecordArticleRedirectClickAction $clickAction,
+        ArticleContentRenderer $renderer,
+    ): View|RedirectResponse {
         $translation = PostArticleTranslation::published()
             ->where('locale', config('post.default_locale'))
             ->where('slug', $slug)
@@ -31,12 +37,25 @@ class PublicArticleController extends Controller
 
         $viewAction->handle($translation);
 
+        // format=redirect — bài không có nội dung riêng, mọi nơi đang link tới route này
+        // (article-card/hero/hero-story/category/search...) không cần đổi gì, vẫn trỏ vào
+        // đúng route này — chỉ chặn lại NGAY Ở ĐÂY để chuyển thẳng ra redirect_url, thay vì
+        // phải sửa href ở từng nơi hiển thị bài viết. view_count vẫn tăng ở trên (đóng vai
+        // trò tổng số click cộng dồn); ghi thêm 1 dòng post_article_redirect_clicks để có dữ
+        // liệu XU HƯỚNG theo ngày cho trang "Thống kê click" (§ArticleAdminController::clicks()).
+        $article = $translation->article;
+        if ($article?->isRedirect() && $article->redirect_url) {
+            $clickAction->handle($article);
+
+            return redirect()->away($article->redirect_url);
+        }
+
         // Không còn truyền 'categories' — Phase 3 chuyển nav sang MenuItem::tree() qua View
         // Composer (MenuServiceProvider), public.article.blade.php không tự dùng $categories
         // cho việc gì khác (xem spec/Menu_Navigation_Technical_Specification.md §8 Phase 4).
         return view('post::public.article', [
             'translation' => $translation,
-            'article'     => $translation->article,
+            'article'     => $article,
             'locale'      => $translation->locale,
             'content'     => $renderer->render($translation),
         ]);

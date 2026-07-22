@@ -104,6 +104,13 @@
                     <td class="text-sm text-base-content/60">{{ $a->createdBy?->name ?? '—' }}</td>
                     <td>
                         <div class="flex gap-1">
+                            @if($a->isRedirect())
+                            <a href="{{ route('backend.post.articles.clicks', $a) }}" class="btn btn-ghost btn-xs btn-square" title="Thống kê click">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                                </svg>
+                            </a>
+                            @endif
                             @if($canManage)
                             <a href="{{ route('backend.post.articles.edit', $a) }}" class="btn btn-ghost btn-xs btn-square" title="Sửa">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -19,6 +19,8 @@ class ArticleData extends Data
 {
     public function __construct(
         public readonly ArticleFormat $format = ArticleFormat::Article,
+        /** Chỉ có ý nghĩa khi format = redirect — NULL ở mọi format khác (Create/UpdateArticleAction tự null-out). */
+        public readonly ?string $redirect_url = null,
         /**
          * spec/Media_Library_Technical_Specification.md §8 — UUID media FilePond (collection
          * `cover`) chờ gắn vào article vừa tạo — CHỈ dùng ở luồng tạo mới (create form, chưa có
