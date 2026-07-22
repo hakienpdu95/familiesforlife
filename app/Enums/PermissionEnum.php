@@ -150,4 +150,11 @@ enum PermissionEnum: string
     // platform_content_head (PagePermissionSeeder), KHÔNG qua config/permissions.php (Lớp B)
     // — cùng nguyên tắc BANNER_MANAGE/OCOP_MANAGE.
     case PAGE_MANAGE = 'page.manage';
+
+    // ══ CORE IDEA EXTRACTOR (trích xuất dữ liệu thô từ 1 URL bài viết bất kỳ — nghiên cứu ý
+    // tưởng viết bài, không phải nội dung nền tảng) ═══
+    // spec/CoreIdeaExtractor.md — gán cho platform_content_editor + platform_content_head
+    // (CoreIdeaExtractorPermissionSeeder), KHÔNG qua config/permissions.php (Lớp B) — cùng
+    // nguyên tắc BANNER_MANAGE/OCOP_MANAGE/PAGE_MANAGE.
+    case CORE_IDEA_EXTRACTOR_USE = 'core_idea_extractor.use';
 }

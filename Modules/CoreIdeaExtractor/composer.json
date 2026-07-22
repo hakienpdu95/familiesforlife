@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/core-idea-extractor",
+    "description": "",
+    "authors": [
+        {
+            "name": "KienDH",
+            "email": "bonhuyn@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\CoreIdeaExtractor\\": "app/",
+            "Modules\\CoreIdeaExtractor\\Database\\Factories\\": "database/factories/",
+            "Modules\\CoreIdeaExtractor\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\CoreIdeaExtractor\\Tests\\": "tests/"
+        }
+    }
+}

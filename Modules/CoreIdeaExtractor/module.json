@@ -1,0 +1,11 @@
+{
+    "name": "CoreIdeaExtractor",
+    "alias": "core-idea-extractor",
+    "description": "Trích xuất dữ liệu thô ổn định (title/meta/headings/main_content/confidence) từ 1 URL bài viết bất kỳ (spec/CoreIdeaExtractor.md) — chỉ Layer 1, trả JSON, không tích hợp AI Provider.",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\CoreIdeaExtractor\\Providers\\CoreIdeaExtractorServiceProvider"
+    ],
+    "files": []
+}

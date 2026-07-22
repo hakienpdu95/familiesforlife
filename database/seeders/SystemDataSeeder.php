@@ -13,6 +13,7 @@ use Modules\LeadPipelineStage\Database\Seeders\LeadPipelineStageSeeder;
 use Modules\LeadSource\Database\Seeders\LeadSourceSeeder;
 use Modules\Aicem\Database\Seeders\AicemDatabaseSeeder;
 use Modules\Banner\Database\Seeders\BannerDatabaseSeeder;
+use Modules\CoreIdeaExtractor\Database\Seeders\CoreIdeaExtractorDatabaseSeeder;
 use Modules\Event\Database\Seeders\EventDatabaseSeeder;
 use Modules\Event\Database\Seeders\EventDemoSeeder;
 use Modules\Menu\Database\Seeders\MenuDatabaseSeeder;
@@ -128,6 +129,11 @@ class SystemDataSeeder extends Seeder
             // + 4 trang tĩnh mặc định (draft, is_system=true) — spec/Page_Static_Pages_Technical_
             // Specification.md §6/§7 ──
             PageDatabaseSeeder::class,
+
+            // ── 27d. CoreIdeaExtractor: permission core_idea_extractor.use — gán cho
+            // platform_content_editor/platform_content_head (role do ApprovalDatabaseSeeder tạo
+            // ở bước 27), cùng nguyên tắc Banner/Page, PHẢI đứng sau bước đó ──
+            CoreIdeaExtractorDatabaseSeeder::class,
 
             // ── 28. Demo content: bài viết + sự kiện mẫu đã xuất bản (đọc cho trang public) ──
             PostDemoSeeder::class,
