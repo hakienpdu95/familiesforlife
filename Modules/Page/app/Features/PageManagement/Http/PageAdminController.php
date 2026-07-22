@@ -114,6 +114,9 @@ class PageAdminController extends Controller
             'seo_description'   => ['nullable', 'string', 'max:300'],
             'seo_noindex'       => ['boolean'],
             'sort_order'        => ['integer', 'min:0'],
+        ], [
+            'slug.not_in' => 'Đường dẫn này đã được hệ thống sử dụng, vui lòng chọn đường dẫn khác.',
+            'template.in' => 'Thiết kế đã chọn không tồn tại.',
         ]);
     }
 }

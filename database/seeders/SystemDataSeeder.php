@@ -15,7 +15,6 @@ use Modules\Aicem\Database\Seeders\AicemDatabaseSeeder;
 use Modules\Banner\Database\Seeders\BannerDatabaseSeeder;
 use Modules\Event\Database\Seeders\EventDatabaseSeeder;
 use Modules\Event\Database\Seeders\EventDemoSeeder;
-use Modules\ContentBrief\Database\Seeders\ContentBriefDatabaseSeeder;
 use Modules\Menu\Database\Seeders\MenuDatabaseSeeder;
 use Modules\Page\Database\Seeders\PageDatabaseSeeder;
 use Modules\Product\Database\Seeders\ProductDatabaseSeeder;
@@ -144,10 +143,6 @@ class SystemDataSeeder extends Seeder
 
             // ── 29. Menu (header): mega-menu công khai — cần category_id thật (bước 28) ──
             MenuDatabaseSeeder::class,
-
-            // ── 30. Content Brief: permission content_brief.* (Lớp A — ceo/ops duyệt,
-            // marketing soạn thảo) — chỉ cần 8 role gốc (bước 1) + super-admin (bước 3) đã tồn tại ──
-            ContentBriefDatabaseSeeder::class,
         ]);
 
         $this->command->newLine();

@@ -31,6 +31,7 @@
             <directory>Modules/Post/tests/Feature</directory>
             <directory>Modules/Ocop/tests/Feature</directory>
             <directory>Modules/Banner/tests/Feature</directory>
+            <directory>Modules/Page/tests/Feature</directory>
         </testsuite>
     </testsuites>
     <source>

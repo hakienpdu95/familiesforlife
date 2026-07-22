@@ -1,10 +1,17 @@
 {{-- Dùng chung create/edit — spec/Page_Static_Pages_Technical_Specification.md §4.2. --}}
 @php
     $selectedTemplate = old('template', $page?->template ?? 'default');
+    $isPublished = $page && $page->status === \Modules\Page\Enums\PageStatus::Published;
 @endphp
 
 <div class="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6 items-start"
-     x-data="{ template: '{{ $selectedTemplate }}' }">
+     x-data="{
+        template: '{{ $selectedTemplate }}',
+        slug: '{{ old('slug', $page?->slug) }}',
+        originalTemplate: '{{ $page?->template ?? 'default' }}',
+        originalSlug: '{{ $page?->slug }}',
+        isPublished: {{ $isPublished ? 'true' : 'false' }},
+     }">
 
     {{-- ── Card chính ──────────────────────────────────────────────── --}}
     <div class="space-y-5">
@@ -37,11 +44,16 @@
                         </label>
                         <div class="flex items-center gap-1.5">
                             <span class="text-sm text-base-content/40">{{ url('/') }}/</span>
-                            <input type="text" name="slug" id="page-slug" value="{{ old('slug', $page?->slug) }}"
+                            <input type="text" name="slug" id="page-slug" x-model="slug"
+                                   value="{{ old('slug', $page?->slug) }}"
                                    class="input input-bordered input-sm w-full font-mono @error('slug') input-error @enderror"
                                    maxlength="160" placeholder="gioi-thieu">
                         </div>
                         @error('slug')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                        <p class="mt-1.5 text-xs text-warning"
+                           x-show="isPublished && slug !== originalSlug && slug !== ''" x-cloak>
+                            ⚠ Trang đang "Đã xuất bản" — đổi đường dẫn sẽ khiến các liên kết cũ (menu, mạng xã hội, backlink) trỏ tới URL cũ (<span class="font-mono" x-text="'/'+originalSlug"></span>) bị lỗi 404.
+                        </p>
                         @if($page)
                         <div class="mt-2 flex items-center gap-2">
                             <input type="text" readonly value="{{ url('/'.$page->slug) }}"
@@ -67,6 +79,10 @@
                         @error('template')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                         <p class="text-xs text-base-content/40 mt-1.5" x-show="template !== 'default'" x-cloak>
                             Trang này dùng thiết kế riêng do lập trình viên dựng sẵn — nội dung ở khối "Nội dung (WYSIWYG)" bên dưới có thể không hiển thị trực tiếp.
+                        </p>
+                        <p class="mt-1.5 text-xs text-warning"
+                           x-show="isPublished && template !== originalTemplate" x-cloak>
+                            ⚠ Trang đang "Đã xuất bản" — đổi thiết kế sẽ thay đổi cách hiển thị ngay khi lưu. Nếu đổi từ "Mặc định" sang 1 thiết kế riêng, nội dung ở khối WYSIWYG bên dưới sẽ không còn hiển thị (trừ khi template đó có chủ động dùng lại content/excerpt). Nội dung cũ vẫn còn nguyên trong DB, chỉ ngừng hiển thị — đổi lại template như cũ sẽ thấy lại.
                         </p>
                     </div>
 

@@ -14,5 +14,9 @@ return [
         'email', 'profile', 'me', 'auth', 'notifications', 'storage',
         'forgot-password', 'reset-password', 'confirm-password',
         'two-factor-challenge', 'user',
+        // Route gốc của các module khác (rà lại bằng `php artisan route:list --method=GET`
+        // mỗi khi PageReservedSlugsTest báo thiếu — xem §4.1.1):
+        'billing', 'customers', 'dia-phuong', 'leads', 'ocop', 'report', 'su-kien',
+        'event-sitemap.xml', 'post-sitemap.xml',
     ],
 ];

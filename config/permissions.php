@@ -46,9 +46,6 @@ return [
         P::POST_ARTICLE_PUBLISH->value,
         // AICEM: View (full) — xem knowledge base/lịch sử, không tự chạy workflow
         P::AICEM_VIEW->value,
-        // Content Brief: View + Duyệt (không tự soạn thảo — Marketing soạn)
-        P::CONTENT_BRIEF_VIEW->value,
-        P::CONTENT_BRIEF_APPROVE->value,
     ],
 
     R::SALES->value => [
@@ -107,9 +104,6 @@ return [
         P::POST_ARTICLE_PUBLISH->value,
         // AICEM: View (limited) — giống cách Ops xem Sales AI
         P::AICEM_VIEW->value,
-        // Content Brief: View + Duyệt
-        P::CONTENT_BRIEF_VIEW->value,
-        P::CONTENT_BRIEF_APPROVE->value,
     ],
 
     R::MARKETING->value => [
@@ -135,9 +129,6 @@ return [
         P::POST_ARTICLE_DELETE->value,
         // AICEM: Use — người thực chạy workflow khi soạn bài/sản phẩm
         P::AICEM_USE->value,
-        // Content Brief: Soạn thảo/Gửi duyệt/Yêu cầu sinh nội dung (CEO/Ops duyệt)
-        P::CONTENT_BRIEF_VIEW->value,
-        P::CONTENT_BRIEF_MANAGE->value,
     ],
 
     R::HR->value => [
@@ -228,10 +219,6 @@ return [
         P::MENU_MANAGE->value,
         // AICEM: Config — provider, API key, hạn mức chi phí theo Organization
         P::AICEM_CONFIG->value,
-        // Content Brief: Full (soạn thảo + duyệt)
-        P::CONTENT_BRIEF_VIEW->value,
-        P::CONTENT_BRIEF_MANAGE->value,
-        P::CONTENT_BRIEF_APPROVE->value,
     ],
 
     R::VIEWER->value => [
