@@ -1,0 +1,46 @@
+@extends('layouts.backend')
+@section('title', 'Đánh dấu tin nóng')
+
+@section('content')
+
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-2xl font-bold text-base-content">Đánh dấu tin nóng</h1>
+        <p class="text-sm text-base-content/50 mt-0.5">Chọn 1 bài viết đã xuất bản để ghim vào dải ticker đầu trang chủ</p>
+    </div>
+    <a href="{{ route('backend.post.breaking-news.items.index') }}" class="btn btn-ghost btn-sm gap-1.5">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        Quay lại
+    </a>
+</div>
+
+@if($errors->any())
+<div class="alert alert-error py-3 px-4 mb-5 flex items-start gap-3 text-sm">
+    <svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+    </svg>
+    <div>
+        <p class="font-semibold">Có {{ $errors->count() }} lỗi cần kiểm tra:</p>
+        <ul class="mt-1.5 list-disc list-inside space-y-0.5 text-xs opacity-90">
+            @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
+        </ul>
+    </div>
+</div>
+@endif
+
+<form method="POST" action="{{ route('backend.post.breaking-news.items.store') }}" novalidate>
+    @csrf
+    @include('post::admin.breaking-news._form', ['breakingNews' => null])
+</form>
+
+@endsection
+
+@push('scripts')
+    @vite([
+        'resources/js/modules/tom-select.js',
+        'resources/js/modules/flatpickr.js',
+        'Modules/Post/resources/assets/js/post.js',
+    ], 'build/backend')
+@endpush

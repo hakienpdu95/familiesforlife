@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use Modules\Post\Features\ArticleAuthoring\Http\ArticleAdminController;
 use Modules\Post\Features\ArticleAuthoring\Http\ArticleApiController;
 use Modules\Post\Features\ArticleAuthoring\Http\TranslationController;
+use Modules\Post\Features\BreakingNews\Http\BreakingNewsAdminController;
+use Modules\Post\Features\BreakingNews\Http\BreakingNewsApiController;
+use Modules\Post\Features\BreakingNews\Http\BreakingNewsPublicController;
 use Modules\Post\Features\CategoryManagement\Http\CategoryAdminController;
 use Modules\Post\Features\CategoryManagement\Http\CategoryApiController;
 use Modules\Post\Features\PublicReading\Http\ProductBlockClickController;
@@ -80,6 +83,21 @@ Route::middleware(['auth'])->prefix('backend/api/post')->name('backend.api.post.
     Route::get('tags', [TagApiController::class, 'index'])->name('tags');
 });
 
+// ── Breaking News — spec/Breaking_News_Ticker_Technical_Specification.md §6.1 ───────────────
+Route::middleware(['auth'])->prefix('dashboard/breaking-news')->name('backend.post.breaking-news.')
+    ->group(function (): void {
+        Route::resource('items', BreakingNewsAdminController::class)->except(['show'])
+            ->parameters(['items' => 'breakingNews']);
+    });
+
+Route::middleware(['auth'])->prefix('backend/api/breaking-news')->name('backend.api.breaking-news.')
+    ->group(function (): void {
+        Route::get('items', [BreakingNewsApiController::class, 'index'])->name('items');
+        // §6.2 — autocomplete "chọn bài viết" (TomSelect remote), gated breaking_news.manage
+        // (KHÔNG dùng lại backend.api.post.articles — xem docblock searchArticles()).
+        Route::get('articles/search', [BreakingNewsApiController::class, 'searchArticles'])->name('articles.search');
+    });
+
 // ── Click tracking CTA (public — không yêu cầu đăng nhập) ──────────────────
 Route::get('posts/cta/{button}', [ProductBlockClickController::class, 'redirect'])->name('post.cta.redirect');
 
@@ -96,6 +114,10 @@ Route::get('posts/cta/{button}', [ProductBlockClickController::class, 'redirect'
 // nội bộ. Trang chủ đăng ký thẳng tại domain gốc ('/'), không phải '/bai-viet' — tránh 2 URL
 // cùng phục vụ 1 nội dung (trùng lặp SEO).
 Route::get('post-sitemap.xml', [SitemapController::class, 'index'])->name('post.public.sitemap');
+
+// spec/Breaking_News_Ticker_Technical_Specification.md §7.4 — polling JSON công khai, ticker
+// tự gọi định kỳ (config('post.breaking_news.poll_seconds')) để cập nhật không cần F5.
+Route::get('tin-nong/hien-tai', [BreakingNewsPublicController::class, 'current'])->name('post.public.breaking-news.current');
 
 Route::get('/', [PublicCategoryController::class, 'index'])->name('post.public.home');
 

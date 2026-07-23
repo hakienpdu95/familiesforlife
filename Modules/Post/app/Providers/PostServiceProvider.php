@@ -12,9 +12,11 @@ use Modules\Post\Jobs\PruneArticleViewEventsJob;
 use Modules\Post\Jobs\PublishDueTranslationsJob;
 use Modules\Post\Models\PostArticle;
 use Modules\Post\Models\PostArticleTranslation;
+use Modules\Post\Models\PostBreakingNews;
 use Modules\Post\Models\PostCategory;
 use Modules\Post\Models\PostTag;
 use Modules\Post\Policies\PostArticlePolicy;
+use Modules\Post\Policies\PostBreakingNewsPolicy;
 use Modules\Post\Policies\PostCategoryPolicy;
 use Modules\Post\Policies\PostTagPolicy;
 use Nwidart\Modules\Support\ModuleServiceProvider;
@@ -40,6 +42,10 @@ class PostServiceProvider extends ModuleServiceProvider
         // dưới vì các method đó giờ nhận PostArticleTranslation (spec §8).
         Gate::policy(PostArticle::class, PostArticlePolicy::class);
         Gate::policy(PostArticleTranslation::class, PostArticlePolicy::class);
+        // spec/Breaking_News_Ticker_Technical_Specification.md §6.3 — KHÔNG có job dọn dẹp nào
+        // (tin hết hạn tự biến mất qua scopeActive()/isCurrentlyBreaking(), cùng nguyên tắc
+        // Banner — xem §0 "Job dọn dẹp định kỳ").
+        Gate::policy(PostBreakingNews::class, PostBreakingNewsPolicy::class);
 
         $this->commands([
             BackfillPostTranslationsCommand::class,

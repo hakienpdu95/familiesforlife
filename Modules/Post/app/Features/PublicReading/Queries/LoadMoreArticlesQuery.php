@@ -28,5 +28,8 @@ class LoadMoreArticlesQuery implements QueryInterface
         /** @var int[] */
         public readonly array $excludeArticleIds = [],
         public readonly int $limit = 8,
+        // spec: "Xem thêm bài viết" theo danh mục (danh-muc/{slug}) — tái dùng đúng query này
+        // (cùng cursor/limit) thay vì viết riêng, chỉ thêm 1 điều kiện lọc category khi có.
+        public readonly ?int $categoryId = null,
     ) {}
 }

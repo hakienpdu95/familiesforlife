@@ -33,6 +33,8 @@
 
 @section('content')
 
+<x-frontend.breaking-news-ticker :items="$breakingNews" />
+
 @if($featured)
 <x-frontend.hero :featured="$featured" :side="$heroSide" />
 @endif

@@ -57,6 +57,10 @@ Route::prefix('su-kien')->group(function (): void {
     Route::get('/', [PublicEventController::class, 'index'])->name('event.public.home');
     Route::get('danh-muc/{category:slug}', [PublicEventController::class, 'category'])->name('event.public.category');
 
+    // "Xem thêm sự kiện" (load-more, Alpine) — cùng mẫu 'tai-them' của Post
+    // (Modules/Post/routes/web.php, route post.public.load-more).
+    Route::get('tai-them', [PublicEventController::class, 'loadMore'])->name('event.public.load-more');
+
     Route::prefix('gui-su-kien')->name('event.public.submit.')->group(function (): void {
         Route::get('/', [EventSubmissionController::class, 'create'])->name('form');
         Route::post('/', [EventSubmissionController::class, 'store'])

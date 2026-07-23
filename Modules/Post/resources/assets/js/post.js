@@ -17,3 +17,5 @@ import './pages/article-index.js';
 import './pages/category-form.js';
 import './pages/category-index.js';
 import './pages/tag-index.js';
+import './pages/breaking-news-form.js';
+import './pages/breaking-news-index.js';

@@ -40,6 +40,12 @@ export default defineConfig(({ mode }) => {
           'resources/js/modules/tom-select.js',
           'resources/js/modules/flatpickr.js',
 
+          // spec/Breaking_News_Ticker_Technical_Specification.md — hiệu ứng trượt ngang cho
+          // dải "tin nóng" trang chủ. Lazy — chỉ @vite ở chính component ticker (resources/
+          // views/components/frontend/breaking-news-ticker.blade.php), KHÔNG load site-wide
+          // (component tự @push khi $items rỗng thì không render gì, không load JS thừa).
+          'resources/js/modules/swiper.js',
+
           // Event public submission form
           'Modules/Event/resources/assets/js/event-public.js',
         ],
@@ -96,6 +102,7 @@ export default defineConfig(({ mode }) => {
           },
           manualChunks(id) {
             if (id.includes('node_modules/alpinejs')) return 'vendor-alpine';
+            if (id.includes('node_modules/swiper')) return 'vendor-swiper';
           },
         },
       },

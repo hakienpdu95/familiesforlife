@@ -215,6 +215,18 @@
         </div>
         @endcan
 
+        {{-- spec/Breaking_News_Ticker_Technical_Specification.md §6.3 — breaking_news.manage
+             cấp cho platform_ops/platform_content_head (Modules\Post\Database\Seeders\BreakingNewsPermissionSeeder). --}}
+        @can(\App\Enums\PermissionEnum::BREAKING_NEWS_MANAGE->value)
+        <div class="nav-group">
+            <a href="{{ route('backend.post.breaking-news.items.index') }}"
+               class="nav-link {{ request()->routeIs('backend.post.breaking-news.items.*') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                <span class="nav-label">Tin nóng</span>
+            </a>
+        </div>
+        @endcan
+
         {{-- spec/Page_Static_Pages_Technical_Specification.md §7 — page.manage cấp cho
              platform_ops/platform_content_head (Modules\Page\Database\Seeders\PagePermissionSeeder). --}}
         @can(\App\Enums\PermissionEnum::PAGE_MANAGE->value)

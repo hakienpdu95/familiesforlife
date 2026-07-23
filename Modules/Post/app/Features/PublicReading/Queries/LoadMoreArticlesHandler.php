@@ -22,6 +22,11 @@ class LoadMoreArticlesHandler implements QueryHandlerInterface
             $q->whereNotIn('article_id', $query->excludeArticleIds);
         }
 
+        if ($query->categoryId) {
+            $categoryId = $query->categoryId;
+            $q->whereHas('article.categories', fn ($sub) => $sub->where('post_categories.id', $categoryId));
+        }
+
         // Keyset/cursor — cùng thứ tự orderByDesc(published_at)->orderByDesc(id) bên dưới,
         // "id" phá thế hoà khi nhiều bài trùng published_at (dữ liệu demo publish hàng loạt
         // cùng lúc — không có nó, LIMIT có thể lặp/bỏ sót dòng giữa 2 lần gọi kế tiếp).

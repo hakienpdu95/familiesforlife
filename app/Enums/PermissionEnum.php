@@ -157,4 +157,10 @@ enum PermissionEnum: string
     // (CoreIdeaExtractorPermissionSeeder), KHÔNG qua config/permissions.php (Lớp B) — cùng
     // nguyên tắc BANNER_MANAGE/OCOP_MANAGE/PAGE_MANAGE.
     case CORE_IDEA_EXTRACTOR_USE = 'core_idea_extractor.use';
+
+    // ══ BREAKING NEWS (Tin nóng/tin chạy ghim đầu trang chủ — tài sản nền tảng) ═══
+    // spec/Breaking_News_Ticker_Technical_Specification.md §6.3 — gán cho platform_ops +
+    // platform_content_head (BreakingNewsPermissionSeeder), KHÔNG qua config/permissions.php
+    // (Lớp B) — cùng nguyên tắc BANNER_MANAGE/OCOP_MANAGE/PAGE_MANAGE/CORE_IDEA_EXTRACTOR_USE.
+    case BREAKING_NEWS_MANAGE = 'breaking_news.manage';
 }

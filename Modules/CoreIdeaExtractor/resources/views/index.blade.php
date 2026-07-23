@@ -16,25 +16,48 @@
 
     <div class="card bg-base-100 shadow-sm border border-base-200 mb-4">
         <div class="card-body py-4 px-5">
-            <form @submit.prevent="submit()" class="flex flex-wrap gap-3 items-end">
-                <div class="form-control flex-1 min-w-72">
-                    <label class="label py-0.5"><span class="label-text text-xs font-medium">URL bài viết</span></label>
-                    <input type="url" x-model="url" required placeholder="https://..."
-                           class="input input-sm input-bordered w-full">
+            <div class="tabs tabs-boxed tabs-xs w-fit mb-3">
+                <button type="button" class="tab" :class="{ 'tab-active': mode === 'url' }" @click="mode = 'url'">Nhập URL</button>
+                <button type="button" class="tab" :class="{ 'tab-active': mode === 'html' }" @click="mode = 'html'">Dán mã HTML</button>
+            </div>
+
+            <form @submit.prevent="submit()" class="flex flex-col gap-3">
+                <div class="flex flex-wrap gap-3 items-end">
+                    <div class="form-control flex-1 min-w-72" x-show="mode === 'url'">
+                        <label class="label py-0.5"><span class="label-text text-xs font-medium">URL bài viết</span></label>
+                        <input type="url" x-model="url" :required="mode === 'url'" placeholder="https://..."
+                               class="input input-sm input-bordered w-full">
+                    </div>
+                    <div class="form-control flex-1 min-w-72">
+                        <label class="label py-0.5">
+                            <span class="label-text text-xs font-medium">Selector vùng nội dung chính (tùy chọn)</span>
+                        </label>
+                        <input type="text" x-model="contentSelector" placeholder=".detail-content, #main-content..."
+                               class="input input-sm input-bordered w-full">
+                    </div>
                 </div>
-                <div class="form-control flex-1 min-w-72">
-                    <label class="label py-0.5">
-                        <span class="label-text text-xs font-medium">Selector vùng nội dung chính (tùy chọn)</span>
-                    </label>
-                    <input type="text" x-model="contentSelector" placeholder=".detail-content, #main-content..."
-                           class="input input-sm input-bordered w-full">
+
+                <div class="form-control" x-show="mode === 'html'" x-cloak>
+                    <label class="label py-0.5"><span class="label-text text-xs font-medium">Mã HTML</span></label>
+                    <textarea x-model="html" :required="mode === 'html'" rows="8"
+                              placeholder="Dán mã nguồn trang (View Source / Ctrl+U), hoặc chỉ đoạn HTML trong khối nội dung chính (VD &lt;div class=&quot;post__content&quot;&gt;...&lt;/div&gt;)..."
+                              class="textarea textarea-bordered textarea-sm w-full font-mono text-xs"></textarea>
+                    <p class="text-xs text-base-content/40 mt-1">
+                        Dùng khi trang chặn crawl tự động (lỗi HTTP 403 — bot protection/WAF). Dán CẢ trang (View Source) để lấy đủ
+                        title/meta/ngôn ngữ; nếu chỉ dán riêng 1 khối nội dung (VD <code>div.post__content</code>) thì vẫn lấy được
+                        <code>main_content</code>/<code>headings</code> bình thường, nhưng title/meta_description/author sẽ trống vì
+                        không có <code>&lt;head&gt;</code> trong đoạn dán.
+                    </p>
                 </div>
-                <button type="submit" class="btn btn-primary btn-sm gap-1.5" :disabled="loading">
-                    <span x-show="!loading">Trích xuất</span>
-                    <span x-show="loading" x-cloak>Đang xử lý...</span>
-                </button>
+
+                <div>
+                    <button type="submit" class="btn btn-primary btn-sm gap-1.5" :disabled="loading">
+                        <span x-show="!loading">Trích xuất</span>
+                        <span x-show="loading" x-cloak>Đang xử lý...</span>
+                    </button>
+                </div>
             </form>
-            <p class="text-xs text-base-content/40 mt-2">
+            <p class="text-xs text-base-content/40 mt-2" x-show="mode === 'url'">
                 Chỉ định id hoặc class của khối chứa nội dung chính (VD <code>.detail-content</code>, <code>#main-content</code>,
                 <code>div.article-body</code>) để lấy <code>main_content</code> chính xác hơn thuật toán tự động. Có thể liệt kê
                 nhiều selector, phân tách bởi dấu phẩy — hệ thống thử lần lượt, dùng selector đầu tiên khớp. Bỏ trống để dùng
@@ -76,7 +99,9 @@ document.addEventListener('alpine:init', () => {
         const { apiUrl = '' } = serverData;
 
         return {
+            mode: 'url',
             url: '',
+            html: '',
             contentSelector: '',
             loading: false,
             result: null,
@@ -100,7 +125,8 @@ document.addEventListener('alpine:init', () => {
                             'Accept':            'application/json',
                         },
                         body: JSON.stringify({
-                            url: this.url,
+                            url: this.mode === 'url' ? this.url : null,
+                            html: this.mode === 'html' ? this.html : null,
                             main_content_selector: this.contentSelector || null,
                         }),
                     });
@@ -108,7 +134,10 @@ document.addEventListener('alpine:init', () => {
                     const data = await res.json().catch(() => ({}));
 
                     if (!res.ok) {
-                        this.errorMessage = data.message || data.errors?.url?.[0] || 'Có lỗi xảy ra, vui lòng thử lại.';
+                        this.errorMessage = data.message
+                            || data.errors?.url?.[0]
+                            || data.errors?.html?.[0]
+                            || 'Có lỗi xảy ra, vui lòng thử lại.';
                         return;
                     }
 

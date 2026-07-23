@@ -917,3 +917,10 @@
 .banner-slot__link { position: relative; display: block; }
 .banner-slot__img { display: block; width: 100%; height: auto; border-radius: var(--radius-box, .75rem); }
 .banner-slot__badge { position: absolute; top: .5rem; left: .5rem; z-index: 10; text-transform: uppercase; }
+
+/* ══════════════════════════════════════════════════════════════════
+ * breaking-news-ticker — resources/js/frontend.js initBreakingNewsTicker(). slidesPerView:
+ * 'auto' nên mỗi .swiper-slide phải tự co theo nội dung (không bị Swiper/Tailwind ép width
+ * bằng nhau) — tiêu đề dài hiển thị TRỌN VẸN trên 1 hàng, không cắt "...", không marquee.
+ * ══════════════════════════════════════════════════════════════════ */
+#breaking-news-ticker .swiper-slide { width: auto; }

@@ -33,7 +33,7 @@ class PublicArticleController extends Controller
             ->where('locale', config('post.default_locale'))
             ->where('slug', $slug)
             ->with([
-                'article.categories', 'article.tags',
+                'article.categories', 'article.tags', 'article.createdBy',
                 'contentBlocks.productBlock.items.product', 'contentBlocks.productBlock.items.buttons', 'contentBlocks.productBlock.buttons',
             ])
             ->first();

@@ -28,6 +28,13 @@ return [
         'user_agent'        => 'CoreIdeaExtractorBot/1.0 (+internal content research tool)',
     ],
 
+    // Mã HTML người dùng dán tay trực tiếp (khi trang chặn crawl tự động — 403/bot protection)
+    // — chặn ký tự tối đa để tránh payload quá lớn (không đi qua HTTP nên không dùng chung cap
+    // 'fetch.max_content_bytes' theo byte; đây tính theo ký tự vì là input dạng string từ form).
+    'paste' => [
+        'max_chars' => 2_000_000,
+    ],
+
     // Cắt main_content trả về JSON để tránh payload quá lớn khi bài viết rất dài — 20000 từng
     // cắt cụt cả bài viết bình thường (VD 1 bài ~3000 từ, 21596 ký tự đã bị cắt mất đoạn cuối),
     // nên nới lên mức chỉ chặn được trường hợp cực đoan (content root chọn nhầm nguyên trang).

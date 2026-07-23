@@ -7,6 +7,17 @@
 <link rel="canonical" href="{{ route('event.public.home') }}">
 @endpush
 
+@php
+    // "Tin to" + "Xem thêm sự kiện" (load-more) chỉ áp dụng trang 1/không tìm kiếm — cùng
+    // nguyên tắc danh-muc/{slug} của Post (public/category.blade.php).
+    $isMagazine    = ! $search && $events->currentPage() === 1;
+    $collection    = $events->getCollection();
+    $shownEventIds = $isMagazine
+        ? $collection->pluck('id')->when($lead, fn ($ids) => $ids->push($lead->id))->values()
+        : collect();
+    $lastEvent = $isMagazine ? $collection->last() : null;
+@endphp
+
 @section('content')
 
 @if($eventCategories->isNotEmpty())
@@ -33,7 +44,41 @@
                    class="input input-bordered input-sm w-full sm:w-72">
         </form>
 
+        @if($lead)
+        <div class="mb-8">
+            <x-frontend.event-card :event="$lead" size="lg" />
+        </div>
+        @endif
+
+        @if($isMagazine)
+        <div x-data="loadMoreEvents({
+                 endpoint: '{{ route('event.public.load-more') }}',
+                 exclude: '{{ $shownEventIds->implode(',') }}',
+                 afterStartDate: {{ $lastEvent ? "'".$lastEvent->start_date->toDateString()."'" : 'null' }},
+                 afterId: {{ $lastEvent?->id ?? 'null' }},
+                 loaded: {{ $shownEventIds->count() }},
+                 maxTotal: {{ config('event.load_more_max_total') }},
+                 hasMore: {{ ($events->hasMorePages() && $shownEventIds->count() < config('event.load_more_max_total')) ? 'true' : 'false' }},
+                 limit: 12,
+             })">
+            <section class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6" x-ref="grid">
+                @forelse($collection as $event)
+                <x-frontend.event-card :event="$event" size="sm" />
+                @empty
+                <p class="col-span-full text-center text-base-content/40 py-10">Chưa có sự kiện nào sắp diễn ra.</p>
+                @endforelse
+            </section>
+
+            <div class="pt-10 flex justify-center" x-show="hasMore" x-cloak>
+                <button type="button" class="btn btn-primary" @click="loadMore()" :disabled="loading">
+                    <span x-show="!loading">Xem thêm sự kiện</span>
+                    <span x-show="loading" x-cloak>Đang tải...</span>
+                </button>
+            </div>
+        </div>
+        @else
         <x-frontend.event-grid :events="$events" />
+        @endif
     </div>
 </div>
 @endsection

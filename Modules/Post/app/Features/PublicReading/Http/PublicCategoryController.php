@@ -12,6 +12,7 @@ use Modules\Post\Features\PublicReading\Queries\ListPublishedArticlesQuery;
 use Modules\Post\Features\PublicReading\Queries\LoadMoreArticlesHandler;
 use Modules\Post\Features\PublicReading\Queries\LoadMoreArticlesQuery;
 use Modules\Post\Models\PostArticleTranslation;
+use Modules\Post\Models\PostBreakingNews;
 use Modules\Post\Models\PostCategory;
 
 /**
@@ -64,16 +65,24 @@ class PublicCategoryController extends Controller
 
         $categories = PostCategory::navTree();
 
-        return view('post::public.home', compact('articles', 'categories', 'locale', 'featured', 'heroSide', 'upcomingEvents', 'search'));
+        // spec/Breaking_News_Ticker_Technical_Specification.md §7.1 — loại trừ khi đang tìm
+        // kiếm, cùng cách $featured bị đặt null khi $search (§0 "Vị trí hiển thị" — chỉ trang chủ).
+        $breakingNews = $search ? collect() : PostBreakingNews::currentList(
+            (int) config('post.breaking_news.max_ticker_items', 8)
+        );
+
+        return view('post::public.home', compact('articles', 'categories', 'locale', 'featured', 'heroSide', 'upcomingEvents', 'search', 'breakingNews'));
     }
 
     /**
-     * "Xem thêm bài viết" — khối lưới cuối trang chủ (Modules/Post/resources/views/public/
-     * home.blade.php), gọi qua Alpine (resources/js/frontend.js `loadMoreArticles`). Trả JSON
-     * (html đã render + has_more) thay vì điều hướng trang.
+     * "Xem thêm bài viết" — dùng chung cho khối lưới cuối trang chủ VÀ khối lưới trang danh
+     * mục (Modules/Post/resources/views/public/{home,category}.blade.php), gọi qua Alpine
+     * (resources/js/frontend.js `loadMoreArticles`). Trả JSON (html đã render + has_more) thay
+     * vì điều hướng trang.
      *
      * Cursor (after_published_at/after_id) thay offset — xem LoadMoreArticlesQuery. exclude
-     * chỉ gồm bài hero + feature chunks (cố định, không phình theo số lần bấm).
+     * chỉ gồm bài hero + feature chunks (cố định, không phình theo số lần bấm). `category_id`
+     * (tuỳ chọn) — có khi gọi từ trang danh mục, lọc thêm đúng danh mục đó.
      *
      * `loaded` (tổng số bài phía client đã hiển thị, gồm hero+feature+lưới) cho phép chặn
      * SỚM ở đây khi đã chạm LOAD_MORE_MAX_TOTAL — trả về ngay, KHÔNG chạm DB — vừa là giới
@@ -95,14 +104,19 @@ class PublicCategoryController extends Controller
             ->values()
             ->all();
 
+        // 'limit' tuỳ chọn — trang chủ không gửi (mặc định 8, giữ nguyên hành vi cũ), trang
+        // danh mục gửi 12 (đúng số bài/trang ban đầu, xem category.blade.php). min(24, ...):
+        // giới hạn cứng phía server bất kể client gửi gì, chống bị sửa request thủ công.
+        $requestedLimit = $request->filled('limit') ? $request->integer('limit') : 8;
+        $limit          = min(24, max(1, $requestedLimit), $remaining);
+
         $result = $handler->handle(new LoadMoreArticlesQuery(
             locale: config('post.default_locale'),
             afterPublishedAt: $request->string('after_published_at')->value() ?: null,
             afterId: $request->filled('after_id') ? $request->integer('after_id') : null,
             excludeArticleIds: $excludeArticleIds,
-            // min(8, ...): giới hạn cứng phía server — client không thể yêu cầu 1 lần tải hơn
-            // 8 bài dù có sửa request thủ công.
-            limit: min(8, $remaining),
+            limit: $limit,
+            categoryId: $request->filled('category_id') ? $request->integer('category_id') : null,
         ));
 
         $articles = $result['articles'];
@@ -146,12 +160,22 @@ class PublicCategoryController extends Controller
     {
         $locale = config('post.default_locale');
         $search = $request->string('q')->trim()->value() ?: null;
+        $page   = max(1, $request->integer('page', 1));
+        $isMagazine = ! $search && $page === 1;
+
+        // "Tin to" (size=lg) — ưu tiên bài is_featured=true CỦA ĐÚNG danh mục này (mới nhất
+        // trong số is_featured nếu có nhiều); không có bài nào is_featured thì fallback dùng
+        // bài published mới nhất của danh mục — LUÔN tách riêng khỏi truy vấn lưới bên dưới
+        // (loại qua excludeArticleIds), không "bóc" từ đầu danh sách như trước, nên lưới luôn
+        // đủ đúng 12 bài bất kể tin to lấy từ đâu.
+        $lead = $isMagazine ? $this->leadArticleForCategory($locale, $category->id) : null;
 
         $articles = $handler->handle(new ListPublishedArticlesQuery(
             locale: $locale,
-            page: max(1, $request->integer('page', 1)),
+            page: $page,
             categoryId: $category->id,
             search: $search,
+            excludeArticleIds: $lead ? [$lead->article_id] : [],
         ));
 
         $breadcrumb = collect();
@@ -164,6 +188,33 @@ class PublicCategoryController extends Controller
         // Không còn truyền 'categories' — Phase 3 chuyển nav sang MenuItem::tree() qua View
         // Composer (MenuServiceProvider), public.category.blade.php không tự dùng $categories
         // cho việc gì khác (xem spec/Menu_Navigation_Technical_Specification.md §8 Phase 4).
-        return view('post::public.category', compact('articles', 'category', 'breadcrumb', 'locale', 'search'));
+        return view('post::public.category', compact('articles', 'category', 'breadcrumb', 'locale', 'search', 'lead'));
+    }
+
+    private function leadArticleForCategory(string $locale, int $categoryId): ?PostArticleTranslation
+    {
+        // orderByDesc('id') phá thế hoà khi nhiều bài is_featured trùng published_at (tới từng
+        // giây) — hay gặp với dữ liệu seed hàng loạt (nhiều bài publish cùng lúc bằng
+        // now()->subDay()). Không có tiêu chí phụ, thứ tự sẽ không xác định giữa các lần query.
+        $featured = PostArticleTranslation::published()
+            ->where('locale', $locale)
+            ->whereHas('article', fn ($q) => $q->where('is_featured', true)
+                ->whereHas('categories', fn ($c) => $c->where('post_categories.id', $categoryId)))
+            ->with(['article.categories', 'article.createdBy'])
+            ->orderByDesc('published_at')
+            ->orderByDesc('id')
+            ->first();
+
+        if ($featured) {
+            return $featured;
+        }
+
+        return PostArticleTranslation::published()
+            ->where('locale', $locale)
+            ->whereHas('article', fn ($q) => $q->whereHas('categories', fn ($c) => $c->where('post_categories.id', $categoryId)))
+            ->with(['article.categories', 'article.createdBy'])
+            ->orderByDesc('published_at')
+            ->orderByDesc('id')
+            ->first();
     }
 }

@@ -43,4 +43,14 @@ return [
             'popularity'           => 8,  // nhân với log10(1 + view_count) — điểm phụ/tie-break, KHÔNG để 1 bài cực hot thắng mọi bài mới đúng chủ đề hơn
         ],
     ],
+
+    // spec/Breaking_News_Ticker_Technical_Specification.md — dải ticker "tin nóng" ghim đầu
+    // trang chủ.
+    'breaking_news' => [
+        'max_ticker_items'       => 8,   // tối đa số tin trong vòng xoay (thừa thì không hiển thị, không lỗi)
+        'rotate_seconds'         => 5,   // mỗi tiêu đề hiện bao lâu trước khi chuyển sang tiêu đề kế tiếp
+        'poll_seconds'           => 60,  // tần suất ticker tự kiểm tra danh sách mới qua JSON (§7.3)
+        'default_badge_label'    => 'NÓNG',
+        'default_duration_hours' => 48, // chỉ gợi ý prefill ends_at trên form admin, KHÔNG ép validate
+    ],
 ];

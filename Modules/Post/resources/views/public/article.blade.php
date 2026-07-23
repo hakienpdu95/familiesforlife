@@ -39,11 +39,18 @@
     </div>
     @endif
 
-    <span class="text-xs font-black uppercase tracking-wide text-primary">
-        {{ $article->categories->first()?->name }}
-    </span>
-    <h1 class="text-3xl font-bold text-base-content mt-1 mb-2">{{ $translation->title }}</h1>
-    <p class="text-sm text-secondary font-semibold mb-4">{{ $translation->published_at?->format('d/m/Y') }}</p>
+    {{-- Bố cục đầu bài căn giữa (badge danh mục + tiêu đề + tác giả/ngày đăng) — tham khảo
+         giao diện spec/page-detail, giữ nguyên màu/font theo theme hiện tại của site, không
+         đổi bộ nhận diện thương hiệu. --}}
+    <div class="text-center mb-4">
+        <span class="text-xs font-black uppercase tracking-wide text-primary">
+            {{ $article->categories->first()?->name }}
+        </span>
+        <h1 class="text-3xl font-bold text-base-content mt-1 mb-2">{{ $translation->title }}</h1>
+        <p class="text-sm text-secondary font-semibold">
+            Bởi {{ $article->createdBy?->name ?? 'Ban biên tập' }} · {{ $translation->published_at?->format('d/m/Y') }}
+        </p>
+    </div>
 
     @if($article->categories->isNotEmpty())
     <div class="flex flex-wrap gap-1.5 mb-4">

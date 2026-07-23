@@ -25,7 +25,49 @@ class GetRelatedArticlesHandler implements QueryHandlerInterface
         $ttlHours = (int) config('post.related_posts.cache_ttl_hours', 6);
         $cacheKey = "related_posts:{$query->articleId}:{$query->locale}:{$query->limit}";
 
-        return Cache::remember($cacheKey, now()->addHours($ttlHours), fn () => $this->compute($query));
+        // Cache CHỈ mảng translation_id (int[] phẳng), KHÔNG cache thẳng Collection Eloquent
+        // (model + relation lồng nhau article->categories/tags...) — cache store 'database' dùng
+        // PHP serialize()/unserialize() thô, RẤT dễ vỡ nếu shape class đổi giữa lúc ghi cache và
+        // lúc đọc (deploy mới, sửa model, đổi migration...): unserialize() khi đó có thể trả về
+        // __PHP_Incomplete_Class thay vì object thật, gây TypeError ngay tại khai báo return type
+        // của hàm này (đã gặp thật trong lúc phát triển). Mảng số nguyên thuần luôn
+        // serialize/unserialize đúng bất kể model đổi thế nào — đánh đổi 1 câu query nhẹ theo
+        // khoá chính ở hydrate() (kể cả khi cache hit) để lấy sự bền vững đó, đồng thời tự "lành"
+        // nếu 1 id trong cache đã bị unpublish/xoá giữa chừng (§5.5 tinh thần luôn trả kết quả
+        // đúng, không phải dữ liệu cache có thể đã lỗi thời).
+        $translationIds = Cache::remember(
+            $cacheKey,
+            now()->addHours($ttlHours),
+            fn () => $this->compute($query)->pluck('id')->all(),
+        );
+
+        return $this->hydrate($translationIds, $query->locale);
+    }
+
+    /**
+     * Truy vấn lại model thật theo đúng thứ tự id đã cache — whereIn() không đảm bảo thứ tự nên
+     * phải tự sắp lại theo $translationIds; lọc bỏ id không còn published (đã unpublish/xoá).
+     *
+     * @param int[] $translationIds
+     * @return Collection<int, PostArticleTranslation>
+     */
+    private function hydrate(array $translationIds, string $locale): Collection
+    {
+        if ($translationIds === []) {
+            return collect();
+        }
+
+        $translations = PostArticleTranslation::published()
+            ->where('locale', $locale)
+            ->whereIn('id', $translationIds)
+            ->with(['article.categories', 'article.tags'])
+            ->get()
+            ->keyBy('id');
+
+        return collect($translationIds)
+            ->map(fn (int $id) => $translations->get($id))
+            ->filter()
+            ->values();
     }
 
     /** @return Collection<int, PostArticleTranslation> */
