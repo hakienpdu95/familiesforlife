@@ -59,18 +59,31 @@ class ExtractRawContentAction
         'table', 'tr', 'td', 'th', 'pre',
     ];
 
-    /** @return array{title:?string, meta_description:?string, headings:HeadingData[], main_content:string, publish_date:?string, author:?string, language:string, word_count:int, meaningful_heading_count:int, paywall_suspected:bool} */
-    public function handle(string $html): array
+    /**
+     * @param string|null $mainContentSelector Selector đơn giản (id/class, kiểu ".detail-content",
+     * "#main-content", có thể kèm tag như "div.detail-content") do người dùng chỉ định để khoanh
+     * vùng main_content thay cho thuật toán tự động resolveContentRoot(). Null/rỗng → tự động.
+     * @return array{title:?string, meta_description:?string, keywords:string[], headings:HeadingData[], main_content:string, publish_date:?string, author:?string, language:string, word_count:int, meaningful_heading_count:int, paywall_suspected:bool, custom_selector_matched:?bool}
+     */
+    public function handle(string $html, ?string $mainContentSelector = null): array
     {
         $dom = new \DOMDocument('1.0', 'UTF-8');
         libxml_use_internal_errors(true);
-        $dom->loadHTML($html, LIBXML_NOERROR | LIBXML_NOWARNING);
+        // libxml's HTML parser thường KHÔNG nhận diện được `<meta charset="utf-8">` kiểu HTML5
+        // (nhất là khi charset không phải attribute đầu tiên của thẻ meta, VD trang SSR/Nuxt.js:
+        // `<meta data-n-head="ssr" charset="utf-8">`) và mặc định coi input là ISO-8859-1, làm vỡ
+        // MỌI ký tự tiếng Việt có dấu dù $html (từ FetchArticleHtmlAction) đã đúng là UTF-8 —
+        // (VD gặp thật: "Lịch ăn dặm" bị đọc thành "Lá»ch Än dáº·m"). Prefix pseudo-declaration
+        // `<?xml encoding="UTF-8">` ép libxml parse đúng theo UTF-8 mà KHÔNG chèn node thật vào
+        // DOM (libxml có xử lý đặc biệt cho khai báo này khi dùng với loadHTML).
+        $dom->loadHTML('<?xml encoding="UTF-8">'.$html, LIBXML_NOERROR | LIBXML_NOWARNING);
         libxml_clear_errors();
 
         $xpath = new \DOMXPath($dom);
 
         $language        = $this->extractLanguage($xpath);
         $metaDescription = $this->extractMetaDescription($xpath);
+        $keywords        = $this->extractKeywords($xpath);
         $publishDate     = $this->extractPublishDate($xpath, $html);
         $author          = $this->extractAuthor($xpath, $html);
         $paywallSuspected = $this->looksLikePaywalled($xpath);
@@ -83,13 +96,28 @@ class ExtractRawContentAction
 
         $title = $rawTitle ?: $this->firstHeadingText($xpath, 'h1');
 
+        // Nếu người dùng chỉ định selector riêng (id/class), ưu tiên dùng khối đó làm root thay
+        // vì thuật toán tự động — cho phép người dùng "sửa tay" khi thuật toán chọn sai container
+        // (thường gặp với site có bố cục lạ/hiếm). Không khớp được (selector sai/không tồn tại
+        // trên trang) → coi như không chỉ định, rơi về thuật toán tự động như cũ, không throw lỗi.
+        $customSelectorMatched = null;
+        $contentRoot = null;
+
+        if ($mainContentSelector !== null && trim($mainContentSelector) !== '') {
+            $contentRoot = $this->resolveContentRootFromSelector($xpath, $mainContentSelector);
+            $customSelectorMatched = $contentRoot !== null;
+        }
+
         // Xác định 1 node GỐC duy nhất cho nội dung chính, rồi soi headings TRONG PHẠM VI node
         // đó (không quét cả document) — nhiều site (VD báo Việt Nam) dùng <article> cho MỌI thẻ
         // "story card" (bài liên quan/xem nhiều), không chỉ bài chính; quét headings toàn trang
         // sẽ lẫn cả tiêu đề các bài KHÁC không liên quan (đã gặp thật: "Xem nhiều"/"Cùng chuyên
         // mục" kèm tiêu đề 10 bài linh tinh). Cùng root cho main_content luôn đảm bảo 2 field
         // nhất quán với nhau (headings chắc chắn nằm trong main_content, không lệch phạm vi).
-        $contentRoot = $this->resolveContentRoot($xpath);
+        if ($contentRoot === null) {
+            $contentRoot = $this->resolveContentRoot($xpath);
+        }
+
         $mainContent = $contentRoot ? $this->cleanText($this->extractBlockText($contentRoot)) : '';
         $headings    = $this->extractHeadings($xpath, $contentRoot);
         $wordCount   = $this->countWords($mainContent, $language);
@@ -97,6 +125,7 @@ class ExtractRawContentAction
         return [
             'title'                    => $title !== '' ? $title : null,
             'meta_description'        => $metaDescription,
+            'keywords'                 => $keywords,
             'headings'                 => $headings,
             'main_content'             => $mainContent,
             'publish_date'             => $publishDate,
@@ -105,7 +134,77 @@ class ExtractRawContentAction
             'word_count'               => $wordCount,
             'meaningful_heading_count' => count($headings),
             'paywall_suspected'        => $paywallSuspected,
+            'custom_selector_matched'  => $customSelectorMatched,
         ];
+    }
+
+    /**
+     * meta[name="keywords"] chuẩn HTML là 1 chuỗi các từ khoá phân tách bởi dấu phẩy — tách ra
+     * mảng string, bỏ khoảng trắng thừa và phần tử rỗng (VD content="a, b,, c" → ["a","b","c"]).
+     *
+     * @return string[]
+     */
+    private function extractKeywords(\DOMXPath $xpath): array
+    {
+        $content = $this->metaContent($xpath, "//meta[@name='keywords']");
+
+        if ($content === null) {
+            return [];
+        }
+
+        $parts = array_map('trim', explode(',', $content));
+
+        return array_values(array_filter($parts, static fn (string $p) => $p !== ''));
+    }
+
+    /**
+     * Chuyển selector đơn giản do người dùng nhập (id/class, có thể kèm tag) thành XPath rồi tìm
+     * node đầu tiên khớp. Chỉ hỗ trợ cú pháp CSS selector cơ bản nhất — ĐÚNG PHẠM VI yêu cầu
+     * (chọn khối theo id/class, kiểu "class=\"detail-content\""), không phải 1 CSS-selector-engine
+     * đầy đủ (không hỗ trợ tổ hợp combinator/pseudo-class — nếu cần phức tạp hơn, thuật toán tự
+     * động resolveContentRoot() vẫn là fallback an toàn).
+     *
+     * Cú pháp hỗ trợ (có thể liệt kê nhiều, phân tách bởi dấu phẩy, thử lần lượt theo thứ tự,
+     * dùng khối đầu tiên khớp): ".class", "#id", "tag.class", "tag#id", hoặc chỉ "tag".
+     */
+    private function resolveContentRootFromSelector(\DOMXPath $xpath, string $selector): ?\DOMNode
+    {
+        foreach (explode(',', $selector) as $part) {
+            $query = $this->simpleSelectorToXPath(trim($part));
+
+            if ($query === null) {
+                continue;
+            }
+
+            $node = $xpath->query($query)?->item(0);
+
+            if ($node instanceof \DOMNode) {
+                return $node;
+            }
+        }
+
+        return null;
+    }
+
+    private function simpleSelectorToXPath(string $part): ?string
+    {
+        if ($part === '') {
+            return null;
+        }
+
+        if (! preg_match('/^([a-zA-Z][a-zA-Z0-9]*)?([.#])([a-zA-Z0-9_-]+)$/', $part, $m)) {
+            // Không khớp cú pháp id/class hỗ trợ — coi selector này là tên tag thuần (VD "article").
+            return preg_match('/^[a-zA-Z][a-zA-Z0-9]*$/', $part) ? "//{$part}" : null;
+        }
+
+        [, $tag, $marker, $name] = $m;
+        $tag = $tag !== '' ? $tag : '*';
+
+        if ($marker === '#') {
+            return "//{$tag}[@id='{$name}']";
+        }
+
+        return "//{$tag}[contains(concat(' ', normalize-space(@class), ' '), ' {$name} ')]";
     }
 
     private function extractTitleFromHead(\DOMXPath $xpath): string

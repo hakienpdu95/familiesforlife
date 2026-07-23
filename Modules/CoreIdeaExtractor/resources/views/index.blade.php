@@ -22,11 +22,24 @@
                     <input type="url" x-model="url" required placeholder="https://..."
                            class="input input-sm input-bordered w-full">
                 </div>
+                <div class="form-control flex-1 min-w-72">
+                    <label class="label py-0.5">
+                        <span class="label-text text-xs font-medium">Selector vùng nội dung chính (tùy chọn)</span>
+                    </label>
+                    <input type="text" x-model="contentSelector" placeholder=".detail-content, #main-content..."
+                           class="input input-sm input-bordered w-full">
+                </div>
                 <button type="submit" class="btn btn-primary btn-sm gap-1.5" :disabled="loading">
                     <span x-show="!loading">Trích xuất</span>
                     <span x-show="loading" x-cloak>Đang xử lý...</span>
                 </button>
             </form>
+            <p class="text-xs text-base-content/40 mt-2">
+                Chỉ định id hoặc class của khối chứa nội dung chính (VD <code>.detail-content</code>, <code>#main-content</code>,
+                <code>div.article-body</code>) để lấy <code>main_content</code> chính xác hơn thuật toán tự động. Có thể liệt kê
+                nhiều selector, phân tách bởi dấu phẩy — hệ thống thử lần lượt, dùng selector đầu tiên khớp. Bỏ trống để dùng
+                thuật toán tự động nhận diện.
+            </p>
             <p x-show="errorMessage" x-cloak class="text-error text-sm mt-2" x-text="errorMessage"></p>
         </div>
     </div>
@@ -64,6 +77,7 @@ document.addEventListener('alpine:init', () => {
 
         return {
             url: '',
+            contentSelector: '',
             loading: false,
             result: null,
             errorMessage: '',
@@ -85,7 +99,10 @@ document.addEventListener('alpine:init', () => {
                             'X-Requested-With':  'XMLHttpRequest',
                             'Accept':            'application/json',
                         },
-                        body: JSON.stringify({ url: this.url }),
+                        body: JSON.stringify({
+                            url: this.url,
+                            main_content_selector: this.contentSelector || null,
+                        }),
                     });
 
                     const data = await res.json().catch(() => ({}));

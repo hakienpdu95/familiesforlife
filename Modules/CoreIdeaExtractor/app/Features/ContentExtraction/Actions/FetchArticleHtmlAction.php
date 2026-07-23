@@ -50,7 +50,16 @@ class FetchArticleHtmlAction
             }
 
             if (! $response->successful()) {
-                throw new UrlFetchException("Trang trả về mã lỗi HTTP {$response->status()}.");
+                // 403/429 thường là do WAF/bot-management (Cloudflare, BigScoots...) chặn thẳng
+                // request không phải trình duyệt thật — module dùng User-Agent minh bạch (xem
+                // config('core_idea_extractor.fetch.user_agent')), không giả mạo browser để né
+                // chặn, nên với site chặn kiểu này việc fetch thất bại là theo đúng thiết kế của
+                // site đó, không phải lỗi code. Chú thích rõ cho người dùng thay vì để mã lỗi trơ.
+                $hint = in_array($response->status(), [403, 429], true)
+                    ? ' Trang có thể đang chặn truy cập tự động (bot protection/WAF) — không thể trích xuất bằng công cụ này.'
+                    : '';
+
+                throw new UrlFetchException("Trang trả về mã lỗi HTTP {$response->status()}.{$hint}");
             }
 
             $contentType = (string) $response->header('Content-Type');
@@ -59,13 +68,46 @@ class FetchArticleHtmlAction
                 throw new UrlFetchException("Nội dung không phải HTML (Content-Type: {$contentType}).");
             }
 
-            $body     = $response->body();
+            $body     = $this->normalizeToUtf8($response->body(), $contentType);
             $maxBytes = (int) config('core_idea_extractor.fetch.max_content_bytes', 5 * 1024 * 1024);
 
             return strlen($body) > $maxBytes ? substr($body, 0, $maxBytes) : $body;
         }
 
         throw new UrlFetchException("Quá nhiều lượt redirect (>{$maxRedirects}).");
+    }
+
+    /**
+     * ExtractRawContentAction giả định $html trả ra từ đây LUÔN LÀ UTF-8 (cần cho fix parse
+     * charset ở đó) — nên site khai báo charset khác UTF-8 (VD windows-1258, thường gặp ở site
+     * Việt Nam cũ) phải được convert ở đây, TRƯỚC khi tới tay parser.
+     */
+    private function normalizeToUtf8(string $body, string $contentTypeHeader): string
+    {
+        $charset = $this->detectCharset($body, $contentTypeHeader);
+
+        if ($charset === null || in_array(strtolower($charset), ['utf-8', 'utf8'], true)) {
+            return $body;
+        }
+
+        $converted = @mb_convert_encoding($body, 'UTF-8', $charset);
+
+        return $converted !== false ? $converted : $body;
+    }
+
+    private function detectCharset(string $body, string $contentTypeHeader): ?string
+    {
+        if (preg_match('/charset=["\']?([a-zA-Z0-9._-]+)/i', $contentTypeHeader, $m)) {
+            return trim($m[1], "\"' ");
+        }
+
+        // Charset khai qua <meta> luôn nằm trong <head>, gần đầu document — chỉ cần quét vài KB
+        // đầu, không cần quét cả body (tốn CPU vô ích với response vài MB).
+        if (preg_match('/<meta[^>]+charset=["\']?([a-zA-Z0-9._-]+)/i', substr($body, 0, 4096), $m)) {
+            return trim($m[1], "\"' ");
+        }
+
+        return null;
     }
 
     private function assertSafeUrl(string $url): void

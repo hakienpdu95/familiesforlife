@@ -31,7 +31,8 @@ class CoreIdeaExtractorController extends Controller
     public function extract(Request $request, FetchArticleHtmlAction $fetch, ExtractRawContentAction $extractRaw, ComputeExtractionConfidenceAction $computeConfidence): JsonResponse
     {
         $data = ExtractRequestData::from($request->validate([
-            'url' => ['required', 'url', 'max:2048'],
+            'url'                    => ['required', 'url', 'max:2048'],
+            'main_content_selector'  => ['nullable', 'string', 'max:255'],
         ]));
 
         try {
@@ -40,6 +41,7 @@ class CoreIdeaExtractorController extends Controller
             return response()->json($this->buildResult(
                 title: null,
                 metaDescription: null,
+                keywords: [],
                 headings: [],
                 mainContent: '',
                 publishDate: null,
@@ -50,19 +52,21 @@ class CoreIdeaExtractorController extends Controller
             )->toApiArray());
         }
 
-        $extracted        = $extractRaw->handle($html);
+        $extracted        = $extractRaw->handle($html, $data->main_content_selector);
         $confidenceResult = $computeConfidence->handle($extracted);
+        $notes            = $this->appendSelectorNote($confidenceResult['notes'], $data->main_content_selector, $extracted['custom_selector_matched']);
 
         $result = $this->buildResult(
             title: $extracted['title'],
             metaDescription: $extracted['meta_description'],
+            keywords: $extracted['keywords'],
             headings: $extracted['headings'],
             mainContent: $this->truncateMainContent($extracted['main_content']),
             publishDate: $extracted['publish_date'],
             author: $extracted['author'],
             language: $extracted['language'],
             confidence: $confidenceResult['confidence'],
-            notes: $confidenceResult['notes'],
+            notes: $notes,
             wordCount: $extracted['word_count'],
             headingCount: $extracted['meaningful_heading_count'],
         );
@@ -70,10 +74,11 @@ class CoreIdeaExtractorController extends Controller
         return response()->json($result->toApiArray());
     }
 
-    /** @param HeadingData[] $headings */
+    /** @param HeadingData[] $headings @param string[] $keywords */
     private function buildResult(
         ?string $title,
         ?string $metaDescription,
+        array $keywords,
         array $headings,
         string $mainContent,
         ?string $publishDate,
@@ -87,6 +92,7 @@ class CoreIdeaExtractorController extends Controller
         return new RawExtractionData(
             title: $title,
             meta_description: $metaDescription,
+            keywords: $keywords,
             headings: $headings,
             main_content: $mainContent,
             publish_date: $publishDate,
@@ -97,6 +103,22 @@ class CoreIdeaExtractorController extends Controller
             word_count: $wordCount,
             meaningful_heading_count: $headingCount,
         );
+    }
+
+    /**
+     * Selector do người dùng chỉ định nhưng không khớp phần tử nào trên trang → vẫn trả kết quả
+     * (đã tự động rơi về resolveContentRoot() mặc định trong ExtractRawContentAction), nhưng
+     * thêm ghi chú để người dùng biết selector của họ không được áp dụng.
+     */
+    private function appendSelectorNote(?string $notes, ?string $selector, ?bool $customSelectorMatched): ?string
+    {
+        if ($selector === null || trim($selector) === '' || $customSelectorMatched !== false) {
+            return $notes;
+        }
+
+        $note = "Selector tùy chỉnh \"{$selector}\" không khớp phần tử nào trên trang — đã dùng thuật toán tự động để xác định main_content.";
+
+        return $notes ? "{$note} {$notes}" : $note;
     }
 
     private function truncateMainContent(string $text): string
