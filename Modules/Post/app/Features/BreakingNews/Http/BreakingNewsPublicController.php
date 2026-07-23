@@ -19,7 +19,6 @@ class BreakingNewsPublicController extends Controller
 
         return response()->json([
             'items' => $items->map(fn (PostBreakingNews $n) => [
-                'badge'    => $n->displayBadgeLabel(),
                 'headline' => $n->displayHeadline(),
                 'url'      => $n->publicTranslation()
                     ? route('post.public.article', ['slug' => $n->publicTranslation()->slug, 'id' => $n->publicTranslation()->id])

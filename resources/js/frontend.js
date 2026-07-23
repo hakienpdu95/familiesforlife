@@ -297,29 +297,51 @@ function initBreakingNewsTicker() {
             .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     };
 
-    // .swiper-slide chỉ để Swiper quản lý (CSS core của Swiper set display/height cho phần tử
-    // này) — layout flex phải nằm ở thẻ lồng bên trong, không đặt trực tiếp trên .swiper-slide,
-    // vì vendor-swiper.css load sau frontend.css (do @vite của swiper.js nằm trong @push
-    // ('scripts') cuối trang) nên sẽ đè mất display:flex nếu đặt cùng cấp.
-    // slidesPerView:'auto' (dưới) — mỗi item rộng theo ĐÚNG độ dài tiêu đề thật (whitespace-
-    // nowrap, không truncate/marquee), không chia đều 3 cột bằng nhau nữa; tiêu đề ngắn/dài
-    // đứng cạnh nhau linh hoạt, hiển thị TRỌN VẸN, Swiper tự tính có bao nhiêu item vừa 1 màn.
-    const slideHtml = (item) => `
+    // Băng chuyển liên tục kiểu nhandan.vn (khối ".feature .news" trang chủ — xem
+    // main.min-*.js: new Swiper(".feature .news", {slidesPerView:'auto', spaceBetween:20,
+    // speed:1500, loop:true, autoplay:{delay:2500}})). MỖI tiêu đề là 1 slide riêng (không gom
+    // nhóm), slidesPerGroup mặc định = 1 nên mỗi lượt autoplay chỉ trượt sang ĐÚNG 1 tiêu đề.
+    // Tiêu đề mới luôn vào từ phải, tiêu đề cũ trôi dần sang trái và ra khỏi khung — phần bị
+    // cắt ở mép phải được che bằng gradient mờ dần (CSS #breaking-news-ticker .swiper::after
+    // trong resources/css/frontend.css), y hệt cách nhandan.vn dùng ".news:before" — thay vì
+    // cố canh "sát mép trái tuyệt đối".
+    //
+    // loop:true (không dùng rewind) — yêu cầu trượt LIỀN MẠCH đúng thứ tự 1-2-3-4-1-2-3...,
+    // không "giật lùi" về tin đầu như hiệu ứng rewind của Swiper (rewind trượt NGƯỢC chiều để
+    // quay về slide đầu, trông như bị reset chứ không phải trượt tiếp). loop:true mới cho hiệu
+    // ứng trượt tiếp đúng 1 chiều, NHƯNG cần đủ số lượng slide để Swiper dựng vùng đệm — tin
+    // nóng thực tế có lúc chỉ 3-4 tin (ít hơn nhiều so với danh sách luôn dồi dào của
+    // nhandan.vn), không đủ đệm thì Swiper tự tắt loop (đã gặp thực tế — trượt tới tin cuối rồi
+    // dừng hẳn). Khắc phục bằng cách lặp lại mảng tin cho đủ MIN_LOOP_SLIDES bản ghi DOM trước
+    // khi đưa vào Swiper — chỉ ảnh hưởng dữ liệu hiển thị (các tin gốc lặp lại vài vòng trong
+    // danh sách slide), không đổi thứ tự hay nội dung, đủ để loop luôn hoạt động bất kể có bao
+    // nhiêu tin đang hiệu lực.
+    const MIN_LOOP_SLIDES = 12;
+    const padForLoop = (items) => {
+        if (items.length <= 1) return items;
+        const out = [];
+        while (out.length < MIN_LOOP_SLIDES) out.push(...items);
+        return out;
+    };
+
+    const itemLink = (item) => `
         <div class="swiper-slide !w-auto">
             <a href="${esc(item.url)}" class="flex items-center gap-2 py-2 whitespace-nowrap hover:underline">
-                <span class="badge badge-sm badge-neutral shrink-0">${esc(item.badge)}</span>
+                <svg class="w-4 h-4 text-warning shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.958a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.368 2.447a1 1 0 00-.363 1.118l1.287 3.957c.3.922-.755 1.688-1.538 1.118l-3.367-2.446a1 1 0 00-1.176 0l-3.367 2.446c-.783.57-1.838-.196-1.538-1.118l1.286-3.957a1 1 0 00-.363-1.118L2.062 9.385c-.783-.57-.38-1.81.588-1.81h4.163a1 1 0 00.95-.69l1.286-3.958z"/>
+                </svg>
                 <span class="text-sm font-medium">${esc(item.headline)}</span>
             </a>
         </div>`;
 
-    wrapper.innerHTML = config.items.map(slideHtml).join('');
+    wrapper.innerHTML = padForLoop(config.items).map(itemLink).join('');
 
     const swiper = window.initSwiper(el.querySelector('.breaking-news-swiper'), {
         direction:       'horizontal',
         slidesPerView:   'auto',
-        spaceBetween:    32,
-        loop:            true,
-        speed:           600,
+        spaceBetween:    20,
+        loop:            config.items.length > 1,
+        speed:           1500,
         navigation:      false,
         pagination:      false,
         allowTouchMove:  false,
@@ -334,7 +356,7 @@ function initBreakingNewsTicker() {
             const data = await res.json();
 
             swiper.removeAllSlides();
-            swiper.appendSlide(data.items.map(slideHtml));
+            swiper.appendSlide(padForLoop(data.items).map(itemLink));
 
             // loopDestroy()/loopCreate() bắt buộc SAU KHI đổi slide khi loop:true — Swiper nhân
             // bản slide nội bộ để trượt liền mạch, đổi nội dung mà không dựng lại các bản sao

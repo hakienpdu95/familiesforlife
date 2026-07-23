@@ -74,7 +74,6 @@ php artisan queue:work --queue=high,default,low,workflows,webhooks,ai,actlog,pas
 # Thiết lập queue worker chạy thường trực (systemd)
 # Sửa JSON → chạy lệnh này → DB cập nhật đầy đủ
 php artisan migration:generate --fresh
-php artisan import:provinces-wards
 php artisan db:seed
 
 php artisan module:make Auth

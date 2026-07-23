@@ -276,7 +276,8 @@
         "province_name///string///255///_NULL///NULL///__///Tên tỉnh denormalized",
         "ward_code///char///5///_NULL///NULL///__///Mã phường/xã — tuỳ chọn, chỉ điền khi bài gắn 1 địa điểm cụ thể",
         "ward_name///string///255///_NULL///NULL///__///__",
-        "__index///index///__///__///__///province_code|idx_post_article_province///__"
+        "__index///index///__///__///__///province_code|idx_post_article_province///__",
+        "redirect_url///string///500///_NULL///NULL///__///__"
     ],
     [
         "post_articles///drop///__///Publishing Engine Phase 13 — field publishing chuyển sang post_article_translations",

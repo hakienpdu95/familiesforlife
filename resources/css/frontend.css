@@ -922,5 +922,19 @@
  * breaking-news-ticker — resources/js/frontend.js initBreakingNewsTicker(). slidesPerView:
  * 'auto' nên mỗi .swiper-slide phải tự co theo nội dung (không bị Swiper/Tailwind ép width
  * bằng nhau) — tiêu đề dài hiển thị TRỌN VẸN trên 1 hàng, không cắt "...", không marquee.
+ *
+ * Băng chuyển liên tục (không gom nhóm, không cố canh sát mép trái — xem comment trong
+ * frontend.js) nên tiêu đề ở mép phải luôn có lúc bị cắt nửa chừng khi đang trượt vào; che
+ * bằng gradient mờ dần sang màu nền của ticker, giống hệt kỹ thuật ".news:before" của
+ * nhandan.vn — nhìn giống "làm mờ có chủ đích" thay vì bị cắt cụt.
  * ══════════════════════════════════════════════════════════════════ */
 #breaking-news-ticker .swiper-slide { width: auto; }
+#breaking-news-ticker .swiper { position: relative; }
+#breaking-news-ticker .swiper::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: 64px;
+    background: linear-gradient(to right, transparent, var(--color-error));
+    pointer-events: none;
+}

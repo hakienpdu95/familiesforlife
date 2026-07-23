@@ -56,13 +56,16 @@ return new class extends Migration {
             if (!Schema::hasIndex('post_articles', 'idx_post_article_province')) {
                 $table->index('province_code', 'idx_post_article_province');
             }
+            if (!Schema::hasColumn('post_articles', 'redirect_url')) {
+                $table->string('redirect_url', 500)->nullable()->after('ward_name');
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('post_articles', function (Blueprint $table) {
-            $cols = array_filter(['main_locale', 'is_sponsored', 'sponsor_name', 'sponsor_logo_url', 'sponsor_label', 'campaign_code', 'sponsored_start_date', 'sponsored_end_date', 'sponsored_published_at', 'province_code', 'province_name', 'ward_code', 'ward_name'], fn($c) => Schema::hasColumn('post_articles', $c));
+            $cols = array_filter(['main_locale', 'is_sponsored', 'sponsor_name', 'sponsor_logo_url', 'sponsor_label', 'campaign_code', 'sponsored_start_date', 'sponsored_end_date', 'sponsored_published_at', 'province_code', 'province_name', 'ward_code', 'ward_name', 'redirect_url'], fn($c) => Schema::hasColumn('post_articles', $c));
             if (!empty($cols)) $table->dropColumn(array_values($cols));
         });
     }

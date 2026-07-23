@@ -12,7 +12,6 @@
 <div id="breaking-news-ticker" class="breaking-news-ticker bg-error text-error-content"
      data-config="{{ json_encode([
          'items' => $items->map(fn ($n) => [
-             'badge' => $n->displayBadgeLabel(),
              'headline' => $n->displayHeadline(),
              'url' => $n->publicTranslation()
                  ? route('post.public.article', ['slug' => $n->publicTranslation()->slug, 'id' => $n->publicTranslation()->id])

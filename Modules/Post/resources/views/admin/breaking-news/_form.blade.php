@@ -71,21 +71,6 @@
                         @error('headline_override')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                     </div>
 
-                    <div class="form-control">
-                        <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Nhãn badge</span>
-                            <span class="label-text-alt text-xs text-base-content/40">Để trống = "{{ config('post.breaking_news.default_badge_label', 'NÓNG') }}"</span>
-                        </label>
-                        <input type="text" name="badge_label" list="badge-label-suggestions"
-                               value="{{ old('badge_label', $breakingNews?->badge_label) }}"
-                               class="input input-bordered input-sm w-full @error('badge_label') input-error @enderror"
-                               maxlength="40">
-                        <datalist id="badge-label-suggestions">
-                            <option value="NÓNG"><option value="KHẨN"><option value="MỚI">
-                        </datalist>
-                        @error('badge_label')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
-                    </div>
-
                     <div class="divider my-1"></div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
