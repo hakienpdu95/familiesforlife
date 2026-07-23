@@ -8,6 +8,7 @@ use Modules\Post\Console\Commands\BackfillPostTranslationsCommand;
 use Modules\Post\Console\Commands\MonitorScoutFailedJobsCommand;
 use Modules\Post\Console\Commands\PruneArticleVersionsCommand;
 use Modules\Post\Jobs\ExpireSponsoredArticlesJob;
+use Modules\Post\Jobs\PruneArticleViewEventsJob;
 use Modules\Post\Jobs\PublishDueTranslationsJob;
 use Modules\Post\Models\PostArticle;
 use Modules\Post\Models\PostArticleTranslation;
@@ -59,6 +60,10 @@ class PostServiceProvider extends ModuleServiceProvider
             // spec/SiteSearch_Activation_Expansion_Technical_Specification.md §4.3 — giám sát
             // failed_jobs cho job Scout (MakeSearchable/RemoveFromSearch), 15 phút/lần.
             $schedule->command(MonitorScoutFailedJobsCommand::class)->everyFifteenMinutes()->withoutOverlapping();
+
+            // spec/Related_Posts_Engine_Technical_Specification.md §6.2 — dọn post_article_view_events
+            // cũ hơn behavior_lookback_days, daily cùng nguyên tắc ExpireSponsoredArticlesJob.
+            $schedule->job(new PruneArticleViewEventsJob(), 'low')->daily()->withoutOverlapping();
         });
     }
 }

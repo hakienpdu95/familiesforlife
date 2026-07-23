@@ -7,6 +7,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Modules\Post\Features\PublicReading\Actions\IncrementArticleViewCountAction;
 use Modules\Post\Features\PublicReading\Actions\RecordArticleRedirectClickAction;
+use Modules\Post\Features\RelatedPosts\Actions\RecordArticleViewEventAction;
+use Modules\Post\Features\RelatedPosts\Queries\GetRelatedArticlesHandler;
+use Modules\Post\Features\RelatedPosts\Queries\GetRelatedArticlesQuery;
 use Modules\Post\Models\PostArticleTranslation;
 use Modules\Post\Support\ArticleContentRenderer;
 
@@ -22,6 +25,8 @@ class PublicArticleController extends Controller
         string $slug,
         IncrementArticleViewCountAction $viewAction,
         RecordArticleRedirectClickAction $clickAction,
+        RecordArticleViewEventAction $viewEventAction,
+        GetRelatedArticlesHandler $relatedHandler,
         ArticleContentRenderer $renderer,
     ): View|RedirectResponse {
         $translation = PostArticleTranslation::published()
@@ -50,14 +55,26 @@ class PublicArticleController extends Controller
             return redirect()->away($article->redirect_url);
         }
 
+        // spec/Related_Posts_Engine_Technical_Specification.md §6.1 — ghi nhận hành vi CHỈ khi
+        // bài thực sự được đọc (không ghi cho nhánh redirect ở trên, vì redirect rời trang trước
+        // khi có "đọc" thật nào diễn ra).
+        $viewEventAction->handle($article->id);
+
+        $related = $relatedHandler->handle(new GetRelatedArticlesQuery(
+            articleId: $article->id,
+            locale: $translation->locale,
+            limit: (int) config('post.related_posts.max_results', 6),
+        ));
+
         // Không còn truyền 'categories' — Phase 3 chuyển nav sang MenuItem::tree() qua View
         // Composer (MenuServiceProvider), public.article.blade.php không tự dùng $categories
         // cho việc gì khác (xem spec/Menu_Navigation_Technical_Specification.md §8 Phase 4).
         return view('post::public.article', [
-            'translation' => $translation,
-            'article'     => $article,
-            'locale'      => $translation->locale,
-            'content'     => $renderer->render($translation),
+            'translation'     => $translation,
+            'article'         => $article,
+            'locale'          => $translation->locale,
+            'content'         => $renderer->render($translation),
+            'relatedArticles' => $related,
         ]);
     }
 }

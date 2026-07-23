@@ -84,5 +84,7 @@
     </div>
     @endif
 
+    <x-frontend.related-posts :articles="$relatedArticles" />
+
 </div>
 @endsection
