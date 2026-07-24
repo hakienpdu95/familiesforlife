@@ -27,7 +27,7 @@ class CreateRealEstateListingAction
     {
         return DB::transaction(function () use ($data) {
             $listing = RealEstateListing::create(array_merge($this->buildAttributes($data), [
-                'slug'       => $this->uniqueSlug($data->title),
+                'slug'       => $data->slug ? Str::slug($data->slug) : $this->uniqueSlug($data->title),
                 'created_by' => auth()->id(),
             ]));
 

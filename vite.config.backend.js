@@ -53,6 +53,7 @@ const JS_OUTPUT = {
   'event':                  'assets/modules/event.[hash].js',
   'menu':                   'assets/modules/menu.[hash].js',
   'ocop':                   'assets/modules/ocop.[hash].js',
+  'realestate':             'assets/modules/realestate.[hash].js',
 };
 
 /** CSS asset name → output path.
@@ -86,6 +87,7 @@ const CSS_OUTPUT = {
   'event.css':                  'assets/modules/event.[hash].css',
   'menu.css':                   'assets/modules/menu.[hash].css',
   'ocop.css':                   'assets/modules/ocop.[hash].css',
+  'realestate.css':             'assets/modules/realestate.[hash].css',
 };
 
 // ─── Module input entries ─────────────────────────────────────────────
@@ -153,6 +155,9 @@ const MODULE_ENTRIES = [
   'Modules/Page/resources/assets/js/page.js',
   // Aicem
   'Modules/Aicem/resources/assets/js/aicem.js',
+  // RealEstate
+  'Modules/RealEstate/resources/assets/sass/realestate.scss',
+  'Modules/RealEstate/resources/assets/js/realestate.js',
 ];
 
 // ─────────────────────────────────────────────────────────────────────

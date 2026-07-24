@@ -26,8 +26,6 @@ use Modules\RealEstate\Features\ListingManagement\Actions\DeleteRealEstateListin
 use Modules\RealEstate\Features\ListingManagement\Actions\ReorderGalleryMediaAction;
 use Modules\RealEstate\Features\ListingManagement\Actions\UpdateRealEstateListingAction;
 use Modules\RealEstate\Features\ListingManagement\Data\RealEstateListingData;
-use Modules\RealEstate\Features\ListingManagement\Queries\ListRealEstateListingsForAdminHandler;
-use Modules\RealEstate\Features\ListingManagement\Queries\ListRealEstateListingsForAdminQuery;
 use Modules\RealEstate\Models\RealEstateListing;
 
 /**
@@ -41,14 +39,11 @@ class RealEstateListingAdminController extends Controller
         $this->authorizeResource(RealEstateListing::class, 'listing');
     }
 
-    public function index(Request $request, ListRealEstateListingsForAdminHandler $handler): View
+    public function index(): View
     {
-        $listings = $handler->handle(new ListRealEstateListingsForAdminQuery(
-            listingType: $request->filled('listing_type') ? ListingType::tryFrom($request->string('listing_type')->value()) : null,
-            page: max(1, $request->integer('page', 1)),
-        ));
-
-        return view('realestate::admin.listings.index', compact('listings'));
+        // Danh sách thật lấy qua Tabulator (remote pagination/sort/filter) — xem
+        // RealEstateListingApiController, cùng pattern ProductAdminController::index().
+        return view('realestate::admin.listings.index');
     }
 
     public function create(): View
@@ -80,7 +75,7 @@ class RealEstateListingAdminController extends Controller
     {
         abort_if($request->user()?->isPlatformViewer(), 403);
 
-        $data = RealEstateListingData::from($this->validated($request));
+        $data = RealEstateListingData::from($this->validated($request, $listing));
 
         try {
             $action->handle($listing, $data);
@@ -161,7 +156,7 @@ class RealEstateListingAdminController extends Controller
 
     // ── Validation (§5.3/§5.4 spec Bán) ─────────────────────────────────────
 
-    private function validated(Request $request): array
+    private function validated(Request $request, ?RealEstateListing $listing = null): array
     {
         $listingType   = $request->input('listing_type');
         $isSale        = $listingType === ListingType::Sale->value;
@@ -184,6 +179,10 @@ class RealEstateListingAdminController extends Controller
                 },
             ],
             'title'            => ['required', 'string', 'max:250'],
+            'slug'             => [
+                'nullable', 'string', 'max:255', 'regex:/^[a-z0-9\-]+$/',
+                Rule::unique('real_estate_listings', 'slug')->ignore($listing?->id),
+            ],
             'description'      => ['nullable', 'string'],
             'address_detail'   => ['nullable', 'string', 'max:255'],
             'province_code'    => ['required', 'exists:provinces,province_code'],
@@ -225,6 +224,29 @@ class RealEstateListingAdminController extends Controller
 
             'gallery_media_uuids'   => ['nullable', 'array', 'max:6'],
             'gallery_media_uuids.*' => ['string', 'uuid'],
+        ], [
+            'listing_type.required'       => 'Vui lòng chọn loại tin (Bán hoặc Thuê).',
+            'listing_type.in'             => 'Loại tin không hợp lệ.',
+            'property_type.required'      => 'Vui lòng chọn loại hình bất động sản.',
+            'title.required'               => 'Vui lòng nhập tiêu đề tin.',
+            'title.max'                    => 'Tiêu đề không được vượt quá :max ký tự.',
+            'slug.regex'                   => 'Slug chỉ được chứa chữ thường, số và dấu gạch ngang.',
+            'slug.unique'                  => 'Slug này đã được dùng cho tin khác, vui lòng chọn slug khác.',
+            'slug.max'                     => 'Slug không được vượt quá :max ký tự.',
+            'address_detail.max'           => 'Địa chỉ không được vượt quá :max ký tự.',
+            'province_code.required'       => 'Vui lòng chọn Tỉnh/Thành phố.',
+            'province_code.exists'         => 'Tỉnh/Thành phố không hợp lệ.',
+            'ward_code.required'           => 'Vui lòng chọn Phường/Xã.',
+            'ward_code.exists'             => 'Phường/Xã không hợp lệ.',
+            'area.required'                => 'Vui lòng nhập diện tích.',
+            'area.numeric'                 => 'Diện tích phải là số.',
+            'area.min'                     => 'Diện tích phải lớn hơn 0.',
+            'price.required'               => 'Vui lòng nhập giá bán (hoặc chọn "Giá thoả thuận").',
+            'price.numeric'                => 'Giá bán phải là số.',
+            'monthly_rent.required'        => 'Vui lòng nhập giá thuê/tháng (hoặc chọn "Giá thoả thuận").',
+            'monthly_rent.numeric'         => 'Giá thuê/tháng phải là số.',
+            'rental_period_months.min'     => 'Thời hạn thuê tối thiểu :min tháng.',
+            'gallery_media_uuids.max'      => 'Tối đa :max ảnh cho mỗi tin.',
         ]);
     }
 }

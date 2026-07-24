@@ -1,0 +1,10 @@
+// Modules/RealEstate/resources/assets/sass/realestate.scss
+// Build: vite.config.backend.js → public/build/backend/assets/modules/realestate.[hash].css
+//
+// Blade:
+//   @push('styles')
+//       @vite(['Modules/RealEstate/resources/assets/sass/realestate.scss'], 'build/backend')
+//   @endpush
+
+@use 'form-patterns';   // .form-submit-bar, .empty-state...
+@use 'tom-select';      // TomSelect dark/light theme — form có nhiều select

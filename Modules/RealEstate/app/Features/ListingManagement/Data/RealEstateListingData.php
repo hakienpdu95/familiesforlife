@@ -24,6 +24,7 @@ class RealEstateListingData extends Data
         public readonly ListingType $listing_type,
         public readonly PropertyType $property_type,
         public readonly string $title,
+        public readonly ?string $slug = null,
         public readonly ?string $description = null,
         public readonly ?string $address_detail = null,
         public readonly string $province_code = '',
