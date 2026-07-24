@@ -16,6 +16,13 @@ return [
             // Published ngay khi backfill — tránh gãy catalog hiện có (§9.6).
             'initial_status_resolver' => \Modules\Product\Support\ProductInitialApprovalStatusResolver::class,
         ],
+        // spec/RealEstateForSale_Technical_Specification.md §6 — tin BĐS bán/thuê của
+        // Organization, KHÔNG cần initial_status_resolver (bảng mới, không backfill).
+        'real_estate_listing' => [
+            'model' => \Modules\RealEstate\Models\RealEstateListing::class,
+            'label' => 'Tin bất động sản',
+        ],
+
         'organization' => [
             // Class GỐC (App\Shared\Tenancy\Models\Organization), không phải subclass
             // Modules\Organization\Models\Organization — HasApproval đặt trên class gốc vì

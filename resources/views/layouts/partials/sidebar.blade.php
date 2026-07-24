@@ -138,6 +138,26 @@
         </details>
         @endcan
 
+        {{-- spec/RealEstateForSale_Technical_Specification.md §6 — real_estate.view cấp cho
+             CEO/Sales/Ops/Marketing (config/permissions.php). --}}
+        @can(\App\Enums\PermissionEnum::REAL_ESTATE_VIEW->value)
+        <details {{ request()->routeIs('backend.real-estate.*') ? 'open' : '' }}>
+            <summary class="nav-summary {{ request()->routeIs('backend.real-estate.*') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                <span class="nav-label">Bất động sản</span>
+                <svg class="nav-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m9 18 6-6-6-6"/></svg>
+            </summary>
+            <div class="sub-menu">
+                <a href="{{ route('backend.real-estate.index') }}"
+                   class="sub-link {{ request()->routeIs('backend.real-estate.index') ? 'active' : '' }}">Danh sách tin</a>
+                @can('create', \Modules\RealEstate\Models\RealEstateListing::class)
+                <a href="{{ route('backend.real-estate.create') }}"
+                   class="sub-link {{ request()->routeIs('backend.real-estate.create') ? 'active' : '' }}">Đăng tin mới</a>
+                @endcan
+            </div>
+        </details>
+        @endcan
+
         @can(\App\Enums\PermissionEnum::POST_ARTICLE_VIEW->value)
         <details {{ request()->routeIs('backend.post.*') ? 'open' : '' }}>
             <summary class="nav-summary {{ request()->routeIs('backend.post.*') ? 'active' : '' }}">

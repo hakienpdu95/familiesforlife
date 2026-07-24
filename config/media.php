@@ -60,6 +60,15 @@ return [
             'is_public'    => true,
             'conversions'  => ['thumb', 'medium', 'preview'],
         ],
+        // spec/RealEstateForSale_Technical_Specification.md §4.4 — gallery đa ảnh (max 6, kéo
+        // thả sắp thứ tự qua order_column có sẵn của Spatie) — KHÔNG thêm vào
+        // MediaUploadController::SINGLE_FILE_COLLECTIONS (multi-file mặc định).
+        'real_estate_gallery' => [
+            'max_size_kb'  => 10240,
+            'allowed_mime' => ['image/jpeg', 'image/png', 'image/webp'],
+            'is_public'    => true,
+            'conversions'  => ['thumb', 'medium'],
+        ],
         // spec/Media_Library_Technical_Specification.md §7.5 — collection riêng cho Banner,
         // KHÔNG dùng chung `cover`: `.banner-slot__img { width:100%; height:auto }` không ép
         // aspect ratio cố định, trong khi `cover.thumb` crop cứng 150×150 vuông sẽ làm méo/cắt

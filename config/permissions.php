@@ -41,6 +41,10 @@ return [
         P::PRODUCT_VIEW->value,
         P::PRODUCT_CREATE->value,
         P::PRODUCT_EDIT->value,
+        // Real Estate: View + Create + Edit (CEO tự đăng tin BĐS — cùng nhóm quản lý Product)
+        P::REAL_ESTATE_VIEW->value,
+        P::REAL_ESTATE_CREATE->value,
+        P::REAL_ESTATE_EDIT->value,
         // Post: View + Duyệt & publish (không tự soạn thảo — Marketing soạn)
         P::POST_ARTICLE_VIEW->value,
         P::POST_ARTICLE_PUBLISH->value,
@@ -68,6 +72,10 @@ return [
         P::PRODUCT_VIEW->value,
         P::PRODUCT_CREATE->value,
         P::PRODUCT_EDIT->value,
+        // Real Estate: View + Create + Edit (Sales tự đăng tin BĐS)
+        P::REAL_ESTATE_VIEW->value,
+        P::REAL_ESTATE_CREATE->value,
+        P::REAL_ESTATE_EDIT->value,
         // Post: View only (xem bài đã publish)
         P::POST_ARTICLE_VIEW->value,
     ],
@@ -99,6 +107,10 @@ return [
         P::PRODUCT_VIEW->value,
         P::PRODUCT_CREATE->value,
         P::PRODUCT_EDIT->value,
+        // Real Estate: View + Create + Edit (Ops quản lý tin BĐS)
+        P::REAL_ESTATE_VIEW->value,
+        P::REAL_ESTATE_CREATE->value,
+        P::REAL_ESTATE_EDIT->value,
         // Post: View + Duyệt & publish
         P::POST_ARTICLE_VIEW->value,
         P::POST_ARTICLE_PUBLISH->value,
@@ -122,6 +134,10 @@ return [
         P::PRODUCT_VIEW->value,
         P::PRODUCT_CREATE->value,
         P::PRODUCT_EDIT->value,
+        // Real Estate: View + Create + Edit (Marketing tự đăng tin BĐS)
+        P::REAL_ESTATE_VIEW->value,
+        P::REAL_ESTATE_CREATE->value,
+        P::REAL_ESTATE_EDIT->value,
         // Post: Soạn thảo (Marketing tự viết/sửa/xoá bài, gửi duyệt — CEO/Ops publish)
         P::POST_ARTICLE_VIEW->value,
         P::POST_ARTICLE_CREATE->value,
@@ -208,6 +224,11 @@ return [
         P::PRODUCT_EDIT->value,
         P::PRODUCT_DELETE->value,
         P::PRODUCT_CATEGORY_MANAGE->value,
+        // Real Estate: Full manage (tin BĐS bán/thuê)
+        P::REAL_ESTATE_VIEW->value,
+        P::REAL_ESTATE_CREATE->value,
+        P::REAL_ESTATE_EDIT->value,
+        P::REAL_ESTATE_DELETE->value,
         // Post: Full manage (bài viết + quản lý danh mục)
         P::POST_ARTICLE_VIEW->value,
         P::POST_ARTICLE_CREATE->value,

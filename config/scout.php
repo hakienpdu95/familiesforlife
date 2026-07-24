@@ -152,6 +152,15 @@ return [
                 'sortableAttributes'   => ['star_rating'],
                 'rankingRules'         => ['words', 'typo', 'proximity', 'attribute', 'sort', 'exactness'],
             ],
+            // spec/RealEstateForSale_Technical_Specification.md §0/§2.6 — range filter theo
+            // giá/diện tích (Meilisearch hỗ trợ range trực tiếp trên field numeric đã khai ở
+            // filterableAttributes, không cần cấu hình gì thêm ngoài khai đúng field).
+            \Modules\RealEstate\Models\RealEstateListing::class => [
+                'searchableAttributes' => ['title', 'description'],
+                'filterableAttributes' => ['listing_type', 'property_type', 'province_code', 'ward_code', 'price', 'monthly_rent', 'bedrooms', 'bathrooms', 'area', 'is_featured'],
+                'sortableAttributes'   => ['price', 'monthly_rent', 'area', 'published_at'],
+                'rankingRules'         => ['words', 'typo', 'proximity', 'attribute', 'sort', 'exactness'],
+            ],
         ],
     ],
 

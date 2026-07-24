@@ -35,7 +35,7 @@ class MediaUploadController extends Controller
      * jodit_content is exclusively managed by MediaJoditUploadController.
      */
     private const ALLOWED_COLLECTIONS = [
-        'avatar', 'logo', 'thumbnail', 'cover', 'banner',
+        'avatar', 'logo', 'thumbnail', 'cover', 'banner', 'real_estate_gallery',
         'attachments', 'attachments_private',
     ];
 
@@ -57,6 +57,7 @@ class MediaUploadController extends Controller
         'post_author_profile'     => \Modules\Post\Models\PostAuthorProfile::class,
         'ocop_product'            => \Modules\Ocop\Models\OcopProduct::class,
         'banner'                  => \Modules\Banner\Models\Banner::class,
+        'real_estate_listing'     => \Modules\RealEstate\Models\RealEstateListing::class,
     ];
 
     public function __construct(

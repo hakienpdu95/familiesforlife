@@ -1,0 +1,11 @@
+{
+    "name": "RealEstate",
+    "alias": "realestate",
+    "description": "Tin rao bán/thuê bất động sản của Organization (nhà, căn hộ, đất, mặt bằng) — duyệt qua Modules/Approval, hiển thị công khai tại /nha-dat-ban và /nha-dat-thue",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\RealEstate\\Providers\\RealEstateServiceProvider"
+    ],
+    "files": []
+}

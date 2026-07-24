@@ -163,4 +163,13 @@ enum PermissionEnum: string
     // platform_content_head (BreakingNewsPermissionSeeder), KHÔNG qua config/permissions.php
     // (Lớp B) — cùng nguyên tắc BANNER_MANAGE/OCOP_MANAGE/PAGE_MANAGE/CORE_IDEA_EXTRACTOR_USE.
     case BREAKING_NEWS_MANAGE = 'breaking_news.manage';
+
+    // ══ REAL ESTATE (Tin rao bán/thuê bất động sản — listing của Organization) ═══
+    // spec/RealEstateForSale_Technical_Specification.md §6 — Lớp B, qua config/permissions.php
+    // + RoleEnum (CEO/SALES/OPS/MARKETING: view+create+edit; ADMIN: thêm delete) — cùng
+    // nguyên tắc PRODUCT_VIEW/PRODUCT_CREATE/PRODUCT_EDIT/PRODUCT_DELETE.
+    case REAL_ESTATE_VIEW   = 'real_estate.view';
+    case REAL_ESTATE_CREATE = 'real_estate.create';
+    case REAL_ESTATE_EDIT   = 'real_estate.edit';
+    case REAL_ESTATE_DELETE = 'real_estate.delete';
 }
