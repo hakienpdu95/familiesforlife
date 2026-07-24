@@ -4,6 +4,7 @@ namespace Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions;
 
 use Illuminate\Support\Facades\Http;
 use Lorisleiva\Actions\Concerns\AsAction;
+use Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions\Concerns\CachesFetchedHtml;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions\Concerns\GuardsUrlSafety;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Exceptions\UrlFetchException;
 
@@ -21,12 +22,20 @@ use Modules\CoreIdeaExtractor\Features\ContentExtraction\Exceptions\UrlFetchExce
  */
 class FetchArticleHtmlAction
 {
-    use AsAction, GuardsUrlSafety;
+    use AsAction, GuardsUrlSafety, CachesFetchedHtml;
 
     private const REDIRECT_STATUSES = [301, 302, 303, 307, 308];
 
-    public function handle(string $url): string
+    public function handle(string $url, bool $forceRefresh = false): string
     {
+        if (! $forceRefresh) {
+            $cached = $this->cachedHtml($url);
+
+            if ($cached !== null) {
+                return $cached;
+            }
+        }
+
         $current      = $url;
         $maxRedirects = (int) config('core_idea_extractor.fetch.max_redirects', 3);
 
@@ -71,8 +80,11 @@ class FetchArticleHtmlAction
 
             $body     = $this->normalizeToUtf8($response->body(), $contentType);
             $maxBytes = (int) config('core_idea_extractor.fetch.max_content_bytes', 5 * 1024 * 1024);
+            $body     = strlen($body) > $maxBytes ? substr($body, 0, $maxBytes) : $body;
 
-            return strlen($body) > $maxBytes ? substr($body, 0, $maxBytes) : $body;
+            $this->putCachedHtml($url, $body);
+
+            return $body;
         }
 
         throw new UrlFetchException("Quá nhiều lượt redirect (>{$maxRedirects}).");

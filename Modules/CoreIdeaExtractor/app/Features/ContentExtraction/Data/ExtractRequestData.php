@@ -25,5 +25,7 @@ class ExtractRequestData extends Data
         /** CSS selector đơn giản (id/class) do người dùng chỉ định để khoanh vùng main_content, VD ".detail-content", "#main-content". Null → dùng thuật toán tự động resolveContentRoot(). */
         #[Nullable, Max(255)]
         public readonly ?string $main_content_selector = null,
+        /** true = bỏ qua cache HTML đã fetch trước đó (xem CachesFetchedHtml), luôn fetch mạng lại — dùng khi user nghi ngờ nội dung trang đã đổi hoặc site đã hết bị chặn. */
+        public readonly bool $force_refresh = false,
     ) {}
 }

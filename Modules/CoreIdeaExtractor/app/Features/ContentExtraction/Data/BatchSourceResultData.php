@@ -9,6 +9,10 @@ use Spatie\LaravelData\Data;
  * không áp dụng thì null có chủ đích (không dùng chuỗi rỗng) — để downstream (kể cả AI đọc JSON
  * này) không phải rẽ nhánh theo status mới biết field nào tồn tại. `keywords`/`headings` vẫn
  * dùng mảng rỗng `[]` khi không có dữ liệu (không phải null) vì đây là list, không phải scalar.
+ *
+ * `duplicate_of`: url ĐẦU TIÊN (có thể từ batch trước, khác request) có cùng content_hash đã
+ * chuẩn hoá — phát hiện qua cache cross-reference (xem CoreIdeaExtractorController), không phải
+ * so sánh trong bộ nhớ của riêng batch này. null nếu url này là url đầu tiên có nội dung đó.
  */
 class BatchSourceResultData extends Data
 {
@@ -29,6 +33,7 @@ class BatchSourceResultData extends Data
         public readonly array $headings,
         public readonly ?string $main_content,
         public readonly ?string $content_hash,
+        public readonly ?string $duplicate_of,
         public readonly ?int $word_count,
         public readonly ?string $publish_date,
         public readonly ?string $author,
@@ -46,6 +51,7 @@ class BatchSourceResultData extends Data
         ?int $httpStatus,
         RawExtractionData $extraction,
         string $contentHash,
+        ?string $duplicateOf,
         string $fetchedAt,
     ): self {
         return new self(
@@ -64,6 +70,7 @@ class BatchSourceResultData extends Data
             ),
             main_content: $extraction->main_content,
             content_hash: $contentHash,
+            duplicate_of: $duplicateOf,
             word_count: $extraction->word_count,
             publish_date: $extraction->publish_date,
             author: $extraction->author,
@@ -98,6 +105,7 @@ class BatchSourceResultData extends Data
             headings: [],
             main_content: null,
             content_hash: null,
+            duplicate_of: null,
             word_count: null,
             publish_date: null,
             author: null,
@@ -124,6 +132,7 @@ class BatchSourceResultData extends Data
             'headings'               => $this->headings,
             'main_content'           => $this->main_content,
             'content_hash'           => $this->content_hash,
+            'duplicate_of'           => $this->duplicate_of,
             'word_count'             => $this->word_count,
             'publish_date'           => $this->publish_date,
             'author'                 => $this->author,

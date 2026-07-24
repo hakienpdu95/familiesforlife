@@ -48,4 +48,17 @@ return [
         'max_urls'                          => 7,
         'max_main_content_chars_per_source' => 12000,
     ],
+
+    // Cache HTML thô theo URL (Cache facade — dùng cache store mặc định của app, KHÔNG phải
+    // bảng DB riêng, đúng tinh thần "module KHÔNG có Eloquent Model nào") — 2 batch khác nhau
+    // vô tình trùng URL sẽ không fetch/tải mạng lại trong TTL này. Cache RAW HTML (trước parse)
+    // chứ không cache kết quả extract đã xong, vì main_content_selector có thể khác nhau giữa
+    // 2 lần gọi cùng URL — parse luôn chạy lại, chỉ bước fetch mạng là được tái sử dụng.
+    // content_hash_ttl_seconds dùng cho index dedup (content_hash => url đầu tiên thấy nội dung
+    // này) — TTL dài hơn vì chỉ lưu 1 chuỗi url, không tốn nhiều bộ nhớ như cache HTML.
+    'cache' => [
+        'enabled'                  => true,
+        'fetch_ttl_seconds'        => 3600,
+        'content_hash_ttl_seconds' => 86400,
+    ],
 ];

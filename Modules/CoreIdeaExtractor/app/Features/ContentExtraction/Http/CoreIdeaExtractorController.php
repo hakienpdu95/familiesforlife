@@ -5,6 +5,7 @@ namespace Modules\CoreIdeaExtractor\Features\ContentExtraction\Http;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 use Modules\CoreIdeaExtractor\Enums\ExtractionConfidence;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions\ComputeExtractionConfidenceAction;
@@ -43,6 +44,7 @@ class CoreIdeaExtractorController extends Controller
             'url'                    => ['nullable', 'url', 'max:2048', 'required_without:html'],
             'html'                   => ['nullable', 'string', 'max:'.config('core_idea_extractor.paste.max_chars', 2_000_000), 'required_without:url'],
             'main_content_selector'  => ['nullable', 'string', 'max:255'],
+            'force_refresh'          => ['nullable', 'boolean'],
         ]));
 
         $pasted = $data->html !== null && trim($data->html) !== '';
@@ -51,7 +53,7 @@ class CoreIdeaExtractorController extends Controller
             $html = $data->html;
         } else {
             try {
-                $html = $fetch->handle($data->url);
+                $html = $fetch->handle($data->url, $data->force_refresh);
             } catch (UrlFetchException $e) {
                 return response()->json($this->buildResult(
                     title: null,
@@ -107,10 +109,15 @@ class CoreIdeaExtractorController extends Controller
             'urls'                   => ['required', 'array', 'min:1', "max:{$maxUrls}"],
             'urls.*'                 => ['url', 'max:2048', 'distinct'],
             'topic'                  => ['nullable', 'string', 'max:255'],
+            'audience'               => ['nullable', 'string', 'max:500'],
+            'goal'                   => ['nullable', 'string', 'max:500'],
+            'constraints'            => ['nullable', 'string', 'max:500'],
+            'style_sample'           => ['nullable', 'string', 'max:3000'],
             'main_content_selector'  => ['nullable', 'string', 'max:255'],
+            'force_refresh'          => ['nullable', 'boolean'],
         ]));
 
-        $fetched = $fetchBatch->handle($data->urls);
+        $fetched = $fetchBatch->handle($data->urls, $data->force_refresh);
 
         $sources = [];
         $success = 0;
@@ -142,6 +149,7 @@ class CoreIdeaExtractorController extends Controller
             $confidenceResult = $computeConfidence->handle($extracted);
             $notes            = $this->appendSelectorNote($confidenceResult['notes'], $data->main_content_selector, $extracted['custom_selector_matched']);
             $mainContent      = $this->truncateBatchMainContent($extracted['main_content']);
+            $contentHash      = $this->computeContentHash($mainContent);
 
             $sources[] = BatchSourceResultData::success(
                 url: $url,
@@ -162,7 +170,8 @@ class CoreIdeaExtractorController extends Controller
                     wordCount: $extracted['word_count'],
                     headingCount: $extracted['meaningful_heading_count'],
                 ),
-                contentHash: $this->computeContentHash($mainContent),
+                contentHash: $contentHash,
+                duplicateOf: $this->resolveDuplicateOf($contentHash, $url),
                 fetchedAt: $item['fetched_at'],
             );
 
@@ -171,6 +180,10 @@ class CoreIdeaExtractorController extends Controller
 
         $result = new ExtractBatchResultData(
             topic: $data->topic,
+            audience: $data->audience,
+            goal: $data->goal,
+            constraints: $data->constraints,
+            style_sample: $data->style_sample,
             processed_at: now()->toIso8601String(),
             requested_count: count($data->urls),
             success_count: $success,
@@ -191,7 +204,7 @@ class CoreIdeaExtractorController extends Controller
     {
         $max = (int) config('core_idea_extractor.batch.max_main_content_chars_per_source', 12000);
 
-        return mb_strlen($text) > $max ? mb_substr($text, 0, $max).'…' : $text;
+        return $this->truncateAtBoundary($text, $max);
     }
 
     /**
@@ -205,6 +218,31 @@ class CoreIdeaExtractorController extends Controller
         $normalized = mb_strtolower(preg_replace('/\s+/u', ' ', trim($mainContent)));
 
         return hash('sha256', $normalized);
+    }
+
+    /**
+     * Tra cache content_hash => url ĐẦU TIÊN thấy nội dung này — bắt được trùng lặp cả TRONG 1
+     * batch (2 url cùng batch, xử lý tuần tự nên url sau sẽ thấy cache url trước) lẫn GIỮA các
+     * batch khác nhau (memory bền qua nhiều request, đúng tinh thần "Memory Layer" — không phải
+     * mảng cục bộ trong request). Cache::add() chỉ ghi khi key CHƯA tồn tại — giữ đúng ngữ nghĩa
+     * "url đầu tiên/gốc", không bị url sau ghi đè.
+     */
+    private function resolveDuplicateOf(string $contentHash, string $url): ?string
+    {
+        if (! config('core_idea_extractor.cache.enabled', true)) {
+            return null;
+        }
+
+        $key = 'core_idea_extractor:content_hash:'.$contentHash;
+        $ttl = (int) config('core_idea_extractor.cache.content_hash_ttl_seconds', 86400);
+
+        if (Cache::add($key, $url, $ttl)) {
+            return null;
+        }
+
+        $firstSeenUrl = Cache::get($key);
+
+        return $firstSeenUrl !== $url ? $firstSeenUrl : null;
     }
 
     /** @param HeadingData[] $headings @param string[] $keywords */
@@ -275,6 +313,36 @@ class CoreIdeaExtractorController extends Controller
     {
         $max = (int) config('core_idea_extractor.max_main_content_chars', 20000);
 
-        return mb_strlen($text) > $max ? mb_substr($text, 0, $max).'…' : $text;
+        return $this->truncateAtBoundary($text, $max);
+    }
+
+    /**
+     * Cắt tại ranh giới câu gần nhất (.!?  theo sau bởi khoảng trắng/hết chuỗi, hoặc xuống dòng)
+     * thay vì cắt cứng theo vị trí ký tự — tránh cắt giữa câu/giữa từ, và tránh mất hẳn phần kết
+     * luận nếu ranh giới câu nằm ngay trước ngưỡng. Chỉ dùng ranh giới nếu nó giữ được ít nhất
+     * 70% ngân sách ký tự yêu cầu — nếu ranh giới gần nhất ở quá xa về đầu (VD nội dung không có
+     * dấu câu rõ ràng, danh sách dài...), rơi về cắt cứng để không mất quá nhiều nội dung.
+     */
+    private function truncateAtBoundary(string $text, int $max): string
+    {
+        if (mb_strlen($text) <= $max) {
+            return $text;
+        }
+
+        $window        = mb_substr($text, 0, $max);
+        $minAcceptable = (int) ($max * 0.7);
+        $cutAt         = null;
+
+        if (preg_match_all('/[.!?](?=\s|$)|\n/u', $window, $matches, PREG_OFFSET_CAPTURE)) {
+            [$boundary, $byteOffset] = end($matches[0]);
+            $charOffset              = mb_strlen(substr($window, 0, $byteOffset));
+            $cutAt                   = $boundary === "\n" ? $charOffset : $charOffset + 1;
+        }
+
+        if ($cutAt !== null && $cutAt >= $minAcceptable) {
+            return rtrim(mb_substr($text, 0, $cutAt)).'…';
+        }
+
+        return $window.'…';
     }
 }

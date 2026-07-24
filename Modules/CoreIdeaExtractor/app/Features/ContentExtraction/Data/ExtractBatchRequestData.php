@@ -17,8 +17,30 @@ class ExtractBatchRequestData extends Data
         /** Từ khóa nghiên cứu do người dùng nhập — thuần metadata, echo lại trong response để nhận diện payload khi dán vào chat AI, KHÔNG dùng để thay đổi logic fetch/extract. */
         #[Nullable, Max(255)]
         public readonly ?string $topic = null,
+        /**
+         * Ngữ cảnh phía người viết (audience/goal/constraints) — thuần metadata do người dùng tự
+         * gõ, echo lại trong response dưới `brief`, KHÔNG qua AI xử lý. Lý do thêm: nội dung
+         * sources[] chỉ là ngữ cảnh PHÍA NGUỒN (source-side) — nếu dán JSON vào chat AI mà thiếu
+         * hẳn ngữ cảnh phía người viết (đối tượng đọc, mục tiêu, ràng buộc), AI vẫn trả lời chung
+         * chung dù nguồn tham khảo có sâu đến đâu.
+         */
+        #[Nullable, Max(500)]
+        public readonly ?string $audience = null,
+        #[Nullable, Max(500)]
+        public readonly ?string $goal = null,
+        #[Nullable, Max(500)]
+        public readonly ?string $constraints = null,
+        /**
+         * Đoạn văn mẫu người dùng tự dán (VD 1 đoạn họ từng viết) — mô tả giọng văn bằng LỜI
+         * (constraints ở trên) kém hiệu quả hơn nhiều so với đưa VÍ DỤ THẬT cho AI học theo.
+         * Thuần passthrough, không xử lý gì thêm ở Layer 1.
+         */
+        #[Nullable, Max(3000)]
+        public readonly ?string $style_sample = null,
         /** Áp dụng chung cho mọi URL trong batch — xem ExtractRequestData::$main_content_selector. */
         #[Nullable, Max(255)]
         public readonly ?string $main_content_selector = null,
+        /** Áp dụng chung cho mọi URL trong batch — xem ExtractRequestData::$force_refresh. */
+        public readonly bool $force_refresh = false,
     ) {}
 }

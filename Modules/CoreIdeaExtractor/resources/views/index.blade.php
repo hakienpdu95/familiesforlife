@@ -55,6 +55,43 @@
                     </div>
                 </div>
 
+                <details class="rounded-lg border border-base-200 px-3 py-2" x-show="mode === 'url'">
+                    <summary class="cursor-pointer text-xs font-medium text-base-content/60">
+                        Ngữ cảnh cho người viết (tùy chọn) — giúp AI không trả lời chung chung khi bạn dán JSON vào chat
+                    </summary>
+                    <div class="flex flex-wrap gap-3 mt-2">
+                        <div class="form-control flex-1 min-w-64">
+                            <label class="label py-0.5"><span class="label-text text-xs font-medium">Đối tượng độc giả</span></label>
+                            <input type="text" x-model="audience" placeholder="VD: mẹ mới sinh con đầu lòng, chưa có kinh nghiệm"
+                                   class="input input-sm input-bordered w-full">
+                        </div>
+                        <div class="form-control flex-1 min-w-64">
+                            <label class="label py-0.5"><span class="label-text text-xs font-medium">Mục tiêu bài viết</span></label>
+                            <input type="text" x-model="goal" placeholder="VD: bài blog 1500 từ, cần góc nhìn khác các nguồn tham khảo"
+                                   class="input input-sm input-bordered w-full">
+                        </div>
+                        <div class="form-control flex-1 min-w-64">
+                            <label class="label py-0.5"><span class="label-text text-xs font-medium">Ràng buộc / không muốn</span></label>
+                            <input type="text" x-model="constraints" placeholder="VD: không viết giọng hàn lâm, không quảng cáo sản phẩm"
+                                   class="input input-sm input-bordered w-full">
+                        </div>
+                    </div>
+                    <div class="form-control mt-2">
+                        <label class="label py-0.5">
+                            <span class="label-text text-xs font-medium">Đoạn văn mẫu (giọng văn của bạn — ví dụ thật hiệu quả hơn mô tả)</span>
+                        </label>
+                        <textarea x-model="styleSample" rows="3" placeholder="Dán 1 đoạn bạn từng viết để AI học theo giọng văn thật, thay vì chỉ mô tả bằng lời..."
+                                  class="textarea textarea-bordered textarea-sm w-full text-xs"></textarea>
+                    </div>
+                </details>
+
+                <label class="label cursor-pointer justify-start gap-2 py-0" x-show="mode === 'url'">
+                    <input type="checkbox" x-model="forceRefresh" class="checkbox checkbox-xs">
+                    <span class="label-text text-xs text-base-content/60">
+                        Bỏ qua cache, fetch lại từ đầu (HTML mỗi URL được cache {{ (int) (config('core_idea_extractor.cache.fetch_ttl_seconds', 3600) / 60) }} phút — tick nếu nghi ngờ nội dung trang đã đổi hoặc site đã hết bị chặn)
+                    </span>
+                </label>
+
                 <div class="form-control" x-show="mode === 'html'" x-cloak>
                     <label class="label py-0.5"><span class="label-text text-xs font-medium">Mã HTML</span></label>
                     <textarea x-model="html" :required="mode === 'html'" rows="8"
@@ -113,9 +150,11 @@
             <template x-if="isBatchResult()">
                 <div class="flex flex-wrap gap-1.5 mb-3">
                     <template x-for="source in result.sources" :key="source.url">
-                        <span class="badge badge-sm gap-1" :class="sourceBadgeClass(source.status)" :title="source.url">
+                        <span class="badge badge-sm gap-1" :class="sourceBadgeClass(source.status)"
+                              :title="source.duplicate_of ? `Trùng nội dung với: ${source.duplicate_of}` : source.url">
                             <span x-text="source.domain"></span>
                             <span x-show="source.status !== 'success'" x-text="`(${source.failure_type ?? source.status})`"></span>
+                            <span x-show="source.duplicate_of" x-cloak class="opacity-70">(trùng)</span>
                         </span>
                     </template>
                 </div>
@@ -141,8 +180,13 @@ document.addEventListener('alpine:init', () => {
             mode: 'url',
             urlsText: '',
             topic: '',
+            audience: '',
+            goal: '',
+            constraints: '',
+            styleSample: '',
             html: '',
             contentSelector: '',
+            forceRefresh: false,
             loading: false,
             result: null,
             errorMessage: '',
@@ -178,7 +222,12 @@ document.addEventListener('alpine:init', () => {
                     ? JSON.stringify({
                         urls: this.parsedUrls().slice(0, this.maxUrls),
                         topic: this.topic || null,
+                        audience: this.audience || null,
+                        goal: this.goal || null,
+                        constraints: this.constraints || null,
+                        style_sample: this.styleSample || null,
                         main_content_selector: this.contentSelector || null,
+                        force_refresh: this.forceRefresh,
                     })
                     : JSON.stringify({
                         url: null,

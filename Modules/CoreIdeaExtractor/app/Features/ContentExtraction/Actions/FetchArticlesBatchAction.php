@@ -5,6 +5,7 @@ namespace Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions;
 use Illuminate\Http\Client\Pool;
 use Illuminate\Support\Facades\Http;
 use Lorisleiva\Actions\Concerns\AsAction;
+use Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions\Concerns\CachesFetchedHtml;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions\Concerns\GuardsUrlSafety;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Exceptions\UrlFetchException;
 
@@ -22,7 +23,7 @@ use Modules\CoreIdeaExtractor\Features\ContentExtraction\Exceptions\UrlFetchExce
  */
 class FetchArticlesBatchAction
 {
-    use AsAction, GuardsUrlSafety;
+    use AsAction, GuardsUrlSafety, CachesFetchedHtml;
 
     private const REDIRECT_STATUSES = [301, 302, 303, 307, 308];
 
@@ -30,7 +31,7 @@ class FetchArticlesBatchAction
      * @param  array<int|string, string>  $urls
      * @return array<int|string, array{html: ?string, resolved_url: ?string, http_status: ?int, fetched_at: string, failure: ?array{status: string, failure_type: string, http_status: ?int, error_message: string}}>
      */
-    public function handle(array $urls): array
+    public function handle(array $urls, bool $forceRefresh = false): array
     {
         $maxRedirects = (int) config('core_idea_extractor.fetch.max_redirects', 3);
         $userAgent    = config('core_idea_extractor.fetch.user_agent');
@@ -41,6 +42,7 @@ class FetchArticlesBatchAction
 
         foreach ($urls as $key => $url) {
             $items[$key] = [
+                'original'     => $url,
                 'current'      => $url,
                 'resolved_url' => null,
                 'html'         => null,
@@ -54,6 +56,19 @@ class FetchArticlesBatchAction
                 $this->assertSafeUrl($url);
             } catch (UrlFetchException $e) {
                 $this->markFailed($items, $key, 'error', 'invalid_url', null, $e->getMessage());
+
+                continue;
+            }
+
+            if (! $forceRefresh) {
+                $cached = $this->cachedHtml($url);
+
+                if ($cached !== null) {
+                    $items[$key]['done']        = true;
+                    $items[$key]['html']        = $cached;
+                    $items[$key]['http_status'] = 200;
+                    $items[$key]['fetched_at']  = now()->toIso8601String();
+                }
             }
         }
 
@@ -162,11 +177,14 @@ class FetchArticlesBatchAction
         }
 
         $body = $this->normalizeToUtf8($response->body(), $contentType);
+        $body = strlen($body) > $maxBytes ? substr($body, 0, $maxBytes) : $body;
 
         $items[$key]['done']        = true;
-        $items[$key]['html']        = strlen($body) > $maxBytes ? substr($body, 0, $maxBytes) : $body;
+        $items[$key]['html']        = $body;
         $items[$key]['http_status'] = $response->status();
         $items[$key]['fetched_at']  = now()->toIso8601String();
+
+        $this->putCachedHtml($items[$key]['original'], $body);
     }
 
     private function markFailed(array &$items, int|string $key, string $status, string $failureType, ?int $httpStatus, string $errorMessage): void

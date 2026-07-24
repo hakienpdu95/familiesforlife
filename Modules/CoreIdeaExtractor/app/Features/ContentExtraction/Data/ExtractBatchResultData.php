@@ -9,6 +9,10 @@ class ExtractBatchResultData extends Data
     /** @param BatchSourceResultData[] $sources */
     public function __construct(
         public readonly ?string $topic,
+        public readonly ?string $audience,
+        public readonly ?string $goal,
+        public readonly ?string $constraints,
+        public readonly ?string $style_sample,
         public readonly string $processed_at,
         public readonly int $requested_count,
         public readonly int $success_count,
@@ -20,7 +24,19 @@ class ExtractBatchResultData extends Data
     public function toApiArray(): array
     {
         return [
-            'topic'            => $this->topic,
+            'topic' => $this->topic,
+            /**
+             * Ngữ cảnh phía người viết (audience/goal/constraints) — khác `sources[]` (ngữ cảnh
+             * phía nguồn). Thiếu phần này, dán nguyên JSON vào chat AI vẫn dễ ra câu trả lời
+             * chung chung dù sources có sâu đến đâu (AI không biết viết cho ai, để làm gì, giới
+             * hạn gì) — xem thảo luận "why AI gives generic answers" đã tham khảo khi thiết kế.
+             */
+            'brief' => [
+                'audience'     => $this->audience,
+                'goal'         => $this->goal,
+                'constraints'  => $this->constraints,
+                'style_sample' => $this->style_sample,
+            ],
             'requested_count'  => $this->requested_count,
             'source_coverage'  => [
                 'success' => $this->success_count,
