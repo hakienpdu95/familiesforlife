@@ -18,4 +18,5 @@ Route::middleware(['auth', 'can:core_idea_extractor.use'])
     ->name('backend.api.coreideaextractor.')
     ->group(function (): void {
         Route::post('extract', [CoreIdeaExtractorController::class, 'extract'])->name('extract');
+        Route::post('extract-batch', [CoreIdeaExtractorController::class, 'extractBatch'])->name('extract-batch');
     });

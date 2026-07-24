@@ -10,6 +10,10 @@ use Modules\CoreIdeaExtractor\Enums\ExtractionConfidence;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions\ComputeExtractionConfidenceAction;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions\ExtractRawContentAction;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions\FetchArticleHtmlAction;
+use Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions\FetchArticlesBatchAction;
+use Modules\CoreIdeaExtractor\Features\ContentExtraction\Data\BatchSourceResultData;
+use Modules\CoreIdeaExtractor\Features\ContentExtraction\Data\ExtractBatchRequestData;
+use Modules\CoreIdeaExtractor\Features\ContentExtraction\Data\ExtractBatchResultData;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Data\ExtractRequestData;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Data\HeadingData;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Data\RawExtractionData;
@@ -85,6 +89,103 @@ class CoreIdeaExtractorController extends Controller
         );
 
         return response()->json($result->toApiArray());
+    }
+
+    /**
+     * Batch tối đa `core_idea_extractor.batch.max_urls` URL, fetch song song qua
+     * FetchArticlesBatchAction (Http::pool) — 1 nguồn lỗi/bị chặn (Cloudflare/WAF) KHÔNG làm
+     * hỏng cả batch, chỉ xuất status='blocked'/'error' cho riêng nguồn đó (xem
+     * BatchSourceResultData). main_content mỗi nguồn cắt ngắn hơn mode 1-URL (xem
+     * truncateBatchMainContent()) vì kết quả dùng để copy nguyên JSON dán vào chat AI —
+     * 7 nguồn full 100000 ký tự/nguồn sẽ quá lớn để paste.
+     */
+    public function extractBatch(Request $request, FetchArticlesBatchAction $fetchBatch, ExtractRawContentAction $extractRaw, ComputeExtractionConfidenceAction $computeConfidence): JsonResponse
+    {
+        $maxUrls = (int) config('core_idea_extractor.batch.max_urls', 7);
+
+        $data = ExtractBatchRequestData::from($request->validate([
+            'urls'                   => ['required', 'array', 'min:1', "max:{$maxUrls}"],
+            'urls.*'                 => ['url', 'max:2048', 'distinct'],
+            'topic'                  => ['nullable', 'string', 'max:255'],
+            'main_content_selector'  => ['nullable', 'string', 'max:255'],
+        ]));
+
+        $fetched = $fetchBatch->handle($data->urls);
+
+        $sources    = [];
+        $successful = 0;
+        $blocked    = 0;
+        $failed     = 0;
+
+        foreach ($data->urls as $key => $url) {
+            $item   = $fetched[$key];
+            $domain = $this->resolveDomain($url);
+
+            if ($item['failure'] !== null) {
+                $sources[] = BatchSourceResultData::failure(
+                    sourceUrl: $url,
+                    resolvedUrl: $item['resolved_url'],
+                    domain: $domain,
+                    status: $item['failure']['status'],
+                    blockReason: $item['failure']['block_reason'],
+                    notes: $item['failure']['message'],
+                );
+
+                $item['failure']['status'] === 'blocked' ? $blocked++ : $failed++;
+
+                continue;
+            }
+
+            $extracted        = $extractRaw->handle($item['html'], $data->main_content_selector);
+            $confidenceResult = $computeConfidence->handle($extracted);
+            $notes            = $this->appendSelectorNote($confidenceResult['notes'], $data->main_content_selector, $extracted['custom_selector_matched']);
+
+            $sources[] = BatchSourceResultData::success(
+                sourceUrl: $url,
+                resolvedUrl: $item['resolved_url'],
+                domain: $domain,
+                extraction: $this->buildResult(
+                    title: $extracted['title'],
+                    metaDescription: $extracted['meta_description'],
+                    keywords: $extracted['keywords'],
+                    headings: $extracted['headings'],
+                    mainContent: $this->truncateBatchMainContent($extracted['main_content']),
+                    publishDate: $extracted['publish_date'],
+                    author: $extracted['author'],
+                    language: $extracted['language'],
+                    confidence: $confidenceResult['confidence'],
+                    notes: $notes,
+                    wordCount: $extracted['word_count'],
+                    headingCount: $extracted['meaningful_heading_count'],
+                ),
+            );
+
+            $successful++;
+        }
+
+        $result = new ExtractBatchResultData(
+            topic: $data->topic,
+            generated_at: now()->toIso8601String(),
+            total_requested: count($data->urls),
+            successful: $successful,
+            blocked: $blocked,
+            failed: $failed,
+            sources: $sources,
+        );
+
+        return response()->json($result->toApiArray());
+    }
+
+    private function resolveDomain(string $url): string
+    {
+        return parse_url($url, PHP_URL_HOST) ?: $url;
+    }
+
+    private function truncateBatchMainContent(string $text): string
+    {
+        $max = (int) config('core_idea_extractor.batch.max_main_content_chars_per_source', 12000);
+
+        return mb_strlen($text) > $max ? mb_substr($text, 0, $max).'…' : $text;
     }
 
     /** @param HeadingData[] $headings @param string[] $keywords */

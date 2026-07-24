@@ -39,4 +39,13 @@ return [
     // cắt cụt cả bài viết bình thường (VD 1 bài ~3000 từ, 21596 ký tự đã bị cắt mất đoạn cuối),
     // nên nới lên mức chỉ chặn được trường hợp cực đoan (content root chọn nhầm nguyên trang).
     'max_main_content_chars' => 100000,
+
+    // Batch nhiều URL cùng lúc (Http::pool) — kết quả dùng để copy nguyên JSON dán vào chat AI
+    // (claude.ai), nên main_content mỗi nguồn phải cắt ngắn hơn NHIỀU so với mode 1-URL: 7 nguồn
+    // x 100000 ký tự sẽ quá lớn để paste. 12000 ký tự (~2000+ từ) đủ cho phần lớn bài viết bình
+    // thường, chỉ cắt bớt các bài cực dài.
+    'batch' => [
+        'max_urls'                          => 7,
+        'max_main_content_chars_per_source' => 12000,
+    ],
 ];
