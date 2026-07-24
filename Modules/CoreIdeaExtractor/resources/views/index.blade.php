@@ -96,9 +96,9 @@
                 </template>
                 <template x-if="isBatchResult()">
                     <div class="flex items-center gap-2 text-xs text-base-content/60">
-                        <span x-text="`${result.source_coverage.successful}/${result.source_coverage.total_requested} nguồn thành công`"></span>
+                        <span x-text="`${result.source_coverage.success}/${result.requested_count} nguồn thành công`"></span>
                         <span x-show="result.source_coverage.blocked" class="badge badge-warning badge-xs" x-text="`${result.source_coverage.blocked} bị chặn`"></span>
-                        <span x-show="result.source_coverage.failed" class="badge badge-error badge-xs" x-text="`${result.source_coverage.failed} lỗi`"></span>
+                        <span x-show="result.source_coverage.error" class="badge badge-error badge-xs" x-text="`${result.source_coverage.error} lỗi`"></span>
                     </div>
                 </template>
                 <button type="button" class="btn btn-ghost btn-xs gap-1.5" @click="copyJson()">
@@ -112,16 +112,17 @@
 
             <template x-if="isBatchResult()">
                 <div class="flex flex-wrap gap-1.5 mb-3">
-                    <template x-for="source in result.sources" :key="source.source_url">
-                        <span class="badge badge-sm gap-1" :class="sourceBadgeClass(source.status)" :title="source.source_url">
+                    <template x-for="source in result.sources" :key="source.url">
+                        <span class="badge badge-sm gap-1" :class="sourceBadgeClass(source.status)" :title="source.url">
                             <span x-text="source.domain"></span>
-                            <span x-show="source.status !== 'success'" x-text="`(${source.block_reason ?? source.status})`"></span>
+                            <span x-show="source.status !== 'success'" x-text="`(${source.failure_type ?? source.status})`"></span>
                         </span>
                     </template>
                 </div>
             </template>
 
             <p x-show="!isBatchResult() && result && result.notes" x-cloak class="text-xs text-warning mb-3" x-text="result?.notes"></p>
+            <p x-show="isBatchResult() && result.summary_note" x-cloak class="text-xs text-warning mb-3" x-text="result?.summary_note"></p>
 
             <pre class="bg-base-200 rounded-lg p-4 text-xs overflow-x-auto max-h-[70vh]" x-text="prettyJson()"></pre>
         </div>

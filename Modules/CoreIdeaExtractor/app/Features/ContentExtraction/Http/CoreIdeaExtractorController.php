@@ -112,10 +112,10 @@ class CoreIdeaExtractorController extends Controller
 
         $fetched = $fetchBatch->handle($data->urls);
 
-        $sources    = [];
-        $successful = 0;
-        $blocked    = 0;
-        $failed     = 0;
+        $sources = [];
+        $success = 0;
+        $blocked = 0;
+        $error   = 0;
 
         foreach ($data->urls as $key => $url) {
             $item   = $fetched[$key];
@@ -123,15 +123,17 @@ class CoreIdeaExtractorController extends Controller
 
             if ($item['failure'] !== null) {
                 $sources[] = BatchSourceResultData::failure(
-                    sourceUrl: $url,
-                    resolvedUrl: $item['resolved_url'],
+                    url: $url,
+                    finalUrl: $item['resolved_url'],
                     domain: $domain,
                     status: $item['failure']['status'],
-                    blockReason: $item['failure']['block_reason'],
-                    notes: $item['failure']['message'],
+                    failureType: $item['failure']['failure_type'],
+                    httpStatus: $item['failure']['http_status'],
+                    errorMessage: $item['failure']['error_message'],
+                    fetchedAt: $item['fetched_at'],
                 );
 
-                $item['failure']['status'] === 'blocked' ? $blocked++ : $failed++;
+                $item['failure']['status'] === 'blocked' ? $blocked++ : $error++;
 
                 continue;
             }
@@ -139,17 +141,19 @@ class CoreIdeaExtractorController extends Controller
             $extracted        = $extractRaw->handle($item['html'], $data->main_content_selector);
             $confidenceResult = $computeConfidence->handle($extracted);
             $notes            = $this->appendSelectorNote($confidenceResult['notes'], $data->main_content_selector, $extracted['custom_selector_matched']);
+            $mainContent      = $this->truncateBatchMainContent($extracted['main_content']);
 
             $sources[] = BatchSourceResultData::success(
-                sourceUrl: $url,
-                resolvedUrl: $item['resolved_url'],
+                url: $url,
+                finalUrl: $item['resolved_url'],
                 domain: $domain,
+                httpStatus: $item['http_status'],
                 extraction: $this->buildResult(
                     title: $extracted['title'],
                     metaDescription: $extracted['meta_description'],
                     keywords: $extracted['keywords'],
                     headings: $extracted['headings'],
-                    mainContent: $this->truncateBatchMainContent($extracted['main_content']),
+                    mainContent: $mainContent,
                     publishDate: $extracted['publish_date'],
                     author: $extracted['author'],
                     language: $extracted['language'],
@@ -158,18 +162,20 @@ class CoreIdeaExtractorController extends Controller
                     wordCount: $extracted['word_count'],
                     headingCount: $extracted['meaningful_heading_count'],
                 ),
+                contentHash: $this->computeContentHash($mainContent),
+                fetchedAt: $item['fetched_at'],
             );
 
-            $successful++;
+            $success++;
         }
 
         $result = new ExtractBatchResultData(
             topic: $data->topic,
-            generated_at: now()->toIso8601String(),
-            total_requested: count($data->urls),
-            successful: $successful,
-            blocked: $blocked,
-            failed: $failed,
+            processed_at: now()->toIso8601String(),
+            requested_count: count($data->urls),
+            success_count: $success,
+            blocked_count: $blocked,
+            error_count: $error,
             sources: $sources,
         );
 
@@ -186,6 +192,19 @@ class CoreIdeaExtractorController extends Controller
         $max = (int) config('core_idea_extractor.batch.max_main_content_chars_per_source', 12000);
 
         return mb_strlen($text) > $max ? mb_substr($text, 0, $max).'…' : $text;
+    }
+
+    /**
+     * Hash nội dung đã chuẩn hoá (collapse whitespace + lowercase) — CHỈ bắt được trùng lặp gần
+     * đúng (VD cùng bài fetch 2 lần, hoặc 2 URL cùng trỏ 1 bài). KHÔNG bắt được 2 bài syndicate
+     * nội dung giống ý nhưng câu chữ khác nhau — việc đó cần so sánh ngữ nghĩa (Layer 2), ngoài
+     * phạm vi hash thô này.
+     */
+    private function computeContentHash(string $mainContent): string
+    {
+        $normalized = mb_strtolower(preg_replace('/\s+/u', ' ', trim($mainContent)));
+
+        return hash('sha256', $normalized);
     }
 
     /** @param HeadingData[] $headings @param string[] $keywords */

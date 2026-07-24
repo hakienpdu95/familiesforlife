@@ -28,7 +28,7 @@ class FetchArticlesBatchAction
 
     /**
      * @param  array<int|string, string>  $urls
-     * @return array<int|string, array{html: ?string, resolved_url: ?string, failure: ?array{status: string, block_reason: string, message: string}}>
+     * @return array<int|string, array{html: ?string, resolved_url: ?string, http_status: ?int, fetched_at: string, failure: ?array{status: string, failure_type: string, http_status: ?int, error_message: string}}>
      */
     public function handle(array $urls): array
     {
@@ -44,6 +44,8 @@ class FetchArticlesBatchAction
                 'current'      => $url,
                 'resolved_url' => null,
                 'html'         => null,
+                'http_status'  => null,
+                'fetched_at'   => null,
                 'failure'      => null,
                 'done'         => false,
             ];
@@ -51,8 +53,7 @@ class FetchArticlesBatchAction
             try {
                 $this->assertSafeUrl($url);
             } catch (UrlFetchException $e) {
-                $items[$key]['done']    = true;
-                $items[$key]['failure'] = $this->failure('error', 'invalid_url', $e->getMessage());
+                $this->markFailed($items, $key, 'error', 'invalid_url', null, $e->getMessage());
             }
         }
 
@@ -81,8 +82,7 @@ class FetchArticlesBatchAction
                 $response = $responses[(string) $key] ?? null;
 
                 if ($response instanceof \Throwable) {
-                    $items[$key]['done']    = true;
-                    $items[$key]['failure'] = $this->failure('error', 'network_error', 'Lỗi kết nối khi tải trang: '.$response->getMessage());
+                    $this->markFailed($items, $key, 'error', 'network_error', null, 'Lỗi kết nối khi tải trang: '.$response->getMessage());
 
                     continue;
                 }
@@ -96,8 +96,14 @@ class FetchArticlesBatchAction
                 if (! $response->successful()) {
                     $classification = ClassifyFetchFailureAction::run($response->status(), $response->body(), $response->headers());
 
-                    $items[$key]['done']    = true;
-                    $items[$key]['failure'] = $classification;
+                    $this->markFailed(
+                        $items,
+                        $key,
+                        $classification['status'],
+                        $classification['failure_type'],
+                        $classification['http_status'],
+                        $classification['error_message'],
+                    );
 
                     continue;
                 }
@@ -108,13 +114,15 @@ class FetchArticlesBatchAction
 
         foreach ($items as $key => $item) {
             if (! $item['done']) {
-                $items[$key]['failure'] = $this->failure('error', 'too_many_redirects', "Quá nhiều lượt redirect (>{$maxRedirects}).");
+                $this->markFailed($items, $key, 'error', 'too_many_redirects', null, "Quá nhiều lượt redirect (>{$maxRedirects}).");
             }
         }
 
         return array_map(static fn (array $item) => [
             'html'         => $item['html'],
             'resolved_url' => $item['resolved_url'],
+            'http_status'  => $item['http_status'],
+            'fetched_at'   => $item['fetched_at'],
             'failure'      => $item['failure'],
         ], $items);
     }
@@ -124,8 +132,7 @@ class FetchArticlesBatchAction
         $location = $response->header('Location');
 
         if (! $location) {
-            $items[$key]['done']    = true;
-            $items[$key]['failure'] = $this->failure('error', 'redirect_error', 'Redirect không có header Location.');
+            $this->markFailed($items, $key, 'error', 'redirect_error', $response->status(), 'Redirect không có header Location.');
 
             return;
         }
@@ -135,8 +142,7 @@ class FetchArticlesBatchAction
         try {
             $this->assertSafeUrl($next);
         } catch (UrlFetchException $e) {
-            $items[$key]['done']    = true;
-            $items[$key]['failure'] = $this->failure('error', 'invalid_url', $e->getMessage());
+            $this->markFailed($items, $key, 'error', 'invalid_url', $response->status(), $e->getMessage());
 
             return;
         }
@@ -150,20 +156,29 @@ class FetchArticlesBatchAction
         $contentType = (string) $response->header('Content-Type');
 
         if ($contentType !== '' && ! str_contains($contentType, 'html')) {
-            $items[$key]['done']    = true;
-            $items[$key]['failure'] = $this->failure('error', 'invalid_content_type', "Nội dung không phải HTML (Content-Type: {$contentType}).");
+            $this->markFailed($items, $key, 'error', 'invalid_content_type', $response->status(), "Nội dung không phải HTML (Content-Type: {$contentType}).");
 
             return;
         }
 
         $body = $this->normalizeToUtf8($response->body(), $contentType);
 
-        $items[$key]['done'] = true;
-        $items[$key]['html'] = strlen($body) > $maxBytes ? substr($body, 0, $maxBytes) : $body;
+        $items[$key]['done']        = true;
+        $items[$key]['html']        = strlen($body) > $maxBytes ? substr($body, 0, $maxBytes) : $body;
+        $items[$key]['http_status'] = $response->status();
+        $items[$key]['fetched_at']  = now()->toIso8601String();
     }
 
-    private function failure(string $status, string $blockReason, string $message): array
+    private function markFailed(array &$items, int|string $key, string $status, string $failureType, ?int $httpStatus, string $errorMessage): void
     {
-        return ['status' => $status, 'block_reason' => $blockReason, 'message' => $message];
+        $items[$key]['done']        = true;
+        $items[$key]['http_status'] = $httpStatus;
+        $items[$key]['fetched_at']  = now()->toIso8601String();
+        $items[$key]['failure']     = [
+            'status'        => $status,
+            'failure_type'  => $failureType,
+            'http_status'   => $httpStatus,
+            'error_message' => $errorMessage,
+        ];
     }
 }

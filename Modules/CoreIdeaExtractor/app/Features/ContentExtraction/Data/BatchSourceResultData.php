@@ -5,68 +5,133 @@ namespace Modules\CoreIdeaExtractor\Features\ContentExtraction\Data;
 use Spatie\LaravelData\Data;
 
 /**
- * Kết quả 1 nguồn trong batch (spec/CoreIdeaExtractor.md — mở rộng batch, không đổi shape
- * Layer 1 hiện có). `status='success'` xuất toàn bộ field của RawExtractionData::toApiArray()
- * cộng thêm source_url/resolved_url/domain; 'blocked'/'error' xuất shape gọn hơn (không có
- * title/headings/main_content...) kèm block_reason + notes hướng dẫn xử lý (VD dùng tab
- * "Dán mã HTML" cho nguồn bị Cloudflare chặn).
+ * Kết quả 1 nguồn trong batch — 1 SHAPE DUY NHẤT cho mọi status (success/blocked/error), field
+ * không áp dụng thì null có chủ đích (không dùng chuỗi rỗng) — để downstream (kể cả AI đọc JSON
+ * này) không phải rẽ nhánh theo status mới biết field nào tồn tại. `keywords`/`headings` vẫn
+ * dùng mảng rỗng `[]` khi không có dữ liệu (không phải null) vì đây là list, không phải scalar.
  */
 class BatchSourceResultData extends Data
 {
+    /**
+     * @param  string[]  $keywords
+     * @param  array<int, array{level: int, text: string}>  $headings
+     */
     public function __construct(
-        public readonly string $source_url,
-        public readonly ?string $resolved_url,
+        public readonly string $url,
+        public readonly ?string $final_url,
         public readonly string $domain,
         public readonly string $status,
-        public readonly ?string $block_reason = null,
-        public readonly ?string $notes = null,
-        public readonly ?RawExtractionData $extraction = null,
+        public readonly ?string $failure_type,
+        public readonly ?int $http_status,
+        public readonly ?string $title,
+        public readonly ?string $meta_description,
+        public readonly array $keywords,
+        public readonly array $headings,
+        public readonly ?string $main_content,
+        public readonly ?string $content_hash,
+        public readonly ?int $word_count,
+        public readonly ?string $publish_date,
+        public readonly ?string $author,
+        public readonly ?string $language,
+        public readonly ?string $extraction_confidence,
+        public readonly ?string $notes,
+        public readonly ?string $error_message,
+        public readonly string $fetched_at,
     ) {}
 
-    public static function success(string $sourceUrl, ?string $resolvedUrl, string $domain, RawExtractionData $extraction): self
-    {
+    public static function success(
+        string $url,
+        ?string $finalUrl,
+        string $domain,
+        ?int $httpStatus,
+        RawExtractionData $extraction,
+        string $contentHash,
+        string $fetchedAt,
+    ): self {
         return new self(
-            source_url: $sourceUrl,
-            resolved_url: $resolvedUrl,
+            url: $url,
+            final_url: $finalUrl,
             domain: $domain,
             status: 'success',
-            extraction: $extraction,
+            failure_type: null,
+            http_status: $httpStatus,
+            title: $extraction->title,
+            meta_description: $extraction->meta_description,
+            keywords: $extraction->keywords,
+            headings: array_map(
+                static fn (HeadingData $h) => ['level' => $h->level, 'text' => $h->text],
+                $extraction->headings,
+            ),
+            main_content: $extraction->main_content,
+            content_hash: $contentHash,
+            word_count: $extraction->word_count,
+            publish_date: $extraction->publish_date,
+            author: $extraction->author,
+            language: $extraction->language,
+            extraction_confidence: $extraction->extraction_confidence->value,
+            notes: $extraction->notes,
+            error_message: null,
+            fetched_at: $fetchedAt,
         );
     }
 
-    public static function failure(string $sourceUrl, ?string $resolvedUrl, string $domain, string $status, string $blockReason, string $notes): self
-    {
+    public static function failure(
+        string $url,
+        ?string $finalUrl,
+        string $domain,
+        string $status,
+        string $failureType,
+        ?int $httpStatus,
+        string $errorMessage,
+        string $fetchedAt,
+    ): self {
         return new self(
-            source_url: $sourceUrl,
-            resolved_url: $resolvedUrl,
+            url: $url,
+            final_url: $finalUrl,
             domain: $domain,
             status: $status,
-            block_reason: $blockReason,
-            notes: $notes,
+            failure_type: $failureType,
+            http_status: $httpStatus,
+            title: null,
+            meta_description: null,
+            keywords: [],
+            headings: [],
+            main_content: null,
+            content_hash: null,
+            word_count: null,
+            publish_date: null,
+            author: null,
+            language: null,
+            extraction_confidence: null,
+            notes: null,
+            error_message: $errorMessage,
+            fetched_at: $fetchedAt,
         );
     }
 
     public function toApiArray(): array
     {
-        if ($this->status !== 'success') {
-            return [
-                'source_url'   => $this->source_url,
-                'resolved_url' => $this->resolved_url,
-                'domain'       => $this->domain,
-                'status'       => $this->status,
-                'block_reason' => $this->block_reason,
-                'notes'        => $this->notes,
-            ];
-        }
-
-        return array_merge(
-            [
-                'source_url'   => $this->source_url,
-                'resolved_url' => $this->resolved_url,
-                'domain'       => $this->domain,
-                'status'       => 'success',
-            ],
-            $this->extraction->toApiArray(),
-        );
+        return [
+            'url'                    => $this->url,
+            'final_url'              => $this->final_url,
+            'domain'                 => $this->domain,
+            'status'                 => $this->status,
+            'failure_type'           => $this->failure_type,
+            'http_status'            => $this->http_status,
+            'title'                  => $this->title,
+            'meta_description'       => $this->meta_description,
+            'keywords'               => $this->keywords,
+            'headings'               => $this->headings,
+            'main_content'           => $this->main_content,
+            'content_hash'           => $this->content_hash,
+            'word_count'             => $this->word_count,
+            'publish_date'           => $this->publish_date,
+            'author'                 => $this->author,
+            'language'               => $this->language,
+            'extraction_confidence'  => $this->extraction_confidence,
+            'notes'                  => $this->notes,
+            'error_message'          => $this->error_message,
+            'fetched_at'             => $this->fetched_at,
+        ];
     }
 }

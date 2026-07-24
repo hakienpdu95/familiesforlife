@@ -27,18 +27,18 @@ class ClassifyFetchFailureAction
     public function handle(int $status, string $body, array $headers): array
     {
         if ($status === 429) {
-            return $this->result('blocked', 'rate_limited', 'Trang giới hạn tần suất truy cập (HTTP 429) — thử lại sau hoặc dùng tab "Dán mã HTML".');
+            return $this->result($status, 'blocked', 'rate_limited', 'Trang giới hạn tần suất truy cập (HTTP 429) — thử lại sau hoặc dùng tab "Dán mã HTML".');
         }
 
         if (in_array($status, [403, 503], true)) {
             if ($this->looksLikeCloudflareChallenge($body, $headers)) {
-                return $this->result('blocked', 'cloudflare_challenge', 'Trang chặn crawl tự động (Cloudflare challenge) — dùng tab "Dán mã HTML" để trích riêng nguồn này.');
+                return $this->result($status, 'blocked', 'cloudflare_challenge', 'Trang chặn crawl tự động (Cloudflare challenge) — dùng tab "Dán mã HTML" để trích riêng nguồn này.');
             }
 
-            return $this->result('blocked', 'bot_protection', 'Trang chặn truy cập tự động (bot protection/WAF, HTTP '.$status.') — dùng tab "Dán mã HTML" để trích riêng nguồn này.');
+            return $this->result($status, 'blocked', 'bot_protection', 'Trang chặn truy cập tự động (bot protection/WAF, HTTP '.$status.') — dùng tab "Dán mã HTML" để trích riêng nguồn này.');
         }
 
-        return $this->result('error', 'http_error', "Trang trả về mã lỗi HTTP {$status}.");
+        return $this->result($status, 'error', 'http_error', "Trang trả về mã lỗi HTTP {$status}.");
     }
 
     /** @param array<string, mixed> $headers */
@@ -61,8 +61,13 @@ class ClassifyFetchFailureAction
         return false;
     }
 
-    private function result(string $status, string $blockReason, string $message): array
+    private function result(int $httpStatus, string $status, string $failureType, string $errorMessage): array
     {
-        return ['status' => $status, 'block_reason' => $blockReason, 'message' => $message];
+        return [
+            'status'        => $status,
+            'failure_type'  => $failureType,
+            'http_status'   => $httpStatus,
+            'error_message' => $errorMessage,
+        ];
     }
 }
