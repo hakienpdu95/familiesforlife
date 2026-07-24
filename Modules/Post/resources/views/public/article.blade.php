@@ -47,8 +47,22 @@
             {{ $article->categories->first()?->name }}
         </span>
         <h1 class="text-3xl font-bold text-base-content mt-1 mb-2">{{ $translation->title }}</h1>
+        @php
+            // spec/Author_Contributor_Hub_Technical_Specification.md §7.4 — byline trở thành
+            // liên kết tới /tac-gia/{slug} NẾU tác giả có hồ sơ is_public=true VÀ vẫn isPlatform()
+            // (§0 v1.2) — giữ text thường (không link) trong mọi trường hợp khác.
+            $authorProfile = $article->createdBy?->authorProfile;
+            $authorIsLinkable = $authorProfile?->is_public
+                && \Modules\Post\Features\AuthorHub\Support\AuthorRoleResolver::isEligible($article->createdBy);
+        @endphp
         <p class="text-sm text-secondary font-semibold">
-            Bởi {{ $article->createdBy?->name ?? 'Ban biên tập' }} · {{ $translation->published_at?->format('d/m/Y') }}
+            Bởi
+            @if($authorIsLinkable)
+                <a href="{{ route('post.public.author-hub.show', $authorProfile) }}" class="hover:underline">{{ $authorProfile->displayName() }}</a>
+            @else
+                {{ $article->createdBy?->name ?? 'Ban biên tập' }}
+            @endif
+            · {{ $translation->published_at?->format('d/m/Y') }}
         </p>
     </div>
 

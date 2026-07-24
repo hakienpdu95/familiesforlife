@@ -54,6 +54,7 @@ class MediaUploadController extends Controller
     private const ENTITY_MAP = [
         'organization'            => \Modules\Organization\Models\Organization::class,
         'post_article'            => \Modules\Post\Models\PostArticle::class,
+        'post_author_profile'     => \Modules\Post\Models\PostAuthorProfile::class,
         'ocop_product'            => \Modules\Ocop\Models\OcopProduct::class,
         'banner'                  => \Modules\Banner\Models\Banner::class,
     ];

@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Modules\Post\Features\ArticleAuthoring\Http\ArticleAdminController;
 use Modules\Post\Features\ArticleAuthoring\Http\ArticleApiController;
 use Modules\Post\Features\ArticleAuthoring\Http\TranslationController;
+use Modules\Post\Features\AuthorHub\Http\AuthorHubPublicController;
+use Modules\Post\Features\AuthorHub\Http\AuthorProfileSelfController;
 use Modules\Post\Features\BreakingNews\Http\BreakingNewsAdminController;
 use Modules\Post\Features\BreakingNews\Http\BreakingNewsApiController;
 use Modules\Post\Features\BreakingNews\Http\BreakingNewsPublicController;
@@ -98,6 +100,11 @@ Route::middleware(['auth'])->prefix('backend/api/breaking-news')->name('backend.
         Route::get('articles/search', [BreakingNewsApiController::class, 'searchArticles'])->name('articles.search');
     });
 
+// §6.1 — tự lưu hồ sơ tác giả công khai từ card ở /auth/profile (Modules/Auth). Controller
+// thuộc Modules/Post (chủ sở hữu PostAuthorProfile) — xem docblock AuthorProfileSelfController.
+Route::middleware(['auth'])->post('auth/profile/author-hub', [AuthorProfileSelfController::class, 'update'])
+    ->name('post.author-hub.profile.update');
+
 // ── Click tracking CTA (public — không yêu cầu đăng nhập) ──────────────────
 Route::get('posts/cta/{button}', [ProductBlockClickController::class, 'redirect'])->name('post.cta.redirect');
 
@@ -137,6 +144,12 @@ Route::name('post.public.')->group(function (): void {
     // đụng độ (không khớp mẫu 'danh-muc/*' cũng không khớp '{slug}-d{id}.html' — mẫu bài viết
     // bên dưới LUÔN đòi hỏi đuôi '.html' + id số nên không bao giờ trùng path tĩnh này).
     Route::get('tai-them', [PublicCategoryController::class, 'loadMore'])->name('load-more');
+
+    // spec/Author_Contributor_Hub_Technical_Specification.md §7.1 — trang danh sách tác giả +
+    // chi tiết 1 tác giả. Đặt trước '{slug}-d{id}.html' cho rõ mạch, dù không đụng độ thật
+    // (route bài viết luôn đòi hỏi hậu tố '-d{id}.html' bằng regex, §0 "URL trang tác giả").
+    Route::get('tac-gia', [AuthorHubPublicController::class, 'index'])->name('author-hub.index');
+    Route::get('tac-gia/{authorProfile:slug}', [AuthorHubPublicController::class, 'show'])->name('author-hub.show');
 
     // '{slug}-d{id}.html' — hậu tố '-d{id}.html' (id số, KHÔNG dùng để tra cứu, chỉ để phân
     // biệt path với 'danh-muc/*'/'tai-them' ở root) là cơ chế tách bạch tuyệt đối bằng regex,

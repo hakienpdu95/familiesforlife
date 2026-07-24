@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Auth\Http\Controllers\EmailVerificationController;
 use Modules\Auth\Http\Controllers\MeController;
 use Modules\Auth\Http\Controllers\SocialAuthController;
+use Modules\Post\Models\PostArticle;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,8 +50,12 @@ Route::middleware('auth')->delete('auth/social/{provider}', [SocialAuthControlle
 Route::middleware(['auth'])->prefix('auth')->name('auth.')->group(function () {
 
     // Profile page — xem và cập nhật thông tin cá nhân
+    // spec/Author_Contributor_Hub_Technical_Specification.md §6.1 — card "Hồ sơ tác giả công
+    // khai" chỉ hiện nếu user isPlatform() (§0 v1.2) VÀ có ít nhất 1 bài created_by = chính họ.
     Route::get('/profile', fn (Request $request) => view('auth::profile', [
-        'user' => $request->user()->load('socialAccounts'),
+        'user' => $request->user()->load('socialAccounts', 'authorProfile.media'),
+        'canShowAuthorCard' => $request->user()->isPlatform()
+            && PostArticle::where('created_by', $request->user()->id)->exists(),
     ]))->name('profile');
 
     // Context endpoint: trả về user/org/roles của chính mình.

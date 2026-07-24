@@ -154,6 +154,100 @@
         </div>
     </div>
 
+    {{-- ── Author Hub — Hồ sơ tác giả công khai ──────────────────────────────
+         spec/Author_Contributor_Hub_Technical_Specification.md §6.1 — chỉ hiện nếu user
+         isPlatform() (§0 v1.2, loại marketing/Lớp B) VÀ có ít nhất 1 bài viết. --}}
+    @if($canShowAuthorCard)
+    @php $authorProfile = $user->authorProfile; @endphp
+    <div class="card bg-base-100 border border-base-200 shadow-sm">
+        <div class="card-body">
+            <h3 class="font-semibold text-sm mb-1">Hồ sơ tác giả công khai</h3>
+            <p class="text-xs text-base-content/50 mb-3">
+                Hiển thị tại trang <code>/tac-gia</code> nếu bạn bật công khai — độc giả xem được
+                tiểu sử và danh sách bài bạn đã xuất bản.
+            </p>
+
+            @if(session('status') === 'author-profile-updated')
+            <div class="alert alert-success text-sm mb-3 py-2"><span>Đã lưu hồ sơ tác giả.</span></div>
+            @endif
+
+            <form method="POST" action="{{ route('post.author-hub.profile.update') }}" class="space-y-3">
+                @csrf
+
+                <div class="flex items-center gap-4">
+                    <img id="author-avatar-preview"
+                         src="{{ $authorProfile?->avatarUrl() ?? 'https://api.dicebear.com/9.x/initials/svg?seed=' . urlencode($user->name) . '&backgroundColor=6366f1&fontFamily=Arial&fontSize=40&fontWeight=700' }}"
+                         alt="Avatar tác giả" class="w-16 h-16 rounded-full shrink-0 object-cover">
+                    <div class="flex-1">
+                        <div id="author-avatar-filepond"
+                             @if($authorProfile) data-context-type="post_author_profile" data-context-id="{{ $authorProfile->id }}" @endif></div>
+                        <input type="hidden" name="avatar_media_uuid" id="author-avatar-media-uuid">
+                        @error('avatar_media_uuid', 'authorProfile')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                    </div>
+                </div>
+
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text font-medium text-sm">Bút danh</span></label>
+                    <input type="text" name="pen_name" value="{{ old('pen_name', $authorProfile?->pen_name) }}"
+                           placeholder="{{ $user->name }}"
+                           class="input input-bordered input-sm @error('pen_name', 'authorProfile') input-error @enderror"/>
+                    @error('pen_name', 'authorProfile')<label class="label py-0"><span class="label-text-alt text-error">{{ $message }}</span></label>@enderror
+                </div>
+
+                <div class="form-control">
+                    <label class="label py-1"><span class="label-text font-medium text-sm">Tiểu sử</span></label>
+                    <textarea name="bio" rows="3" maxlength="500"
+                              class="textarea textarea-bordered text-sm @error('bio', 'authorProfile') textarea-error @enderror">{{ old('bio', $authorProfile?->bio) }}</textarea>
+                    @error('bio', 'authorProfile')<label class="label py-0"><span class="label-text-alt text-error">{{ $message }}</span></label>@enderror
+                </div>
+
+                <div class="grid sm:grid-cols-2 gap-3">
+                    @foreach(['facebook' => 'Facebook', 'x' => 'X', 'linkedin' => 'LinkedIn', 'website' => 'Website'] as $key => $label)
+                    <div class="form-control">
+                        <label class="label py-1"><span class="label-text text-xs">{{ $label }}</span></label>
+                        <input type="url" name="social_links[{{ $key }}]"
+                               value="{{ old('social_links.'.$key, $authorProfile?->social_links[$key] ?? '') }}"
+                               placeholder="https://..."
+                               class="input input-bordered input-sm @error('social_links.'.$key, 'authorProfile') input-error @enderror"/>
+                        @error('social_links.'.$key, 'authorProfile')<label class="label py-0"><span class="label-text-alt text-error">{{ $message }}</span></label>@enderror
+                    </div>
+                    @endforeach
+                </div>
+
+                <label class="label cursor-pointer justify-start gap-2 py-1">
+                    <input type="checkbox" name="is_public" value="1" class="toggle toggle-sm toggle-primary"
+                           {{ old('is_public', $authorProfile?->is_public ?? true) ? 'checked' : '' }}>
+                    <span class="label-text text-sm">Hiển thị trang tác giả công khai</span>
+                </label>
+
+                <div class="pt-1">
+                    <button type="submit" class="btn btn-primary btn-sm">Lưu hồ sơ tác giả</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    @endif
+
 </div>
 
 @endsection
+
+@push('scripts')
+    @vite(['resources/js/modules/filepond.js'], 'build/backend')
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const el = document.getElementById('author-avatar-filepond');
+        if (window.initFilePondUpload && el) {
+            initFilePondUpload(el, {
+                collection: 'avatar',
+                contextType: el.dataset.contextType,
+                contextId: el.dataset.contextId,
+                bindTo: '#author-avatar-media-uuid',
+                onUploaded: (uuid, url) => {
+                    document.getElementById('author-avatar-preview').src = url;
+                },
+            });
+        }
+    });
+    </script>
+@endpush

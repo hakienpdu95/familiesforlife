@@ -53,4 +53,11 @@ return [
         'default_badge_label'    => 'NÓNG',
         'default_duration_hours' => 48, // chỉ gợi ý prefill ends_at trên form admin, KHÔNG ép validate
     ],
+
+    // spec/Author_Contributor_Hub_Technical_Specification.md §4.2 — trang tác giả công khai.
+    // KHÔNG còn phần thống kê hiệu suất (dashboard nội bộ) — đã bỏ, dùng Google Analytics thay
+    // thế để tránh phình bảng CSDL bằng cơ chế đếm/log riêng.
+    'author_hub' => [
+        'articles_per_page' => 12,  // phân trang danh sách bài trên /tac-gia/{slug}
+    ],
 ];

@@ -85,6 +85,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(SocialAccount::class);
     }
 
+    /**
+     * spec/Author_Contributor_Hub_Technical_Specification.md §7.4 — quan hệ ĐỌC duy nhất cần
+     * thêm vào User cho Author Hub (không phải cột, không phá vỡ nguyên tắc "không thêm cột
+     * vào users" — §0). Hồ sơ tác giả công khai sống ở Modules/Post (post_author_profiles).
+     */
+    public function authorProfile(): HasOne
+    {
+        return $this->hasOne(\Modules\Post\Models\PostAuthorProfile::class);
+    }
+
     // ── Identity helpers ─────────────────────────────────────────────
 
     public function isFree(): bool
