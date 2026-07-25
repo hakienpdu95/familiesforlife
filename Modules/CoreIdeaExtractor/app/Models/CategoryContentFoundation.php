@@ -24,6 +24,8 @@ class CategoryContentFoundation extends Model
         'core_focus',
         'unique_angle',
         'content_goals',
+        'pain_points',
+        'rejected_ideas',
         'audience',
         'constraints',
         'style_sample',

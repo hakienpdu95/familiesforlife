@@ -7,6 +7,7 @@
     'apiBatchUrl' => route('backend.api.coreideaextractor.extract-batch'),
     'maxUrls' => config('core_idea_extractor.batch.max_urls', 7),
     'categoryFoundationsUrl' => route('backend.coreideaextractor.category-foundations.index'),
+    'existingArticlesUrlTemplate' => route('backend.api.coreideaextractor.category-foundations.existing-articles', ['category' => '__UUID__']),
     'categories' => $categoryFoundations,
 ]) }})">
 
@@ -76,6 +77,10 @@
                             </template>
                         </select>
                         <p x-show="selectedFoundationSummary()" x-cloak class="text-xs text-base-content/40 mt-1" x-text="selectedFoundationSummary()"></p>
+                        <p x-show="selectedCategoryUuid && loadingExistingArticles" x-cloak class="text-xs text-base-content/40 mt-1">Đang tải danh sách bài đã có trong chuyên mục...</p>
+                        <p x-show="selectedCategoryUuid && !loadingExistingArticles && existingArticleTitles.length" x-cloak class="text-xs text-base-content/40 mt-1">
+                            <span x-text="existingArticleTitles.length"></span> bài đã publish trong chuyên mục này sẽ được đưa vào prompt để AI tránh gợi ý trùng.
+                        </p>
                     </div>
 
                     <div class="flex flex-wrap gap-3 mt-2">
@@ -190,6 +195,7 @@
 
             <p x-show="!isBatchResult() && result && result.notes" x-cloak class="text-xs text-warning mb-3" x-text="result?.notes"></p>
             <p x-show="isBatchResult() && result.summary_note" x-cloak class="text-xs text-warning mb-3" x-text="result?.summary_note"></p>
+            <p x-show="isPromptLarge()" x-cloak class="text-xs text-warning mb-3" x-text="promptSizeWarningText()"></p>
 
             <pre class="bg-base-200 rounded-lg p-4 text-xs overflow-x-auto max-h-[70vh]" x-text="prettyJson()"></pre>
         </div>
@@ -202,7 +208,7 @@
 <script>
 document.addEventListener('alpine:init', () => {
     Alpine.data('coreIdeaExtractorPage', (serverData = {}) => {
-        const { apiUrl = '', apiBatchUrl = '', maxUrls = 7, categoryFoundationsUrl = '', categories = [] } = serverData;
+        const { apiUrl = '', apiBatchUrl = '', maxUrls = 7, categoryFoundationsUrl = '', existingArticlesUrlTemplate = '', categories = [] } = serverData;
 
         return {
             mode: 'url',
@@ -222,8 +228,11 @@ document.addEventListener('alpine:init', () => {
             copiedPrompt: false,
             maxUrls,
             categoryFoundationsUrl,
+            existingArticlesUrlTemplate,
             categories,
             selectedCategoryUuid: '',
+            existingArticleTitles: [],
+            loadingExistingArticles: false,
 
             parsedUrls() {
                 return [...new Set(
@@ -242,16 +251,44 @@ document.addEventListener('alpine:init', () => {
             /**
              * Prefill CÁC field ad-hoc hiện có (audience/goal/constraints/styleSample) từ
              * Category Content Foundation đã lưu — vẫn để người dùng tự sửa tiếp cho lần chạy
-             * này, không khoá field (spec/CoreIdeaExtractor.md §12, v1.4).
+             * này, không khoá field (spec/CoreIdeaExtractor.md §12, v1.4). Đồng thời fetch danh
+             * sách bài đã publish trong category (§12.8, v1.11) — RESET trước, không chỉ khi có
+             * foundation, để không giữ lại danh sách của category đã chọn TRƯỚC ĐÓ khi người dùng
+             * đổi sang category khác/bỏ chọn.
              */
             applyCategoryFoundation() {
-                const foundation = this.selectedCategory()?.foundation;
-                if (!foundation) return;
+                const category = this.selectedCategory();
+                this.existingArticleTitles = [];
 
-                this.audience = foundation.audience || this.audience;
-                this.goal = foundation.content_goals || this.goal;
-                this.constraints = foundation.constraints || this.constraints;
-                this.styleSample = foundation.style_sample || this.styleSample;
+                if (!category) return;
+
+                const foundation = category.foundation;
+                if (foundation) {
+                    this.audience = foundation.audience || this.audience;
+                    this.goal = foundation.content_goals || this.goal;
+                    this.constraints = foundation.constraints || this.constraints;
+                    this.styleSample = foundation.style_sample || this.styleSample;
+                }
+
+                this.fetchExistingArticles(category.uuid);
+            },
+
+            async fetchExistingArticles(categoryUuid) {
+                this.loadingExistingArticles = true;
+
+                try {
+                    const res = await fetch(this.existingArticlesUrlTemplate.replace('__UUID__', categoryUuid), {
+                        headers: { 'Accept': 'application/json' },
+                    });
+                    const data = await res.json().catch(() => ({}));
+
+                    this.existingArticleTitles = data.titles || [];
+                } catch (e) {
+                    console.error('[core-idea-extractor] failed to load existing articles', e);
+                    this.existingArticleTitles = [];
+                } finally {
+                    this.loadingExistingArticles = false;
+                }
             },
 
             selectedFoundationSummary() {
@@ -261,6 +298,7 @@ document.addEventListener('alpine:init', () => {
                 const parts = [];
                 if (foundation.core_focus) parts.push(`Trọng tâm: ${foundation.core_focus}`);
                 if (foundation.unique_angle) parts.push(`Góc nhìn khác biệt: ${foundation.unique_angle}`);
+                if (foundation.pain_points) parts.push(`Pain points: ${foundation.pain_points}`);
 
                 return parts.join(' — ');
             },
@@ -338,6 +376,36 @@ document.addEventListener('alpine:init', () => {
                 return ({ high: 'badge-success', medium: 'badge-warning', low: 'badge-error' })[this.result?.extraction_confidence] ?? 'badge-ghost';
             },
 
+            /**
+             * Cảnh báo NHẸ (không chặn, không tự cắt nội dung — bài học từ lần thử rút gọn
+             * main_content trước đó: cắt content phá mất chiều sâu, xem copyPromptForAi()) khi
+             * payload lớn. Tham khảo https://blog.neosage.io/p/the-ai-application-layer-where-context
+             * — độ chính xác AI giảm dần khi context dài + nhiệm vụ phức tạp, KHÔNG có "ngưỡng an
+             * toàn" cụ thể (GPT-4o: 99.3% → 69.7% khi task phức tạp + context dài, theo bài viết)
+             * — nên đây chỉ là gợi ý dựa trên số đo THẬT, để người dùng tự quyết (giảm số nguồn/
+             * chạy theo đợt), KHÔNG phải ngưỡng cứng.
+             *
+             * Ước lượng token = ký_tự / 4 — xấp xỉ thô (tiếng Việt có dấu/không phân từ bằng
+             * khoảng trắng có thể lệch so với tokenizer thật), CHỈ để người dùng có cảm nhận độ
+             * lớn tương đối, không phải con số chính xác cho billing.
+             */
+            estimatedPromptChars() {
+                return this.result ? this.prettyJson().length : 0;
+            },
+
+            isPromptLarge() {
+                return this.estimatedPromptChars() > 50000;
+            },
+
+            promptSizeWarningText() {
+                const chars = this.estimatedPromptChars();
+                const tokens = Math.round(chars / 4);
+
+                return `Dữ liệu khá lớn (~${chars.toLocaleString('vi-VN')} ký tự, ~${tokens.toLocaleString('vi-VN')} token ước tính). `
+                    + `Ngữ cảnh càng dài + nhiệm vụ càng phức tạp, độ chính xác AI có thể càng giảm — `
+                    + `nếu câu trả lời không ổn, thử giảm số nguồn hoặc chạy theo từng đợt nhỏ hơn.`;
+            },
+
             async copyJson() {
                 await navigator.clipboard.writeText(this.prettyJson());
                 this.copied = true;
@@ -369,6 +437,14 @@ document.addEventListener('alpine:init', () => {
              *     đang quá lỏng/quá chặt.
              * (3) Khi có ≥2 nguồn thành công (batch), bắt buộc ít nhất 1 ý tưởng TỔNG HỢP CHÉO
              *     nhiều nguồn — dạng insight khó bị sao chép nhất vì không nguồn đơn lẻ nào tự có.
+             * v1.11 (§12.7/§12.8) — tránh AI đề xuất lại ý tưởng đã có/đã bị từ chối, tham khảo
+             * matthopkins.com (Decision Log) + memgraph.com (curation/entity resolution), bổ
+             * sung cho nhau: `foundation.rejected_ideas` là tribal knowledge editor tự ghi tay
+             * (KHÔNG suy ra được từ dữ liệu), `existingArticleTitles` là danh sách bài ĐÃ publish
+             * trong category — tự động, khách quan, không cần ai nhớ cập nhật tay (xem
+             * fetchExistingArticles()). Cả 2 đưa vào TOP + có chỉ dẫn tường minh ở BOTTOM (không
+             * chỉ đưa context suông — context engineering: chỉ dẫn tường minh đáng tin hơn hy vọng
+             * model tự suy ra từ context).
              * Không gọi AI Provider nào ở backend — giữ triết lý "công cụ nghiên cứu, copy tay"
              * hiện có.
              */
@@ -387,6 +463,12 @@ document.addEventListener('alpine:init', () => {
                 if (foundation?.core_focus) top.push(`Trọng tâm nội dung chuyên mục: ${foundation.core_focus}`);
                 if (foundation?.unique_angle) top.push(`Góc nhìn khác biệt của chuyên mục: ${foundation.unique_angle}`);
                 if (foundation?.content_goals) top.push(`Mục tiêu nội dung: ${foundation.content_goals}`);
+                if (foundation?.pain_points) top.push(`Pain points / câu hỏi thường gặp của độc giả (từ nghiên cứu thực tế): ${foundation.pain_points}`);
+                if (foundation?.rejected_ideas) top.push(`Ý tưởng đã cân nhắc và quyết định KHÔNG viết (Decision Log — không đề xuất lại): ${foundation.rejected_ideas}`);
+                if (this.existingArticleTitles.length) {
+                    top.push(`Bài đã publish trong chuyên mục này (${this.existingArticleTitles.length} bài, KHÔNG đề xuất trùng):`);
+                    this.existingArticleTitles.forEach(title => top.push(`- ${title}`));
+                }
                 if (this.audience) top.push(`Đối tượng độc giả: ${this.audience}`);
                 if (this.goal) top.push(`Mục tiêu bài viết: ${this.goal}`);
                 if (this.constraints) top.push(`Ràng buộc / không muốn: ${this.constraints}`);
@@ -405,6 +487,10 @@ document.addEventListener('alpine:init', () => {
 
                 if (successfulSourceCount >= 2) {
                     bottom.push('Trong đó BẮT BUỘC có ít nhất 1 ý tưởng TỔNG HỢP CHÉO từ ≥2 nguồn khác nhau ở trên (kết hợp insight của nhiều nguồn thành 1 góc nhìn mà không nguồn đơn lẻ nào tự có) — đây là dạng ý tưởng khó bị sao chép nhất.');
+                }
+
+                if (foundation?.rejected_ideas || this.existingArticleTitles.length) {
+                    bottom.push('KHÔNG đề xuất ý tưởng trùng/gần giống bài đã publish hoặc ý tưởng đã bị từ chối liệt kê ở phần bối cảnh trên.');
                 }
 
                 bottom.push(

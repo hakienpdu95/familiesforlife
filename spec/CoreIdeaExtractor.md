@@ -1,9 +1,15 @@
 # CoreIdeaExtractor
 
-**Version:** 1.8  
+**Version:** 1.11  
 **Last Updated:** 2026-07-25  
 **Status:** Design Specification (Ready for Implementation)
 
+> **v1.11 (Tránh trùng lặp ý tưởng — §12.7/§12.8):** Tham khảo matthopkins.com (Decision Log — ghi lại quyết định + lý do để AI không đề xuất lại thứ đã bị bác bỏ) + memgraph.com (curation/entity resolution — tránh trùng lặp qua nhận diện thực thể đã tồn tại), 2 bài độc lập cùng chỉ vào đúng khoảng trống đã ghi ở §11/§12.3 từ trước ("không tự động kéo tag/bài viết hiện có vào prompt"). Làm CẢ 2 cách bổ sung cho nhau: (1) `rejected_ideas` (§12.7) — field tay mới trên Category Content Foundation, editor tự ghi ý tưởng đã cân nhắc và quyết định KHÔNG viết kèm lý do (tribal knowledge, không suy ra được từ dữ liệu); (2) `ListCategoryExistingArticlesAction` (§12.8) — tự động kéo tiêu đề bài ĐÃ publish trong category (qua `PostCategory::articles()` có sẵn của Post, không cần Post sửa gì), fetch on-demand khi chọn category (không preload cho mọi category). Cả 2 đưa vào TOP của "Copy prompt cho AI" + có chỉ dẫn tường minh "KHÔNG đề xuất trùng" ở BOTTOM (không chỉ đưa context suông). KHÔNG đổi Layer 1/Layer 2 JSON schema (§5, §7).
+>
+> **v1.10 (Pain Points — §12.6):** Tham khảo case study B2B thought-leadership (nghiên cứu khách hàng định kỳ — phỏng vấn + phân tích sales call để tìm pain point — là NỀN của content strategy, không chỉ mô tả trừu tượng). Thêm field `pain_points` vào Category Content Foundation (bảng `cie_category_foundations`, cột mới sau `content_goals`) — câu hỏi/khó khăn thường gặp của độc giả rút ra từ nghiên cứu thực tế (khảo sát/feedback/câu hỏi lặp lại), khác với `core_focus`/`unique_angle`/`content_goals` (mô tả tĩnh do editor tự viết). Đưa vào TOP của "Copy prompt cho AI" (§12.4) và tóm tắt hiển thị trên trang trích xuất chính. KHÔNG đổi Layer 1/Layer 2 JSON schema (§5, §7) — vẫn thuần field UI/prompt-template như core_focus/unique_angle/content_goals.
+>
+> **v1.9 (Cảnh báo kích thước prompt — §12.5):** Tham khảo https://blog.neosage.io/p/the-ai-application-layer-where-context — độ chính xác AI giảm dần khi context dài + nhiệm vụ phức tạp, KHÔNG có ngưỡng an toàn cụ thể (bài viết dẫn số liệu GPT-4o: 99.3% → 69.7%). Thêm cảnh báo NHẸ (không chặn) trên UI khi dữ liệu dựng prompt vượt 50.000 ký tự (~12.500 token ước tính, đo trên `prettyJson()` thật — không phải giả định) — gợi ý người dùng tự giảm số nguồn/chạy theo đợt nhỏ hơn nếu câu trả lời AI không ổn. CỐ Ý KHÔNG lặp lại cách tiếp cận đã bỏ ở v1.6 (tự động cắt `main_content`) — bài học từ lần đó: cắt nội dung phá mất chiều sâu chắc chắn 100%, trong khi cảnh báo để người dùng tự quyết không đánh đổi gì.
+>
 > **v1.8 (Prompt — dựa trên test thật với grok.com/claude.ai):** Test thực tế cho thấy mọi ý tưởng trả về đều "Có" tuyệt đối ở cả 3 tiêu chí — vì AI tự lọc TRƯỚC khi hiển thị (đúng yêu cầu "chỉ giữ ý tưởng thoả cả 3"), khiến cột Có/Không thành "con dấu" không verify được. 3 tinh chỉnh cho BƯỚC nhiệm vụ ở §12.4: (1) thêm cột **"Lý do"** (1 câu) vào Bảng 1 — không còn Có/Không suông; (2) thêm **Bảng 2 — Ý tưởng bị loại** kèm tiêu chí không đạt + lý do, để thấy bộ lọc thực sự hoạt động chứ không chỉ ẩn ý tưởng không đạt; (3) khi có ≥2 nguồn thành công (batch), bắt buộc ít nhất 1 ý tưởng **tổng hợp chéo nhiều nguồn** (dạng insight khó sao chép nhất, chỉ áp dụng khi đủ ≥2 nguồn — single-URL hoặc batch chỉ 1 nguồn thành công thì bỏ qua). Nhiệm vụ giờ chia rõ 3 bước (sinh ý tưởng chưa lọc → đánh giá từng tiêu chí → xuất 2 bảng) thay vì 1 bước lọc-luôn như trước.
 >
 > **v1.7 (Spec ↔ code residuals):** (1) Thêm §7.1 "Batch Output Schema" — khoá đúng shape `extract-batch` ĐÃ CHẠY THẬT trong code/UI từ trước nhưng chưa từng lên spec (envelope `topic/brief/requested_count/source_coverage/summary_note/sources/processed_at` + shape 1-duy-nhất của mỗi phần tử `sources[]`, liệt kê đủ giá trị `failure_type`, quy tắc `source_structure = null` khi `status != success`) — đây là khoảng trống spec ↔ code rõ nhất trước bản này; (2) thêm 1 câu làm rõ ở §13: advisory note của `source_structure` chỉ là gợi ý (append `notes`), KHÔNG ảnh hưởng `extraction_confidence`/`error`/`status`; (3) thêm ghi chú ở §7: field Layer 2 lý thuyết (`article_type`/`thesis`/`core_ideas`/...) chưa từng được endpoint nào trả về thật — khoảng cách đã có từ thiết kế ban đầu, không phải lỗi mới. KHÔNG đổi ngưỡng/logic/schema nào đang chạy — thuần cập nhật tài liệu cho khớp implementation.
@@ -426,7 +432,7 @@ Module đã có ngữ cảnh ad-hoc (`audience/goal/constraints/style_sample`, �
 ### 12.2 Thiết kế
 
 - Bảng `cie_category_foundations` (tên rút gọn — tên đầy đủ `core_idea_extractor_category_foundations` khiến tên constraint auto-gen của Laravel vượt giới hạn 64 ký tự của MySQL) (model `CategoryContentFoundation`) — model Eloquent ĐẦU TIÊN của module — sống trong `CoreIdeaExtractor`, FK `post_category_id → post_categories.id` (unique, 1 bản ghi/category), cùng hướng phụ thuộc 1 chiều với `Ocop → Post` (`post_article_ocop_products`). `Post` module không cần sửa gì.
-- Field: `core_focus`, `unique_angle`, `content_goals` (3 thành phần Business Foundation ánh xạ sang ngữ cảnh biên tập) + `audience`, `constraints`, `style_sample` (persist hoá field ad-hoc đã có).
+- Field: `core_focus`, `unique_angle`, `content_goals` (3 thành phần Business Foundation ánh xạ sang ngữ cảnh biên tập) + `pain_points` (câu hỏi/khó khăn thường gặp của độc giả, rút ra từ nghiên cứu thực tế — xem §12.6, v1.10) + `rejected_ideas` (Decision Log — ý tưởng đã cân nhắc và quyết định KHÔNG viết, xem §12.7, v1.11) + `audience`, `constraints`, `style_sample` (persist hoá field ad-hoc đã có).
 - **Không đổi Layer 1/Layer 2 JSON schema (§5, §7)** — foundation chỉ dùng để prefill form và dựng prompt ở tầng UI, không bao giờ chèn vào JSON output.
 - Quyền sửa foundation của 1 category: `platform_content_editor`/`platform_content_head` sửa được mọi category (giữ nguyên quyền `core_idea_extractor.use` không giới hạn hiện có); `platform_section_editor` chỉ sửa được category mình được gán qua `post_category_editors` — cùng pattern với `PostArticlePolicy::approve()`. Implement bằng `Gate::define('core_idea_extractor.manage_category_foundation', ...)` (KHÔNG phải `Policy` gắn vào `PostCategory`, vì `Post` module đã đăng ký `PostCategoryPolicy` cho chính model đó — đăng ký thêm 1 policy nữa sẽ ghi đè lẫn nhau).
 - UI: trang quản lý riêng (`/dashboard/core-idea-extractor/category-foundations`) để CRUD foundation theo từng category; trang trích xuất chính thêm `<select>` chuyên mục — khi chọn, tự prefill `audience/goal/constraints/style_sample` (vẫn tự sửa được, không khoá field) + nút "Copy prompt cho AI" bọc JSON + foundation + 3 câu hỏi lọc ý tưởng (bản dịch sang ngữ cảnh biên tập) thành 1 prompt dán thẳng vào chat AI.
@@ -487,6 +493,104 @@ minh:
 
 Dòng khoá format cứng (v1.6) vẫn giữ nguyên, chỉ chuyển thành 1 phần của chỉ dẫn Bước 3 (không
 viết gì ngoài 2 bảng).
+
+### 12.5 Cảnh báo kích thước prompt (v1.9)
+
+Tham khảo https://blog.neosage.io/p/the-ai-application-layer-where-context — model chỉ nhìn thấy
+đúng token trong context window; nghiên cứu được bài viết dẫn cho thấy độ chính xác giảm dần khi
+context dài + nhiệm vụ phức tạp (GPT-4o: 99.3% → 69.7%), và **không có ngưỡng an toàn cụ thể** —
+hiệu năng giảm dần đều theo độ dài, không phải "dưới X thì an toàn, trên X thì hỏng".
+
+**Cách tiếp cận: cảnh báo, KHÔNG cắt nội dung.** Đã từng thử cắt `main_content` để giảm kích
+thước prompt (v1.6, bỏ ngay trong cùng bản — xem §12.4) — bài học rút ra: cắt nội dung phá mất
+chiều sâu là cái mất CHẮC CHẮN 100%, trong khi lợi ích (context ngắn hơn) chỉ là suy đoán. v1.9 áp
+dụng đúng bài học đó theo hướng khác: đo kích thước THẬT (không giả định) và hiển thị cảnh báo
+nhẹ, để NGƯỜI DÙNG tự quyết định giảm số nguồn/chạy theo đợt nhỏ hơn — không tự động đánh đổi nội
+dung.
+
+- Đo trên `prettyJson()` (chính là phần "filling" ở GIỮA prompt, thành phần chiếm phần lớn kích
+  thước) — ngưỡng cảnh báo: **> 50.000 ký tự** (~12.500 token, ước lượng thô `ký_tự / 4` — CHỈ để
+  người dùng có cảm nhận độ lớn tương đối, không phải con số chính xác cho billing/tokenizer thật).
+- Hiển thị dưới dạng 1 dòng cảnh báo (`text-warning`, cùng style với `notes`/`summary_note` đã có)
+  ngay dưới khu vực nút "Copy prompt cho AI"/"Copy JSON" — KHÔNG chặn thao tác copy, chỉ là gợi ý.
+- Không áp dụng riêng cho single-URL hay batch — tính chung trên kích thước JSON thật của
+  `this.result` ở thời điểm đó, đúng với cả 2 chế độ.
+- Xem `estimatedPromptChars()`/`isPromptLarge()`/`promptSizeWarningText()` trong `index.blade.php`.
+
+### 12.6 Pain Points (v1.10)
+
+Tham khảo case study B2B thought-leadership: bước nền của toàn bộ content strategy là **nghiên
+cứu khách hàng định kỳ** (phỏng vấn + phân tích sales call để tìm pain point/objection lặp lại),
+KHÔNG phải chỉ mô tả trừu tượng về "trọng tâm nội dung". `core_focus`/`unique_angle`/
+`content_goals` (§12.2) là mô tả TĨNH do editor tự viết một lần; `pain_points` khác — là câu hỏi/
+khó khăn THẬT của độc giả, lý tưởng nhất là rút ra từ nghiên cứu thực tế định kỳ (khảo sát,
+feedback, câu hỏi lặp lại từ độc giả/khách hàng) chứ không phải editor tự đoán.
+
+- Field mới `pain_points` (text, nullable) trên `cie_category_foundations` — migration
+  `2026_07_25_000002_add_pain_points_to_cie_category_foundations_table.php` (thêm cột, KHÔNG đổi
+  migration gốc đã chạy).
+- Cùng nhóm validate/quyền/UI với `core_focus`/`unique_angle`/`content_goals` — không có quy tắc
+  riêng, không có Gate riêng (dùng chung `core_idea_extractor.manage_category_foundation`, §12.2).
+- Xuất hiện ở TOP của "Copy prompt cho AI" (§12.4) ngay sau `content_goals`, và ở tóm tắt hiển thị
+  trên trang trích xuất chính (`selectedFoundationSummary()`) — cùng cơ chế prefill/hiển thị như
+  3 field kia, không thêm luồng riêng.
+- **Không đổi Layer 1/Layer 2 JSON schema (§5, §7)** — thuần field UI/prompt-template, giống
+  `core_focus`/`unique_angle`/`content_goals`.
+- Ngoài phạm vi (v1.10): KHÔNG tự động hoá việc thu thập pain points (không tích hợp khảo sát/
+  phân tích sales call nào) — vẫn là field editor tự điền tay, dựa trên nghiên cứu họ tự làm bên
+  ngoài hệ thống. Không thuộc phạm vi module này.
+
+### 12.7 Decision Log — `rejected_ideas` (v1.11)
+
+Tham khảo "Five-File Framework" (matthopkins.com) — 1 trong 5 file ngữ cảnh cá nhân được đề xuất
+là **Decision Log**: ghi lại quyết định đã chốt + lý do + phương án đã loại bỏ, để AI không đề
+xuất lại thứ đã bị bác bỏ hoặc lặp lại câu hỏi đã trả lời rồi.
+
+- Field mới `rejected_ideas` (text, nullable) trên `cie_category_foundations`, SAU `pain_points` —
+  migration `2026_07_25_000003_add_rejected_ideas_to_cie_category_foundations_table.php`.
+- Khác `pain_points` (câu hỏi/khó khăn CỦA ĐỘC GIẢ) — `rejected_ideas` là ý tưởng BÀI VIẾT đã
+  từng được cân nhắc và CHỦ ĐỘNG quyết định không viết, kèm lý do (VD "đối thủ đã làm rất kỹ, khó
+  cạnh tranh"). Đây là tribal knowledge — editor tự ghi tay, KHÔNG suy ra được từ dữ liệu có sẵn
+  (khác §12.8 — danh sách bài đã publish chỉ cho biết "đã viết gì", không biết "đã cân nhắc rồi
+  từ chối cái gì").
+- Cùng nhóm validate/quyền/UI với `pain_points`/`core_focus`/`unique_angle`/`content_goals` —
+  không có quy tắc/Gate riêng.
+- Xuất hiện ở TOP của "Copy prompt cho AI" (§12.4) ngay sau `pain_points`, KÈM 1 chỉ dẫn tường
+  minh ở BOTTOM ("KHÔNG đề xuất ý tưởng trùng/gần giống... đã bị từ chối") — không chỉ đưa context
+  suông, vì chỉ dẫn tường minh đáng tin hơn hy vọng model tự suy luận từ context (context
+  engineering).
+- **Không đổi Layer 1/Layer 2 JSON schema (§5, §7)**.
+
+### 12.8 Tự động tránh trùng — bài đã publish trong category (v1.11)
+
+Tham khảo memgraph.com ("Context Engineering for Beginners") — nhấn mạnh **curation**: dọn dữ
+liệu trùng lặp qua nhận diện thực thể đã tồn tại (entity resolution), để hệ thống biết "cái này
+đã có rồi" trước khi tạo thêm. Bổ sung cho §12.7 (Decision Log — tay, có lý do) bằng 1 nguồn dữ
+liệu KHÁCH QUAN, TỰ ĐỘNG: danh sách tiêu đề bài đã publish thật trong category.
+
+- Action mới `ListCategoryExistingArticlesAction` (`Features/CategoryFoundation/Actions/`) — lấy
+  bài qua `PostCategory::articles()` (quan hệ ĐÃ CÓ SẴN của `Post`, không cần `Post` sửa gì, cùng
+  hướng phụ thuộc 1 chiều đã áp dụng xuyên suốt module này), lấy `mainTranslation()` (helper PHP
+  có sẵn trên `PostArticle`, dùng collection `translations` đã eager-load — CÙNG pattern
+  `PostArticle::scopeWithMainTranslation()` đang dùng ở `Post::ListArticlesForAdminHandler`,
+  KHÔNG viết join/query riêng), lọc `status = TranslationStatus::Published`, sort theo
+  `published_at` giảm dần, cắt còn tối đa `existing_articles.max_titles` (mặc định 30 — cấu hình
+  ở `config/core_idea_extractor.php`, cùng thói quen module: mọi danh sách không giới hạn đều có
+  trần, xem `batch.max_urls`). `existing_articles.db_fetch_limit` (mặc định 100) giới hạn số bản
+  ghi fetch thô từ DB trước khi lọc/sort, tránh query runaway với category có hàng nghìn bài.
+- Endpoint riêng `GET .../category-foundations/{category}/existing-articles` — fetch ON-DEMAND
+  khi người dùng CHỌN category ở trang trích xuất chính (`fetchExistingArticles()`), KHÔNG preload
+  cho mọi category lúc tải trang (khác `list()` vốn preload toàn bộ foundation) — 1 category có
+  thể có hàng chục/hàng trăm bài, preload hết cho MỌI category sẽ phình payload ban đầu không cần
+  thiết cho category người dùng chưa chọn tới.
+- Chỉ tiêu đề (chuỗi ngắn) → không có rủi ro "phình" prompt như `main_content` (khác quyết định đã
+  bỏ ở v1.6 — xem §12.4) — cap ở đây là phòng ngừa runaway, không phải đánh đổi chiều sâu nội
+  dung.
+- Đưa vào TOP của "Copy prompt cho AI" ngay sau `rejected_ideas`, liệt kê từng tiêu đề — kèm chỉ
+  dẫn tường minh chung với §12.7 ở BOTTOM.
+- Ngoài phạm vi (v1.11): không dùng tag/similarity ngữ nghĩa để phát hiện trùng lặp GẦN GIỐNG
+  (chỉ liệt kê tiêu đề, để AI tự đánh giá mức độ trùng) — để dành cho lần lặp sau nếu cần chính
+  xác hơn.
 
 ---
 

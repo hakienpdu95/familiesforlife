@@ -25,4 +25,5 @@ Route::middleware(['auth', 'can:core_idea_extractor.use'])
         Route::post('extract-batch', [CoreIdeaExtractorController::class, 'extractBatch'])->name('extract-batch');
         Route::get('category-foundations', [CategoryFoundationController::class, 'list'])->name('category-foundations.list');
         Route::put('category-foundations/{category}', [CategoryFoundationController::class, 'upsert'])->name('category-foundations.upsert');
+        Route::get('category-foundations/{category}/existing-articles', [CategoryFoundationController::class, 'existingArticles'])->name('category-foundations.existing-articles');
     });

@@ -53,6 +53,20 @@
                             <textarea x-model="cat._form.content_goals" rows="2" placeholder="VD: Tăng traffic tìm kiếm dài hạn, xây uy tín chuyên gia"
                                       class="textarea textarea-bordered textarea-sm w-full"></textarea>
                         </div>
+                        <div class="form-control">
+                            <label class="label py-0.5">
+                                <span class="label-text text-xs font-medium">Pain points / câu hỏi thường gặp của độc giả (dựa trên nghiên cứu thực tế — khảo sát, feedback, câu hỏi lặp lại)</span>
+                            </label>
+                            <textarea x-model="cat._form.pain_points" rows="2" placeholder="VD: Con hay bị táo bón khi đổi sữa, mẹ không biết phân biệt sữa mát thật/giả"
+                                      class="textarea textarea-bordered textarea-sm w-full"></textarea>
+                        </div>
+                        <div class="form-control">
+                            <label class="label py-0.5">
+                                <span class="label-text text-xs font-medium">Ý tưởng đã cân nhắc và quyết định KHÔNG viết (kèm lý do — Decision Log)</span>
+                            </label>
+                            <textarea x-model="cat._form.rejected_ideas" rows="2" placeholder="VD: 'So sánh giá sữa mát các hãng' — đã bỏ vì đối thủ đã làm rất kỹ, khó cạnh tranh"
+                                      class="textarea textarea-bordered textarea-sm w-full"></textarea>
+                        </div>
                         <div class="flex flex-wrap gap-3">
                             <div class="form-control flex-1 min-w-64">
                                 <label class="label py-0.5"><span class="label-text text-xs font-medium">Đối tượng độc giả</span></label>
@@ -93,7 +107,7 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('categoryFoundationsPage', (serverData = {}) => {
         const { listUrl = '', upsertUrlTemplate = '', backUrl = '' } = serverData;
 
-        const emptyForm = () => ({ core_focus: '', unique_angle: '', content_goals: '', audience: '', constraints: '', style_sample: '' });
+        const emptyForm = () => ({ core_focus: '', unique_angle: '', content_goals: '', pain_points: '', rejected_ideas: '', audience: '', constraints: '', style_sample: '' });
 
         return {
             categories: [],

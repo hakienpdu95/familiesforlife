@@ -20,7 +20,7 @@ class ListCategoryFoundationsAction
     use AsAction;
 
     /**
-     * @return array<int, array{category_id:int, uuid:string, name:string, depth:int, foundation: array{core_focus:?string, unique_angle:?string, content_goals:?string, audience:?string, constraints:?string, style_sample:?string}|null}>
+     * @return array<int, array{category_id:int, uuid:string, name:string, depth:int, foundation: array{core_focus:?string, unique_angle:?string, content_goals:?string, pain_points:?string, rejected_ideas:?string, audience:?string, constraints:?string, style_sample:?string}|null}>
      */
     public function handle(): array
     {
@@ -42,12 +42,14 @@ class ListCategoryFoundationsAction
                 'name'        => $category->name,
                 'depth'       => $node['depth'],
                 'foundation'  => $foundation ? [
-                    'core_focus'    => $foundation->core_focus,
-                    'unique_angle'  => $foundation->unique_angle,
-                    'content_goals' => $foundation->content_goals,
-                    'audience'      => $foundation->audience,
-                    'constraints'   => $foundation->constraints,
-                    'style_sample'  => $foundation->style_sample,
+                    'core_focus'     => $foundation->core_focus,
+                    'unique_angle'   => $foundation->unique_angle,
+                    'content_goals'  => $foundation->content_goals,
+                    'pain_points'    => $foundation->pain_points,
+                    'rejected_ideas' => $foundation->rejected_ideas,
+                    'audience'       => $foundation->audience,
+                    'constraints'    => $foundation->constraints,
+                    'style_sample'   => $foundation->style_sample,
                 ] : null,
             ];
         }, $flat);

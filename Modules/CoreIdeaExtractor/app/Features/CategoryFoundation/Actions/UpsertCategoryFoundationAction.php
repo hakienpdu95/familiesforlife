@@ -23,13 +23,15 @@ class UpsertCategoryFoundationAction
         ]);
 
         $foundation->fill([
-            'core_focus'    => $data->core_focus,
-            'unique_angle'  => $data->unique_angle,
-            'content_goals' => $data->content_goals,
-            'audience'      => $data->audience,
-            'constraints'   => $data->constraints,
-            'style_sample'  => $data->style_sample,
-            'updated_by'    => $userId,
+            'core_focus'     => $data->core_focus,
+            'unique_angle'   => $data->unique_angle,
+            'content_goals'  => $data->content_goals,
+            'pain_points'    => $data->pain_points,
+            'rejected_ideas' => $data->rejected_ideas,
+            'audience'       => $data->audience,
+            'constraints'    => $data->constraints,
+            'style_sample'   => $data->style_sample,
+            'updated_by'     => $userId,
         ]);
 
         if (! $foundation->exists) {

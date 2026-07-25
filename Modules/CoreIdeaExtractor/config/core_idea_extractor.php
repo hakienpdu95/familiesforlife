@@ -61,4 +61,14 @@ return [
         'fetch_ttl_seconds'        => 3600,
         'content_hash_ttl_seconds' => 86400,
     ],
+
+    // spec/CoreIdeaExtractor.md §12.8 (v1.11) — danh sách bài ĐÃ publish trong 1 category, kéo
+    // vào prompt để tránh AI đề xuất trùng ý tưởng đã viết. Chỉ tiêu đề (chuỗi ngắn) nên không có
+    // rủi ro "phình" prompt như main_content — cap vẫn đặt ra theo đúng thói quen của module (mọi
+    // danh sách không giới hạn đều có trần, xem batch.max_urls) để tránh truy vấn/payload runaway
+    // với category có hàng nghìn bài.
+    'existing_articles' => [
+        'db_fetch_limit' => 100, // số bài fetch thô từ DB trước khi lọc theo status=published + sort — cần dư ra vì không phải bài nào cũng published
+        'max_titles'     => 30,  // số tiêu đề tối đa đưa vào prompt sau khi đã lọc/sort
+    ],
 ];

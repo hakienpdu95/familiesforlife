@@ -7,11 +7,16 @@ use Spatie\LaravelData\Attributes\Validation\Nullable;
 use Spatie\LaravelData\Data;
 
 /**
- * spec/CoreIdeaExtractor.md §12 (v1.4) — ngữ cảnh biên tập bền vững theo 1 PostCategory
- * ("Category Content Foundation"). core_focus/unique_angle/content_goals ánh xạ 3 thành phần
- * "Business Foundation Document" (core offering/UVP/goals) sang ngữ cảnh biên tập; audience/
- * constraints/style_sample giữ nguyên field ad-hoc đã có ở form batch (ExtractBatchRequestData)
- * — chỉ khác là được LƯU LẠI theo category thay vì gõ tay mỗi lần.
+ * spec/CoreIdeaExtractor.md §12 (v1.4)/§12.6 (v1.10)/§12.7 (v1.11) — ngữ cảnh biên tập bền vững
+ * theo 1 PostCategory ("Category Content Foundation"). core_focus/unique_angle/content_goals ánh
+ * xạ 3 thành phần "Business Foundation Document" (core offering/UVP/goals) sang ngữ cảnh biên
+ * tập; pain_points là câu hỏi/khó khăn thường gặp của độc giả rút ra từ NGHIÊN CỨU THỰC TẾ (khảo
+ * sát/feedback/câu hỏi lặp lại); rejected_ideas là "Decision Log" — ý tưởng đã cân nhắc và QUYẾT
+ * ĐỊNH KHÔNG viết kèm lý do (tribal knowledge editor tự ghi tay, không suy ra được từ dữ liệu có
+ * sẵn — khác `ListCategoryExistingArticlesAction` chỉ liệt kê bài ĐÃ publish, không biết ý tưởng
+ * nào từng bị CÂN NHẮC RỒI TỪ CHỐI); audience/constraints/style_sample giữ nguyên field ad-hoc đã
+ * có ở form batch (ExtractBatchRequestData) — chỉ khác là được LƯU LẠI theo category thay vì gõ
+ * tay mỗi lần.
  */
 class CategoryFoundationData extends Data
 {
@@ -22,6 +27,10 @@ class CategoryFoundationData extends Data
         public readonly ?string $unique_angle = null,
         #[Nullable, Max(2000)]
         public readonly ?string $content_goals = null,
+        #[Nullable, Max(2000)]
+        public readonly ?string $pain_points = null,
+        #[Nullable, Max(2000)]
+        public readonly ?string $rejected_ideas = null,
         #[Nullable, Max(500)]
         public readonly ?string $audience = null,
         #[Nullable, Max(500)]
