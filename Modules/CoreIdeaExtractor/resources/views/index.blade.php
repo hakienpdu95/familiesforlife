@@ -345,41 +345,86 @@ document.addEventListener('alpine:init', () => {
             },
 
             /**
-             * Bọc JSON đã trích xuất + Category Content Foundation (nếu có chọn chuyên mục) +
-             * ngữ cảnh ad-hoc + 3 câu hỏi lọc ý tưởng (chuyển thể từ "Business Foundation
-             * Document" sang ngữ cảnh biên tập) thành 1 prompt dán thẳng vào chat AI — không gọi
-             * AI Provider nào ở backend, giữ đúng triết lý "công cụ nghiên cứu, copy tay" hiện có
-             * của module (spec/CoreIdeaExtractor.md §12, v1.4).
+             * "Context sandwich" (https://www.mindstudio.ai/blog/context-sandwich-prompting-method-ai-results)
+             * + context engineering (https://www.promptingguide.ai/guides/context-engineering-guide):
+             * TOP = vai trò + bối cảnh (foundation/ad-hoc, súc tích — "more context isn't always
+             * better"), MIDDLE = JSON thô ĐẦY ĐỦ đã trích xuất (phần "filling") — KHÔNG rút gọn
+             * main_content: đã thử cắt còn ~500 ký tự ở 1 bản trước nhưng phá mất chiều sâu nội
+             * dung (500 ký tự chỉ đủ 1 đoạn mở bài) trong khi tool này TỒN TẠI để nghiên cứu sâu
+             * nguồn — cái mất (nội dung thực chất) chắc chắn xảy ra, còn cái được (model "chú ý"
+             * phần cuối tốt hơn) chỉ là suy đoán và không đáng với model hiện đại (context window
+             * lớn, có ranh giới cấu trúc rõ ràng); server đã tự giới hạn kích thước rồi (single
+             * 100.000 ký tự, batch 12.000 ký tự/nguồn — §core_idea_extractor.max_main_content_chars/
+             * batch.max_main_content_chars_per_source), không cần thêm 1 lớp cắt nữa ở client.
+             * BOTTOM = nhiệm vụ 3 bước + ĐỊNH DẠNG OUTPUT tường minh (2 bảng), đặt NGAY TRƯỚC chỗ
+             * model bắt đầu sinh câu trả lời vì đó là vùng model "chú ý" nhiều nhất khi generate.
+             * Output yêu cầu dạng bảng Markdown — kime.ai: bảng được trích dẫn nhiều gấp 4.2x so
+             * với văn xuôi mô tả cùng dữ liệu. 3 tinh chỉnh dựa trên test thật với grok.com/claude.ai
+             * (spec/CoreIdeaExtractor.md §12.4, v1.8):
+             * (1) Thêm cột "Lý do" — trước đó mọi ý tưởng đều "Có" tuyệt đối ở cả 3 tiêu chí vì AI
+             *     tự lọc TRƯỚC khi hiển thị (đúng theo yêu cầu "chỉ giữ lại ý tưởng thoả cả 3"),
+             *     khiến cột Có/Không thành "con dấu" vô nghĩa, không verify được AI đang nghĩ gì.
+             * (2) Thêm Bảng 2 liệt kê ý tưởng BỊ LOẠI kèm lý do — cho thấy bộ lọc thật sự hoạt
+             *     động (không phải chỉ hiển thị ý tưởng đã được chọn sẵn), giúp đánh giá bộ lọc có
+             *     đang quá lỏng/quá chặt.
+             * (3) Khi có ≥2 nguồn thành công (batch), bắt buộc ít nhất 1 ý tưởng TỔNG HỢP CHÉO
+             *     nhiều nguồn — dạng insight khó bị sao chép nhất vì không nguồn đơn lẻ nào tự có.
+             * Không gọi AI Provider nào ở backend — giữ triết lý "công cụ nghiên cứu, copy tay"
+             * hiện có.
              */
             async copyPromptForAi() {
                 if (!this.result) return;
 
-                const foundation = this.selectedCategory()?.foundation;
-                const lines = [];
+                const category = this.selectedCategory();
+                const foundation = category?.foundation;
+                const successfulSourceCount = this.isBatchResult()
+                    ? (this.result.sources ?? []).filter(s => s.status === 'success').length
+                    : 1;
 
-                if (foundation) {
-                    lines.push(`Bối cảnh chuyên mục "${this.selectedCategory().name}":`);
-                    if (foundation.core_focus) lines.push(`- Trọng tâm nội dung: ${foundation.core_focus}`);
-                    if (foundation.unique_angle) lines.push(`- Góc nhìn khác biệt: ${foundation.unique_angle}`);
-                    if (foundation.content_goals) lines.push(`- Mục tiêu nội dung: ${foundation.content_goals}`);
-                    lines.push('');
+                const top = [];
+                top.push(`Bạn là biên tập viên giàu kinh nghiệm${category ? ` của chuyên mục "${category.name}"` : ''}, đang nghiên cứu ý tưởng bài viết mới.`);
+                top.push(`Ngày hôm nay: ${new Date().toISOString().slice(0, 10)}.`);
+                if (foundation?.core_focus) top.push(`Trọng tâm nội dung chuyên mục: ${foundation.core_focus}`);
+                if (foundation?.unique_angle) top.push(`Góc nhìn khác biệt của chuyên mục: ${foundation.unique_angle}`);
+                if (foundation?.content_goals) top.push(`Mục tiêu nội dung: ${foundation.content_goals}`);
+                if (this.audience) top.push(`Đối tượng độc giả: ${this.audience}`);
+                if (this.goal) top.push(`Mục tiêu bài viết: ${this.goal}`);
+                if (this.constraints) top.push(`Ràng buộc / không muốn: ${this.constraints}`);
+                if (this.styleSample) top.push(`Giọng văn mẫu:\n${this.styleSample}`);
+
+                const middle = [
+                    'Dữ liệu thô đã trích xuất (tham khảo để lấy ý — KHÔNG copy nguyên văn):',
+                    this.prettyJson(),
+                ];
+
+                const bottom = [
+                    'Nhiệm vụ: đề xuất ý tưởng bài viết mới từ dữ liệu trên, làm theo đúng 3 bước sau.',
+                    '',
+                    'BƯỚC 1 — Sinh ý tưởng: liệt kê tối đa 8-10 ý tưởng ứng viên (chưa lọc).',
+                ];
+
+                if (successfulSourceCount >= 2) {
+                    bottom.push('Trong đó BẮT BUỘC có ít nhất 1 ý tưởng TỔNG HỢP CHÉO từ ≥2 nguồn khác nhau ở trên (kết hợp insight của nhiều nguồn thành 1 góc nhìn mà không nguồn đơn lẻ nào tự có) — đây là dạng ý tưởng khó bị sao chép nhất.');
                 }
 
-                if (this.audience) lines.push(`Đối tượng độc giả: ${this.audience}`);
-                if (this.goal) lines.push(`Mục tiêu bài viết: ${this.goal}`);
-                if (this.constraints) lines.push(`Ràng buộc / không muốn: ${this.constraints}`);
-                if (this.styleSample) lines.push(`Giọng văn mẫu:\n${this.styleSample}`);
-                if (lines.length) lines.push('');
+                bottom.push(
+                    '',
+                    'BƯỚC 2 — Đánh giá TỪNG ý tưởng qua cả 3 tiêu chí (không bỏ qua tiêu chí nào, kể cả khi câu trả lời là "Không"):',
+                    '1. Khớp trọng tâm: có gắn với trọng tâm nội dung của chuyên mục này không?',
+                    '2. Góc nhìn độc quyền: đây có phải insight mà chỉ chuyên mục này viết được, không phải điều nguồn nào cũng viết được?',
+                    '3. Phục vụ mục tiêu: có phục vụ mục tiêu nội dung đã nêu ở trên không?',
+                    '',
+                    'BƯỚC 3 — Trả lời bằng ĐÚNG 2 bảng Markdown dưới đây. Không viết giải thích, không mở đầu, không kết luận, không viết gì khác ngoài 2 bảng:',
+                    '',
+                    'Bảng 1 — Ý tưởng ĐẠT cả 3 tiêu chí, cột: '
+                        + '| Ý tưởng | Khớp trọng tâm? | Góc nhìn độc quyền? | Phục vụ mục tiêu? | Lý do (1 câu, vì sao đạt cả 3) | Đề xuất tiêu đề bài viết |',
+                    'Bảng 2 — Ý tưởng BỊ LOẠI (không đạt ít nhất 1 tiêu chí) — LUÔN liệt kê nếu có ý tưởng bị loại ở Bước 1, không được bỏ qua bảng này, cột: '
+                        + '| Ý tưởng bị loại | Tiêu chí không đạt | Lý do loại |',
+                );
 
-                lines.push('Với MỖI ý tưởng bạn đề xuất từ dữ liệu bên dưới, chỉ giữ lại ý tưởng thoả CẢ 3 điều kiện:');
-                lines.push('1. Có gắn với trọng tâm nội dung của chuyên mục này không?');
-                lines.push('2. Đây có phải góc nhìn/insight mà chỉ chuyên mục này viết được (dựa trên góc nhìn khác biệt ở trên), không phải điều nguồn nào cũng viết được?');
-                lines.push('3. Có phục vụ mục tiêu nội dung đã nêu ở trên không?');
-                lines.push('');
-                lines.push('Dữ liệu thô đã trích xuất:');
-                lines.push(this.prettyJson());
+                const prompt = [...top, '', ...middle, '', ...bottom].join('\n');
 
-                await navigator.clipboard.writeText(lines.join('\n'));
+                await navigator.clipboard.writeText(prompt);
                 this.copiedPrompt = true;
                 setTimeout(() => { this.copiedPrompt = false; }, 2000);
             },

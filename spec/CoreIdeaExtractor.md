@@ -1,9 +1,17 @@
 # CoreIdeaExtractor
 
-**Version:** 1.4  
+**Version:** 1.8  
 **Last Updated:** 2026-07-25  
 **Status:** Design Specification (Ready for Implementation)
 
+> **v1.8 (Prompt — dựa trên test thật với grok.com/claude.ai):** Test thực tế cho thấy mọi ý tưởng trả về đều "Có" tuyệt đối ở cả 3 tiêu chí — vì AI tự lọc TRƯỚC khi hiển thị (đúng yêu cầu "chỉ giữ ý tưởng thoả cả 3"), khiến cột Có/Không thành "con dấu" không verify được. 3 tinh chỉnh cho BƯỚC nhiệm vụ ở §12.4: (1) thêm cột **"Lý do"** (1 câu) vào Bảng 1 — không còn Có/Không suông; (2) thêm **Bảng 2 — Ý tưởng bị loại** kèm tiêu chí không đạt + lý do, để thấy bộ lọc thực sự hoạt động chứ không chỉ ẩn ý tưởng không đạt; (3) khi có ≥2 nguồn thành công (batch), bắt buộc ít nhất 1 ý tưởng **tổng hợp chéo nhiều nguồn** (dạng insight khó sao chép nhất, chỉ áp dụng khi đủ ≥2 nguồn — single-URL hoặc batch chỉ 1 nguồn thành công thì bỏ qua). Nhiệm vụ giờ chia rõ 3 bước (sinh ý tưởng chưa lọc → đánh giá từng tiêu chí → xuất 2 bảng) thay vì 1 bước lọc-luôn như trước.
+>
+> **v1.7 (Spec ↔ code residuals):** (1) Thêm §7.1 "Batch Output Schema" — khoá đúng shape `extract-batch` ĐÃ CHẠY THẬT trong code/UI từ trước nhưng chưa từng lên spec (envelope `topic/brief/requested_count/source_coverage/summary_note/sources/processed_at` + shape 1-duy-nhất của mỗi phần tử `sources[]`, liệt kê đủ giá trị `failure_type`, quy tắc `source_structure = null` khi `status != success`) — đây là khoảng trống spec ↔ code rõ nhất trước bản này; (2) thêm 1 câu làm rõ ở §13: advisory note của `source_structure` chỉ là gợi ý (append `notes`), KHÔNG ảnh hưởng `extraction_confidence`/`error`/`status`; (3) thêm ghi chú ở §7: field Layer 2 lý thuyết (`article_type`/`thesis`/`core_ideas`/...) chưa từng được endpoint nào trả về thật — khoảng cách đã có từ thiết kế ban đầu, không phải lỗi mới. KHÔNG đổi ngưỡng/logic/schema nào đang chạy — thuần cập nhật tài liệu cho khớp implementation.
+>
+> **v1.6 (Prompt hardening — §12.4):** Thêm 1 dòng khoá format CỨNG ở cuối cùng của "Copy prompt cho AI" ("Chỉ trả về bảng Markdown. Không viết giải thích, không mở đầu, không kết luận.") — giảm AI trả lời dài dòng trước/sau bảng. (Có thử thêm rút gọn `main_content` trong JSON dựng prompt còn ~500 ký tự để giảm "phình" prompt, nhưng ĐÃ BỎ NGAY trong cùng phiên bản sau phản hồi: 500 ký tự chỉ đủ 1 đoạn mở bài, phá mất chiều sâu nội dung nguồn — trong khi cả module tồn tại để nghiên cứu SÂU nguồn tham khảo. Cái mất là chắc chắn, cái được [model "chú ý" cuối prompt tốt hơn] chỉ là suy đoán và không đáng với model hiện đại/context window lớn có ranh giới cấu trúc rõ ràng. Server đã tự giới hạn kích thước sẵn — single 100.000 ký tự, batch 12.000 ký tự/nguồn — nên không cần thêm 1 lớp cắt nữa ở client.)
+>
+> **v1.5 (Source Structure Signal):** Thêm §13 + field `source_structure` vào §5.2/§7 — tín hiệu THÔ (có bảng/danh sách số/tỉ lệ heading dạng câu hỏi) cho biết nguồn tham khảo đã "cấu trúc tốt cho AI trích xuất" tới đâu (tham khảo https://kime.ai/blog/structure-content-for-llm-extraction), kèm ghi chú advisory khi nguồn đã tối ưu tốt. ĐÂY LÀ THAY ĐỔI SCHEMA ĐẦU TIÊN từ v1.3 — mọi response (kể cả batch, kể cả `extraction_confidence=low`) từ nay có thêm field `source_structure` (§7), downstream cần cập nhật để đọc field mới này nếu parse JSON theo schema cứng.
+>
 > **v1.4 (Category Content Foundation):** Thêm §12 — ngữ cảnh biên tập lưu bền vững theo TỪNG `PostCategory` ("Business Foundation Document" áp dụng cho biên tập nội dung, xem https://afterhoursai.substack.com/p/how-to-train-ai-to-extract-content), thay cho việc phải gõ lại `audience/goal/constraints/style_sample` mỗi lần chạy. Module có Eloquent Model đầu tiên (`CategoryContentFoundation`) — không đổi gì ở Layer 1/Layer 2 JSON schema (§5, §7), chỉ bổ sung 1 lớp prefill + prompt-template ở tầng UI.
 >
 > **v1.1:** Gộp output về 1 schema duy nhất cho mọi trường hợp (thêm field `error`, các field Layer 2 để `null` thay vì bị bỏ khỏi JSON khi `low`) + nới rule `core_ideas` cho trường hợp `medium` + nội dung mỏng (cho phép < 3 ý, không độn ý) — xem §6.1.4, §7, §8, §9.
@@ -89,9 +97,17 @@ Trích xuất dữ liệu thô một cách ổn định nhất có thể từ nh
   "author": "string | null",
   "language": "string",
   "extraction_confidence": "high | medium | low",
-  "notes": "string | null"
+  "notes": "string | null",
+  "source_structure": {
+    "has_tables": "boolean",
+    "has_numbered_lists": "boolean",
+    "has_bullet_lists": "boolean",
+    "question_heading_ratio": "float (0.0–1.0)"
+  }
 }
 ```
+
+`source_structure` (v1.5, xem §13) — tín hiệu cấu trúc THÔ của nguồn, KHÁC PROPAGATE SANG §7 (không như `publish_date`/`author`): field này CÓ mặt ở Final Output Schema vì hữu ích trực tiếp cho người viết (không phải dữ liệu nội bộ chỉ dùng cho Layer 2).
 
 ### 5.3 Chiến lược trích xuất (theo thứ tự ưu tiên)
 
@@ -196,12 +212,99 @@ Chỉ chạy khi `extraction_confidence` = `medium` hoặc `high`.
   "writing_inspiration": "string | null",
   "extraction_confidence": "high | medium | low",
   "notes": "string | null",
-  "error": "boolean"
+  "error": "boolean",
+  "source_structure": {
+    "has_tables": "boolean",
+    "has_numbered_lists": "boolean",
+    "has_bullet_lists": "boolean",
+    "question_heading_ratio": "float (0.0–1.0)"
+  }
 }
 ```
 
 - `error`: luôn có mặt, mặc định `false`. Chỉ `true` khi không thể trích xuất được nội dung tối thiểu (xem §9).
 - Khi `extraction_confidence = "low"`: `article_type`, `thesis`, `main_sections`, `core_ideas`, `writing_inspiration` LUÔN là `null` (Layer 2 không chạy) — `title`/`language` vẫn giữ giá trị nếu Layer 1 lấy được (chỉ `null` khi hoàn toàn không lấy được gì, xem §9).
+- **Lưu ý triển khai thực tế**: `url`/`article_type`/`thesis`/`main_sections`/`core_ideas`/`writing_inspiration`/`error` là field LÝ THUYẾT của Layer 2 — CHƯA endpoint nào của module (`extract` hay `extract-batch`, xem §7.1) từng trả về các field này, vì Layer 2 chưa bao giờ được tự động hoá (§1, §12.3: module chỉ trích xuất, người dùng tự chạy Layer 2 bằng cách dán JSON vào chat AI). Response THẬT của `extract` hôm nay chỉ gồm đúng field Layer 1 (§5.2) + `source_structure` — khác với schema lý thuyết ở trên. Đây là khoảng cách đã tồn tại từ thiết kế ban đầu, không phải lỗi mới.
+- `source_structure` (v1.5): LUÔN có mặt kể cả khi `extraction_confidence = "low"` (là dữ liệu Layer 1, không phụ thuộc Layer 2) — chỉ toàn `false`/`0.0` khi không lấy được HTML nào để phân tích (§9). Xem §13.
+
+### 7.1 Batch Output Schema (v1.7)
+
+Áp dụng riêng cho `POST extract-batch` (nhiều URL cùng lúc, tối đa `batch.max_urls` — mặc định
+7) — schema NÀY, không phải §7 gốc (single-URL). Khoá đúng shape đã implement
+(`ExtractBatchResultData`/`BatchSourceResultData`), CHƯA từng được viết ra spec trước v1.7 dù đã
+chạy thật trong code + UI — đây là khoảng trống spec ↔ code rõ nhất trước khi vá.
+
+**Envelope cấp batch:**
+
+```json
+{
+  "topic": "string | null",
+  "brief": {
+    "audience": "string | null",
+    "goal": "string | null",
+    "constraints": "string | null",
+    "style_sample": "string | null"
+  },
+  "requested_count": "int",
+  "source_coverage": {
+    "success": "int",
+    "blocked": "int",
+    "error": "int"
+  },
+  "summary_note": "string | null",
+  "sources": ["… xem §7.1.1"],
+  "processed_at": "string (ISO 8601)"
+}
+```
+
+- `topic`: từ khoá nghiên cứu người dùng nhập — thuần metadata echo lại, KHÔNG ảnh hưởng logic fetch/extract.
+- `brief`: ngữ cảnh PHÍA NGƯỜI VIẾT (đối tượng đọc/mục tiêu/ràng buộc/giọng văn) — khác `sources[]` (ngữ cảnh phía NGUỒN). Thuần passthrough dữ liệu người dùng tự gõ, không qua AI xử lý.
+- `source_coverage`: đếm theo `status` của từng phần tử `sources[]` — `success + blocked + error = requested_count` luôn đúng.
+- `summary_note`: `null` khi mọi nguồn đều `success`; ngược lại là câu tóm tắt số nguồn không trích được tự động (kèm gợi ý dùng tab "Dán mã HTML") — KHÔNG thay thế `notes`/`error_message` của từng nguồn, chỉ để không bị bỏ sót khi có nhiều nguồn lỗi.
+
+#### 7.1.1 `sources[]` — 1 SHAPE DUY NHẤT cho mọi `status`
+
+```json
+{
+  "url": "string",
+  "final_url": "string | null",
+  "domain": "string",
+  "status": "success | blocked | error",
+  "failure_type": "string | null",
+  "http_status": "int | null",
+  "title": "string | null",
+  "meta_description": "string | null",
+  "keywords": ["string"],
+  "headings": [{ "level": 1 | 2 | 3, "text": "string" }],
+  "main_content": "string | null",
+  "content_hash": "string | null",
+  "duplicate_of": "string | null",
+  "word_count": "int | null",
+  "publish_date": "string | null",
+  "author": "string | null",
+  "language": "string | null",
+  "extraction_confidence": "high | medium | low | null",
+  "notes": "string | null",
+  "error_message": "string | null",
+  "fetched_at": "string (ISO 8601)",
+  "source_structure": {
+    "has_tables": "boolean",
+    "has_numbered_lists": "boolean",
+    "has_bullet_lists": "boolean",
+    "question_heading_ratio": "float (0.0–1.0)"
+  } | null
+}
+```
+
+**Quy tắc cứng** (mỗi phần tử `sources[]` kế thừa gần đúng field Layer 1 của §5.2 — KHÔNG có
+field Layer 2 lý thuyết như `article_type`/`thesis`/`core_ideas`, cùng lý do nêu ở §7 — cộng thêm
+vài field riêng của batch: trạng thái fetch + chống trùng):
+
+- **1 shape duy nhất cho mọi `status`** — field không áp dụng thì `null` có chủ đích, để downstream (kể cả AI đọc JSON) không phải rẽ nhánh theo `status` mới biết field nào tồn tại. Ngoại lệ: `keywords`/`headings` dùng mảng rỗng `[]` khi không có dữ liệu (list, không phải scalar).
+- `status = "success"`: `failure_type` = `null`, `error_message` = `null`; mọi field trích xuất (`title` → `source_structure`) có giá trị thật (có thể vẫn `null` riêng lẻ nếu Layer 1 không lấy được, y hệt §7).
+- `status = "blocked"` hoặc `"error"`: `failure_type` có giá trị (`rate_limited`, `cloudflare_challenge`, `bot_protection`, `http_error`, `redirect_error`, `invalid_url`, `invalid_content_type`, `network_error`, `too_many_redirects` — xem `ClassifyFetchFailureAction`/`FetchArticlesBatchAction`), `error_message` có giá trị; **MỌI field trích xuất đều `null`** (`title`, `meta_description`, `main_content`, `word_count`, `publish_date`, `author`, `language`, `extraction_confidence`, `notes`), `keywords`/`headings` = `[]`.
+- **`source_structure = null` khi `status != "success"`** — Layer 1 hoàn toàn không chạy (không có HTML nào để phân tích), không phải giá trị `false`/`0.0` mặc định như trường hợp lỗi hoàn toàn ở single-URL (§9) — batch phân biệt rõ "không chạy" (`null`) với "chạy nhưng không thấy tín hiệu" (single-URL).
+- `duplicate_of`: URL ĐẦU TIÊN (có thể từ 1 batch khác, không chỉ trong batch hiện tại — phát hiện qua cache cross-request theo `content_hash`) có cùng nội dung đã chuẩn hoá; `null` nếu URL này là URL đầu tiên có nội dung đó.
 
 ---
 
@@ -332,6 +435,104 @@ Module đã có ngữ cảnh ad-hoc (`audience/goal/constraints/style_sample`, �
 
 - Không tự động kéo tag/bài viết hiện có của category vào prompt (tránh trùng nội dung đã viết) — để dành cho lần lặp sau (§11).
 - Không tự động hoá Layer 2 (gọi AI Provider thật) — module vẫn là công cụ nghiên cứu, copy tay vào chat AI, đúng triết lý hiện có.
+
+### 12.4 "Copy prompt cho AI" — cấu trúc context sandwich (v1.5, hardening v1.6, task 3 bước v1.8)
+
+Tham khảo https://www.mindstudio.ai/blog/context-sandwich-prompting-method-ai-results +
+https://www.promptingguide.ai/guides/context-engineering-guide: prompt copy ra ở §12.2 dựng
+theo cấu trúc sandwich — **TRÊN** = vai trò biên tập viên + bối cảnh (foundation/ad-hoc, súc
+tích — "more context isn't always better") + ngày hôm nay (dynamic context); **GIỮA** = JSON thô
+ĐẦY ĐỦ đã trích xuất (phần "filling", chỉ để tham khảo — KHÔNG rút gọn `main_content`, xem lý do
+bên dưới); **DƯỚI CÙNG** = nhiệm vụ 3 bước + định dạng output tường minh (2 bảng Markdown —
+kime.ai: bảng được trích dẫn nhiều gấp 4.2x văn xuôi), đặt NGAY TRƯỚC chỗ model bắt đầu sinh câu
+trả lời (khác bản v1.4 để JSON ở cuối). Trang quản lý foundation (§12.2) có thêm gợi ý viết ngắn
+gọn (1-2 câu/field).
+
+**v1.6 — khoá format cứng:** luôn kết thúc BOTTOM bằng chỉ dẫn không viết giải thích/mở
+đầu/kết luận ngoài các bảng yêu cầu — đặt SAU CÙNG (đúng nguyên tắc sandwich: chỗ model chú ý
+nhất ngay trước khi generate) để giảm tình trạng AI viết lời dẫn/kết luận thừa quanh bảng.
+
+**Đã cân nhắc nhưng KHÔNG làm — rút gọn `main_content` trong JSON giữa prompt:** ý tưởng ban đầu
+là cắt `main_content` còn ~500 ký tự khi batch nhiều nguồn/bài dài, để tránh phần GIỮA phình to
+đẩy nhiệm vụ ở BOTTOM ra xa vùng model chú ý nhất. Bỏ NGAY trong cùng phiên bản sau khi cân nhắc
+lại: 500 ký tự chỉ đủ 1 đoạn mở bài, phá mất chiều sâu nội dung nguồn — trong khi cả module tồn
+tại để nghiên cứu SÂU nguồn tham khảo, không phải lướt qua tiêu đề. Cái mất (nội dung thực chất)
+là chắc chắn 100%, cái được (model "chú ý" cuối prompt tốt hơn) chỉ là suy đoán và không đáng kể
+với model hiện đại (context window lớn, có ranh giới cấu trúc rõ ràng giữa các phần trong prompt).
+Server đã tự giới hạn kích thước sẵn (single 100.000 ký tự — `max_main_content_chars`; batch
+12.000 ký tự/nguồn — `batch.max_main_content_chars_per_source`), không cần thêm 1 lớp cắt nữa ở
+client.
+
+**v1.8 — nhiệm vụ chia 3 bước, dựa trên kết quả test thật (dán prompt vào grok.com/claude.ai)
+với 2 URL thật:** kết quả trả về mọi ý tưởng đều "Có" tuyệt đối ở cả 3 tiêu chí — đúng bản chất,
+vì bản v1.6 yêu cầu AI *"chỉ giữ lại ý tưởng thoả cả 3 điều kiện"*, nên AI tự lọc TRƯỚC khi hiển
+thị, người đọc không còn thấy được ý tưởng nào bị loại hay ranh giới lọc ở đâu — 3 cột Có/Không
+trở thành "con dấu" không mang thông tin. BOTTOM đổi từ 1 bước "lọc luôn" thành 3 bước tường
+minh:
+
+1. **BƯỚC 1 — Sinh ý tưởng (chưa lọc)**: liệt kê tối đa 8-10 ý tưởng ứng viên. Khi có **≥2 nguồn
+   thành công** (batch — đếm qua `sources[].status === 'success'`, KHÔNG tính nguồn `blocked`/
+   `error`), bắt buộc thêm chỉ dẫn: phải có ít nhất 1 ý tưởng **tổng hợp chéo nhiều nguồn** (kết
+   hợp insight của ≥2 nguồn thành 1 góc nhìn mà không nguồn đơn lẻ nào tự có — dạng ý tưởng khó bị
+   sao chép nhất, đúng tinh thần câu hỏi lọc #2). Single-URL hoặc batch chỉ có 1 nguồn thành công
+   → bỏ qua chỉ dẫn này (không có gì để tổng hợp chéo).
+2. **BƯỚC 2 — Đánh giá từng ý tưởng qua cả 3 tiêu chí** (không đổi nội dung 3 câu hỏi so với
+   v1.5, chỉ đổi cách dùng: đánh giá tường minh thay vì lọc ngầm).
+3. **BƯỚC 3 — Xuất đúng 2 bảng Markdown**:
+   - **Bảng 1** (ý tưởng đạt cả 3 tiêu chí) — thêm cột **"Lý do"** (1 câu) so với v1.5: không còn
+     Có/Không suông, người viết verify được AI đang dựa vào đâu để kết luận "khớp"/"độc quyền".
+   - **Bảng 2** (ý tưởng bị loại, mới ở v1.8) — liệt kê ý tưởng KHÔNG đạt ít nhất 1 tiêu chí, kèm
+     tiêu chí không đạt + lý do loại — chứng minh bộ lọc thực sự chạy (không phải chỉ ẩn đi),
+     giúp người viết đánh giá bộ lọc đang lỏng hay chặt so với kỳ vọng.
+
+Dòng khoá format cứng (v1.6) vẫn giữ nguyên, chỉ chuyển thành 1 phần của chỉ dẫn Bước 3 (không
+viết gì ngoài 2 bảng).
+
+---
+
+## 13. Source Structure Signal (v1.5)
+
+### 13.1 Bối cảnh
+
+Tham khảo https://kime.ai/blog/structure-content-for-llm-extraction — nội dung dùng bảng, danh
+sách đánh số, heading dạng câu hỏi được AI answer engine (ChatGPT/Perplexity/AI Overviews) trích
+dẫn nhiều hơn văn xuôi thường (bảng: 4.2x, danh sách đánh số cho quy trình: 2.7x). Khi nghiên cứu
+1 nguồn tham khảo, người viết có lợi khi biết nguồn đó **đã tối ưu tốt cho AI search tới đâu** —
+nếu đối thủ đã viết rất "AI-friendly", cạnh tranh thứ hạng trên AI answer engine bằng góc viết
+giống hệt sẽ khó hơn; nên cân nhắc chọn góc viết khác biệt.
+
+### 13.2 Thiết kế
+
+- Field mới `source_structure` (object, xem §5.2/§7) — tính trong `ExtractRawContentAction`,
+  SCOPE THEO cùng root đã dùng cho `main_content`/`headings` (không quét toàn trang) — tránh đếm
+  nhầm bảng/danh sách nằm trong sidebar/widget "bài liên quan" không thuộc nội dung chính:
+  - `has_tables`: có ít nhất 1 `<table>` trong phạm vi nội dung chính.
+  - `has_numbered_lists`: có ít nhất 1 `<ol>`.
+  - `has_bullet_lists`: có ít nhất 1 `<ul>`.
+  - `question_heading_ratio`: tỉ lệ heading (đã loại noise/trang trí, §5.3) kết thúc bằng dấu
+    "?" trên tổng số heading — `0.0` nếu không có heading nào.
+- Đây là tín hiệu THÔ, khách quan (đếm được, không suy diễn) — CỐ Ý không quy về 1 nhãn
+  "tốt/xấu" đơn nhất trong field riêng, tránh thêm 1 tầng heuristic mờ vào schema đã version hoá
+  chặt chẽ (§5.4/§9 dùng ngưỡng số cụ thể, không phải nhãn cảm tính).
+- **Ghi chú advisory** (không phải field riêng): khi `(has_tables HOẶC has_numbered_lists) VÀ
+  question_heading_ratio >= 0.3`, phần `notes` (§5.2/§7) có thêm câu gợi ý nguồn đã cấu trúc khá
+  tốt cho AI trích xuất, cân nhắc góc viết khác biệt. Ngưỡng `0.3` là heuristic nhẹ (tham khảo,
+  không phải số liệu khoa học) — xem `CoreIdeaExtractorController::appendStructureNote()`.
+  **Advisory note CHỈ là gợi ý tham khảo (append vào `notes`/hiển thị UI) — KHÔNG ảnh hưởng
+  `extraction_confidence`, `error`, hay `status` (§7.1) theo bất kỳ cách nào**; các field đó tính
+  hoàn toàn độc lập, đúng như trước khi có `source_structure` (v1.5).
+- Luôn có mặt kể cả khi `extraction_confidence = "low"` (dữ liệu Layer 1 thuần, không phụ thuộc
+  Layer 2) — toàn `false`/`0.0` khi không lấy được HTML nào để phân tích (§9, xem
+  `SourceStructureData::none()`).
+- Áp dụng cho CẢ single-URL (`extract`) lẫn batch (`extract-batch`, field `source_structure`
+  trong mỗi phần tử `sources[]`, `null` khi nguồn đó `status != success`).
+
+### 13.3 Ngoài phạm vi (v1.5)
+
+- Không phân tích cấu trúc CHÍNH bài viết đang soạn trong module `Post` (đó là 1 tính năng khác —
+  "AEO readiness checklist" cho editor, chưa triển khai, xem thảo luận đi kèm).
+- Không tự động hoá Layer 2/gọi AI Provider — vẫn thuần phân tích DOM (đếm thẻ/regex), không có
+  lệnh gọi AI nào ở tính năng này.
 
 ---
 

@@ -4,6 +4,7 @@ namespace Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions;
 
 use Lorisleiva\Actions\Concerns\AsAction;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Data\HeadingData;
+use Modules\CoreIdeaExtractor\Features\ContentExtraction\Data\SourceStructureData;
 
 /**
  * Layer 1 — spec/CoreIdeaExtractor.md §5.2/§5.3. Parse HTML bằng DOMDocument/DOMXPath built-in
@@ -63,7 +64,7 @@ class ExtractRawContentAction
      * @param string|null $mainContentSelector Selector đơn giản (id/class, kiểu ".detail-content",
      * "#main-content", có thể kèm tag như "div.detail-content") do người dùng chỉ định để khoanh
      * vùng main_content thay cho thuật toán tự động resolveContentRoot(). Null/rỗng → tự động.
-     * @return array{title:?string, meta_description:?string, keywords:string[], headings:HeadingData[], main_content:string, publish_date:?string, author:?string, language:string, word_count:int, meaningful_heading_count:int, paywall_suspected:bool, custom_selector_matched:?bool}
+     * @return array{title:?string, meta_description:?string, keywords:string[], headings:HeadingData[], main_content:string, publish_date:?string, author:?string, language:string, word_count:int, meaningful_heading_count:int, paywall_suspected:bool, custom_selector_matched:?bool, source_structure:SourceStructureData}
      */
     public function handle(string $html, ?string $mainContentSelector = null): array
     {
@@ -118,9 +119,10 @@ class ExtractRawContentAction
             $contentRoot = $this->resolveContentRoot($xpath);
         }
 
-        $mainContent = $contentRoot ? $this->cleanText($this->extractBlockText($contentRoot)) : '';
-        $headings    = $this->extractHeadings($xpath, $contentRoot);
-        $wordCount   = $this->countWords($mainContent, $language);
+        $mainContent      = $contentRoot ? $this->cleanText($this->extractBlockText($contentRoot)) : '';
+        $headings         = $this->extractHeadings($xpath, $contentRoot);
+        $wordCount        = $this->countWords($mainContent, $language);
+        $sourceStructure  = $this->analyzeStructure($xpath, $contentRoot, $headings);
 
         return [
             'title'                    => $title !== '' ? $title : null,
@@ -135,7 +137,41 @@ class ExtractRawContentAction
             'meaningful_heading_count' => count($headings),
             'paywall_suspected'        => $paywallSuspected,
             'custom_selector_matched'  => $customSelectorMatched,
+            'source_structure'         => $sourceStructure,
         ];
+    }
+
+    /**
+     * spec/CoreIdeaExtractor.md §5.2/§7 (v1.5) — tín hiệu cấu trúc THÔ của nguồn, tham khảo
+     * https://kime.ai/blog/structure-content-for-llm-extraction (bảng/danh sách số/heading dạng
+     * câu hỏi được AI answer engine trích dẫn nhiều hơn văn xuôi). Quét bảng/danh sách TRONG
+     * PHẠM VI $contentRoot (không quét toàn trang) — cùng lý do đã áp dụng cho headings/
+     * main_content (§ resolveContentRoot() docblock): tránh đếm nhầm bảng/danh sách nằm trong
+     * sidebar/widget "bài liên quan" không thuộc nội dung chính.
+     */
+    private function analyzeStructure(\DOMXPath $xpath, ?\DOMNode $contentRoot, array $headings): SourceStructureData
+    {
+        $hasTables        = false;
+        $hasNumberedLists = false;
+        $hasBulletLists   = false;
+
+        if ($contentRoot !== null) {
+            $hasTables        = $xpath->query('.//table', $contentRoot)->length > 0;
+            $hasNumberedLists = $xpath->query('.//ol', $contentRoot)->length > 0;
+            $hasBulletLists   = $xpath->query('.//ul', $contentRoot)->length > 0;
+        }
+
+        $questionHeadings = array_filter(
+            $headings,
+            static fn (HeadingData $h) => str_ends_with(trim($h->text), '?')
+        );
+
+        return new SourceStructureData(
+            has_tables: $hasTables,
+            has_numbered_lists: $hasNumberedLists,
+            has_bullet_lists: $hasBulletLists,
+            question_heading_ratio: $headings === [] ? 0.0 : round(count($questionHeadings) / count($headings), 2),
+        );
     }
 
     /**

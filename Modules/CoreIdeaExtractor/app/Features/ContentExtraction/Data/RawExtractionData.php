@@ -30,9 +30,10 @@ class RawExtractionData extends Data
         public readonly ?string $notes,
         public readonly int $word_count,
         public readonly int $meaningful_heading_count,
+        public readonly SourceStructureData $source_structure,
     ) {}
 
-    /** @return array{title:?string, meta_description:?string, keywords:array, headings:array, main_content:string, publish_date:?string, author:?string, language:string, extraction_confidence:string, notes:?string} */
+    /** @return array{title:?string, meta_description:?string, keywords:array, headings:array, main_content:string, publish_date:?string, author:?string, language:string, extraction_confidence:string, notes:?string, source_structure:array} */
     public function toApiArray(): array
     {
         return [
@@ -46,6 +47,7 @@ class RawExtractionData extends Data
             'language'              => $this->language,
             'extraction_confidence' => $this->extraction_confidence->value,
             'notes'                 => $this->notes,
+            'source_structure'      => $this->source_structure->toArray(),
         ];
     }
 }

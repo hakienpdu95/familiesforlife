@@ -14,7 +14,8 @@
             <p class="text-sm text-base-content/50 mt-0.5">
                 Ngữ cảnh biên tập lưu bền vững cho từng chuyên mục (trọng tâm nội dung, góc nhìn khác biệt, mục tiêu, đối
                 tượng độc giả, giọng văn...) — trang "Trích xuất nội dung bài viết" sẽ tự nạp lại khi bạn chọn chuyên mục,
-                không cần gõ lại mỗi lần.
+                không cần gõ lại mỗi lần. Nên viết ngắn gọn (1-2 câu/field) — nhồi quá nhiều chữ không giúp AI trả lời
+                tốt hơn, chỉ loãng trọng tâm.
             </p>
         </div>
         <a :href="backUrl" class="btn btn-ghost btn-xs">&larr; Về trang trích xuất</a>

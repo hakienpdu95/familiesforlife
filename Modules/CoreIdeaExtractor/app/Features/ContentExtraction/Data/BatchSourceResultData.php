@@ -42,6 +42,7 @@ class BatchSourceResultData extends Data
         public readonly ?string $notes,
         public readonly ?string $error_message,
         public readonly string $fetched_at,
+        public readonly ?array $source_structure,
     ) {}
 
     public static function success(
@@ -79,6 +80,7 @@ class BatchSourceResultData extends Data
             notes: $extraction->notes,
             error_message: null,
             fetched_at: $fetchedAt,
+            source_structure: $extraction->source_structure->toArray(),
         );
     }
 
@@ -114,6 +116,7 @@ class BatchSourceResultData extends Data
             notes: null,
             error_message: $errorMessage,
             fetched_at: $fetchedAt,
+            source_structure: null,
         );
     }
 
@@ -141,6 +144,7 @@ class BatchSourceResultData extends Data
             'notes'                  => $this->notes,
             'error_message'          => $this->error_message,
             'fetched_at'             => $this->fetched_at,
+            'source_structure'       => $this->source_structure,
         ];
     }
 }

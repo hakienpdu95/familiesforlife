@@ -19,6 +19,7 @@ use Modules\CoreIdeaExtractor\Features\ContentExtraction\Data\ExtractBatchResult
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Data\ExtractRequestData;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Data\HeadingData;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Data\RawExtractionData;
+use Modules\CoreIdeaExtractor\Features\ContentExtraction\Data\SourceStructureData;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Exceptions\UrlFetchException;
 
 class CoreIdeaExtractorController extends Controller
@@ -82,6 +83,7 @@ class CoreIdeaExtractorController extends Controller
         $confidenceResult = $computeConfidence->handle($extracted);
         $notes            = $this->appendSelectorNote($confidenceResult['notes'], $data->main_content_selector, $extracted['custom_selector_matched']);
         $notes            = $this->appendPastedFragmentNote($notes, $pasted, $extracted['title']);
+        $notes            = $this->appendStructureNote($notes, $extracted['source_structure']);
 
         $result = $this->buildResult(
             title: $extracted['title'],
@@ -96,6 +98,7 @@ class CoreIdeaExtractorController extends Controller
             notes: $notes,
             wordCount: $extracted['word_count'],
             headingCount: $extracted['meaningful_heading_count'],
+            sourceStructure: $extracted['source_structure'],
         );
 
         return response()->json($result->toApiArray());
@@ -156,6 +159,7 @@ class CoreIdeaExtractorController extends Controller
             $extracted        = $extractRaw->handle($item['html'], $data->main_content_selector);
             $confidenceResult = $computeConfidence->handle($extracted);
             $notes            = $this->appendSelectorNote($confidenceResult['notes'], $data->main_content_selector, $extracted['custom_selector_matched']);
+            $notes            = $this->appendStructureNote($notes, $extracted['source_structure']);
             $mainContent      = $this->truncateBatchMainContent($extracted['main_content']);
             $contentHash      = $this->computeContentHash($mainContent);
 
@@ -177,6 +181,7 @@ class CoreIdeaExtractorController extends Controller
                     notes: $notes,
                     wordCount: $extracted['word_count'],
                     headingCount: $extracted['meaningful_heading_count'],
+                    sourceStructure: $extracted['source_structure'],
                 ),
                 contentHash: $contentHash,
                 duplicateOf: $this->resolveDuplicateOf($contentHash, $url),
@@ -267,6 +272,7 @@ class CoreIdeaExtractorController extends Controller
         ?string $notes,
         int $wordCount = 0,
         int $headingCount = 0,
+        ?SourceStructureData $sourceStructure = null,
     ): RawExtractionData {
         return new RawExtractionData(
             title: $title,
@@ -281,6 +287,7 @@ class CoreIdeaExtractorController extends Controller
             notes: $notes,
             word_count: $wordCount,
             meaningful_heading_count: $headingCount,
+            source_structure: $sourceStructure ?? SourceStructureData::none(),
         );
     }
 
@@ -298,6 +305,27 @@ class CoreIdeaExtractorController extends Controller
         $note = "Selector tùy chỉnh \"{$selector}\" không khớp phần tử nào trên trang — đã dùng thuật toán tự động để xác định main_content.";
 
         return $notes ? "{$note} {$notes}" : $note;
+    }
+
+    /**
+     * spec/CoreIdeaExtractor.md §13 (v1.5) — tham khảo https://kime.ai/blog/structure-content-for-llm-extraction:
+     * nguồn dùng bảng/danh sách số CÙNG heading dạng câu hỏi thường được AI answer engine trích
+     * dẫn nhiều hơn văn xuôi — ghi chú advisory để người viết biết nguồn tham khảo đã "tối ưu cho
+     * AI search" tới đâu, cân nhắc chọn góc viết khác biệt thay vì lặp lại. Ngưỡng 0.3 (≥ 30%
+     * heading dạng câu hỏi) là heuristic nhẹ, không phải số liệu khoa học — chỉ mang tính gợi ý.
+     */
+    private function appendStructureNote(?string $notes, SourceStructureData $structure): ?string
+    {
+        $wellStructured = ($structure->has_tables || $structure->has_numbered_lists)
+            && $structure->question_heading_ratio >= 0.3;
+
+        if (! $wellStructured) {
+            return $notes;
+        }
+
+        $note = 'Nguồn có bảng/danh sách số + heading dạng câu hỏi — đã cấu trúc khá tốt cho AI trích xuất (dễ được AI answer engine trích dẫn), cân nhắc chọn góc viết khác biệt thay vì lặp lại thông tin tương tự.';
+
+        return $notes ? "{$notes} {$note}" : $note;
     }
 
     /**
