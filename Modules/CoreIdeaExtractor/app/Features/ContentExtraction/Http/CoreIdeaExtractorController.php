@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 use Modules\CoreIdeaExtractor\Enums\ExtractionConfidence;
+use Modules\CoreIdeaExtractor\Features\CategoryFoundation\Actions\ListCategoryFoundationsAction;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions\ComputeExtractionConfidenceAction;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions\ExtractRawContentAction;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions\FetchArticleHtmlAction;
@@ -22,9 +23,16 @@ use Modules\CoreIdeaExtractor\Features\ContentExtraction\Exceptions\UrlFetchExce
 
 class CoreIdeaExtractorController extends Controller
 {
-    public function index(): View
+    /**
+     * spec/CoreIdeaExtractor.md §12 (v1.4) — nạp sẵn danh sách chuyên mục + Category Content
+     * Foundation qua Js::from() trong view, KHÔNG qua AJAX riêng — danh sách nhỏ (toàn bộ cây
+     * chuyên mục active), tránh round-trip thừa cho picker xuất hiện ngay khi tải trang.
+     */
+    public function index(ListCategoryFoundationsAction $listCategoryFoundations): View
     {
-        return view('coreideaextractor::index');
+        return view('coreideaextractor::index', [
+            'categoryFoundations' => $listCategoryFoundations->handle(),
+        ]);
     }
 
     /**

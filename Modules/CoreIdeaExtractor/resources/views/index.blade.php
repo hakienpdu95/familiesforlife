@@ -6,15 +6,20 @@
     'apiUrl' => route('backend.api.coreideaextractor.extract'),
     'apiBatchUrl' => route('backend.api.coreideaextractor.extract-batch'),
     'maxUrls' => config('core_idea_extractor.batch.max_urls', 7),
+    'categoryFoundationsUrl' => route('backend.coreideaextractor.category-foundations.index'),
+    'categories' => $categoryFoundations,
 ]) }})">
 
-    <div class="mb-5">
-        <h1 class="text-2xl font-bold text-base-content">Trích xuất nội dung bài viết</h1>
-        <p class="text-sm text-base-content/50 mt-0.5">
-            Nhập tối đa <span x-text="maxUrls"></span> URL (mỗi dòng 1 URL) để lấy dữ liệu thô (tiêu đề, heading, nội dung
-            chính...) của từng nguồn dưới dạng 1 JSON — công cụ nghiên cứu ý tưởng viết bài, copy JSON này dán thẳng vào
-            chat AI (VD claude.ai) để nghiên cứu sâu hơn. Module này chỉ trích xuất, không tự sinh ý chính bằng AI.
-        </p>
+    <div class="mb-5 flex items-start justify-between flex-wrap gap-2">
+        <div>
+            <h1 class="text-2xl font-bold text-base-content">Trích xuất nội dung bài viết</h1>
+            <p class="text-sm text-base-content/50 mt-0.5">
+                Nhập tối đa <span x-text="maxUrls"></span> URL (mỗi dòng 1 URL) để lấy dữ liệu thô (tiêu đề, heading, nội dung
+                chính...) của từng nguồn dưới dạng 1 JSON — công cụ nghiên cứu ý tưởng viết bài, copy JSON này dán thẳng vào
+                chat AI (VD claude.ai) để nghiên cứu sâu hơn. Module này chỉ trích xuất, không tự sinh ý chính bằng AI.
+            </p>
+        </div>
+        <a :href="categoryFoundationsUrl" class="btn btn-ghost btn-xs">Quản lý Content Foundation theo chuyên mục</a>
     </div>
 
     <div class="card bg-base-100 shadow-sm border border-base-200 mb-4">
@@ -55,10 +60,24 @@
                     </div>
                 </div>
 
-                <details class="rounded-lg border border-base-200 px-3 py-2" x-show="mode === 'url'">
+                <details class="rounded-lg border border-base-200 px-3 py-2" x-show="mode === 'url'" open>
                     <summary class="cursor-pointer text-xs font-medium text-base-content/60">
                         Ngữ cảnh cho người viết (tùy chọn) — giúp AI không trả lời chung chung khi bạn dán JSON vào chat
                     </summary>
+
+                    <div class="form-control mt-2">
+                        <label class="label py-0.5">
+                            <span class="label-text text-xs font-medium">Chuyên mục (tự nạp Content Foundation đã lưu, nếu có)</span>
+                        </label>
+                        <select x-model="selectedCategoryUuid" @change="applyCategoryFoundation()" class="select select-sm select-bordered w-full">
+                            <option value="">— Không chọn —</option>
+                            <template x-for="cat in categories" :key="cat.uuid">
+                                <option :value="cat.uuid" x-text="'—'.repeat(cat.depth) + ' ' + cat.name"></option>
+                            </template>
+                        </select>
+                        <p x-show="selectedFoundationSummary()" x-cloak class="text-xs text-base-content/40 mt-1" x-text="selectedFoundationSummary()"></p>
+                    </div>
+
                     <div class="flex flex-wrap gap-3 mt-2">
                         <div class="form-control flex-1 min-w-64">
                             <label class="label py-0.5"><span class="label-text text-xs font-medium">Đối tượng độc giả</span></label>
@@ -138,13 +157,22 @@
                         <span x-show="result.source_coverage.error" class="badge badge-error badge-xs" x-text="`${result.source_coverage.error} lỗi`"></span>
                     </div>
                 </template>
-                <button type="button" class="btn btn-ghost btn-xs gap-1.5" @click="copyJson()">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                    </svg>
-                    <span x-text="copied ? 'Đã copy!' : 'Copy JSON'"></span>
-                </button>
+                <div class="flex items-center gap-1.5">
+                    <button type="button" class="btn btn-ghost btn-xs gap-1.5" @click="copyPromptForAi()">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-6l-4 4v-4z"/>
+                        </svg>
+                        <span x-text="copiedPrompt ? 'Đã copy!' : 'Copy prompt cho AI'"></span>
+                    </button>
+                    <button type="button" class="btn btn-ghost btn-xs gap-1.5" @click="copyJson()">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                        </svg>
+                        <span x-text="copied ? 'Đã copy!' : 'Copy JSON'"></span>
+                    </button>
+                </div>
             </div>
 
             <template x-if="isBatchResult()">
@@ -174,7 +202,7 @@
 <script>
 document.addEventListener('alpine:init', () => {
     Alpine.data('coreIdeaExtractorPage', (serverData = {}) => {
-        const { apiUrl = '', apiBatchUrl = '', maxUrls = 7 } = serverData;
+        const { apiUrl = '', apiBatchUrl = '', maxUrls = 7, categoryFoundationsUrl = '', categories = [] } = serverData;
 
         return {
             mode: 'url',
@@ -191,7 +219,11 @@ document.addEventListener('alpine:init', () => {
             result: null,
             errorMessage: '',
             copied: false,
+            copiedPrompt: false,
             maxUrls,
+            categoryFoundationsUrl,
+            categories,
+            selectedCategoryUuid: '',
 
             parsedUrls() {
                 return [...new Set(
@@ -201,6 +233,36 @@ document.addEventListener('alpine:init', () => {
 
             parsedUrlCount() {
                 return this.parsedUrls().length;
+            },
+
+            selectedCategory() {
+                return this.categories.find(cat => cat.uuid === this.selectedCategoryUuid) ?? null;
+            },
+
+            /**
+             * Prefill CÁC field ad-hoc hiện có (audience/goal/constraints/styleSample) từ
+             * Category Content Foundation đã lưu — vẫn để người dùng tự sửa tiếp cho lần chạy
+             * này, không khoá field (spec/CoreIdeaExtractor.md §12, v1.4).
+             */
+            applyCategoryFoundation() {
+                const foundation = this.selectedCategory()?.foundation;
+                if (!foundation) return;
+
+                this.audience = foundation.audience || this.audience;
+                this.goal = foundation.content_goals || this.goal;
+                this.constraints = foundation.constraints || this.constraints;
+                this.styleSample = foundation.style_sample || this.styleSample;
+            },
+
+            selectedFoundationSummary() {
+                const foundation = this.selectedCategory()?.foundation;
+                if (!foundation) return '';
+
+                const parts = [];
+                if (foundation.core_focus) parts.push(`Trọng tâm: ${foundation.core_focus}`);
+                if (foundation.unique_angle) parts.push(`Góc nhìn khác biệt: ${foundation.unique_angle}`);
+
+                return parts.join(' — ');
             },
 
             async submit() {
@@ -280,6 +342,46 @@ document.addEventListener('alpine:init', () => {
                 await navigator.clipboard.writeText(this.prettyJson());
                 this.copied = true;
                 setTimeout(() => { this.copied = false; }, 2000);
+            },
+
+            /**
+             * Bọc JSON đã trích xuất + Category Content Foundation (nếu có chọn chuyên mục) +
+             * ngữ cảnh ad-hoc + 3 câu hỏi lọc ý tưởng (chuyển thể từ "Business Foundation
+             * Document" sang ngữ cảnh biên tập) thành 1 prompt dán thẳng vào chat AI — không gọi
+             * AI Provider nào ở backend, giữ đúng triết lý "công cụ nghiên cứu, copy tay" hiện có
+             * của module (spec/CoreIdeaExtractor.md §12, v1.4).
+             */
+            async copyPromptForAi() {
+                if (!this.result) return;
+
+                const foundation = this.selectedCategory()?.foundation;
+                const lines = [];
+
+                if (foundation) {
+                    lines.push(`Bối cảnh chuyên mục "${this.selectedCategory().name}":`);
+                    if (foundation.core_focus) lines.push(`- Trọng tâm nội dung: ${foundation.core_focus}`);
+                    if (foundation.unique_angle) lines.push(`- Góc nhìn khác biệt: ${foundation.unique_angle}`);
+                    if (foundation.content_goals) lines.push(`- Mục tiêu nội dung: ${foundation.content_goals}`);
+                    lines.push('');
+                }
+
+                if (this.audience) lines.push(`Đối tượng độc giả: ${this.audience}`);
+                if (this.goal) lines.push(`Mục tiêu bài viết: ${this.goal}`);
+                if (this.constraints) lines.push(`Ràng buộc / không muốn: ${this.constraints}`);
+                if (this.styleSample) lines.push(`Giọng văn mẫu:\n${this.styleSample}`);
+                if (lines.length) lines.push('');
+
+                lines.push('Với MỖI ý tưởng bạn đề xuất từ dữ liệu bên dưới, chỉ giữ lại ý tưởng thoả CẢ 3 điều kiện:');
+                lines.push('1. Có gắn với trọng tâm nội dung của chuyên mục này không?');
+                lines.push('2. Đây có phải góc nhìn/insight mà chỉ chuyên mục này viết được (dựa trên góc nhìn khác biệt ở trên), không phải điều nguồn nào cũng viết được?');
+                lines.push('3. Có phục vụ mục tiêu nội dung đã nêu ở trên không?');
+                lines.push('');
+                lines.push('Dữ liệu thô đã trích xuất:');
+                lines.push(this.prettyJson());
+
+                await navigator.clipboard.writeText(lines.join('\n'));
+                this.copiedPrompt = true;
+                setTimeout(() => { this.copiedPrompt = false; }, 2000);
             },
         };
     });

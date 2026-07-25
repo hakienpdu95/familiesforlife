@@ -1,9 +1,11 @@
 # CoreIdeaExtractor
 
-**Version:** 1.3  
-**Last Updated:** 2026-07-22  
+**Version:** 1.4  
+**Last Updated:** 2026-07-25  
 **Status:** Design Specification (Ready for Implementation)
 
+> **v1.4 (Category Content Foundation):** Thêm §12 — ngữ cảnh biên tập lưu bền vững theo TỪNG `PostCategory` ("Business Foundation Document" áp dụng cho biên tập nội dung, xem https://afterhoursai.substack.com/p/how-to-train-ai-to-extract-content), thay cho việc phải gõ lại `audience/goal/constraints/style_sample` mỗi lần chạy. Module có Eloquent Model đầu tiên (`CategoryContentFoundation`) — không đổi gì ở Layer 1/Layer 2 JSON schema (§5, §7), chỉ bổ sung 1 lớp prefill + prompt-template ở tầng UI.
+>
 > **v1.1:** Gộp output về 1 schema duy nhất cho mọi trường hợp (thêm field `error`, các field Layer 2 để `null` thay vì bị bỏ khỏi JSON khi `low`) + nới rule `core_ideas` cho trường hợp `medium` + nội dung mỏng (cho phép < 3 ý, không độn ý) — xem §6.1.4, §7, §8, §9.
 >
 > **v1.2 (Consistency & Rule fixes):** (1) Chuẩn hóa ngưỡng từ về DUY NHẤT 1 mốc `< 200 từ → low` (xoá vùng xám 150–199 từ giữa §5.4 và §9 cũ), `< 150 từ` chỉ còn là điều kiện phụ set `error=true`; (2) thay mô tả cảm tính "nội dung mỏng" bằng "Thin content trigger" định lượng (`medium` + word_count<300 hoặc ≤1 heading có ý nghĩa) ở §6.1.4/§8; (3) sửa wording pipeline §4 khớp hành vi thật (`low` → skip Layer 2 nhưng vẫn trả full schema, không phải "dừng & trả lỗi"); (4) đánh dấu rõ `publish_date`/`author` (§5.2) là dữ liệu nội bộ Layer 1, không propagate sang Final Output Schema (§7).
@@ -306,6 +308,30 @@ Các hướng mở rộng có thể triển khai sau:
 - Thêm trường `sentiment` hoặc `tone`
 - Cho phép tùy chỉnh số lượng `core_ideas` (3–7)
 - Tích hợp đánh giá chất lượng ý tưởng viết (idea quality score)
+- Tự động kéo tag/bài viết hiện có của chuyên mục (§12) vào prompt để AI tránh gợi ý trùng nội dung đã viết — chưa triển khai ở v1.4, xem §12 "Ngoài phạm vi"
+
+---
+
+## 12. Category Content Foundation (v1.4)
+
+### 12.1 Bối cảnh
+
+Tham khảo từ https://afterhoursai.substack.com/p/how-to-train-ai-to-extract-content — AI chỉ gợi ý nội dung sắc bén khi được cấp 1 "Business Foundation" bền vững (core offering/UVP/goals) thay vì lặp lại ngữ cảnh mỗi lần chat, và mỗi ý tưởng nên được lọc qua 3 câu hỏi: *có gắn với core offering không? chỉ mình mới chia sẻ được insight này không? có phục vụ mục tiêu cụ thể không?*
+
+Module đã có ngữ cảnh ad-hoc (`audience/goal/constraints/style_sample`, §"Ngữ cảnh cho người viết") nhưng phải gõ lại mỗi lần chạy. `Post` (nơi bài viết thật sự tồn tại) là tài sản **platform-wide, không tenant-scoped** — biên tập viên được gán **theo `PostCategory`** (`post_category_editors`), không theo Organization. Vì vậy phạm vi hợp lý cho 1 bộ ngữ cảnh bền vững là **theo từng PostCategory**, không phải Organization hay tác giả.
+
+### 12.2 Thiết kế
+
+- Bảng `cie_category_foundations` (tên rút gọn — tên đầy đủ `core_idea_extractor_category_foundations` khiến tên constraint auto-gen của Laravel vượt giới hạn 64 ký tự của MySQL) (model `CategoryContentFoundation`) — model Eloquent ĐẦU TIÊN của module — sống trong `CoreIdeaExtractor`, FK `post_category_id → post_categories.id` (unique, 1 bản ghi/category), cùng hướng phụ thuộc 1 chiều với `Ocop → Post` (`post_article_ocop_products`). `Post` module không cần sửa gì.
+- Field: `core_focus`, `unique_angle`, `content_goals` (3 thành phần Business Foundation ánh xạ sang ngữ cảnh biên tập) + `audience`, `constraints`, `style_sample` (persist hoá field ad-hoc đã có).
+- **Không đổi Layer 1/Layer 2 JSON schema (§5, §7)** — foundation chỉ dùng để prefill form và dựng prompt ở tầng UI, không bao giờ chèn vào JSON output.
+- Quyền sửa foundation của 1 category: `platform_content_editor`/`platform_content_head` sửa được mọi category (giữ nguyên quyền `core_idea_extractor.use` không giới hạn hiện có); `platform_section_editor` chỉ sửa được category mình được gán qua `post_category_editors` — cùng pattern với `PostArticlePolicy::approve()`. Implement bằng `Gate::define('core_idea_extractor.manage_category_foundation', ...)` (KHÔNG phải `Policy` gắn vào `PostCategory`, vì `Post` module đã đăng ký `PostCategoryPolicy` cho chính model đó — đăng ký thêm 1 policy nữa sẽ ghi đè lẫn nhau).
+- UI: trang quản lý riêng (`/dashboard/core-idea-extractor/category-foundations`) để CRUD foundation theo từng category; trang trích xuất chính thêm `<select>` chuyên mục — khi chọn, tự prefill `audience/goal/constraints/style_sample` (vẫn tự sửa được, không khoá field) + nút "Copy prompt cho AI" bọc JSON + foundation + 3 câu hỏi lọc ý tưởng (bản dịch sang ngữ cảnh biên tập) thành 1 prompt dán thẳng vào chat AI.
+
+### 12.3 Ngoài phạm vi (v1.4)
+
+- Không tự động kéo tag/bài viết hiện có của category vào prompt (tránh trùng nội dung đã viết) — để dành cho lần lặp sau (§11).
+- Không tự động hoá Layer 2 (gọi AI Provider thật) — module vẫn là công cụ nghiên cứu, copy tay vào chat AI, đúng triết lý hiện có.
 
 ---
 
