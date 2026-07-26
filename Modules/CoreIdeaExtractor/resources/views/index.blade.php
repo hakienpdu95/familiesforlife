@@ -385,6 +385,14 @@ document.addEventListener('alpine:init', () => {
              * — nên đây chỉ là gợi ý dựa trên số đo THẬT, để người dùng tự quyết (giảm số nguồn/
              * chạy theo đợt), KHÔNG phải ngưỡng cứng.
              *
+             * Phản hồi thực tế từ người dùng (test thật với Claude/Grok, batch 7 nguồn) — payload
+             * lớn không chỉ ảnh hưởng ĐỘ CHÍNH XÁC mà còn khiến AI TRẢ LỜI CHẬM RÕ RỆT (thời gian
+             * chờ ~ hàm của số token input phải đọc + số token output phải sinh — batch 7 nguồn còn
+             * yêu cầu sinh 20-25 ý tưởng + đánh giá 4 tiêu chí + tới 2 bảng, nên phần SINH OUTPUT
+             * cũng góp phần không nhỏ, không chỉ riêng input dài). Bổ sung nhắc về TỐC ĐỘ vào cùng
+             * cảnh báo này (thay vì chỉ nói về độ chính xác như trước) — cùng 1 giải pháp (giảm số
+             * nguồn/chạy theo đợt) xử lý được cả 2 vấn đề, không cần cảnh báo riêng.
+             *
              * Ước lượng token = ký_tự / 4 — xấp xỉ thô (tiếng Việt có dấu/không phân từ bằng
              * khoảng trắng có thể lệch so với tokenizer thật), CHỈ để người dùng có cảm nhận độ
              * lớn tương đối, không phải con số chính xác cho billing.
@@ -402,8 +410,8 @@ document.addEventListener('alpine:init', () => {
                 const tokens = Math.round(chars / 4);
 
                 return `Dữ liệu khá lớn (~${chars.toLocaleString('vi-VN')} ký tự, ~${tokens.toLocaleString('vi-VN')} token ước tính). `
-                    + `Ngữ cảnh càng dài + nhiệm vụ càng phức tạp, độ chính xác AI có thể càng giảm — `
-                    + `nếu câu trả lời không ổn, thử giảm số nguồn hoặc chạy theo từng đợt nhỏ hơn.`;
+                    + `Ngữ cảnh càng dài + nhiệm vụ càng phức tạp, độ chính xác AI có thể càng giảm, và AI cũng có thể trả lời CHẬM hơn rõ rệt — `
+                    + `nếu câu trả lời không ổn hoặc chờ quá lâu, thử giảm số nguồn (VD 3-4 URL thay vì 7) hoặc chạy theo từng đợt nhỏ hơn.`;
             },
 
             async copyJson() {
@@ -537,6 +545,22 @@ document.addEventListener('alpine:init', () => {
              *      (gsdcouncil.org/iternal.ai) cho kết quả bám sát chuyên môn/đối tượng hơn khi vai
              *      trò gắn liền ngữ cảnh cụ thể thay vì vai trò chung chung kèm dữ kiện rời rạc bên
              *      cạnh. Không có topic/audience → rơi về đúng câu cũ (không đổi hành vi mặc định).
+             *
+             * (13) "Derivability Test" (bosio.digital/articles/context-engineering-rules — Anthropic):
+             *      GIỮ 1 chỉ dẫn nếu model KHÔNG thể tự suy ra được từ ngữ cảnh xung quanh VÀ sai sót
+             *      là "âm thầm mà tốn kém" (silent and costly). Soát lại toàn bộ TOP/BOTTOM hiện có
+             *      theo tiêu chí này — không tìm thấy chỉ dẫn nào đủ thừa để xoá (phần lớn đã được
+             *      thêm sau khi quan sát THẬT model suy luận sai nếu thiếu, xem lịch sử (1)-(12)).
+             *      Nhưng lộ 1 khoảng trống thật: `familiesforlife.com` có 2 chuyên mục lõi "Sức khoẻ
+             *      gia đình"/"Dinh dưỡng" — 1 ý tưởng SAI ở nhóm chủ đề này (mẹo dân gian/claim y
+             *      khoa chưa kiểm chứng) là rủi ro "silent and costly" thật (model không có cách nào
+             *      tự biết ranh giới này nếu không nói rõ, hậu quả ảnh hưởng sức khoẻ độc giả, nặng
+             *      hơn hẳn 1 ý tưởng dở thông thường) — mà BƯỚC 1 trước đó hoàn toàn không nhắc tới.
+             *      Thêm 1 câu ràng buộc NGAY TRONG BƯỚC 1 (chỗ sinh ý tưởng, trước khi ý tưởng "lỡ"
+             *      được đề xuất) thay vì chỉ lọc ở BƯỚC 2 — chặn từ gốc rẻ hơn lọc sau. Luôn bật
+             *      (không điều kiện theo category) vì chủ đề sức khoẻ/an toàn trẻ em có thể xuất
+             *      hiện ở nhiều chuyên mục khác ngoài "Dinh dưỡng"/"Sức khoẻ gia đình" (VD "Nuôi dạy
+             *      con"/"Kỹ năng sống"), match theo tên category sẽ không đủ tin cậy.
              */
             async copyPromptForAi() {
                 if (!this.result) return;
@@ -650,6 +674,10 @@ document.addEventListener('alpine:init', () => {
                         + 'không chỉ biến tấu lại vài ý giống nhau. Đa dạng hoá bằng nhiều dạng góc nhìn khác nhau từ dữ liệu nguồn: '
                         + 'theo giai đoạn/độ tuổi, theo vấn đề cụ thể, theo đối tượng đặc thù (VD mẹ đi làm, sinh non, sinh đôi), '
                         + 'dạng so sánh/đối chiếu, dạng checklist/hướng dẫn chọn, dạng sai lầm thường gặp, dạng FAQ.',
+                    'Riêng ý tưởng liên quan sức khoẻ/dinh dưỡng/an toàn trẻ em: KHÔNG đề xuất theo hướng khẳng định chắc chắn '
+                        + 'các mẹo dân gian hay claim y khoa chưa được kiểm chứng khoa học — ưu tiên góc nhìn cần tham vấn '
+                        + 'chuyên gia/dựa trên nguồn uy tín, khách quan (sai sót ở nhóm chủ đề này ảnh hưởng trực tiếp tới '
+                        + 'sức khoẻ độc giả, không đơn thuần là 1 ý tưởng bài viết dở).',
                 );
 
                 if (successfulSourceCount >= 2) {
