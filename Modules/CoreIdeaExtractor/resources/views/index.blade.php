@@ -421,8 +421,18 @@ document.addEventListener('alpine:init', () => {
             },
 
             /**
-             * "Context sandwich" (https://www.mindstudio.ai/blog/context-sandwich-prompting-method-ai-results)
-             * + context engineering (https://www.promptingguide.ai/guides/context-engineering-guide):
+             * LẤY CẢM HỨNG (không sao chép 1:1) từ "context sandwich"
+             * (https://www.mindstudio.ai/blog/context-sandwich-prompting-method-better-ai-results)
+             * + context engineering (https://www.promptingguide.ai/guides/context-engineering-guide).
+             * Bài gốc định nghĩa TOP=Context, MIDDLE=Task (yêu cầu cụ thể), BOTTOM=Criteria (định
+             * dạng/tiêu chí output) — 3 lớp cho prompt ĐƠN GIẢN, không có khái niệm 1 khối bằng
+             * chứng/dữ liệu retrieved lớn. Code này KHÁC: MIDDLE ở đây là EVIDENCE (JSON thô đã
+             * trích xuất), còn Task+Criteria gộp chung ở BOTTOM — thích ứng riêng cho kịch bản có
+             * khối dữ liệu khổng lồ (tới ~84.000 ký tự/batch) mà bài gốc không đề cập tới. Đặt
+             * Task+Criteria ở BOTTOM (không phải ngay sau TOP như bài gốc gợi ý) có lý do RIÊNG đã
+             * kiểm chứng thật (hiệu ứng recency lúc model bắt đầu sinh câu trả lời — xem giải thích
+             * ngay dưới), không phải áp dụng máy móc thứ tự Context→Task→Criteria của bài gốc.
+             *
              * TOP = vai trò + bối cảnh (foundation/ad-hoc, súc tích — "more context isn't always
              * better"), MIDDLE = JSON thô ĐẦY ĐỦ đã trích xuất (phần "filling") — KHÔNG rút gọn
              * main_content: đã thử cắt còn ~500 ký tự ở 1 bản trước nhưng phá mất chiều sâu nội
@@ -561,6 +571,15 @@ document.addEventListener('alpine:init', () => {
              *      (không điều kiện theo category) vì chủ đề sức khoẻ/an toàn trẻ em có thể xuất
              *      hiện ở nhiều chuyên mục khác ngoài "Dinh dưỡng"/"Sức khoẻ gia đình" (VD "Nuôi dạy
              *      con"/"Kỹ năng sống"), match theo tên category sẽ không đủ tin cậy.
+             *
+             * (14) Đối chiếu quy tắc "Avoid redundancy; don't restate constraints multiple times"
+             *      của chính bài context-sandwich (xem đầu hàm) với việc neo lại core_focus/goal/
+             *      unique_angle/audience ở CẢ TOP lẫn BOTTOM (mục (10)/(11)) — KHÔNG mâu thuẫn: quy
+             *      tắc đó cảnh báo kiểu lặp LIỀN KỀ vô ích (nói 2 lần ngay cạnh nhau, không thêm giá
+             *      trị — đúng lý do (6) đã bỏ dòng "Từ khóa nghiên cứu"/"Đối tượng độc giả" đứng
+             *      riêng ở TOP), khác hẳn việc neo giá trị CÓ CHỦ ĐÍCH qua khoảng cách xa (cách nhau
+             *      cả khối MIDDLE ~84.000 ký tự) để chống "lost in the middle" — 2 tình huống khác
+             *      bản chất dù cùng là "nhắc lại 1 giá trị hơn 1 lần trong prompt".
              */
             async copyPromptForAi() {
                 if (!this.result) return;
