@@ -71,4 +71,12 @@ return [
         'db_fetch_limit' => 100, // số bài fetch thô từ DB trước khi lọc theo status=published + sort — cần dư ra vì không phải bài nào cũng published
         'max_titles'     => 30,  // số tiêu đề tối đa đưa vào prompt sau khi đã lọc/sort
     ],
+
+    // Ngưỡng "có thể đã cũ" cho Category Content Foundation (core_focus/pain_points/rejected_ideas...)
+    // — CHỈ hiển thị nhắc nhở trực quan ở trang quản lý (KHÔNG chặn/xoá/tự động làm gì) để editor để
+    // ý ôn lại ngữ cảnh định kỳ, tránh "set và quên" mãi mãi — ngữ cảnh biên tập là tài sản SỐNG, cần
+    // cập nhật theo thời gian, không phải cấu hình tĩnh viết 1 lần rồi thôi.
+    'foundation' => [
+        'stale_after_days' => 180,
+    ],
 ];

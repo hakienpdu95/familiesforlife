@@ -6,6 +6,7 @@
     'listUrl' => route('backend.api.coreideaextractor.category-foundations.list'),
     'upsertUrlTemplate' => route('backend.api.coreideaextractor.category-foundations.upsert', ['category' => '__UUID__']),
     'backUrl' => route('backend.coreideaextractor.index'),
+    'staleAfterDays' => $staleAfterDays,
 ]) }})">
 
     <div class="mb-5 flex items-center justify-between flex-wrap gap-2">
@@ -33,6 +34,11 @@
                         <span class="flex items-center gap-2">
                             <span class="badge badge-xs" :class="cat.foundation ? 'badge-success' : 'badge-ghost'"
                                   x-text="cat.foundation ? 'Đã có foundation' : 'Chưa có'"></span>
+                            <span x-show="cat.foundation?.updated_at" x-cloak
+                                  class="badge badge-xs"
+                                  :class="isFoundationStale(cat.foundation?.updated_at) ? 'badge-warning' : 'badge-ghost'"
+                                  :title="isFoundationStale(cat.foundation?.updated_at) ? `Đã hơn ${staleAfterDays} ngày chưa cập nhật — cân nhắc ôn lại ngữ cảnh này` : ''"
+                                  x-text="formatFoundationAge(cat.foundation?.updated_at)"></span>
                             <span class="text-base-content/40 text-xs" x-text="cat._open ? '▲' : '▼'"></span>
                         </span>
                     </button>
@@ -105,7 +111,7 @@
 <script>
 document.addEventListener('alpine:init', () => {
     Alpine.data('categoryFoundationsPage', (serverData = {}) => {
-        const { listUrl = '', upsertUrlTemplate = '', backUrl = '' } = serverData;
+        const { listUrl = '', upsertUrlTemplate = '', backUrl = '', staleAfterDays = 180 } = serverData;
 
         const emptyForm = () => ({ core_focus: '', unique_angle: '', content_goals: '', pain_points: '', rejected_ideas: '', audience: '', constraints: '', style_sample: '' });
 
@@ -114,26 +120,68 @@ document.addEventListener('alpine:init', () => {
             loading: true,
             errorMessage: '',
             backUrl,
+            staleAfterDays,
 
             async init() {
                 try {
                     const res = await fetch(listUrl, { headers: { 'Accept': 'application/json' } });
                     const data = await res.json();
 
-                    this.categories = (data.categories || []).map(cat => ({
-                        ...cat,
-                        _open: false,
-                        _saving: false,
-                        _saved: false,
-                        _error: '',
-                        _form: { ...emptyForm(), ...(cat.foundation || {}) },
-                    }));
+                    this.categories = (data.categories || []).map(cat => {
+                        // `updated_at` chỉ để HIỂN THỊ (badge "cập nhật lần cuối") — loại khỏi
+                        // _form để không gửi kèm lên upsert() (server không khai field này trong
+                        // rule validate(), gửi lên cũng bị bỏ qua, nhưng loại từ đầu cho sạch).
+                        const { updated_at, ...foundationFields } = cat.foundation || {};
+
+                        return {
+                            ...cat,
+                            _open: false,
+                            _saving: false,
+                            _saved: false,
+                            _error: '',
+                            _form: { ...emptyForm(), ...foundationFields },
+                        };
+                    });
                 } catch (e) {
                     console.error('[core-idea-extractor] failed to load categories', e);
                     this.errorMessage = 'Không tải được danh sách chuyên mục.';
                 } finally {
                     this.loading = false;
                 }
+            },
+
+            /**
+             * `cie_category_foundations` đã có `timestamps()` ở DB từ đầu nhưng chưa từng lộ ra
+             * UI — editor không có cách nào biết 1 foundation đã bao lâu chưa được ôn lại. Context
+             * engineering: ngữ cảnh biên tập (core_focus/pain_points/rejected_ideas...) là tài sản
+             * SỐNG, cần cập nhật theo thời gian (VD pain_points độc giả 2 năm trước có thể không
+             * còn đúng), không phải cấu hình tĩnh viết 1 lần rồi bỏ quên — chỉ hiển thị NHẮC NHỞ
+             * trực quan (badge-warning khi quá `staleAfterDays` ngày), KHÔNG tự động xoá/chặn gì.
+             */
+            foundationAgeDays(updatedAt) {
+                if (!updatedAt) return null;
+
+                return Math.floor((Date.now() - new Date(updatedAt).getTime()) / (1000 * 60 * 60 * 24));
+            },
+
+            formatFoundationAge(updatedAt) {
+                const days = this.foundationAgeDays(updatedAt);
+
+                if (days === null) return '';
+                if (days < 1) return 'Cập nhật: hôm nay';
+                if (days === 1) return 'Cập nhật: 1 ngày trước';
+                if (days < 30) return `Cập nhật: ${days} ngày trước`;
+
+                const months = Math.floor(days / 30);
+                if (months < 12) return `Cập nhật: ${months} tháng trước`;
+
+                return `Cập nhật: ${Math.floor(months / 12)} năm trước`;
+            },
+
+            isFoundationStale(updatedAt) {
+                const days = this.foundationAgeDays(updatedAt);
+
+                return days !== null && days >= this.staleAfterDays;
             },
 
             async save(cat) {

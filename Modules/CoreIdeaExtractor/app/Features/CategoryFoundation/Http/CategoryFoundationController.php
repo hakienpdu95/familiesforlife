@@ -23,7 +23,9 @@ class CategoryFoundationController extends Controller
 {
     public function index(): View
     {
-        return view('coreideaextractor::category-foundations');
+        return view('coreideaextractor::category-foundations', [
+            'staleAfterDays' => (int) config('core_idea_extractor.foundation.stale_after_days', 180),
+        ]);
     }
 
     public function list(ListCategoryFoundationsAction $listCategoryFoundations): JsonResponse
@@ -70,6 +72,7 @@ class CategoryFoundationController extends Controller
                 'audience'       => $foundation->audience,
                 'constraints'    => $foundation->constraints,
                 'style_sample'   => $foundation->style_sample,
+                'updated_at'     => $foundation->updated_at?->toIso8601String(),
             ],
         ]);
     }

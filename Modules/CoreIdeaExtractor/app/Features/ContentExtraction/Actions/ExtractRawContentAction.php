@@ -46,6 +46,18 @@ class ExtractRawContentAction
 
     private const PAYWALL_KEYWORDS = ['paywall', 'premium-content', 'subscriber-only', 'đăng nhập để đọc tiếp', 'subscribe to continue'];
 
+    /** Title chứa 1 trong các cụm này (sau khi lowercase) → tín hiệu bài dạng hướng dẫn từng bước. */
+    private const HOWTO_TITLE_KEYWORDS = ['cách ', 'hướng dẫn', 'làm thế nào', 'làm sao để', 'bí quyết'];
+
+    /** Title chứa 1 trong các cụm này → tín hiệu bài dạng so sánh/đánh giá. */
+    private const REVIEW_TITLE_KEYWORDS = ['so sánh', ' vs ', 'đánh giá', 'review'];
+
+    /** question_heading_ratio (đã có sẵn ở SourceStructureData) từ ngưỡng này trở lên → tín hiệu bài dạng FAQ. */
+    private const FAQ_QUESTION_RATIO_THRESHOLD = 0.5;
+
+    /** Tỉ lệ heading khớp pattern "số + khoảng trắng + chữ" (VD "1. Nguyên nhân") từ ngưỡng này trở lên → tín hiệu listicle/các-bước-đánh-số. */
+    private const LISTICLE_HEADING_RATIO_THRESHOLD = 0.5;
+
     /**
      * Thẻ block-level cần chèn ranh giới đoạn khi nối text — DOMNode::textContent tự nó KHÔNG
      * chèn khoảng trắng/newline giữa các thẻ (chỉ nối chuỗi text node liền nhau), nên với HTML
@@ -64,7 +76,7 @@ class ExtractRawContentAction
      * @param string|null $mainContentSelector Selector đơn giản (id/class, kiểu ".detail-content",
      * "#main-content", có thể kèm tag như "div.detail-content") do người dùng chỉ định để khoanh
      * vùng main_content thay cho thuật toán tự động resolveContentRoot(). Null/rỗng → tự động.
-     * @return array{title:?string, meta_description:?string, keywords:string[], headings:HeadingData[], main_content:string, publish_date:?string, author:?string, language:string, word_count:int, meaningful_heading_count:int, paywall_suspected:bool, custom_selector_matched:?bool, source_structure:SourceStructureData}
+     * @return array{title:?string, meta_description:?string, canonical_url:?string, content_category:?string, declared_content_type:?string, content_type_signal:?string, keywords:string[], headings:HeadingData[], main_content:string, publish_date:?string, date_modified:?string, author:?string, publisher_name:?string, language:string, language_mismatch_suspected:bool, word_count:int, meaningful_heading_count:int, paywall_suspected:bool, custom_selector_matched:?bool, source_structure:SourceStructureData}
      */
     public function handle(string $html, ?string $mainContentSelector = null): array
     {
@@ -82,12 +94,22 @@ class ExtractRawContentAction
 
         $xpath = new \DOMXPath($dom);
 
-        $language        = $this->extractLanguage($xpath);
+        $declaredLanguage = $this->extractLanguage($xpath);
         $metaDescription = $this->extractMetaDescription($xpath);
-        $keywords        = $this->extractKeywords($xpath);
+        $keywords        = $this->extractKeywords($xpath, $html);
         $publishDate     = $this->extractPublishDate($xpath, $html);
         $author          = $this->extractAuthor($xpath, $html);
         $paywallSuspected = $this->looksLikePaywalled($xpath);
+
+        // Tín hiệu do chính site khai báo qua OpenGraph/JSON-LD — đọc TRƯỚC stripNoise() cùng
+        // nhóm với publishDate/author ở trên (đều nằm trong <head>/thẻ script, không phụ thuộc
+        // cấu trúc <body>, và fromJsonLd() vốn đọc trên $html thô nên không bị ảnh hưởng bởi
+        // việc DOM có bị mutate hay không — chỉ đặt cùng chỗ cho nhất quán quy ước đọc field).
+        $canonicalUrl         = $this->extractCanonicalUrl($xpath);
+        $contentCategory      = $this->extractContentCategory($xpath, $html);
+        $declaredContentType  = $this->extractDeclaredContentType($xpath);
+        $dateModified         = $this->extractDateModified($xpath, $html);
+        $publisherName        = $this->extractPublisherName($xpath, $html);
 
         // Title lấy TRƯỚC khi xoá noise (nằm trong <head>, không bị ảnh hưởng), nhưng fallback
         // h1 phải lấy SAU khi xoá noise (tránh h1 trang trí trong header/nav).
@@ -121,24 +143,99 @@ class ExtractRawContentAction
 
         $mainContent      = $contentRoot ? $this->cleanText($this->extractBlockText($contentRoot)) : '';
         $headings         = $this->extractHeadings($xpath, $contentRoot);
+        $languageResolution = $this->resolveLanguage($declaredLanguage, $mainContent);
+        $language         = $languageResolution['language'];
         $wordCount        = $this->countWords($mainContent, $language);
         $sourceStructure  = $this->analyzeStructure($xpath, $contentRoot, $headings);
+        $contentTypeSignal = $this->classifyContentTypeSignal($title !== '' ? $title : null, $headings, $sourceStructure);
 
         return [
-            'title'                    => $title !== '' ? $title : null,
-            'meta_description'        => $metaDescription,
-            'keywords'                 => $keywords,
-            'headings'                 => $headings,
-            'main_content'             => $mainContent,
-            'publish_date'             => $publishDate,
-            'author'                   => $author,
-            'language'                 => $language,
-            'word_count'               => $wordCount,
-            'meaningful_heading_count' => count($headings),
-            'paywall_suspected'        => $paywallSuspected,
-            'custom_selector_matched'  => $customSelectorMatched,
-            'source_structure'         => $sourceStructure,
+            'title'                       => $title !== '' ? $title : null,
+            'meta_description'           => $metaDescription,
+            'canonical_url'               => $canonicalUrl,
+            'content_category'            => $contentCategory,
+            'declared_content_type'       => $declaredContentType,
+            'content_type_signal'         => $contentTypeSignal,
+            'keywords'                    => $keywords,
+            'headings'                    => $headings,
+            'main_content'                => $mainContent,
+            'publish_date'                => $publishDate,
+            'date_modified'               => $dateModified,
+            'author'                      => $author,
+            'publisher_name'              => $publisherName,
+            'language'                    => $language,
+            'language_mismatch_suspected' => $languageResolution['mismatch_suspected'],
+            'word_count'                  => $wordCount,
+            'meaningful_heading_count'    => count($headings),
+            'paywall_suspected'           => $paywallSuspected,
+            'custom_selector_matched'     => $customSelectorMatched,
+            'source_structure'            => $sourceStructure,
         ];
+    }
+
+    /** Ngưỡng "chiếm ưu thế" khi đối chiếu script ký tự — CÙNG giá trị 0.3 đã dùng ở countWords() (§6.1.4), giữ nhất quán 1 quyết định "chiếm ưu thế" cho cả 2 mục đích (đếm từ + đối chiếu ngôn ngữ). */
+    private const NON_LATIN_SCRIPT_DOMINANCE_RATIO = 0.3;
+
+    /**
+     * `<html lang>` do site khai báo (đọc ở extractLanguage()) CÓ THỂ SAI/lỗi thời so với ngôn ngữ
+     * THẬT của main_content — đã gặp thật: site khai `lang="en-US"` (nhiều khả năng do site dùng
+     * chung 1 template mặc định tiếng Anh, chỉ đổi nội dung mà quên đổi thẻ <html lang>) nhưng
+     * main_content thực tế viết bằng tiếng Thái. Trường `language` sai sẽ khiến người đọc JSON (và
+     * chỉ dẫn ngôn ngữ output ở copyPromptForAi() — xem index.blade.php) hiểu nhầm nguồn viết bằng
+     * ngôn ngữ khác hẳn thực tế.
+     *
+     * Chỉ đối chiếu được CHẮC CHẮN với các script KHÔNG dùng chữ Latin (Thái/Trung/Nhật/Hàn — cùng
+     * dải Unicode đã dùng ở countWords()) vì đây là tín hiệu ký tự học rõ ràng, không cần mô hình
+     * ngôn ngữ học đầy đủ (repo không có package NLP/language-detection chuyên dụng, cùng tinh thần
+     * "không thêm dependency mới" đã áp dụng cho việc parse HTML ở đầu file). KHÔNG cố phân biệt
+     * các ngôn ngữ cùng dùng chữ Latin (VD "vi" vs "en" vs "fr") — không có tín hiệu ký tự nào đủ
+     * tin cậy để làm việc đó bằng rule đơn giản, nên các trường hợp này vẫn tin nguyên `<html lang>`
+     * như hành vi cũ (an toàn hơn đoán sai).
+     *
+     * @return array{language: string, mismatch_suspected: bool}
+     */
+    private function resolveLanguage(string $declaredLanguage, string $mainContent): array
+    {
+        $detectedScript = $this->detectNonLatinScript($mainContent);
+
+        if ($detectedScript === null || $detectedScript === $declaredLanguage) {
+            return ['language' => $declaredLanguage, 'mismatch_suspected' => false];
+        }
+
+        return ['language' => $detectedScript, 'mismatch_suspected' => true];
+    }
+
+    /**
+     * Trả về mã ngôn ngữ ('th'/'ja'/'ko'/'zh') nếu 1 script không dùng chữ Latin CHIẾM ƯU THẾ
+     * trong $text, ngược lại null (không đủ tín hiệu để kết luận — giữ nguyên declared lang).
+     * Hiragana/Katakana xét TRƯỚC và tách riêng khỏi Kanji (dải 'zh') vì Kanji dùng CHUNG giữa
+     * tiếng Trung và tiếng Nhật — báo tiếng Nhật luôn trộn Kanji + Hiragana/Katakana, nên hễ có
+     * đáng kể Hiragana/Katakana là đủ chắc chắn kết luận 'ja' mà không cần so tỉ lệ với Kanji.
+     */
+    private function detectNonLatinScript(string $text): ?string
+    {
+        $totalChars = mb_strlen($text);
+
+        if ($totalChars === 0) {
+            return null;
+        }
+
+        preg_match_all('/[\x{3040}-\x{30FF}]/u', $text, $hiraganaKatakana);
+        if (count($hiraganaKatakana[0]) / $totalChars > self::NON_LATIN_SCRIPT_DOMINANCE_RATIO) {
+            return 'ja';
+        }
+
+        $counts = [];
+        foreach (['th' => '\x{0E00}-\x{0E7F}', 'ko' => '\x{AC00}-\x{D7A3}', 'zh' => '\x{4E00}-\x{9FFF}'] as $code => $range) {
+            preg_match_all("/[{$range}]/u", $text, $m);
+            $counts[$code] = count($m[0]);
+        }
+
+        arsort($counts);
+        $topCode  = array_key_first($counts);
+        $topCount = $counts[$topCode];
+
+        return ($topCount / $totalChars) > self::NON_LATIN_SCRIPT_DOMINANCE_RATIO ? $topCode : null;
     }
 
     /**
@@ -175,22 +272,203 @@ class ExtractRawContentAction
     }
 
     /**
+     * Nhãn phân loại content type suy ra bằng RULE THUẦN (pattern heading/title) — KHÔNG phải AI
+     * phân tích ngữ nghĩa, chỉ là tín hiệu tham khảo THÔ (có thể sai), khác hẳn
+     * `declared_content_type` (do chính site tự khai qua og:type, đáng tin hơn nhưng thường chỉ
+     * "article"/"website", không chi tiết tới mức listicle/how-to). Ưu tiên theo thứ tự
+     * listicle > how_to > review_comparison > faq — 1 bài có thể mang nhiều đặc điểm cùng lúc
+     * (VD "10 cách..." vừa là listicle vừa là how-to), chỉ trả về nhãn ĐẦU TIÊN khớp thay vì
+     * gắn nhiều nhãn, để giữ field đơn giản (string, không phải mảng).
+     *
+     * Trả về null nếu không khớp rule nào rõ ràng — KHÔNG suy đoán ép buộc (an toàn hơn 1 nhãn
+     * sai chắc chắn gây hiểu lầm cho người đọc JSON này).
+     */
+    private function classifyContentTypeSignal(?string $title, array $headings, SourceStructureData $sourceStructure): ?string
+    {
+        $titleLower = mb_strtolower(trim((string) $title));
+
+        // Listicle: title bắt đầu bằng số (VD "10 cách trị ho cho bé...") HOẶC đa số heading tự
+        // đánh số (VD "1. Nguyên nhân", "2. Triệu chứng") — bắt được cả 2 kiểu listicle phổ biến:
+        // đánh số ngay ở tiêu đề, hoặc đánh số ở từng heading con dù tiêu đề không có số.
+        $titleStartsWithNumber = preg_match('/^\d+\s+\S/u', $titleLower) === 1;
+
+        $numberedHeadings = array_filter(
+            $headings,
+            static fn (HeadingData $h) => preg_match('/^\d+[.\)]?\s+\S/u', trim($h->text)) === 1
+        );
+        $numberedHeadingRatio = $headings === [] ? 0.0 : count($numberedHeadings) / count($headings);
+
+        if ($titleStartsWithNumber || $numberedHeadingRatio >= self::LISTICLE_HEADING_RATIO_THRESHOLD) {
+            return 'listicle';
+        }
+
+        foreach (self::HOWTO_TITLE_KEYWORDS as $keyword) {
+            if (str_contains($titleLower, $keyword)) {
+                return 'how_to';
+            }
+        }
+
+        foreach (self::REVIEW_TITLE_KEYWORDS as $keyword) {
+            if (str_contains($titleLower, $keyword)) {
+                return 'review_comparison';
+            }
+        }
+
+        if ($headings !== [] && $sourceStructure->question_heading_ratio >= self::FAQ_QUESTION_RATIO_THRESHOLD) {
+            return 'faq';
+        }
+
+        return null;
+    }
+
+    /**
      * meta[name="keywords"] chuẩn HTML là 1 chuỗi các từ khoá phân tách bởi dấu phẩy — tách ra
      * mảng string, bỏ khoảng trắng thừa và phần tử rỗng (VD content="a, b,, c" → ["a","b","c"]).
+     * Nhiều site hiện đại đã bỏ hẳn meta keywords (deprecated cho SEO) nhưng vẫn khai qua
+     * `article:tag` (OpenGraph, có thể lặp lại nhiều thẻ) hoặc `keywords` trong JSON-LD — gộp cả
+     * 3 nguồn, loại trùng lặp (case-insensitive) để không mất tín hiệu chỉ vì site không dùng
+     * đúng tag "chuẩn" mà spec ban đầu nhắm tới.
      *
      * @return string[]
      */
-    private function extractKeywords(\DOMXPath $xpath): array
+    private function extractKeywords(\DOMXPath $xpath, string $html): array
     {
-        $content = $this->metaContent($xpath, "//meta[@name='keywords']");
+        $metaKeywords = [];
+        $content      = $this->metaContent($xpath, "//meta[@name='keywords']");
 
-        if ($content === null) {
-            return [];
+        if ($content !== null) {
+            $parts        = array_map('trim', explode(',', $content));
+            $metaKeywords = array_values(array_filter($parts, static fn (string $p) => $p !== ''));
         }
 
-        $parts = array_map('trim', explode(',', $content));
+        $merged = array_merge($metaKeywords, $this->extractArticleTags($xpath), $this->extractJsonLdKeywords($html));
 
-        return array_values(array_filter($parts, static fn (string $p) => $p !== ''));
+        $seen   = [];
+        $unique = [];
+        foreach ($merged as $keyword) {
+            $normalized = mb_strtolower($keyword);
+            if (isset($seen[$normalized])) {
+                continue;
+            }
+            $seen[$normalized] = true;
+            $unique[]          = $keyword;
+        }
+
+        return $unique;
+    }
+
+    /** @return string[] */
+    private function extractArticleTags(\DOMXPath $xpath): array
+    {
+        $tags = [];
+
+        foreach ($xpath->query("//meta[@property='article:tag']") as $node) {
+            if (! $node instanceof \DOMElement) {
+                continue;
+            }
+
+            $value = trim($node->getAttribute('content'));
+
+            if ($value !== '') {
+                $tags[] = $value;
+            }
+        }
+
+        return $tags;
+    }
+
+    /** @return string[] */
+    private function extractJsonLdKeywords(string $html): array
+    {
+        $keywords = $this->fromJsonLd($html, 'keywords');
+
+        if (is_array($keywords)) {
+            $trimmed = array_map(static fn ($k) => trim((string) $k), $keywords);
+
+            return array_values(array_filter($trimmed, static fn (string $k) => $k !== ''));
+        }
+
+        if (is_string($keywords) && trim($keywords) !== '') {
+            $parts = array_map('trim', explode(',', $keywords));
+
+            return array_values(array_filter($parts, static fn (string $p) => $p !== ''));
+        }
+
+        return [];
+    }
+
+    /** Do chính trang khai báo qua `<link rel="canonical">` — bản gốc/chuẩn của URL, có thể khác `final_url` (redirect) khi trang là bản syndicate/AMP trỏ về bài gốc. */
+    private function extractCanonicalUrl(\DOMXPath $xpath): ?string
+    {
+        $node = $xpath->query("//link[@rel='canonical']")->item(0);
+
+        if (! $node instanceof \DOMElement) {
+            return null;
+        }
+
+        $href = trim($node->getAttribute('href'));
+
+        return $href !== '' ? $href : null;
+    }
+
+    /** Chủ đề/chuyên mục do chính site khai báo (`article:section`/`articleSection`) — KHÔNG phải suy đoán, đối chiếu trực tiếp được với Category Content Foundation. */
+    private function extractContentCategory(\DOMXPath $xpath, string $html): ?string
+    {
+        $meta = $this->metaContent($xpath, "//meta[@property='article:section']");
+
+        if ($meta) {
+            return $meta;
+        }
+
+        $value = $this->fromJsonLd($html, 'articleSection');
+
+        if (is_array($value)) {
+            $first = $value[0] ?? null;
+
+            return is_string($first) && trim($first) !== '' ? trim($first) : null;
+        }
+
+        return is_string($value) && trim($value) !== '' ? trim($value) : null;
+    }
+
+    /** Loại nội dung do chính site khai báo qua `og:type` (VD "article", "website", "product") — an toàn hơn tự đoán bằng heuristic vì là dữ liệu publisher tự công bố. */
+    private function extractDeclaredContentType(\DOMXPath $xpath): ?string
+    {
+        return $this->metaContent($xpath, "//meta[@property='og:type']");
+    }
+
+    /** Thời điểm cập nhật GẦN NHẤT (`article:modified_time`/`dateModified`) — khác `publish_date` (thời điểm đăng lần đầu), tín hiệu độ mới khi so sánh nhiều nguồn. */
+    private function extractDateModified(\DOMXPath $xpath, string $html): ?string
+    {
+        $meta = $this->metaContent($xpath, "//meta[@property='article:modified_time']");
+
+        if ($meta) {
+            return $meta;
+        }
+
+        $value = $this->fromJsonLd($html, 'dateModified');
+
+        return is_string($value) && trim($value) !== '' ? $value : null;
+    }
+
+    /** Tên đơn vị xuất bản do chính site khai (`og:site_name`/`publisher.name`) — khác `domain` (hostname thô), giúp đánh giá độ uy tín nguồn. */
+    private function extractPublisherName(\DOMXPath $xpath, string $html): ?string
+    {
+        $meta = $this->metaContent($xpath, "//meta[@property='og:site_name']");
+
+        if ($meta) {
+            return $meta;
+        }
+
+        $publisher = $this->fromJsonLd($html, 'publisher');
+
+        if (is_array($publisher)) {
+            $name = $publisher['name'] ?? null;
+
+            return is_string($name) && trim($name) !== '' ? trim($name) : null;
+        }
+
+        return is_string($publisher) && trim($publisher) !== '' ? trim($publisher) : null;
     }
 
     /**

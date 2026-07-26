@@ -43,6 +43,13 @@ class ExtractBatchResultData extends Data
                 'blocked' => $this->blocked_count,
                 'error'   => $this->error_count,
             ],
+            /**
+             * Giao (case-insensitive) của keywords các nguồn THÀNH CÔNG — tính bằng PHP thuần
+             * (array_intersect), KHÔNG suy luận ngữ nghĩa. Chỉ có ý nghĩa khi so sánh được từ 2
+             * nguồn trở lên — cho AI 1 điểm khởi đầu cụ thể khi tổng hợp ý tưởng chéo nguồn, thay
+             * vì phải tự dò qua từng danh sách keywords của 7 nguồn bằng mắt.
+             */
+            'common_keywords' => $this->buildCommonKeywords(),
             'summary_note' => $this->buildSummaryNote(),
             'sources'      => array_map(
                 static fn (BatchSourceResultData $s) => $s->toApiArray(),
@@ -50,6 +57,26 @@ class ExtractBatchResultData extends Data
             ),
             'processed_at' => $this->processed_at,
         ];
+    }
+
+    /** @return string[] */
+    private function buildCommonKeywords(): array
+    {
+        $lists = array_values(array_filter(array_map(
+            static fn (BatchSourceResultData $s) => ($s->status === 'success' && $s->keywords !== []) ? $s->keywords : null,
+            $this->sources,
+        )));
+
+        if (count($lists) < 2) {
+            return [];
+        }
+
+        $normalized = array_map(
+            static fn (array $kws) => array_unique(array_map(static fn (string $k) => mb_strtolower(trim($k)), $kws)),
+            $lists,
+        );
+
+        return array_values(array_intersect(...$normalized));
     }
 
     /**

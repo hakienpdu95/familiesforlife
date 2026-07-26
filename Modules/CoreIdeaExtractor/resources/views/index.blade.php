@@ -447,6 +447,96 @@ document.addEventListener('alpine:init', () => {
              * model tự suy ra từ context).
              * Không gọi AI Provider nào ở backend — giữ triết lý "công cụ nghiên cứu, copy tay"
              * hiện có.
+             *
+             * Bổ sung (chuẩn hoá JSON đầu ra cho prompt thủ công) — tận dụng field OpenGraph/
+             * JSON-LD mới (canonical_url/content_category/declared_content_type/date_modified/
+             * publisher_name, xem ExtractRawContentAction) do CHÍNH site khai báo thay vì suy đoán:
+             * (1) Thêm câu chú giải ngắn ở đầu MIDDLE để AI không hiểu sai field mới/dễ nhầm
+             *     (declared_content_type vs suy đoán, date_modified vs publish_date).
+             * (2) Thêm chỉ dẫn tường minh dùng common_keywords (giao keywords các nguồn, tính bằng
+             *     PHP thuần ở ExtractBatchResultData) làm điểm khởi đầu tổng hợp chéo — cùng
+             *     nguyên tắc "chỉ dẫn tường minh đáng tin hơn hy vọng model tự suy ra".
+             * (3) Thêm chỉ dẫn ưu tiên nguồn date_modified gần đây hơn khi các nguồn mâu thuẫn.
+             * (4) Thêm lưu ý hạ độ tin cậy theo extraction_confidence/notes (paywall) — trước đó
+             *     2 field này CÓ trong JSON nhưng chưa từng được nhắc tới ở BOTTOM nên dễ bị AI
+             *     bỏ qua khi đánh giá.
+             *
+             * Bổ sung tiếp (đọc thêm subramanya.ai/2026/04/23/context-engineering-why-prompt-
+             * engineering-was-never-enough + getcollate.io/learning-center/context-engineering):
+             * (5) SỬA LỖI THẬT — TOP trước đó lấy audience/goal/constraints/styleSample từ state
+             *     form hiện tại (this.audience...), còn JSON ở MIDDLE lại có result.brief (giá
+             *     trị đã submit) + result.topic KHÔNG hề xuất hiện ở TOP dù người dùng có nhập.
+             *     Nếu người dùng sửa ô input sau khi có kết quả rồi mới bấm "Copy prompt", TOP và
+             *     JSON nêu 2 giá trị khác nhau cho CÙNG 1 field — đúng "context confusion" (thông
+             *     tin mâu thuẫn nhau trong context) bài viết mô tả. Nay TOP đọc từ result.brief/
+             *     result.topic (nguồn đã xử lý thật, single-URL fallback về state JS vì response
+             *     không có brief/topic) — 1 nguồn sự thật duy nhất.
+             * (6) Loại `brief`/`topic` khỏi JSON dán ở MIDDLE (đã có ở TOP) — tránh lặp lại cùng
+             *     thông tin 2 lần trong 1 prompt, tăng "signal density" thay vì chỉ tăng số token.
+             *     Nút "Copy JSON" riêng (prettyJson()) không đổi, vẫn xuất bản đầy đủ nguyên trạng.
+             *
+             * Phản hồi thực tế từ người dùng (test với 3 nguồn thật) — Bước 1 giới hạn "tối đa
+             * 8-10 ý tưởng ứng viên" khiến sau khi lọc ở Bước 2 chỉ còn 3 ý đạt cả 3 tiêu chí ở
+             * Bảng 1, quá ít để chọn:
+             * (7) Tăng Bước 1 từ "tối đa 8-10" thành "20-25 ý tưởng, đa dạng góc nhìn" — kèm gợi ý
+             *     cụ thể các dạng góc nhìn (theo giai đoạn/độ tuổi, theo đối tượng đặc thù, dạng
+             *     so sánh, checklist, sai lầm thường gặp, FAQ) để tránh AI chỉ biến tấu lại vài ý
+             *     giống nhau cho đủ số lượng — pool ứng viên rộng hơn mới có đủ ý SỐNG SÓT qua bộ
+             *     lọc 3 tiêu chí nghiêm ngặt, thay vì chỉ tăng ngưỡng lọc lỏng hơn (sẽ hạ chất
+             *     lượng Bảng 1).
+             * (8) Thêm chỉ tiêu tường minh "Bảng 1 cần ÍT NHẤT 10 ý tưởng đạt cả 3 tiêu chí, nếu
+             *     chưa đủ thì quay lại Bước 1 sinh thêm" — có "van an toàn" cho phép dừng dưới 10
+             *     kèm giải thích nếu dữ liệu nguồn thực sự không đủ sâu, để AI không bịa ý tưởng
+             *     yếu/generic chỉ để đủ số lượng (đánh đổi rõ ràng: ưu tiên trung thực về giới hạn
+             *     dữ liệu hơn là ép đủ 10 ý bằng mọi giá).
+             *
+             * (9) Dùng field mới `content_type_signal` (rule-based, xem ExtractRawContentAction::
+             *     classifyContentTypeSignal — listicle/how_to/review_comparison/faq suy từ pattern
+             *     heading/tiêu đề, KHÔNG phải AI): thêm chú giải rõ đây là PHỎNG ĐOÁN có thể sai
+             *     (khác các field OpenGraph/JSON-LD do site tự khai ở mục (1)-(4), đáng tin hơn);
+             *     và khi ĐA SỐ nguồn batch cùng chung 1 content_type_signal, gợi ý chọn định dạng
+             *     bài KHÁC — cùng tinh thần appendStructureNote() ở controller (tránh lặp lại hình
+             *     thức nội dung đã phổ biến ở các nguồn tham khảo).
+             *
+             * (10) "Lost in the middle" (machinelearningmastery.com/context-vs-memory-engineering-
+             *      in-agentic-ai-systems: model chú ý mạnh ở ĐẦU/CUỐI context, phần GIỮA — chính là
+             *      MIDDLE (JSON thô, có thể tới ~84.000 ký tự với batch 7 nguồn) — bị "lãng quên"
+             *      nhiều nhất) — 2 tiêu chí đánh giá ở BƯỚC 2 cần dùng ĐÚNG core_focus/goal đã nêu ở
+             *      TOP, nhưng TOP nằm cách BƯỚC 2 cả khối MIDDLE khổng lồ. Trước đây BƯỚC 2 chỉ nhắc
+             *      TÊN tiêu chí ("trọng tâm nội dung của chuyên mục NÀY", "mục tiêu đã nêu Ở TRÊN")
+             *      mà không nhắc lại GIÁ TRỊ, buộc model phải tự nhớ lại nội dung TOP xuyên qua toàn
+             *      bộ MIDDLE — rủi ro y hệt lý do khiến (2)/(7) đã inline common_keywords/
+             *      dominantSignal thẳng vào BOTTOM thay vì chỉ trỏ tên field. Áp dụng NHẤT QUÁN
+             *      cùng nguyên tắc đó cho tiêu chí 1/3: khi có core_focus/goal, nhắc lại GIÁ TRỊ
+             *      thật ngay trong câu tiêu chí (coreFocusText/goalText bên dưới) — CHỈ 2 giá trị
+             *      ngắn (core_focus/goal), không phải lặp cả khối `brief`/`foundation` như (6) đã
+             *      cố tình tránh, nên không đổi quyết định "signal density" đã có, chỉ neo đúng 2
+             *      giá trị ĐANG được dùng làm tiêu chí đánh giá vào đúng chỗ áp dụng.
+             *
+             * (11) Thêm tiêu chí 4 "Phù hợp đối tượng độc giả" — trong 4 field ngữ cảnh riêng đã có
+             *      ở TOP (audience/goal/constraints/style_sample), chỉ `goal` được dùng làm tiêu chí
+             *      chọn Ý TƯỞNG (tiêu chí 3); `audience` bị bỏ sót hoàn toàn dù cùng mức quan trọng —
+             *      1 ý tưởng có thể khớp trọng tâm + độc quyền + đúng mục tiêu nhưng vẫn sai độ phức
+             *      tạp/giọng văn so với đối tượng độc giả cụ thể (VD audience khai "chưa có kinh
+             *      nghiệm" nhưng ý tưởng giả định kiến thức nền), mà không tiêu chí nào trước đó bắt
+             *      được lỗi này. KHÔNG đưa `constraints`/`style_sample` vào tiêu chí — 2 field này là
+             *      ràng buộc VỀ CÁCH VIẾT (giọng văn, không quảng cáo...), khác phạm vi với 4 tiêu
+             *      chí đều là chọn Ý TƯỞNG nào đáng viết; gộp nhầm sẽ làm tiêu chí mất rõ ràng. Tiêu
+             *      chí 4 (và tiêu chí 2 — trước đó thiếu neo giá trị `unique_angle` dù cùng dạng với
+             *      1/3) đều neo giá trị thật ngay tại câu tiêu chí, nhất quán với (10). Đồng bộ mọi
+             *      chỗ giả định "3 tiêu chí" trước đó (header Bước 2, tên cột + tiêu đề Bảng 1, câu
+             *      "Mục tiêu số lượng") sang "4 tiêu chí" — trừ các đoạn trong docblock lịch sử (1)/
+             *      (7)/(8) ở trên vẫn giữ nguyên "3" vì mô tả ĐÚNG bối cảnh tại thời điểm đó.
+             *
+             * (12) Câu vai trò (persona) mở đầu TOP trước đây CỐ ĐỊNH "biên tập viên giàu kinh
+             *      nghiệm" + tên category (nếu có), hoàn toàn không đổi theo chủ đề/đối tượng độc
+             *      giả cụ thể của từng lần chạy — phản hồi từ người dùng: câu này "hơi cố định,
+             *      không linh hoạt theo context, chủ đề, đối tượng độc giả". Dệt thẳng `promptTopic`/
+             *      `audienceText` vào câu vai trò (xem chi tiết ngay phía dưới, trước khai báo
+             *      `top`) thay vì để 2 dòng ngữ cảnh đứng riêng ngay sau — role-based prompting
+             *      (gsdcouncil.org/iternal.ai) cho kết quả bám sát chuyên môn/đối tượng hơn khi vai
+             *      trò gắn liền ngữ cảnh cụ thể thay vì vai trò chung chung kèm dữ kiện rời rạc bên
+             *      cạnh. Không có topic/audience → rơi về đúng câu cũ (không đổi hành vi mặc định).
              */
             async copyPromptForAi() {
                 if (!this.result) return;
@@ -457,8 +547,61 @@ document.addEventListener('alpine:init', () => {
                     ? (this.result.sources ?? []).filter(s => s.status === 'success').length
                     : 1;
 
+                /**
+                 * `language` (§ExtractRawContentAction::extractLanguage, đọc từ `<html lang="...">`)
+                 * có sẵn trên mỗi nguồn nhưng trước đây chưa từng được dùng ở BOTTOM — nếu nguồn
+                 * tham khảo (VD tiếng Anh) chiếm phần lớn MIDDLE (tới ~84.000 ký tự/batch), trong khi
+                 * TOP/BOTTOM chỉ vài trăm ký tự tiếng Việt, AI có thể ngầm lệch sang trả lời/đặt tiêu
+                 * đề bằng ngôn ngữ nguồn hoặc dịch máy móc nguyên văn — cùng rủi ro "chỉ dẫn tường
+                 * minh đáng tin hơn hy vọng model tự suy ra" đã áp dụng ở (2)/(9)/(10)/(11), nên thêm
+                 * chỉ dẫn NGÔN NGỮ OUTPUT tường minh thay vì dựa vào suy đoán ngầm.
+                 */
+                const sourceLanguages = this.isBatchResult()
+                    ? new Set((this.result.sources ?? [])
+                        .filter(s => s.status === 'success' && s.language && s.language !== 'unknown')
+                        .map(s => s.language))
+                    : new Set(this.result.language && this.result.language !== 'unknown' ? [this.result.language] : []);
+                const hasNonVietnameseSource = [...sourceLanguages].some(lang => lang !== 'vi');
+
+                // Dùng giá trị ĐÃ THỰC SỰ được xử lý (this.result.brief/topic — chỉ có ở batch
+                // mode) thay vì state form hiện tại (this.audience/goal/...) — nếu người dùng sửa
+                // ô input SAU khi đã có kết quả nhưng TRƯỚC khi bấm "Copy prompt", dùng state hiện
+                // tại sẽ khiến TOP và JSON (result.brief) nêu 2 giá trị KHÁC NHAU cho cùng 1 field,
+                // model đọc phải 2 nguồn mâu thuẫn ("context confusion" — subramanya.ai/2026/04/23/
+                // context-engineering-why-prompt-engineering-was-never-enough). Single-URL mode
+                // không có `brief`/`topic` trong response nên fallback về state JS hiện tại.
+                const brief = this.result.brief ?? {
+                    audience: this.audience || null,
+                    goal: this.goal || null,
+                    constraints: this.constraints || null,
+                    style_sample: this.styleSample || null,
+                };
+                const promptTopic = this.isBatchResult() ? (this.result.topic ?? null) : (this.topic || null);
+                const coreFocusText = foundation?.core_focus || null;
+                const uniqueAngleText = foundation?.unique_angle || null;
+                const goalText = brief.goal || null;
+                const audienceText = brief.audience || null;
+
+                /**
+                 * Persona (PCRF — iternal.ai/gsdcouncil: role-based prompting bám chuyên môn CỤ THỂ
+                 * cho kết quả đúng trọng tâm hơn hẳn 1 vai trò chung chung) — trước đây câu vai trò
+                 * CỐ ĐỊNH "biên tập viên giàu kinh nghiệm" bất kể chủ đề/đối tượng độc giả cụ thể ra
+                 * sao, chỉ đổi theo category đã chọn; `promptTopic`/`audienceText` lại nằm tách rời
+                 * thành 2 dòng ngữ cảnh phía dưới, không gắn liền với vai trò. Nay dệt thẳng 2 giá
+                 * trị này vào câu vai trò — role-based prompting hiệu quả hơn khi vai trò gắn với
+                 * NGỮ CẢNH CỤ THỂ (nghiên cứu về CÁI GÌ, viết CHO AI đọc) thay vì chỉ liệt kê dữ kiện
+                 * bên cạnh 1 vai trò chung chung y hệt mọi lần chạy. Bỏ 2 dòng "Từ khóa nghiên cứu"/
+                 * "Đối tượng độc giả" đứng riêng ngay bên dưới vì cùng giá trị đã dệt vào câu vai trò
+                 * — giữ cả 2 sẽ lặp lại đúng 1 thông tin 2 lần liền kề nhau trong TOP, giảm signal
+                 * density (cùng nguyên tắc đã áp dụng ở (6); KHÔNG mâu thuẫn với việc audienceText
+                 * còn được neo lại ở tiêu chí 4 BOTTOM — đó là lặp lại có chủ đích qua khoảng cách xa
+                 * (chống "lost in the middle", xem (10)/(11)), khác với lặp liền kề vô ích ở đây).
+                 */
+                const personaAudience = audienceText ? `, chuyên viết cho đối tượng độc giả: ${audienceText}` : '';
+                const personaTopic = promptTopic ? ` về chủ đề "${promptTopic}"` : '';
+
                 const top = [];
-                top.push(`Bạn là biên tập viên giàu kinh nghiệm${category ? ` của chuyên mục "${category.name}"` : ''}, đang nghiên cứu ý tưởng bài viết mới.`);
+                top.push(`Bạn là biên tập viên giàu kinh nghiệm${category ? ` của chuyên mục "${category.name}"` : ''}${personaAudience}, đang nghiên cứu ý tưởng bài viết mới${personaTopic}.`);
                 top.push(`Ngày hôm nay: ${new Date().toISOString().slice(0, 10)}.`);
                 if (foundation?.core_focus) top.push(`Trọng tâm nội dung chuyên mục: ${foundation.core_focus}`);
                 if (foundation?.unique_angle) top.push(`Góc nhìn khác biệt của chuyên mục: ${foundation.unique_angle}`);
@@ -469,24 +612,68 @@ document.addEventListener('alpine:init', () => {
                     top.push(`Bài đã publish trong chuyên mục này (${this.existingArticleTitles.length} bài, KHÔNG đề xuất trùng):`);
                     this.existingArticleTitles.forEach(title => top.push(`- ${title}`));
                 }
-                if (this.audience) top.push(`Đối tượng độc giả: ${this.audience}`);
-                if (this.goal) top.push(`Mục tiêu bài viết: ${this.goal}`);
-                if (this.constraints) top.push(`Ràng buộc / không muốn: ${this.constraints}`);
-                if (this.styleSample) top.push(`Giọng văn mẫu:\n${this.styleSample}`);
+                if (brief.goal) top.push(`Mục tiêu bài viết: ${brief.goal}`);
+                if (brief.constraints) top.push(`Ràng buộc / không muốn: ${brief.constraints}`);
+                if (brief.style_sample) top.push(`Giọng văn mẫu:\n${brief.style_sample}`);
+
+                // Loại `brief`/`topic` khỏi khối JSON dán ở MIDDLE — đã đưa lên TOP ở trên, giữ
+                // nguyên trong JSON sẽ lặp lại cùng 1 thông tin 2 lần trong cùng 1 prompt (tốn
+                // token vô ích + giảm "signal density", xem getcollate.io/learning-center/
+                // context-engineering: "including more context does not guarantee better
+                // results"). Nút "Copy JSON" riêng vẫn xuất bản đầy đủ nguyên trạng (prettyJson()),
+                // không bị ảnh hưởng.
+                const promptData = Object.fromEntries(
+                    Object.entries(this.result).filter(([key]) => key !== 'brief' && key !== 'topic')
+                );
 
                 const middle = [
-                    'Dữ liệu thô đã trích xuất (tham khảo để lấy ý — KHÔNG copy nguyên văn):',
-                    this.prettyJson(),
+                    'Dữ liệu thô đã trích xuất (tham khảo để lấy ý — KHÔNG copy nguyên văn). '
+                        + 'Chú giải nhanh vài trường dễ hiểu nhầm: `declared_content_type`/`content_category`/`publisher_name`/`canonical_url` '
+                        + 'là do CHÍNH trang web tự khai báo (không phải suy đoán); `date_modified` là lần CẬP NHẬT GẦN NHẤT, khác `publish_date` '
+                        + '(lần đăng đầu tiên); `extraction_confidence`/`notes` phản ánh chất lượng TRÍCH XUẤT KỸ THUẬT, không phải chất lượng nội dung bài viết; '
+                        + '`content_type_signal` (listicle/how_to/review_comparison/faq) là PHỎNG ĐOÁN bằng rule đơn giản trên pattern heading/tiêu đề '
+                        + '(KHÔNG phải AI phân tích nội dung) — có thể sai hoặc null nếu không rõ, tự đối chiếu lại với main_content trước khi dùng:',
+                    JSON.stringify(promptData, null, 2),
                 ];
 
                 const bottom = [
                     'Nhiệm vụ: đề xuất ý tưởng bài viết mới từ dữ liệu trên, làm theo đúng 3 bước sau.',
-                    '',
-                    'BƯỚC 1 — Sinh ý tưởng: liệt kê tối đa 8-10 ý tưởng ứng viên (chưa lọc).',
                 ];
+
+                if (hasNonVietnameseSource) {
+                    bottom.push(`Nguồn tham khảo có ngôn ngữ gốc khác tiếng Việt (${[...sourceLanguages].join(', ')}) — LUÔN viết TOÀN BỘ output (ý tưởng, lý do, tiêu đề đề xuất) bằng tiếng Việt tự nhiên cho độc giả Việt Nam, KHÔNG dịch nguyên văn/máy móc câu chữ hay tiêu đề gốc.`);
+                }
+
+                bottom.push(
+                    '',
+                    'BƯỚC 1 — Sinh ý tưởng: brainstorm RỘNG, liệt kê 20-25 ý tưởng ứng viên đa dạng góc nhìn (chưa lọc) — '
+                        + 'không chỉ biến tấu lại vài ý giống nhau. Đa dạng hoá bằng nhiều dạng góc nhìn khác nhau từ dữ liệu nguồn: '
+                        + 'theo giai đoạn/độ tuổi, theo vấn đề cụ thể, theo đối tượng đặc thù (VD mẹ đi làm, sinh non, sinh đôi), '
+                        + 'dạng so sánh/đối chiếu, dạng checklist/hướng dẫn chọn, dạng sai lầm thường gặp, dạng FAQ.',
+                );
 
                 if (successfulSourceCount >= 2) {
                     bottom.push('Trong đó BẮT BUỘC có ít nhất 1 ý tưởng TỔNG HỢP CHÉO từ ≥2 nguồn khác nhau ở trên (kết hợp insight của nhiều nguồn thành 1 góc nhìn mà không nguồn đơn lẻ nào tự có) — đây là dạng ý tưởng khó bị sao chép nhất.');
+
+                    const commonKeywords = this.result.common_keywords ?? [];
+                    if (commonKeywords.length) {
+                        bottom.push(`Điểm chung giữa các nguồn (common_keywords): ${commonKeywords.join(', ')} — có thể dùng làm điểm khởi đầu cho ý tưởng tổng hợp chéo ở trên.`);
+                    }
+
+                    const modifiedDates = new Set((this.result.sources ?? [])
+                        .filter(s => s.status === 'success' && s.date_modified)
+                        .map(s => s.date_modified));
+                    if (modifiedDates.size >= 2) {
+                        bottom.push('Các nguồn có thời điểm cập nhật (date_modified) khác nhau — khi thông tin giữa các nguồn mâu thuẫn, ưu tiên nguồn có date_modified gần đây hơn.');
+                    }
+
+                    const contentTypeSignals = (this.result.sources ?? [])
+                        .filter(s => s.status === 'success' && s.content_type_signal)
+                        .map(s => s.content_type_signal);
+                    const dominantSignal = contentTypeSignals.length >= 2 && new Set(contentTypeSignals).size === 1 ? contentTypeSignals[0] : null;
+                    if (dominantSignal) {
+                        bottom.push(`Đa số nguồn đều có content_type_signal = "${dominantSignal}" — cân nhắc chọn định dạng bài KHÁC (VD nếu nguồn toàn dạng liệt kê/listicle, thử viết dạng phân tích chuyên sâu hoặc so sánh) để tránh trùng hình thức với các nguồn tham khảo.`);
+                    }
                 }
 
                 if (foundation?.rejected_ideas || this.existingArticleTitles.length) {
@@ -494,16 +681,33 @@ document.addEventListener('alpine:init', () => {
                 }
 
                 bottom.push(
+                    'Mục tiêu số lượng: Bảng 1 cần có ÍT NHẤT 10 ý tưởng đạt cả 4 tiêu chí. Nếu ở Bước 2 chưa đủ 10 ý đạt, quay lại '
+                        + 'Bước 1 sinh thêm ý tưởng MỚI ở góc nhìn khác (không lặp ý đã liệt kê) cho đến khi đủ 10 — chỉ dừng dưới 10 '
+                        + 'nếu đã thực sự khai thác hết góc nhìn hợp lý từ dữ liệu nguồn, và khi đó ghi rõ lý do ở cuối Bảng 2 '
+                        + '(VD: dữ liệu nguồn không đủ sâu để tạo thêm ý tưởng chất lượng — KHÔNG được bịa ý tưởng yếu/generic chỉ để đủ số lượng).',
+                );
+
+                bottom.push(
                     '',
-                    'BƯỚC 2 — Đánh giá TỪNG ý tưởng qua cả 3 tiêu chí (không bỏ qua tiêu chí nào, kể cả khi câu trả lời là "Không"):',
-                    '1. Khớp trọng tâm: có gắn với trọng tâm nội dung của chuyên mục này không?',
-                    '2. Góc nhìn độc quyền: đây có phải insight mà chỉ chuyên mục này viết được, không phải điều nguồn nào cũng viết được?',
-                    '3. Phục vụ mục tiêu: có phục vụ mục tiêu nội dung đã nêu ở trên không?',
+                    'BƯỚC 2 — Đánh giá TỪNG ý tưởng qua cả 4 tiêu chí (không bỏ qua tiêu chí nào, kể cả khi câu trả lời là "Không"):',
+                    coreFocusText
+                        ? `1. Khớp trọng tâm ("${coreFocusText}"): ý tưởng có thực sự gắn với trọng tâm này không?`
+                        : '1. Khớp trọng tâm: có gắn với trọng tâm nội dung của chuyên mục này không?',
+                    uniqueAngleText
+                        ? `2. Góc nhìn độc quyền ("${uniqueAngleText}"): ý tưởng có thực sự thể hiện góc nhìn này không, hay điều nguồn nào cũng viết được?`
+                        : '2. Góc nhìn độc quyền: đây có phải insight mà chỉ chuyên mục này viết được, không phải điều nguồn nào cũng viết được?',
+                    goalText
+                        ? `3. Phục vụ mục tiêu ("${goalText}"): ý tưởng có thực sự phục vụ mục tiêu này không?`
+                        : '3. Phục vụ mục tiêu: có phục vụ mục tiêu nội dung đã nêu ở trên không?',
+                    audienceText
+                        ? `4. Phù hợp đối tượng độc giả ("${audienceText}"): góc độ/độ phức tạp/giọng văn của ý tưởng có thực sự phù hợp với đối tượng này không?`
+                        : '4. Phù hợp đối tượng độc giả: ý tưởng có phù hợp với đối tượng độc giả đã nêu ở trên không?',
+                    'Lưu ý khi đánh giá: nếu nguồn có extraction_confidence thấp hoặc notes cảnh báo nghi vấn paywall, hạ độ tin cậy khi dùng nguồn đó làm căn cứ cho ý tưởng.',
                     '',
                     'BƯỚC 3 — Trả lời bằng ĐÚNG 2 bảng Markdown dưới đây. Không viết giải thích, không mở đầu, không kết luận, không viết gì khác ngoài 2 bảng:',
                     '',
-                    'Bảng 1 — Ý tưởng ĐẠT cả 3 tiêu chí, cột: '
-                        + '| Ý tưởng | Khớp trọng tâm? | Góc nhìn độc quyền? | Phục vụ mục tiêu? | Lý do (1 câu, vì sao đạt cả 3) | Đề xuất tiêu đề bài viết |',
+                    'Bảng 1 — Ý tưởng ĐẠT cả 4 tiêu chí, cột: '
+                        + '| Ý tưởng | Khớp trọng tâm? | Góc nhìn độc quyền? | Phục vụ mục tiêu? | Phù hợp đối tượng? | Lý do (1 câu, vì sao đạt cả 4) | Đề xuất tiêu đề bài viết |',
                     'Bảng 2 — Ý tưởng BỊ LOẠI (không đạt ít nhất 1 tiêu chí) — LUÔN liệt kê nếu có ý tưởng bị loại ở Bước 1, không được bỏ qua bảng này, cột: '
                         + '| Ý tưởng bị loại | Tiêu chí không đạt | Lý do loại |',
                 );

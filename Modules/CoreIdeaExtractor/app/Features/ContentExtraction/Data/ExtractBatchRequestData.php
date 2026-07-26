@@ -14,7 +14,16 @@ class ExtractBatchRequestData extends Data
      */
     public function __construct(
         public readonly array $urls,
-        /** Từ khóa nghiên cứu do người dùng nhập — thuần metadata, echo lại trong response để nhận diện payload khi dán vào chat AI, KHÔNG dùng để thay đổi logic fetch/extract. */
+        /**
+         * Từ khóa nghiên cứu do người dùng nhập — echo lại trong response để nhận diện payload
+         * khi dán vào chat AI, KHÔNG dùng để thay đổi việc fetch URL nào/parse HTML ra sao (mọi
+         * nguồn vẫn được crawl và extract đầy đủ y hệt nhau, không có SSRF/logic rẽ nhánh nào phụ
+         * thuộc topic). Có 1 ngoại lệ hẹp: khi main_content 1 nguồn dài hơn ngân sách ký tự phải
+         * cắt bớt để paste vào chat AI, topic được dùng làm tín hiệu chọn ĐOẠN VĂN nào ưu tiên
+         * giữ lại (xem CoreIdeaExtractorController::selectRelevantContent()) — vẫn chỉ ảnh hưởng
+         * tới việc HIỂN THỊ phần nào của nội dung đã trích được, không thay đổi kết quả trích xuất
+         * gốc (title/headings/keywords/confidence... tính trên toàn bộ main_content chưa cắt).
+         */
         #[Nullable, Max(255)]
         public readonly ?string $topic = null,
         /**

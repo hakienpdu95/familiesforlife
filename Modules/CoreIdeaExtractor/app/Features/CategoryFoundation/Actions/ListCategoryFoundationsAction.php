@@ -20,7 +20,7 @@ class ListCategoryFoundationsAction
     use AsAction;
 
     /**
-     * @return array<int, array{category_id:int, uuid:string, name:string, depth:int, foundation: array{core_focus:?string, unique_angle:?string, content_goals:?string, pain_points:?string, rejected_ideas:?string, audience:?string, constraints:?string, style_sample:?string}|null}>
+     * @return array<int, array{category_id:int, uuid:string, name:string, depth:int, foundation: array{core_focus:?string, unique_angle:?string, content_goals:?string, pain_points:?string, rejected_ideas:?string, audience:?string, constraints:?string, style_sample:?string, updated_at:?string}|null}>
      */
     public function handle(): array
     {
@@ -50,6 +50,11 @@ class ListCategoryFoundationsAction
                     'audience'       => $foundation->audience,
                     'constraints'    => $foundation->constraints,
                     'style_sample'   => $foundation->style_sample,
+                    // Trước đây có sẵn ở DB (timestamps()) nhưng chưa từng lộ ra API/UI — editor
+                    // không có cách nào biết 1 foundation đã bao lâu chưa được ôn lại (context
+                    // engineering: ngữ cảnh cần được xem là tài sản SỐNG, không phải cấu hình tĩnh
+                    // viết 1 lần rồi bỏ quên — xem cảnh báo "stale" ở category-foundations.blade.php).
+                    'updated_at'     => $foundation->updated_at?->toIso8601String(),
                 ] : null,
             ];
         }, $flat);
