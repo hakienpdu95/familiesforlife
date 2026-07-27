@@ -87,12 +87,20 @@ class CoreIdeaExtractorController extends Controller
         $notes            = $this->appendStructureNote($notes, $extracted['source_structure']);
         $notes            = $this->appendLanguageMismatchNote($notes, $extracted['language_mismatch_suspected'], $extracted['language']);
 
+        // sections[] phải tính LẠI trên main_content ĐÃ CẮT (không dùng thẳng $extracted['sections']
+        // — vốn tính trên bản CHƯA cắt trong ExtractRawContentAction::handle()) — nếu không, khi
+        // main_content vượt ngưỡng cắt (hiếm với single-URL vì ngưỡng tới 100.000 ký tự, nhưng vẫn
+        // có thể xảy ra), sections sẽ "rò rỉ" phần nội dung đã bị cắt bỏ ra ngoài, không nhất quán
+        // với main_content THẬT SỰ trả về.
+        $finalMainContent = $this->truncateMainContent($extracted['main_content']);
+
         $result = $this->buildResult(
             title: $extracted['title'],
             metaDescription: $extracted['meta_description'],
             keywords: $extracted['keywords'],
             headings: $extracted['headings'],
-            mainContent: $this->truncateMainContent($extracted['main_content']),
+            sections: $extractRaw->buildSections($finalMainContent, $extracted['headings']),
+            mainContent: $finalMainContent,
             publishDate: $extracted['publish_date'],
             author: $extracted['author'],
             language: $extracted['language'],
@@ -188,6 +196,11 @@ class CoreIdeaExtractorController extends Controller
                     metaDescription: $extracted['meta_description'],
                     keywords: $extracted['keywords'],
                     headings: $extracted['headings'],
+                    // Tính LẠI trên main_content ĐÃ CẮT theo ngân sách batch (không dùng thẳng
+                    // $extracted['sections'] — tính trên bản CHƯA cắt) — nếu không, sections sẽ
+                    // rò rỉ nội dung đã bị cắt bỏ, làm mất tác dụng giới hạn ngân sách ký tự/nguồn
+                    // (xem docblock ExtractRawContentAction::buildSections()).
+                    sections: $extractRaw->buildSections($mainContent, $extracted['headings']),
                     mainContent: $mainContent,
                     publishDate: $extracted['publish_date'],
                     author: $extracted['author'],
@@ -461,6 +474,7 @@ class CoreIdeaExtractorController extends Controller
         ?string $dateModified = null,
         ?string $publisherName = null,
         ?string $contentTypeSignal = null,
+        array $sections = [],
     ): RawExtractionData {
         return new RawExtractionData(
             title: $title,
@@ -471,6 +485,7 @@ class CoreIdeaExtractorController extends Controller
             content_type_signal: $contentTypeSignal,
             keywords: $keywords,
             headings: $headings,
+            sections: $sections,
             main_content: $mainContent,
             publish_date: $publishDate,
             date_modified: $dateModified,

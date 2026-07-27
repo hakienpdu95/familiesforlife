@@ -16,10 +16,23 @@ class ExtractRawContentAction
 {
     use AsAction;
 
-    /** class/id chứa 1 trong các từ khoá này bị coi là noise (menu/sidebar/quảng cáo...). */
+    /**
+     * class/id chứa 1 trong các từ khoá này bị coi là noise (menu/sidebar/quảng cáo...).
+     * v1.15 — phản hồi thực tế: `sections`/`main_content` vẫn lẫn noise "trong thân bài" (không
+     * phải widget/sidebar mà `stripNoise()` đã xử lý trước đó) — ngày đăng/lượt xem/"bởi Team"
+     * (thường nằm trong khối byline/post-meta ngay đầu bài) và link "Mua ngay"/"Thêm vào giỏ"
+     * (trang sản phẩm) — thêm từ khoá cho 2 nhóm này, cùng cơ chế/ngưỡng an toàn (tỉ lệ chữ tối đa
+     * so với `<body>`) như các từ khoá đã có, không phải rule riêng.
+     */
     private const NOISE_KEYWORDS = [
         'menu', 'nav', 'sidebar', 'comment', 'share', 'related',
         'advertisement', 'ads', 'breadcrumb', 'pagination', 'cookie', 'popup', 'modal', 'footer',
+        // Viết cách nhau bằng KHOẢNG TRẮNG (không phải dấu gạch nối) — stripNoise() đã translate()
+        // '-'/'_' trong @class/@id thành khoảng trắng TRƯỚC khi so khớp (xem $conditions bên
+        // dưới), nên "post-meta"/"post_meta" trong DOM thực tế đều thành "post meta" ở chuỗi so
+        // khớp; viết keyword bằng gạch nối ở đây sẽ KHÔNG BAO GIỜ khớp được gì.
+        'byline', 'post meta', 'entry meta', 'view count', 'reading time',
+        'add to cart', 'buy now', 'cta button',
     ];
 
     /** Heading text khớp 1 trong các cụm này (sau khi lowercase) coi là trang trí, không "có ý nghĩa" (§6.1.4 v1.3). */
@@ -47,7 +60,10 @@ class ExtractRawContentAction
     private const PAYWALL_KEYWORDS = ['paywall', 'premium-content', 'subscriber-only', 'đăng nhập để đọc tiếp', 'subscribe to continue'];
 
     /** Title chứa 1 trong các cụm này (sau khi lowercase) → tín hiệu bài dạng hướng dẫn từng bước. */
-    private const HOWTO_TITLE_KEYWORDS = ['cách ', 'hướng dẫn', 'làm thế nào', 'làm sao để', 'bí quyết'];
+    private const HOWTO_TITLE_KEYWORDS = [
+        'cách ', 'hướng dẫn', 'làm thế nào', 'làm sao để', 'bí quyết',
+        'phòng ngừa', 'phòng tránh', 'biện pháp', 'lưu ý khi',
+    ];
 
     /** Title chứa 1 trong các cụm này → tín hiệu bài dạng so sánh/đánh giá. */
     private const REVIEW_TITLE_KEYWORDS = ['so sánh', ' vs ', 'đánh giá', 'review'];
@@ -57,6 +73,9 @@ class ExtractRawContentAction
 
     /** Tỉ lệ heading khớp pattern "số + khoảng trắng + chữ" (VD "1. Nguyên nhân") từ ngưỡng này trở lên → tín hiệu listicle/các-bước-đánh-số. */
     private const LISTICLE_HEADING_RATIO_THRESHOLD = 0.5;
+
+    /** Số heading có ý nghĩa TỐI THIỂU để coi bài là "educational" khi không khớp rule cụ thể nào khác (xem classifyContentTypeSignal()). */
+    private const EDUCATIONAL_MIN_HEADINGS = 3;
 
     /**
      * Thẻ block-level cần chèn ranh giới đoạn khi nối text — DOMNode::textContent tự nó KHÔNG
@@ -80,7 +99,7 @@ class ExtractRawContentAction
      * th/id) — GHI ĐÈ hoàn toàn `<html lang>` khai báo lẫn kết quả đối chiếu ký tự script ở
      * resolveLanguage(), vì tự detect nhiều khi không chính xác (xem docblock resolveLanguage()).
      * Null → giữ nguyên hành vi tự động cũ.
-     * @return array{title:?string, meta_description:?string, canonical_url:?string, content_category:?string, declared_content_type:?string, content_type_signal:?string, keywords:string[], headings:HeadingData[], main_content:string, publish_date:?string, date_modified:?string, author:?string, publisher_name:?string, language:string, language_mismatch_suspected:bool, word_count:int, meaningful_heading_count:int, paywall_suspected:bool, custom_selector_matched:?bool, source_structure:SourceStructureData}
+     * @return array{title:?string, meta_description:?string, canonical_url:?string, content_category:?string, declared_content_type:?string, content_type_signal:?string, keywords:string[], headings:HeadingData[], sections:array<int, array{heading: ?string, text: string}>, main_content:string, publish_date:?string, date_modified:?string, author:?string, publisher_name:?string, language:string, language_mismatch_suspected:bool, word_count:int, meaningful_heading_count:int, paywall_suspected:bool, custom_selector_matched:?bool, source_structure:SourceStructureData}
      */
     public function handle(string $html, ?string $mainContentSelector = null, ?string $languageOverride = null): array
     {
@@ -100,7 +119,6 @@ class ExtractRawContentAction
 
         $declaredLanguage = $this->extractLanguage($xpath);
         $metaDescription = $this->extractMetaDescription($xpath);
-        $keywords        = $this->extractKeywords($xpath, $html);
         $publishDate     = $this->extractPublishDate($xpath, $html);
         $author          = $this->extractAuthor($xpath, $html);
         $paywallSuspected = $this->looksLikePaywalled($xpath);
@@ -147,6 +165,7 @@ class ExtractRawContentAction
 
         $mainContent      = $contentRoot ? $this->cleanText($this->extractBlockText($contentRoot)) : '';
         $headings         = $this->extractHeadings($xpath, $contentRoot);
+        $keywords         = $this->extractKeywords($xpath, $html, $headings, $title !== '' ? $title : null);
         $languageResolution = $languageOverride !== null
             ? ['language' => $languageOverride, 'mismatch_suspected' => false]
             : $this->resolveLanguage($declaredLanguage, $mainContent);
@@ -154,6 +173,7 @@ class ExtractRawContentAction
         $wordCount        = $this->countWords($mainContent, $language);
         $sourceStructure  = $this->analyzeStructure($xpath, $contentRoot, $headings);
         $contentTypeSignal = $this->classifyContentTypeSignal($title !== '' ? $title : null, $headings, $sourceStructure, $declaredContentType);
+        $sections         = $this->buildSections($mainContent, $headings);
 
         return [
             'title'                       => $title !== '' ? $title : null,
@@ -164,6 +184,7 @@ class ExtractRawContentAction
             'content_type_signal'         => $contentTypeSignal,
             'keywords'                    => $keywords,
             'headings'                    => $headings,
+            'sections'                    => $sections,
             'main_content'                => $mainContent,
             'publish_date'                => $publishDate,
             'date_modified'               => $dateModified,
@@ -314,8 +335,11 @@ class ExtractRawContentAction
         $titleLower = mb_strtolower(trim((string) $title));
 
         // Listicle: title bắt đầu bằng số (VD "10 cách trị ho cho bé...") HOẶC đa số heading tự
-        // đánh số (VD "1. Nguyên nhân", "2. Triệu chứng") — bắt được cả 2 kiểu listicle phổ biến:
-        // đánh số ngay ở tiêu đề, hoặc đánh số ở từng heading con dù tiêu đề không có số.
+        // đánh số (VD "1. Nguyên nhân", "2. Triệu chứng") HOẶC trang dùng danh sách đánh số thật
+        // (`<ol>`, xem `has_numbered_lists`) — bắt thêm trường hợp bài liệt kê N mục (VD "5 dưỡng
+        // chất thiết yếu") nhưng KHÔNG đánh số ở text heading/title (mỗi mục 1 heading tên riêng,
+        // VD "DHA", "Omega 3"...) mà đánh số bằng <ol> thật trong main_content — heading-ratio/
+        // title-number đơn thuần bỏ sót trường hợp này.
         $titleStartsWithNumber = preg_match('/^\d+\s+\S/u', $titleLower) === 1;
 
         $numberedHeadings = array_filter(
@@ -324,7 +348,7 @@ class ExtractRawContentAction
         );
         $numberedHeadingRatio = $headings === [] ? 0.0 : count($numberedHeadings) / count($headings);
 
-        if ($titleStartsWithNumber || $numberedHeadingRatio >= self::LISTICLE_HEADING_RATIO_THRESHOLD) {
+        if ($titleStartsWithNumber || $numberedHeadingRatio >= self::LISTICLE_HEADING_RATIO_THRESHOLD || $sourceStructure->has_numbered_lists) {
             return 'listicle';
         }
 
@@ -344,7 +368,56 @@ class ExtractRawContentAction
             return 'faq';
         }
 
+        // Fallback THẤP ĐỘ TIN CẬY (khác các nhãn trên — đều có tín hiệu cụ thể): bài có NHIỀU
+        // heading có ý nghĩa (đã nhiều mục/phần rõ ràng) nhưng không khớp rule cụ thể nào ở trên
+        // (không phải sản phẩm/listicle/how-to/review/faq) — VD bài kiến thức/y tế/nuôi dạy con
+        // nhiều phần (dinh dưỡng, dấu hiệu, cách chăm sóc...) không rơi gọn vào 1 khuôn cụ thể nào.
+        // Vẫn hơn `null` (không gợi ý gì) dù độ chắc chắn thấp hơn các nhãn trên.
+        if (count($headings) >= self::EDUCATIONAL_MIN_HEADINGS) {
+            return 'educational';
+        }
+
         return null;
+    }
+
+    /** Heading dài hơn ngưỡng này (số TỪ, tách bằng khoảng trắng) coi là 1 câu mô tả, KHÔNG phải tên 1 chủ đề/thực thể cụ thể — không đáng làm keyword. */
+    private const HEADING_KEYWORD_MAX_WORDS = 4;
+
+    /**
+     * Heading NGẮN (VD "DHA", "Omega 3", "Sắt") tự nó CHÍNH LÀ 1 chủ đề/thực thể cụ thể của bài —
+     * đáng tin hơn hẳn meta[name=keywords]/JSON-LD (thường chỉ có tên shop/brand chung chung,
+     * xem phản hồi thực tế: bài về dinh dưỡng trẻ em nhưng keywords toàn tên brand sữa như "Hi-Q"/
+     * "S-Mom Club" — không phản ánh ĐÚNG chủ đề bài đang nói về gì). Bỏ qua: heading dạng câu hỏi
+     * (kết thúc bằng "?", đã là FAQ — 1 câu hỏi không phải "tên chủ đề"), heading trùng chính
+     * `$title` (không phải thông tin mới), và heading DÀI hơn HEADING_KEYWORD_MAX_WORDS từ (câu
+     * mô tả, không phải nhãn chủ đề ngắn gọn). Strip số thứ tự đầu (VD "1. DHA" → "DHA", xem
+     * extractPseudoHeadings()) vì số thứ tự không phải 1 phần ý nghĩa của keyword.
+     *
+     * @param HeadingData[] $headings
+     * @return string[]
+     */
+    private function extractHeadingKeywords(array $headings, ?string $title): array
+    {
+        $titleNormalized = mb_strtolower(trim((string) $title));
+        $keywords        = [];
+
+        foreach ($headings as $heading) {
+            $text = trim(preg_replace('/^\d+[.\)]\s*/u', '', $heading->text) ?? $heading->text);
+
+            if ($text === '' || str_ends_with($text, '?') || mb_strtolower($text) === $titleNormalized) {
+                continue;
+            }
+
+            $wordCount = count(preg_split('/\s+/u', $text, -1, PREG_SPLIT_NO_EMPTY));
+
+            if ($wordCount > self::HEADING_KEYWORD_MAX_WORDS) {
+                continue;
+            }
+
+            $keywords[] = $text;
+        }
+
+        return $keywords;
     }
 
     /**
@@ -355,9 +428,10 @@ class ExtractRawContentAction
      * 3 nguồn, loại trùng lặp (case-insensitive) để không mất tín hiệu chỉ vì site không dùng
      * đúng tag "chuẩn" mà spec ban đầu nhắm tới.
      *
+     * @param HeadingData[] $headings
      * @return string[]
      */
-    private function extractKeywords(\DOMXPath $xpath, string $html): array
+    private function extractKeywords(\DOMXPath $xpath, string $html, array $headings, ?string $title): array
     {
         $metaKeywords = [];
         $content      = $this->metaContent($xpath, "//meta[@name='keywords']");
@@ -367,10 +441,13 @@ class ExtractRawContentAction
             $metaKeywords = array_values(array_filter($parts, static fn (string $p) => $p !== ''));
         }
 
-        // Tên sản phẩm/thương hiệu (JSON-LD Product) đặt lên ĐẦU — tín hiệu cụ thể hơn hẳn
-        // "tên shop" chung chung thường lẫn trong meta[name=keywords]/article:tag của trang bán
-        // hàng, giúp AI brainstorm bám đúng sản phẩm đang nghiên cứu thay vì chỉ thấy tên shop.
+        // Thứ tự ưu tiên: (1) heading NGẮN — chủ đề THẬT của CHÍNH bài này (xem
+        // extractHeadingKeywords()); (2) tên sản phẩm/thương hiệu (JSON-LD Product) — vẫn cụ thể,
+        // do site tự khai; (3)-(4) meta keywords/article:tag/JSON-LD keywords chung — phản hồi
+        // thực tế cho thấy nhóm này thường chỉ là tên shop/brand marketing, ít phản ánh ĐÚNG chủ
+        // đề nội dung, nên xếp SAU cùng thay vì đứng đầu như trước.
         $merged = array_merge(
+            $this->extractHeadingKeywords($headings, $title),
             $this->extractJsonLdProductKeywords($html),
             $metaKeywords,
             $this->extractArticleTags($xpath),
@@ -956,11 +1033,92 @@ class ExtractRawContentAction
 
     private function cleanText(string $text): string
     {
+        // "\r\n"/"\r" đơn lẻ (line ending kiểu Windows, đã gặp thật khi site nguồn dùng text node
+        // CRLF) — chuẩn hoá về "\n" TRƯỚC các bước dưới, nếu không "\r" sót lại sẽ hiện ra thành
+        // ký tự lạ/dòng trống bất thường trong main_content/sections đã trích.
+        $text = str_replace(["\r\n", "\r"], "\n", $text);
         $text = preg_replace('/[ \t]+/', ' ', $text) ?? $text;
         $text = preg_replace('/[ \t]*\n[ \t]*/', "\n", $text) ?? $text;
         $text = preg_replace('/\n{3,}/', "\n\n", $text) ?? $text;
 
         return trim($text);
+    }
+
+    /**
+     * v1.14 — phản hồi thực tế: module tên "CoreIdeaExtractor" nhưng vẫn đẩy gần như nguyên văn
+     * `main_content` cho AI tự tách đoạn theo heading, tốn công AI + tốn token. Cân nhắc phương
+     * án ĐẦY ĐỦ hơn (`key_points[]`/`claims[]`/`nutrients_benefits[]`... tự sinh bằng rule PHP)
+     * nhưng đã KHÔNG chọn — về bản chất là tự động hoá Layer 2 (diễn giải Ý NGHĨA nội dung) bằng
+     * heuristic thay vì AI, đi ngược §12.3 ("không tự động hoá Layer 2"), rủi ro suy diễn sai cao
+     * hơn hẳn lợi ích với nội dung sức khoẻ/dinh dưỡng. `sections[]` là phương án AN TOÀN: THUẦN
+     * TỔ CHỨC LẠI `main_content` đã có theo ranh giới heading (giữ NGUYÊN VĂN, không diễn giải/gắn
+     * nhãn ý nghĩa nào) — giúp AI khỏi phải tự tách đoạn từ 1 khối main_content phẳng, không thêm
+     * rủi ro hallucinate vì không suy luận gì cả, chỉ là REORGANIZE dữ liệu đã trích được.
+     *
+     * Cách khớp: `$headings` (thật hoặc pseudo, xem extractHeadings()/extractPseudoHeadings()) đều
+     * là các NODE BLOCK-LEVEL đã nằm sẵn trong `$mainContent` dưới dạng 1 "đoạn" riêng (mọi
+     * h1-h6/p/li đều thuộc BLOCK_TAGS, luôn được bọc `\n\n...\n\n` khi extractBlockText() nối chuỗi)
+     * — nên tách `$mainContent` thành các đoạn (ranh giới dòng trống), rồi so khớp TUẦN TỰ với
+     * `$headingTexts` theo đúng thứ tự: đoạn nào trùng khớp y hệt text heading TIẾP THEO đang chờ
+     * → bắt đầu section mới, còn lại gộp vào `text` của section hiện tại. Không có heading nào
+     * (`$headings === []`) → không có ranh giới để tách, trả về mảng rỗng (dùng thẳng
+     * `main_content`, tránh trùng lặp dữ liệu vô nghĩa).
+     *
+     * Giới hạn CHẤP NHẬN ĐƯỢC (best-effort, không phải parser chính xác tuyệt đối): nếu 1 đoạn văn
+     * THƯỜNG (không phải heading) tình cờ trùng y hệt text heading đang chờ khớp, sẽ bị hiểu nhầm
+     * thành ranh giới mới — hiếm gặp trong thực tế, và hậu quả chỉ là 1 section bị tách hơi lệch,
+     * không phải lỗi/crash.
+     *
+     * Public (không phải private như các helper khác cùng file) — CoreIdeaExtractorController
+     * cần gọi lại hàm này ở batch mode SAU KHI `main_content` đã bị cắt/chọn lọc theo ngân sách ký
+     * tự (`truncateBatchMainContent()`/`selectRelevantContent()`), để `sections[]` phản ánh ĐÚNG
+     * phần nội dung THẬT SỰ được trả về (không rò rỉ nội dung đã bị cắt bỏ ra ngoài `sections`,
+     * làm mất tác dụng giới hạn ngân sách ký tự/nguồn của batch — xem CoreIdeaExtractorController::
+     * extractBatch()/extract()).
+     *
+     * @param HeadingData[] $headings
+     * @return array<int, array{heading: ?string, text: string}>
+     */
+    public function buildSections(string $mainContent, array $headings): array
+    {
+        if ($headings === []) {
+            return [];
+        }
+
+        $paragraphs   = preg_split('/\n{2,}/', trim($mainContent)) ?: [];
+        $headingTexts = array_map(static fn (HeadingData $h) => $h->text, $headings);
+        $nextHeading  = 0;
+
+        $sections = [];
+        $current  = ['heading' => null, 'text' => []];
+
+        foreach ($paragraphs as $paragraph) {
+            $trimmed = trim($paragraph);
+
+            if ($nextHeading < count($headingTexts) && $trimmed === $headingTexts[$nextHeading]) {
+                if ($current['heading'] !== null || $current['text'] !== []) {
+                    $sections[] = ['heading' => $current['heading'], 'text' => trim(implode("\n\n", $current['text']))];
+                }
+
+                $current = ['heading' => $trimmed, 'text' => []];
+                $nextHeading++;
+
+                continue;
+            }
+
+            $current['text'][] = $paragraph;
+        }
+
+        if ($current['heading'] !== null || $current['text'] !== []) {
+            $sections[] = ['heading' => $current['heading'], 'text' => trim(implode("\n\n", $current['text']))];
+        }
+
+        // Loại section HOÀN TOÀN rỗng (không heading lẫn không text) — không có tình huống thật
+        // nào tạo ra dạng này (luôn ít nhất có heading hoặc text), chỉ là an toàn phòng hờ.
+        return array_values(array_filter(
+            $sections,
+            static fn (array $s) => $s['heading'] !== null || $s['text'] !== '',
+        ));
     }
 
     private function extractPublishDate(\DOMXPath $xpath, string $html): ?string

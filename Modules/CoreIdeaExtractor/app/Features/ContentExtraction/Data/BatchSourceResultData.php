@@ -13,12 +13,16 @@ use Spatie\LaravelData\Data;
  * `duplicate_of`: url ĐẦU TIÊN (có thể từ batch trước, khác request) có cùng content_hash đã
  * chuẩn hoá — phát hiện qua cache cross-reference (xem CoreIdeaExtractorController), không phải
  * so sánh trong bộ nhớ của riêng batch này. null nếu url này là url đầu tiên có nội dung đó.
+ *
+ * `sections` (v1.14): cũng dùng mảng rỗng `[]` khi không có heading nào để tách (cùng quy ước với
+ * `keywords`/`headings`) — xem ExtractRawContentAction::buildSections().
  */
 class BatchSourceResultData extends Data
 {
     /**
      * @param  string[]  $keywords
      * @param  array<int, array{level: int, text: string}>  $headings
+     * @param  array<int, array{heading: ?string, text: string}>  $sections
      */
     public function __construct(
         public readonly string $url,
@@ -35,6 +39,7 @@ class BatchSourceResultData extends Data
         public readonly ?string $content_type_signal,
         public readonly array $keywords,
         public readonly array $headings,
+        public readonly array $sections,
         public readonly ?string $main_content,
         public readonly ?string $content_hash,
         public readonly ?string $duplicate_of,
@@ -79,6 +84,7 @@ class BatchSourceResultData extends Data
                 static fn (HeadingData $h) => ['level' => $h->level, 'text' => $h->text],
                 $extraction->headings,
             ),
+            sections: $extraction->sections,
             main_content: $extraction->main_content,
             content_hash: $contentHash,
             duplicate_of: $duplicateOf,
@@ -121,6 +127,7 @@ class BatchSourceResultData extends Data
             content_type_signal: null,
             keywords: [],
             headings: [],
+            sections: [],
             main_content: null,
             content_hash: null,
             duplicate_of: null,
@@ -155,6 +162,7 @@ class BatchSourceResultData extends Data
             'content_type_signal'    => $this->content_type_signal,
             'keywords'               => $this->keywords,
             'headings'               => $this->headings,
+            'sections'               => $this->sections,
             'main_content'           => $this->main_content,
             'content_hash'           => $this->content_hash,
             'duplicate_of'           => $this->duplicate_of,

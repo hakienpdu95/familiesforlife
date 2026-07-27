@@ -59,7 +59,15 @@ class ExtractBatchResultData extends Data
         ];
     }
 
-    /** @return string[] */
+    /**
+     * v1.15 — trước đây chỉ lowercase+trim rồi so khớp NGUYÊN VĂN, nên "Omega 3" (nguồn A) và
+     * "Omega-3" (nguồn B) — CÙNG 1 khái niệm, chỉ khác dấu câu — không giao nhau, khiến
+     * `common_keywords` trống ngay cả khi 2 nguồn thật sự cùng chủ đề. Gộp thêm bước chuẩn hoá
+     * dấu gạch nối/gạch dưới về khoảng trắng trước khi so khớp — vẫn thuần so khớp CHUỖI (không
+     * suy luận ngữ nghĩa), chỉ khoan dung hơn với biến thể dấu câu phổ biến.
+     *
+     * @return string[]
+     */
     private function buildCommonKeywords(): array
     {
         $lists = array_values(array_filter(array_map(
@@ -71,8 +79,15 @@ class ExtractBatchResultData extends Data
             return [];
         }
 
+        $normalize = static function (string $k): string {
+            $k = mb_strtolower(trim($k));
+            $k = preg_replace('/[\s_-]+/u', ' ', $k) ?? $k;
+
+            return trim($k);
+        };
+
         $normalized = array_map(
-            static fn (array $kws) => array_unique(array_map(static fn (string $k) => mb_strtolower(trim($k)), $kws)),
+            static fn (array $kws) => array_unique(array_map($normalize, $kws)),
             $lists,
         );
 

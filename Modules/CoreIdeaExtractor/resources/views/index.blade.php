@@ -442,14 +442,45 @@ document.addEventListener('alpine:init', () => {
              * toàn bộ field kỹ thuật khác vốn đã `null` (xem §7.1.1 spec) nên giữ nguyên chỉ lặp
              * lại hàng chục `null` vô ích, `summary_note` cấp batch đã đủ giải thích lý do.
              *
-             * `main_content` CHỈ bị cắt khi `extraction_confidence === 'low'` — CỐ Ý KHÔNG áp dụng
-             * cho `medium`/`high` (xem lịch sử §12.4/§12.5 spec: đã thử cắt main_content rồi BỎ
-             * NGAY vì phá mất chiều sâu nội dung, trong khi lợi ích chỉ là suy đoán). Khác biệt ở
-             * đây: `low` là mức Layer 2 KHÔNG BAO GIỜ chạy tới (§4/§7 — nội dung được coi là chưa
-             * đủ tin cậy để sinh ý ngay từ thiết kế ban đầu), nên với riêng payload dán vào AI, chỉ
-             * giữ 1 đoạn ngắn để AI biết nguồn tồn tại/sơ lược nội dung, thay vì dán nguyên khối
-             * main_content mà module tự đánh giá là không đủ tin cậy.
+             * `main_content`/`sections` CHỈ bị cắt khi `extraction_confidence === 'low'` — CỐ Ý
+             * KHÔNG áp dụng cho `medium`/`high` (xem lịch sử §12.4/§12.5 spec: đã thử cắt
+             * main_content rồi BỎ NGAY vì phá mất chiều sâu nội dung, trong khi lợi ích chỉ là suy
+             * đoán). Khác biệt ở đây: `low` là mức Layer 2 KHÔNG BAO GIỜ chạy tới (§4/§7 — nội
+             * dung được coi là chưa đủ tin cậy để sinh ý ngay từ thiết kế ban đầu), nên với riêng
+             * payload dán vào AI, chỉ giữ 1 đoạn ngắn để AI biết nguồn tồn tại/sơ lược nội dung,
+             * thay vì dán nguyên khối mà module tự đánh giá là không đủ tin cậy.
+             *
+             * `sections` (v1.14, xem ExtractRawContentAction::buildSections()) — main_content ĐÃ
+             * ĐƯỢC TỔ CHỨC LẠI theo ranh giới heading (nguyên văn, không diễn giải ý nghĩa) — khi
+             * có, dùng THAY CHO `main_content` phẳng (không gửi cả 2 — trùng lặp y hệt nội dung,
+             * tốn token vô ích), giúp AI khỏi phải tự tách đoạn theo heading từ 1 khối văn bản dài.
+             * Không có heading nào (`sections` rỗng) → vẫn dùng `main_content` như cũ.
+             *
+             * v1.15 — 3 tinh chỉnh nhỏ theo phản hồi thực tế:
+             * (1) Bỏ hẳn `headings` phẳng khỏi payload này khi đã có `sections` — `sections[].heading`
+             *     LUÔN chứa đúng cùng danh sách text heading (2 mảng chỉ khác nhau ở việc sections
+             *     có kèm text thân bài) nên gửi cả 2 là trùng lặp thuần tuý, tốn token vô ích khi
+             *     batch nhiều nguồn. Vẫn giữ `headings` khi KHÔNG có sections (trường hợp hiếm —
+             *     xem buildSections(), thực tế headings rỗng ⟺ sections rỗng nên nhánh này gần như
+             *     luôn là mảng rỗng, giữ lại chỉ để không mất field nếu có edge case).
+             * (2) Thêm `publish_date`/`word_count` — ĐÃ có sẵn ở Layer 1 (không cần trích thêm gì
+             *     mới), trước đây bị loại khỏi payload rút gọn theo tinh thần "chỉ giữ field cần
+             *     cho brainstorm" — nhưng phản hồi cho thấy 2 field này thực sự hữu ích: biết được
+             *     ngày đăng CHUẨN HOÁ (ISO, do site tự khai qua article:published_time/JSON-LD,
+             *     không phải để AI tự parse ngày tháng lẫn trong `main_content`/`sections` dạng
+             *     text tự do) để đánh giá độ mới, và `word_count` để biết nguồn nào mỏng/dày mà
+             *     không cần tự đếm.
+             * (3) Thêm `_schema_notes` (chuỗi ngắn, xem bên dưới) NGAY TRONG JSON — trước đây chú
+             *     giải field chỉ nằm ở câu dẫn trước khối JSON trong prompt; nếu người dùng chỉ
+             *     copy JSON riêng (không kèm phần dẫn) để dùng ở nơi khác, JSON sẽ mất hẳn ngữ
+             *     cảnh giải thích field nào tự khai/field nào phỏng đoán. Nhúng thẳng vào JSON để
+             *     tự mô tả, không phụ thuộc phần prompt bao quanh còn tồn tại hay không.
              */
+            SCHEMA_NOTES: '`declared_content_type`/`publisher_name`/`publish_date` do CHÍNH site tự khai báo (không phải suy đoán). '
+                + '`extraction_confidence`/`notes` phản ánh chất lượng TRÍCH XUẤT KỸ THUẬT, không phải chất lượng nội dung. '
+                + '`content_type_signal` (listicle/how_to/review_comparison/faq/product/product_faq/educational) là PHỎNG ĐOÁN bằng rule đơn giản, có thể sai hoặc null. '
+                + '`sections`/`main_content` là NGUYÊN VĂN đã trích (không phải AI tóm tắt) — `sections` chỉ tổ chức lại theo heading, không diễn giải ý nghĩa.',
+
             buildAiPayload() {
                 const LOW_CONFIDENCE_MAIN_CONTENT_CHARS = 3000;
 
@@ -464,26 +495,57 @@ document.addEventListener('alpine:init', () => {
                     return (lastSpace > LOW_CONFIDENCE_MAIN_CONTENT_CHARS * 0.7 ? window.slice(0, lastSpace) : window) + '…';
                 };
 
-                const pickCore = (source) => ({
-                    title: source.title,
-                    meta_description: source.meta_description,
-                    declared_content_type: source.declared_content_type,
-                    content_type_signal: source.content_type_signal,
-                    keywords: source.keywords,
-                    headings: source.headings,
-                    language: source.language,
-                    extraction_confidence: source.extraction_confidence,
-                    notes: source.notes,
-                    publisher_name: source.publisher_name,
-                    source_structure: source.source_structure,
-                    main_content: trimLowConfidenceContent(source.main_content, source.extraction_confidence),
-                });
+                const trimLowConfidenceSections = (sections, confidence) => {
+                    if (confidence !== 'low') return sections;
+
+                    let budget = LOW_CONFIDENCE_MAIN_CONTENT_CHARS;
+                    const trimmed = [];
+
+                    for (const section of sections) {
+                        if (budget <= 0) break;
+
+                        if (section.text.length <= budget) {
+                            trimmed.push(section);
+                            budget -= section.text.length;
+                            continue;
+                        }
+
+                        trimmed.push({ heading: section.heading, text: section.text.slice(0, budget) + '…' });
+                        break;
+                    }
+
+                    return trimmed;
+                };
+
+                const pickCore = (source) => {
+                    const hasSections = Array.isArray(source.sections) && source.sections.length > 0;
+
+                    return {
+                        title: source.title,
+                        meta_description: source.meta_description,
+                        declared_content_type: source.declared_content_type,
+                        content_type_signal: source.content_type_signal,
+                        keywords: source.keywords,
+                        ...(hasSections ? {} : { headings: source.headings }),
+                        publish_date: source.publish_date,
+                        word_count: source.word_count,
+                        language: source.language,
+                        extraction_confidence: source.extraction_confidence,
+                        notes: source.notes,
+                        publisher_name: source.publisher_name,
+                        source_structure: source.source_structure,
+                        ...(hasSections
+                            ? { sections: trimLowConfidenceSections(source.sections, source.extraction_confidence) }
+                            : { main_content: trimLowConfidenceContent(source.main_content, source.extraction_confidence) }),
+                    };
+                };
 
                 if (!this.isBatchResult()) {
-                    return pickCore(this.result);
+                    return { _schema_notes: this.SCHEMA_NOTES, ...pickCore(this.result) };
                 }
 
                 return {
+                    _schema_notes: this.SCHEMA_NOTES,
                     common_keywords: this.result.common_keywords ?? [],
                     summary_note: this.result.summary_note ?? null,
                     sources: (this.result.sources ?? []).map(s => s.status === 'success'
@@ -794,12 +856,13 @@ document.addEventListener('alpine:init', () => {
                 // xuất bản đầy đủ nguyên trạng cho debug/audit.
                 const promptData = this.buildAiPayload();
 
+                // v1.15: chú giải field (trước đây viết cả ở đây LẪN không có trong JSON) nay CHỈ
+                // còn 1 bản duy nhất — nhúng trong `_schema_notes` NGAY TRONG promptData (xem
+                // buildAiPayload()) để JSON tự mô tả được, không mất ngữ cảnh nếu ai đó copy riêng
+                // khối JSON (không kèm đoạn dẫn này) sang chỗ khác dùng. Câu dẫn ở đây chỉ còn trỏ
+                // tới field đó, không lặp lại nội dung.
                 const middle = [
-                    'Dữ liệu thô đã trích xuất (tham khảo để lấy ý — KHÔNG copy nguyên văn; vài field thuần kỹ thuật đã lược bớt so với JSON gốc để đỡ tốn token). '
-                        + 'Chú giải nhanh vài trường dễ hiểu nhầm: `declared_content_type`/`publisher_name` là do CHÍNH trang web tự khai báo (không phải suy đoán); '
-                        + '`extraction_confidence`/`notes` phản ánh chất lượng TRÍCH XUẤT KỸ THUẬT, không phải chất lượng nội dung bài viết; '
-                        + '`content_type_signal` (listicle/how_to/review_comparison/faq/product/product_faq) là PHỎNG ĐOÁN bằng rule đơn giản trên pattern heading/tiêu đề/loại trang '
-                        + '(KHÔNG phải AI phân tích nội dung) — có thể sai hoặc null nếu không rõ, tự đối chiếu lại với main_content trước khi dùng:',
+                    'Dữ liệu thô đã trích xuất (tham khảo để lấy ý — KHÔNG copy nguyên văn; vài field thuần kỹ thuật đã lược bớt so với JSON gốc để đỡ tốn token; xem `_schema_notes` trong JSON để hiểu ý nghĩa từng trường dễ hiểu nhầm):',
                     JSON.stringify(promptData, null, 2),
                 ];
 
