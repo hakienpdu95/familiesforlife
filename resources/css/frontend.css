@@ -399,7 +399,7 @@
     margin: 0;
 }
 
-.site-header .nav-sub .nav-item { border-bottom: none; text-transform: none; }
+.site-header .nav-sub .nav-item { border-bottom: none; text-transform: none; position: relative; }
 
 /* content/font-family gốc là glyph fontello '\e80c' (file font không có trong spec) — thay
  * bằng dấu chấm tròn thường, giữ nguyên margin/size/vertical-align gốc. */
@@ -440,13 +440,31 @@
         position: relative;
     }
 
-    .site-header .nav .nav-item:hover .nav-sub {
+    .site-header .nav .nav-item:hover > .nav-sub {
         display: block;
         transition: .25s all ease-out;
         visibility: visible;
         opacity: 1;
         transform: translateY(0);
         transition-delay: .1s;
+    }
+
+    /* Cấp 3 (flyout lồng trong .nav-sub, xem frontend-header.blade.php) — hiện khi hover đúng
+     * <li> cấp 2 chứa nó (":hover > .nav-sub", không phải cả nhóm cấp 1), trồi sang PHẢI thay vì
+     * xuống dưới (nếu không sẽ chồng lên chính .nav-sub cấp 2 đang chứa nó). */
+    .site-header .nav .nav-sub .nav-item:hover > .nav-sub {
+        display: block;
+        transition: .25s all ease-out;
+        visibility: visible;
+        opacity: 1;
+        transform: translateX(0);
+        transition-delay: .1s;
+    }
+
+    .site-header .nav .nav-sub .nav-sub {
+        top: 0;
+        left: 100%;
+        transform: translateX(1rem);
     }
 
     .site-header .nav .nav-item:hover .nav-link { background-color: #f5f5f5; }

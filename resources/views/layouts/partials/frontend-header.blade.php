@@ -99,6 +99,7 @@
                     <ul class="nav-sub">
                         @foreach($item->children as $child)
                         @php($childUrl = $child->resolveUrl())
+                        @php($hasGrandchildren = $child->children->isNotEmpty())
                         <li class="nav-item">
                             <a class="nav-link" href="{{ $childUrl ?? '#' }}" title="{{ $child->label }}"
                                @if($child->open_in_new_tab) target="_blank" @endif
@@ -108,6 +109,28 @@
                             >
                                 @if($child->icon)<i class="{{ $child->icon }} mr-1"></i>@endif{{ $child->label }}
                             </a>
+
+                            {{-- Cấp 3 (VD "Babies"/"Toddler & Kids" > giai đoạn tuổi > mục lá, xem
+                                 MenuDatabaseSeeder::seedNestedUrlGroup()) — hiện flyout sang phải
+                                 khi hover đúng <li> giai đoạn tuổi này (xem .nav-sub .nav-sub trong
+                                 frontend.css), không phải khi hover cả nhóm cấp 1. --}}
+                            @if($hasGrandchildren)
+                            <ul class="nav-sub">
+                                @foreach($child->children as $grandchild)
+                                @php($grandchildUrl = $grandchild->resolveUrl())
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ $grandchildUrl ?? '#' }}" title="{{ $grandchild->label }}"
+                                       @if($grandchild->open_in_new_tab) target="_blank" @endif
+                                       @if($grandchild->open_in_new_tab || $grandchild->isExternalUrl())
+                                       rel="{{ trim(($grandchild->open_in_new_tab ? 'noopener ' : '') . ($grandchild->isExternalUrl() ? 'nofollow' : '')) }}"
+                                       @endif
+                                    >
+                                        @if($grandchild->icon)<i class="{{ $grandchild->icon }} mr-1"></i>@endif{{ $grandchild->label }}
+                                    </a>
+                                </li>
+                                @endforeach
+                            </ul>
+                            @endif
                         </li>
                         @endforeach
                     </ul>
