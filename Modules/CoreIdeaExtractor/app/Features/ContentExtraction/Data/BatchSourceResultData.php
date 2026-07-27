@@ -54,6 +54,9 @@ class BatchSourceResultData extends Data
         public readonly ?string $error_message,
         public readonly string $fetched_at,
         public readonly ?array $source_structure,
+        public readonly ?int $raw_html_chars,
+        public readonly ?int $main_content_chars,
+        public readonly ?float $reduction_percent,
     ) {}
 
     public static function success(
@@ -99,6 +102,9 @@ class BatchSourceResultData extends Data
             error_message: null,
             fetched_at: $fetchedAt,
             source_structure: $extraction->source_structure->toArray(),
+            raw_html_chars: $extraction->raw_html_chars,
+            main_content_chars: $extraction->main_content_chars,
+            reduction_percent: $extraction->reduction_percent,
         );
     }
 
@@ -142,6 +148,9 @@ class BatchSourceResultData extends Data
             error_message: $errorMessage,
             fetched_at: $fetchedAt,
             source_structure: null,
+            raw_html_chars: null,
+            main_content_chars: null,
+            reduction_percent: null,
         );
     }
 
@@ -177,6 +186,11 @@ class BatchSourceResultData extends Data
             'error_message'          => $this->error_message,
             'fetched_at'             => $this->fetched_at,
             'source_structure'       => $this->source_structure,
+            'content_reduction'      => $this->raw_html_chars === null ? null : [
+                'raw_html_chars'     => $this->raw_html_chars,
+                'main_content_chars' => $this->main_content_chars,
+                'reduction_percent'  => $this->reduction_percent,
+            ],
         ];
     }
 }

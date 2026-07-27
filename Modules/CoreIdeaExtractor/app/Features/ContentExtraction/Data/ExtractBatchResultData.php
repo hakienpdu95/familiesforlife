@@ -50,6 +50,7 @@ class ExtractBatchResultData extends Data
              * vì phải tự dò qua từng danh sách keywords của 7 nguồn bằng mắt.
              */
             'common_keywords' => $this->buildCommonKeywords(),
+            'content_reduction' => $this->buildContentReduction(),
             'summary_note' => $this->buildSummaryNote(),
             'sources'      => array_map(
                 static fn (BatchSourceResultData $s) => $s->toApiArray(),
@@ -92,6 +93,33 @@ class ExtractBatchResultData extends Data
         );
 
         return array_values(array_intersect(...$normalized));
+    }
+
+    /**
+     * Tổng % giảm dung lượng HTML→Markdown TRÊN CẢ BATCH (tổng ký tự HTML gốc / tổng ký tự
+     * main_content Markdown của MỌI nguồn thành công) — khác `reduction_percent` riêng từng
+     * nguồn trong `sources[].content_reduction` (xem BatchSourceResultData), đây là con số GỘP để
+     * người dùng thấy ngay hiệu quả tổng thể mà không phải tự cộng tay qua 7 nguồn. null khi không
+     * có nguồn thành công nào (không có gì để tính).
+     *
+     * @return array{raw_html_chars: int, main_content_chars: int, reduction_percent: float}|null
+     */
+    private function buildContentReduction(): ?array
+    {
+        $successful = array_filter($this->sources, static fn (BatchSourceResultData $s) => $s->status === 'success');
+
+        if ($successful === []) {
+            return null;
+        }
+
+        $rawHtmlChars     = array_sum(array_map(static fn (BatchSourceResultData $s) => $s->raw_html_chars ?? 0, $successful));
+        $mainContentChars = array_sum(array_map(static fn (BatchSourceResultData $s) => $s->main_content_chars ?? 0, $successful));
+
+        return [
+            'raw_html_chars'     => $rawHtmlChars,
+            'main_content_chars' => $mainContentChars,
+            'reduction_percent'  => $rawHtmlChars > 0 ? round((1 - $mainContentChars / $rawHtmlChars) * 100, 1) : 0.0,
+        ];
     }
 
     /**

@@ -1005,30 +1005,198 @@ class ExtractRawContentAction
     }
 
     /**
-     * Nối text theo cấu trúc DOM, tự chèn ranh giới đoạn cho thẻ block (xem BLOCK_TAGS) và
-     * newline đơn cho `<br>` — thay cho `$node->textContent` (không phân biệt ranh giới thẻ,
-     * gây dính chữ ở HTML minify).
+     * Nối text theo cấu trúc DOM và xuất ra Markdown THẬT (không phải text thuần) — heading
+     * (`<h1>`-`<h6>`) → `#`-`######`, `<strong>`/`<b>` → `**text**`, `<em>`/`<i>` → `*text*`,
+     * `<a href>` → `[text](href)`, `<ul>`/`<ol>`/`<li>` → `- `/`N. `, `<blockquote>` → `> `,
+     * `<pre>` → fenced code block, `<table>` → GFM table (xem tableToMarkdown()). Mục tiêu: giữ
+     * lại cấu trúc ngữ nghĩa (heading/list/nhấn mạnh/link) khi đưa vào prompt AI thay vì làm
+     * phẳng thành văn xuôi — cùng kỹ thuật "HTML → clean Markdown" các công cụ trích xuất nội
+     * dung cho AI (VD Firecrawl) dùng để giảm token so với gửi thẳng HTML thô.
+     *
+     * $listContext theo dõi `ordered`/`index` khi đệ quy VÀO BÊN TRONG 1 `<ul>`/`<ol>` — để
+     * `<li>` biết dùng marker "- " hay "N. " (N tăng dần theo đúng thứ tự item). null khi không
+     * nằm trong danh sách nào.
+     *
+     * KHÔNG escape ký tự đặc biệt Markdown (`#`/`*`/`-`/`` ` ``...) xuất hiện tự nhiên trong văn
+     * bản nguồn — hiếm gặp trong nội dung bài viết thực tế (khác hẳn code/công thức), và việc
+     * escape đúng theo CommonMark phức tạp hơn nhiều so với lợi ích cho phạm vi module này.
      */
-    private function extractBlockText(\DOMNode $node): string
+    private function extractBlockText(\DOMNode $node, ?array $listContext = null): string
     {
         if ($node instanceof \DOMText) {
             return $node->nodeValue ?? '';
-        }
-
-        if ($node->nodeName === 'br') {
-            return "\n";
         }
 
         if (! $node instanceof \DOMElement && ! $node instanceof \DOMDocument) {
             return '';
         }
 
-        $text = '';
-        foreach ($node->childNodes as $child) {
-            $text .= $this->extractBlockText($child);
+        $tag = $node->nodeName;
+
+        if (in_array($tag, ['script', 'style'], true)) {
+            return '';
         }
 
-        return in_array($node->nodeName, self::BLOCK_TAGS, true) ? "\n\n{$text}\n\n" : $text;
+        if ($tag === 'br') {
+            return "\n";
+        }
+
+        if (in_array($tag, ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'], true)) {
+            $text = trim($this->collectChildrenText($node, $listContext));
+
+            return $text === '' ? '' : "\n\n".str_repeat('#', (int) substr($tag, 1))." {$text}\n\n";
+        }
+
+        if (in_array($tag, ['strong', 'b'], true)) {
+            $text = trim($this->collectChildrenText($node, $listContext));
+
+            return $text === '' ? '' : "**{$text}**";
+        }
+
+        if (in_array($tag, ['em', 'i'], true)) {
+            $text = trim($this->collectChildrenText($node, $listContext));
+
+            return $text === '' ? '' : "*{$text}*";
+        }
+
+        if ($tag === 'a') {
+            $href = trim($node->getAttribute('href'));
+            $text = trim($this->collectChildrenText($node, $listContext));
+
+            if ($text === '') {
+                return '';
+            }
+
+            if ($href === '') {
+                return $text;
+            }
+
+            // href chứa dấu ngoặc đơn/khoảng trắng (VD URL Wikipedia dạng
+            // "...Test_(demo)") sẽ đóng cú pháp `[text](href)` SỚM ở dấu ")" đầu tiên nếu để
+            // trần — bọc `<...>` (CommonMark cho phép link destination trong dấu ngoặc nhọn để
+            // chứa các ký tự này) khi phát hiện.
+            $needsAngleBrackets = str_contains($href, '(') || str_contains($href, ')') || str_contains($href, ' ');
+
+            return $needsAngleBrackets ? "[{$text}](<{$href}>)" : "[{$text}]({$href})";
+        }
+
+        if ($tag === 'pre') {
+            $code = trim($node->textContent);
+
+            return $code === '' ? '' : "\n\n```\n{$code}\n```\n\n";
+        }
+
+        if ($tag === 'code') {
+            $text = trim($this->collectChildrenText($node, $listContext));
+
+            return $text === '' ? '' : "`{$text}`";
+        }
+
+        if ($tag === 'li') {
+            $text = trim($this->collectChildrenText($node, $listContext));
+
+            if ($text === '') {
+                return '';
+            }
+
+            $marker = $listContext !== null && $listContext['ordered'] ? "{$listContext['index']}. " : '- ';
+
+            return "\n{$marker}{$text}";
+        }
+
+        if ($tag === 'ul' || $tag === 'ol') {
+            $ordered = $tag === 'ol';
+            $text    = '';
+            // Đếm bằng biến CỦA VÒNG LẶP NÀY (không phải trong $listContext truyền cho `<li>`) —
+            // PHP truyền mảng theo GIÁ TRỊ, `$listContext['index']++` bên trong nhánh `<li>` chỉ
+            // tăng bản SAO cục bộ của lệnh gọi đệ quy đó, không phản ánh ngược lại biến `$context`
+            // ở đây; mọi `<li>` sẽ nhận cùng index=1 nếu tăng ở phía nhận thay vì phía phát.
+            $index = 1;
+
+            foreach ($node->childNodes as $child) {
+                if ($child instanceof \DOMElement && $child->nodeName === 'li') {
+                    $text .= $this->extractBlockText($child, ['ordered' => $ordered, 'index' => $index]);
+                    $index++;
+                }
+            }
+
+            return $text === '' ? '' : "\n\n{$text}\n\n";
+        }
+
+        if ($tag === 'blockquote') {
+            $inner = trim($this->collectChildrenText($node, $listContext));
+
+            if ($inner === '') {
+                return '';
+            }
+
+            $quoted = implode("\n", array_map(static fn (string $line) => '> '.$line, explode("\n", $inner)));
+
+            return "\n\n{$quoted}\n\n";
+        }
+
+        if ($tag === 'table' && $node instanceof \DOMElement) {
+            return $this->tableToMarkdown($node);
+        }
+
+        $text = $this->collectChildrenText($node, $listContext);
+
+        return in_array($tag, self::BLOCK_TAGS, true) ? "\n\n{$text}\n\n" : $text;
+    }
+
+    private function collectChildrenText(\DOMElement $node, ?array $listContext): string
+    {
+        $text = '';
+
+        foreach ($node->childNodes as $child) {
+            $text .= $this->extractBlockText($child, $listContext);
+        }
+
+        return $text;
+    }
+
+    /**
+     * Bảng GFM (`| a | b |` + hàng gạch ngang phân tách header) — dùng `getElementsByTagName('tr')`
+     * (gộp cả `<thead>`/`<tbody>` nếu có, không cần phân biệt) để lấy MỌI hàng theo đúng thứ tự
+     * tài liệu. Hàng đầu tiên luôn coi là header (GFM bắt buộc phải có hàng phân cách `---`, kể cả
+     * khi bảng nguồn không dùng `<th>` cho hàng đầu) — đơn giản hơn dò `<thead>` có/không, và trong
+     * phạm vi module (bảng dinh dưỡng/so sánh) hàng đầu hầu như luôn là tiêu đề cột trên thực tế.
+     */
+    private function tableToMarkdown(\DOMElement $table): string
+    {
+        $rows = [];
+
+        foreach ($table->getElementsByTagName('tr') as $tr) {
+            $cells = [];
+
+            foreach ($tr->childNodes as $cellNode) {
+                if ($cellNode instanceof \DOMElement && in_array($cellNode->nodeName, ['td', 'th'], true)) {
+                    $cellText = trim(preg_replace('/\s+/u', ' ', $this->collectChildrenText($cellNode, null)) ?? '');
+                    $cells[]  = str_replace('|', '\|', $cellText);
+                }
+            }
+
+            if ($cells !== []) {
+                $rows[] = $cells;
+            }
+        }
+
+        if ($rows === []) {
+            return '';
+        }
+
+        $colCount = max(array_map('count', $rows));
+        $pad      = static fn (array $row) => array_pad($row, $colCount, '');
+
+        $lines   = [];
+        $lines[] = '| '.implode(' | ', $pad($rows[0])).' |';
+        $lines[] = '| '.implode(' | ', array_fill(0, $colCount, '---')).' |';
+
+        foreach (array_slice($rows, 1) as $row) {
+            $lines[] = '| '.implode(' | ', $pad($row)).' |';
+        }
+
+        return "\n\n".implode("\n", $lines)."\n\n";
     }
 
     private function cleanText(string $text): string
@@ -1085,7 +1253,8 @@ class ExtractRawContentAction
             return [];
         }
 
-        $paragraphs   = preg_split('/\n{2,}/', trim($mainContent)) ?: [];
+        $blocks       = preg_split('/\n{2,}/', trim($mainContent)) ?: [];
+        $paragraphs   = array_merge([], ...array_map($this->splitListBlockIntoItems(...), $blocks));
         $headingTexts = array_map(static fn (HeadingData $h) => $h->text, $headings);
         $nextHeading  = 0;
 
@@ -1093,14 +1262,15 @@ class ExtractRawContentAction
         $current  = ['heading' => null, 'text' => []];
 
         foreach ($paragraphs as $paragraph) {
-            $trimmed = trim($paragraph);
+            $trimmed    = trim($paragraph);
+            $normalized = $this->stripHeadingMarkdownSyntax($trimmed);
 
-            if ($nextHeading < count($headingTexts) && $trimmed === $headingTexts[$nextHeading]) {
+            if ($nextHeading < count($headingTexts) && $normalized === $headingTexts[$nextHeading]) {
                 if ($current['heading'] !== null || $current['text'] !== []) {
                     $sections[] = ['heading' => $current['heading'], 'text' => trim(implode("\n\n", $current['text']))];
                 }
 
-                $current = ['heading' => $trimmed, 'text' => []];
+                $current = ['heading' => $headingTexts[$nextHeading], 'text' => []];
                 $nextHeading++;
 
                 continue;
@@ -1119,6 +1289,64 @@ class ExtractRawContentAction
             $sections,
             static fn (array $s) => $s['heading'] !== null || $s['text'] !== '',
         ));
+    }
+
+    /**
+     * 1 block giữa 2 dòng trống có thể là TOÀN BỘ 1 danh sách Markdown gộp chung (`<li>` chỉ cách
+     * nhau 1 `\n` — xem extractBlockText() nhánh `<li>`, ĐÚNG cú pháp CommonMark cho list liền
+     * mạch, không phải blank line như các block khác) — nếu không tách riêng từng dòng,
+     * buildSections() sẽ không bao giờ khớp được heading/pseudo-heading nằm trong `<li>` (VD
+     * trang sản phẩm dùng `<ul><li>1. Công dụng</li><li>mô tả...</li>...</ul>` thay vì
+     * `<p><strong>...</strong></p>`) vì cả danh sách bị coi là 1 "đoạn văn" DUY NHẤT, không khớp
+     * bất kỳ heading text nào — đã gặp thật khi rà soát sau khi đổi main_content sang Markdown.
+     *
+     * Chỉ tách khi MỌI dòng không rỗng trong block đều bắt đầu bằng marker danh sách ("- " hoặc
+     * "N. ") — tránh tách nhầm 1 đoạn văn xuôi bình thường chỉ tình cờ có 1 dòng bắt đầu bằng số/
+     * gạch đầu dòng (VD blockquote nhiều dòng, mỗi dòng "> ..." không khớp điều kiện này nên vẫn
+     * giữ nguyên là 1 block).
+     *
+     * @return string[]
+     */
+    private function splitListBlockIntoItems(string $block): array
+    {
+        $lines = explode("\n", $block);
+
+        $isListBlock = array_reduce(
+            $lines,
+            static fn (bool $carry, string $line) => $carry && (trim($line) === '' || preg_match('/^(-\s+|\d+\.\s+)/u', $line) === 1),
+            true,
+        );
+
+        if (! $isListBlock || count($lines) <= 1) {
+            return [$block];
+        }
+
+        return array_values(array_filter(array_map('trim', $lines), static fn (string $line) => $line !== ''));
+    }
+
+    /**
+     * `$headingTexts` (so khớp trong buildSections()) là text THUẦN đọc trực tiếp từ
+     * `$node->textContent` (xem extractHeadings()/extractPseudoHeadings()), trong khi đoạn tương
+     * ứng trong `$mainContent` giờ đã là Markdown — heading thật bọc `#`-`######`, pseudo-heading
+     * dạng bôi đậm bọc `**...**`, pseudo-heading/heading nằm trong `<li>` có thêm marker "- " (xem
+     * extractBlockText()). Bóc lại các lớp bọc này TRƯỚC khi so khớp, nếu không buildSections()
+     * sẽ không nhận diện được ranh giới heading nào nữa sau khi đổi sang Markdown.
+     */
+    private function stripHeadingMarkdownSyntax(string $paragraph): string
+    {
+        if (preg_match('/^#{1,6}\s+(.+)$/u', $paragraph, $m) === 1) {
+            return trim($m[1]);
+        }
+
+        if (preg_match('/^\*\*(.+)\*\*$/u', $paragraph, $m) === 1) {
+            return trim($m[1]);
+        }
+
+        if (preg_match('/^-\s+(.+)$/u', $paragraph, $m) === 1) {
+            return trim($m[1]);
+        }
+
+        return $paragraph;
     }
 
     private function extractPublishDate(\DOMXPath $xpath, string $html): ?string

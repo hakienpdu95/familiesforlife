@@ -45,9 +45,12 @@ class RawExtractionData extends Data
         public readonly int $word_count,
         public readonly int $meaningful_heading_count,
         public readonly SourceStructureData $source_structure,
+        public readonly int $raw_html_chars,
+        public readonly int $main_content_chars,
+        public readonly float $reduction_percent,
     ) {}
 
-    /** @return array{title:?string, meta_description:?string, canonical_url:?string, content_category:?string, declared_content_type:?string, content_type_signal:?string, keywords:array, headings:array, sections:array, main_content:string, word_count:int, publish_date:?string, date_modified:?string, author:?string, publisher_name:?string, language:string, extraction_confidence:string, notes:?string, source_structure:array} */
+    /** @return array{title:?string, meta_description:?string, canonical_url:?string, content_category:?string, declared_content_type:?string, content_type_signal:?string, keywords:array, headings:array, sections:array, main_content:string, word_count:int, publish_date:?string, date_modified:?string, author:?string, publisher_name:?string, language:string, extraction_confidence:string, notes:?string, source_structure:array, content_reduction:array{raw_html_chars:int, main_content_chars:int, reduction_percent:float}} */
     public function toApiArray(): array
     {
         return [
@@ -70,6 +73,19 @@ class RawExtractionData extends Data
             'extraction_confidence'  => $this->extraction_confidence->value,
             'notes'                  => $this->notes,
             'source_structure'       => $this->source_structure->toArray(),
+            /**
+             * Đo THẬT (không phải ước lượng) mức giảm dung lượng khi chuyển HTML thô sang
+             * main_content dạng Markdown đã trích — `raw_html_chars` là độ dài HTML gốc TRƯỚC khi
+             * parse (đã fetch/dán), `main_content_chars` là độ dài Markdown SAU CÙNG (đã cắt theo
+             * max_main_content_chars nếu có) đưa vào JSON trả về, `reduction_percent` = (1 -
+             * main_content_chars/raw_html_chars) * 100, làm tròn 1 chữ số thập phân. 0 khi
+             * raw_html_chars = 0 (VD nhánh lỗi fetch — không có HTML để so sánh).
+             */
+            'content_reduction'      => [
+                'raw_html_chars'     => $this->raw_html_chars,
+                'main_content_chars' => $this->main_content_chars,
+                'reduction_percent'  => $this->reduction_percent,
+            ],
         ];
     }
 }

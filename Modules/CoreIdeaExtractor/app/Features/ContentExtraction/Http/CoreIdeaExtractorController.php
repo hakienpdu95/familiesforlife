@@ -80,6 +80,8 @@ class CoreIdeaExtractorController extends Controller
             }
         }
 
+        $rawHtmlChars = mb_strlen($html);
+
         $extracted        = $extractRaw->handle($html, $data->main_content_selector, $data->source_language);
         $confidenceResult = $computeConfidence->handle($extracted);
         $notes            = $this->appendSelectorNote($confidenceResult['notes'], $data->main_content_selector, $extracted['custom_selector_matched']);
@@ -93,6 +95,7 @@ class CoreIdeaExtractorController extends Controller
         // có thể xảy ra), sections sẽ "rò rỉ" phần nội dung đã bị cắt bỏ ra ngoài, không nhất quán
         // với main_content THẬT SỰ trả về.
         $finalMainContent = $this->truncateMainContent($extracted['main_content']);
+        $contentReduction = $this->computeContentReduction($rawHtmlChars, $finalMainContent);
 
         $result = $this->buildResult(
             title: $extracted['title'],
@@ -115,6 +118,9 @@ class CoreIdeaExtractorController extends Controller
             dateModified: $extracted['date_modified'],
             publisherName: $extracted['publisher_name'],
             contentTypeSignal: $extracted['content_type_signal'],
+            rawHtmlChars: $contentReduction['raw_html_chars'],
+            mainContentChars: $contentReduction['main_content_chars'],
+            reductionPercent: $contentReduction['reduction_percent'],
         );
 
         return response()->json($result->toApiArray());
@@ -176,6 +182,7 @@ class CoreIdeaExtractorController extends Controller
             }
 
             $selector         = $this->resolveSelectorForUrl($data, $key);
+            $rawHtmlChars     = mb_strlen($item['html']);
             $extracted        = $extractRaw->handle($item['html'], $selector, $data->source_language);
             $confidenceResult = $computeConfidence->handle($extracted);
             $notes            = $this->appendSelectorNote($confidenceResult['notes'], $selector, $extracted['custom_selector_matched']);
@@ -185,6 +192,7 @@ class CoreIdeaExtractorController extends Controller
             $mainContent      = $selection['text'];
             $notes            = $this->appendRelevanceNote($notes, $selection['relevance_applied'], $data->topic);
             $contentHash      = $this->computeContentHash($mainContent);
+            $contentReduction = $this->computeContentReduction($rawHtmlChars, $mainContent);
 
             $sources[] = BatchSourceResultData::success(
                 url: $url,
@@ -216,6 +224,9 @@ class CoreIdeaExtractorController extends Controller
                     dateModified: $extracted['date_modified'],
                     publisherName: $extracted['publisher_name'],
                     contentTypeSignal: $extracted['content_type_signal'],
+                    rawHtmlChars: $contentReduction['raw_html_chars'],
+                    mainContentChars: $contentReduction['main_content_chars'],
+                    reductionPercent: $contentReduction['reduction_percent'],
                 ),
                 contentHash: $contentHash,
                 duplicateOf: $this->resolveDuplicateOf($contentHash, $url),
@@ -475,6 +486,9 @@ class CoreIdeaExtractorController extends Controller
         ?string $publisherName = null,
         ?string $contentTypeSignal = null,
         array $sections = [],
+        int $rawHtmlChars = 0,
+        int $mainContentChars = 0,
+        float $reductionPercent = 0.0,
     ): RawExtractionData {
         return new RawExtractionData(
             title: $title,
@@ -497,7 +511,29 @@ class CoreIdeaExtractorController extends Controller
             word_count: $wordCount,
             meaningful_heading_count: $headingCount,
             source_structure: $sourceStructure ?? SourceStructureData::none(),
+            raw_html_chars: $rawHtmlChars,
+            main_content_chars: $mainContentChars,
+            reduction_percent: $reductionPercent,
         );
+    }
+
+    /**
+     * So sánh độ dài HTML gốc (trước parse) với main_content Markdown SAU CÙNG (đã cắt theo ngân
+     * sách ký tự nếu có) — số đo THẬT, không phải ước lượng token/4 như `promptSizeWarningText()`
+     * ở view (mục đích khác: đó là cảnh báo kích thước PROMPT tổng thể gửi AI, đây là % giảm dung
+     * lượng riêng của bước trích xuất HTML→Markdown). 0% khi không có HTML để so (nhánh lỗi fetch).
+     *
+     * @return array{raw_html_chars: int, main_content_chars: int, reduction_percent: float}
+     */
+    private function computeContentReduction(int $rawHtmlChars, string $mainContent): array
+    {
+        $mainContentChars = mb_strlen($mainContent);
+
+        return [
+            'raw_html_chars'     => $rawHtmlChars,
+            'main_content_chars' => $mainContentChars,
+            'reduction_percent'  => $rawHtmlChars > 0 ? round((1 - $mainContentChars / $rawHtmlChars) * 100, 1) : 0.0,
+        ];
     }
 
     /**

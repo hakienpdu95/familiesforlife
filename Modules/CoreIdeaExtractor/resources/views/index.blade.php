@@ -231,6 +231,7 @@
 
             <p x-show="!isBatchResult() && result && result.notes" x-cloak class="text-xs text-warning mb-3" x-text="result?.notes"></p>
             <p x-show="isBatchResult() && result.summary_note" x-cloak class="text-xs text-warning mb-3" x-text="result?.summary_note"></p>
+            <p x-show="result && result.content_reduction" x-cloak class="text-xs text-base-content/60 mb-1" x-text="contentReductionText()"></p>
             <p x-show="isPromptLarge()" x-cloak class="text-xs text-warning mb-3" x-text="promptSizeWarningText()"></p>
 
             <pre class="bg-base-200 rounded-lg p-4 text-xs overflow-x-auto max-h-[70vh]" x-text="prettyJson()"></pre>
@@ -587,6 +588,25 @@ document.addEventListener('alpine:init', () => {
              * khoảng trắng có thể lệch so với tokenizer thật), CHỈ để người dùng có cảm nhận độ
              * lớn tương đối, không phải con số chính xác cho billing.
              */
+            /**
+             * `content_reduction` (đo THẬT bằng ký tự, xem CoreIdeaExtractorController::
+             * computeContentReduction()) — KHÁC promptSizeWarningText() bên dưới (ước lượng THÔ
+             * ký_tự/4 cho TOÀN BỘ payload prompt): đây là % giảm dung lượng CỤ THỂ của riêng bước
+             * trích xuất HTML gốc → main_content Markdown, cùng field ở cả single-URL
+             * (`result.content_reduction`) lẫn batch (tổng trên mọi nguồn thành công — xem
+             * ExtractBatchResultData::buildContentReduction()), nên dùng chung 1 hàm hiển thị.
+             */
+            contentReductionText() {
+                const r = this.result?.content_reduction;
+
+                if (!r) {
+                    return '';
+                }
+
+                return `HTML gốc → Markdown đã trích: ${r.raw_html_chars.toLocaleString('vi-VN')} → `
+                    + `${r.main_content_chars.toLocaleString('vi-VN')} ký tự (giảm ${r.reduction_percent}%).`;
+            },
+
             estimatedPromptChars() {
                 return this.result ? this.prettyJson().length : 0;
             },
