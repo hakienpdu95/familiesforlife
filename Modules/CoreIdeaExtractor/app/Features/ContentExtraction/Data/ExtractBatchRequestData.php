@@ -2,6 +2,7 @@
 
 namespace Modules\CoreIdeaExtractor\Features\ContentExtraction\Data;
 
+use Spatie\LaravelData\Attributes\Validation\In;
 use Spatie\LaravelData\Attributes\Validation\Max;
 use Spatie\LaravelData\Attributes\Validation\Nullable;
 use Spatie\LaravelData\Data;
@@ -46,10 +47,29 @@ class ExtractBatchRequestData extends Data
          */
         #[Nullable, Max(3000)]
         public readonly ?string $style_sample = null,
-        /** Áp dụng chung cho mọi URL trong batch — xem ExtractRequestData::$main_content_selector. */
+        /**
+         * Selector MẶC ĐỊNH/fallback khi 1 URL không có override riêng ở `main_content_selectors`
+         * — xem ExtractRequestData::$main_content_selector.
+         */
         #[Nullable, Max(255)]
         public readonly ?string $main_content_selector = null,
+        /**
+         * Selector RIÊNG cho từng URL, cùng thứ tự/vị trí (index) với `urls` — VD `urls[2]` dùng
+         * `main_content_selectors[2]` nếu có giá trị. Lý do cần riêng field này: nhiều nguồn trong
+         * 1 batch thường thuộc NHIỀU DOMAIN KHÁC NHAU, mỗi domain có bố cục CSS/template riêng —
+         * 1 selector áp dụng chung cho mọi URL (như `main_content_selector` ở trên) hiếm khi đúng
+         * cho tất cả. Vị trí không có override (thiếu phần tử, hoặc giá trị null/rỗng) → rơi về
+         * `main_content_selector` chung, rồi mới tới tự động — xem
+         * `CoreIdeaExtractorController::resolveSelectorForUrl()`. KHÔNG bắt buộc cùng độ dài với
+         * `urls` (validate ở controller: nullable|array, mỗi phần tử nullable|string|max:255).
+         *
+         * @var array<int, string|null>|null
+         */
+        public readonly ?array $main_content_selectors = null,
         /** Áp dụng chung cho mọi URL trong batch — xem ExtractRequestData::$force_refresh. */
         public readonly bool $force_refresh = false,
+        /** Áp dụng chung cho mọi URL trong batch — xem ExtractRequestData::$source_language. */
+        #[Nullable, In(['vi', 'en', 'th', 'id'])]
+        public readonly ?string $source_language = null,
     ) {}
 }

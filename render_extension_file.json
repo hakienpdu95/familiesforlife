@@ -339,5 +339,10 @@
         "authority///string///255///_NULL///NULL///__///Cơ quan chủ trì quản lý — chỉ có ở cấp sâu nhất của mỗi nhánh",
         "__index///index///__///__///__///parent_id,sort_order|idx_ocop_category_tree///__",
         "__index///index///__///__///__///depth,sort_order|idx_ocop_category_depth///__"
+    ],
+    [
+        "cie_category_foundations///add///__///",
+        "pain_points///text///__///_NULL///NULL///__///__",
+        "rejected_ideas///text///__///_NULL///NULL///__///__"
     ]
 ]

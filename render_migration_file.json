@@ -2165,5 +2165,19 @@
         "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
         "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật",
         "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm"
+    ],
+    [
+        "cie_category_foundations///__///__///",
+        "post_category_id///unsignedBigInteger///__///NOT_NULL///__///->constrained('post_categories')->onDelete('cascade')///__",
+        "core_focus///text///__///_NULL///NULL///__///__",
+        "unique_angle///text///__///_NULL///NULL///__///__",
+        "content_goals///text///__///_NULL///NULL///__///__",
+        "audience///string///500///_NULL///NULL///__///__",
+        "constraints///string///500///_NULL///NULL///__///__",
+        "style_sample///text///__///_NULL///NULL///__///__",
+        "created_by///unsignedBigInteger///__///_NULL///NULL///->constrained('users')->onDelete('set null')///__",
+        "updated_by///unsignedBigInteger///__///_NULL///NULL///->constrained('users')->onDelete('set null')///__",
+        "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
+        "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật"
     ]
 ]

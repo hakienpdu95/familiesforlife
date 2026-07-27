@@ -46,6 +46,25 @@
                     </p>
                 </div>
 
+                <div class="form-control" x-show="mode === 'url' && parsedUrlCount() > 0" x-cloak>
+                    <label class="label py-0.5">
+                        <span class="label-text text-xs font-medium">Selector riêng cho từng URL (tùy chọn)</span>
+                    </label>
+                    <div class="flex flex-col gap-1 max-h-40 overflow-y-auto border border-base-200 rounded-lg p-2">
+                        <template x-for="src in parsedSources().slice(0, maxUrls)" :key="src.url">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-base-content/60 truncate flex-1" x-text="src.url" :title="src.url"></span>
+                                <input type="text" x-model="selectorOverrides[src.url]" placeholder="mặc định / tự động"
+                                       class="input input-xs input-bordered w-44 font-mono">
+                            </div>
+                        </template>
+                    </div>
+                    <p class="text-xs text-base-content/40 mt-1">
+                        Để trống 1 dòng = dùng selector mặc định bên dưới (hoặc tự động nếu selector mặc định cũng bỏ trống). Mỗi
+                        nguồn thường thuộc domain/bố cục khác nhau nên selector hiếm khi giống nhau giữa các URL.
+                    </p>
+                </div>
+
                 <div class="flex flex-wrap gap-3 items-end">
                     <div class="form-control flex-1 min-w-72" x-show="mode === 'url'">
                         <label class="label py-0.5"><span class="label-text text-xs font-medium">Từ khóa nghiên cứu (tùy chọn)</span></label>
@@ -54,12 +73,26 @@
                     </div>
                     <div class="form-control flex-1 min-w-72">
                         <label class="label py-0.5">
-                            <span class="label-text text-xs font-medium">Selector vùng nội dung chính (tùy chọn)</span>
+                            <span class="label-text text-xs font-medium" x-text="mode === 'url' ? 'Selector mặc định (tùy chọn)' : 'Selector vùng nội dung chính (tùy chọn)'"></span>
                         </label>
                         <input type="text" x-model="contentSelector" placeholder=".detail-content, #main-content..."
                                class="input input-sm input-bordered w-full">
                     </div>
+                    <div class="form-control min-w-40">
+                        <label class="label py-0.5">
+                            <span class="label-text text-xs font-medium">Ngôn ngữ nguồn</span>
+                        </label>
+                        <select x-model="sourceLanguage" class="select select-sm select-bordered w-full">
+                            <option value="vi">Tiếng Việt</option>
+                            <option value="en">Tiếng Anh</option>
+                            <option value="th">Tiếng Thái</option>
+                            <option value="id">Tiếng Indonesia</option>
+                        </select>
+                    </div>
                 </div>
+                <p class="text-xs text-base-content/40 -mt-2">
+                    Chọn tay ngôn ngữ thật của nguồn thay vì để hệ thống tự nhận diện qua <code>&lt;html lang&gt;</code>/ký tự nội dung — cách tự động nhiều khi không chính xác (site khai sai, hoặc không đủ tín hiệu để đối chiếu).
+                </p>
 
                 <details class="rounded-lg border border-base-200 px-3 py-2" x-show="mode === 'url'" open>
                     <summary class="cursor-pointer text-xs font-medium text-base-content/60">
@@ -138,9 +171,12 @@
             </form>
             <p class="text-xs text-base-content/40 mt-2" x-show="mode === 'url'">
                 Chỉ định id hoặc class của khối chứa nội dung chính (VD <code>.detail-content</code>, <code>#main-content</code>,
-                <code>div.article-body</code>) để lấy <code>main_content</code> chính xác hơn thuật toán tự động. Có thể liệt kê
-                nhiều selector, phân tách bởi dấu phẩy — hệ thống thử lần lượt, dùng selector đầu tiên khớp. Bỏ trống để dùng
-                thuật toán tự động nhận diện.
+                <code>div.article-body</code>) để lấy <code>main_content</code> chính xác hơn thuật toán tự động. Có thể ghép
+                nhiều class/id liền nhau (không dấu cách) để khớp ĐÚNG 1 khối có ĐỦ tất cả class đó — VD
+                <code>.col-md-12.content-full</code> cho <code>&lt;div class="col-md-12 content-full"&gt;</code>, hữu ích khi 1
+                class riêng lẻ (VD chỉ <code>.content-full</code>) khớp nhầm cả khối khác trên trang (VD sidebar cũng gắn class
+                đó). Có thể liệt kê nhiều selector khác nhau, phân tách bởi dấu phẩy — hệ thống thử lần lượt, dùng selector đầu
+                tiên khớp. Bỏ trống để dùng thuật toán tự động nhận diện.
             </p>
             <p x-show="errorMessage" x-cloak class="text-error text-sm mt-2" x-text="errorMessage"></p>
         </div>
@@ -220,6 +256,16 @@ document.addEventListener('alpine:init', () => {
             styleSample: '',
             html: '',
             contentSelector: '',
+            /**
+             * Selector RIÊNG theo từng URL — key là chính URL (không phải index), value là chuỗi
+             * selector người dùng gõ trong ô tương ứng ở danh sách "Selector riêng cho từng URL".
+             * Dùng URL làm key (không phải vị trí dòng trong textarea) để override KHÔNG bị lệch
+             * khi người dùng thêm/xoá/sắp xếp lại dòng — sửa URL khác không ảnh hưởng override
+             * đã gõ cho URL này, và override vẫn còn nguyên nếu người dùng tạm xoá rồi dán lại
+             * đúng URL đó.
+             */
+            selectorOverrides: {},
+            sourceLanguage: 'vi',
             forceRefresh: false,
             loading: false,
             result: null,
@@ -242,6 +288,21 @@ document.addEventListener('alpine:init', () => {
 
             parsedUrlCount() {
                 return this.parsedUrls().length;
+            },
+
+            /**
+             * Ghép mỗi URL với selector RIÊNG người dùng gõ ở danh sách "Selector riêng cho từng
+             * URL" (`selectorOverrides`, key theo URL) — nhiều nguồn trong 1 batch thường thuộc
+             * nhiều domain/bố cục khác nhau, 1 selector mặc định chung (`contentSelector`) hiếm
+             * khi đúng cho tất cả. Ô để trống → `selector: null` → submit() rơi về
+             * `main_content_selector` chung, rồi tới tự động — xem
+             * CoreIdeaExtractorController::resolveSelectorForUrl().
+             */
+            parsedSources() {
+                return this.parsedUrls().map(url => ({
+                    url,
+                    selector: (this.selectorOverrides[url] || '').trim() || null,
+                }));
             },
 
             selectedCategory() {
@@ -318,21 +379,25 @@ document.addEventListener('alpine:init', () => {
 
                 const isBatch = this.mode === 'url';
                 const endpoint = isBatch ? apiBatchUrl : apiUrl;
+                const batchSources = isBatch ? this.parsedSources().slice(0, this.maxUrls) : [];
                 const body = isBatch
                     ? JSON.stringify({
-                        urls: this.parsedUrls().slice(0, this.maxUrls),
+                        urls: batchSources.map(s => s.url),
                         topic: this.topic || null,
                         audience: this.audience || null,
                         goal: this.goal || null,
                         constraints: this.constraints || null,
                         style_sample: this.styleSample || null,
                         main_content_selector: this.contentSelector || null,
+                        main_content_selectors: batchSources.map(s => s.selector),
                         force_refresh: this.forceRefresh,
+                        source_language: this.sourceLanguage || null,
                     })
                     : JSON.stringify({
                         url: null,
                         html: this.html,
                         main_content_selector: this.contentSelector || null,
+                        source_language: this.sourceLanguage || null,
                     });
 
                 try {
@@ -362,6 +427,69 @@ document.addEventListener('alpine:init', () => {
 
             prettyJson() {
                 return this.result ? JSON.stringify(this.result, null, 2) : '';
+            },
+
+            /**
+             * Payload RÚT GỌN dành RIÊNG cho "Copy prompt cho AI" — khác mục đích với "Copy JSON"
+             * (giữ NGUYÊN this.result cho debug/audit qua prettyJson(), KHÔNG đổi). Phản hồi thực
+             * tế sau khi test với Claude/Grok: nhiều field kỹ thuật thuần (`final_url`/
+             * `failure_type`/`http_status`/`content_hash`/`duplicate_of`/`fetched_at`/
+             * `error_message`, `canonical_url`/`content_category`/`publish_date`/`date_modified`/
+             * `author`) không giúp ích gì cho việc BRAINSTORM Ý TƯỞNG — chỉ tốn token khi dán vào
+             * chat AI, không đổi giá trị của "Copy JSON"/API response (vẫn đủ mọi field cho debug/
+             * audit — xem RawExtractionData::toApiArray()/BatchSourceResultData::toApiArray()).
+             * Batch: nguồn `blocked`/`error` rút gọn còn `{url, domain, status, failure_type}` —
+             * toàn bộ field kỹ thuật khác vốn đã `null` (xem §7.1.1 spec) nên giữ nguyên chỉ lặp
+             * lại hàng chục `null` vô ích, `summary_note` cấp batch đã đủ giải thích lý do.
+             *
+             * `main_content` CHỈ bị cắt khi `extraction_confidence === 'low'` — CỐ Ý KHÔNG áp dụng
+             * cho `medium`/`high` (xem lịch sử §12.4/§12.5 spec: đã thử cắt main_content rồi BỎ
+             * NGAY vì phá mất chiều sâu nội dung, trong khi lợi ích chỉ là suy đoán). Khác biệt ở
+             * đây: `low` là mức Layer 2 KHÔNG BAO GIỜ chạy tới (§4/§7 — nội dung được coi là chưa
+             * đủ tin cậy để sinh ý ngay từ thiết kế ban đầu), nên với riêng payload dán vào AI, chỉ
+             * giữ 1 đoạn ngắn để AI biết nguồn tồn tại/sơ lược nội dung, thay vì dán nguyên khối
+             * main_content mà module tự đánh giá là không đủ tin cậy.
+             */
+            buildAiPayload() {
+                const LOW_CONFIDENCE_MAIN_CONTENT_CHARS = 3000;
+
+                const trimLowConfidenceContent = (mainContent, confidence) => {
+                    if (confidence !== 'low' || !mainContent || mainContent.length <= LOW_CONFIDENCE_MAIN_CONTENT_CHARS) {
+                        return mainContent;
+                    }
+
+                    const window = mainContent.slice(0, LOW_CONFIDENCE_MAIN_CONTENT_CHARS);
+                    const lastSpace = window.lastIndexOf(' ');
+
+                    return (lastSpace > LOW_CONFIDENCE_MAIN_CONTENT_CHARS * 0.7 ? window.slice(0, lastSpace) : window) + '…';
+                };
+
+                const pickCore = (source) => ({
+                    title: source.title,
+                    meta_description: source.meta_description,
+                    declared_content_type: source.declared_content_type,
+                    content_type_signal: source.content_type_signal,
+                    keywords: source.keywords,
+                    headings: source.headings,
+                    language: source.language,
+                    extraction_confidence: source.extraction_confidence,
+                    notes: source.notes,
+                    publisher_name: source.publisher_name,
+                    source_structure: source.source_structure,
+                    main_content: trimLowConfidenceContent(source.main_content, source.extraction_confidence),
+                });
+
+                if (!this.isBatchResult()) {
+                    return pickCore(this.result);
+                }
+
+                return {
+                    common_keywords: this.result.common_keywords ?? [],
+                    summary_note: this.result.summary_note ?? null,
+                    sources: (this.result.sources ?? []).map(s => s.status === 'success'
+                        ? { url: s.url, domain: s.domain, ...pickCore(s) }
+                        : { url: s.url, domain: s.domain, status: s.status, failure_type: s.failure_type }),
+                };
             },
 
             confidenceLabel() {
@@ -659,22 +787,18 @@ document.addEventListener('alpine:init', () => {
                 if (brief.constraints) top.push(`Ràng buộc / không muốn: ${brief.constraints}`);
                 if (brief.style_sample) top.push(`Giọng văn mẫu:\n${brief.style_sample}`);
 
-                // Loại `brief`/`topic` khỏi khối JSON dán ở MIDDLE — đã đưa lên TOP ở trên, giữ
-                // nguyên trong JSON sẽ lặp lại cùng 1 thông tin 2 lần trong cùng 1 prompt (tốn
-                // token vô ích + giảm "signal density", xem getcollate.io/learning-center/
-                // context-engineering: "including more context does not guarantee better
-                // results"). Nút "Copy JSON" riêng vẫn xuất bản đầy đủ nguyên trạng (prettyJson()),
-                // không bị ảnh hưởng.
-                const promptData = Object.fromEntries(
-                    Object.entries(this.result).filter(([key]) => key !== 'brief' && key !== 'topic')
-                );
+                // `brief`/`topic` đã đưa lên TOP ở trên nên loại khỏi JSON ở MIDDLE (tránh lặp lại
+                // cùng 1 thông tin 2 lần, giảm "signal density" — xem getcollate.io/learning-center/
+                // context-engineering); các field kỹ thuật thuần khác cũng loại bỏ ở đây — xem
+                // buildAiPayload(). Nút "Copy JSON" riêng (prettyJson()) không bị ảnh hưởng, vẫn
+                // xuất bản đầy đủ nguyên trạng cho debug/audit.
+                const promptData = this.buildAiPayload();
 
                 const middle = [
-                    'Dữ liệu thô đã trích xuất (tham khảo để lấy ý — KHÔNG copy nguyên văn). '
-                        + 'Chú giải nhanh vài trường dễ hiểu nhầm: `declared_content_type`/`content_category`/`publisher_name`/`canonical_url` '
-                        + 'là do CHÍNH trang web tự khai báo (không phải suy đoán); `date_modified` là lần CẬP NHẬT GẦN NHẤT, khác `publish_date` '
-                        + '(lần đăng đầu tiên); `extraction_confidence`/`notes` phản ánh chất lượng TRÍCH XUẤT KỸ THUẬT, không phải chất lượng nội dung bài viết; '
-                        + '`content_type_signal` (listicle/how_to/review_comparison/faq) là PHỎNG ĐOÁN bằng rule đơn giản trên pattern heading/tiêu đề '
+                    'Dữ liệu thô đã trích xuất (tham khảo để lấy ý — KHÔNG copy nguyên văn; vài field thuần kỹ thuật đã lược bớt so với JSON gốc để đỡ tốn token). '
+                        + 'Chú giải nhanh vài trường dễ hiểu nhầm: `declared_content_type`/`publisher_name` là do CHÍNH trang web tự khai báo (không phải suy đoán); '
+                        + '`extraction_confidence`/`notes` phản ánh chất lượng TRÍCH XUẤT KỸ THUẬT, không phải chất lượng nội dung bài viết; '
+                        + '`content_type_signal` (listicle/how_to/review_comparison/faq/product/product_faq) là PHỎNG ĐOÁN bằng rule đơn giản trên pattern heading/tiêu đề/loại trang '
                         + '(KHÔNG phải AI phân tích nội dung) — có thể sai hoặc null nếu không rõ, tự đối chiếu lại với main_content trước khi dùng:',
                     JSON.stringify(promptData, null, 2),
                 ];

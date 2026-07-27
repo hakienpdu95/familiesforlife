@@ -54,6 +54,7 @@ class CoreIdeaExtractorController extends Controller
             'html'                   => ['nullable', 'string', 'max:'.config('core_idea_extractor.paste.max_chars', 2_000_000), 'required_without:url'],
             'main_content_selector'  => ['nullable', 'string', 'max:255'],
             'force_refresh'          => ['nullable', 'boolean'],
+            'source_language'        => ['nullable', 'string', 'in:vi,en,th,id'],
         ]));
 
         $pasted = $data->html !== null && trim($data->html) !== '';
@@ -79,7 +80,7 @@ class CoreIdeaExtractorController extends Controller
             }
         }
 
-        $extracted        = $extractRaw->handle($html, $data->main_content_selector);
+        $extracted        = $extractRaw->handle($html, $data->main_content_selector, $data->source_language);
         $confidenceResult = $computeConfidence->handle($extracted);
         $notes            = $this->appendSelectorNote($confidenceResult['notes'], $data->main_content_selector, $extracted['custom_selector_matched']);
         $notes            = $this->appendPastedFragmentNote($notes, $pasted, $extracted['title']);
@@ -132,7 +133,10 @@ class CoreIdeaExtractorController extends Controller
             'constraints'            => ['nullable', 'string', 'max:500'],
             'style_sample'           => ['nullable', 'string', 'max:3000'],
             'main_content_selector'  => ['nullable', 'string', 'max:255'],
+            'main_content_selectors'   => ['nullable', 'array'],
+            'main_content_selectors.*' => ['nullable', 'string', 'max:255'],
             'force_refresh'          => ['nullable', 'boolean'],
+            'source_language'        => ['nullable', 'string', 'in:vi,en,th,id'],
         ]));
 
         $fetched = $fetchBatch->handle($data->urls, $data->force_refresh);
@@ -163,9 +167,10 @@ class CoreIdeaExtractorController extends Controller
                 continue;
             }
 
-            $extracted        = $extractRaw->handle($item['html'], $data->main_content_selector);
+            $selector         = $this->resolveSelectorForUrl($data, $key);
+            $extracted        = $extractRaw->handle($item['html'], $selector, $data->source_language);
             $confidenceResult = $computeConfidence->handle($extracted);
-            $notes            = $this->appendSelectorNote($confidenceResult['notes'], $data->main_content_selector, $extracted['custom_selector_matched']);
+            $notes            = $this->appendSelectorNote($confidenceResult['notes'], $selector, $extracted['custom_selector_matched']);
             $notes            = $this->appendStructureNote($notes, $extracted['source_structure']);
             $notes            = $this->appendLanguageMismatchNote($notes, $extracted['language_mismatch_suspected'], $extracted['language']);
             $selection        = $this->truncateBatchMainContent($extracted['main_content'], $data->topic);
@@ -227,6 +232,20 @@ class CoreIdeaExtractorController extends Controller
     private function resolveDomain(string $url): string
     {
         return parse_url($url, PHP_URL_HOST) ?: $url;
+    }
+
+    /**
+     * Selector áp dụng cho `urls[$key]` — ưu tiên override riêng ở `main_content_selectors[$key]`
+     * (xem docblock field ở `ExtractBatchRequestData`), rồi mới tới `main_content_selector` chung
+     * cho cả batch, cuối cùng `null` (tự động `resolveContentRoot()`). Nhiều nguồn trong 1 batch
+     * thường thuộc nhiều domain khác nhau — mỗi domain có bố cục CSS riêng, 1 selector chung hiếm
+     * khi đúng cho tất cả.
+     */
+    private function resolveSelectorForUrl(ExtractBatchRequestData $data, int $key): ?string
+    {
+        $override = $data->main_content_selectors[$key] ?? null;
+
+        return ($override !== null && trim($override) !== '') ? $override : $data->main_content_selector;
     }
 
     /** @return array{text: string, relevance_applied: bool} */

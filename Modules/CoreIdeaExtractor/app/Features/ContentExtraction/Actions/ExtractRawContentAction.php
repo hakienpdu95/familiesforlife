@@ -76,9 +76,13 @@ class ExtractRawContentAction
      * @param string|null $mainContentSelector Selector đơn giản (id/class, kiểu ".detail-content",
      * "#main-content", có thể kèm tag như "div.detail-content") do người dùng chỉ định để khoanh
      * vùng main_content thay cho thuật toán tự động resolveContentRoot(). Null/rỗng → tự động.
+     * @param string|null $languageOverride Ngôn ngữ nguồn do người dùng tự chọn trên form (vi/en/
+     * th/id) — GHI ĐÈ hoàn toàn `<html lang>` khai báo lẫn kết quả đối chiếu ký tự script ở
+     * resolveLanguage(), vì tự detect nhiều khi không chính xác (xem docblock resolveLanguage()).
+     * Null → giữ nguyên hành vi tự động cũ.
      * @return array{title:?string, meta_description:?string, canonical_url:?string, content_category:?string, declared_content_type:?string, content_type_signal:?string, keywords:string[], headings:HeadingData[], main_content:string, publish_date:?string, date_modified:?string, author:?string, publisher_name:?string, language:string, language_mismatch_suspected:bool, word_count:int, meaningful_heading_count:int, paywall_suspected:bool, custom_selector_matched:?bool, source_structure:SourceStructureData}
      */
-    public function handle(string $html, ?string $mainContentSelector = null): array
+    public function handle(string $html, ?string $mainContentSelector = null, ?string $languageOverride = null): array
     {
         $dom = new \DOMDocument('1.0', 'UTF-8');
         libxml_use_internal_errors(true);
@@ -107,7 +111,7 @@ class ExtractRawContentAction
         // việc DOM có bị mutate hay không — chỉ đặt cùng chỗ cho nhất quán quy ước đọc field).
         $canonicalUrl         = $this->extractCanonicalUrl($xpath);
         $contentCategory      = $this->extractContentCategory($xpath, $html);
-        $declaredContentType  = $this->extractDeclaredContentType($xpath);
+        $declaredContentType  = $this->extractDeclaredContentType($xpath, $html);
         $dateModified         = $this->extractDateModified($xpath, $html);
         $publisherName        = $this->extractPublisherName($xpath, $html);
 
@@ -143,11 +147,13 @@ class ExtractRawContentAction
 
         $mainContent      = $contentRoot ? $this->cleanText($this->extractBlockText($contentRoot)) : '';
         $headings         = $this->extractHeadings($xpath, $contentRoot);
-        $languageResolution = $this->resolveLanguage($declaredLanguage, $mainContent);
+        $languageResolution = $languageOverride !== null
+            ? ['language' => $languageOverride, 'mismatch_suspected' => false]
+            : $this->resolveLanguage($declaredLanguage, $mainContent);
         $language         = $languageResolution['language'];
         $wordCount        = $this->countWords($mainContent, $language);
         $sourceStructure  = $this->analyzeStructure($xpath, $contentRoot, $headings);
-        $contentTypeSignal = $this->classifyContentTypeSignal($title !== '' ? $title : null, $headings, $sourceStructure);
+        $contentTypeSignal = $this->classifyContentTypeSignal($title !== '' ? $title : null, $headings, $sourceStructure, $declaredContentType);
 
         return [
             'title'                       => $title !== '' ? $title : null,
@@ -271,20 +277,40 @@ class ExtractRawContentAction
         );
     }
 
+    /** `declared_content_type` khớp 1 trong các cụm này (sau khi lowercase) coi là trang sản phẩm. */
+    private const PRODUCT_CONTENT_TYPE_MARKERS = ['product', 'sản phẩm'];
+
     /**
      * Nhãn phân loại content type suy ra bằng RULE THUẦN (pattern heading/title) — KHÔNG phải AI
      * phân tích ngữ nghĩa, chỉ là tín hiệu tham khảo THÔ (có thể sai), khác hẳn
-     * `declared_content_type` (do chính site tự khai qua og:type, đáng tin hơn nhưng thường chỉ
-     * "article"/"website", không chi tiết tới mức listicle/how-to). Ưu tiên theo thứ tự
-     * listicle > how_to > review_comparison > faq — 1 bài có thể mang nhiều đặc điểm cùng lúc
-     * (VD "10 cách..." vừa là listicle vừa là how-to), chỉ trả về nhãn ĐẦU TIÊN khớp thay vì
-     * gắn nhiều nhãn, để giữ field đơn giản (string, không phải mảng).
+     * `declared_content_type` (do chính site tự khai qua og:type/JSON-LD, đáng tin hơn nhưng
+     * thường chỉ "article"/"website"/"product", không chi tiết tới mức listicle/how-to).
+     *
+     * `product`/`product_faq` xét TRƯỚC listicle/how_to/review/faq — dựa trên `declaredContentType`
+     * (dữ liệu publisher TỰ khai báo, đáng tin hơn hẳn heuristic heading/title đoán mò ở dưới), nên
+     * ưu tiên cao hơn: 1 trang sản phẩm có mục "1. Công dụng, 2. Đối tượng..." dễ bị heuristic
+     * listicle bên dưới khớp nhầm trước nếu không xét product trước.`product_faq` (thay vì gắn 2
+     * nhãn) khi trang sản phẩm ĐỒNG THỜI có tỉ lệ heading dạng câu hỏi cao — vẫn giữ field đơn giản
+     * (string, không phải mảng) như các nhãn khác, chỉ thêm 1 giá trị enum mới cho tổ hợp này.
+     *
+     * Các nhãn còn lại ưu tiên theo thứ tự listicle > how_to > review_comparison > faq — 1 bài có
+     * thể mang nhiều đặc điểm cùng lúc (VD "10 cách..." vừa là listicle vừa là how-to), chỉ trả về
+     * nhãn ĐẦU TIÊN khớp thay vì gắn nhiều nhãn.
      *
      * Trả về null nếu không khớp rule nào rõ ràng — KHÔNG suy đoán ép buộc (an toàn hơn 1 nhãn
      * sai chắc chắn gây hiểu lầm cho người đọc JSON này).
      */
-    private function classifyContentTypeSignal(?string $title, array $headings, SourceStructureData $sourceStructure): ?string
+    private function classifyContentTypeSignal(?string $title, array $headings, SourceStructureData $sourceStructure, ?string $declaredContentType): ?string
     {
+        $declaredContentTypeLower = mb_strtolower(trim((string) $declaredContentType));
+        $isFaqHeavy = $headings !== [] && $sourceStructure->question_heading_ratio >= self::FAQ_QUESTION_RATIO_THRESHOLD;
+
+        foreach (self::PRODUCT_CONTENT_TYPE_MARKERS as $marker) {
+            if (str_contains($declaredContentTypeLower, $marker)) {
+                return $isFaqHeavy ? 'product_faq' : 'product';
+            }
+        }
+
         $titleLower = mb_strtolower(trim((string) $title));
 
         // Listicle: title bắt đầu bằng số (VD "10 cách trị ho cho bé...") HOẶC đa số heading tự
@@ -314,7 +340,7 @@ class ExtractRawContentAction
             }
         }
 
-        if ($headings !== [] && $sourceStructure->question_heading_ratio >= self::FAQ_QUESTION_RATIO_THRESHOLD) {
+        if ($isFaqHeavy) {
             return 'faq';
         }
 
@@ -341,7 +367,15 @@ class ExtractRawContentAction
             $metaKeywords = array_values(array_filter($parts, static fn (string $p) => $p !== ''));
         }
 
-        $merged = array_merge($metaKeywords, $this->extractArticleTags($xpath), $this->extractJsonLdKeywords($html));
+        // Tên sản phẩm/thương hiệu (JSON-LD Product) đặt lên ĐẦU — tín hiệu cụ thể hơn hẳn
+        // "tên shop" chung chung thường lẫn trong meta[name=keywords]/article:tag của trang bán
+        // hàng, giúp AI brainstorm bám đúng sản phẩm đang nghiên cứu thay vì chỉ thấy tên shop.
+        $merged = array_merge(
+            $this->extractJsonLdProductKeywords($html),
+            $metaKeywords,
+            $this->extractArticleTags($xpath),
+            $this->extractJsonLdKeywords($html),
+        );
 
         $seen   = [];
         $unique = [];
@@ -355,6 +389,26 @@ class ExtractRawContentAction
         }
 
         return $unique;
+    }
+
+    /**
+     * Tên sản phẩm + thương hiệu do CHÍNH site khai báo qua JSON-LD Product schema — chỉ đọc khi
+     * `@type` của block đó khớp "product" (xem docblock `fromJsonLd()`), tránh lẫn `name` của
+     * block Organization/BreadcrumbList khác nằm cùng trang.
+     *
+     * @return string[]
+     */
+    private function extractJsonLdProductKeywords(string $html): array
+    {
+        $name  = $this->fromJsonLd($html, 'name', 'product');
+        $brand = $this->fromJsonLd($html, 'brand', 'product');
+
+        $brandName = is_array($brand) ? ($brand['name'] ?? null) : $brand;
+
+        return array_values(array_filter(
+            [is_string($name) ? trim($name) : null, is_string($brandName) ? trim($brandName) : null],
+            static fn (?string $v) => $v !== null && $v !== '',
+        ));
     }
 
     /** @return string[] */
@@ -431,10 +485,25 @@ class ExtractRawContentAction
         return is_string($value) && trim($value) !== '' ? trim($value) : null;
     }
 
-    /** Loại nội dung do chính site khai báo qua `og:type` (VD "article", "website", "product") — an toàn hơn tự đoán bằng heuristic vì là dữ liệu publisher tự công bố. */
-    private function extractDeclaredContentType(\DOMXPath $xpath): ?string
+    /**
+     * Loại nội dung do chính site khai báo (VD "article", "website", "product") — an toàn hơn tự
+     * đoán bằng heuristic vì là dữ liệu publisher tự công bố. Ưu tiên `og:type` (chuẩn OpenGraph,
+     * đã dùng từ trước); nhiều trang sản phẩm (VD WooCommerce/Shopify) chỉ khai schema.org qua
+     * JSON-LD (`@type: "Product"`) mà bỏ hẳn og:type, nên fallback đọc `@type` JSON-LD khi
+     * og:type vắng mặt — cùng nguồn tự khai báo, chỉ khác vị trí trong HTML.
+     */
+    private function extractDeclaredContentType(\DOMXPath $xpath, string $html): ?string
     {
-        return $this->metaContent($xpath, "//meta[@property='og:type']");
+        $ogType = $this->metaContent($xpath, "//meta[@property='og:type']");
+
+        if ($ogType !== null) {
+            return $ogType;
+        }
+
+        $jsonLdType = $this->fromJsonLd($html, '@type');
+        $first      = is_array($jsonLdType) ? ($jsonLdType[0] ?? null) : $jsonLdType;
+
+        return is_string($first) && trim($first) !== '' ? trim($first) : null;
     }
 
     /** Thời điểm cập nhật GẦN NHẤT (`article:modified_time`/`dateModified`) — khác `publish_date` (thời điểm đăng lần đầu), tín hiệu độ mới khi so sánh nhiều nguồn. */
@@ -479,7 +548,12 @@ class ExtractRawContentAction
      * động resolveContentRoot() vẫn là fallback an toàn).
      *
      * Cú pháp hỗ trợ (có thể liệt kê nhiều, phân tách bởi dấu phẩy, thử lần lượt theo thứ tự,
-     * dùng khối đầu tiên khớp): ".class", "#id", "tag.class", "tag#id", hoặc chỉ "tag".
+     * dùng khối đầu tiên khớp): ".class", "#id", "tag.class", "tag#id", chỉ "tag", hoặc GHÉP NHIỀU
+     * class/id liền nhau (VD ".col-md-12.content-full", "div#main.content-full") — khớp phần tử có
+     * ĐỦ TẤT CẢ class/id liệt kê (điều kiện AND, giống CSS thật), không phải chỉ khớp 1 trong số
+     * đó — cần thiết khi 1 class riêng lẻ (VD ".content-full") khớp NHẦM nhiều khối khác trên trang
+     * (VD widget/sidebar cũng gắn class đó), còn ghép thêm class layout đi kèm (VD ".col-md-12") mới
+     * xác định ĐÚNG DUY NHẤT 1 khối.
      */
     private function resolveContentRootFromSelector(\DOMXPath $xpath, string $selector): ?\DOMNode
     {
@@ -506,19 +580,30 @@ class ExtractRawContentAction
             return null;
         }
 
-        if (! preg_match('/^([a-zA-Z][a-zA-Z0-9]*)?([.#])([a-zA-Z0-9_-]+)$/', $part, $m)) {
-            // Không khớp cú pháp id/class hỗ trợ — coi selector này là tên tag thuần (VD "article").
-            return preg_match('/^[a-zA-Z][a-zA-Z0-9]*$/', $part) ? "//{$part}" : null;
+        // Tên tag thuần, không class/id (VD "article") — không đi qua nhánh ghép qualifier bên dưới.
+        if (preg_match('/^[a-zA-Z][a-zA-Z0-9]*$/', $part) === 1) {
+            return "//{$part}";
         }
 
-        [, $tag, $marker, $name] = $m;
+        // "tag" (tùy chọn) + 1 hoặc nhiều ".class"/"#id" GHÉP LIỀN NHAU, không dấu cách (đúng ngữ
+        // nghĩa CSS compound selector — mọi qualifier liệt kê đều phải khớp CÙNG 1 phần tử).
+        if (! preg_match('/^([a-zA-Z][a-zA-Z0-9]*)?((?:[.#][a-zA-Z0-9_-]+)+)$/', $part, $m)) {
+            return null;
+        }
+
+        [, $tag, $qualifiers] = $m;
         $tag = $tag !== '' ? $tag : '*';
 
-        if ($marker === '#') {
-            return "//{$tag}[@id='{$name}']";
-        }
+        preg_match_all('/([.#])([a-zA-Z0-9_-]+)/', $qualifiers, $matches, PREG_SET_ORDER);
 
-        return "//{$tag}[contains(concat(' ', normalize-space(@class), ' '), ' {$name} ')]";
+        $conditions = array_map(
+            static fn (array $q) => $q[1] === '#'
+                ? "@id='{$q[2]}'"
+                : "contains(concat(' ', normalize-space(@class), ' '), ' {$q[2]} ')",
+            $matches,
+        );
+
+        return "//{$tag}[".implode(' and ', $conditions).']';
     }
 
     private function extractTitleFromHead(\DOMXPath $xpath): string
@@ -665,6 +750,64 @@ class ExtractRawContentAction
             }
 
             $headings[] = new HeadingData(level: (int) substr($node->nodeName, 1), text: $text);
+        }
+
+        // Fallback CHỈ khi không có <h1>-<h3> thật nào — nhiều trang (đặc biệt trang sản phẩm)
+        // dùng đoạn/danh sách đánh số hoặc bôi đậm làm "tiêu đề mục" thay vì thẻ heading chuẩn
+        // (VD "<p><strong>1. CÔNG DỤNG</strong></p>"), khiến headings:[] dù nội dung có cấu trúc
+        // rõ ràng — xem extractPseudoHeadings(). Không chạy song song với heading thật để không
+        // đổi hành vi bài viết bình thường đã có <h1>-<h3> chuẩn.
+        if ($headings === [] && $contextNode !== null) {
+            $headings = $this->extractPseudoHeadings($xpath, $contextNode);
+        }
+
+        return $headings;
+    }
+
+    /** Nhãn mục giả định (numbered/bold-as-heading) không được dài hơn ngưỡng này — phân biệt với câu văn dài vô tình đánh số/bôi đậm. */
+    private const PSEUDO_HEADING_MAX_CHARS = 80;
+
+    /**
+     * Fallback khi trang không dùng <h1>-<h3> thật cho các mục con (đã gặp thật qua phản hồi
+     * người dùng: trang sản phẩm cấu trúc rõ ràng "1. CÔNG DỤNG", "2. ĐỐI TƯỢNG SỬ DỤNG"... bằng
+     * <p><strong>...</strong></p> thay vì <h2>, khiến headings:[] dù nội dung không hề thiếu cấu
+     * trúc — 1 lỗi extraction thật, không phải nội dung nguồn thiếu tổ chức).
+     *
+     * 2 dạng nhận diện, cả 2 giới hạn PSEUDO_HEADING_MAX_CHARS (nhãn mục ngắn, không phải câu văn
+     * dài), quét theo ĐÚNG thứ tự xuất hiện trong tài liệu (union XPath trả node-set theo document
+     * order):
+     * 1. `<p>`/`<li>` mà TOÀN BỘ nội dung khớp pattern đánh số (VD "1. Công dụng") — không phải
+     *    câu văn thường chỉ TÌNH CỜ bắt đầu bằng số.
+     * 2. `<strong>`/`<b>` mà text trùng khớp HOÀN TOÀN với text của thẻ cha (nghĩa là bôi đậm
+     *    chiếm TRỌN cả dòng/đoạn) — phân biệt với bôi đậm 1 cụm từ để nhấn mạnh GIỮA câu văn dài
+     *    (trường hợp đó `parentNode->textContent` sẽ dài hơn hẳn text của riêng thẻ bôi đậm).
+     *
+     * Gán level 2 cho mọi pseudo-heading (không phân biệt được cấp bậc thật như heading chuẩn).
+     */
+    private function extractPseudoHeadings(\DOMXPath $xpath, \DOMNode $contextNode): array
+    {
+        $headings  = [];
+        $seenTexts = [];
+
+        foreach ($xpath->query('.//p | .//li | .//strong | .//b', $contextNode) as $node) {
+            $text = trim(preg_replace('/\s+/', ' ', $node->textContent) ?? '');
+
+            if ($text === '' || mb_strlen($text) > self::PSEUDO_HEADING_MAX_CHARS
+                || $this->isDecorativeHeading($text) || isset($seenTexts[$text])) {
+                continue;
+            }
+
+            $isNumbered  = preg_match('/^\d+[.\)]\s*\S/u', $text) === 1;
+            $isBoldLabel = in_array($node->nodeName, ['strong', 'b'], true)
+                && $node->parentNode
+                && trim(preg_replace('/\s+/', ' ', $node->parentNode->textContent) ?? '') === $text;
+
+            if (! $isNumbered && ! $isBoldLabel) {
+                continue;
+            }
+
+            $seenTexts[$text] = true;
+            $headings[]       = new HeadingData(level: 2, text: $text);
         }
 
         return $headings;
@@ -846,8 +989,15 @@ class ExtractRawContentAction
         return $author;
     }
 
-    /** Best-effort đọc JSON-LD (<script type="application/ld+json">) — không throw nếu JSON sai định dạng. */
-    private function fromJsonLd(string $html, string $key): mixed
+    /**
+     * Best-effort đọc JSON-LD (<script type="application/ld+json">) — không throw nếu JSON sai
+     * định dạng. `$typeSubstring` (tùy chọn, case-insensitive) giới hạn chỉ đọc từ block có
+     * `@type` khớp — cần thiết khi trang có NHIỀU JSON-LD block cùng lúc (VD Organization +
+     * BreadcrumbList + Product): nếu chỉ tra theo `$key` bất kể `@type` (hành vi mặc định khi
+     * không truyền `$typeSubstring`), dễ đọc NHẦM field cùng tên ở block KHÁC (VD `name` của
+     * Organization thay vì của Product).
+     */
+    private function fromJsonLd(string $html, string $key, ?string $typeSubstring = null): mixed
     {
         if (! preg_match_all('#<script[^>]*type=["\']application/ld\+json["\'][^>]*>(.*?)</script>#is', $html, $matches)) {
             return null;
@@ -863,6 +1013,15 @@ class ExtractRawContentAction
             $candidates = isset($decoded[0]) && is_array($decoded[0]) ? $decoded : [$decoded];
 
             foreach ($candidates as $item) {
+                if ($typeSubstring !== null) {
+                    $type      = $item['@type'] ?? null;
+                    $typeValue = is_array($type) ? ($type[0] ?? '') : (string) $type;
+
+                    if (! str_contains(mb_strtolower($typeValue), $typeSubstring)) {
+                        continue;
+                    }
+                }
+
                 if (isset($item[$key])) {
                     return $item[$key];
                 }

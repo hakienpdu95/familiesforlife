@@ -2,6 +2,7 @@
 
 namespace Modules\CoreIdeaExtractor\Features\ContentExtraction\Data;
 
+use Spatie\LaravelData\Attributes\Validation\In;
 use Spatie\LaravelData\Attributes\Validation\Max;
 use Spatie\LaravelData\Attributes\Validation\Nullable;
 use Spatie\LaravelData\Attributes\Validation\Url;
@@ -27,5 +28,14 @@ class ExtractRequestData extends Data
         public readonly ?string $main_content_selector = null,
         /** true = bỏ qua cache HTML đã fetch trước đó (xem CachesFetchedHtml), luôn fetch mạng lại — dùng khi user nghi ngờ nội dung trang đã đổi hoặc site đã hết bị chặn. */
         public readonly bool $force_refresh = false,
+        /**
+         * Ngôn ngữ nguồn do người dùng tự chọn (vi/en/th/id) — GHI ĐÈ hoàn toàn kết quả tự
+         * detect của ExtractRawContentAction (cả `<html lang>` khai báo lẫn đối chiếu ký tự script
+         * ở resolveLanguage()), vì tự detect nhiều khi không chính xác (site khai lang sai, hoặc
+         * không phải script không-Latin nên không đối chiếu được). Null → giữ nguyên hành vi tự
+         * động cũ (dùng khi gọi API trực tiếp không qua form, VD test).
+         */
+        #[Nullable, In(['vi', 'en', 'th', 'id'])]
+        public readonly ?string $source_language = null,
     ) {}
 }
