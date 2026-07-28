@@ -18,6 +18,19 @@ return [
         'key' => env('POSTMARK_API_KEY'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Anthropic (nền tảng, không qua Organization)
+    |--------------------------------------------------------------------------
+    | Fallback cuối cùng đọc bởi App\Services\AI\AIProviderManager::makeProvider() khi
+    | tổ chức KHÔNG tự cấu hình BYOK riêng (organizations.ai_provider_config) VÀ
+    | config('ai.default.api_key') (AI_DEFAULT_API_KEY) cũng chưa set — tức đây là key
+    | nền tảng DÙNG CHUNG cho mọi tổ chức không tự mang key riêng.
+    */
+    'anthropic' => [
+        'api_key' => env('ANTHROPIC_API_KEY'),
+    ],
+
     'resend' => [
         'key' => env('RESEND_API_KEY'),
     ],

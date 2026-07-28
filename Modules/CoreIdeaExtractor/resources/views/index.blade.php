@@ -9,6 +9,7 @@
     'categoryFoundationsUrl' => route('backend.coreideaextractor.category-foundations.index'),
     'existingArticlesUrlTemplate' => route('backend.api.coreideaextractor.category-foundations.existing-articles', ['category' => '__UUID__']),
     'categories' => $categoryFoundations,
+    'layer2Url' => route('backend.api.coreideaextractor.layer2'),
 ]) }})">
 
     <div class="mb-5 flex items-start justify-between flex-wrap gap-2">
@@ -213,7 +214,30 @@
                         </svg>
                         <span x-text="copied ? 'Đã copy!' : 'Copy JSON'"></span>
                     </button>
+                    <button type="button" class="btn btn-primary btn-xs gap-1.5"
+                            :disabled="layer2Loading || (!isBatchResult() && result?.extraction_confidence === 'low')"
+                            :title="(!isBatchResult() && result?.extraction_confidence === 'low') ? 'Độ tin cậy trích xuất thấp — Layer 2 không chạy (xem spec §4)' : ''"
+                            @click="runLayer2()">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        <span x-show="!layer2Loading">Chạy Layer 2 bằng AI</span>
+                        <span x-show="layer2Loading" x-cloak>Đang gọi AI (có thể mất tới 30 giây)...</span>
+                    </button>
                 </div>
+            </div>
+
+            <div x-show="layer2Error" x-cloak class="alert alert-error text-xs py-2 px-3 mb-3" x-text="layer2Error"></div>
+
+            <div x-show="layer2Result" x-cloak class="mb-4">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium">Kết quả Layer 2 (AI)</span>
+                    <span class="text-xs text-base-content/40" x-show="layer2Result">
+                        Model: <span x-text="layer2Result?.model_used"></span> — Chi phí: $<span x-text="layer2Result?.cost_usd?.toFixed(4)"></span>
+                    </span>
+                </div>
+                <pre class="bg-base-200 rounded-lg p-4 text-xs overflow-x-auto max-h-[70vh] whitespace-pre-wrap" x-text="layer2Result?.markdown_output"></pre>
             </div>
 
             <template x-if="isBatchResult()">
@@ -245,7 +269,7 @@
 <script>
 document.addEventListener('alpine:init', () => {
     Alpine.data('coreIdeaExtractorPage', (serverData = {}) => {
-        const { apiUrl = '', apiBatchUrl = '', maxUrls = 7, categoryFoundationsUrl = '', existingArticlesUrlTemplate = '', categories = [] } = serverData;
+        const { apiUrl = '', apiBatchUrl = '', maxUrls = 7, categoryFoundationsUrl = '', existingArticlesUrlTemplate = '', categories = [], layer2Url = '' } = serverData;
 
         return {
             mode: 'url',
@@ -280,6 +304,12 @@ document.addEventListener('alpine:init', () => {
             selectedCategoryUuid: '',
             existingArticleTitles: [],
             loadingExistingArticles: false,
+
+            // "Layer 2" tự động hoá qua nút bấm thủ công (2026-07-28) — xem runLayer2().
+            layer2Url,
+            layer2Loading: false,
+            layer2Error: '',
+            layer2Result: null,
 
             parsedUrls() {
                 return [...new Set(
@@ -791,8 +821,16 @@ document.addEventListener('alpine:init', () => {
              *      cả khối MIDDLE ~84.000 ký tự) để chống "lost in the middle" — 2 tình huống khác
              *      bản chất dù cùng là "nhắc lại 1 giá trị hơn 1 lần trong prompt".
              */
-            async copyPromptForAi() {
-                if (!this.result) return;
+            /**
+             * 2026-07-28 — tách riêng phần BUILD chuỗi prompt (dùng chung cho "Copy prompt cho AI"
+             * VÀ nút "Chạy Layer 2 bằng AI" mới) khỏi hành động COPY vào clipboard — trả về
+             * `null` nếu chưa có `this.result` (giữ đúng guard cũ). KHÔNG đổi bất kỳ logic/wording
+             * nào của prompt đã tinh chỉnh qua 15 phiên bản bên dưới, chỉ đổi từ "tự copy" thành
+             * "return string" để nơi gọi tự quyết định làm gì với nó (copy tay hoặc gửi thẳng lên
+             * server để gọi AI).
+             */
+            buildLayer2PromptText() {
+                if (!this.result) return null;
 
                 const category = this.selectedCategory();
                 const foundation = category?.foundation;
@@ -966,11 +1004,58 @@ document.addEventListener('alpine:init', () => {
                         + '| Ý tưởng bị loại | Tiêu chí không đạt | Lý do loại |',
                 );
 
-                const prompt = [...top, '', ...middle, '', ...bottom].join('\n');
+                return [...top, '', ...middle, '', ...bottom].join('\n');
+            },
+
+            async copyPromptForAi() {
+                const prompt = this.buildLayer2PromptText();
+                if (!prompt) return;
 
                 await navigator.clipboard.writeText(prompt);
                 this.copiedPrompt = true;
                 setTimeout(() => { this.copiedPrompt = false; }, 2000);
+            },
+
+            /**
+             * 2026-07-28 — tự động hoá "Layer 2" qua nút bấm THỦ CÔNG (yêu cầu người dùng: cần
+             * kiểm soát chi phí + tối ưu nội dung kỹ thuật trước khi tốn tiền, nên KHÔNG tự động
+             * chạy sau khi trích xuất xong). Gửi NGUYÊN VĂN prompt đã build (giống hệt "Copy
+             * prompt cho AI") lên server — server gọi thẳng Anthropic/OpenAI bằng key đã cấu hình
+             * ở "Cấu hình AICEM" (BYOK tổ chức hoặc mặc định nền tảng), trừ vào CÙNG ngân sách
+             * tháng của tổ chức (xem RunLayer2ExtractionAction/CheckCoreIdeaAiBudgetAction).
+             */
+            async runLayer2() {
+                const prompt = this.buildLayer2PromptText();
+                if (!prompt || this.layer2Loading) return;
+
+                this.layer2Loading = true;
+                this.layer2Error = '';
+                this.layer2Result = null;
+
+                try {
+                    const res = await fetch(this.layer2Url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({ prompt }),
+                    });
+
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        this.layer2Error = data.message || `Lỗi HTTP ${res.status}`;
+                        return;
+                    }
+
+                    this.layer2Result = data;
+                } catch (e) {
+                    this.layer2Error = 'Không gọi được server — kiểm tra kết nối mạng.';
+                } finally {
+                    this.layer2Loading = false;
+                }
             },
         };
     });

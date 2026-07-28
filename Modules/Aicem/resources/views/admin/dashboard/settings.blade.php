@@ -25,7 +25,28 @@
 </div>
 @endif
 
-<form method="POST" action="{{ route('backend.aicem.settings.update') }}" class="max-w-2xl">
+@php
+    // 2026-07-28 — Model trước đó là input tự gõ (dễ gõ sai model ID). Đổi thành select theo
+    // provider để tránh gõ sai, nhưng vẫn PHẢI giữ được model CŨ nếu nó không nằm trong danh sách
+    // preset (đã lưu từ trước khi có select này, hoặc model mới ra sau này) — không thì chuyển
+    // sang select sẽ ÂM THẦM đổi model đang dùng khi admin bấm Lưu mà không sửa gì ở đây.
+    $currentModel = old('ai_model', $organization->ai_provider_config['model'] ?? '');
+    // 2026-07-28 — mặc định Provider = Anthropic khi tổ chức CHƯA cấu hình gì (không phải khi đã
+    // lưu rỗng có chủ đích để "dùng mặc định nền tảng" — nhưng thực tế provider rỗng (chưa từng
+    // lưu) và provider lưu rỗng có chủ đích không phân biệt được trong DB, nên coi rỗng = chưa
+    // cấu hình = mặc định Anthropic cho dễ dùng, vẫn còn option "— Dùng mặc định nền tảng —" nếu
+    // admin chủ động chọn lại.
+    $currentProvider = old('ai_provider', $organization->ai_provider_config['provider'] ?? '') ?: 'anthropic';
+    // Model Anthropic — ĐÚNG NGUYÊN VĂN theo yêu cầu người dùng (2026-07-28), không tự đổi.
+    $anthropicModels = ['claude-opus-4-8', 'claude-sonnet-5', 'claude-haiku-4-5'];
+    // Model OpenAI — GPT-5 family (gpt-5/gpt-5-mini/gpt-5-nano), tự chọn theo hiểu biết hiện có,
+    // CHƯA đối chiếu lại danh sách model mới nhất của OpenAI — kiểm tra lại trước khi tin tưởng
+    // tuyệt đối nếu OpenAI đã đổi/thêm model khác.
+    $openaiModels = ['gpt-5', 'gpt-5-mini', 'gpt-5-nano'];
+@endphp
+
+<form method="POST" action="{{ route('backend.aicem.settings.update') }}" class="max-w-2xl"
+      x-data="{ provider: '{{ $currentProvider }}' }">
     @csrf
     @method('PUT')
 
@@ -33,24 +54,48 @@
         <div class="card-body">
             <h2 class="card-title text-base mb-1">Provider AI (BYOK)</h2>
             <p class="text-xs text-base-content/40 mb-4">
-                Để trống toàn bộ để dùng provider mặc định của nền tảng (config('ai.default')).
+                Mặc định Anthropic — chọn "Dùng mặc định nền tảng" nếu muốn theo config('ai.default') thay vì tự chọn ở đây.
             </p>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div class="form-control">
                     <label class="label py-0 pb-1.5"><span class="label-text font-medium">Provider</span></label>
-                    <select name="ai_provider" class="select select-bordered select-sm w-full @error('ai_provider') select-error @enderror">
+                    <select name="ai_provider" x-model="provider" class="select select-bordered select-sm w-full @error('ai_provider') select-error @enderror">
                         <option value="">— Dùng mặc định nền tảng —</option>
-                        <option value="anthropic" {{ old('ai_provider', $organization->ai_provider_config['provider'] ?? '') === 'anthropic' ? 'selected' : '' }}>Anthropic</option>
-                        <option value="openai" {{ old('ai_provider', $organization->ai_provider_config['provider'] ?? '') === 'openai' ? 'selected' : '' }}>OpenAI</option>
+                        <option value="anthropic" {{ $currentProvider === 'anthropic' ? 'selected' : '' }}>Anthropic</option>
+                        <option value="openai" {{ $currentProvider === 'openai' ? 'selected' : '' }}>OpenAI</option>
                     </select>
                     @error('ai_provider')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                 </div>
                 <div class="form-control">
                     <label class="label py-0 pb-1.5"><span class="label-text font-medium">Model</span></label>
-                    <input type="text" name="ai_model" value="{{ old('ai_model', $organization->ai_provider_config['model'] ?? '') }}"
+
+                    <select name="ai_model" x-show="provider === 'anthropic'" :disabled="provider !== 'anthropic'"
+                            class="select select-bordered select-sm w-full font-mono @error('ai_model') select-error @enderror">
+                        @if($currentModel && !in_array($currentModel, $anthropicModels, true))
+                        <option value="{{ $currentModel }}" selected>{{ $currentModel }} (đã lưu trước đó)</option>
+                        @endif
+                        @foreach($anthropicModels as $m)
+                        <option value="{{ $m }}" {{ $currentModel === $m ? 'selected' : '' }}>{{ $m }}</option>
+                        @endforeach
+                    </select>
+
+                    <select name="ai_model" x-show="provider === 'openai'" :disabled="provider !== 'openai'"
+                            class="select select-bordered select-sm w-full font-mono @error('ai_model') select-error @enderror">
+                        @if($currentModel && !in_array($currentModel, $openaiModels, true))
+                        <option value="{{ $currentModel }}" selected>{{ $currentModel }} (đã lưu trước đó)</option>
+                        @endif
+                        @foreach($openaiModels as $m)
+                        <option value="{{ $m }}" {{ $currentModel === $m ? 'selected' : '' }}>{{ $m }}</option>
+                        @endforeach
+                    </select>
+
+                    <input type="text" name="ai_model" value="{{ $currentModel }}"
+                           x-show="provider !== 'anthropic' && provider !== 'openai'"
+                           :disabled="provider === 'anthropic' || provider === 'openai'"
                            class="input input-bordered input-sm w-full font-mono @error('ai_model') input-error @enderror"
                            placeholder="VD: claude-sonnet-5">
+
                     @error('ai_model')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                 </div>
             </div>

@@ -3,6 +3,9 @@
 namespace Modules\CoreIdeaExtractor\Features\ContentExtraction\Http;
 
 use App\Http\Controllers\Controller;
+use App\Services\AI\Exceptions\AIProviderConfigException;
+use App\Services\AI\Exceptions\UnknownModelPricingException;
+use App\Shared\Tenancy\TenantContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -13,6 +16,7 @@ use Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions\ComputeExtracti
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions\ExtractRawContentAction;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions\FetchArticleHtmlAction;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions\FetchArticlesBatchAction;
+use Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions\RunLayer2ExtractionAction;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Data\BatchSourceResultData;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Data\ExtractBatchRequestData;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Data\ExtractBatchResultData;
@@ -20,6 +24,7 @@ use Modules\CoreIdeaExtractor\Features\ContentExtraction\Data\ExtractRequestData
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Data\HeadingData;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Data\RawExtractionData;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Data\SourceStructureData;
+use Modules\CoreIdeaExtractor\Features\ContentExtraction\Exceptions\AiBudgetExceededException;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Exceptions\UrlFetchException;
 
 class CoreIdeaExtractorController extends Controller
@@ -251,6 +256,34 @@ class CoreIdeaExtractorController extends Controller
         );
 
         return response()->json($result->toApiArray());
+    }
+
+    /**
+     * Tự động hoá "Layer 2" — CHỈ chạy khi người dùng bấm nút thủ công (nút "Chạy Layer 2 bằng
+     * AI" ở index.blade.php), KHÔNG tự động sau extract()/extractBatch() (yêu cầu 2026-07-28:
+     * kiểm soát chi phí + cho phép tối ưu Layer 1/ngữ cảnh trước khi tốn tiền gọi AI thật).
+     * `prompt` nhận NGUYÊN VĂN chuỗi đã build sẵn ở client (copyPromptForAi()/buildLayer2Prompt())
+     * — xem docblock RunLayer2ExtractionAction để biết lý do không build lại ở PHP.
+     */
+    public function runLayer2(Request $request, RunLayer2ExtractionAction $action): JsonResponse
+    {
+        $data = $request->validate([
+            'prompt' => ['required', 'string', 'max:'.config('core_idea_extractor.layer2.max_prompt_chars', 300000)],
+        ]);
+
+        $organization = TenantContext::get();
+
+        if (! $organization) {
+            return response()->json(['message' => 'Không xác định được tổ chức hiện tại — không thể gọi AI.'], 422);
+        }
+
+        try {
+            $result = $action->handle($organization, $data['prompt']);
+        } catch (AiBudgetExceededException|AIProviderConfigException|UnknownModelPricingException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+
+        return response()->json($result);
     }
 
     private function resolveDomain(string $url): string

@@ -62,6 +62,16 @@ return [
         'content_hash_ttl_seconds' => 86400,
     ],
 
+    // 2026-07-28 — tự động hoá "Layer 2" (§6/§12.3) qua nút bấm thủ công (KHÔNG tự động sau
+    // Layer 1 — kiểm soát chi phí, xem RunLayer2ExtractionAction). max_prompt_chars chặn payload
+    // quá lớn gửi lên endpoint (khác max_main_content_chars — đó là cắt bớt NỘI DUNG trích xuất,
+    // đây là trần cho toàn bộ prompt TOP+MIDDLE+BOTTOM đã ghép). max_output_tokens đủ cho 2 bảng
+    // Markdown tới ~25 ý tưởng kèm lý do mỗi ý (BƯỚC 1-3 của prompt).
+    'layer2' => [
+        'max_prompt_chars'  => 300000,
+        'max_output_tokens' => 4096,
+    ],
+
     // spec/CoreIdeaExtractor.md §12.8 (v1.11) — danh sách bài ĐÃ publish trong 1 category, kéo
     // vào prompt để tránh AI đề xuất trùng ý tưởng đã viết. Chỉ tiêu đề (chuỗi ngắn) nên không có
     // rủi ro "phình" prompt như main_content — cap vẫn đặt ra theo đúng thói quen của module (mọi

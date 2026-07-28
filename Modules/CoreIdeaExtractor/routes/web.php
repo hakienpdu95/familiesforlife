@@ -23,6 +23,7 @@ Route::middleware(['auth', 'can:core_idea_extractor.use'])
     ->group(function (): void {
         Route::post('extract', [CoreIdeaExtractorController::class, 'extract'])->name('extract');
         Route::post('extract-batch', [CoreIdeaExtractorController::class, 'extractBatch'])->name('extract-batch');
+        Route::post('layer2', [CoreIdeaExtractorController::class, 'runLayer2'])->name('layer2');
         Route::get('category-foundations', [CategoryFoundationController::class, 'list'])->name('category-foundations.list');
         Route::put('category-foundations/{category}', [CategoryFoundationController::class, 'upsert'])->name('category-foundations.upsert');
         Route::get('category-foundations/{category}/existing-articles', [CategoryFoundationController::class, 'existingArticles'])->name('category-foundations.existing-articles');
