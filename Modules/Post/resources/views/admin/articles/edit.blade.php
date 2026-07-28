@@ -271,10 +271,10 @@ function postVersionHistory(indexUrl, translationStatus, knownLatestId, canResto
     {{-- ── Cột chính: form bản dịch (hoặc lời mời tạo bản dịch) ──────────── --}}
     <div x-data="{
         tab: 'noi_dung',
-        tabFields: { noi_dung: ['title', 'excerpt', 'direct_answer', 'blocks', 'disclosure_text', 'cta_text', 'cta_url'], seo: ['seo_title', 'seo_description'] },
+        tabFields: { noi_dung: ['title', 'excerpt', 'direct_answer', 'blocks', 'disclosure_text', 'cta_text', 'cta_url'], seo: ['seo_title', 'seo_description'], geo: [] },
         errs: {{ Js::from($errors->keys()) }},
         errCount(t) { return this.tabFields[t].filter(f => this.errs.some(e => e === f || e.startsWith(f + '.'))).length; },
-        init() { for (const t of ['noi_dung', 'seo']) { if (this.errCount(t) > 0) { this.tab = t; break; } } }
+        init() { for (const t of ['noi_dung', 'seo', 'geo']) { if (this.errCount(t) > 0) { this.tab = t; break; } } }
     }">
 
     @if($translation)
@@ -296,6 +296,11 @@ function postVersionHistory(indexUrl, translationStatus, knownLatestId, canResto
                         :class="tab === 'seo' ? 'border-primary text-primary' : 'border-transparent text-base-content/50 hover:text-base-content hover:border-base-content/20'">
                     SEO
                     <span x-show="errCount('seo') > 0" x-text="errCount('seo')" class="badge badge-error badge-xs"></span>
+                </button>
+                <button type="button" role="tab" @click="tab = 'geo'"
+                        class="flex items-center gap-1.5 px-1 py-4 text-sm font-medium border-b-2 transition-colors"
+                        :class="tab === 'geo' ? 'border-primary text-primary' : 'border-transparent text-base-content/50 hover:text-base-content hover:border-base-content/20'">
+                    GEO Checklist
                 </button>
             </nav>
         </div>
@@ -429,6 +434,30 @@ function postVersionHistory(indexUrl, translationStatus, knownLatestId, canResto
                               maxlength="300">{{ old('seo_description', $translation->seo_description) }}</textarea>
                     @error('seo_description')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                 </div>
+            </div>
+
+            <div x-show="tab === 'geo'" data-tab-label="GEO Checklist" class="space-y-6">
+                <p class="text-xs text-base-content/50">
+                    Checklist tham khảo để tối ưu nội dung cho AI search (ChatGPT, Gemini, Google AI Overview...) —
+                    tự đối chiếu bằng mắt trước khi xuất bản, không cần tick vào đây.
+                </p>
+
+                @foreach($geoChecklistGroups as $groupLabel => $items)
+                <div>
+                    <p class="text-xs font-semibold text-primary uppercase tracking-wide mb-3">{{ $groupLabel }}</p>
+                    <ol class="space-y-3">
+                        @foreach($items as $item)
+                        <li class="flex gap-3">
+                            <span class="badge badge-sm badge-outline shrink-0 mt-0.5">{{ $loop->iteration }}</span>
+                            <span>
+                                <span class="text-sm font-medium block">{{ $item['label'] }}</span>
+                                <span class="text-xs text-base-content/40">{{ $item['hint'] }}</span>
+                            </span>
+                        </li>
+                        @endforeach
+                    </ol>
+                </div>
+                @endforeach
             </div>
 
             <div class="flex justify-end pt-4 border-t border-base-200 mt-4">

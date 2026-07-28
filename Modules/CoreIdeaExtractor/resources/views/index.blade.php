@@ -1000,8 +1000,6 @@ document.addEventListener('alpine:init', () => {
                     '',
                     'Bảng 1 — Ý tưởng ĐẠT cả 4 tiêu chí, cột: '
                         + '| Ý tưởng | Khớp trọng tâm? | Góc nhìn độc quyền? | Phục vụ mục tiêu? | Phù hợp đối tượng? | Lý do (1 câu, vì sao đạt cả 4) | Đề xuất tiêu đề bài viết |',
-                    'Bảng 2 — Ý tưởng BỊ LOẠI (không đạt ít nhất 1 tiêu chí) — LUÔN liệt kê nếu có ý tưởng bị loại ở Bước 1, không được bỏ qua bảng này, cột: '
-                        + '| Ý tưởng bị loại | Tiêu chí không đạt | Lý do loại |',
                 );
 
                 return [...top, '', ...middle, '', ...bottom].join('\n');

@@ -23,6 +23,7 @@ use Modules\Post\Features\ArticleAuthoring\Queries\GetArticleRedirectClickStatsH
 use Modules\Post\Features\ArticleAuthoring\Queries\GetArticleRedirectClickStatsQuery;
 use Modules\Post\Features\ArticleAuthoring\Queries\ListPendingReviewTranslationsHandler;
 use Modules\Post\Features\ArticleAuthoring\Queries\ListPendingReviewTranslationsQuery;
+use Modules\Post\Features\ArticleAuthoring\Support\GeoChecklist;
 use Modules\Post\Features\CategoryManagement\Queries\GetCategoryTreeHandler;
 use Modules\Post\Features\CategoryManagement\Queries\GetCategoryTreeQuery;
 use Modules\Post\Features\CategoryManagement\Queries\ListCategoriesForAdminHandler;
@@ -156,7 +157,10 @@ class ArticleAdminController extends Controller
         $translation = $article->translation($activeLocale);
         $existingBlocks = $translation ? $renderer->toComposerPayload($translation) : [];
 
-        return view('post::admin.articles.edit', compact('article', 'categoryTree', 'activeLocale', 'translation', 'existingBlocks', 'ocopProducts'));
+        // GEO Checklist (spec/blog.md) — danh sách tham khảo tĩnh, không phụ thuộc dữ liệu bài viết.
+        $geoChecklistGroups = GeoChecklist::groups();
+
+        return view('post::admin.articles.edit', compact('article', 'categoryTree', 'activeLocale', 'translation', 'existingBlocks', 'ocopProducts', 'geoChecklistGroups'));
     }
 
     public function update(Request $request, PostArticle $article, UpdateArticleAction $action): RedirectResponse

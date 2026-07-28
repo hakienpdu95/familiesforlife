@@ -31,6 +31,28 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Site-wide Organization/WebSite JSON-LD (GEO/AEO)
+    |--------------------------------------------------------------------------
+    |
+    | Dùng để dựng node Organization/WebSite trong resources/views/layouts/frontend.blade.php
+    | — khác `site_name` (đã dùng riêng cho title tag + publisher trong Article schema), 2 field
+    | này CHƯA có nguồn nào để đọc trước đây, khiến AI/search engine không có cách nào xác nhận
+    | logo/mạng xã hội chính thức của site (entity clarity — spec/blog.md nhiều nguồn cùng nhấn
+    | mạnh điểm này). Để trống nếu chưa có — schema tự bỏ qua field rỗng thay vì bịa giá trị giả.
+    |
+    */
+
+    'site_logo_url' => env('APP_SITE_LOGO_URL'),
+
+    // Phân tách bằng dấu phẩy trong .env, VD: APP_SITE_SOCIAL_LINKS="https://facebook.com/...,https://youtube.com/..."
+    'site_social_links' => array_filter(explode(',', (string) env('APP_SITE_SOCIAL_LINKS', ''))),
+
+    // Trước đây hardcode riêng trong Modules/Post/resources/views/public/home.blade.php — gộp về
+    // đây để Organization JSON-LD site-wide (layouts/frontend.blade.php) dùng chung 1 nguồn.
+    'site_description' => env('APP_SITE_DESCRIPTION', 'Cẩm nang gia đình — hoạt động, trường học, nuôi dạy con và trải nghiệm cho cả nhà.'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
     |
