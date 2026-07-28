@@ -5,6 +5,7 @@ namespace Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions;
 use App\Services\AI\AIProviderManager;
 use App\Services\AI\AIRequestOptions;
 use App\Shared\Tenancy\Models\Organization;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Tự động hoá "Layer 2" (spec/CoreIdeaExtractor.md §6/§12.3) — CHỈ chạy khi người dùng bấm nút
@@ -72,6 +73,16 @@ class RunLayer2ExtractionAction
         ], $options);
 
         $this->budget->recordActualCost($organization, $response->costUsd);
+
+        // Log riêng cho dashboard Aicem ("Tổng quan") cộng đúng chi phí Layer 2 vào
+        // `cost_this_month` — KHÔNG dùng cho việc chặn hạn mức (xem $this->budget ở trên và
+        // comment đầu file cie_layer2_runs migration để hiểu vì sao cần bảng riêng).
+        DB::table('cie_layer2_runs')->insert([
+            'organization_id' => $organization->id,
+            'cost_usd'        => $response->costUsd,
+            'model_used'      => $response->modelUsed,
+            'created_at'      => now(),
+        ]);
 
         $decoded = json_decode($response->content, associative: true);
 

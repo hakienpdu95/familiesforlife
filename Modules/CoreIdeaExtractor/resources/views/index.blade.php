@@ -237,7 +237,7 @@
                         Model: <span x-text="layer2Result?.model_used"></span> — Chi phí: $<span x-text="layer2Result?.cost_usd?.toFixed(4)"></span>
                     </span>
                 </div>
-                <pre class="bg-base-200 rounded-lg p-4 text-xs overflow-x-auto max-h-[70vh] whitespace-pre-wrap" x-text="layer2Result?.markdown_output"></pre>
+                <div class="bg-base-200 rounded-lg p-4 max-h-[70vh] overflow-y-auto" x-html="renderLayer2Markdown(layer2Result?.markdown_output)"></div>
             </div>
 
             <template x-if="isBatchResult()">
@@ -1056,6 +1056,64 @@ document.addEventListener('alpine:init', () => {
                 } finally {
                     this.layer2Loading = false;
                 }
+            },
+
+            /**
+             * RunLayer2ExtractionAction cố tình trả về 1 chuỗi `markdown_output` (2 bảng Markdown)
+             * thay vì mảng dữ liệu có cấu trúc theo từng cột — xem lý do ở comment đầu file
+             * RunLayer2ExtractionAction.php (tránh rủi ro lệch schema nếu AI đổi tên/thêm cột theo
+             * yêu cầu editorial sau này). Vì vậy việc dựng bảng HTML thật phải parse Markdown ở
+             * đây thay vì đổi backend — chỉ hỗ trợ đúng cú pháp bảng pipe Markdown chuẩn (2 bảng
+             * theo BƯỚC 3 của prompt), text nằm ngoài bảng (nếu AI lỡ thêm) vẫn hiển thị an toàn
+             * dưới dạng đoạn văn thay vì bị bỏ qua.
+             */
+            renderLayer2Markdown(markdown) {
+                if (!markdown) return '';
+
+                const escapeHtml = (str) => str
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+
+                const isTableRow = (line) => /^\s*\|.*\|\s*$/.test(line);
+                const isSeparatorRow = (line) => /^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$/.test(line);
+                const splitRow = (line) => line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map(cell => cell.trim());
+
+                const lines = markdown.replace(/\r\n/g, '\n').split('\n');
+                const html = [];
+                let i = 0;
+
+                while (i < lines.length) {
+                    const line = lines[i];
+
+                    if (isTableRow(line) && i + 1 < lines.length && isSeparatorRow(lines[i + 1])) {
+                        const header = splitRow(line);
+                        i += 2;
+
+                        const rows = [];
+                        while (i < lines.length && isTableRow(lines[i])) {
+                            rows.push(splitRow(lines[i]));
+                            i++;
+                        }
+
+                        html.push('<div class="overflow-x-auto mb-4"><table class="table table-sm table-zebra">');
+                        html.push('<thead><tr>' + header.map(h => `<th>${escapeHtml(h)}</th>`).join('') + '</tr></thead>');
+                        html.push('<tbody>' + rows.map(r => '<tr>'
+                            + header.map((_, idx) => `<td class="align-top">${escapeHtml(r[idx] ?? '')}</td>`).join('')
+                            + '</tr>').join('') + '</tbody>');
+                        html.push('</table></div>');
+                        continue;
+                    }
+
+                    if (line.trim() !== '') {
+                        html.push(`<p class="text-xs text-base-content/70 mb-2">${escapeHtml(line.trim())}</p>`);
+                    }
+                    i++;
+                }
+
+                return html.join('');
             },
         };
     });

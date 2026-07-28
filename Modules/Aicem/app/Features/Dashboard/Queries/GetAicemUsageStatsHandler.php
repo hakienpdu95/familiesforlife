@@ -5,6 +5,7 @@ namespace Modules\Aicem\Features\Dashboard\Queries;
 use App\Shared\Contracts\QueryHandlerInterface;
 use App\Shared\Contracts\QueryInterface;
 use App\Shared\Tenancy\TenantContext;
+use Illuminate\Support\Facades\DB;
 use Modules\Aicem\Models\AicemGenerationRun;
 use Modules\Aicem\Models\AicemMonthlyBudgetUsage;
 use Modules\Aicem\Models\AicemWorkflow;
@@ -13,6 +14,12 @@ use Modules\Aicem\Models\AicemWorkflow;
  * Thống kê gọn cho CEO/System Admin xem — tính trực tiếp từ aicem_generation_runs (không chỉ
  * đọc aicem_monthly_budget_usage, vì bảng đó CHỈ tồn tại khi Organization có đặt hạn mức —
  * mục 13.1) để vẫn có số liệu hữu ích ngay cả khi Organization chưa cấu hình budget.
+ *
+ * `cost_this_month` PHẢI cộng thêm chi phí "Layer 2" của CoreIdeaExtractor (bảng riêng
+ * `cie_layer2_runs`, xem RunLayer2ExtractionAction) — Layer 2 gọi AI trừ đúng vào CÙNG ngân sách
+ * tổ chức mà Aicem dùng (aicem_monthly_budget_usage), nhưng KHÔNG tạo dòng nào ở
+ * aicem_generation_runs (không có khái niệm workflow/subject), nên nếu chỉ sum() bảng đó thì con
+ * số hiển thị sẽ THẤP HƠN thực tế đã chi khi tổ chức có dùng cả 2 tính năng.
  */
 class GetAicemUsageStatsHandler implements QueryHandlerInterface
 {
@@ -26,11 +33,16 @@ class GetAicemUsageStatsHandler implements QueryHandlerInterface
 
         $budgetUsage = AicemMonthlyBudgetUsage::query()->where('year_month', $yearMonth)->first();
 
+        $coreIdeaLayer2CostThisMonth = (float) DB::table('cie_layer2_runs')
+            ->where('organization_id', $organization->id)
+            ->where('created_at', '>=', $monthStart)
+            ->sum('cost_usd');
+
         return [
             'total_runs_this_month'     => $baseQuery()->count(),
             'succeeded_runs_this_month' => $baseQuery()->where('status', 'succeeded')->count(),
             'failed_runs_this_month'    => $baseQuery()->where('status', 'failed')->count(),
-            'cost_this_month'           => (float) $baseQuery()->where('status', 'succeeded')->sum('cost_usd'),
+            'cost_this_month'           => (float) $baseQuery()->where('status', 'succeeded')->sum('cost_usd') + $coreIdeaLayer2CostThisMonth,
             // Phase 6 (mục 8.7/15) — token đọc từ cache Anthropic tháng này, tín hiệu prompt
             // caching có đang phát huy tác dụng không (không quy đổi $ chính xác ở đây vì cần giá
             // theo từng model/run riêng — xem cache_read_tokens trên từng aicem_generation_runs).
