@@ -8,7 +8,7 @@
          dùng chung frontendNav, resources/js/frontend.js — initHeaderPin() port lại 1:1
          windowScroll() ở spec/app.js) — phần CSS phản ứng các class này đã copy y hệt
          spec/main.css trong resources/css/frontend.css. --}}
-@php($brand = config('app.name', 'Laravel') === 'Laravel' ? 'Vì Gia Đình' : config('app.name'))
+@php($brand = config('app.site_name'))
 <header class="site-header" id="site-header"
         :class="pinned ? 'is-pinned' : ''"
         :style="pinned ? ('height: ' + headerHeight + 'px') : ''"

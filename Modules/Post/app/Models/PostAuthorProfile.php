@@ -21,7 +21,7 @@ class PostAuthorProfile extends Model implements HasMedia
     protected $table = 'post_author_profiles';
 
     protected $fillable = [
-        'user_id', 'slug', 'pen_name', 'bio', 'social_links', 'is_public',
+        'user_id', 'slug', 'pen_name', 'bio', 'social_links', 'is_public', 'job_title', 'credentials',
     ];
 
     protected $casts = [

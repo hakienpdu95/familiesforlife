@@ -11,7 +11,7 @@
      cuối trang ".nav-siteinfo" thay vì 1 cột, khớp đúng spec/footer.html (nav-footer__content
      ở trên vs nav-siteinfo ở dưới cùng dòng bản quyền). --}}
 @php
-    $brand = config('app.name', 'Laravel') === 'Laravel' ? 'Vì Gia Đình' : config('app.name');
+    $brand = config('app.site_name');
 
     $footerColumns = ($footerMenuTree ?? collect())->filter(fn ($item) => $item->children->isNotEmpty());
     $legalGroup    = $footerColumns->last();

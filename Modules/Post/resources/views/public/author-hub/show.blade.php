@@ -3,6 +3,40 @@
 @section('title', $authorProfile->displayName())
 @section('meta_description', $authorProfile->bio ?: $authorProfile->displayName())
 
+@php
+    // GEO (2026-07-28) — trang tác giả trước đó không có structured data riêng (Person chỉ được
+    // embed bên trong Article schema của TỪNG bài, xem ArticleStructuredDataBuilder::buildAuthor()).
+    // Controller đã abort_unless(is_public && eligible) TRƯỚC KHI vào view này (AuthorHubPublicController::show()),
+    // nên KHÔNG cần lặp lại điều kiện đó ở đây như buildAuthor() phải làm (nó dùng chung cho
+    // author của MỌI bài viết, kể cả author chưa public).
+    $authorCanonicalUrl = route('post.public.author-hub.show', $authorProfile);
+    $authorSameAs       = array_values(array_filter($authorProfile->social_links ?? []));
+
+    $authorPersonSchema = array_filter([
+        '@context'    => 'https://schema.org',
+        '@type'       => 'Person',
+        'name'        => $authorProfile->displayName(),
+        'url'         => $authorCanonicalUrl,
+        'image'       => $authorProfile->avatarUrl(),
+        'jobTitle'    => $authorProfile->job_title,
+        'description' => $authorProfile->credentials ?: $authorProfile->bio,
+        'worksFor'    => ['@type' => 'Organization', 'name' => config('app.site_name'), 'url' => route('post.public.home')],
+        'sameAs'      => $authorSameAs ?: null,
+    ]);
+@endphp
+
+@push('meta')
+<link rel="canonical" href="{{ $authorCanonicalUrl }}">
+<meta property="og:type" content="profile">
+<meta property="og:title" content="{{ $authorProfile->displayName() }}">
+@if($authorProfile->bio)
+<meta property="og:description" content="{{ $authorProfile->bio }}">
+@endif
+<meta property="og:url" content="{{ $authorCanonicalUrl }}">
+<meta property="og:image" content="{{ $authorProfile->avatarUrl() }}">
+<script type="application/ld+json">{!! json_encode($authorPersonSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+@endpush
+
 @section('content')
 <div class="container py-10">
 
@@ -21,7 +55,14 @@
              class="w-28 h-28 rounded-full object-cover shrink-0">
         <div class="min-w-0">
             <h1 class="text-2xl font-bold text-base-content">{{ $authorProfile->displayName() }}</h1>
+            @if($authorProfile->job_title)
+            <p class="text-sm font-medium text-primary mt-0.5">{{ $authorProfile->job_title }}</p>
+            @endif
             <p class="text-sm text-base-content/50 mt-0.5">{{ $articles->total() }} bài đã xuất bản</p>
+
+            @if($authorProfile->credentials)
+            <p class="text-xs text-base-content/60 mt-1">{{ $authorProfile->credentials }}</p>
+            @endif
 
             @if($authorProfile->bio)
             <p class="text-base-content/70 mt-3 max-w-2xl">{{ $authorProfile->bio }}</p>

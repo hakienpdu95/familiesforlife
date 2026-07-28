@@ -202,6 +202,23 @@
                 </div>
 
                 <div class="grid sm:grid-cols-2 gap-3">
+                    <div class="form-control">
+                        <label class="label py-1"><span class="label-text text-xs">Chức danh chuyên môn</span></label>
+                        <input type="text" name="job_title" value="{{ old('job_title', $authorProfile?->job_title) }}"
+                               placeholder="VD: Bác sĩ Nhi khoa"
+                               class="input input-bordered input-sm @error('job_title', 'authorProfile') input-error @enderror"/>
+                        @error('job_title', 'authorProfile')<label class="label py-0"><span class="label-text-alt text-error">{{ $message }}</span></label>@enderror
+                    </div>
+                    <div class="form-control">
+                        <label class="label py-1"><span class="label-text text-xs">Bằng cấp/chứng chỉ</span></label>
+                        <input type="text" name="credentials" value="{{ old('credentials', $authorProfile?->credentials) }}"
+                               placeholder="VD: Thạc sĩ Dinh dưỡng, 10 năm kinh nghiệm"
+                               class="input input-bordered input-sm @error('credentials', 'authorProfile') input-error @enderror"/>
+                        @error('credentials', 'authorProfile')<label class="label py-0"><span class="label-text-alt text-error">{{ $message }}</span></label>@enderror
+                    </div>
+                </div>
+
+                <div class="grid sm:grid-cols-2 gap-3">
                     @foreach(['facebook' => 'Facebook', 'x' => 'X', 'linkedin' => 'LinkedIn', 'website' => 'Website'] as $key => $label)
                     <div class="form-control">
                         <label class="label py-1"><span class="label-text text-xs">{{ $label }}</span></label>

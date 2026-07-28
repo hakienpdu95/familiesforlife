@@ -19,7 +19,6 @@ return new class extends Migration
             $table->id();
             $table->uuid()->nullable()->unique()->comment('Public UUID — expose ra ngoài, không phải PK');
             $table->unsignedInteger('order_column')->nullable()->index()->comment('Thứ tự sắp xếp — Spatie Sortable / ORDER BY');
-            $table->foreignId('post_category_id')->constrained('post_categories')->cascadeOnDelete();
             $table->text('core_focus')->nullable();
             $table->text('unique_angle')->nullable();
             $table->text('content_goals')->nullable();

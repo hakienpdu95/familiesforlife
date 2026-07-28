@@ -17,6 +17,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Public Site Name
+    |--------------------------------------------------------------------------
+    |
+    | Tên hiển thị công khai (title tag, footer, Organization/Article JSON-LD) — tách khỏi
+    | `app.name` (dùng cho notification/UI nội bộ) vì .env thường để nguyên APP_NAME=Laravel
+    | mặc định của Laravel skeleton, không phản ánh tên site thật. Trước đây 3 nơi khác nhau tự
+    | lặp lại "nếu app.name === Laravel thì fallback 'Vì Gia Đình'" — gộp về 1 chỗ duy nhất.
+    |
+    */
+
+    'site_name' => (env('APP_NAME') && env('APP_NAME') !== 'Laravel') ? env('APP_NAME') : 'Vì Gia Đình',
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
     |

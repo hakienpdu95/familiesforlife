@@ -197,6 +197,7 @@ class TranslationController extends Controller
                     ->ignore($translation?->id),
             ],
             'excerpt'          => ['nullable', 'string', 'max:500'],
+            'direct_answer'    => ['nullable', 'string', 'max:500'],
             'blocks_json'      => ['nullable', 'string'],
             'seo_title'        => ['nullable', 'string', 'max:200'],
             'seo_description'  => ['nullable', 'string', 'max:300'],

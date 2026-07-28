@@ -121,6 +121,8 @@ Route::get('posts/cta/{button}', [ProductBlockClickController::class, 'redirect'
 // nội bộ. Trang chủ đăng ký thẳng tại domain gốc ('/'), không phải '/bai-viet' — tránh 2 URL
 // cùng phục vụ 1 nội dung (trùng lặp SEO).
 Route::get('post-sitemap.xml', [SitemapController::class, 'index'])->name('post.public.sitemap');
+Route::get('robots.txt', [SitemapController::class, 'robots'])->name('post.public.robots');
+Route::get('llms.txt', [SitemapController::class, 'llms'])->name('post.public.llms');
 
 // spec/Breaking_News_Ticker_Technical_Specification.md §7.4 — polling JSON công khai, ticker
 // tự gọi định kỳ (config('post.breaking_news.poll_seconds')) để cập nhật không cần F5.

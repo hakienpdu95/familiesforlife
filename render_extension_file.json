@@ -297,6 +297,11 @@
     [
         "post_content_blocks///add///__///",
         "translation_id///unsignedBigInteger///__///_NULL///NULL///__///__",
+        "faq_block_id///unsignedBigInteger///__///_NULL///NULL///->constrained('post_faq_blocks')->onDelete('cascade')///__",
+        "citation_text///text///__///_NULL///NULL///__///Nội dung trích dẫn/thống kê — chỉ dùng khi type=citation",
+        "citation_source_name///string///200///_NULL///NULL///__///Tên nguồn (VD: Bộ Y tế, 2026) — chỉ dùng khi type=citation",
+        "citation_source_url///string///500///_NULL///NULL///__///Link nguồn (không bắt buộc) — chỉ dùng khi type=citation",
+        "howto_block_id///unsignedBigInteger///__///_NULL///NULL///->constrained('post_howto_blocks')->onDelete('cascade')///__",
         "__index///index///__///__///__///translation_id,sort_order|idx_post_cb_translation_order///__"
     ],
     [
@@ -307,8 +312,7 @@
     [
         "post_product_blocks///add///__///",
         "translation_id///unsignedBigInteger///__///_NULL///NULL///__///__",
-        "__index///index///__///__///__///translation_id|idx_post_pb_translation///__",
-        "__index///index///__///__///__///organization_id,translation_id|idx_post_pb_org_translation///__"
+        "__index///index///__///__///__///translation_id|idx_post_pb_translation///__"
     ],
     [
         "post_product_blocks///drop///__///Publishing Engine Phase 13 — article_id thay bằng translation_id",
@@ -320,6 +324,7 @@
         "disclosure_text///string///500///_NULL///NULL///__///__",
         "cta_text///string///100///_NULL///NULL///__///__",
         "cta_url///string///500///_NULL///NULL///__///__",
+        "direct_answer///string///500///_NULL///NULL///__///AEO — câu trả lời trực tiếp hiển thị nổi bật đầu bài (khuyến nghị ~60 từ), khác excerpt (excerpt là mô tả/preview, direct_answer là câu TRẢ LỜI thẳng câu hỏi chính của bài)",
         "__index///unique///__///__///__///locale,slug|uq_post_trans_locale_slug///__",
         "__index///index///__///__///__///locale,status,published_at|idx_post_trans_status_pub///__"
     ],
@@ -344,5 +349,10 @@
         "cie_category_foundations///add///__///",
         "pain_points///text///__///_NULL///NULL///__///__",
         "rejected_ideas///text///__///_NULL///NULL///__///__"
+    ],
+    [
+        "post_author_profiles///add///__///",
+        "job_title///string///150///_NULL///NULL///__///Chức danh/nghề nghiệp chuyên môn (VD: Bác sĩ Nhi khoa) — dùng cho Person schema (E-E-A-T)",
+        "credentials///string///255///_NULL///NULL///__///Bằng cấp/chứng chỉ chuyên môn (VD: Thạc sĩ Dinh dưỡng, 10 năm kinh nghiệm)"
     ]
 ]

@@ -10,6 +10,8 @@ use Modules\Post\Enums\ProductBlockTemplate;
 use Modules\Post\Features\ArticleAuthoring\Exceptions\ProductBlockValidationException;
 use Modules\Post\Models\PostArticleTranslation;
 use Modules\Post\Models\PostContentBlock;
+use Modules\Post\Models\PostFaqBlock;
+use Modules\Post\Models\PostHowtoBlock;
 use Modules\Post\Models\PostProductBlock;
 use Modules\Post\Models\PostProductBlockButton;
 use Modules\Post\Models\PostProductBlockItem;
@@ -32,6 +34,11 @@ class SyncContentBlocksAction
     private const MAX_PRODUCT_BLOCKS_PER_ARTICLE = 3;
     private const MAX_BUTTONS_PER_ITEM           = 5;
     private const MAX_TOTAL_BLOCKS               = 100; // chặn nhồi rác, không giới hạn nghiệp vụ thật
+    private const MAX_FAQ_BLOCKS_PER_ARTICLE     = 3;
+    private const MAX_FAQ_ITEMS_PER_BLOCK        = 15;
+    private const MAX_CITATION_BLOCKS_PER_ARTICLE = 10;
+    private const MAX_HOWTO_BLOCKS_PER_ARTICLE    = 3;
+    private const MAX_HOWTO_STEPS_PER_BLOCK       = 20;
 
     public function __construct(
         private readonly ArticleContentRenderer $renderer,
@@ -47,9 +54,15 @@ class SyncContentBlocksAction
             ]);
         }
 
-        $productBlocksData = array_values(array_filter($blocks, fn ($b) => ($b['type'] ?? null) === 'product'));
+        $productBlocksData  = array_values(array_filter($blocks, fn ($b) => ($b['type'] ?? null) === 'product'));
+        $faqBlocksData      = array_values(array_filter($blocks, fn ($b) => ($b['type'] ?? null) === 'faq'));
+        $citationBlocksData = array_values(array_filter($blocks, fn ($b) => ($b['type'] ?? null) === 'citation'));
+        $howtoBlocksData    = array_values(array_filter($blocks, fn ($b) => ($b['type'] ?? null) === 'howto'));
 
         $this->validateProductBlocks($translation, $productBlocksData);
+        $this->validateFaqBlocks($faqBlocksData);
+        $this->validateCitationBlocks($citationBlocksData);
+        $this->validateHowtoBlocks($howtoBlocksData);
 
         $productIdsBefore = $this->currentProductIds($translation);
 
@@ -65,6 +78,32 @@ class SyncContentBlocksAction
 
         // Khối sản phẩm không còn xuất hiện trong bài → xoá (cascade items/buttons)
         $translation->productBlocks()->whereNotIn('uuid', $seenUuids)->get()->each->delete();
+
+        // ── 1b. Upsert-by-uuid post_faq_blocks (giữ block ổn định qua các lần sửa) — items bên
+        // trong xoá-tạo-lại toàn bộ mỗi lần lưu, KHÔNG cần upsert-by-key như product item vì FAQ
+        // không có click_count/số liệu gì cần bảo toàn (câu hỏi/trả lời là dữ liệu tĩnh nhập tay). ──
+        $seenFaqUuids = [];
+        $faqBlockIdByUuid = [];
+
+        foreach ($faqBlocksData as $sortOrder => $blockData) {
+            $seenFaqUuids[] = $blockData['block_uuid'];
+            $block = $this->upsertFaqBlock($translation, $blockData, $sortOrder);
+            $faqBlockIdByUuid[$blockData['block_uuid']] = $block->id;
+        }
+
+        $translation->faqBlocks()->whereNotIn('uuid', $seenFaqUuids)->get()->each->delete();
+
+        // ── 1c. Upsert-by-uuid post_howto_blocks — cùng lý do 1b (không click_count cần bảo toàn). ──
+        $seenHowtoUuids = [];
+        $howtoBlockIdByUuid = [];
+
+        foreach ($howtoBlocksData as $sortOrder => $blockData) {
+            $seenHowtoUuids[] = $blockData['block_uuid'];
+            $block = $this->upsertHowtoBlock($translation, $blockData, $sortOrder);
+            $howtoBlockIdByUuid[$blockData['block_uuid']] = $block->id;
+        }
+
+        $translation->howtoBlocks()->whereNotIn('uuid', $seenHowtoUuids)->get()->each->delete();
 
         // ── 2. Ghi lại post_content_blocks — chỉ là con trỏ sắp xếp, không mang trạng thái
         // (click_count nằm ở product_blocks/items/buttons đã upsert-by-key ở trên), nên
@@ -90,6 +129,40 @@ class SyncContentBlocksAction
                         'type'             => ContentBlockType::Product,
                         'sort_order'       => $sortOrder,
                         'product_block_id' => $productBlockId,
+                    ]);
+                }
+            } elseif ($type === 'faq') {
+                $faqBlockId = $faqBlockIdByUuid[$blockData['block_uuid']] ?? null;
+
+                if ($faqBlockId) {
+                    PostContentBlock::create([
+                        'translation_id' => $translation->id,
+                        'type'           => ContentBlockType::Faq,
+                        'sort_order'     => $sortOrder,
+                        'faq_block_id'   => $faqBlockId,
+                    ]);
+                }
+            } elseif ($type === 'citation') {
+                // Không có bảng con — khác Product/Faq/Howto, Citation là 1 câu trích dẫn ĐƠN duy
+                // nhất, không phải danh sách item lặp lại, nên lưu thẳng 3 cột trên chính
+                // post_content_blocks (giống cách type=text lưu thẳng text_html).
+                PostContentBlock::create([
+                    'translation_id'       => $translation->id,
+                    'type'                 => ContentBlockType::Citation,
+                    'sort_order'           => $sortOrder,
+                    'citation_text'        => trim((string) ($blockData['citation_text'] ?? '')),
+                    'citation_source_name' => trim((string) ($blockData['citation_source_name'] ?? '')),
+                    'citation_source_url'  => $blockData['citation_source_url'] ?: null,
+                ]);
+            } elseif ($type === 'howto') {
+                $howtoBlockId = $howtoBlockIdByUuid[$blockData['block_uuid']] ?? null;
+
+                if ($howtoBlockId) {
+                    PostContentBlock::create([
+                        'translation_id' => $translation->id,
+                        'type'           => ContentBlockType::Howto,
+                        'sort_order'     => $sortOrder,
+                        'howto_block_id' => $howtoBlockId,
                     ]);
                 }
             }
@@ -214,6 +287,166 @@ class SyncContentBlocksAction
                 }
             })(),
         };
+    }
+
+    /** @param array<int, array> $blocksData @throws ProductBlockValidationException */
+    private function validateFaqBlocks(array $blocksData): void
+    {
+        $errors = [];
+
+        if (count($blocksData) > self::MAX_FAQ_BLOCKS_PER_ARTICLE) {
+            $errors[] = sprintf('Bài viết chỉ được tối đa %d khối FAQ (hiện có %d).', self::MAX_FAQ_BLOCKS_PER_ARTICLE, count($blocksData));
+        }
+
+        foreach ($blocksData as $i => $block) {
+            $label = 'Khối FAQ #' . ($i + 1);
+            $items = $block['items'] ?? [];
+
+            if (count($items) === 0) {
+                $errors[] = "{$label}: cần ít nhất 1 câu hỏi.";
+            }
+
+            if (count($items) > self::MAX_FAQ_ITEMS_PER_BLOCK) {
+                $errors[] = "{$label}: tối đa " . self::MAX_FAQ_ITEMS_PER_BLOCK . ' câu hỏi (hiện có ' . count($items) . ').';
+            }
+
+            foreach ($items as $j => $item) {
+                if (trim((string) ($item['question'] ?? '')) === '') {
+                    $errors[] = "{$label}, câu hỏi #" . ($j + 1) . ': không được để trống câu hỏi.';
+                }
+
+                if (trim((string) ($item['answer'] ?? '')) === '') {
+                    $errors[] = "{$label}, câu hỏi #" . ($j + 1) . ': không được để trống câu trả lời.';
+                }
+            }
+        }
+
+        if ($errors) {
+            throw new ProductBlockValidationException($errors);
+        }
+    }
+
+    /**
+     * @param array<int, array> $blocksData @throws ProductBlockValidationException
+     *
+     * `citation_source_name` BẮT BUỘC — 1 trích dẫn không rõ nguồn thì mất hết giá trị "citation
+     * engineering" (nghiên cứu Princeton/KDD 2024 dẫn trong trao đổi GEO đợt 4: thêm nguồn tăng
+     * tới +115% khả năng được AI trích dẫn, NHƯNG phải là nguồn ĐẶT TÊN, không phải trích dẫn mù).
+     */
+    private function validateCitationBlocks(array $blocksData): void
+    {
+        $errors = [];
+
+        if (count($blocksData) > self::MAX_CITATION_BLOCKS_PER_ARTICLE) {
+            $errors[] = sprintf('Bài viết chỉ được tối đa %d khối trích dẫn (hiện có %d).', self::MAX_CITATION_BLOCKS_PER_ARTICLE, count($blocksData));
+        }
+
+        foreach ($blocksData as $i => $block) {
+            $label = 'Trích dẫn #' . ($i + 1);
+
+            if (trim((string) ($block['citation_text'] ?? '')) === '') {
+                $errors[] = "{$label}: không được để trống nội dung trích dẫn.";
+            }
+
+            if (trim((string) ($block['citation_source_name'] ?? '')) === '') {
+                $errors[] = "{$label}: cần ghi rõ tên nguồn (VD: \"Bộ Y tế, 2026\") — trích dẫn không nêu nguồn không có giá trị.";
+            }
+
+            $url = $block['citation_source_url'] ?? null;
+            if ($url && (! filter_var($url, FILTER_VALIDATE_URL) || ! preg_match('#^https?://#i', $url))) {
+                $errors[] = "{$label}: link nguồn không hợp lệ (\"{$url}\").";
+            }
+        }
+
+        if ($errors) {
+            throw new ProductBlockValidationException($errors);
+        }
+    }
+
+    /** @param array<int, array> $blocksData @throws ProductBlockValidationException */
+    private function validateHowtoBlocks(array $blocksData): void
+    {
+        $errors = [];
+
+        if (count($blocksData) > self::MAX_HOWTO_BLOCKS_PER_ARTICLE) {
+            $errors[] = sprintf('Bài viết chỉ được tối đa %d khối hướng dẫn từng bước (hiện có %d).', self::MAX_HOWTO_BLOCKS_PER_ARTICLE, count($blocksData));
+        }
+
+        foreach ($blocksData as $i => $block) {
+            $label = 'Khối hướng dẫn #' . ($i + 1);
+            $steps = $block['steps'] ?? [];
+
+            if (count($steps) < 2) {
+                $errors[] = "{$label}: cần ít nhất 2 bước (dưới 2 bước không phải \"hướng dẫn từng bước\").";
+            }
+
+            if (count($steps) > self::MAX_HOWTO_STEPS_PER_BLOCK) {
+                $errors[] = "{$label}: tối đa " . self::MAX_HOWTO_STEPS_PER_BLOCK . ' bước (hiện có ' . count($steps) . ').';
+            }
+
+            foreach ($steps as $j => $step) {
+                if (trim((string) ($step['name'] ?? '')) === '') {
+                    $errors[] = "{$label}, bước #" . ($j + 1) . ': không được để trống tên bước.';
+                }
+
+                if (trim((string) ($step['text'] ?? '')) === '') {
+                    $errors[] = "{$label}, bước #" . ($j + 1) . ': không được để trống nội dung bước.';
+                }
+            }
+        }
+
+        if ($errors) {
+            throw new ProductBlockValidationException($errors);
+        }
+    }
+
+    private function upsertHowtoBlock(PostArticleTranslation $translation, array $blockData, int $sortOrder): PostHowtoBlock
+    {
+        /** @var PostHowtoBlock $block */
+        $block = $translation->howtoBlocks()->firstOrNew(['uuid' => $blockData['block_uuid']]);
+        $block->fill([
+            'name'        => $blockData['name'] ?? null,
+            'description' => $blockData['description'] ?? null,
+            'sort_order'  => $sortOrder,
+        ]);
+        $block->save();
+
+        $block->steps()->delete();
+
+        foreach (($blockData['steps'] ?? []) as $stepSort => $stepData) {
+            $block->steps()->create([
+                'name'       => trim((string) $stepData['name']),
+                'text'       => trim((string) $stepData['text']),
+                'sort_order' => $stepSort,
+            ]);
+        }
+
+        return $block;
+    }
+
+    private function upsertFaqBlock(PostArticleTranslation $translation, array $blockData, int $sortOrder): PostFaqBlock
+    {
+        /** @var PostFaqBlock $block */
+        $block = $translation->faqBlocks()->firstOrNew(['uuid' => $blockData['block_uuid']]);
+        $block->fill([
+            'heading'    => $blockData['heading'] ?? null,
+            'sort_order' => $sortOrder,
+        ]);
+        $block->save();
+
+        // Không có click_count/số liệu nào cần bảo toàn ở item — xoá-tạo-lại đơn giản hơn
+        // upsert-by-key (khác hẳn post_product_block_items, xem docblock class).
+        $block->items()->delete();
+
+        foreach (($blockData['items'] ?? []) as $itemSort => $itemData) {
+            $block->items()->create([
+                'question'   => trim((string) $itemData['question']),
+                'answer'     => trim((string) $itemData['answer']),
+                'sort_order' => $itemSort,
+            ]);
+        }
+
+        return $block;
     }
 
     private function upsertProductBlock(PostArticleTranslation $translation, array $blockData, int $sortOrder): PostProductBlock

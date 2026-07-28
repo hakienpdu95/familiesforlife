@@ -274,10 +274,191 @@
             refreshSelectedList();
         }
 
+        // ── Block: Câu hỏi thường gặp (FAQ, AEO 2026-07-28) ───────────────
+        // Đơn giản hơn nhiều so với Khối sản phẩm: không tham chiếu entity ngoài (không cần
+        // search API), không có buttons/CTA, không có template — chỉ danh sách câu hỏi/trả lời.
+
+        function addFaqBlock(existingState) {
+            const el = document.createElement('div');
+            el.className = 'pbc-block';
+            el.dataset.kind = 'faq';
+            el.innerHTML = blockHeaderHtml('Câu hỏi thường gặp', 'pbc-badge-faq')
+                + '<div class="pbc-block-body"></div>';
+            wireCommonControls(el);
+            listEl.appendChild(el);
+
+            const state = existingState || { blockUuid: uid('blk-'), heading: '', items: [] };
+            el._faqState = state;
+            renderFaqForm(el.querySelector('.pbc-block-body'), state);
+        }
+
+        function renderFaqForm(body, state) {
+            body.innerHTML = `
+                <div style="margin-bottom:10px;">
+                    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Tiêu đề khối (không bắt buộc)</label>
+                    <input type="text" class="input input-bordered input-sm w-full pbc-faq-heading" value="${esc(state.heading)}"
+                           placeholder="VD: Câu hỏi thường gặp">
+                </div>
+                <div class="pbc-faq-items" style="display:flex;flex-direction:column;gap:8px;"></div>
+                <button type="button" class="btn btn-sm btn-outline pbc-faq-add mt-2">+ Thêm câu hỏi</button>
+            `;
+
+            body.querySelector('.pbc-faq-heading').addEventListener('input', (e) => { state.heading = e.target.value; });
+
+            const itemsBox = body.querySelector('.pbc-faq-items');
+
+            function renderItems() {
+                itemsBox.innerHTML = state.items.map((item, idx) => `
+                    <div class="pbc-faq-item" data-idx="${idx}" style="border:1px solid var(--fallback-b3,#e5e7eb);border-radius:8px;padding:8px;">
+                        <div style="display:flex;gap:6px;align-items:start;">
+                            <div style="flex:1;">
+                                <input type="text" class="input input-bordered input-sm w-full pbc-faq-question" placeholder="Câu hỏi" value="${esc(item.question)}">
+                                <textarea class="textarea textarea-bordered textarea-sm w-full mt-1 pbc-faq-answer" rows="2" placeholder="Câu trả lời">${esc(item.answer)}</textarea>
+                            </div>
+                            <button type="button" class="btn btn-ghost btn-xs text-error pbc-faq-remove" title="Xoá câu hỏi">✕</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                itemsBox.querySelectorAll('.pbc-faq-item').forEach((row) => {
+                    const idx = Number(row.dataset.idx);
+                    row.querySelector('.pbc-faq-question').addEventListener('input', (e) => { state.items[idx].question = e.target.value; });
+                    row.querySelector('.pbc-faq-answer').addEventListener('input', (e) => { state.items[idx].answer = e.target.value; });
+                    row.querySelector('.pbc-faq-remove').addEventListener('click', () => {
+                        state.items.splice(idx, 1);
+                        renderItems();
+                    });
+                });
+            }
+
+            body.querySelector('.pbc-faq-add').addEventListener('click', () => {
+                state.items.push({ question: '', answer: '' });
+                renderItems();
+            });
+
+            renderItems();
+        }
+
+        // ── Block: Trích dẫn có nguồn (Citation, GEO đợt 4 2026-07-28) ────
+        // Đơn giản nhất trong 5 loại block: KHÔNG có bảng con (không phải danh sách item lặp
+        // lại) — 1 khối = 1 câu trích dẫn/thống kê + tên nguồn (bắt buộc) + link nguồn (tuỳ chọn).
+
+        function addCitationBlock(existingState) {
+            const el = document.createElement('div');
+            el.className = 'pbc-block';
+            el.dataset.kind = 'citation';
+            el.innerHTML = blockHeaderHtml('Trích dẫn có nguồn', 'pbc-badge-citation')
+                + '<div class="pbc-block-body"></div>';
+            wireCommonControls(el);
+            listEl.appendChild(el);
+
+            const state = existingState || { citationText: '', citationSourceName: '', citationSourceUrl: '' };
+            el._citationState = state;
+            renderCitationForm(el.querySelector('.pbc-block-body'), state);
+        }
+
+        function renderCitationForm(body, state) {
+            body.innerHTML = `
+                <div style="margin-bottom:10px;">
+                    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Nội dung trích dẫn/thống kê</label>
+                    <textarea class="textarea textarea-bordered textarea-sm w-full pbc-citation-text" rows="2"
+                              placeholder="VD: 82% trẻ dưới 2 tuổi ở Việt Nam thiếu vi chất kẽm theo khảo sát quốc gia 2025">${esc(state.citationText)}</textarea>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                    <div>
+                        <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Tên nguồn (bắt buộc)</label>
+                        <input type="text" class="input input-bordered input-sm w-full pbc-citation-source-name" value="${esc(state.citationSourceName)}"
+                               placeholder="VD: Bộ Y tế, 2025">
+                    </div>
+                    <div>
+                        <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Link nguồn (không bắt buộc)</label>
+                        <input type="url" class="input input-bordered input-sm w-full pbc-citation-source-url" value="${esc(state.citationSourceUrl)}"
+                               placeholder="https://...">
+                    </div>
+                </div>
+            `;
+
+            body.querySelector('.pbc-citation-text').addEventListener('input', (e) => { state.citationText = e.target.value; });
+            body.querySelector('.pbc-citation-source-name').addEventListener('input', (e) => { state.citationSourceName = e.target.value; });
+            body.querySelector('.pbc-citation-source-url').addEventListener('input', (e) => { state.citationSourceUrl = e.target.value; });
+        }
+
+        // ── Block: Hướng dẫn từng bước (HowTo, GEO đợt 4 2026-07-28) ──────
+        // Cùng độ phức tạp FAQ — danh sách item lặp lại (các bước), không tham chiếu entity ngoài.
+
+        function addHowtoBlock(existingState) {
+            const el = document.createElement('div');
+            el.className = 'pbc-block';
+            el.dataset.kind = 'howto';
+            el.innerHTML = blockHeaderHtml('Hướng dẫn từng bước', 'pbc-badge-howto')
+                + '<div class="pbc-block-body"></div>';
+            wireCommonControls(el);
+            listEl.appendChild(el);
+
+            const state = existingState || { blockUuid: uid('blk-'), name: '', description: '', steps: [] };
+            el._howtoState = state;
+            renderHowtoForm(el.querySelector('.pbc-block-body'), state);
+        }
+
+        function renderHowtoForm(body, state) {
+            body.innerHTML = `
+                <div style="margin-bottom:10px;">
+                    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Tên hướng dẫn (không bắt buộc)</label>
+                    <input type="text" class="input input-bordered input-sm w-full pbc-howto-name" value="${esc(state.name)}"
+                           placeholder="VD: Cách pha sữa công thức đúng chuẩn">
+                </div>
+                <div style="margin-bottom:10px;">
+                    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Mô tả ngắn (không bắt buộc)</label>
+                    <textarea class="textarea textarea-bordered textarea-sm w-full pbc-howto-description" rows="2">${esc(state.description)}</textarea>
+                </div>
+                <div class="pbc-howto-steps" style="display:flex;flex-direction:column;gap:8px;"></div>
+                <button type="button" class="btn btn-sm btn-outline pbc-howto-add mt-2">+ Thêm bước</button>
+            `;
+
+            body.querySelector('.pbc-howto-name').addEventListener('input', (e) => { state.name = e.target.value; });
+            body.querySelector('.pbc-howto-description').addEventListener('input', (e) => { state.description = e.target.value; });
+
+            const stepsBox = body.querySelector('.pbc-howto-steps');
+
+            function renderSteps() {
+                stepsBox.innerHTML = state.steps.map((step, idx) => `
+                    <div class="pbc-howto-step" data-idx="${idx}" style="border:1px solid var(--fallback-b3,#e5e7eb);border-radius:8px;padding:8px;">
+                        <div style="display:flex;gap:6px;align-items:start;">
+                            <div style="flex:1;">
+                                <input type="text" class="input input-bordered input-sm w-full pbc-howto-step-name" placeholder="Tên bước (VD: Bước ${idx + 1} — Rửa tay sạch)" value="${esc(step.name)}">
+                                <textarea class="textarea textarea-bordered textarea-sm w-full mt-1 pbc-howto-step-text" rows="2" placeholder="Nội dung chi tiết bước này">${esc(step.text)}</textarea>
+                            </div>
+                            <button type="button" class="btn btn-ghost btn-xs text-error pbc-howto-step-remove" title="Xoá bước">✕</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                stepsBox.querySelectorAll('.pbc-howto-step').forEach((row) => {
+                    const idx = Number(row.dataset.idx);
+                    row.querySelector('.pbc-howto-step-name').addEventListener('input', (e) => { state.steps[idx].name = e.target.value; });
+                    row.querySelector('.pbc-howto-step-text').addEventListener('input', (e) => { state.steps[idx].text = e.target.value; });
+                    row.querySelector('.pbc-howto-step-remove').addEventListener('click', () => {
+                        state.steps.splice(idx, 1);
+                        renderSteps();
+                    });
+                });
+            }
+
+            body.querySelector('.pbc-howto-add').addEventListener('click', () => {
+                state.steps.push({ name: '', text: '' });
+                renderSteps();
+            });
+
+            renderSteps();
+        }
+
         // ── Toolbar thêm block ───────────────────────────────────────────
 
         composerEl.querySelector('.pbc-add-text').addEventListener('click', () => addTextBlock(''));
         composerEl.querySelector('.pbc-add-product').addEventListener('click', () => addProductBlock(null));
+        composerEl.querySelector('.pbc-add-faq')?.addEventListener('click', () => addFaqBlock(null));
+        composerEl.querySelector('.pbc-add-citation')?.addEventListener('click', () => addCitationBlock(null));
+        composerEl.querySelector('.pbc-add-howto')?.addEventListener('click', () => addHowtoBlock(null));
 
         // ── Hydrate từ block đã có (trang sửa bài) ──────────────────────
 
@@ -311,6 +492,25 @@
                         url: btn.url || '', productLinkType: btn.product_link_type || '',
                         target: btn.target || '_blank', style: btn.style || 'primary',
                     })),
+                });
+            } else if (b.type === 'faq') {
+                addFaqBlock({
+                    blockUuid: b.block_uuid,
+                    heading: b.heading || '',
+                    items: (b.items || []).map((it) => ({ question: it.question || '', answer: it.answer || '' })),
+                });
+            } else if (b.type === 'citation') {
+                addCitationBlock({
+                    citationText: b.citation_text || '',
+                    citationSourceName: b.citation_source_name || '',
+                    citationSourceUrl: b.citation_source_url || '',
+                });
+            } else if (b.type === 'howto') {
+                addHowtoBlock({
+                    blockUuid: b.block_uuid,
+                    name: b.name || '',
+                    description: b.description || '',
+                    steps: (b.steps || []).map((s) => ({ name: s.name || '', text: s.text || '' })),
                 });
             }
         });
@@ -346,6 +546,31 @@
                             button_key: b.btnKey, label: b.label, url_type: b.urlType,
                             url: b.url, product_link_type: b.productLinkType, target: b.target, style: b.style,
                         })),
+                    });
+                } else if (el.dataset.kind === 'faq') {
+                    const st = el._faqState;
+                    out.push({
+                        type: 'faq',
+                        block_uuid: st.blockUuid,
+                        heading: st.heading,
+                        items: st.items.map((it) => ({ question: it.question, answer: it.answer })),
+                    });
+                } else if (el.dataset.kind === 'citation') {
+                    const st = el._citationState;
+                    out.push({
+                        type: 'citation',
+                        citation_text: st.citationText,
+                        citation_source_name: st.citationSourceName,
+                        citation_source_url: st.citationSourceUrl,
+                    });
+                } else if (el.dataset.kind === 'howto') {
+                    const st = el._howtoState;
+                    out.push({
+                        type: 'howto',
+                        block_uuid: st.blockUuid,
+                        name: st.name,
+                        description: st.description,
+                        steps: st.steps.map((s) => ({ name: s.name, text: s.text })),
                     });
                 }
             });

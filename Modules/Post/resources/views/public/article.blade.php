@@ -5,8 +5,55 @@
 @section('meta_description', $translation->seo_description ?: $translation->excerpt)
 @endif
 
+@php
+    // AEO/GEO (2026-07-28) — Open Graph + Twitter Card: site trước đó KHÔNG có thẻ nào, ảnh
+    // hưởng cả chia sẻ social lẫn 1 số AI crawler dùng OG làm nguồn tóm tắt trang. Cùng độ ưu
+    // tiên description với ArticleStructuredDataBuilder (seo_description > direct_answer > excerpt)
+    // để nhất quán giữa JSON-LD và meta tag.
+    $ogTitle       = $translation->seo_title ?: $translation->title;
+    $ogDescription = $translation->seo_description ?: $translation->direct_answer ?: $translation->excerpt;
+    $ogImage       = $article->cover_image_url;
+    $ogSiteName    = config('app.site_name');
+@endphp
+
 @push('meta')
-<link rel="canonical" href="{{ route('post.public.article', ['slug' => $translation->slug, 'id' => $translation->id]) }}">
+<link rel="canonical" href="{{ $canonicalUrl }}">
+
+<meta property="og:type" content="article">
+<meta property="og:title" content="{{ $ogTitle }}">
+@if($ogDescription)
+<meta property="og:description" content="{{ $ogDescription }}">
+@endif
+<meta property="og:url" content="{{ $canonicalUrl }}">
+<meta property="og:site_name" content="{{ $ogSiteName }}">
+@if($ogImage)
+<meta property="og:image" content="{{ $ogImage }}">
+@endif
+@if($translation->published_at)
+<meta property="article:published_time" content="{{ $translation->published_at->toIso8601String() }}">
+@endif
+@if($translation->updated_at)
+<meta property="article:modified_time" content="{{ $translation->updated_at->toIso8601String() }}">
+@endif
+
+<meta name="twitter:card" content="{{ $ogImage ? 'summary_large_image' : 'summary' }}">
+<meta name="twitter:title" content="{{ $ogTitle }}">
+@if($ogDescription)
+<meta name="twitter:description" content="{{ $ogDescription }}">
+@endif
+@if($ogImage)
+<meta name="twitter:image" content="{{ $ogImage }}">
+@endif
+
+@if(!empty($structuredData))
+{{--
+    AEO/GEO (2026-07-28) — Article + BreadcrumbList JSON-LD (xem ArticleStructuredDataBuilder).
+    2 node độc lập trong 1 script — hợp lệ theo schema.org (không cần bọc @graph).
+--}}
+@foreach($structuredData as $node)
+<script type="application/ld+json">{!! json_encode($node, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+@endforeach
+@endif
 @endpush
 
 @section('content')
@@ -71,6 +118,17 @@
         @foreach($article->categories as $cat)
         <a href="{{ route('post.public.category', ['category' => $cat->slug]) }}" class="badge badge-sm badge-ghost hover:badge-primary">{{ $cat->name }}</a>
         @endforeach
+    </div>
+    @endif
+
+    {{--
+        AEO (2026-07-28) — câu trả lời trực tiếp đặt NGAY ĐẦU bài, TRƯỚC excerpt/nội dung chính,
+        để cả người đọc lẫn AI answer engine (Google AI Overview, ChatGPT...) thấy câu trả lời
+        thẳng vào câu hỏi chính của bài trong những từ đầu tiên — xem ArticleStructuredDataBuilder.
+    --}}
+    @if($translation->direct_answer)
+    <div class="alert bg-base-200 border-0 mb-4">
+        <span class="text-sm font-medium">{{ $translation->direct_answer }}</span>
     </div>
     @endif
 

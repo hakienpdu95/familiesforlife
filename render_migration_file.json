@@ -2185,5 +2185,44 @@
         "post_category_id///unsignedBigInteger///__///NOT_NULL///__///->unique()->constrained('post_categories')->onDelete('cascade')///__",
         "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
         "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật"
+    ],
+    [
+        "post_faq_blocks///__///__///",
+        "translation_id///unsignedBigInteger///__///NOT_NULL///__///->constrained('post_article_translations')->onDelete('cascade')///__",
+        "heading///string///200///_NULL///NULL///__///__",
+        "sort_order///unsignedSmallInteger///__///NOT_NULL///0///__///__",
+        "__index///index///__///__///__///translation_id,sort_order|idx_post_fb_translation_order///__",
+        "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
+        "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật"
+    ],
+    [
+        "post_faq_items///__///__///",
+        "faq_block_id///unsignedBigInteger///__///NOT_NULL///__///->constrained('post_faq_blocks')->onDelete('cascade')///__",
+        "question///string///500///NOT_NULL///__///__///__",
+        "answer///text///__///NOT_NULL///__///__///__",
+        "sort_order///unsignedSmallInteger///__///NOT_NULL///0///__///__",
+        "__index///index///__///__///__///faq_block_id,sort_order|idx_post_fi_block_order///__",
+        "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
+        "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật"
+    ],
+    [
+        "post_howto_blocks///__///__///",
+        "translation_id///unsignedBigInteger///__///NOT_NULL///__///->constrained('post_article_translations')->onDelete('cascade')///__",
+        "name///string///200///_NULL///NULL///__///Tên hướng dẫn (VD: Cách pha sữa công thức đúng chuẩn) — dùng làm HowTo.name nếu có, fallback tiêu đề bài",
+        "description///text///__///_NULL///NULL///__///Mô tả ngắn — dùng làm HowTo.description",
+        "sort_order///unsignedSmallInteger///__///NOT_NULL///0///__///__",
+        "__index///index///__///__///__///translation_id,sort_order|idx_post_hb_translation_order///__",
+        "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
+        "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật"
+    ],
+    [
+        "post_howto_steps///__///__///",
+        "howto_block_id///unsignedBigInteger///__///NOT_NULL///__///->constrained('post_howto_blocks')->onDelete('cascade')///__",
+        "name///string///200///NOT_NULL///__///__///Tên bước (VD: Bước 1 — Rửa tay sạch)",
+        "text///text///__///NOT_NULL///__///__///Nội dung chi tiết của bước",
+        "sort_order///unsignedSmallInteger///__///NOT_NULL///0///__///__",
+        "__index///index///__///__///__///howto_block_id,sort_order|idx_post_hs_block_order///__",
+        "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
+        "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật"
     ]
 ]

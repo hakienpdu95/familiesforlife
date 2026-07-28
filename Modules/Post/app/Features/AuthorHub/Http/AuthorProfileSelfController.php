@@ -30,6 +30,8 @@ class AuthorProfileSelfController extends Controller
         $validated = $request->validateWithBag('authorProfile', [
             'pen_name'               => ['nullable', 'string', 'max:120'],
             'bio'                    => ['nullable', 'string', 'max:500'],
+            'job_title'              => ['nullable', 'string', 'max:150'],
+            'credentials'            => ['nullable', 'string', 'max:255'],
             'social_links'           => ['nullable', 'array'],
             'social_links.facebook'  => ['nullable', 'url', 'max:255'],
             'social_links.x'         => ['nullable', 'url', 'max:255'],
@@ -44,6 +46,8 @@ class AuthorProfileSelfController extends Controller
         $action->handle($user, AuthorProfileData::from([
             'pen_name'          => $validated['pen_name'] ?? null,
             'bio'               => $validated['bio'] ?? null,
+            'job_title'         => $validated['job_title'] ?? null,
+            'credentials'       => $validated['credentials'] ?? null,
             'social_links'      => $socialLinks ?: null,
             'is_public'         => $request->boolean('is_public'),
             'avatar_media_uuid' => $validated['avatar_media_uuid'] ?? null,

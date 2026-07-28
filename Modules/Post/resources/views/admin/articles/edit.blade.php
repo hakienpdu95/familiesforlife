@@ -271,7 +271,7 @@ function postVersionHistory(indexUrl, translationStatus, knownLatestId, canResto
     {{-- ── Cột chính: form bản dịch (hoặc lời mời tạo bản dịch) ──────────── --}}
     <div x-data="{
         tab: 'noi_dung',
-        tabFields: { noi_dung: ['title', 'excerpt', 'blocks', 'disclosure_text', 'cta_text', 'cta_url'], seo: ['seo_title', 'seo_description'] },
+        tabFields: { noi_dung: ['title', 'excerpt', 'direct_answer', 'blocks', 'disclosure_text', 'cta_text', 'cta_url'], seo: ['seo_title', 'seo_description'] },
         errs: {{ Js::from($errors->keys()) }},
         errCount(t) { return this.tabFields[t].filter(f => this.errs.some(e => e === f || e.startsWith(f + '.'))).length; },
         init() { for (const t of ['noi_dung', 'seo']) { if (this.errCount(t) > 0) { this.tab = t; break; } } }
@@ -331,6 +331,22 @@ function postVersionHistory(indexUrl, translationStatus, knownLatestId, canResto
                 </div>
 
                 <div class="form-control">
+                    <label class="label py-0 pb-1.5">
+                        <span class="label-text font-medium">Câu trả lời trực tiếp (AEO)</span>
+                        <span class="label-text-alt text-xs text-base-content/40">~60 từ, trả lời thẳng câu hỏi chính của bài</span>
+                    </label>
+                    <textarea name="direct_answer" rows="2" data-val-maxlength="500"
+                              placeholder="VD: Kỷ luật tích cực là phương pháp dạy con thiết lập ranh giới rõ ràng mà không cần la mắng, dựa trên tôn trọng và hợp tác thay vì trừng phạt."
+                              class="textarea textarea-bordered textarea-sm w-full @error('direct_answer') textarea-error @enderror"
+                              maxlength="500">{{ old('direct_answer', $translation->direct_answer) }}</textarea>
+                    @error('direct_answer')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                    <p class="text-xs text-base-content/40 mt-1">
+                        Hiển thị nổi bật ngay đầu bài viết công khai — AI answer engine (Google AI Overview,
+                        ChatGPT...) ưu tiên trích dẫn câu trả lời trực tiếp xuất hiện sớm trong bài.
+                    </p>
+                </div>
+
+                <div class="form-control">
                     <div class="flex items-center justify-between mb-1">
                         <label class="label py-0 !p-0"><span class="label-text font-medium">Nội dung</span></label>
                         <span class="text-xs text-base-content/40">Tối đa 3 khối sản phẩm/bài</span>
@@ -344,6 +360,9 @@ function postVersionHistory(indexUrl, translationStatus, knownLatestId, canResto
                         <div class="pbc-add-row">
                             <button type="button" class="btn btn-sm btn-outline pbc-add-text">+ Thêm đoạn văn bản</button>
                             <button type="button" class="btn btn-sm btn-outline btn-primary pbc-add-product">+ Thêm khối sản phẩm</button>
+                            <button type="button" class="btn btn-sm btn-outline btn-secondary pbc-add-faq">+ Thêm câu hỏi thường gặp</button>
+                            <button type="button" class="btn btn-sm btn-outline btn-accent pbc-add-citation">+ Thêm trích dẫn có nguồn</button>
+                            <button type="button" class="btn btn-sm btn-outline pbc-add-howto">+ Thêm hướng dẫn từng bước</button>
                         </div>
                         {{-- BUGFIX (không thuộc phần Version History) — phải nằm TRONG .pbc-composer:
                              post-block-composer.js dùng composerEl.querySelector('input[name="blocks_json"]')

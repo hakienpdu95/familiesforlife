@@ -10,20 +10,20 @@ use Carbon\Carbon;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::table('post_content_blocks', function (Blueprint $table) {
-            if (!Schema::hasColumn('post_content_blocks', 'translation_id')) {
+        Schema::table('post_product_blocks', function (Blueprint $table) {
+            if (!Schema::hasColumn('post_product_blocks', 'translation_id')) {
                 $table->unsignedBigInteger('translation_id')->nullable();
             }
-            if (!Schema::hasIndex('post_content_blocks', 'idx_post_cb_translation_order')) {
-                $table->index(['translation_id', 'sort_order'], 'idx_post_cb_translation_order');
+            if (!Schema::hasIndex('post_product_blocks', 'idx_post_pb_translation')) {
+                $table->index('translation_id', 'idx_post_pb_translation');
             }
         });
     }
 
     public function down(): void
     {
-        Schema::table('post_content_blocks', function (Blueprint $table) {
-            $cols = array_filter(['translation_id'], fn($c) => Schema::hasColumn('post_content_blocks', $c));
+        Schema::table('post_product_blocks', function (Blueprint $table) {
+            $cols = array_filter(['translation_id'], fn($c) => Schema::hasColumn('post_product_blocks', $c));
             if (!empty($cols)) $table->dropColumn(array_values($cols));
         });
     }

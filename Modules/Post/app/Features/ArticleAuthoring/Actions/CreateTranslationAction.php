@@ -11,6 +11,8 @@ use Modules\Post\Features\ArticleAuthoring\Data\TranslationData;
 use Modules\Post\Models\PostArticle;
 use Modules\Post\Models\PostArticleTranslation;
 use Modules\Post\Models\PostContentBlock;
+use Modules\Post\Models\PostFaqBlock;
+use Modules\Post\Models\PostHowtoBlock;
 use Modules\Post\Models\PostProductBlock;
 use Modules\Post\Models\PostProductBlockButton;
 
@@ -36,6 +38,7 @@ class CreateTranslationAction
                 'excerpt'         => $data->excerpt,
                 'seo_title'       => $data->seo_title,
                 'seo_description' => $data->seo_description,
+                'direct_answer'   => $data->direct_answer,
                 'status'          => TranslationStatus::Draft,
                 // spec/dac-ta-ky-thuat-bai-viet-tai-tro.md §7 — field per-locale của sponsorship,
                 // đúng như disclosure_text/cta_text/cta_url đã validate ở §6.2.
@@ -97,8 +100,88 @@ class CreateTranslationAction
                     'sort_order'       => $block->sort_order,
                     'product_block_id' => $newProductBlock->id,
                 ]);
+
+                continue;
+            }
+
+            if ($block->type === ContentBlockType::Faq && $block->faqBlock) {
+                $newFaqBlock = $this->copyFaqBlock($block->faqBlock, $target);
+
+                PostContentBlock::create([
+                    'translation_id' => $target->id,
+                    'type'           => ContentBlockType::Faq,
+                    'sort_order'     => $block->sort_order,
+                    'faq_block_id'   => $newFaqBlock->id,
+                ]);
+
+                continue;
+            }
+
+            if ($block->type === ContentBlockType::Citation) {
+                PostContentBlock::create([
+                    'translation_id'       => $target->id,
+                    'type'                 => ContentBlockType::Citation,
+                    'sort_order'           => $block->sort_order,
+                    'citation_text'        => $block->citation_text,
+                    'citation_source_name' => $block->citation_source_name,
+                    'citation_source_url'  => $block->citation_source_url,
+                ]);
+
+                continue;
+            }
+
+            if ($block->type === ContentBlockType::Howto && $block->howtoBlock) {
+                $newHowtoBlock = $this->copyHowtoBlock($block->howtoBlock, $target);
+
+                PostContentBlock::create([
+                    'translation_id' => $target->id,
+                    'type'           => ContentBlockType::Howto,
+                    'sort_order'     => $block->sort_order,
+                    'howto_block_id' => $newHowtoBlock->id,
+                ]);
             }
         }
+    }
+
+    private function copyHowtoBlock(PostHowtoBlock $source, PostArticleTranslation $target): PostHowtoBlock
+    {
+        $new = PostHowtoBlock::create([
+            'uuid'           => (string) Str::uuid(),
+            'translation_id' => $target->id,
+            'name'           => $source->name,
+            'description'    => $source->description,
+            'sort_order'     => $source->sort_order,
+        ]);
+
+        foreach ($source->steps as $step) {
+            $new->steps()->create([
+                'name'       => $step->name,
+                'text'       => $step->text,
+                'sort_order' => $step->sort_order,
+            ]);
+        }
+
+        return $new;
+    }
+
+    private function copyFaqBlock(PostFaqBlock $source, PostArticleTranslation $target): PostFaqBlock
+    {
+        $new = PostFaqBlock::create([
+            'uuid'           => (string) Str::uuid(),
+            'translation_id' => $target->id,
+            'heading'        => $source->heading,
+            'sort_order'     => $source->sort_order,
+        ]);
+
+        foreach ($source->items as $item) {
+            $new->items()->create([
+                'question'   => $item->question,
+                'answer'     => $item->answer,
+                'sort_order' => $item->sort_order,
+            ]);
+        }
+
+        return $new;
     }
 
     private function copyProductBlock(PostProductBlock $source, PostArticleTranslation $target): PostProductBlock

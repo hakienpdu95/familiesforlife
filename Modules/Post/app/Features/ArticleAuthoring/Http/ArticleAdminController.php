@@ -120,7 +120,7 @@ class ArticleAdminController extends Controller
     {
         $this->authorizeArticle($article, 'post_article.edit');
 
-        $article->load(['categories', 'tags', 'ocopProducts', 'translations.contentBlocks.productBlock.items.product', 'translations.contentBlocks.productBlock.items.buttons', 'translations.contentBlocks.productBlock.buttons']);
+        $article->load(['categories', 'tags', 'ocopProducts', 'translations.contentBlocks.productBlock.items.product', 'translations.contentBlocks.productBlock.items.buttons', 'translations.contentBlocks.productBlock.buttons', 'translations.contentBlocks.faqBlock.items', 'translations.contentBlocks.howtoBlock.steps']);
 
         // Cây danh mục thật (cha/con/cháu...) — cùng lý do create() ở trên.
         $categoryTree = $categoryTreeHandler->handle(new GetCategoryTreeQuery());

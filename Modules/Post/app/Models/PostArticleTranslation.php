@@ -67,6 +67,7 @@ class PostArticleTranslation extends Model implements HasMedia
         'disclosure_text',
         'cta_text',
         'cta_url',
+        'direct_answer',
     ];
 
     protected $casts = [
@@ -134,6 +135,16 @@ class PostArticleTranslation extends Model implements HasMedia
     public function productBlocks(): HasMany
     {
         return $this->hasMany(PostProductBlock::class, 'translation_id')->orderBy('sort_order');
+    }
+
+    public function faqBlocks(): HasMany
+    {
+        return $this->hasMany(PostFaqBlock::class, 'translation_id')->orderBy('sort_order');
+    }
+
+    public function howtoBlocks(): HasMany
+    {
+        return $this->hasMany(PostHowtoBlock::class, 'translation_id')->orderBy('sort_order');
     }
 
     public function publishingLogs(): HasMany
@@ -229,6 +240,46 @@ class PostArticleTranslation extends Model implements HasMedia
             ->map(fn ($html) => trim(strip_tags((string) $html)))
             ->filter()
             ->implode(' ');
+
+        // AEO — nội dung FAQ (câu hỏi + trả lời) cũng nên tìm được, cùng lý do body_text ở trên
+        // phải QUERY LẠI (không dùng property đã cache) trong cùng transaction xoá-tạo-lại blocks.
+        $faqText = $this->faqBlocks()
+            ->with('items:id,faq_block_id,question,answer')
+            ->get()
+            ->flatMap(fn (PostFaqBlock $block) => $block->items)
+            ->map(fn (PostFaqItem $item) => trim(strip_tags($item->question . ' ' . $item->answer)))
+            ->filter()
+            ->implode(' ');
+
+        if ($faqText !== '') {
+            $bodyText = trim($bodyText . ' ' . $faqText);
+        }
+
+        // GEO đợt 4 — nội dung Citation (trích dẫn/thống kê + tên nguồn) cũng nên tìm được.
+        $citationText = $this->contentBlocks()
+            ->where('type', ContentBlockType::Citation)
+            ->orderBy('sort_order')
+            ->get(['citation_text', 'citation_source_name'])
+            ->map(fn ($block) => trim($block->citation_text . ' ' . $block->citation_source_name))
+            ->filter()
+            ->implode(' ');
+
+        if ($citationText !== '') {
+            $bodyText = trim($bodyText . ' ' . $citationText);
+        }
+
+        // GEO đợt 4 — nội dung HowTo (tên bước + chi tiết bước) cũng nên tìm được, cùng lý do trên.
+        $howtoText = $this->howtoBlocks()
+            ->with('steps:id,howto_block_id,name,text')
+            ->get()
+            ->flatMap(fn (PostHowtoBlock $block) => $block->steps)
+            ->map(fn (PostHowtoStep $step) => trim(strip_tags($step->name . ' ' . $step->text)))
+            ->filter()
+            ->implode(' ');
+
+        if ($howtoText !== '') {
+            $bodyText = trim($bodyText . ' ' . $howtoText);
+        }
 
         return [
             'id'               => $this->id,

@@ -6,6 +6,10 @@ use Illuminate\Support\Collection;
 use Modules\Post\Enums\ContentBlockType;
 use Modules\Post\Models\PostArticleTranslation;
 use Modules\Post\Models\PostContentBlock;
+use Modules\Post\Models\PostFaqBlock;
+use Modules\Post\Models\PostFaqItem;
+use Modules\Post\Models\PostHowtoBlock;
+use Modules\Post\Models\PostHowtoStep;
 use Modules\Post\Models\PostProductBlock;
 use Modules\Post\Models\PostProductBlockButton;
 use Modules\Post\Models\PostProductBlockItem;
@@ -24,12 +28,28 @@ class ArticleContentRenderer
     public function render(PostArticleTranslation $translation): string
     {
         $blocks = $translation->contentBlocks()
-            ->with(['productBlock.items.product', 'productBlock.items.buttons', 'productBlock.buttons'])
+            ->with(['productBlock.items.product', 'productBlock.items.buttons', 'productBlock.buttons', 'faqBlock.items', 'howtoBlock.steps'])
             ->get();
 
         return $blocks->map(function ($block) {
             if ($block->type === ContentBlockType::Text) {
                 return (string) $block->text_html;
+            }
+
+            if ($block->type === ContentBlockType::Faq) {
+                return $block->faqBlock
+                    ? view('post::components.faq-block.default', ['block' => $block->faqBlock])->render()
+                    : '';
+            }
+
+            if ($block->type === ContentBlockType::Citation) {
+                return view('post::components.citation-block.default', ['block' => $block])->render();
+            }
+
+            if ($block->type === ContentBlockType::Howto) {
+                return $block->howtoBlock
+                    ? view('post::components.howto-block.default', ['block' => $block->howtoBlock])->render()
+                    : '';
             }
 
             if (! $block->productBlock) {
@@ -106,12 +126,56 @@ class ArticleContentRenderer
     public function toComposerPayload(PostArticleTranslation $translation): array
     {
         $blocks = $translation->contentBlocks()
-            ->with(['productBlock.items.product', 'productBlock.items.buttons', 'productBlock.buttons'])
+            ->with(['productBlock.items.product', 'productBlock.items.buttons', 'productBlock.buttons', 'faqBlock.items', 'howtoBlock.steps'])
             ->get();
 
         return $blocks->map(function (PostContentBlock $block) {
             if ($block->type === ContentBlockType::Text) {
                 return ['type' => 'text', 'html' => $block->text_html];
+            }
+
+            if ($block->type === ContentBlockType::Faq) {
+                $fb = $block->faqBlock;
+                if (! $fb) {
+                    return null;
+                }
+
+                return [
+                    'type'       => 'faq',
+                    'block_uuid' => $fb->uuid,
+                    'heading'    => $fb->heading,
+                    'items'      => $fb->items->map(fn ($item) => [
+                        'question' => $item->question,
+                        'answer'   => $item->answer,
+                    ])->values(),
+                ];
+            }
+
+            if ($block->type === ContentBlockType::Citation) {
+                return [
+                    'type'                 => 'citation',
+                    'citation_text'        => $block->citation_text,
+                    'citation_source_name' => $block->citation_source_name,
+                    'citation_source_url'  => $block->citation_source_url,
+                ];
+            }
+
+            if ($block->type === ContentBlockType::Howto) {
+                $hb = $block->howtoBlock;
+                if (! $hb) {
+                    return null;
+                }
+
+                return [
+                    'type'        => 'howto',
+                    'block_uuid'  => $hb->uuid,
+                    'name'        => $hb->name,
+                    'description' => $hb->description,
+                    'steps'       => $hb->steps->map(fn ($step) => [
+                        'name' => $step->name,
+                        'text' => $step->text,
+                    ])->values(),
+                ];
             }
 
             $pb = $block->productBlock;
@@ -203,6 +267,31 @@ class ArticleContentRenderer
                 return (string) ($blockData['text_html'] ?? '');
             }
 
+            if (($blockData['type'] ?? null) === 'faq') {
+                return view('post::components.faq-block.default', [
+                    'block'   => $this->hydrateFaqBlockSnapshot($blockData),
+                    'preview' => true,
+                ])->render();
+            }
+
+            if (($blockData['type'] ?? null) === 'citation') {
+                return view('post::components.citation-block.default', [
+                    'block'   => (object) [
+                        'citation_text'        => $blockData['citation_text'] ?? '',
+                        'citation_source_name'  => $blockData['citation_source_name'] ?? '',
+                        'citation_source_url'   => $blockData['citation_source_url'] ?? null,
+                    ],
+                    'preview' => true,
+                ])->render();
+            }
+
+            if (($blockData['type'] ?? null) === 'howto') {
+                return view('post::components.howto-block.default', [
+                    'block'   => $this->hydrateHowtoBlockSnapshot($blockData),
+                    'preview' => true,
+                ])->render();
+            }
+
             $block = $this->hydrateProductBlockSnapshot($blockData, $existingProducts, $missingProductIds);
 
             return view(
@@ -212,6 +301,63 @@ class ArticleContentRenderer
         })->implode('');
 
         return ['html' => $html, 'missing_products' => $missingProducts];
+    }
+
+    /** FAQ không tham chiếu entity ngoài (Product) — không có khái niệm "đã xoá"/fallback như product, đơn giản hơn nhiều. */
+    private function hydrateFaqBlockSnapshot(array $blockData): PostFaqBlock
+    {
+        $block = new PostFaqBlock();
+        $block->exists = false;
+        $block->forceFill([
+            'id'      => 0,
+            'uuid'    => $blockData['block_uuid'] ?? null,
+            'heading' => $blockData['heading'] ?? null,
+        ]);
+
+        $items = collect($blockData['items'] ?? [])->map(function ($itemData) {
+            $item = new PostFaqItem();
+            $item->exists = false;
+            $item->forceFill([
+                'id'       => 0,
+                'question' => $itemData['question'] ?? '',
+                'answer'   => $itemData['answer'] ?? '',
+            ]);
+
+            return $item;
+        });
+
+        $block->setRelation('items', $items);
+
+        return $block;
+    }
+
+    /** HowTo không tham chiếu entity ngoài — không cần fallback như product, đơn giản hơn nhiều. */
+    private function hydrateHowtoBlockSnapshot(array $blockData): PostHowtoBlock
+    {
+        $block = new PostHowtoBlock();
+        $block->exists = false;
+        $block->forceFill([
+            'id'          => 0,
+            'uuid'        => $blockData['block_uuid'] ?? null,
+            'name'        => $blockData['name'] ?? null,
+            'description' => $blockData['description'] ?? null,
+        ]);
+
+        $steps = collect($blockData['steps'] ?? [])->map(function ($stepData) {
+            $step = new PostHowtoStep();
+            $step->exists = false;
+            $step->forceFill([
+                'id'   => 0,
+                'name' => $stepData['name'] ?? '',
+                'text' => $stepData['text'] ?? '',
+            ]);
+
+            return $step;
+        });
+
+        $block->setRelation('steps', $steps);
+
+        return $block;
     }
 
     private function hydrateProductBlockSnapshot(array $blockData, Collection $existingProducts, Collection $missingProductIds): PostProductBlock

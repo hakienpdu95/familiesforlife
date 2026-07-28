@@ -21,6 +21,11 @@ class PostContentBlock extends Model
         'sort_order',
         'text_html',
         'product_block_id',
+        'faq_block_id',
+        'citation_text',
+        'citation_source_name',
+        'citation_source_url',
+        'howto_block_id',
     ];
 
     protected $casts = [
@@ -36,5 +41,15 @@ class PostContentBlock extends Model
     public function productBlock(): BelongsTo
     {
         return $this->belongsTo(PostProductBlock::class, 'product_block_id');
+    }
+
+    public function faqBlock(): BelongsTo
+    {
+        return $this->belongsTo(PostFaqBlock::class, 'faq_block_id');
+    }
+
+    public function howtoBlock(): BelongsTo
+    {
+        return $this->belongsTo(PostHowtoBlock::class, 'howto_block_id');
     }
 }

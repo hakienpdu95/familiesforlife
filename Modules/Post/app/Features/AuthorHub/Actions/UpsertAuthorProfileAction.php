@@ -32,6 +32,8 @@ class UpsertAuthorProfileAction
         $profile->user_id      = $user->id;
         $profile->pen_name     = $data->pen_name;
         $profile->bio          = $data->bio;
+        $profile->job_title    = $data->job_title;
+        $profile->credentials  = $data->credentials;
         $profile->social_links = $data->social_links;
         $profile->is_public    = $data->is_public;
         $profile->save();

@@ -5,6 +5,42 @@
 
 @push('meta')
 <link rel="canonical" href="{{ route('post.public.home') }}">
+
+{{--
+    GEO (2026-07-28) — Organization + WebSite JSON-LD: trang chủ trước đó chỉ có
+    SiteNavigationElement (layouts/frontend.blade.php), không có node nào xác định THỰC THỂ site
+    (tên/mô tả/URL) — nhiều bài GEO nhấn mạnh "Entity Clarity" là yếu tố AI answer engine ưu tiên.
+    SearchAction trỏ đúng query param `q` mà PublicCategoryController::index() đang đọc
+    ($request->string('q')) — KHÔNG phải `search`, dễ nhầm vì tên biến Blade là $search.
+--}}
+@php
+    $homeUrl = route('post.public.home');
+    $orgWebsiteJsonLd = json_encode([
+        '@context' => 'https://schema.org',
+        '@graph'   => [
+            [
+                '@type' => 'Organization',
+                'name'  => config('app.site_name'),
+                'url'   => $homeUrl,
+                'description' => 'Cẩm nang gia đình — hoạt động, trường học, nuôi dạy con và trải nghiệm cho cả nhà.',
+            ],
+            [
+                '@type' => 'WebSite',
+                'name'  => config('app.site_name'),
+                'url'   => $homeUrl,
+                'potentialAction' => [
+                    '@type'  => 'SearchAction',
+                    'target' => [
+                        '@type'       => 'EntryPoint',
+                        'urlTemplate' => $homeUrl . '?q={search_term_string}',
+                    ],
+                    'query-input' => 'required name=search_term_string',
+                ],
+            ],
+        ],
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+@endphp
+<script type="application/ld+json">{!! $orgWebsiteJsonLd !!}</script>
 @endpush
 
 @php

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@hasSection('title')@yield('title') — @endif{{ config('app.name', 'Cổng thông tin') }}</title>
+    <title>@hasSection('title')@yield('title') — @endif{{ config('app.site_name') }}</title>
     @hasSection('meta_description')
     <meta name="description" content="@yield('meta_description')">
     @endif

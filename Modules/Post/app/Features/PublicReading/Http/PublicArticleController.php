@@ -12,6 +12,7 @@ use Modules\Post\Features\RelatedPosts\Queries\GetRelatedArticlesHandler;
 use Modules\Post\Features\RelatedPosts\Queries\GetRelatedArticlesQuery;
 use Modules\Post\Models\PostArticleTranslation;
 use Modules\Post\Support\ArticleContentRenderer;
+use Modules\Post\Support\ArticleStructuredDataBuilder;
 
 /**
  * Cổng thông tin công khai chỉ phục vụ 1 locale (config('post.default_locale')) — không còn
@@ -28,13 +29,16 @@ class PublicArticleController extends Controller
         RecordArticleViewEventAction $viewEventAction,
         GetRelatedArticlesHandler $relatedHandler,
         ArticleContentRenderer $renderer,
+        ArticleStructuredDataBuilder $structuredDataBuilder,
     ): View|RedirectResponse {
         $translation = PostArticleTranslation::published()
             ->where('locale', config('post.default_locale'))
             ->where('slug', $slug)
             ->with([
-                'article.categories', 'article.tags', 'article.createdBy',
+                'article.categories', 'article.tags', 'article.createdBy.authorProfile',
                 'contentBlocks.productBlock.items.product', 'contentBlocks.productBlock.items.buttons', 'contentBlocks.productBlock.buttons',
+                'contentBlocks.faqBlock.items', 'faqBlocks.items',
+                'contentBlocks.howtoBlock.steps', 'howtoBlocks.steps',
             ])
             ->first();
 
@@ -66,6 +70,8 @@ class PublicArticleController extends Controller
             limit: (int) config('post.related_posts.max_results', 6),
         ));
 
+        $canonicalUrl = route('post.public.article', ['slug' => $translation->slug, 'id' => $translation->id]);
+
         // Không còn truyền 'categories' — Phase 3 chuyển nav sang MenuItem::tree() qua View
         // Composer (MenuServiceProvider), public.article.blade.php không tự dùng $categories
         // cho việc gì khác (xem spec/Menu_Navigation_Technical_Specification.md §8 Phase 4).
@@ -75,6 +81,8 @@ class PublicArticleController extends Controller
             'locale'          => $translation->locale,
             'content'         => $renderer->render($translation),
             'relatedArticles' => $related,
+            'canonicalUrl'    => $canonicalUrl,
+            'structuredData'  => $structuredDataBuilder->build($article, $translation, $canonicalUrl),
         ]);
     }
 }
