@@ -94,7 +94,7 @@
 
     {{-- ── Top referrers ───────────────────────────────────────────────── --}}
     <div class="card bg-base-100 border border-base-200 shadow-sm">
-        <div class="card-body p-4">
+        <div class="card-body p-3">
             <h2 class="font-semibold text-base-content mb-1">Top nguồn dẫn tới click (30 ngày gần nhất)</h2>
             <p class="text-xs text-base-content/40 mb-3">Đường dẫn (vd "/", "/bai-viet/danh-muc/...") = trang trên chính site này; tên domain = nguồn ngoài (Facebook, Google...).</p>
             @if($stats['topReferrers']->isEmpty())

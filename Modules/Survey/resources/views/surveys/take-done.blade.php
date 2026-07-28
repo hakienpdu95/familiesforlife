@@ -55,7 +55,7 @@
 
         {{-- Score card --}}
         <div class="card bg-base-100 shadow-sm border border-base-200">
-            <div class="card-body p-4">
+            <div class="card-body p-3">
 
                 <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-4">
                     Kết quả của bạn

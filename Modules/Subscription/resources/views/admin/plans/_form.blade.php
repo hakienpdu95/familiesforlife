@@ -46,13 +46,13 @@
     @csrf
     @if ($method !== 'POST') @method($method) @endif
 
-    <div class="grid grid-cols-1 xl:grid-cols-[1fr_268px] gap-6 items-start">
+    <div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-6 items-start">
 
         {{-- ── Card chính: tab nav + panels ─────────────────────────── --}}
         <div class="card bg-base-100 shadow-sm border border-base-200">
 
             {{-- Tab navigation --}}
-            <div class="border-b border-base-200 px-6">
+            <div class="border-b border-base-200 px-3">
                 <nav class="flex -mb-px" role="tablist" aria-label="Phần thông tin plan">
 
                     <button type="button" role="tab" :aria-selected="tab === 'basic'"
@@ -92,7 +92,7 @@
             </div>
 
             {{-- Tab panels --}}
-            <div class="p-6">
+            <div class="p-3">
 
                 {{-- ── Tab 1: Thông tin cơ bản ─────────────────────── --}}
                 <div x-show="tab === 'basic'" data-tab-label="Thông tin cơ bản" class="space-y-4">
@@ -409,7 +409,7 @@
         <div class="xl:sticky xl:top-4 space-y-4">
 
             <div class="card bg-base-100 shadow-sm border border-base-200">
-                <div class="card-body p-4">
+                <div class="card-body p-3">
 
                     <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">
                         Xuất bản

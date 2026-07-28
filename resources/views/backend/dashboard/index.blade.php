@@ -84,7 +84,7 @@
     <a href="{{ $card['link'] }}"
        class="card bg-base-100 border {{ $card['urgent'] ? 'border-' . ($card['color'] === 'error' ? 'error' : 'warning') . '/40' : 'border-base-200' }}
               shadow-sm hover:shadow-md hover:border-primary/30 transition-all group">
-        <div class="card-body p-4">
+        <div class="card-body p-3">
             <div class="flex items-start justify-between mb-3">
                 <div class="w-9 h-9 rounded-xl {{ $c['bg'] }} flex items-center justify-center shrink-0">
                     <svg class="w-5 h-5 {{ $c['icon'] }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -134,7 +134,7 @@
         {{-- Lead Funnel --}}
         @if($showLeadFunnel)
         <div class="card bg-base-100 border border-base-200 shadow-sm">
-            <div class="card-body p-4">
+            <div class="card-body p-3">
                 <div class="mb-3">
                     <h3 class="font-semibold text-sm text-base-content">Phễu Sales (Lead đang theo dõi)</h3>
                     <p class="text-xs text-base-content/40 mt-0.5">Số lead active theo từng giai đoạn pipeline</p>
@@ -152,7 +152,7 @@
         {{-- Workflow Health --}}
         @if($showWorkflowHealth)
         <div class="card bg-base-100 border border-base-200 shadow-sm">
-            <div class="card-body p-4">
+            <div class="card-body p-3">
                 <div class="flex items-center justify-between mb-3">
                     <div>
                         <h3 class="font-semibold text-sm text-base-content">Workflow Health</h3>

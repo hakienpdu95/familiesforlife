@@ -26,7 +26,7 @@
 
 {{-- Filters --}}
 <div class="card bg-base-100 shadow-sm border border-base-200 mb-4">
-    <div class="card-body p-4">
+    <div class="card-body p-3">
         <div class="flex flex-wrap gap-3 items-end">
             <div class="form-control flex-1 min-w-[160px]">
                 <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Tìm kiếm</span></label>

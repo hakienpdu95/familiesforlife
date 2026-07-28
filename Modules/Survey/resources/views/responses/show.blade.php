@@ -46,7 +46,7 @@
 
     {{-- Meta card --}}
     <div class="card bg-base-100 border border-base-200 shadow-sm">
-        <div class="card-body p-4">
+        <div class="card-body p-3">
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
                 <div>
                     <p class="text-xs text-base-content/50 mb-0.5">Respondent</p>

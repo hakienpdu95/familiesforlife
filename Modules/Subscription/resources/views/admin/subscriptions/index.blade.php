@@ -320,7 +320,7 @@
         </div>
 
         {{-- Tab navigation --}}
-        <div class="border-b border-base-200 px-6">
+        <div class="border-b border-base-200 px-3">
             <nav class="flex -mb-px" role="tablist">
 
                 <button type="button" role="tab" :aria-selected="activeTab === 'assign'"

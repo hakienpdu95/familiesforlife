@@ -204,7 +204,7 @@
 
     {{-- ── By Source table ──────────────────────────────────────────────── --}}
     <div class="card bg-base-100 border border-base-200 shadow-sm">
-        <div class="card-body p-4">
+        <div class="card-body p-3">
             <h2 class="font-semibold text-sm text-base-content mb-3">Phân tích theo Nguồn Lead</h2>
 
             <div class="overflow-x-auto rounded-lg border border-base-200">
@@ -268,7 +268,7 @@
 
     {{-- ── By Assignee table ────────────────────────────────────────────── --}}
     <div class="card bg-base-100 border border-base-200 shadow-sm">
-        <div class="card-body p-4">
+        <div class="card-body p-3">
             <h2 class="font-semibold text-sm text-base-content mb-3">Phân tích theo Người phụ trách</h2>
 
             <div class="overflow-x-auto rounded-lg border border-base-200">

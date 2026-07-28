@@ -27,7 +27,7 @@
     <div class="space-y-3">
         @foreach($tasks as $task)
         <div class="card bg-base-100 shadow-sm border border-base-200 hover:border-primary/30 transition-colors">
-            <div class="card-body p-4">
+            <div class="card-body p-3">
                 <div class="flex items-start justify-between gap-4">
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 mb-1.5">

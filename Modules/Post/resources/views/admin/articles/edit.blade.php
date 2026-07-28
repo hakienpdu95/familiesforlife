@@ -266,7 +266,7 @@ function postVersionHistory(indexUrl, translationStatus, knownLatestId, canResto
 </div>
 @endif
 
-<div class="grid grid-cols-1 xl:grid-cols-[1fr_268px] gap-6 items-start">
+<div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-6 items-start">
 
     {{-- ── Cột chính: form bản dịch (hoặc lời mời tạo bản dịch) ──────────── --}}
     <div x-data="{
@@ -283,7 +283,7 @@ function postVersionHistory(indexUrl, translationStatus, knownLatestId, canResto
         @csrf
         @method('PUT')
 
-        <div class="border-b border-base-200 px-6">
+        <div class="border-b border-base-200 px-3">
             <nav class="flex -mb-px" role="tablist">
                 <button type="button" role="tab" @click="tab = 'noi_dung'"
                         class="flex items-center gap-1.5 px-1 py-4 mr-6 text-sm font-medium border-b-2 transition-colors"
@@ -300,7 +300,7 @@ function postVersionHistory(indexUrl, translationStatus, knownLatestId, canResto
             </nav>
         </div>
 
-        <div class="p-6">
+        <div class="p-3">
 
             <div x-show="tab === 'noi_dung'" data-tab-label="Nội dung" class="space-y-4">
 
@@ -494,7 +494,7 @@ function postVersionHistory(indexUrl, translationStatus, knownLatestId, canResto
               x-data="{ isSponsored: {{ old('is_sponsored', $article->is_sponsored) ? 'true' : 'false' }}, format: '{{ old('format', $article->format->value) }}' }">
             @csrf
             @method('PUT')
-            <div class="card-body p-4">
+            <div class="card-body p-3">
                 <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">Cài đặt chung</p>
 
                 <div class="form-control mb-3">
@@ -704,7 +704,7 @@ function postVersionHistory(indexUrl, translationStatus, knownLatestId, canResto
         @if($translation)
         <div class="card bg-base-100 shadow-sm border border-base-200"
              x-data="{ showSchedule: false, showUnpublish: false, showTakedown: false }">
-            <div class="card-body p-4">
+            <div class="card-body p-3">
                 <div class="flex items-center justify-between mb-3">
                     <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide">Trạng thái ({{ config('post.locales')[$translation->locale] }})</p>
                     <span class="badge badge-sm {{ $translation->status->badgeClass() }}">{{ $translation->status->label() }}</span>
@@ -827,7 +827,7 @@ function postVersionHistory(indexUrl, translationStatus, knownLatestId, canResto
              mới, tái dùng post_article.view (§0). --}}
         @if($canViewHistory)
         <div class="card bg-base-100 shadow-sm border border-base-200">
-            <div class="card-body p-4">
+            <div class="card-body p-3">
                 <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">Lịch sử phiên bản</p>
                 <button type="button" class="btn btn-outline btn-sm w-full" @click="openHistory()">Xem lịch sử phiên bản</button>
             </div>

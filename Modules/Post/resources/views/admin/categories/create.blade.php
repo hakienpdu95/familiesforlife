@@ -36,7 +36,7 @@
 <form method="POST" action="{{ route('backend.post.categories.store') }}" novalidate data-post-category-form>
     @csrf
 
-    <div class="grid grid-cols-1 xl:grid-cols-[1fr_268px] gap-6 items-start">
+    <div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-6 items-start">
 
         {{-- ── Card chính ──────────────────────────────────────────────── --}}
         <div class="space-y-5">
@@ -147,7 +147,7 @@
         {{-- ── Sidebar ──────────────────────────────────────────────────── --}}
         <div class="xl:sticky xl:top-4 space-y-4">
             <div class="card bg-base-100 shadow-sm border border-base-200">
-                <div class="card-body p-4">
+                <div class="card-body p-3">
 
                     <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">
                         Xuất bản

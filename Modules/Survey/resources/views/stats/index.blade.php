@@ -225,7 +225,7 @@
                  x-transition:enter-start="opacity-0 translate-y-1"
                  x-transition:enter-end="opacity-100 translate-y-0"
                  class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-shadow">
-                <div class="card-body p-4">
+                <div class="card-body p-3">
 
                     {{-- Card header --}}
                     <div class="flex items-start justify-between gap-2 mb-1">

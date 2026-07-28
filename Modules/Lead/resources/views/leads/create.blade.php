@@ -53,13 +53,13 @@
 <form method="POST" action="{{ route('lead.store') }}" novalidate data-lead-form>
     @csrf
 
-    <div class="grid grid-cols-1 xl:grid-cols-[1fr_268px] gap-6 items-start">
+    <div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-6 items-start">
 
         {{-- ── Card chính: tab nav + panels ───────────────────────────── --}}
         <div class="card bg-base-100 shadow-sm border border-base-200">
 
             {{-- Tab navigation --}}
-            <div class="border-b border-base-200 px-6">
+            <div class="border-b border-base-200 px-3">
                 <nav class="flex -mb-px" role="tablist" aria-label="Form sections">
 
                     <button type="button" role="tab" :aria-selected="tab === 'customer'"
@@ -108,7 +108,7 @@
             </div>
 
             {{-- Tab panels --}}
-            <div class="p-6">
+            <div class="p-3">
 
                 {{-- ── Panel: Khách hàng ─────────────────────────────── --}}
                 <div x-show="tab === 'customer'" data-tab-label="Khách hàng" class="space-y-4">
@@ -424,7 +424,7 @@
 
             {{-- Pipeline & Submit --}}
             <div class="card bg-base-100 shadow-sm border border-base-200">
-                <div class="card-body p-4">
+                <div class="card-body p-3">
 
                     <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">
                         Pipeline

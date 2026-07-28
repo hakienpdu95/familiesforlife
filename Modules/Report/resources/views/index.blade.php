@@ -9,7 +9,7 @@
 @endsection
 
 @section('content')
-<div class="p-6">
+<div class="p-3">
     <div class="mb-6">
         <h1 class="text-2xl font-bold text-base-content">Báo cáo & Phân tích</h1>
         <p class="text-sm text-base-content/60 mt-1">Tổng hợp dữ liệu cross-module theo tổ chức</p>

@@ -360,7 +360,7 @@
                 <div class="space-y-4">
 
                     <div class="card bg-base-100 shadow-sm border border-base-200">
-                        <div class="card-body py-4 px-5">
+                        <div class="card-body py-3 px-3">
                             <div class="grid grid-cols-3 gap-4 text-center">
                                 <div>
                                     <p class="text-xs text-base-content/50 mb-1">Điểm tổng</p>

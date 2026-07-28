@@ -50,7 +50,7 @@
                 <div class="w-full h-full flex items-center justify-center text-base-content/30">Chưa có ảnh</div>
                 @endif
             </figure>
-            <div class="card-body p-4">
+            <div class="card-body p-3">
                 @if($listing->is_urgent)
                 <span class="badge badge-error badge-sm mb-1">Bán gấp</span>
                 @endif

@@ -24,7 +24,7 @@
     </div>
 
     <div class="card bg-base-100 shadow-sm border border-base-200 mb-4">
-        <div class="card-body py-4 px-5">
+        <div class="card-body py-3 px-3">
             <div class="tabs tabs-boxed tabs-xs w-fit mb-3">
                 <button type="button" class="tab" :class="{ 'tab-active': mode === 'url' }" @click="mode = 'url'">Nhập URL</button>
                 <button type="button" class="tab" :class="{ 'tab-active': mode === 'html' }" @click="mode = 'html'">Dán mã HTML</button>
@@ -183,7 +183,7 @@
     </div>
 
     <div class="card bg-base-100 shadow-sm border border-base-200" x-show="result" x-cloak>
-        <div class="card-body py-4 px-5">
+        <div class="card-body py-3 px-3">
             <div class="flex items-center justify-between gap-3 mb-3 flex-wrap">
                 <template x-if="!isBatchResult()">
                     <div class="flex items-center gap-2">

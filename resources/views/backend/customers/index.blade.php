@@ -14,7 +14,7 @@
 {{-- Stats --}}
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
     @foreach([['Tổng KH','4,921','text-primary'],['KH mới tháng này','142','text-success'],['KH hoạt động','3,284','text-info'],['Đã chặn','12','text-error']] as [$label,$val,$color])
-    <div class="card bg-base-100 shadow-sm border border-base-200"><div class="card-body p-4"><p class="text-xs text-base-content/50 uppercase tracking-wide font-semibold mb-1">{{ $label }}</p><p class="text-2xl font-bold {{ $color }}">{{ $val }}</p></div></div>
+    <div class="card bg-base-100 shadow-sm border border-base-200"><div class="card-body p-3"><p class="text-xs text-base-content/50 uppercase tracking-wide font-semibold mb-1">{{ $label }}</p><p class="text-2xl font-bold {{ $color }}">{{ $val }}</p></div></div>
     @endforeach
 </div>
 

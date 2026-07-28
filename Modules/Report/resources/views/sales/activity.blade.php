@@ -205,7 +205,7 @@
 
     {{-- ── By Assignee table ────────────────────────────────────────────── --}}
     <div class="card bg-base-100 border border-base-200 shadow-sm">
-        <div class="card-body p-4">
+        <div class="card-body p-3">
             <div class="flex items-center justify-between gap-2 mb-3">
                 <h2 class="font-semibold text-sm text-base-content">Top 10 nhân viên theo hoạt động</h2>
                 <span class="badge badge-xs badge-ghost">Top 10</span>

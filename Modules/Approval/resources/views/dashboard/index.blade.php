@@ -14,7 +14,7 @@
 
 @forelse ($pending as $subjectType => $items)
     <div class="card bg-base-100 shadow-sm border border-base-200 mb-4">
-        <div class="card-body p-4">
+        <div class="card-body p-3">
             <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">
                 {{ config("approval.subjects.{$subjectType}.label", $subjectType) }}
                 <span class="badge badge-warning badge-sm ml-1">{{ $items->count() }}</span>

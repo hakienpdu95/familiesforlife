@@ -57,7 +57,7 @@
     {{-- Progress bar (multi-section only) --}}
     @if($sectionCount > 1)
     <div class="card bg-base-100 shadow-sm border border-base-200 mb-5">
-        <div class="card-body p-4">
+        <div class="card-body p-3">
             <div class="flex items-center justify-between mb-1.5">
                 <span class="text-xs text-base-content/50">
                     Phần

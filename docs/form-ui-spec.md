@@ -57,7 +57,7 @@ Input height:    input-sm  = 2.25rem (36px)
 Card gap:        space-y-5 = 1.25rem (20px)   ← giữa các card
 Field gap:       gap-4     = 1rem    (16px)    ← giữa fields trong card
 Label→Input:     pb-1.5    = 6px
-Sidebar width:   268px     (xl:grid-cols-[1fr_268px])
+Sidebar width:   300px     (xl:grid-cols-[1fr_300px])
 ```
 
 > ⚠️ **v5 breaking change:** Không dùng `max-w-3xl` làm container form.
@@ -447,7 +447,7 @@ Dùng khi > 10 trường hoặc có từ 3+ nhóm thông tin riêng biệt.
 │  [← Trước]       [Tiếp theo →] │   - Meta         │
 └─────────────────────────────────┴──────────────────┘
 
-Grid: xl:grid-cols-[1fr_268px] gap-6 items-start
+Grid: xl:grid-cols-[1fr_300px] gap-6 items-start
 ```
 
 ### 10.2 Alpine x-data — cấu trúc
@@ -487,7 +487,7 @@ Tab state quản lý bằng Alpine inline (đủ đơn giản, không cần file
 ### 10.3 Tab navigation bar
 
 ```blade
-<div class="border-b border-base-200 px-6">
+<div class="border-b border-base-200 px-3">
     <nav class="flex -mb-px" role="tablist" aria-label="Form sections">
 
         <button type="button" role="tab" :aria-selected="tab === 'basic'"
@@ -510,7 +510,7 @@ Tab state quản lý bằng Alpine inline (đủ đơn giản, không cần file
 ### 10.4 Tab panels
 
 ```blade
-<div class="p-6">
+<div class="p-3">
 
     {{-- data-tab-label: JS đọc để hiện trong Toast thay vì hardcode --}}
     <div x-show="tab === 'basic'" data-tab-label="Thông tin cơ bản" class="space-y-4">
@@ -569,16 +569,16 @@ Tab state quản lý bằng Alpine inline (đủ đơn giản, không cần file
 <form method="POST" action="..." novalidate data-[entity]-form>
     @csrf
 
-    <div class="grid grid-cols-1 xl:grid-cols-[1fr_268px] gap-6 items-start">
+    <div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-6 items-start">
 
         {{-- Card chính: tab nav + panels --}}
         <div class="card bg-base-100 shadow-sm border border-base-200">
-            <div class="border-b border-base-200 px-6">
+            <div class="border-b border-base-200 px-3">
                 <nav class="flex -mb-px" role="tablist">
                     {{-- Tab buttons --}}
                 </nav>
             </div>
-            <div class="p-6">
+            <div class="p-3">
                 {{-- Tab panels (x-show + data-tab-label) --}}
             </div>
         </div>
@@ -604,7 +604,7 @@ Block sidebar xuất hiện trong cả flat form (nếu cần sidebar) và tab f
 
 ```blade
 <div class="card bg-base-100 shadow-sm border border-base-200">
-    <div class="card-body p-4">
+    <div class="card-body p-3">
 
         <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">
             Xuất bản
@@ -646,7 +646,7 @@ Block sidebar xuất hiện trong cả flat form (nếu cần sidebar) và tab f
 
 ```blade
 <div class="card bg-base-100 shadow-sm border border-base-200">
-    <div class="card-body p-4">
+    <div class="card-body p-3">
 
         <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">
             Xuất bản
@@ -752,7 +752,7 @@ Card dùng trong cả flat form và tab panel:
 
 ```blade
 {{-- Tab form --}}
-<div class="grid grid-cols-1 xl:grid-cols-[1fr_268px] gap-6 items-start">
+<div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-6 items-start">
     <div>{{-- card chính --}}</div>
     <div class="xl:sticky xl:top-4 space-y-4">{{-- sidebar --}}</div>
 </div>
@@ -1628,7 +1628,7 @@ Slug:  "ten-slug-vd"
 
 | Thành phần | Class |
 |---|---|
-| Grid tab form | `grid grid-cols-1 xl:grid-cols-[1fr_268px] gap-6 items-start` |
+| Grid tab form | `grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-6 items-start` |
 | Card chính (tab) | `card bg-base-100 shadow-sm border border-base-200` |
 | Sidebar wrapper | `xl:sticky xl:top-4 space-y-4` |
 | Tab nav container | `border-b border-base-200 px-6` |
@@ -1694,7 +1694,7 @@ Slug:  "ten-slug-vd"
 
 | ❌ Sai | ✅ Đúng |
 |---|---|
-| `max-w-3xl` làm container form | Grid `xl:grid-cols-[1fr_268px]` + sidebar |
+| `max-w-3xl` làm container form | Grid `xl:grid-cols-[1fr_300px]` + sidebar |
 | Full-width stacked submit buttons trong sidebar | 2 nút `flex-1` nằm ngang |
 | Icon box màu (`bg-primary/10 rounded-lg`) trong section header | Icon inline `w-4 h-4 text-primary` |
 | Subtitle dưới section header | Bỏ — dùng hint dưới field nếu cần giải thích |
@@ -1808,7 +1808,7 @@ Slug:  "ten-slug-vd"
 - [ ] `toastify.js` load trước module JS trong `@push('scripts')`
 - [ ] `_setupTabGuard(form)` được gọi trong page controller
 - [ ] Sidebar dùng Section 11 pattern (không full-width stacked buttons)
-- [ ] Grid `xl:grid-cols-[1fr_268px]` với `xl:sticky xl:top-4` trên sidebar
+- [ ] Grid `xl:grid-cols-[1fr_300px]` với `xl:sticky xl:top-4` trên sidebar
 - [ ] Mỗi tab panel có footer nav (Prev/Next buttons)
 - [ ] `init()` trong x-data tự chuyển tab có lỗi server
 

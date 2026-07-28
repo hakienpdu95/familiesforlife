@@ -40,7 +40,7 @@
     {{-- Description --}}
     @if($task->description)
     <div class="card bg-base-100 shadow-sm border border-base-200">
-        <div class="card-body p-4">
+        <div class="card-body p-3">
             <h3 class="font-semibold text-sm mb-2">Mô tả</h3>
             <p class="text-sm text-base-content/70 whitespace-pre-line">{{ $task->description }}</p>
         </div>
@@ -50,7 +50,7 @@
     {{-- Context data (if available) --}}
     @if(!empty($task->context_snapshot))
     <div class="card bg-base-100 shadow-sm border border-base-200">
-        <div class="card-body p-4">
+        <div class="card-body p-3">
             <h3 class="font-semibold text-sm mb-2">Dữ liệu liên quan</h3>
             <div class="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
                 @foreach($task->context_snapshot as $key => $val)

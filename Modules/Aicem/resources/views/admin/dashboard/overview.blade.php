@@ -27,7 +27,7 @@
 
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div class="card bg-base-100 shadow-sm border border-base-200">
-            <div class="card-body p-4">
+            <div class="card-body p-3">
                 <p class="text-xs text-base-content/40 uppercase tracking-wide">Lượt chạy tháng này</p>
                 <p class="text-2xl font-bold mt-1">{{ $stats['total_runs_this_month'] }}</p>
                 <p class="text-xs text-base-content/50 mt-1">
@@ -36,7 +36,7 @@
             </div>
         </div>
         <div class="card bg-base-100 shadow-sm border border-base-200">
-            <div class="card-body p-4">
+            <div class="card-body p-3">
                 <p class="text-xs text-base-content/40 uppercase tracking-wide">Chi phí tháng này</p>
                 <p class="text-2xl font-bold mt-1">${{ number_format($stats['cost_this_month'], 4) }}</p>
                 @if($stats['budget_limit'] !== null)
@@ -49,7 +49,7 @@
             </div>
         </div>
         <div class="card bg-base-100 shadow-sm border border-base-200">
-            <div class="card-body p-4">
+            <div class="card-body p-3">
                 <p class="text-xs text-base-content/40 uppercase tracking-wide">Prompt cache (Anthropic)</p>
                 <p class="text-2xl font-bold mt-1">{{ number_format($stats['cache_read_tokens_this_month']) }}</p>
                 <p class="text-xs text-base-content/50 mt-1">
@@ -58,7 +58,7 @@
             </div>
         </div>
         <div class="card bg-base-100 shadow-sm border border-base-200 col-span-2">
-            <div class="card-body p-4">
+            <div class="card-body p-3">
                 <p class="text-xs text-base-content/40 uppercase tracking-wide mb-2">Workflow dùng nhiều nhất (tháng này)</p>
                 @forelse($stats['top_workflows'] as $wf)
                 <div class="flex items-center justify-between text-sm py-0.5">

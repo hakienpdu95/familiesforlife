@@ -1,6 +1,6 @@
 {{-- Dùng chung create/edit — cùng convention Modules/Banner/resources/views/admin/banners/_form.blade.php.
      Tab-based form (docs/form-ui-spec.md §10) — 13 trường / 2 nhóm rõ ràng (cơ bản + nhà sản xuất). --}}
-<div class="grid grid-cols-1 xl:grid-cols-[1fr_268px] gap-6 items-start"
+<div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-6 items-start"
      x-data="{
         tab: 'basic',
         tabFields: {
@@ -23,7 +23,7 @@
     <div class="card bg-base-100 shadow-sm border border-base-200">
 
         {{-- Tab navigation --}}
-        <div class="border-b border-base-200 px-6">
+        <div class="border-b border-base-200 px-3">
             <nav class="flex -mb-px" role="tablist" aria-label="Form sections">
 
                 <button type="button" role="tab" :aria-selected="tab === 'basic'"
@@ -52,7 +52,7 @@
         </div>
 
         {{-- Tab panels --}}
-        <div class="p-6">
+        <div class="p-3">
 
             {{-- Panel: Thông tin sản phẩm --}}
             <div x-show="tab === 'basic'" data-tab-label="Thông tin sản phẩm" class="space-y-4">
@@ -218,7 +218,7 @@
     {{-- ── Sidebar ──────────────────────────────────────────────────── --}}
     <div class="xl:sticky xl:top-4 space-y-4">
         <div class="card bg-base-100 shadow-sm border border-base-200">
-            <div class="card-body p-4">
+            <div class="card-body p-3">
 
                 <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">Xuất bản</p>
 
