@@ -20,21 +20,26 @@ class ListCategoryFoundationsAction
     use AsAction;
 
     /**
-     * @return array<int, array{category_id:int, uuid:string, name:string, depth:int, foundation: array{core_focus:?string, unique_angle:?string, content_goals:?string, pain_points:?string, rejected_ideas:?string, audience:?string, constraints:?string, style_sample:?string, updated_at:?string}|null}>
+     * @return array<int, array{category_id:int, uuid:string, name:string, depth:int, foundation: array{core_focus:?string, unique_angle:?string, content_goals:?string, pain_points:?string, rejected_ideas:?string, audience:?string, constraints:?string, style_sample:?string, updated_at:?string, shared_with: array<int, array{uuid:string, name:string}>}|null}>
      */
     public function handle(): array
     {
         $tree = (new GetCategoryTreeHandler())->handle(new GetCategoryTreeQuery(activeOnly: true));
         $flat = PostCategory::flatten($tree);
 
-        $foundationsByCategoryId = CategoryContentFoundation::query()
-            ->get()
-            ->keyBy('post_category_id');
+        // 1 query cho toàn bộ foundation + category liên kết (§12.9, N-N) — tránh N+1 khi build
+        // `shared_with` cho từng category (số lượng foundation thường nhỏ so với số category).
+        $foundationByCategoryId = [];
+        foreach (CategoryContentFoundation::query()->with('categories:id,uuid,name')->get() as $foundation) {
+            foreach ($foundation->categories as $linkedCategory) {
+                $foundationByCategoryId[$linkedCategory->id] = $foundation;
+            }
+        }
 
-        return array_map(function (array $node) use ($foundationsByCategoryId): array {
+        return array_map(function (array $node) use ($foundationByCategoryId): array {
             /** @var PostCategory $category */
             $category   = $node['category'];
-            $foundation = $foundationsByCategoryId->get($category->id);
+            $foundation = $foundationByCategoryId[$category->id] ?? null;
 
             return [
                 'category_id' => $category->id,
@@ -55,6 +60,13 @@ class ListCategoryFoundationsAction
                     // engineering: ngữ cảnh cần được xem là tài sản SỐNG, không phải cấu hình tĩnh
                     // viết 1 lần rồi bỏ quên — xem cảnh báo "stale" ở category-foundations.blade.php).
                     'updated_at'     => $foundation->updated_at?->toIso8601String(),
+                    // §12.9 — các category KHÁC (ngoài category hiện tại) đang dùng chung đúng bộ
+                    // tiêu chí này, để UI hiển thị "Dùng chung với: ..." và tiền chọn multi-select.
+                    'shared_with'    => $foundation->categories
+                        ->reject(fn (PostCategory $linked) => $linked->id === $category->id)
+                        ->map(fn (PostCategory $linked) => ['uuid' => $linked->uuid, 'name' => $linked->name])
+                        ->values()
+                        ->all(),
                 ] : null,
             ];
         }, $flat);

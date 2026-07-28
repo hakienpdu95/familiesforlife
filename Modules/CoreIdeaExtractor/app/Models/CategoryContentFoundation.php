@@ -4,14 +4,17 @@ namespace Modules\CoreIdeaExtractor\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Modules\Post\Models\PostCategory;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
 /**
- * spec/CoreIdeaExtractor.md §12 (v1.4) — mô hình mới đầu tiên của module (trước đây module hoàn
- * toàn stateless). 1 bản ghi / PostCategory (unique post_category_id), tham chiếu 1 chiều sang
- * Modules\Post — Post KHÔNG biết/không cần đổi gì để hỗ trợ model này.
+ * spec/CoreIdeaExtractor.md §12 (v1.4)/§12.9 (N-N) — mô hình mới đầu tiên của module (trước đây
+ * module hoàn toàn stateless). 1 bộ tiêu chí có thể áp dụng cho NHIỀU PostCategory qua bảng nối
+ * cie_foundation_categories (unique post_category_id ở bảng nối — 1 category chỉ dùng ĐÚNG 1 bộ
+ * tại 1 thời điểm, xem migration 2026_07_28_000001), tham chiếu 1 chiều sang Modules\Post — Post
+ * KHÔNG biết/không cần đổi gì để hỗ trợ model này.
  */
 class CategoryContentFoundation extends Model
 {
@@ -20,7 +23,6 @@ class CategoryContentFoundation extends Model
     protected $table = 'cie_category_foundations';
 
     protected $fillable = [
-        'post_category_id',
         'core_focus',
         'unique_angle',
         'content_goals',
@@ -41,9 +43,10 @@ class CategoryContentFoundation extends Model
             ->dontLogEmptyChanges();
     }
 
-    public function category(): BelongsTo
+    public function categories(): BelongsToMany
     {
-        return $this->belongsTo(PostCategory::class, 'post_category_id');
+        return $this->belongsToMany(PostCategory::class, 'cie_foundation_categories', 'foundation_id', 'post_category_id')
+            ->withTimestamps();
     }
 
     public function createdBy(): BelongsTo
