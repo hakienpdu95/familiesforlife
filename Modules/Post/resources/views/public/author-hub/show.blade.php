@@ -40,17 +40,17 @@
 @section('content')
 <div class="container py-10">
 
-    <div class="text-xs breadcrumbs mb-4">
+    <nav class="text-xs breadcrumbs mb-4" aria-label="Breadcrumb">
         <ul>
             <li><a href="{{ route('post.public.home') }}">Trang Chủ</a></li>
             <li><a href="{{ route('post.public.author-hub.index') }}">Tác giả</a></li>
             <li>{{ $authorProfile->displayName() }}</li>
         </ul>
-    </div>
+    </nav>
 
     {{-- ── Header — avatar to, tên, bio, mạng xã hội (§7.3). KHÔNG hiển thị số liệu hiệu
          suất (view_count) — chỉ số lượng bài đã xuất bản (§0). ─────────────────────── --}}
-    <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 mb-10 text-center sm:text-left">
+    <header class="flex flex-col sm:flex-row items-center sm:items-start gap-5 mb-10 text-center sm:text-left">
         <img src="{{ $authorProfile->avatarUrl() }}" alt="{{ $authorProfile->displayName() }}"
              class="w-28 h-28 rounded-full object-cover shrink-0">
         <div class="min-w-0">
@@ -79,7 +79,7 @@
             </div>
             @endif
         </div>
-    </div>
+    </header>
 
     <h2 class="text-lg font-semibold text-base-content mb-4">Bài đã xuất bản</h2>
 

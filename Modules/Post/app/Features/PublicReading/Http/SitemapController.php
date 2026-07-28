@@ -68,11 +68,19 @@ class SitemapController extends Controller
         'PerplexityBot', 'Perplexity-User',               // Perplexity
         'Google-Extended',                                // Google AI (Gemini/AI Overviews training)
         'CCBot',                                          // Common Crawl — nguồn train của nhiều LLM
+        'cohere-ai',                                      // Cohere (GEO đợt 8, 2026-07-28 — thiếu ở đợt 4)
     ];
 
     public function robots(): Response
     {
-        $lines = ['User-agent: *', 'Disallow:', ''];
+        // GEO đợt 6 (2026-07-28) — `Allow: /llms.txt` phải khai trong CHÍNH group `User-agent: *`
+        // này (không đặt rời sau vòng lặp bên dưới) — 1 dòng Allow/Disallow luôn thuộc về group
+        // User-agent GẦN NHẤT phía trên nó theo đúng cú pháp robots.txt, đặt sai chỗ sẽ vô tình
+        // gán nhầm cho bot cuối cùng trong vòng lặp, không phải cho `*`. `Disallow:` rỗng ở đây đã
+        // cho phép ngầm rồi, dòng Allow chỉ phòng trường hợp sau này ai đó thêm 1 Disallow tổng
+        // quát mà quên loại trừ llms.txt — phá mất mục đích của nó (đúng cảnh báo "Disallow
+        // LLMs.txt in robots.txt = defeats purpose" từ nguồn tham khảo).
+        $lines = ['User-agent: *', 'Disallow:', 'Allow: /llms.txt', ''];
 
         foreach (self::AI_CRAWLER_USER_AGENTS as $userAgent) {
             $lines[] = "User-agent: {$userAgent}";

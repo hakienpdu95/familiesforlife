@@ -76,6 +76,28 @@
         function removeBlock(el) {
             if (!confirm('Xoá block này khỏi bài viết?')) return;
             el.remove();
+            updateTotalWordCount();
+        }
+
+        // ── Đếm từ (Content Marketing 2026-07-28) — bài 2000+ từ có khả năng thành công gấp
+        // gần đôi theo nghiên cứu được dẫn; Jodit tắt bộ đếm mặc định toàn app (jodit.js BASE),
+        // bật RIÊNG cho block-composer qua override + cộng dồn TOÀN BÀI (khác đếm/instance mặc
+        // định của Jodit — nội dung 1 bài giờ tách nhiều block, không phải 1 khung duy nhất).
+        // Chỉ cộng dồn block `type=text` (văn xuôi) — không tính FAQ/citation/howto vào đây, vì
+        // đó là nội dung có cấu trúc riêng, không so sánh cùng ý nghĩa với "độ dài bài viết".
+        const totalWordCountEl = document.querySelector('.pbc-total-word-count');
+
+        function updateTotalWordCount() {
+            if (!totalWordCountEl) return;
+
+            let totalWords = 0;
+            listEl.querySelectorAll(':scope > .pbc-block[data-kind="text"]').forEach((blockEl) => {
+                const html = blockEl._joditEditor ? blockEl._joditEditor.value : '';
+                const text = html.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/gi, ' ').trim();
+                if (text) totalWords += text.split(/\s+/).filter(Boolean).length;
+            });
+
+            totalWordCountEl.textContent = `Tổng ${totalWords.toLocaleString('vi-VN')} từ (đoạn văn bản)`;
         }
 
         // ── Block: Đoạn văn bản ──────────────────────────────────────────
@@ -93,7 +115,8 @@
             const textarea = el.querySelector('textarea');
             textarea.name = 'block_text_' + blockId;
             textarea.value = initialHtml || '';
-            el._joditEditor = window.initJodit(textarea, {});
+            el._joditEditor = window.initJodit(textarea, { showWordsCounter: true, showCharsCounter: true });
+            el._joditEditor.events.on('change', () => updateTotalWordCount());
         }
 
         // ── Block: Khối sản phẩm ─────────────────────────────────────────
@@ -514,6 +537,11 @@
                 });
             }
         });
+
+        // Set giá trị ban đầu ngay sau hydrate — Jodit không đảm bảo fire 'change' khi set value
+        // bằng lập trình (initialHtml ở addTextBlock), chỉ khi user tự gõ, nên phải gọi tường minh
+        // 1 lần ở đây để tổng số từ đúng ngay từ lúc mở trang, không phải đợi user gõ phím đầu tiên.
+        updateTotalWordCount();
 
         // ── Serialize khi submit ─────────────────────────────────────────
 

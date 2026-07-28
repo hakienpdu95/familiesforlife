@@ -9,7 +9,14 @@
     // UI ngay bên dưới) — CHÍNH XÁC hơn bản giản lược 1 cấp ở article.blade.php. ItemList chỉ liệt
     // kê bài viết ĐANG hiển thị trên trang này (không phải toàn bộ category — tránh payload phình
     // to vô ích cho category nhiều nghìn bài, đúng nguyên tắc "so what's visible" của CollectionPage).
-    $categoryCanonicalUrl = route('post.public.category', ['category' => $category->slug]);
+    // Technical SEO (2026-07-28) — cùng lỗi/cách sửa canonical page/q param đã áp dụng ở
+    // public/home.blade.php (agent kiểm tra cometweb.io/blog/technical-seo phát hiện).
+    $categoryCurrentPage = $articles->currentPage();
+    $categoryCanonicalUrl = route('post.public.category', array_filter([
+        'category' => $category->slug,
+        'q'        => $search,
+        'page'     => $categoryCurrentPage > 1 ? $categoryCurrentPage : null,
+    ]));
 
     $categoryBreadcrumbItems = collect([
         ['@type' => 'ListItem', 'position' => 1, 'name' => 'Trang Chủ', 'item' => route('post.public.home')],
@@ -47,6 +54,12 @@
 
 @push('meta')
 <link rel="canonical" href="{{ $categoryCanonicalUrl }}">
+@if($categoryCurrentPage > 1)
+<link rel="prev" href="{{ route('post.public.category', array_filter(['category' => $category->slug, 'q' => $search, 'page' => $categoryCurrentPage - 1 > 1 ? $categoryCurrentPage - 1 : null])) }}">
+@endif
+@if($articles->hasMorePages())
+<link rel="next" href="{{ route('post.public.category', array_filter(['category' => $category->slug, 'q' => $search, 'page' => $categoryCurrentPage + 1])) }}">
+@endif
 <meta property="og:type" content="website">
 <meta property="og:title" content="{{ $category->name }}">
 <meta property="og:description" content="{{ $category->description ?: $category->name }}">
@@ -79,14 +92,14 @@
 @section('content')
 <div class="container py-10">
 
-    <div class="text-xs breadcrumbs mb-4">
+    <nav class="text-xs breadcrumbs mb-4" aria-label="Breadcrumb">
         <ul>
             <li><a href="{{ route('post.public.home') }}">Trang Chủ</a></li>
             @foreach($breadcrumb as $node)
             <li><a href="{{ route('post.public.category', ['category' => $node->slug]) }}">{{ $node->name }}</a></li>
             @endforeach
         </ul>
-    </div>
+    </nav>
 
     <h1 class="text-2xl font-bold text-base-content mb-6">
         {{ $search ? "Kết quả tìm kiếm trong “{$category->name}”: {$search}" : $category->name }}
@@ -97,6 +110,15 @@
     <div class="mb-6">
         <x-frontend.banner-slot placement="category_top" :context="['category_slug' => $category->slug]" />
     </div>
+
+    {{-- Technical GEO/SEO (2026-07-28) — trước đây trang này nhảy thẳng H1 (tên danh mục) xuống
+         H3 (tiêu đề "tin to" $lead, VÀ tiêu đề từng bài trong lưới), không có H2 trung gian nào.
+         Đặt H2 này TRƯỚC khối $lead (không phải sau, như lần sửa đầu — lúc đó $lead vẫn render H3
+         trước H2 này, vẫn sai thứ bậc) để mọi H3 phía dưới (tin to lẫn lưới) đều nằm SAU 1 H2 hợp
+         lệ, đồng thời là tiêu đề section hữu ích cho người đọc thật, không chỉ để "vá" SEO. --}}
+    <h2 class="text-lg font-semibold text-base-content mb-4">
+        {{ $isMagazine ? 'Bài viết mới nhất' : 'Bài viết' }}
+    </h2>
 
     @if($lead)
     <div class="mb-8">

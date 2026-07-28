@@ -349,7 +349,10 @@ function postVersionHistory(indexUrl, translationStatus, knownLatestId, canResto
                 <div class="form-control">
                     <div class="flex items-center justify-between mb-1">
                         <label class="label py-0 !p-0"><span class="label-text font-medium">Nội dung</span></label>
-                        <span class="text-xs text-base-content/40">Tối đa 3 khối sản phẩm/bài</span>
+                        <span class="text-xs text-base-content/40">
+                            Tối đa 3 khối sản phẩm/bài ·
+                            <span class="pbc-total-word-count font-medium"></span>
+                        </span>
                     </div>
                     @error('blocks')<div class="alert alert-error text-xs mb-2">{{ $message }}</div>@enderror
 

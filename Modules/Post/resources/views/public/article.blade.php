@@ -56,17 +56,23 @@
 @endif
 @endpush
 
+{{--
+    Technical GEO (2026-07-28, đợt 9) — thêm thẻ semantic HTML5 (<article>/<header>/<nav>) thay
+    <div> chung chung — các nguồn content-engineering (visibilitystack.ai, higoodie.com) đều nhấn
+    mạnh AI search platform đọc "accessibility structure" (landmarks/semantic tags) để xác định
+    ENTITY chính của trang, không chỉ dựa vào JSON-LD. Không đổi class/style, chỉ đổi tên thẻ.
+--}}
 @section('content')
-<div class="max-w-3xl mx-auto px-4 py-10">
+<article class="max-w-3xl mx-auto px-4 py-10">
 
-    <div class="text-xs breadcrumbs mb-4">
+    <nav class="text-xs breadcrumbs mb-4" aria-label="Breadcrumb">
         <ul>
             <li><a href="{{ route('post.public.home') }}">Trang Chủ</a></li>
             @if($article->categories->isNotEmpty())
             <li><a href="{{ route('post.public.category', ['category' => $article->categories->first()->slug]) }}">{{ $article->categories->first()->name }}</a></li>
             @endif
         </ul>
-    </div>
+    </nav>
 
     {{-- spec/dac-ta-ky-thuat-bai-viet-tai-tro.md §12 — disclosure_text rỗng chỉ có thể xảy ra
          nếu dữ liệu vào thẳng DB bỏ qua Action/validation (vd import tay, sửa trực tiếp) —
@@ -89,7 +95,7 @@
     {{-- Bố cục đầu bài căn giữa (badge danh mục + tiêu đề + tác giả/ngày đăng) — tham khảo
          giao diện spec/page-detail, giữ nguyên màu/font theo theme hiện tại của site, không
          đổi bộ nhận diện thương hiệu. --}}
-    <div class="text-center mb-4">
+    <header class="text-center mb-4">
         <span class="text-xs font-black uppercase tracking-wide text-primary">
             {{ $article->categories->first()?->name }}
         </span>
@@ -111,7 +117,7 @@
             @endif
             · {{ $translation->published_at?->format('d/m/Y') }}
         </p>
-    </div>
+    </header>
 
     @if($article->categories->isNotEmpty())
     <div class="flex flex-wrap gap-1.5 mb-4">
@@ -165,5 +171,5 @@
 
     <x-frontend.related-posts :articles="$relatedArticles" />
 
-</div>
+</article>
 @endsection
