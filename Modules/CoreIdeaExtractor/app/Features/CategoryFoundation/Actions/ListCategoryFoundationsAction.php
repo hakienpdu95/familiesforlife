@@ -2,8 +2,10 @@
 
 namespace Modules\CoreIdeaExtractor\Features\CategoryFoundation\Actions;
 
+use Illuminate\Support\Collection;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Modules\CoreIdeaExtractor\Models\CategoryContentFoundation;
+use Modules\Menu\Models\MenuItem;
 use Modules\Post\Features\CategoryManagement\Queries\GetCategoryTreeHandler;
 use Modules\Post\Features\CategoryManagement\Queries\GetCategoryTreeQuery;
 use Modules\Post\Models\PostCategory;
@@ -25,12 +27,37 @@ class ListCategoryFoundationsAction
     public function handle(): array
     {
         $tree = (new GetCategoryTreeHandler())->handle(new GetCategoryTreeQuery(activeOnly: true));
+
+        // Theo yêu cầu người dùng (2026-07-28) — đồng bộ danh sách trang Content Foundation theo
+        // Menu chính (dashboard/menu/items, location=header): dự án có 88 post_categories nhưng
+        // 44 category là taxonomy CŨ đã bị thay bằng cấu trúc menu mới (2026-07-27), không còn ai
+        // dùng để điều hướng — hiện TOÀN BỘ cây khiến trang lẫn lộn category "sống" (đang lên nav
+        // thật) với category "chết" không ai truy cập. Chỉ giữ category (và tổ tiên của nó, để cây
+        // không bị đứt gãy) đang được ÍT NHẤT 1 `menu_items.location=header` trỏ tới qua
+        // `category_id` — ĐÚNG như điều kiện người dùng chỉ định, không tự thêm ngoại lệ theo số
+        // bài viết (dù 8/44 category "chết" vẫn còn bài viết thật — nếu cần lại category đó, gắn nó
+        // vào Menu chính là đủ để category-foundations tự thấy lại, không cần đổi code này).
+        $referencedCategoryIds = MenuItem::query()
+            ->where('location', 'header')
+            ->whereNotNull('category_id')
+            ->pluck('category_id')
+            ->all();
+
+        $tree = $this->pruneToMenuReferenced($tree, $referencedCategoryIds);
+
         $flat = PostCategory::flatten($tree);
 
         // 1 query cho toàn bộ foundation + category liên kết (§12.9, N-N) — tránh N+1 khi build
         // `shared_with` cho từng category (số lượng foundation thường nhỏ so với số category).
+        // Lọc is_active=true giống hệt GetCategoryTreeQuery(activeOnly: true) ở trên — is_active
+        // KHÔNG phải global scope như SoftDeletes (category bị soft-delete đã tự động biến mất
+        // khỏi quan hệ categories() nhờ global scope, không cần lọc tay), nên nếu không lọc ở đây,
+        // 1 category bị TẮT is_active (ẩn khỏi cây chọn) vẫn "ma" xuất hiện trong `shared_with` của
+        // category khác đang dùng chung — không đồng bộ với những gì cây bên trái đang hiển thị.
         $foundationByCategoryId = [];
-        foreach (CategoryContentFoundation::query()->with('categories:id,uuid,name')->get() as $foundation) {
+        foreach (CategoryContentFoundation::query()->with(['categories' => function ($q) {
+            $q->where('is_active', true)->select('post_categories.id', 'post_categories.uuid', 'post_categories.name');
+        }])->get() as $foundation) {
             foreach ($foundation->categories as $linkedCategory) {
                 $foundationByCategoryId[$linkedCategory->id] = $foundation;
             }
@@ -70,5 +97,27 @@ class ListCategoryFoundationsAction
                 ] : null,
             ];
         }, $flat);
+    }
+
+    /**
+     * Giữ node nếu chính nó nằm trong `$referencedCategoryIds`, HOẶC còn ít nhất 1 nhánh con (sau
+     * khi đệ quy lọc) — trường hợp sau xảy ra khi 1 category "cha" không tự có `category_id` nào
+     * trong Menu chính nhưng vẫn cần hiển thị để giữ category "con" (đang được menu tham chiếu)
+     * đúng vị trí trong cây, thay vì để con bị "mồ côi"/đổi lệch độ sâu khi hiển thị.
+     *
+     * @param Collection<int, PostCategory> $nodes
+     * @param int[] $referencedCategoryIds
+     * @return Collection<int, PostCategory>
+     */
+    private function pruneToMenuReferenced(Collection $nodes, array $referencedCategoryIds): Collection
+    {
+        return $nodes
+            ->map(function (PostCategory $node) use ($referencedCategoryIds) {
+                $node->setRelation('children', $this->pruneToMenuReferenced($node->children, $referencedCategoryIds));
+
+                return $node;
+            })
+            ->filter(fn (PostCategory $node) => in_array($node->id, $referencedCategoryIds, true) || $node->children->isNotEmpty())
+            ->values();
     }
 }

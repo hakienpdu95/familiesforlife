@@ -25,7 +25,7 @@ use Modules\Post\Models\PostCategory;
  *   "/mang-thai/chuan-bi-mang-thai" không khớp route `danh-muc/{category:slug}` (post.public.
  *   category) thật của site nên MỌI mục lá đều 404 khi bấm thử trên site — route dùng model
  *   binding nên chỉ hết 404 khi slug đó THẬT SỰ tồn tại trong bảng `post_categories`. Babies/
- *   Toddler & Kids: giai đoạn tuổi (VD "Sơ sinh 0-3 tháng") cũng là 1 category CHA thật, mục lá
+ *   Toddler & Kids: giai đoạn tuổi (VD "Trẻ sơ sinh (0-3 tháng)") cũng là 1 category CHA thật, mục lá
  *   là category CON (`parent_id` trỏ về category cha đó) — cùng kiểu cây cha/con category 7→9,10
  *   ("Du lịch gia đình" → "Di sản văn hóa"/"Ẩm thực vùng miền") đã có sẵn trong DB.
  *   `seedGroup()`/`seedCategoryLink()`/`seedEventGroup()` (link category/event thật) của bản v1
@@ -79,71 +79,87 @@ class MenuDatabaseSeeder extends Seeder
         $created += $this->seedFlatUrlGroup($userId, 'Mang thai', 10, [
             'Chuẩn bị mang thai',
             'Sự phát triển của thai nhi',
-            'Sức khỏe bà bầu',
-            'Thực phẩm và dinh dưỡng',
-            'Chuẩn bị sinh nở',
+            'Sức khỏe mẹ bầu',
+            'Dinh dưỡng thai kỳ',
+            'Chuyển dạ & đi sinh',
         ]);
 
         // ── 2. Babies - Em bé (nhóm 3 cấp — 2 giai đoạn con, mỗi giai đoạn có mục lá riêng) ──
+        // Nhãn giai đoạn theo đúng cách gọi phổ biến của các trang nuôi dạy con VN (kiểu
+        // "Trẻ sơ sinh (0-12 tháng)"/"Trẻ tập đi (1-3 tuổi)" — vn.theasianparent.com), thống
+        // nhất format "Tên giai đoạn (khoảng tuổi)". Trẻ 0-3 tháng chỉ bú sữa nên KHÔNG có mục
+        // "Thực phẩm..." (sai thực tế ở bản trước) — thay bằng "Giấc ngủ của bé" (chủ đề lớn
+        // của giai đoạn này); "Ăn dặm" bắt đầu từ ~6 tháng nên thuộc giai đoạn 3-12 tháng.
         $created += $this->seedNestedUrlGroup($userId, 'Em bé', 20, [
-            'Sơ sinh 0-3 tháng' => [
+            'Trẻ sơ sinh (0-3 tháng)' => [
                 'Chăm sóc trẻ sơ sinh',
-                'Phát triển trẻ sơ sinh',
-                'Bệnh thường gặp & phòng ngừa',
-                'Sữa mẹ và cho con bú',
-                'Thực phẩm và dinh dưỡng',
+                'Phát triển của trẻ',
+                'Nuôi con bằng sữa mẹ',
+                'Giấc ngủ của bé',
+                'Bệnh thường gặp',
             ],
-            'Trẻ nhỏ 3 tháng - 1 tuổi' => [
+            'Trẻ nhỏ (3-12 tháng)' => [
                 'Chăm sóc trẻ nhỏ',
-                'Phát triển trẻ nhỏ',
-                'Bệnh thường gặp & phòng ngừa',
-                'Thực phẩm và dinh dưỡng',
+                'Phát triển của trẻ',
+                'Ăn dặm & dinh dưỡng',
+                'Bệnh thường gặp',
             ],
         ]);
 
-        // ── 3. Toddler & Kids - Trẻ chập chững & Trẻ em (nhóm 3 cấp — 3 giai đoạn con) ──
-        $created += $this->seedNestedUrlGroup($userId, 'Trẻ chập chững & Trẻ em', 30, [
-            'Trẻ chập chững 1-3 tuổi' => [
-                'Chăm sóc trẻ chập chững',
-                'Phát triển trẻ chập chững',
-                'Bệnh thường gặp & phòng ngừa',
-                'Thực phẩm và dinh dưỡng',
+        // ── 3. Toddler & Kids - Trẻ tập đi & Trẻ em (nhóm 3 cấp — 3 giai đoạn con) ──
+        // "Trẻ tập đi" (không phải "trẻ chập chững") và "Trẻ mầm non" là tên gọi giai đoạn
+        // chuẩn đang dùng trên các site nuôi dạy con VN. Mục lá dùng CHUNG 1 bộ nhãn ngắn gọn
+        // cho cả 3 giai đoạn (đọc kèm category cha nên không cần lặp lại tên giai đoạn) — vẫn
+        // là 3 bộ category KHÁC NHAU trong DB nhờ seedCategory() khoá theo (name, parent_id).
+        $created += $this->seedNestedUrlGroup($userId, 'Trẻ tập đi & Trẻ em', 30, [
+            'Trẻ tập đi (1-3 tuổi)' => [
+                'Chăm sóc & nuôi dạy',
+                'Phát triển của trẻ',
+                'Dinh dưỡng cho trẻ',
+                'Bệnh thường gặp',
             ],
-            'Trẻ mẫu giáo 3-6 tuổi' => [
-                'Chăm sóc trẻ mẫu giáo',
-                'Phát triển trẻ mẫu giáo',
-                'Bệnh thường gặp & phòng ngừa',
-                'Thực phẩm và dinh dưỡng',
+            'Trẻ mầm non (3-6 tuổi)' => [
+                'Chăm sóc & nuôi dạy',
+                'Phát triển của trẻ',
+                'Dinh dưỡng cho trẻ',
+                'Bệnh thường gặp',
             ],
-            'Trẻ tiểu học 6-12 tuổi' => [
-                'Chăm sóc trẻ tiểu học',
-                'Phát triển trẻ tiểu học',
-                'Bệnh thường gặp & phòng ngừa',
-                'Thực phẩm và dinh dưỡng',
+            'Trẻ tiểu học (6-12 tuổi)' => [
+                'Chăm sóc & nuôi dạy',
+                'Phát triển của trẻ',
+                'Dinh dưỡng cho trẻ',
+                'Bệnh thường gặp',
             ],
         ]);
 
         // ── 4. Family - Gia đình (nhóm — dropdown 6 mục phẳng) ───────────────
+        // "Du lịch gia đình" và "Tài chính gia đình" là 2 category ĐÃ TỒN TẠI (seed bởi
+        // PostDemoSeeder, có bài viết thật) — seedCategory() sẽ tái dùng thay vì tạo mới,
+        // menu link thẳng tới nội dung có sẵn.
         $created += $this->seedFlatUrlGroup($userId, 'Gia đình', 40, [
             'Sức khỏe cha mẹ',
-            'Mối quan hệ gia đình',
-            'Hoạt động ngoài trời',
-            'Chăm sóc nhà cửa',
+            'Hôn nhân',
+            'Du lịch gia đình',
+            'Nhà cửa & đời sống',
             'Tài chính gia đình',
-            'Quyền lợi và pháp lý',
+            'Quyền lợi & pháp lý',
         ]);
 
-        // ── 5. School Visit - Lựa chọn trường học (nhóm — dropdown 4 mục phẳng) ──
-        $created += $this->seedFlatUrlGroup($userId, 'Lựa chọn trường học', 50, [
-            'Trường mầm non và tiểu học',
-            'Trường nâng cao kỹ năng',
+        // ── 5. School Visit - Chọn trường cho con (nhóm — dropdown 4 mục phẳng) ──
+        $created += $this->seedFlatUrlGroup($userId, 'Chọn trường cho con', 50, [
+            'Trường mầm non & tiểu học',
+            'Trường năng khiếu & kỹ năng',
             'Trung tâm học tập',
             'Giáo dục tại nhà',
         ]);
 
-        // ── 6. Product & Service - Video & Giải thưởng (nhóm — dropdown 3 mục phẳng) ──
-        $created += $this->seedFlatUrlGroup($userId, 'Video & Giải thưởng', 60, [
-            'Sản phẩm và Dịch vụ',
+        // ── 6. Product & Service - Sản phẩm & Dịch vụ (nhóm — dropdown 3 mục phẳng) ──
+        // Nhãn nhóm đổi về đúng tên nhóm gốc "Product & Service" (bản trước đặt "Video &
+        // Giải thưởng" nhưng mục con đầu lại là "Sản phẩm và Dịch vụ" — nhóm cha/mục con
+        // trùng ý, lệch tên). "Đánh giá sản phẩm" là dạng chuyên mục review quen thuộc
+        // trên các site nuôi dạy con.
+        $created += $this->seedFlatUrlGroup($userId, 'Sản phẩm & Dịch vụ', 60, [
+            'Đánh giá sản phẩm',
             'Video',
             'Giải thưởng nổi bật',
         ]);
@@ -342,8 +358,8 @@ class MenuDatabaseSeeder extends Seeder
 
     /**
      * Tạo (hoặc tái sử dụng) 1 PostCategory THẬT cho mục menu — idempotent theo (name, parent_id),
-     * KHÔNG theo slug (nhiều nhóm dùng chung nhãn "Thực phẩm và dinh dưỡng"/"Bệnh thường gặp &
-     * phòng ngừa" cho các giai đoạn tuổi KHÁC NHAU — đây là các category khác nhau về ngữ nghĩa dù
+     * KHÔNG theo slug (nhiều nhóm dùng chung nhãn "Phát triển của trẻ"/"Bệnh thường gặp"/
+     * "Chăm sóc & nuôi dạy" cho các giai đoạn tuổi KHÁC NHAU — đây là các category khác nhau về ngữ nghĩa dù
      * trùng tên hiển thị, chỉ khác `parent_id`; so theo slug sẽ khiến chúng bị coi là 1 category
      * DUY NHẤT do slug đầu tiên trùng tên được tái sử dụng nhầm cho mọi giai đoạn khác). Nếu tên +
      * parent này đã khớp 1 category có sẵn (VD "Tài chính gia đình" — đã tồn tại từ trước, seed

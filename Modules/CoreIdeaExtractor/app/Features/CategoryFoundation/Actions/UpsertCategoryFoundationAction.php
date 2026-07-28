@@ -70,7 +70,12 @@ class UpsertCategoryFoundationAction
                 ->whereDoesntHave('categories')
                 ->delete();
 
-            return $foundation->load('categories:id,uuid,name');
+            // is_active=false không phải global scope (khác SoftDeletes) — lọc tay để category bị
+            // TẮT hoạt động không "ma" xuất hiện trong `shared_with` trả về (xem cùng lý do ở
+            // ListCategoryFoundationsAction).
+            return $foundation->load(['categories' => function ($q) {
+                $q->where('is_active', true)->select('post_categories.id', 'post_categories.uuid', 'post_categories.name');
+            }]);
         });
     }
 }
