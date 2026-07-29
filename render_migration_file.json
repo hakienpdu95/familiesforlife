@@ -2224,5 +2224,13 @@
         "__index///index///__///__///__///howto_block_id,sort_order|idx_post_hs_block_order///__",
         "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
         "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật"
+    ],
+    [
+        "cie_layer2_runs///__///__///",
+        "organization_id///unsignedBigInteger///__///NOT_NULL///__///->constrained('organizations')->onDelete('cascade')///__",
+        "cost_usd///decimal///10,6///NOT_NULL///__///__///__",
+        "model_used///string///100///NOT_NULL///__///__///__",
+        "created_at///timestamp///__///_NULL///NULL///__///__",
+        "__index///index///__///__///__///organization_id,created_at|cie_layer2_runs_org_created_idx///__"
     ]
 ]
