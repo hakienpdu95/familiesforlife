@@ -172,4 +172,10 @@ enum PermissionEnum: string
     case REAL_ESTATE_CREATE = 'real_estate.create';
     case REAL_ESTATE_EDIT   = 'real_estate.edit';
     case REAL_ESTATE_DELETE = 'real_estate.delete';
+
+    // ══ ACCESSTRADE (đồng bộ voucher/coupon/khuyến mãi + top sản phẩm bán chạy — tài sản nền tảng) ═
+    // Modules/AccessTrade — gán cho platform_ops + platform_content_head
+    // (AccessTradePermissionSeeder), KHÔNG qua config/permissions.php (Lớp B) — cùng nguyên tắc
+    // BANNER_MANAGE/OCOP_MANAGE/PAGE_MANAGE.
+    case ACCESSTRADE_MANAGE = 'accesstrade.manage';
 }

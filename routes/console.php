@@ -31,6 +31,12 @@ Schedule::command('media:cleanup-orphans')
     ->everyFourHours()
     ->onOneServer();
 
+// AccessTrade: đồng bộ voucher/khuyến mãi + top sản phẩm bán chạy mỗi 3h
+Schedule::command('accesstrade:sync')
+    ->name('accesstrade:sync')
+    ->everyThreeHours()
+    ->onOneServer();
+
 // Social Auth: xóa token đã hết hạn > 30 ngày (giảm dữ liệu nhạy cảm lưu trữ)
 Schedule::call(function () {
     SocialAccount::where('token_expires_at', '<', now()->subDays(30))->update([
