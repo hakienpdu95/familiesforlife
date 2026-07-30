@@ -228,7 +228,7 @@
                         <span x-show="layer2Loading" x-cloak>Đang gọi AI (có thể mất tới 30 giây)...</span>
                     </button>
 
-                    <template x-if="!isBatchResult()">
+                    <template x-if="singleSourceContext() !== null">
                         <button type="button" class="btn btn-ghost btn-xs" title="Copy prompt tóm tắt cho AI" @click="copySummarizePrompt()">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -238,7 +238,7 @@
                         </button>
                     </template>
 
-                    <template x-if="!isBatchResult()">
+                    <template x-if="singleSourceContext() !== null">
                         <button type="button" class="btn btn-secondary btn-xs gap-1.5" :disabled="summarizeLoading" @click="runSummarize()">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -249,7 +249,7 @@
                         </button>
                     </template>
 
-                    <template x-if="!isBatchResult()">
+                    <template x-if="singleSourceContext() !== null">
                         <button type="button" class="btn btn-ghost btn-xs" title="Copy prompt tái cấu trúc cho AI" @click="copyRewritePrompt()">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -259,7 +259,7 @@
                         </button>
                     </template>
 
-                    <template x-if="!isBatchResult()">
+                    <template x-if="singleSourceContext() !== null">
                         <button type="button" class="btn btn-secondary btn-xs gap-1.5" :disabled="rewriteLoading" @click="runRewrite()">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -380,9 +380,9 @@ document.addEventListener('alpine:init', () => {
             layer2Result: null,
 
             // 2026-07-30 — 2 tính năng mở rộng (spec/content.md mục A+B): "Tóm tắt nội dung" và
-            // "Tái cấu trúc nội dung". Chỉ áp dụng cho kết quả trích xuất 1 URL (không phải batch
-            // — xem guard isBatchResult() ở buildSummarizePromptText()/buildRewritePromptText()),
-            // vì cả 2 đều xử lý 1 nguồn duy nhất, không phải tổng hợp nhiều nguồn như luồng ý tưởng.
+            // "Tái cấu trúc nội dung". Chỉ dùng được khi có ĐÚNG 1 nguồn (dù qua tab "Dán mã HTML"
+            // hay tab "Nhập URL" chỉ gõ 1 dòng — tab đó LUÔN gọi endpoint batch, xem submit()),
+            // vì cả 2 đều xử lý 1 nguồn duy nhất — xem guard thật ở singleSourceContext().
             summarizeUrl,
             summarizeLoading: false,
             summarizeError: '',
@@ -1252,19 +1252,37 @@ document.addEventListener('alpine:init', () => {
             },
 
             /**
-             * Ngữ cảnh dùng chung cho buildSummarizePromptText()/buildRewritePromptText() — chỉ
-             * hoạt động trên kết quả trích xuất 1 URL (this.result trực tiếp là RawExtractionData,
-             * khác cấu trúc `sources[]` của batch — xem isBatchResult()). Trả `null` ở chế độ batch
-             * vì tóm tắt/tái cấu trúc xử lý 1 nguồn duy nhất, không có khái niệm "batch" như luồng
-             * sinh ý tưởng (vốn tổng hợp NHIỀU nguồn cho 1 ý tưởng).
+             * Ngữ cảnh dùng chung cho buildSummarizePromptText()/buildRewritePromptText() — tóm
+             * tắt/tái cấu trúc xử lý ĐÚNG 1 nguồn, không có khái niệm "batch" như luồng sinh ý
+             * tưởng (vốn tổng hợp NHIỀU nguồn cho 1 ý tưởng). Tab "Nhập URL" LUÔN gọi endpoint
+             * batch (extract-batch) dù người dùng chỉ gõ 1 URL — xem `submit()`
+             * (`const isBatch = this.mode === 'url'`) — nên KHÔNG thể chỉ dựa vào
+             * `!isBatchResult()` để biết có đúng 1 nguồn hay không (làm vậy sẽ ẩn mất nút Tóm
+             * tắt/Tái cấu trúc với đại đa số lượt dùng thật, vốn luôn qua tab "Nhập URL"). Thay
+             * vào đó: chế độ batch vẫn dùng được nếu batch đó chỉ có ĐÚNG 1 nguồn fetch THÀNH CÔNG
+             * (status='success') — nhiều nguồn thành công thì không rõ nên tóm tắt/viết lại nguồn
+             * nào, trả `null` (ẩn nút, giống hệt trường hợp chưa có kết quả).
              */
             singleSourceContext() {
-                if (!this.result || this.isBatchResult()) return null;
+                if (!this.result) return null;
+
+                if (!this.isBatchResult()) {
+                    return {
+                        title: this.result.title || '(không có tiêu đề)',
+                        language: this.result.language || 'unknown',
+                        mainContent: this.result.main_content || '',
+                    };
+                }
+
+                const successfulSources = (this.result.sources ?? []).filter(s => s.status === 'success');
+                if (successfulSources.length !== 1) return null;
+
+                const source = successfulSources[0];
 
                 return {
-                    title: this.result.title || '(không có tiêu đề)',
-                    language: this.result.language || 'unknown',
-                    mainContent: this.result.main_content || '',
+                    title: source.title || '(không có tiêu đề)',
+                    language: source.language || 'unknown',
+                    mainContent: source.main_content || '',
                 };
             },
 
