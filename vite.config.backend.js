@@ -158,8 +158,6 @@ const MODULE_ENTRIES = [
   // RealEstate
   'Modules/RealEstate/resources/assets/sass/realestate.scss',
   'Modules/RealEstate/resources/assets/js/realestate.js',
-  // AccessTrade
-  'Modules/AccessTrade/resources/assets/js/accesstrade.js',
 ];
 
 // ─────────────────────────────────────────────────────────────────────

@@ -35,20 +35,6 @@ return [
         'key' => env('RESEND_API_KEY'),
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | AccessTrade (Publisher API — voucher/coupon/deal, khuyến mãi, top sản phẩm)
-    |--------------------------------------------------------------------------
-    | access_key lấy tại pub.accesstrade.vn/accounts/profile — dùng bởi
-    | Modules\AccessTrade\Services\AccessTradeClient (header "Authorization: Token
-    | <access_token>"). Tham số hành vi đồng bộ (merchants, phân trang...) nằm ở
-    | Modules/AccessTrade/config/config.php, KHÔNG ở đây.
-    */
-    'accesstrade' => [
-        'base_url'     => env('ACCESSTRADE_BASE_URL', 'https://api.accesstrade.vn'),
-        'access_token' => env('ACCESSTRADE_ACCESS_TOKEN'),
-    ],
-
     'ses' => [
         'key' => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),

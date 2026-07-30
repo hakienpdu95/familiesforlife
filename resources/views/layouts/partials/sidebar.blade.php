@@ -235,26 +235,6 @@
         </div>
         @endcan
 
-        {{-- Modules/AccessTrade — accesstrade.manage cấp cho platform_ops/platform_content_head
-             (Modules\AccessTrade\Database\Seeders\AccessTradePermissionSeeder). Dữ liệu chỉ đọc
-             (đồng bộ từ AccessTrade Publisher API), 2 trang con: Voucher/Khuyến mãi + Top sản
-             phẩm bán chạy — cùng cấu trúc dropdown mục "Bản tin" ở trên. --}}
-        @can(\App\Enums\PermissionEnum::ACCESSTRADE_MANAGE->value)
-        <details class="nav-group" {{ request()->routeIs('backend.accesstrade.*') ? 'open' : '' }}>
-            <summary class="nav-summary {{ request()->routeIs('backend.accesstrade.*') ? 'active' : '' }}">
-                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <span class="nav-label">AccessTrade</span>
-                <svg class="nav-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m9 18 6-6-6-6"/></svg>
-            </summary>
-            <div class="sub-menu">
-                <a href="{{ route('backend.accesstrade.offers.index') }}"
-                   class="sub-link {{ request()->routeIs('backend.accesstrade.offers.*') ? 'active' : '' }}">Voucher & Khuyến mãi</a>
-                <a href="{{ route('backend.accesstrade.top-products.index') }}"
-                   class="sub-link {{ request()->routeIs('backend.accesstrade.top-products.*') ? 'active' : '' }}">Top sản phẩm bán chạy</a>
-            </div>
-        </details>
-        @endcan
-
         {{-- spec/Breaking_News_Ticker_Technical_Specification.md §6.3 — breaking_news.manage
              cấp cho platform_ops/platform_content_head (Modules\Post\Database\Seeders\BreakingNewsPermissionSeeder). --}}
         @can(\App\Enums\PermissionEnum::BREAKING_NEWS_MANAGE->value)
