@@ -10,6 +10,8 @@
     'existingArticlesUrlTemplate' => route('backend.api.coreideaextractor.category-foundations.existing-articles', ['category' => '__UUID__']),
     'categories' => $categoryFoundations,
     'layer2Url' => route('backend.api.coreideaextractor.layer2'),
+    'summarizeUrl' => route('backend.api.coreideaextractor.summarize'),
+    'rewriteUrl' => route('backend.api.coreideaextractor.rewrite'),
 ]) }})">
 
     <div class="mb-5 flex items-start justify-between flex-wrap gap-2">
@@ -225,6 +227,48 @@
                         <span x-show="!layer2Loading">Chạy Layer 2 bằng AI</span>
                         <span x-show="layer2Loading" x-cloak>Đang gọi AI (có thể mất tới 30 giây)...</span>
                     </button>
+
+                    <template x-if="!isBatchResult()">
+                        <button type="button" class="btn btn-ghost btn-xs" title="Copy prompt tóm tắt cho AI" @click="copySummarizePrompt()">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                            <span x-show="copiedSummarizePrompt" x-cloak>Đã copy!</span>
+                        </button>
+                    </template>
+
+                    <template x-if="!isBatchResult()">
+                        <button type="button" class="btn btn-secondary btn-xs gap-1.5" :disabled="summarizeLoading" @click="runSummarize()">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M4 6h16M4 12h10M4 18h6"/>
+                            </svg>
+                            <span x-show="!summarizeLoading">Chạy tóm tắt bằng AI</span>
+                            <span x-show="summarizeLoading" x-cloak>Đang gọi AI...</span>
+                        </button>
+                    </template>
+
+                    <template x-if="!isBatchResult()">
+                        <button type="button" class="btn btn-ghost btn-xs" title="Copy prompt tái cấu trúc cho AI" @click="copyRewritePrompt()">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                            <span x-show="copiedRewritePrompt" x-cloak>Đã copy!</span>
+                        </button>
+                    </template>
+
+                    <template x-if="!isBatchResult()">
+                        <button type="button" class="btn btn-secondary btn-xs gap-1.5" :disabled="rewriteLoading" @click="runRewrite()">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                            <span x-show="!rewriteLoading">Chạy tái cấu trúc bằng AI</span>
+                            <span x-show="rewriteLoading" x-cloak>Đang gọi AI...</span>
+                        </button>
+                    </template>
                 </div>
             </div>
 
@@ -237,7 +281,31 @@
                         Model: <span x-text="layer2Result?.model_used"></span> — Chi phí: $<span x-text="layer2Result?.cost_usd?.toFixed(4)"></span>
                     </span>
                 </div>
-                <div class="bg-base-200 rounded-lg p-4 max-h-[70vh] overflow-y-auto" x-html="renderLayer2Markdown(layer2Result?.markdown_output)"></div>
+                <div class="bg-base-200 rounded-lg p-4 max-h-[70vh] overflow-y-auto" x-html="renderMarkdown(layer2Result?.markdown_output)"></div>
+            </div>
+
+            <div x-show="summarizeError" x-cloak class="alert alert-error text-xs py-2 px-3 mb-3" x-text="summarizeError"></div>
+
+            <div x-show="summarizeResult" x-cloak class="mb-4">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium">Kết quả tóm tắt (AI)</span>
+                    <span class="text-xs text-base-content/40" x-show="summarizeResult">
+                        Model: <span x-text="summarizeResult?.model_used"></span> — Chi phí: $<span x-text="summarizeResult?.cost_usd?.toFixed(4)"></span>
+                    </span>
+                </div>
+                <div class="bg-base-200 rounded-lg p-4 max-h-[50vh] overflow-y-auto" x-html="renderMarkdown(summarizeResult?.markdown_output)"></div>
+            </div>
+
+            <div x-show="rewriteError" x-cloak class="alert alert-error text-xs py-2 px-3 mb-3" x-text="rewriteError"></div>
+
+            <div x-show="rewriteResult" x-cloak class="mb-4">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium">Kết quả tái cấu trúc (AI)</span>
+                    <span class="text-xs text-base-content/40" x-show="rewriteResult">
+                        Model: <span x-text="rewriteResult?.model_used"></span> — Chi phí: $<span x-text="rewriteResult?.cost_usd?.toFixed(4)"></span>
+                    </span>
+                </div>
+                <div class="bg-base-200 rounded-lg p-4 max-h-[50vh] overflow-y-auto" x-html="renderMarkdown(rewriteResult?.markdown_output)"></div>
             </div>
 
             <template x-if="isBatchResult()">
@@ -269,7 +337,7 @@
 <script>
 document.addEventListener('alpine:init', () => {
     Alpine.data('coreIdeaExtractorPage', (serverData = {}) => {
-        const { apiUrl = '', apiBatchUrl = '', maxUrls = 7, categoryFoundationsUrl = '', existingArticlesUrlTemplate = '', categories = [], layer2Url = '' } = serverData;
+        const { apiUrl = '', apiBatchUrl = '', maxUrls = 7, categoryFoundationsUrl = '', existingArticlesUrlTemplate = '', categories = [], layer2Url = '', summarizeUrl = '', rewriteUrl = '' } = serverData;
 
         return {
             mode: 'url',
@@ -310,6 +378,22 @@ document.addEventListener('alpine:init', () => {
             layer2Loading: false,
             layer2Error: '',
             layer2Result: null,
+
+            // 2026-07-30 — 2 tính năng mở rộng (spec/content.md mục A+B): "Tóm tắt nội dung" và
+            // "Tái cấu trúc nội dung". Chỉ áp dụng cho kết quả trích xuất 1 URL (không phải batch
+            // — xem guard isBatchResult() ở buildSummarizePromptText()/buildRewritePromptText()),
+            // vì cả 2 đều xử lý 1 nguồn duy nhất, không phải tổng hợp nhiều nguồn như luồng ý tưởng.
+            summarizeUrl,
+            summarizeLoading: false,
+            summarizeError: '',
+            summarizeResult: null,
+            copiedSummarizePrompt: false,
+
+            rewriteUrl,
+            rewriteLoading: false,
+            rewriteError: '',
+            rewriteResult: null,
+            copiedRewritePrompt: false,
 
             parsedUrls() {
                 return [...new Set(
@@ -1091,15 +1175,15 @@ document.addEventListener('alpine:init', () => {
             },
 
             /**
-             * RunLayer2ExtractionAction cố tình trả về 1 chuỗi `markdown_output` (2 bảng Markdown)
-             * thay vì mảng dữ liệu có cấu trúc theo từng cột — xem lý do ở comment đầu file
-             * RunLayer2ExtractionAction.php (tránh rủi ro lệch schema nếu AI đổi tên/thêm cột theo
-             * yêu cầu editorial sau này). Vì vậy việc dựng bảng HTML thật phải parse Markdown ở
-             * đây thay vì đổi backend — chỉ hỗ trợ đúng cú pháp bảng pipe Markdown chuẩn (2 bảng
-             * theo BƯỚC 3 của prompt), text nằm ngoài bảng (nếu AI lỡ thêm) vẫn hiển thị an toàn
-             * dưới dạng đoạn văn thay vì bị bỏ qua.
+             * RunLayer2ExtractionAction/RunCoreIdeaAiPromptAction cố tình trả về 1 chuỗi
+             * `markdown_output` thay vì dữ liệu có cấu trúc theo từng cột/mục — xem lý do ở
+             * comment đầu 2 file action đó (tránh rủi ro lệch schema nếu AI đổi tên/thêm cột/mục
+             * theo yêu cầu editorial sau này). Vì vậy việc dựng HTML thật phải parse Markdown ở
+             * đây thay vì đổi backend — hỗ trợ bảng pipe Markdown chuẩn (luồng ý tưởng), heading
+             * `##` và gạch đầu dòng `-`/`*` (luồng tóm tắt/tái cấu trúc — 2026-07-30), text còn
+             * lại vẫn hiển thị an toàn dưới dạng đoạn văn thay vì bị bỏ qua.
              */
-            renderLayer2Markdown(markdown) {
+            renderMarkdown(markdown) {
                 if (!markdown) return '';
 
                 const escapeHtml = (str) => str
@@ -1112,6 +1196,8 @@ document.addEventListener('alpine:init', () => {
                 const isTableRow = (line) => /^\s*\|.*\|\s*$/.test(line);
                 const isSeparatorRow = (line) => /^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$/.test(line);
                 const splitRow = (line) => line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map(cell => cell.trim());
+                const isHeadingRow = (line) => /^\s*#{1,3}\s+/.test(line);
+                const isBulletRow = (line) => /^\s*[-*]\s+/.test(line);
 
                 const lines = markdown.replace(/\r\n/g, '\n').split('\n');
                 const html = [];
@@ -1139,6 +1225,23 @@ document.addEventListener('alpine:init', () => {
                         continue;
                     }
 
+                    if (isHeadingRow(line)) {
+                        html.push(`<p class="text-sm font-semibold mt-3 mb-1">${escapeHtml(line.replace(/^\s*#{1,3}\s+/, ''))}</p>`);
+                        i++;
+                        continue;
+                    }
+
+                    if (isBulletRow(line)) {
+                        const items = [];
+                        while (i < lines.length && isBulletRow(lines[i])) {
+                            items.push(lines[i].replace(/^\s*[-*]\s+/, ''));
+                            i++;
+                        }
+                        html.push('<ul class="list-disc list-inside text-xs text-base-content/70 mb-2 space-y-0.5">'
+                            + items.map(item => `<li>${escapeHtml(item)}</li>`).join('') + '</ul>');
+                        continue;
+                    }
+
                     if (line.trim() !== '') {
                         html.push(`<p class="text-xs text-base-content/70 mb-2">${escapeHtml(line.trim())}</p>`);
                     }
@@ -1146,6 +1249,178 @@ document.addEventListener('alpine:init', () => {
                 }
 
                 return html.join('');
+            },
+
+            /**
+             * Ngữ cảnh dùng chung cho buildSummarizePromptText()/buildRewritePromptText() — chỉ
+             * hoạt động trên kết quả trích xuất 1 URL (this.result trực tiếp là RawExtractionData,
+             * khác cấu trúc `sources[]` của batch — xem isBatchResult()). Trả `null` ở chế độ batch
+             * vì tóm tắt/tái cấu trúc xử lý 1 nguồn duy nhất, không có khái niệm "batch" như luồng
+             * sinh ý tưởng (vốn tổng hợp NHIỀU nguồn cho 1 ý tưởng).
+             */
+            singleSourceContext() {
+                if (!this.result || this.isBatchResult()) return null;
+
+                return {
+                    title: this.result.title || '(không có tiêu đề)',
+                    language: this.result.language || 'unknown',
+                    mainContent: this.result.main_content || '',
+                };
+            },
+
+            buildSummarizePromptText() {
+                const ctx = this.singleSourceContext();
+                if (!ctx) return '';
+
+                const lines = [
+                    'Bạn là biên tập viên cần nắm nhanh nội dung 1 nguồn để tham khảo, không cần bối cảnh chuyên mục hay mục tiêu biên tập nào khác.',
+                    '',
+                    `Tiêu đề nguồn: "${ctx.title}"`,
+                    `Ngôn ngữ nguồn: ${ctx.language}`,
+                    'Nội dung nguồn (Markdown):',
+                    '"""',
+                    ctx.mainContent,
+                    '"""',
+                    '',
+                ];
+
+                if (ctx.language !== 'vi') {
+                    lines.push(`Nguồn có ngôn ngữ gốc khác tiếng Việt (${ctx.language}) — LUÔN viết TOÀN BỘ output bằng tiếng Việt tự nhiên, KHÔNG dịch nguyên văn/máy móc câu chữ.`, '');
+                }
+
+                lines.push(
+                    'Nhiệm vụ: tóm tắt nội dung trên. Trả về ĐÚNG 2 phần theo thứ tự dưới đây, không thêm giải thích/mở đầu/kết luận nào khác:',
+                    '',
+                    '## Tóm tắt',
+                    'Đoạn văn dưới 100 từ, nắm được nội dung chính.',
+                    '',
+                    '## Ý chính',
+                    '3-5 gạch đầu dòng, mỗi ý 1 câu ngắn, không lặp lại nguyên câu đã có trong đoạn tóm tắt.',
+                );
+
+                return lines.join('\n');
+            },
+
+            buildRewritePromptText() {
+                const ctx = this.singleSourceContext();
+                if (!ctx) return '';
+
+                const lines = [
+                    'Bạn là chuyên gia content đa kênh, cần viết lại 1 nội dung gốc thành nhiều phiên bản cho các nền tảng khác nhau, giữ đúng Ý CHÍNH nhưng đổi giọng văn/độ dài phù hợp từng nền tảng.',
+                    '',
+                    `Tiêu đề nguồn: "${ctx.title}"`,
+                    `Ngôn ngữ nguồn: ${ctx.language}`,
+                    'Nội dung nguồn (Markdown):',
+                    '"""',
+                    ctx.mainContent,
+                    '"""',
+                    '',
+                ];
+
+                if (ctx.language !== 'vi') {
+                    lines.push(`Nguồn có ngôn ngữ gốc khác tiếng Việt (${ctx.language}) — LUÔN viết TOÀN BỘ output bằng tiếng Việt tự nhiên, KHÔNG dịch nguyên văn/máy móc câu chữ.`, '');
+                }
+
+                lines.push(
+                    'Nhiệm vụ: viết lại nội dung trên. Trả về ĐÚNG 3 phần theo thứ tự dưới đây, không thêm giải thích/mở đầu/kết luận nào khác:',
+                    '',
+                    '## Facebook',
+                    'Giọng gần gũi, có thể hài hước nhẹ, 80-120 từ, dùng emoji vừa phải (không lạm dụng), kết thúc bằng 1 câu hỏi gợi độc giả bình luận.',
+                    '',
+                    '## LinkedIn',
+                    'Giọng chuyên nghiệp, có chiều sâu, 150-200 từ, không dùng emoji, nhấn mạnh insight/số liệu/bài học rút ra.',
+                    '',
+                    '## Twitter/X',
+                    'Cực ngắn gọn, dưới 280 ký tự, có thể kèm 1-2 hashtag liên quan trực tiếp tới chủ đề.',
+                );
+
+                return lines.join('\n');
+            },
+
+            async copySummarizePrompt() {
+                const prompt = this.buildSummarizePromptText();
+                if (!prompt) return;
+
+                await navigator.clipboard.writeText(prompt);
+                this.copiedSummarizePrompt = true;
+                setTimeout(() => { this.copiedSummarizePrompt = false; }, 2000);
+            },
+
+            async copyRewritePrompt() {
+                const prompt = this.buildRewritePromptText();
+                if (!prompt) return;
+
+                await navigator.clipboard.writeText(prompt);
+                this.copiedRewritePrompt = true;
+                setTimeout(() => { this.copiedRewritePrompt = false; }, 2000);
+            },
+
+            async runSummarize() {
+                const prompt = this.buildSummarizePromptText();
+                if (!prompt || this.summarizeLoading) return;
+
+                this.summarizeLoading = true;
+                this.summarizeError = '';
+                this.summarizeResult = null;
+
+                try {
+                    const res = await fetch(this.summarizeUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({ prompt }),
+                    });
+
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        this.summarizeError = data.message || `Lỗi HTTP ${res.status}`;
+                        return;
+                    }
+
+                    this.summarizeResult = data;
+                } catch (e) {
+                    this.summarizeError = 'Không gọi được server — kiểm tra kết nối mạng.';
+                } finally {
+                    this.summarizeLoading = false;
+                }
+            },
+
+            async runRewrite() {
+                const prompt = this.buildRewritePromptText();
+                if (!prompt || this.rewriteLoading) return;
+
+                this.rewriteLoading = true;
+                this.rewriteError = '';
+                this.rewriteResult = null;
+
+                try {
+                    const res = await fetch(this.rewriteUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({ prompt }),
+                    });
+
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        this.rewriteError = data.message || `Lỗi HTTP ${res.status}`;
+                        return;
+                    }
+
+                    this.rewriteResult = data;
+                } catch (e) {
+                    this.rewriteError = 'Không gọi được server — kiểm tra kết nối mạng.';
+                } finally {
+                    this.rewriteLoading = false;
+                }
             },
         };
     });

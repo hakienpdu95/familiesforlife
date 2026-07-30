@@ -72,6 +72,19 @@ return [
         'max_output_tokens' => 4096,
     ],
 
+    // 2026-07-30 — 2 tính năng mở rộng (spec/content.md mục A+B): "Tóm tắt nội dung" và "Tái cấu
+    // trúc nội dung", dùng chung `layer2.max_prompt_chars` làm trần payload prompt (cùng bản chất
+    // "1 prompt build sẵn ở client" — không cần trần riêng). max_output_tokens thấp hơn Layer 2
+    // vì output ngắn hơn nhiều: tóm tắt chỉ 1 đoạn <100 từ + vài gạch đầu dòng, tái cấu trúc chỉ
+    // 3 đoạn ngắn theo nền tảng (Facebook/LinkedIn/Twitter), không phải bảng tới ~25 dòng ý tưởng.
+    'summarization' => [
+        'max_output_tokens' => 800,
+    ],
+
+    'rewrite' => [
+        'max_output_tokens' => 2000,
+    ],
+
     // spec/CoreIdeaExtractor.md §12.8 (v1.11) — danh sách bài ĐÃ publish trong 1 category, kéo
     // vào prompt để tránh AI đề xuất trùng ý tưởng đã viết. Chỉ tiêu đề (chuỗi ngắn) nên không có
     // rủi ro "phình" prompt như main_content — cap vẫn đặt ra theo đúng thói quen của module (mọi

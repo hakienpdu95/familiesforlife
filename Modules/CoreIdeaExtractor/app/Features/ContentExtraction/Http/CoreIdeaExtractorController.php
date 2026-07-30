@@ -16,6 +16,7 @@ use Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions\ComputeExtracti
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions\ExtractRawContentAction;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions\FetchArticleHtmlAction;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions\FetchArticlesBatchAction;
+use Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions\RunCoreIdeaAiPromptAction;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions\RunLayer2ExtractionAction;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Data\BatchSourceResultData;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Data\ExtractBatchRequestData;
@@ -282,6 +283,60 @@ class CoreIdeaExtractorController extends Controller
 
         try {
             $result = $action->handle($organization, $data['prompt']);
+        } catch (AiBudgetExceededException|AIProviderConfigException|UnknownModelPricingException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+
+        return response()->json($result);
+    }
+
+    /**
+     * 2026-07-30 — "Tóm tắt nội dung" (spec/content.md mục A), tính năng mở rộng CoreIdeaExtractor
+     * cùng mẫu với runLayer2(): `prompt` nhận NGUYÊN VĂN chuỗi client đã build sẵn
+     * (buildSummarizePromptText() ở index.blade.php), PHP chỉ gọi AI + kiểm tra ngân sách + ghi
+     * audit — KHÔNG cần Category Content Foundation/existing-articles, chỉ cần main_content đã
+     * trích ở Layer 1 nên hoạt động độc lập với việc có chọn chuyên mục hay không.
+     */
+    public function summarize(Request $request, RunCoreIdeaAiPromptAction $action): JsonResponse
+    {
+        $data = $request->validate([
+            'prompt' => ['required', 'string', 'max:'.config('core_idea_extractor.layer2.max_prompt_chars', 300000)],
+        ]);
+
+        $organization = TenantContext::get();
+
+        if (! $organization) {
+            return response()->json(['message' => 'Không xác định được tổ chức hiện tại — không thể gọi AI.'], 422);
+        }
+
+        try {
+            $result = $action->handle($organization, $data['prompt'], 'summarization', (int) config('core_idea_extractor.summarization.max_output_tokens', 800));
+        } catch (AiBudgetExceededException|AIProviderConfigException|UnknownModelPricingException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+
+        return response()->json($result);
+    }
+
+    /**
+     * 2026-07-30 — "Tái cấu trúc nội dung" (spec/content.md mục B) — viết lại nội dung gốc thành
+     * nhiều phiên bản theo giọng văn từng nền tảng (Facebook/LinkedIn/Twitter). Cùng mẫu với
+     * summarize()/runLayer2(), chỉ khác `kind` + max_output_tokens.
+     */
+    public function rewrite(Request $request, RunCoreIdeaAiPromptAction $action): JsonResponse
+    {
+        $data = $request->validate([
+            'prompt' => ['required', 'string', 'max:'.config('core_idea_extractor.layer2.max_prompt_chars', 300000)],
+        ]);
+
+        $organization = TenantContext::get();
+
+        if (! $organization) {
+            return response()->json(['message' => 'Không xác định được tổ chức hiện tại — không thể gọi AI.'], 422);
+        }
+
+        try {
+            $result = $action->handle($organization, $data['prompt'], 'rewrite', (int) config('core_idea_extractor.rewrite.max_output_tokens', 2000));
         } catch (AiBudgetExceededException|AIProviderConfigException|UnknownModelPricingException $e) {
             return response()->json(['message' => $e->getMessage()], 422);
         }
