@@ -907,6 +907,25 @@ document.addEventListener('alpine:init', () => {
                 if (brief.constraints) top.push(`Ràng buộc / không muốn: ${brief.constraints}`);
                 if (brief.style_sample) top.push(`Giọng văn mẫu:\n${brief.style_sample}`);
 
+                /**
+                 * (16) Phản hồi thực tế — sau khi thêm Bước 0 (mục (15)) chặn ý tưởng gượng ép khi
+                 * nguồn lệch chuyên mục, người dùng chỉ ra 1 tình huống thật hơn: THỰC TẾ sưu tầm
+                 * nguồn xong mới chọn tạm 1 chuyên mục gần đúng độ tuổi, KHÔNG biết trước chuyên mục
+                 * nào khớp nhất — nếu Bước 0 chỉ dừng ở báo "không phù hợp" rồi trả 0 ý tưởng thì
+                 * không giúp được gì cho đúng nhu cầu này ("AI vẫn phải linh hoạt đưa ra ý tưởng
+                 * chứ"). Vấn đề gốc: Bước 0 trước đó không có DANH SÁCH CÁC CHUYÊN MỤC KHÁC trên
+                 * site để tự đề xuất chuyển hướng — chỉ biết mỗi chuyên mục đã chọn. Thêm danh sách
+                 * TÊN chuyên mục (rẻ — chỉ tên, không kèm core_focus/unique_angle từng cái để tránh
+                 * phình prompt theo số chuyên mục Ơ trên site) để Bước 0 có thể GỌI ĐÚNG TÊN 1 chuyên
+                 * mục THẬT đang tồn tại thay vì chỉ nói suông "không phù hợp", rồi vẫn tạo ý tưởng
+                 * đầy đủ theo chuyên mục mới đó — "linh hoạt" nhưng vẫn trung thực (không hallucinate
+                 * tên chuyên mục không có thật, vì đối chiếu với danh sách CÓ THẬT ngay trong prompt).
+                 */
+                if (this.categories.length) {
+                    top.push(`Danh sách chuyên mục hiện có trên site (dùng ở Bước 0 để gọi tên chuyên mục phù hợp hơn nếu cần — chỉ chọn tên có trong danh sách, không bịa):`);
+                    this.categories.forEach(cat => top.push(`${'  '.repeat(cat.depth)}- ${cat.name}`));
+                }
+
                 // `brief`/`topic` đã đưa lên TOP ở trên nên loại khỏi JSON ở MIDDLE (tránh lặp lại
                 // cùng 1 thông tin 2 lần, giảm "signal density" — xem getcollate.io/learning-center/
                 // context-engineering); các field kỹ thuật thuần khác cũng loại bỏ ở đây — xem
@@ -925,7 +944,7 @@ document.addEventListener('alpine:init', () => {
                 ];
 
                 const bottom = [
-                    'Nhiệm vụ: đề xuất ý tưởng bài viết mới từ dữ liệu trên, làm theo đúng 3 bước sau.',
+                    'Nhiệm vụ: đề xuất ý tưởng bài viết mới từ dữ liệu trên, làm theo đúng trình tự sau (kiểm tra sơ bộ rồi 3 bước).',
                 ];
 
                 if (hasNonVietnameseSource) {
@@ -933,6 +952,18 @@ document.addEventListener('alpine:init', () => {
                 }
 
                 bottom.push(
+                    '',
+                    'BƯỚC 0 — Đối chiếu chủ đề THẬT của nguồn (main_content/title/headings) với trọng tâm/ranh giới "KHÔNG lấn sân" '
+                        + 'của chuyên mục đã chọn. Ưu tiên tạo ý tưởng hữu ích, không dừng lại ở việc báo "không phù hợp":',
+                    '- Khớp chuyên mục (trường hợp thường gặp) → bỏ qua bước này, làm tiếp Bước 1.',
+                    '- Lệch HẲN lĩnh vực (VD nguồn dinh dưỡng/y khoa nhưng chuyên mục là hành vi, hoặc ngược lại) và tìm được 1 tên '
+                        + 'khớp hơn trong "Danh sách chuyên mục" ở trên → viết đúng 1 dòng "Lưu ý: nguồn phù hợp hơn với chuyên mục '
+                        + '\'[tên, copy đúng từ danh sách]\'", rồi làm Bước 1-3 bình thường (đủ 10 ý tưởng như cũ), đánh giá 4 tiêu '
+                        + 'chí theo phỏng đoán hợp lý về chuyên mục MỚI này (dựa tên gọi + kiến thức chung, vì chỉ có core_focus/'
+                        + 'unique_angle/goal/audience của chuyên mục đã chọn ban đầu).',
+                    '- Lệch lĩnh vực nhưng KHÔNG tìm được tên nào khớp hơn → viết 1 dòng "Lưu ý: nguồn thuộc lĩnh vực [X], không có '
+                        + 'chuyên mục nào trên site phù hợp hơn", rồi chỉ đề xuất ở phần giao thoa thật với chuyên mục đã chọn (nếu '
+                        + 'có) — Bảng có thể rất ít hoặc 0 dòng, đây là phương án cuối.',
                     '',
                     'BƯỚC 1 — Sinh ý tưởng: brainstorm RỘNG, liệt kê 20-25 ý tưởng ứng viên đa dạng góc nhìn (chưa lọc) — '
                         + 'không chỉ biến tấu lại vài ý giống nhau. Đa dạng hoá bằng nhiều dạng góc nhìn khác nhau từ dữ liệu nguồn: '
@@ -975,8 +1006,9 @@ document.addEventListener('alpine:init', () => {
                 bottom.push(
                     'Mục tiêu số lượng: Bảng 1 cần có ÍT NHẤT 10 ý tưởng đạt cả 4 tiêu chí. Nếu ở Bước 2 chưa đủ 10 ý đạt, quay lại '
                         + 'Bước 1 sinh thêm ý tưởng MỚI ở góc nhìn khác (không lặp ý đã liệt kê) cho đến khi đủ 10 — chỉ dừng dưới 10 '
-                        + 'nếu đã thực sự khai thác hết góc nhìn hợp lý từ dữ liệu nguồn, và khi đó ghi rõ lý do ở cuối Bảng 2 '
-                        + '(VD: dữ liệu nguồn không đủ sâu để tạo thêm ý tưởng chất lượng — KHÔNG được bịa ý tưởng yếu/generic chỉ để đủ số lượng).',
+                        + 'nếu đã thực sự khai thác hết góc nhìn hợp lý từ dữ liệu nguồn (hoặc do lệch chủ đề ở Bước 0), và khi đó '
+                        + 'ghi rõ lý do bằng 1 dòng ngắn ngay dưới Bảng 1 (VD: dữ liệu nguồn không đủ sâu để tạo thêm ý tưởng chất '
+                        + 'lượng — KHÔNG được bịa ý tưởng yếu/generic chỉ để đủ số lượng).',
                 );
 
                 bottom.push(
@@ -996,9 +1028,11 @@ document.addEventListener('alpine:init', () => {
                         : '4. Phù hợp đối tượng độc giả: ý tưởng có phù hợp với đối tượng độc giả đã nêu ở trên không?',
                     'Lưu ý khi đánh giá: nếu nguồn có extraction_confidence thấp hoặc notes cảnh báo nghi vấn paywall, hạ độ tin cậy khi dùng nguồn đó làm căn cứ cho ý tưởng.',
                     '',
-                    'BƯỚC 3 — Trả lời bằng ĐÚNG 2 bảng Markdown dưới đây. Không viết giải thích, không mở đầu, không kết luận, không viết gì khác ngoài 2 bảng:',
+                    'BƯỚC 3 — Trả lời bằng ĐÚNG 1 bảng Markdown dưới đây, có thể kèm 1 dòng "Lưu ý" ngay trước bảng nếu Bước 0 phát '
+                        + 'hiện lệch chủ đề, hoặc 1 dòng lý do ngắn ngay sau bảng nếu chưa đủ 10 ý tưởng (xem "Mục tiêu số lượng" ở '
+                        + 'trên). Không viết giải thích, không mở đầu, không kết luận nào khác:',
                     '',
-                    'Bảng 1 — Ý tưởng ĐẠT cả 4 tiêu chí, cột: '
+                    'Bảng — Ý tưởng ĐẠT cả 4 tiêu chí, cột: '
                         + '| Ý tưởng | Khớp trọng tâm? | Góc nhìn độc quyền? | Phục vụ mục tiêu? | Phù hợp đối tượng? | Lý do (1 câu, vì sao đạt cả 4) | Đề xuất tiêu đề bài viết |',
                 );
 

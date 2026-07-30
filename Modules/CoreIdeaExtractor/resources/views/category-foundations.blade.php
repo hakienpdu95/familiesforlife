@@ -93,6 +93,13 @@
                                   class="textarea textarea-bordered textarea-sm w-full"></textarea>
                     </div>
                     <div class="form-control">
+                        <label class="label py-0.5">
+                            <span class="label-text text-xs font-medium">Key insights for writers (5-7 gạch đầu dòng tóm tắt nhanh — đọc trước khi đọc hết core_focus/unique_angle)</span>
+                        </label>
+                        <textarea x-model="cat._form.writer_insights" rows="3" placeholder="VD: - Không viết về X, chỉ viết về Y&#10;- Motif lặp cần tránh: ..."
+                                  class="textarea textarea-bordered textarea-sm w-full"></textarea>
+                    </div>
+                    <div class="form-control">
                         <label class="label py-0.5"><span class="label-text text-xs font-medium">Góc nhìn khác biệt (điều chỉ chuyên mục này viết được)</span></label>
                         <textarea x-model="cat._form.unique_angle" rows="2" placeholder="VD: Có đội ngũ chuyên gia dinh dưỡng nội bộ kiểm duyệt, không chỉ dịch lại nguồn ngoại"
                                   class="textarea textarea-bordered textarea-sm w-full"></textarea>
@@ -195,7 +202,7 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('categoryFoundationsPage', (serverData = {}) => {
         const { listUrl = '', upsertUrlTemplate = '', backUrl = '', staleAfterDays = 180 } = serverData;
 
-        const emptyForm = () => ({ core_focus: '', unique_angle: '', content_goals: '', pain_points: '', rejected_ideas: '', audience: '', constraints: '', style_sample: '' });
+        const emptyForm = () => ({ core_focus: '', writer_insights: '', unique_angle: '', content_goals: '', pain_points: '', rejected_ideas: '', audience: '', constraints: '', style_sample: '' });
 
         return {
             categories: [],

@@ -59,6 +59,7 @@ class CategoryFoundationController extends Controller
 
         $validated = $request->validate([
             'core_focus'        => ['nullable', 'string', 'max:2000'],
+            'writer_insights'   => ['nullable', 'string', 'max:1500'],
             'unique_angle'      => ['nullable', 'string', 'max:2000'],
             'content_goals'     => ['nullable', 'string', 'max:2000'],
             'pain_points'       => ['nullable', 'string', 'max:2000'],
@@ -97,7 +98,8 @@ class CategoryFoundationController extends Controller
         return response()->json([
             'category_id' => $category->id,
             'foundation'  => [
-                'core_focus'     => $foundation->core_focus,
+                'core_focus'      => $foundation->core_focus,
+                'writer_insights' => $foundation->writer_insights,
                 'unique_angle'   => $foundation->unique_angle,
                 'content_goals'  => $foundation->content_goals,
                 'pain_points'    => $foundation->pain_points,

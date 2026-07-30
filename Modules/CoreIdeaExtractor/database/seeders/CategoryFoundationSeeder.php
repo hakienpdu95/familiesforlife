@@ -28,6 +28,7 @@ class CategoryFoundationSeeder extends Seeder
      * @var array<int, array{
      *     parent_slug: ?string,
      *     slug: string,
+     *     writer_insights: string,
      *     core_focus: string,
      *     unique_angle: string,
      *     content_goals: string,
@@ -43,6 +44,16 @@ class CategoryFoundationSeeder extends Seeder
         [
             'parent_slug' => 'tre-mam-non-3-6-tuoi',
             'slug'        => 'cham-soc-nuoi-day-2',
+
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: HÀNH VI/CẢM XÚC hằng ngày của trẻ 3-6 tuổi (ăn vạ, nề nếp, tự lập, màn hình, câu hỏi khó, tiền lớp 1).
+                - KHÔNG viết: mốc phát triển/chậm nói (→ Phát triển của trẻ), biếng ăn (→ Dinh dưỡng cho trẻ), bệnh (→ Bệnh thường gặp), chọn trường (→ Trường mầm non & tiểu học).
+                - Góc khác biệt: bản địa hóa phương pháp Tây (time-out, Montessori) cho hoàn cảnh Việt — ông bà cùng chăm, lớp 30-40 cháu, bố mẹ chỉ có 2 tiếng buổi tối.
+                - Giọng bắt buộc: thừa nhận cha mẹ sẽ mất bình tĩnh và thất bại — không lý tưởng hóa, không phán xét.
+                - Ranh giới với "Chăm sóc & nuôi dạy" ở tuổi khác: tuổi 1-3 là ăn vạ/cai bỉm/cai ti (chưa có tư duy trừu tượng); tuổi 3-6 (ở đây) thêm nói dối/ghen tị em/câu hỏi khó; tuổi 6-12 là tự học/mạng xã hội/bắt nạt — không viết chồng giữa 3 mốc.
+                - Điểm nhạy cảm phải xử lý tử tế, không né: thương lượng với ông bà, bất đồng vợ chồng, tội lỗi của mẹ đi làm.
+                - Kịch bản thoại và ví dụ nên có cả tình huống BỐ xử lý con một mình (không chỉ mặc định mẹ là người xử lý chính) — tránh viết như thể nuôi dạy con 3-6 tuổi là việc riêng của mẹ.
+                TEXT,
 
             'core_focus' => <<<'TEXT'
                 Cẩm nang thực hành hằng ngày về nuôi dạy trẻ 3-6 tuổi cho cha mẹ Việt đi làm: xử lý hành vi và cảm xúc (ăn vạ, bướng bỉnh, cãi lại, khủng hoảng tuổi lên 3-4, nói dối, nói bậy, ghen tị với em), xây nề nếp sinh hoạt (giờ ngủ, vệ sinh cá nhân, ngủ riêng, buổi sáng đi học không nước mắt), rèn tính tự lập và tự phục vụ (tự xúc ăn, tự mặc đồ, làm việc nhà theo tuổi), quản lý màn hình (giới hạn, lộ trình cai điện thoại/tivi), kỷ luật tích cực áp dụng được trong gia đình Việt (có ông bà cùng chăm), trả lời các câu hỏi khó của con (cái chết, giới tính, "con sinh ra từ đâu"), dạy con tự bảo vệ trước xâm hại, và chuẩn bị tâm thế - thói quen - kỹ năng cho giai đoạn tiền lớp 1. Mỗi bài đi từ MỘT tình huống cụ thể có thật, giải thích ngắn gọn vì sao trẻ hành xử vậy theo tâm lý lứa tuổi, rồi đưa các bước xử lý làm được ngay và cách xây thói quen trong 2-4 tuần. KHÔNG lấn sân: cột mốc phát triển/chậm nói (thuộc Phát triển của trẻ), biếng ăn/thực đơn (thuộc Dinh dưỡng cho trẻ), bệnh tật (thuộc Bệnh thường gặp), chọn trường (thuộc Trường mầm non & tiểu học).
@@ -64,7 +75,7 @@ class CategoryFoundationSeeder extends Seeder
                 "Review/so sánh trường mầm non tốt nhất Hà Nội, TP.HCM" — thuộc danh mục Trường mầm non & tiểu học, viết ở đây gây chồng lấn nội bộ. "Các cột mốc phát triển trẻ 3-6 tuổi" và "Dấu hiệu chậm nói" — thuộc danh mục Phát triển của trẻ. "Thực đơn cho trẻ biếng ăn" — thuộc Dinh dưỡng cho trẻ; chuyên mục này chỉ viết khía cạnh HÀNH VI bữa ăn (tự xúc, ngồi vào bàn, không xem tivi khi ăn). "So sánh lý thuyết Montessori vs Steiner vs Reggio" — các trường và trang giáo dục đã viết dày đặc để bán tuyển sinh, khó cạnh tranh SEO và ít giá trị hành động; chỉ viết khi quy về "áp dụng tại nhà thế nào". "Dạy con 4-5 tuổi đọc thông viết thạo/học tiếng Anh sớm thành thần đồng" — đi ngược quan điểm biên tập phát triển đúng lứa tuổi, cổ vũ áp lực sớm; thay bằng bài chuẩn bị tiền lớp 1 đúng cách. "Tác hại của điện thoại với trẻ" dạng liệt kê hù dọa — độc giả đã bão hòa và chỉ tăng cảm giác tội lỗi, không đổi được hành vi; chỉ viết dạng lộ trình cai cụ thể. "Trẻ hư tại ông bà" giọng đổ lỗi — đề tài cần viết nhưng KHÔNG theo hướng phán xét ông bà, chỉ viết dạng hướng dẫn thương lượng thiện chí.
                 TEXT,
 
-            'audience' => 'Cha mẹ Việt 27-40 tuổi có con 3-6 tuổi học mầm non (người đọc chính là mẹ, con đầu hoặc vừa có thêm con thứ hai), sống thành thị/ven đô, cả hai đi làm toàn thời gian, chỉ thực sự bên con buổi tối và cuối tuần, nhiều nhà có ông bà chăm cùng; đọc trên điện thoại lúc 21h-23h, tìm giải pháp cho tình huống vừa xảy ra trong ngày, đang mệt và dễ thấy tội lỗi.',
+            'audience' => 'Cha mẹ Việt 27-40 tuổi có con 3-6 tuổi học mầm non (mẹ thường đọc nhiều hơn nhưng bố cũng chủ động tìm khi cần xử lý một tình huống cụ thể vừa xảy ra), con đầu hoặc vừa có thêm con thứ hai, sống thành thị/ven đô, cả hai đi làm toàn thời gian, chỉ thực sự bên con buổi tối và cuối tuần, nhiều nhà có ông bà chăm cùng; đọc trên điện thoại lúc 21h-23h, tìm giải pháp cho tình huống vừa xảy ra trong ngày, đang mệt và dễ thấy tội lỗi.',
 
             'constraints' => 'Không giọng hàn lâm, thuyết giảng hay phán xét cha mẹ; không hù dọa, không "con nhà người ta"; không cổ vũ đòn roi, quát mắng, so sánh; không đổ lỗi cho ông bà hay mẹ đi làm; lời khuyên phải khả thi với nhà chung cư chật, bố mẹ về nhà 18h; luôn có bước làm được ngay tối nay; kịch bản thoại phải là tiếng Việt tự nhiên, không dịch máy.',
 
@@ -78,6 +89,15 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => null,
             'slug'        => 'chuan-bi-mang-thai',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: TRƯỚC khi có thai — khám tiền hôn nhân, tiêm phòng, axit folic, canh thời điểm, chuẩn bị tài chính/tâm lý, nhận biết chậm con.
+                - KHÔNG viết: dinh dưỡng SAU khi đã có thai (→ Dinh dưỡng thai kỳ), theo dõi thai (→ Sự phát triển của thai nhi), điều trị hiếm muộn chuyên sâu.
+                - Điểm khác biệt bắt buộc giữ: viết cho CẢ HAI vợ chồng (sức khỏe tinh trùng, vai trò người chồng) — không viết như chỉ vợ có trách nhiệm.
+                - Nói thẳng phần không ai nói: áp lực giục sinh, tủi thân nhìn bạn bè có con, mệt mỏi khi canh trứng biến chuyện chăn gối thành nghĩa vụ.
+                - Phân định rõ y khoa (tiêm phòng, folic) vs quan niệm dân gian chưa kiểm chứng (xem tuổi, kiêng khem) — tôn trọng nhưng không để hoang mang.
+                - Đây là ĐIỂM CHẠM ĐẦU TIÊN của độc giả với site — ưu tiên chuyển tiếp mượt sang Dinh dưỡng thai kỳ/Sức khỏe mẹ bầu ngay khi có tin vui.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
                 Đồng hành với các cặp vợ chồng Việt từ lúc "quyết định có con" đến lúc que thử lên 2 vạch: chuẩn bị sức khỏe trước mang thai (khám tiền hôn nhân/tiền sản, tiêm phòng trước mang thai, bổ sung axit folic, cai thuốc lá - rượu bia), hiểu chu kỳ và canh thời điểm dễ thụ thai, chuẩn bị tài chính - tâm lý - công việc trước khi có con, xử lý áp lực "bao giờ có tin vui" từ hai bên nội ngoại, và nhận biết khi nào chậm con là bình thường - khi nào nên đi khám hiếm muộn (chuẩn WHO: 1 năm với vợ dưới 35 tuổi, 6 tháng với vợ trên 35). Bài viết dạng lộ trình theo mốc thời gian (6 tháng - 3 tháng - 1 tháng trước khi thả) và dạng giải đáp tình huống thật. KHÔNG lấn sân: dinh dưỡng sau khi ĐÃ có thai (thuộc Dinh dưỡng thai kỳ), theo dõi thai (thuộc Sự phát triển của thai nhi), điều trị hiếm muộn chuyên sâu (chỉ dừng ở mức nhận biết dấu hiệu và hướng dẫn chọn nơi khám).
                 TEXT,
@@ -87,7 +107,7 @@ class CategoryFoundationSeeder extends Seeder
                 TEXT,
 
             'content_goals' => <<<'TEXT'
-                (1) Là điểm CHẠM ĐẦU TIÊN của độc giả với site — người đọc đến từ trước khi có con và nếu được phục vụ tốt sẽ đi cùng site suốt hành trình thai kỳ → sơ sinh → mầm non; ưu tiên chuyển đọc giả sang chuỗi Dinh dưỡng thai kỳ, Sức khỏe mẹ bầu ngay khi họ có tin vui. (2) SEO cho truy vấn giai đoạn sớm: "chuẩn bị gì trước khi mang thai", "uống axit folic trước khi mang thai bao lâu", "thả 6 tháng chưa có thai có sao không", "khám tiền sản ở đâu, hết bao nhiêu tiền". (3) Xây niềm tin y khoa có kiểm chứng ngay từ chuyên mục đầu phễu để định vị site là nguồn đáng tin cho cả hành trình làm cha mẹ.
+                (1) Là điểm CHẠM ĐẦU TIÊN của độc giả với site — người đọc đến từ trước khi có con và nếu được phục vụ tốt sẽ đi cùng site suốt hành trình thai kỳ → sơ sinh → mầm non; ưu tiên chuyển đọc giả sang chuỗi Dinh dưỡng thai kỳ, Sức khỏe mẹ bầu ngay khi họ có tin vui — đo bằng CTR từ bài "chuẩn bị mang thai" sang 2 chuyên mục đó. (2) SEO cho truy vấn giai đoạn sớm: "chuẩn bị gì trước khi mang thai", "uống axit folic trước khi mang thai bao lâu", "thả 6 tháng chưa có thai có sao không", "khám tiền sản ở đâu, hết bao nhiêu tiền". (3) Xây niềm tin y khoa có kiểm chứng ngay từ chuyên mục đầu phễu để định vị site là nguồn đáng tin cho cả hành trình làm cha mẹ — đo bằng thời gian đọc trung bình và tỷ lệ quay lại của độc giả trong nhóm tuổi này.
                 TEXT,
 
             'pain_points' => <<<'TEXT'
@@ -111,6 +131,15 @@ class CategoryFoundationSeeder extends Seeder
         [
             'parent_slug' => null,
             'slug'        => 'su-phat-trien-cua-thai-nhi',
+
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: sự phát triển của THAI NHI theo từng tuần (1-40) — kích thước, cơ quan, mốc siêu âm/xét nghiệm sàng lọc, cách đọc chỉ số phiếu siêu âm, đếm thai máy.
+                - KHÔNG viết: triệu chứng/bệnh của MẸ (→ Sức khỏe mẹ bầu), ăn uống (→ Dinh dưỡng thai kỳ), chuẩn bị sinh (→ Chuyển dạ & đi sinh).
+                - Định dạng chủ lực: chuỗi 40 bài "Thai nhi tuần thứ N" chuẩn hóa cấu trúc — đây là cỗ máy giữ chân độc giả theo tuần suốt 9 tháng.
+                - Khác biệt bắt buộc giữ: bản địa hóa so sánh kích thước (không dùng trái cây Tây xa lạ), khớp đúng lịch khám thai thực tế Việt Nam (kể cả xếp hàng viện công).
+                - Dạy mẹ ĐỌC HIỂU phiếu siêu âm (BPD, FL, EFW...) — không chỉ mô tả thai, vì bác sĩ thường chỉ có 2 phút giải thích.
+                - Mọi chỉ số bất thường phải kèm khoảng bình thường + bước tiếp theo, viết điềm tĩnh — đây là lúc mẹ dễ hoảng loạn nhất.
+                TEXT,
 
             'core_focus' => <<<'TEXT'
                 Theo chân sự phát triển của em bé trong bụng theo TỪNG TUẦN thai (tuần 1-40): kích thước và hình hài của con tuần này (so sánh trực quan kiểu "bằng hạt đậu, quả chanh, quả bưởi"), cơ quan nào đang hình thành, con đã nghe - đã máy - đã xoay đầu chưa, kèm theo đúng mốc đó là: mốc siêu âm - xét nghiệm sàng lọc quan trọng (NIPT, đo độ mờ da gáy tuần 11-13, siêu âm hình thái tuần 20-22, tiểu đường thai kỳ tuần 24-28), cách đọc hiểu các chỉ số trong phiếu siêu âm (BPD, FL, EFW, chỉ số ối...), thai máy - cách đếm cử động thai và khi nào cần đi khám ngay. Định dạng chủ lực: chuỗi bài "Thai nhi tuần thứ N" chuẩn hóa cấu trúc (con thế nào - mẹ thế nào - việc cần làm tuần này) để người đọc theo dõi như lịch. KHÔNG lấn sân: triệu chứng và bệnh của MẸ (thuộc Sức khỏe mẹ bầu), ăn uống (thuộc Dinh dưỡng thai kỳ), chuẩn bị sinh (thuộc Chuyển dạ & đi sinh).
@@ -146,8 +175,17 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => null,
             'slug'        => 'suc-khoe-me-bau',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: sức khỏe THỂ CHẤT + TINH THẦN của MẸ (không phải thai) — triệu chứng khó chịu, bệnh lý thai kỳ, dấu hiệu nguy hiểm, thuốc/vaccine, kiêng cữ dân gian.
+                - Ranh giới với Dinh dưỡng thai kỳ (hay chồng lấn nhất): bệnh lý thai kỳ như tiểu đường/thiếu máu — CHẨN ĐOÁN, theo dõi, thuốc thuộc chuyên mục này; THỰC ĐƠN/món ăn cụ thể để kiểm soát bệnh đó thuộc Dinh dưỡng thai kỳ. Không viết thực đơn ở đây, chỉ dẫn link sang.
+                - KHÔNG viết: chỉ số phát triển của thai (→ Sự phát triển của thai nhi), dấu hiệu chuyển dạ (→ Chuyển dạ & đi sinh).
+                - Khác biệt đã làm tốt, GIỮ NGUYÊN khung này: đứng giữa "bệnh viện chuẩn nhưng lạnh" và "hội nhóm ấm nhưng nguy hiểm" — không lặp lại cách viết này ở chuyên mục khác.
+                - Sức khỏe tinh thần (lo âu thai kỳ, trầm cảm trước sinh) phải ngang hàng thể chất — chủ đề mọi site tiếng Việt khác đang bỏ trống.
+                - Kiêng cữ dân gian: giải thích nguồn gốc + đối chiếu y khoa + cho "kịch bản nói chuyện" giữ hòa khí, không chế giễu.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
-                Sức khỏe THỂ CHẤT và TINH THẦN của người mẹ trong 9 tháng thai kỳ: xử lý các triệu chứng khó chịu theo tam cá nguyệt (ốm nghén, ợ nóng, chuột rút, đau lưng, phù chân, mất ngủ, táo bón, rạn da), nhận biết và theo dõi các bệnh lý thai kỳ thường gặp (tiểu đường thai kỳ, tăng huyết áp - tiền sản giật, thiếu máu, viêm âm đạo khi mang thai), dấu hiệu nguy hiểm phải đi viện NGAY (ra máu, đau bụng dữ dội, phù mặt đột ngột, thai giảm máy), thuốc và vaccine khi mang thai (loại nào an toàn, loại nào cấm), vận động - làm việc - quan hệ vợ chồng khi mang bầu, sức khỏe tinh thần (lo âu thai kỳ, thay đổi cảm xúc, áp lực công việc khi bụng bầu), và bóc tách kiêng cữ dân gian: cái nào có lý, cái nào vô căn cứ. KHÔNG lấn sân: chỉ số phát triển của thai (thuộc Sự phát triển của thai nhi), thực đơn ăn uống (thuộc Dinh dưỡng thai kỳ), dấu hiệu chuyển dạ (thuộc Chuyển dạ & đi sinh).
+                Sức khỏe THỂ CHẤT và TINH THẦN của người mẹ trong 9 tháng thai kỳ: xử lý các triệu chứng khó chịu theo tam cá nguyệt (ốm nghén, ợ nóng, chuột rút, đau lưng, phù chân, mất ngủ, táo bón, rạn da), nhận biết và theo dõi các bệnh lý thai kỳ thường gặp (tiểu đường thai kỳ, tăng huyết áp - tiền sản giật, thiếu máu, viêm âm đạo khi mang thai), dấu hiệu nguy hiểm phải đi viện NGAY (ra máu, đau bụng dữ dội, phù mặt đột ngột, thai giảm máy), thuốc và vaccine khi mang thai (loại nào an toàn, loại nào cấm), vận động - làm việc - quan hệ vợ chồng khi mang bầu, sức khỏe tinh thần (lo âu thai kỳ, thay đổi cảm xúc, áp lực công việc khi bụng bầu), và bóc tách kiêng cữ dân gian: cái nào có lý, cái nào vô căn cứ. KHÔNG lấn sân: chỉ số phát triển của thai (thuộc Sự phát triển của thai nhi), dấu hiệu chuyển dạ (thuộc Chuyển dạ & đi sinh). Ranh giới với Dinh dưỡng thai kỳ: khi bệnh lý thai kỳ (tiểu đường, thiếu máu...) cần điều chỉnh ăn uống, chuyên mục này chỉ nêu NGUYÊN TẮC y khoa (cần kiêng nhóm chất gì) — thực đơn/món ăn cụ thể thuộc Dinh dưỡng thai kỳ, luôn dẫn link sang đó thay vì tự viết thực đơn.
                 TEXT,
 
             'unique_angle' => <<<'TEXT'
@@ -180,12 +218,21 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => null,
             'slug'        => 'dinh-duong-thai-ky',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: ĂN UỐNG của mẹ bầu — nguyên tắc theo tam cá nguyệt, vi chất, thực đơn cơm Việt, "ăn X được không", giải oan giáo lý truyền miệng.
+                - Ranh giới với Sức khỏe mẹ bầu (hay chồng lấn nhất): khi bệnh lý thai kỳ cần ăn kiêng (tiểu đường, thiếu máu), chuyên mục này viết THỰC ĐƠN CỤ THỂ; chẩn đoán/theo dõi bệnh thuộc Sức khỏe mẹ bầu, luôn dẫn link sang đó.
+                - KHÔNG viết: triệu chứng/bệnh lý ngoài ăn uống (→ Sức khỏe mẹ bầu), chỉ số của thai (→ Sự phát triển của thai nhi).
+                - Khác biệt bắt buộc giữ: mọi khuyến nghị khoa học phải quy ra BỮA CƠM VIỆT cụ thể (không dừng ở "protein, lipid, glucid"), có phiên bản ngân sách thấp.
+                - Xây uy tín "không bán gì cả" — không gắn link sữa bầu/TPCN, khác 90% nội dung cùng ngách.
+                - Định dạng mỏ vàng SEO: "bầu ăn X được không" — trả lời rõ mức độ (thoải mái/có chừng mực/nên tránh) kèm lý do, không hù dọa.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
-                Ăn uống thực tế cho mẹ bầu Việt trong 9 tháng: nguyên tắc dinh dưỡng theo tam cá nguyệt (3 tháng đầu nghén ăn được gì thì ăn, 3 tháng giữa tăng chất, 3 tháng cuối kiểm soát đường - muối), vi chất quan trọng và cách bổ sung đúng (sắt, canxi, DHA, axit folic — uống lúc nào, cái nào kỵ nhau, có cần uống đủ loại như quảng cáo không), thực phẩm nên ăn - nên hạn chế - phải tránh (có bằng chứng, không hù dọa), thực đơn mẫu kiểu cơm nhà Việt Nam theo túi tiền, ăn uống khi có bệnh lý thai kỳ (tiểu đường thai kỳ ăn gì, thiếu máu ăn gì), giải quyết tình huống thật: nghén không ăn nổi, thèm ăn vặt, đi ăn cỗ - ăn quán, và hóa giải các "giáo lý" ăn uống truyền miệng (ăn cho hai người, uống nước dừa cho con trắng, ăn trứng ngỗng cho con thông minh). KHÔNG lấn sân: triệu chứng và bệnh lý thai kỳ ngoài khía cạnh ăn uống (thuộc Sức khỏe mẹ bầu), chỉ số của thai (thuộc Sự phát triển của thai nhi).
+                Ăn uống thực tế cho mẹ bầu Việt trong 9 tháng: nguyên tắc dinh dưỡng theo tam cá nguyệt (3 tháng đầu nghén ăn được gì thì ăn, 3 tháng giữa tăng chất, 3 tháng cuối kiểm soát đường - muối), vi chất quan trọng và cách bổ sung đúng (sắt, canxi, DHA, axit folic — uống lúc nào, cái nào kỵ nhau, có cần uống đủ loại như quảng cáo không), thực phẩm nên ăn - nên hạn chế - phải tránh (có bằng chứng, không hù dọa), thực đơn mẫu kiểu cơm nhà Việt Nam theo túi tiền, ăn uống khi có bệnh lý thai kỳ (tiểu đường thai kỳ ăn gì, thiếu máu ăn gì), giải quyết tình huống thật: nghén không ăn nổi, thèm ăn vặt, đi ăn cỗ - ăn quán, và hóa giải các "giáo lý" ăn uống truyền miệng (ăn cho hai người, uống nước dừa cho con trắng, ăn trứng ngỗng cho con thông minh). KHÔNG lấn sân: triệu chứng và bệnh lý thai kỳ ngoài khía cạnh ăn uống (thuộc Sức khỏe mẹ bầu), chỉ số của thai (thuộc Sự phát triển của thai nhi). Ranh giới với Sức khỏe mẹ bầu: khi bệnh lý thai kỳ cần ăn kiêng, chuyên mục này viết THỰC ĐƠN CỤ THỂ (món gì, bao nhiêu); nguyên tắc y khoa/chẩn đoán/theo dõi bệnh thuộc Sức khỏe mẹ bầu — không lặp lại phần đó ở đây, chỉ dẫn link.
                 TEXT,
 
             'unique_angle' => <<<'TEXT'
-                Nội dung dinh dưỡng thai kỳ tiếng Việt bị hai thái cực chiếm đóng: bài khoa học khô khan liệt kê "protein, lipid, glucid" không nấu thành bữa cơm được, và bài bán sữa bầu - TPCN đội lốt tư vấn. Chuyên mục chọn đường thứ ba: (1) Quy mọi khuyến nghị ra BỮA CƠM VIỆT cụ thể — "cần 27mg sắt/ngày" phải thành "một lạng thịt bò + một bát canh rau dền + tráng miệng ổi thay cam"; thực đơn mẫu có phiên bản 50 nghìn/bữa chứ không chỉ cá hồi - hạt chia; (2) Nói thẳng về ngân sách: vi chất nào đáng đồng tiền (sắt, axit folic, canxi), cái nào là marketing (đa phần combo 5-7 lọ TPCN), sữa bầu có bắt buộc không (không — và nói rõ vì sao); (3) Mỗi món "truyền miệng" (trứng ngỗng, nước dừa, cá chép) được kiểm chứng tử tế bằng bằng chứng + văn hóa, không chế nhạo người khuyên.
+                Mẹ bầu Việt tra "bầu ăn dứa/rau ngót/ốc được không" mỗi ngày và nhận về câu trả lời khác nhau ở mỗi trang — trong khi trang khoa học chỉ liệt kê "protein, lipid, glucid" không nấu thành bữa cơm được, còn phần lớn bài "tư vấn dinh dưỡng thai kỳ" khác thực chất là quảng cáo sữa bầu - TPCN cài cắm. Chuyên mục chọn đường thứ ba: (1) Quy mọi khuyến nghị ra BỮA CƠM VIỆT cụ thể — "cần 27mg sắt/ngày" phải thành "một lạng thịt bò + một bát canh rau dền + tráng miệng ổi thay cam"; thực đơn mẫu có phiên bản 50 nghìn/bữa chứ không chỉ cá hồi - hạt chia; (2) Nói thẳng về ngân sách: vi chất nào đáng đồng tiền (sắt, axit folic, canxi), cái nào là marketing (đa phần combo 5-7 lọ TPCN), sữa bầu có bắt buộc không (không — và nói rõ vì sao); (3) Mỗi món "truyền miệng" (trứng ngỗng, nước dừa, cá chép) được kiểm chứng tử tế bằng bằng chứng + văn hóa, không chế nhạo người khuyên.
                 TEXT,
 
             'content_goals' => <<<'TEXT'
@@ -214,6 +261,15 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => null,
             'slug'        => 'chuyen-da-di-sinh',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: tuần 36 đến khi mẹ con về nhà — dấu hiệu chuyển dạ thật/giả, chuẩn bị đồ đi sinh, chọn nơi sinh/chi phí, diễn biến cuộc sinh, 24-72h đầu sau sinh.
+                - KHÔNG viết: chăm bé sau khi VỀ NHÀ (→ nhóm Trẻ sơ sinh), nuôi sữa mẹ dài hạn (→ Nuôi con bằng sữa mẹ).
+                - Khác biệt bắt buộc giữ: người chồng là NHÂN VẬT CHÍNH thứ hai — mỗi bài có phần việc cụ thể cho chồng, không để anh đứng ngoài hút thuốc chờ tin.
+                - Minh bạch chi phí từng khoản (công/tư, thường/mổ, BHYT) — không PR viện nào, đây là chủ đề rất ít nơi viết tử tế.
+                - Bài "giỏ đồ đi sinh" và "chi phí đi sinh" là 2 bài trụ cột bookmark/share cao nhất site — tối ưu dạng checklist tải được.
+                - Nỗi sợ lớn nhất của độc giả không phải cơn đau mà là KHÔNG BIẾT TRƯỚC — mọi bài phải giảm sự không chắc chắn đó trước tiên.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
                 Toàn bộ hành trình từ tuần 36 đến lúc mẹ con về nhà: nhận biết dấu hiệu sắp sinh và chuyển dạ thật - giả (cơn gò Braxton Hicks vs chuyển dạ, vỡ ối, ra nhớt hồng), khi nào phải vào viện ngay, chuẩn bị đồ đi sinh sát thực tế bệnh viện Việt Nam (giỏ đồ cho mẹ - cho bé - giấy tờ bảo hiểm, thứ bệnh viện phát sẵn không cần mang), chọn nơi sinh và hiểu chi phí (viện công vs tư, sinh thường vs mổ, bảo hiểm y tế trái tuyến chi trả thế nào), diễn biến cuộc sinh theo từng giai đoạn để mẹ bớt sợ vì biết trước điều gì sẽ xảy ra, giảm đau khi sinh (gây tê ngoài màng cứng - thực hư đồn đại đau lưng về già), sinh mổ: khi nào cần, hồi phục ra sao, và 24-72 giờ đầu sau sinh tại viện (da kề da, khớp ngậm bú mẹ lần đầu, chăm sóc vết khâu/vết mổ, tắm gội sau sinh). Vai trò người chồng trong ngày đi sinh có mặt xuyên suốt. KHÔNG lấn sân: chăm bé sau khi VỀ NHÀ (thuộc nhóm Trẻ sơ sinh), nuôi sữa mẹ dài hạn (thuộc Nuôi con bằng sữa mẹ).
                 TEXT,
@@ -223,7 +279,7 @@ class CategoryFoundationSeeder extends Seeder
                 TEXT,
 
             'content_goals' => <<<'TEXT'
-                (1) Đón trọn lớp độc giả tuần 32-40 đang ở đỉnh lo lắng và nhu cầu tìm kiếm: "dấu hiệu sắp sinh", "giỏ đồ đi sinh cần những gì", "chi phí sinh ở bệnh viện X", "gây tê ngoài màng cứng có hại không", "vỡ ối bao lâu phải sinh". (2) Bài "chuẩn bị đồ đi sinh" và "chi phí đi sinh" là 2 bài trụ cột có khả năng được lưu (bookmark) và chia sẻ cho chồng/bà ngoại cao nhất site — tối ưu dạng checklist tải được. (3) Là cầu nối chiến lược chuyển độc giả thai kỳ sang hệ sinh thái sau sinh: cuối mỗi bài dẫn sang Chăm sóc trẻ sơ sinh, Nuôi con bằng sữa mẹ — giữ được người đọc ở đúng khoảnh khắc họ "chuyển vai" thành cha mẹ. (4) Xây tin cậy bằng sự minh bạch chi phí — nội dung không viện nào tự viết về mình.
+                (1) Đón trọn lớp độc giả tuần 32-40 đang ở đỉnh lo lắng và nhu cầu tìm kiếm: "dấu hiệu sắp sinh", "giỏ đồ đi sinh cần những gì", "chi phí sinh ở bệnh viện X", "gây tê ngoài màng cứng có hại không", "vỡ ối bao lâu phải sinh". (2) Bài "chuẩn bị đồ đi sinh" và "chi phí đi sinh" là 2 bài trụ cột có khả năng được lưu (bookmark) và chia sẻ cho chồng/bà ngoại cao nhất site — tối ưu dạng checklist tải được, đo bằng tỷ lệ bookmark và lượt chia sẻ. (3) Là cầu nối chiến lược chuyển độc giả thai kỳ sang hệ sinh thái sau sinh: cuối mỗi bài dẫn sang Chăm sóc trẻ sơ sinh, Nuôi con bằng sữa mẹ — giữ được người đọc ở đúng khoảnh khắc họ "chuyển vai" thành cha mẹ. (4) Xây tin cậy bằng sự minh bạch chi phí — nội dung không viện nào tự viết về mình.
                 TEXT,
 
             'pain_points' => <<<'TEXT'
@@ -247,6 +303,14 @@ class CategoryFoundationSeeder extends Seeder
         [
             'parent_slug' => null,
             'slug'        => 'tre-so-sinh-0-3-thang',
+
+            'writer_insights' => <<<'TEXT'
+                - Đây là danh mục CHA — chỉ bài TỔNG QUAN xuyên suốt 0-3 tháng, dẫn vào 5 chuyên mục con. KHÔNG viết chi tiết tắm/rốn/bú/ngủ/bệnh ở đây.
+                - Vai trò: "mục lục sống" giúp cha mẹ mới biết vấn đề của mình thuộc mảng nào, đọc gì trước.
+                - 3 mảng CHỈ chuyên mục cha này viết (không chuyên mục con nào ôm): phân công vợ/chồng/ông bà theo ca, thủ tục hành chính (khai sinh, BHYT), sức khỏe tinh thần CẢ BỐ lẫn mẹ.
+                - Giọng "đồng đội cùng trực đêm" — thừa nhận đây là chặng khó nhất đời làm cha mẹ, không tô hồng thiên chức, không phán xét mẹ kiệt sức.
+                - KPI chính: CTR từ bài pillar xuống đúng 5 chuyên mục con theo nhu cầu (hành vi/phát triển/bú/ngủ/bệnh).
+                TEXT,
 
             'core_focus' => <<<'TEXT'
                 Danh mục CHA của cụm 0-3 tháng — chỉ chứa các bài TỔNG QUAN xuyên suốt giai đoạn, không đi sâu vào mảng đã có chuyên mục con: cẩm nang "sống sót" 3 tháng đầu cho cha mẹ mới (tuần đầu về nhà, nhịp một ngày với trẻ sơ sinh, phân công ca kíp vợ chồng - ông bà), lịch tổng hợp các mốc quan trọng (tiêm chủng, khám sau sinh của mẹ và bé, làm giấy khai sinh - BHYT cho con), sức khỏe tinh thần cha mẹ mới (baby blues, trầm cảm sau sinh — nhận biết và tìm trợ giúp), kiêng cữ ở cữ hiện đại (cái gì giữ, cái gì bỏ, thương lượng với ông bà), và bài định hướng "con 0-3 tháng: cần đọc gì, khi nào" dẫn vào 5 chuyên mục con (Chăm sóc trẻ sơ sinh, Phát triển của trẻ, Nuôi con bằng sữa mẹ, Giấc ngủ của bé, Bệnh thường gặp). Chi tiết tắm - rốn - bú - ngủ - bệnh KHÔNG viết ở đây — đẩy xuống đúng chuyên mục con.
@@ -282,6 +346,16 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => 'tre-so-sinh-0-3-thang',
             'slug'        => 'cham-soc-tre-so-sinh',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: kỹ năng chăm sóc HẰNG NGÀY 0-3 tháng — tắm, rốn, thay tã, bế/ẵm, quấn khăn, ngủ an toàn (SIDS), mốc y tế thường quy.
+                - KHÔNG viết: bú mẹ/sữa công thức (→ Nuôi con bằng sữa mẹ), lịch ngủ/luyện ngủ (→ Giấc ngủ của bé), bệnh lý (→ Bệnh thường gặp).
+                - Khác biệt bắt buộc giữ: hướng dẫn tới mức THAO TÁC (đỡ gáy tay nào, xả nước bên nào trước) + xử lý trực diện độ vênh khoa học vs cách ông bà làm.
+                - Mẹo dân gian nguy hiểm (mật ong rơ lưỡi, đắp lá rốn) phải cảnh báo thẳng bằng dẫn chứng, không chỉ liệt kê.
+                - Chuẩn SIDS/tiêm chủng lấy theo WHO/Bộ Y tế, ghi rõ nguồn — tạo thế đứng vững trước lời khuyên truyền miệng.
+                - KPI: đo bằng tỷ lệ mở lại bài trong tháng đầu (bookmark) và tỷ lệ chia sẻ trong hội nhóm cho nội dung "khoa học vs ông bà".
+                - Ví dụ/kịch bản nên có cả bố trực tiếp tắm bé, cắt móng tay, quấn khăn — không mặc định chỉ mẹ làm dù mẹ đang ở cữ và làm nhiều hơn.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
                 Kỹ năng chăm sóc HẰNG NGÀY cho bé 0-3 tháng, dạy từng bước như có nữ hộ sinh đứng cạnh: tắm bé và vệ sinh (tắm mấy lần/tuần, nhiệt độ nước, trình tự tắm an toàn, vệ sinh mắt - mũi - tai - vùng kín bé trai/bé gái), chăm sóc rốn đến khi rụng và dấu hiệu nhiễm trùng rốn, thay tã và chăm da (hăm tã, rôm sảy, cứt trâu, mụn sữa, vàng da sinh lý nhận biết ban đầu), bế - ẵm - vỗ ợ hơi đúng cách, quấn khăn, cắt móng tay, mặc ấm đúng chuẩn (nguyên tắc hơn người lớn 1 lớp — chống lại thói quen ủ quá kỹ), môi trường an toàn (nhiệt độ phòng, nằm điều hòa, ngủ an toàn chống đột tử SIDS: nằm ngửa, cũi thoáng, không gối chăn mềm), massage cho bé, và các mốc chăm sóc y tế thường quy (tiêm chủng tháng đầu, vitamin D3, sàng lọc sơ sinh). KHÔNG lấn sân: bú mẹ/sữa công thức (thuộc Nuôi con bằng sữa mẹ), lịch ngủ - luyện ngủ (thuộc Giấc ngủ của bé), bệnh lý (thuộc Bệnh thường gặp).
                 TEXT,
@@ -291,7 +365,7 @@ class CategoryFoundationSeeder extends Seeder
                 TEXT,
 
             'content_goals' => <<<'TEXT'
-                (1) SEO cụm truy vấn kỹ năng đầu đời: "cách tắm trẻ sơ sinh", "trẻ sơ sinh nằm điều hòa bao nhiêu độ", "chăm sóc rốn trẻ sơ sinh", "trị hăm tã", "quấn khăn cho trẻ sơ sinh đúng cách" — truy vấn ổn định quanh năm, đối thủ chủ yếu là bài bệnh viện khô cứng thiếu thao tác chi tiết. (2) Trở thành chuỗi bài cha mẹ mở đi mở lại trong tháng đầu (bookmark cao) — cấu trúc bài dạng các bước đánh số + ảnh minh họa để giữa đêm vẫn tra nhanh được. (3) Nội dung "khoa học vs ông bà" tạo khác biệt được chia sẻ trong hội nhóm. (4) Liên kết chặt trong cụm 0-3 tháng: bài tắm bé dẫn sang vàng da (Bệnh thường gặp), bài ngủ an toàn dẫn sang Giấc ngủ của bé — tăng chiều sâu phiên đọc.
+                (1) SEO cụm truy vấn kỹ năng đầu đời: "cách tắm trẻ sơ sinh", "trẻ sơ sinh nằm điều hòa bao nhiêu độ", "chăm sóc rốn trẻ sơ sinh", "trị hăm tã", "quấn khăn cho trẻ sơ sinh đúng cách" — truy vấn ổn định quanh năm, đối thủ chủ yếu là bài bệnh viện khô cứng thiếu thao tác chi tiết. (2) Trở thành chuỗi bài cha mẹ mở đi mở lại trong tháng đầu — cấu trúc bài dạng các bước đánh số + ảnh minh họa để giữa đêm vẫn tra nhanh được, đo bằng tỷ lệ bookmark và số lần quay lại cùng 1 bài trong tháng đầu. (3) Nội dung "khoa học vs ông bà" tạo khác biệt, đo bằng tỷ lệ chia sẻ trong hội nhóm. (4) Liên kết chặt trong cụm 0-3 tháng: bài tắm bé dẫn sang vàng da (Bệnh thường gặp), bài ngủ an toàn dẫn sang Giấc ngủ của bé — tăng chiều sâu phiên đọc.
                 TEXT,
 
             'pain_points' => <<<'TEXT'
@@ -302,7 +376,7 @@ class CategoryFoundationSeeder extends Seeder
                 "Mẹo dân gian chữa X cho trẻ sơ sinh (đắp lá, nặn sữa vào mắt, mật ong rơ lưỡi, nằm than)" dạng hướng dẫn — nguy hiểm thực tế đã có ca ngộ độc/bỏng/nhiễm trùng; chỉ viết dạng bài cảnh báo giải thích cơ chế rủi ro. "Trọn bộ 60 món đồ sơ sinh phải mua" — bài mua sắm affiliate, gây lãng phí; khía cạnh sản phẩm cụ thể thuộc danh mục Đánh giá sản phẩm. "Luyện ngủ cho bé từ tuần đầu" — thuộc Giấc ngủ của bé, không viết ở đây. "Cách chữa vàng da/sốt/nghẹt mũi" — thuộc Bệnh thường gặp; chuyên mục này chỉ dừng ở nhận biết ban đầu và chỉ dấu đi khám. "Phương pháp EASY/4S/5S trọn bộ" dạng tôn sùng một trường phái — cộng đồng mẹ Việt đang chia phe gay gắt; chỉ lấy kỹ thuật cụ thể có bằng chứng (vỗ ợ, quấn khăn, white noise) trình bày trung lập, không gắn nhãn trường phái để tránh war và tránh bó người đọc vào giáo điều.
                 TEXT,
 
-            'audience' => 'Cha mẹ Việt 25-35 tuổi có con đầu lòng 0-3 tháng, chưa từng chăm trẻ sơ sinh trước đó; mẹ đang ở cữ tại nhà (thường có bà nội/ngoại cùng chăm và hay bất đồng cách làm), bố tham gia buổi tối; tra cứu bằng điện thoại một tay ngay TRƯỚC KHI làm thao tác (sắp tắm bé, sắp cắt móng) hoặc giữa đêm khi thấy dấu hiệu lạ trên da, rốn, hơi thở của con.',
+            'audience' => 'Cha mẹ Việt 25-35 tuổi có con đầu lòng 0-3 tháng, chưa từng chăm trẻ sơ sinh trước đó — cả bố lẫn mẹ đều có thể là người trực tiếp tắm bé/cắt móng/thay tã lần đầu, không chỉ mẹ (mẹ thường ở cữ tại nhà cả ngày nên có bà nội/ngoại cùng chăm và hay bất đồng cách làm, bố trực tiếp làm nhiều hơn vào buổi tối và cuối tuần); tra cứu bằng điện thoại một tay ngay TRƯỚC KHI làm thao tác (sắp tắm bé, sắp cắt móng) hoặc giữa đêm khi thấy dấu hiệu lạ trên da, rốn, hơi thở của con.',
 
             'constraints' => 'Không dùng từ chuyên môn không giải thích; hướng dẫn phải chia bước đánh số làm theo được ngay, nêu rõ lỗi thường gặp; không phán xét hay chế giễu cách chăm truyền thống — phân tích và đưa cách nói chuyện với ông bà; mẹo dân gian nguy hiểm phải cảnh báo thẳng, dẫn nguồn y khoa (Bộ Y tế, WHO, AAP); luôn có ngưỡng "dấu hiệu cần đi khám"; không quảng cáo sản phẩm chăm sóc da, sữa tắm.',
 
@@ -316,16 +390,25 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => 'tre-so-sinh-0-3-thang',
             'slug'        => 'phat-trien-cua-tre',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: mốc vận động/giác quan/giao tiếp 0-3 tháng, đọc biểu đồ tăng trưởng percentile, tummy time, ngôn ngữ khóc của trẻ, wonder weeks, red flags.
+                - KHÔNG viết: kỹ năng chăm sóc hằng ngày (→ Chăm sóc trẻ sơ sinh), bú/ngủ/bệnh (→ 3 chuyên mục con còn lại).
+                - Nguyên tắc xuyên suốt: mọi mốc là KHOẢNG, không phải deadline — chống văn hóa so sánh cân nặng/mốc giữa các gia đình Việt.
+                - Dạy đọc percentile trong sổ khám (đường cong của CHÍNH con, không so hàng xóm) — nội dung giáo dục nền tảng ít nơi làm kỹ.
+                - Hoạt động gợi ý phải rẻ/miễn phí bằng đồ có sẵn trong nhà — không bán đồ chơi giáo dục.
+                - KPI: đo bằng tỷ lệ quay lại theo chuỗi "Bé N tuần/tháng tuổi" và tỷ lệ giảm câu hỏi trùng lặp hỏi hội nhóm.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
                 Sự phát triển của bé 0-3 tháng theo từng tuần/tháng và cách cha mẹ đồng hành đúng lứa tuổi: các mốc vận động - giác quan - giao tiếp (khi nào con nhìn theo, hóng chuyện, cười xã giao, ngóc đầu, phát hiện ra bàn tay mình), tăng trưởng cân nặng - chiều cao theo chuẩn WHO và CÁCH ĐỌC biểu đồ percentile (con ở kênh 25% vẫn bình thường — chống lại văn hóa so cân nặng), thời gian nằm sấp (tummy time) tập cổ an toàn, kích thích giác quan đúng cách (nói chuyện, hát, tranh tương phản đen trắng — không cần đồ chơi đắt tiền), hiểu ngôn ngữ của trẻ sơ sinh (các kiểu khóc, tín hiệu đói - buồn ngủ - quá tải kích thích), giai đoạn wonder weeks/growth spurt khiến con bám mẹ gắt gỏng, và ranh giới bình thường - cần theo dõi (khi nào đáng đưa đi khám: không nhìn theo, không phản ứng âm thanh, trương lực cơ bất thường). KHÔNG lấn sân: kỹ năng chăm sóc hằng ngày (thuộc Chăm sóc trẻ sơ sinh), bú - ngủ - bệnh (các chuyên mục con còn lại).
                 TEXT,
 
             'unique_angle' => <<<'TEXT'
-                Nội dung mốc phát triển tiếng Việt hoặc dịch máy từ CDC/AAP, hoặc thành bảng "chuẩn" cứng nhắc khiến cha mẹ đối chiếu như chấm thi. Khác biệt: (1) Mỗi mốc luôn trình bày kèm KHOẢNG dao động bình thường và triết lý "mốc là khoảng, không phải deadline" — giảm lo âu thay vì tạo thêm; đồng thời nói rõ ngưỡng nào mới thật sự cần đi khám (red flags theo AAP), không ba phải; (2) Đánh thẳng vào văn hóa so sánh cân nặng của người Việt — "con em 3 tháng 6kg có còi không chị?" — bằng cách dạy đọc percentile và đường cong tăng trưởng của CHÍNH con thay vì so hàng xóm; (3) Mục "chơi với con tuần này" dùng đồ có sẵn trong nhà Việt (khăn xô, chai nhựa bỏ gạo) thay vì danh sách đồ chơi giáo dục đắt tiền — hoạt động 5-10 phút vừa sức cha mẹ đang thiếu ngủ.
+                Câu cửa miệng của cha mẹ Việt ở buổi tiêm phòng không phải "con phát triển thế nào" mà là "con em mấy cân rồi, có bằng con chị không" — mốc phát triển ở Việt Nam bị dùng như thước đo ganh đua giữa các gia đình chứ không phải công cụ theo dõi sức khỏe. Khác biệt: (1) Mỗi mốc luôn trình bày kèm KHOẢNG dao động bình thường và triết lý "mốc là khoảng, không phải deadline" — giảm lo âu thay vì tạo thêm; đồng thời nói rõ ngưỡng nào mới thật sự cần đi khám (red flags theo AAP), không ba phải; (2) Đánh thẳng vào văn hóa so sánh cân nặng của người Việt — "con em 3 tháng 6kg có còi không chị?" — bằng cách dạy đọc percentile và đường cong tăng trưởng của CHÍNH con thay vì so hàng xóm; (3) Mục "chơi với con tuần này" dùng đồ có sẵn trong nhà Việt (khăn xô, chai nhựa bỏ gạo) thay vì danh sách đồ chơi giáo dục đắt tiền — hoạt động 5-10 phút vừa sức cha mẹ đang thiếu ngủ.
                 TEXT,
 
             'content_goals' => <<<'TEXT'
-                (1) Chuỗi bài trụ cột "Bé N tuần/tháng tuổi" (0-12 tuần) kéo cha mẹ quay lại định kỳ như đã làm với chuỗi tuần thai — chuyển tiếp tự nhiên cho độc giả từ Sự phát triển của thai nhi. (2) SEO truy vấn lo âu so sánh: "trẻ 2 tháng biết làm gì", "trẻ 3 tháng chưa biết lẫy có sao không", "bảng cân nặng trẻ sơ sinh chuẩn WHO", "trẻ mấy tháng biết hóng chuyện", "tummy time là gì". (3) Giảm nhu cầu hỏi hội nhóm bằng bài "đọc biểu đồ tăng trưởng" — nội dung giáo dục nền tảng ít ai làm kỹ. (4) Dẫn luồng sang Bệnh thường gặp khi chạm red flags và sang chuyên mục 3-12 tháng khi con qua mốc — giữ độc giả trong hành trình dài của site.
+                (1) Chuỗi bài trụ cột "Bé N tuần/tháng tuổi" (0-12 tuần) kéo cha mẹ quay lại định kỳ như đã làm với chuỗi tuần thai — chuyển tiếp tự nhiên cho độc giả từ Sự phát triển của thai nhi, đo bằng tỷ lệ quay lại theo tuần/tháng tuổi con. (2) SEO truy vấn lo âu so sánh: "trẻ 2 tháng biết làm gì", "trẻ 3 tháng chưa biết lẫy có sao không", "bảng cân nặng trẻ sơ sinh chuẩn WHO", "trẻ mấy tháng biết hóng chuyện", "tummy time là gì". (3) Giảm nhu cầu hỏi hội nhóm bằng bài "đọc biểu đồ tăng trưởng" — nội dung giáo dục nền tảng ít ai làm kỹ, đo bằng thời gian đọc trung bình của bài này. (4) Dẫn luồng sang Bệnh thường gặp khi chạm red flags và sang chuyên mục 3-12 tháng khi con qua mốc — đo bằng CTR sang 2 chuyên mục đó, giữ độc giả trong hành trình dài của site.
                 TEXT,
 
             'pain_points' => <<<'TEXT'
@@ -350,6 +433,16 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => 'tre-so-sinh-0-3-thang',
             'slug'        => 'nuoi-con-bang-sua-me',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: khớp ngậm, gọi sữa, nhận biết bú ĐỦ, tắc tia/viêm vú, kích/hút sữa cho mẹ đi làm lại, VÀ sữa công thức khi mẹ không đủ sữa — không phán xét.
+                - KHÔNG viết: lịch ngủ (→ Giấc ngủ của bé), bệnh của bé (→ Bệnh thường gặp).
+                - Khác biệt đã làm tốt, GIỮ NGUYÊN khung này: đứng về phía NGƯỜI MẸ giữa phe "sữa mẹ bằng mọi giá" và phe quảng cáo sữa công thức — không lặp khung này ở chuyên mục khác.
+                - Trọng tâm giải quyết "khủng hoảng ảo giác ít sữa" bằng đếm tã/theo dõi cân — không nghe cảm nhận chủ quan của ông bà.
+                - Thực chiến cho mẹ đi làm lại sau 6 tháng: lịch hút sữa văn phòng, quyền vắt sữa theo luật lao động (nối Quyền lợi & pháp lý).
+                - KPI: đo bằng tỷ lệ mẹ vượt qua từng khủng hoảng sữa theo tuần (đọc hết chuỗi bài theo giai đoạn) và tỷ lệ chia sẻ hội nhóm.
+                - Có phần việc CỤ THỂ cho người bố ở mỗi bài (mang nước, đổi ca dậy đêm để mẹ chợp mắt, đứng ra chắn lời nhận xét của ông bà) — không để bố đứng ngoài cuộc chỉ vì đây là "chuyện sữa của mẹ".
+                TEXT,
+
             'core_focus' => <<<'TEXT'
                 Đồng hành thực tế với hành trình sữa mẹ từ cữ bú đầu tiên: khớp ngậm đúng và các tư thế cho bú (kèm cách nhận biết - sửa khớp ngậm sai gây đau nứt đầu ti), cơ chế cung - cầu của sữa mẹ và cách gọi sữa về sau sinh (đặc biệt sau sinh mổ), nhận biết con bú ĐỦ (số tã ướt, cân nặng — thay cho cảm giác "hình như ít sữa" khiến 70% mẹ bỏ cuộc oan), xử lý sự cố: cương sữa, tắc tia (mẹo chườm - massage đúng, khi nào cần thông tia), nứt đầu ti, viêm vú, con chê ti - bú vặt - gắt bú, kích sữa và hút sữa đúng cách (chọn chế độ, lịch hút cho mẹ đi làm lại, bảo quản - rã đông sữa chuẩn), ăn uống của mẹ cho bú (thực hư móng giò - chè vằng - lá đinh lăng, mẹ ăn gì con đau bụng?), cai sữa văn minh, và phần KHÔNG PHÁN XÉT: khi mẹ không đủ sữa hoặc chọn sữa công thức — cách kết hợp, cách chọn, cách pha đúng. KHÔNG lấn sân: lịch ngủ (Giấc ngủ của bé), bệnh của bé (Bệnh thường gặp).
                 TEXT,
@@ -359,7 +452,7 @@ class CategoryFoundationSeeder extends Seeder
                 TEXT,
 
             'content_goals' => <<<'TEXT'
-                (1) SEO cụm truy vấn khủng và cảm xúc cao: "cách gọi sữa về nhanh", "tắc tia sữa phải làm sao", "khớp ngậm đúng", "trẻ sơ sinh bú bao nhiêu là đủ", "bảo quản sữa mẹ được bao lâu", "mẹ ăn gì để nhiều sữa". (2) Giữ chân mẹ qua từng khủng hoảng sữa (tuần 1: gọi sữa; tuần 3-6: ảo giác ít sữa; tháng 5-6: đi làm lại) bằng chuỗi bài theo giai đoạn — mỗi khủng hoảng được vượt qua là một lần niềm tin với site sâu thêm. (3) Trở thành nguồn trung lập hiếm hoi không bán sữa, không bán khóa kích sữa — định vị được chia sẻ mạnh trong hội nhóm. (4) Chuyển tiếp mượt sang Ăn dặm & dinh dưỡng (3-12 tháng) khi con gần 6 tháng.
+                (1) SEO cụm truy vấn khủng và cảm xúc cao: "cách gọi sữa về nhanh", "tắc tia sữa phải làm sao", "khớp ngậm đúng", "trẻ sơ sinh bú bao nhiêu là đủ", "bảo quản sữa mẹ được bao lâu", "mẹ ăn gì để nhiều sữa". (2) Giữ chân mẹ qua từng khủng hoảng sữa (tuần 1: gọi sữa; tuần 3-6: ảo giác ít sữa; tháng 5-6: đi làm lại) bằng chuỗi bài theo giai đoạn — đo bằng tỷ lệ đọc hết chuỗi và tỷ lệ quay lại đúng thời điểm khủng hoảng tiếp theo. (3) Trở thành nguồn trung lập hiếm hoi không bán sữa, không bán khóa kích sữa — đo bằng tỷ lệ chia sẻ trong hội nhóm. (4) Chuyển tiếp mượt sang Ăn dặm & dinh dưỡng (3-12 tháng) khi con gần 6 tháng.
                 TEXT,
 
             'pain_points' => <<<'TEXT'
@@ -384,6 +477,16 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => 'tre-so-sinh-0-3-thang',
             'slug'        => 'giac-ngu-cua-be',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: giấc ngủ 0-3 tháng — chu kỳ ngủ sơ sinh, thiết lập nếp ngủ nhẹ nhàng, an toàn SIDS, xử lý gắt ngủ/ngủ ngày cày đêm/khủng hoảng tháng 4.
+                - KHÔNG viết: bú đêm (phối hợp với Nuôi con bằng sữa mẹ), bệnh làm khó ngủ (→ Bệnh thường gặp).
+                - Khác biệt đã làm tốt, GIỮ NGUYÊN khung này: đối trọng với "trung tâm luyện ngủ" thương mại hóa — là nguồn MIỄN PHÍ đủ chi tiết để tự làm, không lặp khung này ở chuyên mục khác.
+                - Trung lập tuyệt đối giữa các trường phái (EASY, tự ngủ, bế ru, ngủ chung) — KHÔNG phán xét bế ru/ngủ chung như nguồn dịch Tây, vì đó là thực tế đa số gia đình Việt.
+                - Đặt kỳ vọng THẬT: dậy đêm ăn ở 0-3 tháng là sinh lý bình thường, "ngủ xuyên đêm" là ngoại lệ chứ không phải mục tiêu.
+                - KPI: đo bằng tỷ lệ được nhắc tên thay thế khóa luyện ngủ trong hội nhóm, và tỷ lệ quay lại theo chuỗi "chuẩn bị cho tuần khủng hoảng".
+                - Chia ca dậy đêm nên có phương án cụ thể cho BỐ (bú bình sữa mẹ vắt sẵn, đổi ca cuối tuần) — không chỉ nhắc mẹ "ngủ khi con ngủ" như phần lớn nguồn khác.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
                 Mọi thứ về giấc ngủ của bé 0-3 tháng và sự sống còn của giấc ngủ cha mẹ: hiểu giấc ngủ sơ sinh khác người lớn thế nào (chu kỳ ngắn 40-50 phút, ngủ ngày cày đêm do chưa có nhịp sinh học, ngủ REM nhiều nên vặn mình è è là bình thường), tổng thời gian ngủ theo tuần tuổi và dấu hiệu buồn ngủ cần bắt trước khi con gắt (over-tired), thiết lập nếp ngủ nhẹ nhàng từ sớm: phân biệt ngày - đêm, trình tự trước giờ ngủ, môi trường ngủ (tối, white noise, nhiệt độ), quấn khăn và mốc phải bỏ quấn (khi con biết lật), AN TOÀN giấc ngủ chống đột tử SIDS theo chuẩn AAP (nằm ngửa, nôi/cũi thoáng, không gối - chăn mềm - nằm sấp; đối thoại thẳng với thực tế ngủ chung giường phổ biến ở Việt Nam: nếu ngủ chung thì giảm rủi ro thế nào), xử lý tình huống: con gắt ngủ khóc dai, ngủ ngày 30 phút dậy, lẫn lộn ngày đêm, chỉ ngủ trên tay - đặt xuống là dậy, và khủng hoảng ngủ tháng thứ 4 (chuẩn bị tâm lý trước). KHÔNG lấn sân: bú đêm thuộc phối hợp với Nuôi con bằng sữa mẹ; bệnh làm con khó ngủ (thuộc Bệnh thường gặp).
                 TEXT,
@@ -393,7 +496,7 @@ class CategoryFoundationSeeder extends Seeder
                 TEXT,
 
             'content_goals' => <<<'TEXT'
-                (1) SEO cụm truy vấn tuyệt vọng lúc nửa đêm: "trẻ sơ sinh gắt ngủ khóc thét", "trẻ ngủ ngày cày đêm phải làm sao", "trẻ sơ sinh đặt xuống là dậy", "trẻ 2 tháng ngủ bao nhiêu tiếng", "white noise cho trẻ sơ sinh", "khủng hoảng ngủ 4 tháng". (2) Là nguồn MIỄN PHÍ đáng tin thay thế khóa luyện ngủ tiền triệu — nội dung đủ chi tiết để tự làm; định vị này lan mạnh trong hội nhóm. (3) Bài an toàn giấc ngủ SIDS bản địa hóa cho bối cảnh ngủ chung của người Việt là nội dung trách nhiệm xã hội tạo uy tín khác biệt. (4) Chuỗi "chuẩn bị cho tuần khủng hoảng" giữ độc giả quay lại theo mốc tuổi của con, chuyển tiếp sang giấc ngủ 3-12 tháng ở chuyên mục Chăm sóc trẻ nhỏ.
+                (1) SEO cụm truy vấn tuyệt vọng lúc nửa đêm: "trẻ sơ sinh gắt ngủ khóc thét", "trẻ ngủ ngày cày đêm phải làm sao", "trẻ sơ sinh đặt xuống là dậy", "trẻ 2 tháng ngủ bao nhiêu tiếng", "white noise cho trẻ sơ sinh", "khủng hoảng ngủ 4 tháng". (2) Là nguồn MIỄN PHÍ đáng tin thay thế khóa luyện ngủ tiền triệu — nội dung đủ chi tiết để tự làm; đo bằng tỷ lệ được nhắc tên/chia sẻ trong hội nhóm thay vì khóa học trả phí. (3) Bài an toàn giấc ngủ SIDS bản địa hóa cho bối cảnh ngủ chung của người Việt là nội dung trách nhiệm xã hội tạo uy tín khác biệt, đo bằng thời gian đọc và tỷ lệ chia sẻ. (4) Chuỗi "chuẩn bị cho tuần khủng hoảng" giữ độc giả quay lại theo mốc tuổi của con, chuyển tiếp sang giấc ngủ 3-12 tháng ở chuyên mục Chăm sóc trẻ nhỏ.
                 TEXT,
 
             'pain_points' => <<<'TEXT'
@@ -404,12 +507,12 @@ class CategoryFoundationSeeder extends Seeder
                 "Luyện con tự ngủ bằng cry-it-out cho trẻ dưới 4 tháng" — mọi trường phái đều thống nhất KHÔNG để trẻ dưới 4-6 tháng khóc một mình có chủ đích; không viết dạng hướng dẫn ở cụm 0-3 tháng. "Mẹo dân gian cho bé ngủ ngon: đốt vía, treo tỏi, xông phòng" — không bằng chứng, một số có rủi ro (khói); chỉ viết dạng bài kiểm chứng nhẹ nhàng. "Review máy đưa nôi tự động, camera AI theo dõi thở" — thuộc Đánh giá sản phẩm; hơn nữa thiết bị theo dõi thở tạo an toàn giả, cần bài phân tích riêng đúng bằng chứng chứ không phải review khen. "Lịch sinh hoạt EASY chuẩn từng phút theo tuần tuổi" dạng giáo án cứng — trẻ sơ sinh không chạy theo lịch của app, lịch cứng tạo cảm giác thất bại; chỉ viết nhịp sinh hoạt linh hoạt theo tín hiệu của con. "Thuốc/siro giúp bé ngủ ngon" — nguy hiểm (kháng histamine cho trẻ sơ sinh), tuyệt đối không; chỉ có bài cảnh báo. "So sánh xếp hạng trung tâm luyện ngủ" — không tiếp tay thị trường chưa được kiểm soát; viết bài trang bị kiến thức tự đánh giá thay thế.
                 TEXT,
 
-            'audience' => 'Cha mẹ Việt 25-35 tuổi có con 0-3 tháng (đỉnh khủng hoảng ngủ ở tuần 2-8), con đầu lòng; cả hai đều thiếu ngủ trầm trọng, mẹ đọc lúc bế con ru đêm 1-4h sáng, bố tra "trẻ gắt ngủ" trong giờ làm; chịu áp lực hai chiều: ông bà bảo "bế nhiều quen tay, kệ nó khóc", mạng thì dọa "để khóc hại não" — không biết đường nào; sẵn sàng chi tiền triệu cho bất cứ thứ gì hứa hẹn được ngủ, nên rất dễ bị khóa học/thiết bị moi tiền.',
+            'audience' => 'Cha mẹ Việt 25-35 tuổi có con 0-3 tháng (đỉnh khủng hoảng ngủ ở tuần 2-8), con đầu lòng; cả hai đều thiếu ngủ trầm trọng và cùng thay phiên bế con ru đêm 1-4h sáng nếu có chia ca, người còn lại tra "trẻ gắt ngủ" trong giờ làm để tìm giải pháp cho phiên trực tiếp theo; chịu áp lực hai chiều: ông bà bảo "bế nhiều quen tay, kệ nó khóc", mạng thì dọa "để khóc hại não" — không biết đường nào; sẵn sàng chi tiền triệu cho bất cứ thứ gì hứa hẹn được ngủ, nên rất dễ bị khóa học/thiết bị moi tiền.',
 
             'constraints' => 'Không hứa hẹn "ngủ xuyên đêm" cho trẻ dưới 4 tháng; không phán xét bế ru, ngủ chung, hay bất kỳ lựa chọn nào của gia đình; an toàn SIDS là ranh giới cứng không thỏa hiệp nhưng trình bày không dọa nạt; không bán/gợi ý khóa luyện ngủ, thiết bị, siro ngủ; bài phải đọc nổi lúc kiệt sức — kết luận trước, các bước đánh số, có phần "làm ngay đêm nay"; dẫn nguồn AAP/NHS/WHO; luôn nhắc chăm sóc giấc ngủ của chính cha mẹ.',
 
             'style_sample' => <<<'TEXT'
-                3 giờ 40 phút sáng. Con vừa bú xong, mắt nhắm tịt trên vai bạn, thở đều như một thiên thần — và bạn bắt đầu nghi thức quen thuộc: hạ con xuống nôi chậm như tháo bom, từng centimet một, nín thở… và đúng khoảnh khắc lưng con chạm đệm, hai mắt ấy mở bừng ra. Lại bế lên. Lại từ đầu. Nếu bạn đang đọc những dòng này bằng một tay trong tư thế đó, thì trước hết: bạn không làm gì sai, và con bạn cũng không "hư vì được bế nhiều" đâu. Trẻ sơ sinh có một cơ chế rất thật gọi là phản xạ giật mình — khi cảm giác được ôm ấm đột ngột biến mất, não con báo động như thể đang rơi. Cộng thêm việc 20 phút đầu giấc con vẫn ở pha ngủ nông, thì "đặt xuống là dậy" gần như được lập trình sẵn. Tin tốt: có vài cách đánh lừa cơ chế ấy mà các nữ hộ sinh vẫn truyền tay nhau — đợi đủ dấu hiệu ngủ sâu (tay con rơi thõng như sợi bún), đặt con xuống NGHIÊNG người rồi mới xoay ngửa, giữ tay trên ngực con thêm 30 giây như một lời "mẹ vẫn ở đây". Mình sẽ đi từng bước một, kèm cả phương án B rất đáng nói: nếu đêm nay tất cả đều thất bại, bế con ngủ thêm vài tuần nữa không làm hỏng con — nó chỉ làm mỏi tay bạn, và mình có cách chia ca cho đỡ mỏi ở cuối bài.
+                3 giờ 40 phút sáng. Con vừa bú xong, mắt nhắm tịt trên vai bạn, thở đều như một thiên thần — và bạn bắt đầu nghi thức quen thuộc: hạ con xuống nôi chậm như tháo bom, từng centimet một, nín thở… và đúng khoảnh khắc lưng con chạm đệm, hai mắt ấy mở bừng ra. Lại bế lên. Lại từ đầu. Nếu bạn đang đọc những dòng này bằng một tay trong tư thế đó, thì trước hết: bạn không làm gì sai, và con bạn cũng không "hư vì được bế nhiều" đâu. Trẻ sơ sinh có một cơ chế rất thật gọi là phản xạ giật mình — khi cảm giác được ôm ấm đột ngột biến mất, não con báo động như thể đang rơi. Cộng thêm việc 20 phút đầu giấc con vẫn ở pha ngủ nông, thì "đặt xuống là dậy" gần như được lập trình sẵn. Tin tốt: có vài cách đánh lừa cơ chế ấy mà các nữ hộ sinh vẫn truyền tay nhau — đợi đủ dấu hiệu ngủ sâu (tay con rơi thõng như sợi bún), đặt con xuống NGHIÊNG người rồi mới xoay ngửa, giữ tay trên ngực con thêm 30 giây như một lời "có bố/mẹ ở đây rồi". Mình sẽ đi từng bước một, kèm cả phương án B rất đáng nói: nếu đêm nay tất cả đều thất bại, bế con ngủ thêm vài tuần nữa không làm hỏng con — nó chỉ làm mỏi tay bạn, và mình có cách chia ca cho đỡ mỏi ở cuối bài.
                 TEXT,
         ],
 
@@ -418,12 +521,21 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => 'tre-so-sinh-0-3-thang',
             'slug'        => 'benh-thuong-gap',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: vàng da, sốt dưới 3 tháng, nghẹt mũi, nôn trớ, khóc dạ đề, táo bón, chàm sữa, tiêm chủng — LOGIC bắt buộc: đây là gì → mức nào bình thường → chăm tại nhà → NGƯỠNG đi khám.
+                - KHÔNG viết: chăm sóc thường quy khỏe mạnh (→ Chăm sóc trẻ sơ sinh), vấn đề bú (→ Nuôi con bằng sữa mẹ).
+                - Nguyên tắc cứng không thỏa hiệp: sốt ≥38°C ở trẻ dưới 3 tháng = đi viện ngay, không tự hạ sốt ở nhà, không ngoại lệ.
+                - Kết luận hành động (bảng phân tầng 3 mức) phải nằm NGAY ĐẦU BÀI — cha mẹ đọc trong 30 giây lúc nửa đêm, không có kiên nhẫn đọc hết bài.
+                - Giải oan hiện tượng sinh lý bị bệnh-hóa (vặn mình, phân hoa cà, hắt hơi) — giảm đi viện không cần thiết và canxi/men vi sinh vô ích.
+                - Mẹo dân gian nguy hiểm (nước lá chữa vàng da, mật ong) phải cảnh báo bằng ca thực tế đã ghi nhận, không mỉa mai người mách.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
                 Các vấn đề sức khỏe hay gặp nhất ở bé 0-3 tháng, viết theo đúng logic cha mẹ cần lúc lo lắng: đây là gì → mức độ nào bình thường → chăm tại nhà thế nào → NGƯỠNG NÀO đi khám ngay. Trọng tâm: vàng da sơ sinh (sinh lý vs bệnh lý, ngưỡng chiếu đèn), sốt ở trẻ dưới 3 tháng (nguyên tắc thép: dưới 3 tháng sốt ≥38°C là đi viện, không tự hạ sốt ở nhà), nghẹt mũi - thở khò khè - hắt hơi (khi nào là bình thường do mũi bé, cách vệ sinh mũi đúng, hút mũi có hại không), nôn trớ - trào ngược sinh lý vs nôn vọt bất thường, khóc dạ đề/colic (cách sống chung và loại trừ nguyên nhân khác), táo bón - són phân - phân hoa cà hoa cải (đọc màu phân: khi nào bình thường, khi nào báo động), viêm da - chàm sữa - hăm nặng, đau bụng - đầy hơi - vặn mình, nấm miệng, viêm mắt - tắc lệ đạo, và các mốc tiêm chủng 0-3 tháng kèm chăm sóc sau tiêm (sốt sau tiêm 6in1). KHÔNG lấn sân: chăm sóc thường quy khỏe mạnh (thuộc Chăm sóc trẻ sơ sinh), vấn đề bú (thuộc Nuôi con bằng sữa mẹ).
                 TEXT,
 
             'unique_angle' => <<<'TEXT'
-                Bài bệnh trẻ em tiếng Việt hoặc của bệnh viện (chuẩn nhưng viết cho đồng nghiệp đọc), hoặc của trang tin (xào nấu, kết bài nào cũng "đưa trẻ đến cơ sở y tế gần nhất" vô thưởng vô phạt). Khác biệt: (1) Mỗi bài xây quanh MỘT bảng phân tầng rõ ràng ba mức "theo dõi ở nhà / khám trong 24h / đi viện NGAY" với dấu hiệu cụ thể quan sát được (con số, màu sắc, hành vi) — trả lời đúng câu hỏi thật của cha mẹ lúc nửa đêm: "có phải đi viện bây giờ không?"; (2) Giải oan cho các hiện tượng sinh lý bị bệnh-hóa (vặn mình đỏ mặt, phân hoa cà, hắt hơi, nấc) — giảm những chuyến đi viện không cần thiết và những liều canxi/men vi sinh vô ích mà hàng xóm mách; (3) Đối đầu tử tế với mẹo dân gian nguy hiểm ở đúng bối cảnh bệnh: uống nước lá chữa vàng da (chậm trễ chiếu đèn gây biến chứng não), mật ong cho trẻ ho, chích lể — nói thẳng hậu quả bằng ca thực tế đã được báo chí y tế ghi nhận, không mỉa mai người mách.
+                2 giờ sáng, con 6 tuần tuổi sốt 38.1°C — câu hỏi thật của cha mẹ lúc đó không phải "vàng da là gì" mà là "có phải đi viện NGAY BÂY GIỜ không". Bài bệnh viện trả lời đúng nhưng viết cho đồng nghiệp đọc; bài trang tin thì xào nấu rồi kết bằng "đưa trẻ đến cơ sở y tế gần nhất" vô thưởng vô phạt — không ai trả lời thẳng câu hỏi "đêm nay có cần đi không". Khác biệt: (1) Mỗi bài xây quanh MỘT bảng phân tầng rõ ràng ba mức "theo dõi ở nhà / khám trong 24h / đi viện NGAY" với dấu hiệu cụ thể quan sát được (con số, màu sắc, hành vi) — trả lời đúng câu hỏi thật của cha mẹ lúc nửa đêm: "có phải đi viện bây giờ không?"; (2) Giải oan cho các hiện tượng sinh lý bị bệnh-hóa (vặn mình đỏ mặt, phân hoa cà, hắt hơi, nấc) — giảm những chuyến đi viện không cần thiết và những liều canxi/men vi sinh vô ích mà hàng xóm mách; (3) Đối đầu tử tế với mẹo dân gian nguy hiểm ở đúng bối cảnh bệnh: uống nước lá chữa vàng da (chậm trễ chiếu đèn gây biến chứng não), mật ong cho trẻ ho, chích lể — nói thẳng hậu quả bằng ca thực tế đã được báo chí y tế ghi nhận, không mỉa mai người mách.
                 TEXT,
 
             'content_goals' => <<<'TEXT'
@@ -452,6 +564,14 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => null,
             'slug'        => 'tre-nho-3-12-thang',
 
+            'writer_insights' => <<<'TEXT'
+                - Đây là danh mục CHA — chỉ bài TỔNG QUAN 3-12 tháng, dẫn vào 4 chuyên mục con. KHÔNG viết chi tiết ăn dặm/mốc phát triển/bệnh/chăm sóc hằng ngày ở đây.
+                - Sự kiện chi phối cả giai đoạn: MẸ ĐI LÀM LẠI tháng 6-7 — tuyến bài "bàn giao con" (ông bà/giúp việc/nhóm trẻ) là nội dung KHÔNG chuyên mục con nào viết.
+                - An toàn nhà cửa viết theo hiện trạng nhà Việt thật (nhà ống, phích nước, bàn thờ) — không dịch checklist nhà Mỹ.
+                - Giọng "quý nào việc nấy" — giúp cha mẹ đi trước con một bước.
+                - KPI: đo bằng tỷ lệ share trong hội nhóm mẹ bỉm quay lại công sở, và CTR từ pillar xuống đúng 4 chuyên mục con theo quý tuổi.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
                 Danh mục CHA của cụm 3-12 tháng — chứa các bài TỔNG QUAN xuyên suốt giai đoạn con "ra khỏi tổ": cẩm nang từng quý (3-6, 6-9, 9-12 tháng: mỗi quý con thay đổi gì, cha mẹ cần chuẩn bị gì), bước ngoặt mẹ đi làm lại sau thai sản 6 tháng (chọn người trông: ông bà - giúp việc - nhóm trẻ; chuẩn bị con quen người mới; sữa và ăn dặm khi mẹ vắng nhà; cảm giác tội lỗi của mẹ), an toàn trong nhà khi con biết lẫy - bò - vịn đứng (child-proofing kiểu nhà Việt: cầu thang, ổ điện, phích nước, bàn thờ), lịch tổng hợp tiêm chủng - khám định kỳ 3-12 tháng, đưa con ra ngoài: về quê, đi máy bay lần đầu, và sinh nhật 1 tuổi (thôi nôi, ý nghĩa - tổ chức vừa sức). Chi tiết ăn dặm - mốc phát triển - bệnh - chăm sóc hằng ngày KHÔNG viết ở đây — đẩy xuống 4 chuyên mục con.
                 TEXT,
@@ -461,7 +581,7 @@ class CategoryFoundationSeeder extends Seeder
                 TEXT,
 
             'content_goals' => <<<'TEXT'
-                (1) Hai bài pillar "Mẹ đi làm lại" và "An toàn nhà cửa theo giai đoạn bò - đứng - đi" là nội dung khác biệt định vị site, mục tiêu được share trong hội nhóm mẹ bỉm quay lại công sở. (2) SEO truy vấn giai đoạn: "chuẩn bị đi làm lại sau thai sản", "có nên thuê giúp việc trông con", "gửi trẻ 10 tháng được không", "trẻ mấy tháng biết bò", "đi máy bay với trẻ dưới 1 tuổi". (3) Điều phối luồng đọc xuống 4 chuyên mục con và giữ nhịp quay lại theo quý tuổi của con. (4) Chuyển giao độc giả mượt sang cụm Trẻ tập đi (1-3 tuổi) sau sinh nhật 1 tuổi — tiếp tục chuỗi hành trình mà site theo đuổi từ thai kỳ.
+                (1) Hai bài pillar "Mẹ đi làm lại" và "An toàn nhà cửa theo giai đoạn bò - đứng - đi" là nội dung khác biệt định vị site — đo bằng tỷ lệ share trong hội nhóm mẹ bỉm quay lại công sở. (2) SEO truy vấn giai đoạn: "chuẩn bị đi làm lại sau thai sản", "có nên thuê giúp việc trông con", "gửi trẻ 10 tháng được không", "trẻ mấy tháng biết bò", "đi máy bay với trẻ dưới 1 tuổi". (3) Điều phối luồng đọc xuống 4 chuyên mục con và giữ nhịp quay lại theo quý tuổi của con. (4) Chuyển giao độc giả mượt sang cụm Trẻ tập đi (1-3 tuổi) sau sinh nhật 1 tuổi — tiếp tục chuỗi hành trình mà site theo đuổi từ thai kỳ.
                 TEXT,
 
             'pain_points' => <<<'TEXT'
@@ -485,6 +605,15 @@ class CategoryFoundationSeeder extends Seeder
         [
             'parent_slug' => 'tre-nho-3-12-thang',
             'slug'        => 'cham-soc-tre-nho',
+
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: giấc ngủ 3-12 tháng (khủng hoảng tháng 4, luyện tự ngủ trung lập), mọc răng/chăm răng sữa, tắm/vệ sinh khi con hoạt động nhiều, màn hình = 0 trước 18 tháng.
+                - KHÔNG viết: bữa ăn dặm (→ Ăn dặm & dinh dưỡng), mốc vận động (→ Phát triển của trẻ), sốt mọc răng/bệnh (→ Bệnh thường gặp).
+                - Khác biệt bắt buộc giữ: chuyên mục DUY NHẤT trình bày luyện tự ngủ trung lập (từ fading đến Ferber) kèm cả lựa chọn "không luyện".
+                - Mọi bài phải có phần "thống nhất với người trông ban ngày (bà/giúp việc)" — mẹ chỉ kiểm soát được buổi tối.
+                - Chăm răng sữa được nâng đúng tầm — cha mẹ Việt thường bỏ qua đến khi con sâu răng mới đi khám.
+                - Phần "thống nhất với người trông ban ngày" nên tính cả trường hợp BỐ là người trông chính (không chỉ mặc định bà/giúp việc) khi mẹ đi công tác hoặc làm ca.
+                TEXT,
 
             'core_focus' => <<<'TEXT'
                 Chăm sóc hằng ngày cho bé 3-12 tháng — giai đoạn con từ "nằm yên" thành "cỗ máy di chuyển": giấc ngủ 3-12 tháng (khủng hoảng ngủ tháng 4, gộp giấc ngày, luyện tự ngủ các phương pháp từ nhẹ đến mạnh — trình bày trung lập cho trẻ đủ tuổi, cai ti đêm khi nào và thế nào), vệ sinh cơ thể khi con hoạt động nhiều (tắm bé biết ngồi - biết đứng, chăm da mùa nóng rôm sảy - mùa hanh nẻ má, cắt tóc máu), mọc răng và chăm răng sữa đầu tiên (rơ nướu, chải răng từ răng đầu tiên, ti đêm và sâu răng), mặc đồ theo mùa cho trẻ vận động, quần áo - bỉm size nào khi con bò trườn, thói quen sinh hoạt: tập nếp ăn - chơi - ngủ theo nhịp, thời gian màn hình = 0 trước 18 tháng (chuẩn WHO, xử lý thực tế bà bật tivi cho cháu ăn), ra ngoài hằng ngày: tắm nắng đúng cách vs quan niệm cũ, đi dạo, chống nắng - chống muỗi an toàn cho trẻ dưới 1 tuổi. KHÔNG lấn sân: bữa ăn dặm (thuộc Ăn dặm & dinh dưỡng), mốc vận động (thuộc Phát triển của trẻ), sốt mọc răng và bệnh (thuộc Bệnh thường gặp).
@@ -520,6 +649,15 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => 'tre-nho-3-12-thang',
             'slug'        => 'phat-trien-cua-tre-2',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: mốc vận động lớn (lẫy/ngồi/bò/đứng), mốc tinh tế (cầm nắm, bập bẹ, chỉ trỏ, sợ người lạ), red flags AAP/CDC, đọc biểu đồ tăng trưởng giai đoạn chậm lại.
+                - KHÔNG viết: ăn dặm (chuyên mục riêng), chăm sóc/luyện ngủ (→ Chăm sóc trẻ nhỏ), bệnh (→ Bệnh thường gặp).
+                - Đối thoại thẳng với câu ca dao "3 tháng biết lẫy, 7 tháng biết bò, 9 tháng lò dò biết đi" — đúng về TRÌNH TỰ, sai về THỜI ĐIỂM (lấy mốc sớm nhất làm chuẩn).
+                - Chống can thiệp sai phổ biến bằng bằng chứng: xe tròn tập đi (AAP khuyến cáo cấm), đỡ ngồi/xốc nách tập đứng sớm.
+                - Ngôn ngữ/giao tiếp sớm (bập bẹ, chỉ trỏ, phản ứng gọi tên) đặt ngang vận động — cha mẹ Việt hay chỉ đếm lẫy-bò-đi mà bỏ qua các mốc này.
+                - KPI: đo bằng tỷ lệ quay lại theo chuỗi "Bé N tháng tuổi" và tỷ lệ trích dẫn bài "chuẩn ca dao vs chuẩn y khoa".
+                TEXT,
+
             'core_focus' => <<<'TEXT'
                 Sự phát triển của bé 3-12 tháng — năm của các mốc vận động lớn: lẫy (3-6 tháng), ngồi (6-8), bò (7-10), vịn đứng - men đồ (9-12), và có thể những bước đi đầu tiên; kèm mốc tinh tế quan trọng không kém: cầm nắm chuyền tay (4-6), nhặt bằng hai ngón (9-12), bập bẹ "ba ba ma ma" (6-9), gọi tên có quay lại - vẫy tay - chỉ trỏ (9-12), lo lắng khi xa mẹ và sợ người lạ (6-12 — giải thích đây là mốc TỐT của gắn bó, không phải "hư"). Với mỗi mốc: khoảng tuổi bình thường (luôn là KHOẢNG rộng), cách tạo điều kiện cho con tập (không gian sàn, trò chơi tương tác bằng đồ trong nhà), điều KHÔNG nên làm (xe tròn tập đi, đỡ ngồi sớm, ép tập đứng), red flags theo chuẩn AAP/CDC cần khám phát triển (6 tháng chưa lẫy chưa với đồ, 9 tháng chưa ngồi vững chưa bập bẹ, 12 tháng chưa chỉ trỏ không phản ứng gọi tên), và đọc biểu đồ tăng trưởng giai đoạn tốc độ tăng cân chậm lại (giải oan "con dạo này còi đi"). KHÔNG lấn sân: ăn dặm (chuyên mục riêng), chăm sóc - luyện ngủ (Chăm sóc trẻ nhỏ), bệnh (Bệnh thường gặp).
                 TEXT,
@@ -529,7 +667,7 @@ class CategoryFoundationSeeder extends Seeder
                 TEXT,
 
             'content_goals' => <<<'TEXT'
-                (1) Chuỗi bài trụ cột "Bé N tháng tuổi biết làm gì" (3→12 tháng) tiếp nối chuỗi 0-3 tháng, giữ độc giả quay lại hằng tháng. (2) SEO truy vấn so sánh - lo âu volume lớn: "trẻ 6 tháng chưa biết lẫy", "trẻ 9 tháng chưa mọc răng", "trẻ mấy tháng biết ngồi", "trẻ đi chân vòng kiềng", "xe tập đi có tốt không", "trẻ 11 tháng chưa biết đi có sao không". (3) Bài "xe tròn tập đi" và "chuẩn ca dao vs chuẩn y khoa" là nội dung phản đề tạo khác biệt và được trích dẫn. (4) Red flags trình bày chuẩn mực dẫn sang hành động khám phát triển đúng nơi — xây uy tín nội dung có trách nhiệm; luồng đọc nối sang Phát triển của trẻ (1-3 tuổi) khi con tròn 1 tuổi.
+                (1) Chuỗi bài trụ cột "Bé N tháng tuổi biết làm gì" (3→12 tháng) tiếp nối chuỗi 0-3 tháng — đo bằng tỷ lệ quay lại hằng tháng theo tuổi con. (2) SEO truy vấn so sánh - lo âu volume lớn: "trẻ 6 tháng chưa biết lẫy", "trẻ 9 tháng chưa mọc răng", "trẻ mấy tháng biết ngồi", "trẻ đi chân vòng kiềng", "xe tập đi có tốt không", "trẻ 11 tháng chưa biết đi có sao không". (3) Bài "xe tròn tập đi" và "chuẩn ca dao vs chuẩn y khoa" là nội dung phản đề tạo khác biệt — đo bằng số lượt trích dẫn/chia sẻ. (4) Red flags trình bày chuẩn mực dẫn sang hành động khám phát triển đúng nơi — xây uy tín nội dung có trách nhiệm; luồng đọc nối sang Phát triển của trẻ (1-3 tuổi) khi con tròn 1 tuổi.
                 TEXT,
 
             'pain_points' => <<<'TEXT'
@@ -554,6 +692,15 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => 'tre-nho-3-12-thang',
             'slug'        => 'an-dam-dinh-duong',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: dấu hiệu sẵn sàng ăn dặm, 3 trường phái (truyền thống/Nhật/BLW) trung lập, lộ trình thô mịn, sắt, thực phẩm cấm dưới 1 tuổi, an toàn hóc nghẹn.
+                - KHÔNG viết: sữa mẹ/công thức chuyên sâu (→ Nuôi con bằng sữa mẹ), cân nặng/biểu đồ (→ Phát triển của trẻ), tiêu chảy/táo bón bệnh lý (→ Bệnh thường gặp).
+                - Trung lập CÓ NGUYÊN TẮC: không tôn sùng trường phái nào, chỉ giữ nguyên tắc bất biến (đủ sắt, tăng thô đúng nhịp, không ép ăn).
+                - An toàn hóc nghẹn là tuyến bài BẮT BUỘC (cắt nho, xử lý xương cá, sơ cứu) — kỹ năng cứu mạng gần như không cha mẹ Việt nào được dạy.
+                - Viết cho CẢ NHÀ nấu ăn dặm, không chỉ mẹ — bố/ông bà thường là người trực tiếp cho ăn ban ngày khi mẹ đi làm.
+                - KPI: đo bằng lượt lưu/in bộ thực đơn tuần và tỷ lệ chia sẻ bài "thương lượng với ông bà về bữa ăn".
+                TEXT,
+
             'core_focus' => <<<'TEXT'
                 Toàn bộ hành trình ăn dặm 6-12 tháng (và chuẩn bị từ tháng 5): dấu hiệu con SẴN SÀNG ăn dặm (ngồi vững, hết phản xạ đẩy lưỡi — thay vì "cứ tròn 6 tháng" hay "4 tháng cho ăn sớm cứng cáp"), bản đồ trung lập 3 trường phái (ăn dặm truyền thống, kiểu Nhật, BLW bé tự chỉ huy — ưu nhược từng kiểu, kết hợp thế nào, chọn theo hoàn cảnh nhà mình), lộ trình thô mịn theo tháng (6-7-8-10-12: độ thô, số bữa, lượng ăn tham khảo), thực đơn mẫu nguyên liệu chợ Việt theo tuần, nhóm chất và thực phẩm giàu SẮT (mối thiếu hụt số 1 tuổi này), thực phẩm cần tránh trước 1 tuổi (mật ong, muối - nước mắm, sữa bò tươi, hạt nguyên), an toàn hóc nghẹn (cắt đồ ăn đúng cách, phân biệt ọe sinh lý vs hóc, sơ cứu Heimlich cho trẻ nhỏ), uống nước - sữa song song ăn dặm, và xử lý khủng hoảng: con ăn ít, biếng ăn sinh lý, ném đồ ăn, ĂN RONG - XEM TIVI KHI ĂN (cuộc chiến lớn nhất với ông bà), dị ứng thực phẩm (nguyên tắc thử món mới, dấu hiệu dị ứng). KHÔNG lấn sân: sữa mẹ/công thức chuyên sâu (Nuôi con bằng sữa mẹ), cân nặng - biểu đồ (Phát triển của trẻ), tiêu chảy - táo bón bệnh lý (Bệnh thường gặp).
                 TEXT,
@@ -563,7 +710,7 @@ class CategoryFoundationSeeder extends Seeder
                 TEXT,
 
             'content_goals' => <<<'TEXT'
-                (1) SEO cụm truy vấn dày đặc nhất của năm đầu đời: "thực đơn ăn dặm cho bé 6/7/8 tháng", "ăn dặm BLW là gì", "bé 7 tháng ăn được gì", "cách nấu cháo cho bé", "bé ăn dặm bị táo bón", "trẻ 8 tháng biếng ăn" — cạnh tranh bằng độ thực dụng (nguyên liệu chợ Việt, ảnh độ thô từng tháng). (2) Bộ thực đơn tuần theo tháng tuổi là nội dung bookmark/in ra dán tủ lạnh — đo bằng lượt lưu và quay lại. (3) Tuyến bài "thương lượng với ông bà về bữa ăn" và "an toàn hóc nghẹn" là nội dung khác biệt được share mạnh. (4) Nối luồng: dấu hiệu sẵn sàng ↔ Phát triển của trẻ (ngồi vững), biếng ăn bệnh lý ↔ Bệnh thường gặp, và chuyển sang Dinh dưỡng cho trẻ (1-3 tuổi) khi con tròn 1 tuổi — vốn là giai đoạn "ăn cơm cùng nhà" nhiều vấn đề mới.
+                (1) SEO cụm truy vấn dày đặc nhất của năm đầu đời: "thực đơn ăn dặm cho bé 6/7/8 tháng", "ăn dặm BLW là gì", "bé 7 tháng ăn được gì", "cách nấu cháo cho bé", "bé ăn dặm bị táo bón", "trẻ 8 tháng biếng ăn" — cạnh tranh bằng độ thực dụng (nguyên liệu chợ Việt, ảnh độ thô từng tháng). (2) Bộ thực đơn tuần theo tháng tuổi là nội dung bookmark/in ra dán tủ lạnh — đo bằng lượt lưu và tỷ lệ quay lại. (3) Tuyến bài "thương lượng với ông bà về bữa ăn" và "an toàn hóc nghẹn" là nội dung khác biệt — đo bằng tỷ lệ chia sẻ. (4) Nối luồng: dấu hiệu sẵn sàng ↔ Phát triển của trẻ (ngồi vững), biếng ăn bệnh lý ↔ Bệnh thường gặp, và chuyển sang Dinh dưỡng cho trẻ (1-3 tuổi) khi con tròn 1 tuổi — vốn là giai đoạn "ăn cơm cùng nhà" nhiều vấn đề mới.
                 TEXT,
 
             'pain_points' => <<<'TEXT'
@@ -574,7 +721,7 @@ class CategoryFoundationSeeder extends Seeder
                 "Trường phái X là tốt nhất, phân tích tại sao Y sai" — nuôi war tôn giáo ăn dặm, mất một nửa độc giả; chỉ viết trung lập kết hợp. "Thực đơn ăn dặm cho bé TĂNG CÂN VÙ VÙ" — tư duy nhồi cân phản khoa học đang là nỗi ám ảnh có hại của gia đình Việt; thay bằng bài "cân nặng bao nhiêu là đủ" theo percentile. "Bột ăn dặm/váng sữa/phô mai nào tốt nhất" dạng xếp hạng — thuộc Đánh giá sản phẩm, và váng sữa cần bài bóc tách riêng (bản chất là kem béo, không phải "tinh túy sữa" như quảng cáo). "Gia vị ăn dặm cho bé dưới 1 tuổi (mắm nhĩ, hạt nêm trẻ em)" dạng khuyên dùng — dưới 1 tuổi không cần nêm, "hạt nêm cho bé" là lách marketing; viết bài phản biện. "Mẹo cho con ăn hết bát: xem tivi, ăn rong có kiểm soát" — thỏa hiệp với thói quen có hại, đi ngược nguyên tắc ăn chủ động; chỉ viết lộ trình cai. "Nước hầm xương/nước dashi thần thánh" dạng tôn vinh — dashi ok như nước nấu nhưng không thay được đạm thật; viết đúng vai trò, không thần thánh hóa.
                 TEXT,
 
-            'audience' => 'Mẹ Việt 26-36 tuổi có con 5-12 tháng bắt đầu ăn dặm — thời điểm trùng khớp đi làm lại nên bữa ăn ban ngày do bà/giúp việc đảm nhận theo cách cũ (ăn rong, tivi, ép ăn), mẹ chỉ nấu và cho ăn được bữa tối + cuối tuần; đọc công thức buổi tối để chuẩn bị đồ ăn hôm sau, tra cứu khẩn khi con ọe/nổi mẩn/biếng ăn; áp lực lớn nhất: cân nặng của con bị cả họ theo dõi như KPI và mọi bữa con ăn ít đều bị quy về "tại mẹ cho ăn kiểu mới".',
+            'audience' => 'Cha mẹ Việt 26-36 tuổi có con 5-12 tháng bắt đầu ăn dặm — thời điểm trùng khớp mẹ đi làm lại nên bữa ăn ban ngày do bà/giúp việc/đôi khi bố đảm nhận theo cách cũ (ăn rong, tivi, ép ăn), mẹ hoặc bố chỉ nấu và cho ăn được bữa tối + cuối tuần; đọc công thức buổi tối để chuẩn bị đồ ăn hôm sau, tra cứu khẩn khi con ọe/nổi mẩn/biếng ăn; áp lực lớn nhất: cân nặng của con bị cả họ theo dõi như KPI và mọi bữa con ăn ít đều bị quy về "tại cho ăn kiểu mới".',
 
             'constraints' => 'Trung lập giữa các trường phái ăn dặm, không tôn sùng - không dè bỉu; không dùng cân nặng làm thước đo thành công bữa ăn; lượng ăn luôn ghi "tham khảo, tôn trọng tín hiệu no của con"; không ủng hộ ép ăn, ăn rong, màn hình khi ăn nhưng phê phán hành vi chứ không phê phán ông bà; công thức phải nấu được với chợ Việt, có phương án tiết kiệm; an toàn hóc nghẹn và thực phẩm cấm dưới 1 tuổi là ranh giới cứng dẫn nguồn WHO/Viện Dinh dưỡng; không quảng cáo bột, váng sữa, gia vị ăn dặm.',
 
@@ -588,12 +735,20 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => 'tre-nho-3-12-thang',
             'slug'        => 'benh-thuong-gap-2',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: sốt mọc răng (phân biệt sốt bệnh thật), rối loạn tiêu hóa khi chuyển ăn dặm, viêm hô hấp tăng vọt khi đi nhà trẻ, tay chân miệng, viêm tai giữa, mốc tiêm 6-12 tháng.
+                - KHÔNG viết: bệnh đặc thù sơ sinh (→ nhóm Trẻ sơ sinh), chấn thương do biết đi (→ nhóm Trẻ tập đi), ăn uống/thực đơn (→ Ăn dặm & dinh dưỡng), mốc phát triển (→ Phát triển của trẻ).
+                - Bảng phân biệt CỤ THỂ "mọc răng vs bệnh thật" (ngưỡng nhiệt độ, thời gian sốt) — thay vì câu chung chung "sốt do mọc răng là bình thường".
+                - Gắn chặt với cột mốc XÃ HỘI: con bắt đầu đi nhà trẻ nên lây chéo tăng vọt — mỗi bài bệnh hô hấp/tay chân miệng có phần "khi nào nên cho nghỉ học".
+                - Kết luận hành động (phân tầng 3 mức) luôn đặt đầu bài, kèm mốc tiêm chủng đúng lịch Việt Nam.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
-                Các vấn đề sức khỏe đặc trưng của giai đoạn 3-12 tháng — khi con vừa hết lớp kháng thể tự nhiên nhận từ mẹ (miễn dịch thụ động suy giảm rõ rệt sau tháng thứ 6) vừa bắt đầu ăn dặm, và một số bắt đầu đi nhà trẻ sớm nên tần suất ốm vặt tăng vọt so với 3 tháng đầu đời. Trọng tâm: sốt mọc răng — phân biệt với sốt bệnh thật bằng dấu hiệu cụ thể (mọc răng chỉ gây sốt nhẹ dưới 38.5°C kèm chảy dãi nhiều, cắn gặm, khó chịu nhẹ — không gây sốt cao kéo dài, tiêu chảy nặng hay ho; có các dấu hiệu này phải tìm nguyên nhân bệnh lý khác); rối loạn tiêu hóa khi chuyển sang ăn dặm (tiêu chảy do hệ vi sinh đường ruột thích nghi thức ăn mới — phân biệt với tiêu chảy nhiễm trùng cần theo dõi dấu hiệu mất nước; táo bón do thiếu chất xơ - thiếu nước khi chuyển từ sữa lỏng sang thức ăn đặc); viêm đường hô hấp tăng vọt khi bắt đầu đi nhà trẻ (viêm mũi họng, viêm tiểu phế quản, viêm phổi — dấu hiệu thở nhanh, rút lõm lồng ngực cần cấp cứu) và các bệnh lây chéo điển hình ở môi trường nhóm trẻ (tay chân miệng — phân độ nhẹ - nặng, ngưỡng nhập viện; viêm tai giữa thường theo sau một đợt viêm hô hấp trên, khó nhận biết ở trẻ chưa biết nói); lịch tiêm chủng các mốc 6-12 tháng (cúm mùa tiêm được từ 6 tháng, viêm não Nhật Bản mũi đầu quanh mốc con tròn 1 tuổi, phế cầu) và cách phân biệt sốt sau tiêm với sốt bệnh thật. KHÔNG lấn sân: bệnh đặc thù của trẻ sơ sinh như vàng da, nhiễm trùng sơ sinh (thuộc Bệnh thường gặp của nhóm Trẻ sơ sinh 0-3 tháng); chấn thương do biết đi và ngộ độc do tự bốc ăn (thuộc nhóm Trẻ tập đi 1-3 tuổi); khía cạnh ăn uống - thực đơn khi ăn dặm (thuộc Ăn dặm & dinh dưỡng); cột mốc phát triển vận động - ngôn ngữ (thuộc Phát triển của trẻ, cùng nhóm 3-12 tháng).
+                Các vấn đề sức khỏe đặc trưng của giai đoạn 3-12 tháng — khi con vừa hết miễn dịch thụ động từ mẹ (suy giảm rõ sau tháng thứ 6), vừa bắt đầu ăn dặm, và một số đi nhà trẻ sớm nên ốm vặt tăng vọt so với 3 tháng đầu. Trọng tâm: sốt mọc răng — phân biệt sốt bệnh thật bằng ngưỡng cụ thể (mọc răng chỉ gây sốt nhẹ dưới 38.5°C kèm chảy dãi, cắn gặm — không gây sốt cao kéo dài, tiêu chảy nặng hay ho); rối loạn tiêu hóa khi chuyển ăn dặm (tiêu chảy thích nghi thức ăn mới vs tiêu chảy nhiễm trùng cần theo dõi mất nước; táo bón do thiếu chất xơ/nước); viêm hô hấp tăng vọt khi đi nhà trẻ (viêm mũi họng, viêm tiểu phế quản, viêm phổi — dấu hiệu thở nhanh/rút lõm lồng ngực cần cấp cứu); bệnh lây chéo ở môi trường nhóm trẻ (tay chân miệng phân độ nhẹ - nặng; viêm tai giữa khó nhận biết ở trẻ chưa biết nói); và lịch tiêm 6-12 tháng (cúm, viêm não Nhật Bản, phế cầu) kèm cách phân biệt sốt sau tiêm với sốt bệnh thật. KHÔNG lấn sân: bệnh đặc thù sơ sinh như vàng da (thuộc Bệnh thường gặp của Trẻ sơ sinh); chấn thương/ngộ độc do biết đi (thuộc nhóm Trẻ tập đi); ăn uống/thực đơn (thuộc Ăn dặm & dinh dưỡng); mốc phát triển vận động - ngôn ngữ (thuộc Phát triển của trẻ, cùng nhóm tuổi).
                 TEXT,
 
             'unique_angle' => <<<'TEXT'
-                Bài bệnh trẻ em tiếng Việt ở khúc tuổi này thường rơi vào hai cực: bài bệnh viện chuẩn nhưng viết chung chung "sốt do mọc răng là bình thường" mà không cho tiêu chí phân biệt cụ thể, hoặc bài tổng hợp dịch từ nguồn nước ngoài liệt kê triệu chứng khô khan không gắn với bối cảnh thật của cha mẹ Việt đang đi làm. Ba điểm khác biệt: (1) Bảng phân biệt CỤ THỂ "mọc răng vs bệnh thật" — nêu đúng ngưỡng nhiệt độ, thời gian sốt, triệu chứng đi kèm để cha mẹ tự đánh giá tại chỗ thay vì mỗi nguồn nói một kiểu; (2) Gắn chặt với cột mốc XÃ HỘI thật của giai đoạn này — con bắt đầu đi nhà trẻ/gửi ông bà trông cùng trẻ khác nên lây chéo tăng vọt, mỗi bài bệnh hô hấp/tay chân miệng đều có phần "con vừa đi trẻ về là ốm, có bình thường không, khi nào nên cho nghỉ ở nhà" — bối cảnh mà các trang bệnh viện không đề cập vì họ chỉ viết y khoa thuần túy; (3) Mỗi bệnh đều có bảng phân tầng ba mức hành động rõ ràng (theo dõi ở nhà / khám trong 24h / đi viện ngay) kèm mốc tiêm chủng đúng lịch Việt Nam (cả tiêm chủng mở rộng miễn phí lẫn vắc-xin dịch vụ có mốc tiêm sớm hơn) — thay vì bài chỉ liệt kê triệu chứng rồi kết luận mơ hồ "đưa trẻ đến cơ sở y tế gần nhất".
+                "Sốt do mọc răng, bình thường thôi" — đúng ở nhà, nhưng vô dụng lúc 9 giờ tối khi con sốt 38.6°C và câu hỏi thật là CÓ phải đi khám không. Bài bệnh viện dừng lại đúng ở câu trấn an đó; bài dịch nước ngoài thì liệt kê triệu chứng khô khan, không gắn với việc con vừa đi nhà trẻ về. Ba điểm khác biệt: (1) Bảng phân biệt CỤ THỂ "mọc răng vs bệnh thật" — đúng ngưỡng nhiệt độ, thời gian sốt, để cha mẹ tự đánh giá tại chỗ; (2) Gắn với cột mốc XÃ HỘI thật — con đi nhà trẻ/gửi ông bà nên lây chéo tăng vọt, mỗi bài hô hấp/tay chân miệng có phần "khi nào nên cho nghỉ ở nhà" mà trang bệnh viện không đề cập; (3) Mỗi bệnh có bảng phân tầng ba mức hành động (theo dõi ở nhà / khám trong 24h / đi viện ngay) kèm mốc tiêm đúng lịch Việt Nam — thay vì kết luận mơ hồ "đưa trẻ đến cơ sở y tế gần nhất".
                 TEXT,
 
             'content_goals' => <<<'TEXT'
@@ -622,12 +777,19 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => null,
             'slug'        => 'tre-tap-di-1-3-tuoi',
 
+            'writer_insights' => <<<'TEXT'
+                - Đây là danh mục CHA — chỉ bài TỔNG QUAN chuẩn bị tâm thế trước "khủng hoảng tuổi lên 2", dẫn vào 4 chuyên mục con. KHÔNG viết chi tiết ăn vạ/mốc/thực đơn/bệnh ở đây.
+                - Vai trò: "bản đồ TRƯỚC bão" — mọi bài khủng hoảng tuổi lên 2 khác viết SAU khi cha mẹ đã hoảng; bài này giúp nhận ra ngay dấu hiệu đầu tiên.
+                - Gộp 3 cuộc "cai" diễn ra gần như cùng lúc (bỉm, ti, bế/bồng) thành 1 bức tranh có thứ tự ưu tiên — không nguồn nào ở Việt Nam làm việc này.
+                - Đây là MẮT XÍCH bận rộn nhất trong chuỗi bài theo tuổi — biến động dồn dập nhiều mặt cùng lúc khiến cha mẹ dễ lạc hướng đọc nhất.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
-                Danh mục CHA của cụm 1-3 tuổi — chỉ chứa các bài TỔNG QUAN xuyên suốt giai đoạn, không đi sâu vào mảng đã có chuyên mục con: cẩm nang chuẩn bị tâm thế bước vào giai đoạn "khủng hoảng tuổi lên 2" nổi tiếng khó nhất trong ba năm đầu đời (đây là gì, vì sao xảy ra, kéo dài bao lâu, khác gì với con hư), điểm lại các mốc lớn hội tụ cùng lúc trong giai đoạn này (biết đi vững rồi chạy, nói được câu ngắn 2-3 từ, cai bỉm ban ngày, cai ti mẹ - ti giả - bình sữa hoàn toàn — những cuộc "chia tay" đồng thời khiến cả nhà đảo lộn), giải thích ngắn gọn hai thay đổi tâm sinh lý cốt lõi chi phối cả giai đoạn (bùng nổ ý thức về "cái tôi" khiến con nói KHÔNG với mọi thứ, và năng lực kiềm chế cảm xúc chưa theo kịp mong muốn khiến ăn vạ lên đến đỉnh điểm), lịch tổng hợp các mốc khám - tiêm chủng 1-3 tuổi, và bài định hướng "con 1-3 tuổi: đọc gì, khi nào" dẫn vào 4 chuyên mục con (Chăm sóc & nuôi dạy, Phát triển của trẻ, Dinh dưỡng cho trẻ, Bệnh thường gặp). Chi tiết kỹ thuật xử lý ăn vạ, mốc phát triển từng tháng, thực đơn, bệnh cụ thể KHÔNG viết ở đây — đẩy xuống đúng chuyên mục con.
+                Danh mục CHA của cụm 1-3 tuổi — chỉ bài TỔNG QUAN xuyên suốt giai đoạn: cẩm nang chuẩn bị tâm thế bước vào "khủng hoảng tuổi lên 2" (là gì, vì sao xảy ra, kéo dài bao lâu, khác gì con hư), các mốc lớn hội tụ cùng lúc (đi vững rồi chạy, nói câu ngắn 2-3 từ, cai bỉm, cai ti - bình sữa — những cuộc "chia tay" đồng thời khiến cả nhà đảo lộn), hai thay đổi tâm sinh lý cốt lõi (bùng nổ ý thức "cái tôi" khiến con nói KHÔNG, năng lực kiềm chế cảm xúc chưa theo kịp mong muốn), lịch khám - tiêm chủng 1-3 tuổi, và bài định hướng dẫn vào 4 chuyên mục con (Chăm sóc & nuôi dạy, Phát triển của trẻ, Dinh dưỡng cho trẻ, Bệnh thường gặp). Chi tiết kỹ thuật xử lý ăn vạ, mốc phát triển, thực đơn, bệnh cụ thể KHÔNG viết ở đây.
                 TEXT,
 
             'unique_angle' => <<<'TEXT'
-                Nếu 0-3 tháng là giai đoạn cha mẹ bị ngợp vì thiếu ngủ và 3-12 tháng là giai đoạn phải ra quyết định thuê - gửi con, thì 1-3 tuổi là lần đầu tiên cha mẹ đối mặt với một con người có Ý CHÍ RIÊNG — và gần như không ai được chuẩn bị trước cho cú sốc này. Vai trò riêng của danh mục cha: (1) Đóng vai "bản đồ trước bão" thay vì "nhật ký sau bão" — mọi bài khủng hoảng tuổi lên 2 trên mạng đều viết SAU khi phụ huynh đã hoảng, còn bài pillar này mô tả TRƯỚC để cha mẹ nhận ra ngay từ dấu hiệu đầu tiên "à, đây là lúc nó bắt đầu" thay vì tưởng con hư đi; (2) Gộp ba cuộc "cai" (bỉm, ti, bế - bồng) đang diễn ra gần như cùng lúc trong 12 tháng ngắn ngủi này thành một bức tranh tổng thể có trình tự ưu tiên — không nguồn nào ở Việt Nam nhìn gộp ba việc này lại để cha mẹ biết nên dồn sức vào việc gì trước; (3) Định vị rõ đây là MẮT XÍCH bận rộn nhất trong chuỗi bài theo tuổi của site, vì biến động dồn dập ở nhiều mặt cùng lúc (thân thể, cảm xúc, ngôn ngữ, môi trường sống khi đi nhà trẻ) khiến cha mẹ dễ lạc hướng đọc nhất trong ba năm đầu.
+                Nếu 0-3 tháng là giai đoạn ngợp vì thiếu ngủ và 3-12 tháng là giai đoạn ra quyết định thuê - gửi con, thì 1-3 tuổi là lần đầu cha mẹ đối mặt một con người có Ý CHÍ RIÊNG — và gần như không ai được chuẩn bị trước cho cú sốc này. Vai trò riêng của danh mục cha: (1) Là "bản đồ trước bão" thay vì "nhật ký sau bão" — mọi bài khủng hoảng tuổi lên 2 khác viết SAU khi phụ huynh đã hoảng, còn bài pillar này giúp nhận ra ngay dấu hiệu đầu tiên; (2) Gộp ba cuộc "cai" (bỉm, ti, bế) diễn ra gần như cùng lúc thành một bức tranh có thứ tự ưu tiên — không nguồn nào ở Việt Nam làm việc này; (3) Định vị đây là MẮT XÍCH bận rộn nhất trong chuỗi bài theo tuổi, vì biến động dồn dập nhiều mặt cùng lúc khiến cha mẹ dễ lạc hướng đọc nhất trong ba năm đầu.
                 TEXT,
 
             'content_goals' => <<<'TEXT'
@@ -656,12 +818,21 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => 'tre-tap-di-1-3-tuoi',
             'slug'        => 'cham-soc-nuoi-day',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: HÀNH VI/CẢM XÚC trẻ 1-3 tuổi — ăn vạ/khủng hoảng tuổi lên 2, cai bỉm, cai ti, hành vi xã hội đầu đời, ngày đầu đi nhà trẻ, an toàn nhà khi con biết trèo.
+                - Ranh giới với "Chăm sóc & nuôi dạy" ở tuổi khác: đây là mốc con CHƯA có tư duy trừu tượng (ăn vạ vì chưa kiềm chế được cảm xúc) — khác hẳn tuổi 3-6 (nói dối, ghen tị em — đã hiểu được hậu quả hành động) và tuổi 6-12 (tự học, mạng xã hội).
+                - KHÔNG viết: hành vi phức tạp hơn của 3-6 tuổi như nói dối/câu hỏi khó (→ Chăm sóc & nuôi dạy của Mầm non), mốc phát triển (→ Phát triển của trẻ), ăn uống (→ Dinh dưỡng cho trẻ).
+                - Đây là lần đầu cha mẹ đối mặt "tantrum" — viết đúng tâm thế người mới, không giả định đã biết xử lý.
+                - Xử lý 3 cuộc "cai" (bỉm, ti, bế) như 3 dự án riêng có lộ trình — không phải lời khuyên mơ hồ "đến lúc là tự cai".
+                - Ví dụ ăn vạ nên có cả tình huống BỐ ở một mình với con nơi công cộng — không mặc định mẹ luôn có mặt khi con ăn vạ.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
-                Cẩm nang thực hành hằng ngày cho cha mẹ đối mặt "tantrum" lần đầu trong đời làm cha mẹ: hiểu và xử lý ăn vạ - khủng hoảng tuổi lên 2 (phân biệt ăn vạ thao túng và ăn vạ vỡ oà cảm xúc thật, cách phản ứng tại nhà và nơi công cộng, thống nhất cách xử lý với ông bà), cai bỉm ban ngày (dấu hiệu con sẵn sàng, lộ trình từng bước, xử lý tái phát, và khi nào chưa cần vội), cai ti giả - ti mẹ - bình sữa (thời điểm phù hợp, các cách cai nhẹ nhàng, xử lý đêm đầu tiên không ti), dạy con những hành vi xã hội đầu đời: nói "không" đúng cách thay vì cắn - đánh khi tranh giành đồ chơi với bạn, chào hỏi, chia sẻ ở mức vừa sức tuổi; chuẩn bị và vượt qua ngày đầu đi nhà trẻ (lo âu xa cách - separation anxiety, cách chia tay dứt khoát, thời gian con cần để quen); và an toàn trong nhà khi con biết trèo, mở được mọi ngăn tủ, khóa cửa (child-proofing giai đoạn hiếu động nhất). KHÔNG lấn sân: hành vi phức tạp hơn của trẻ 3-6 tuổi như nói dối, ghen tị với em, câu hỏi khó về giới tính - cái chết (thuộc Chăm sóc & nuôi dạy của Trẻ mầm non); không viết mốc phát triển vận động - ngôn ngữ (thuộc Phát triển của trẻ); không viết chuyện ăn uống (thuộc Dinh dưỡng cho trẻ).
+                Cẩm nang thực hành hằng ngày cho cha mẹ đối mặt "tantrum" lần đầu: hiểu và xử lý ăn vạ - khủng hoảng tuổi lên 2 (phân biệt ăn vạ thao túng và ăn vạ vỡ oà cảm xúc thật, phản ứng tại nhà và nơi công cộng, thống nhất với ông bà), cai bỉm ban ngày (dấu hiệu sẵn sàng, lộ trình từng bước, xử lý tái phát), cai ti giả - ti mẹ - bình sữa (thời điểm phù hợp, cách cai nhẹ nhàng, đêm đầu không ti), dạy hành vi xã hội đầu đời (nói "không" đúng cách thay vì cắn - đánh khi tranh đồ chơi, chào hỏi, chia sẻ vừa sức), ngày đầu đi nhà trẻ (lo âu xa cách, cách chia tay dứt khoát), và an toàn nhà khi con biết trèo, mở được mọi ngăn tủ (child-proofing giai đoạn hiếu động nhất). KHÔNG lấn sân: hành vi phức tạp hơn của 3-6 tuổi như nói dối, ghen tị với em, câu hỏi khó (thuộc Chăm sóc & nuôi dạy của Trẻ mầm non — ranh giới: 1-3 tuổi là PHẢN XẠ CẢM XÚC, 3-6 tuổi là hành vi có TÍNH TOÁN/hiểu hậu quả); mốc phát triển vận động - ngôn ngữ (thuộc Phát triển của trẻ); ăn uống (thuộc Dinh dưỡng cho trẻ).
                 TEXT,
 
             'unique_angle' => <<<'TEXT'
-                Phần lớn bài "ăn vạ tuổi lên 2" trên mạng viết chung chung "hãy kiên nhẫn, hãy đồng cảm" mà không đưa được kịch bản làm cụ thể cho cha mẹ ĐANG RUN TAY lần đầu chứng kiến con gào khóc giữa đám đông. Ba điểm khác biệt: (1) Đây là lần đầu cha mẹ đối mặt "tantrum" nên bài viết theo đúng tâm thế người mới — giải thích thẳng vì sao ăn vạ ở tuổi 1-3 khác hẳn "làm mình làm mẩy" của trẻ lớn (não bộ kiềm chế cảm xúc chưa hình thành, không phải cố tình), kèm kịch bản thoại tiếng Việt tự nhiên cho cả tình huống ở nhà lẫn nơi công cộng - trước mặt ông bà, họ hàng; (2) Xử lý ba cuộc "cai" (bỉm, ti, bế) như ba dự án riêng có lộ trình từng bước thay vì lời khuyên mơ hồ "đến lúc là tự cai" — vì đây là giai đoạn cha mẹ Việt bị stress nhất về việc "con mình có đang chậm hơn con nhà người ta không"; (3) Xử lý trực diện nỗi lo lớn nhất khi con lần đầu đi nhà trẻ: không chỉ mẹo "chia tay dứt khoát" copy từ Tây, mà cả kịch bản thương lượng với ông bà đang xót cháu khóc đòi đón về giữa buổi, và cách phân biệt lo âu xa cách bình thường với dấu hiệu con thực sự không ổn ở lớp.
+                Phần lớn bài "ăn vạ tuổi lên 2" trên mạng viết chung chung "hãy kiên nhẫn, hãy đồng cảm" mà không có kịch bản cụ thể cho cha mẹ ĐANG RUN TAY lần đầu chứng kiến con gào khóc giữa đám đông. Ba điểm khác biệt: (1) Viết đúng tâm thế người mới lần đầu đối mặt "tantrum" — giải thích vì sao ăn vạ 1-3 tuổi khác hẳn "làm mình làm mẩy" của trẻ lớn (não kiềm chế cảm xúc chưa hình thành, không phải cố tình), kèm kịch bản thoại tự nhiên cho cả ở nhà lẫn nơi công cộng trước mặt ông bà; (2) Xử lý ba cuộc "cai" (bỉm, ti, bế) như ba dự án riêng có lộ trình, thay vì lời khuyên mơ hồ "đến lúc là tự cai"; (3) Kịch bản thương lượng với ông bà xót cháu khóc đòi đón về giữa buổi khi con lần đầu đi nhà trẻ, và cách phân biệt lo âu xa cách bình thường với dấu hiệu con thực sự không ổn ở lớp.
                 TEXT,
 
             'content_goals' => <<<'TEXT'
@@ -690,16 +861,25 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => 'tre-tap-di-1-3-tuoi',
             'slug'        => 'phat-trien-cua-tre-3',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: mốc vận động thô/tinh, NGÔN NGỮ bùng nổ mạnh nhất (18-36 tháng), và "giai đoạn vàng" tầm soát tự kỷ 18-24 tháng theo M-CHAT-R.
+                - KHÔNG viết: hành vi/ăn vạ (→ Chăm sóc & nuôi dạy), bệnh (→ Bệnh thường gặp).
+                - Tách bạch then chốt: "chậm nói đơn thuần" (vốn từ ít nhưng chỉ trỏ tốt, giao tiếp mắt tốt) vs dấu hiệu cần tầm soát sâu hơn — phần lớn nội dung Việt gộp chung gây hoang mang hoặc chủ quan sai.
+                - M-CHAT-R chỉ có giá trị SÀNG LỌC, không phải chẩn đoán — luôn dẫn tới khám chuyên khoa, không để cha mẹ tự kết luận.
+                - Đối thoại thẳng với văn hóa so sánh "con nhà người ta 2 tuổi đã nói cả câu" bằng dữ liệu khoảng bình thường.
+                - KPI: đo bằng tỷ lệ quay lại theo chuỗi "Con N tháng tuổi" và tỷ lệ dẫn tới hành động khám đúng nơi (không chỉ đọc rồi hoang mang).
+                TEXT,
+
             'core_focus' => <<<'TEXT'
-                Các mốc phát triển của trẻ 1-3 tuổi và cách cha mẹ đồng hành đúng nhịp: mốc vận động thô (đi vững rồi chạy, leo - xuống cầu thang, đá bóng, nhảy tại chỗ), vận động tinh (xếp chồng khối, cầm bút nguệch ngoạc, tự xúc ăn bằng thìa, lật trang sách), ngôn ngữ — mảng bùng nổ nhất giai đoạn này (vốn từ tăng vọt từ khoảng 20 từ lúc 18 tháng lên hàng trăm từ lúc 2 tuổi, bắt đầu ghép câu 2-3 từ như "mẹ bế con", hiểu chỉ dẫn đơn giản, gọi tên đồ vật quen thuộc), nhận thức và chơi tưởng tượng (chơi giả vờ cho búp bê ăn, phân loại đồ vật theo màu - hình, nhận biết bản thân trong gương), cột mốc xã hội - cảm xúc đi kèm phát triển (chơi cạnh bạn dù chưa chơi cùng, thể hiện sự đồng cảm sơ khai). Với mỗi mốc: luôn nêu khoảng tuổi dao động bình thường, cách tạo điều kiện tập tại nhà, và — nội dung quan trọng và nhạy cảm nhất của cụm 1-3 tuổi — dấu hiệu cần tầm soát sớm rối loạn phổ tự kỷ trong "giai đoạn vàng" 18-24 tháng (chưa chỉ trỏ, chưa gọi tên phản ứng, chưa chơi giả vờ, mất kỹ năng đã có) theo chuẩn M-CHAT/AAP, viết điềm tĩnh không hù dọa. KHÔNG lấn sân: hành vi ăn vạ - kỷ luật (thuộc Chăm sóc & nuôi dạy), bệnh lý (thuộc Bệnh thường gặp).
+                Các mốc phát triển của trẻ 1-3 tuổi và cách cha mẹ đồng hành đúng nhịp: vận động thô (đi vững rồi chạy, leo - xuống cầu thang, đá bóng), vận động tinh (xếp chồng khối, cầm bút nguệch ngoạc, tự xúc ăn), ngôn ngữ — mảng bùng nổ nhất giai đoạn này (vốn từ tăng từ ~20 từ lúc 18 tháng lên hàng trăm từ lúc 2 tuổi, ghép câu 2-3 từ, hiểu chỉ dẫn đơn giản), nhận thức và chơi tưởng tượng (chơi giả vờ, phân loại theo màu - hình), và mốc xã hội - cảm xúc (chơi cạnh bạn, đồng cảm sơ khai). Mỗi mốc nêu khoảng tuổi bình thường, cách tạo điều kiện tại nhà, và — nội dung nhạy cảm nhất của cụm 1-3 tuổi — dấu hiệu cần tầm soát sớm tự kỷ trong "giai đoạn vàng" 18-24 tháng (chưa chỉ trỏ, chưa gọi tên phản ứng, chưa chơi giả vờ) theo chuẩn M-CHAT/AAP, viết điềm tĩnh không hù dọa. KHÔNG lấn sân: hành vi ăn vạ - kỷ luật (thuộc Chăm sóc & nuôi dạy), bệnh lý (thuộc Bệnh thường gặp).
                 TEXT,
 
             'unique_angle' => <<<'TEXT'
-                Đây là giai đoạn mốc ngôn ngữ bùng nổ mạnh nhất đời trẻ và cũng là "giai đoạn vàng" để phát hiện sớm các vấn đề phát triển — hai lý do khiến nội dung ở đây cần chính xác và cẩn trọng hơn mọi chuyên mục phát triển khác. Ba điểm khác biệt: (1) Tách bạch rõ ràng giữa "chậm nói đơn thuần" (vốn từ ít nhưng hiểu tốt, giao tiếp bằng mắt tốt, chỉ trỏ tốt) và các dấu hiệu cần tầm soát sâu hơn (không chỉ trỏ, không phản ứng gọi tên, không chơi giả vờ) — sự phân biệt then chốt mà phần lớn nội dung tiếng Việt gộp chung khiến cha mẹ hoặc quá hoảng hoặc quá chủ quan; (2) Viết về tầm soát tự kỷ sớm bằng giọng điềm tĩnh, dựa trên công cụ chuẩn (M-CHAT-R) và luôn kèm hành động cụ thể (khám ở đâu, quy trình thế nào) thay vì liệt kê triệu chứng gây hoang mang rồi bỏ lửng — cách tiếp cận hiếm thấy ở nội dung tiếng Việt vốn hoặc né tránh chủ đề này hoàn toàn, hoặc giật tít hù dọa; (3) Đối thoại thẳng với văn hóa so sánh "con nhà người ta 2 tuổi đã nói cả câu" bằng dữ liệu về độ rộng của khoảng bình thường, đặc biệt với các gia đình có ông bà nói giọng địa phương khác nhau khiến trẻ tiếp nhận ngôn ngữ chậm hơn.
+                Đây là giai đoạn ngôn ngữ bùng nổ mạnh nhất đời trẻ và cũng là "giai đoạn vàng" phát hiện sớm vấn đề phát triển — nội dung ở đây cần chính xác và cẩn trọng hơn mọi chuyên mục phát triển khác. Ba điểm khác biệt: (1) Tách bạch "chậm nói đơn thuần" (vốn từ ít nhưng hiểu tốt, giao tiếp mắt tốt, chỉ trỏ tốt) và dấu hiệu cần tầm soát sâu hơn (không chỉ trỏ, không phản ứng gọi tên) — phân biệt then chốt mà nội dung Việt hay gộp chung khiến cha mẹ quá hoảng hoặc quá chủ quan; (2) Viết tầm soát tự kỷ sớm bằng giọng điềm tĩnh, dựa công cụ chuẩn (M-CHAT-R), luôn kèm hành động cụ thể (khám ở đâu) thay vì liệt kê triệu chứng rồi bỏ lửng; (3) Đối thoại thẳng với văn hóa so sánh "con nhà người ta 2 tuổi đã nói cả câu" bằng dữ liệu khoảng bình thường, đặc biệt khi ông bà nói giọng địa phương khác khiến trẻ tiếp nhận ngôn ngữ chậm hơn.
                 TEXT,
 
             'content_goals' => <<<'TEXT'
-                (1) Chuỗi bài trụ cột "Con 18/20/24/30/36 tháng biết làm gì" tiếp nối chuỗi mốc phát triển từ 0-3 tháng và 3-12 tháng, giữ độc giả quay lại theo từng mốc tuổi của con trong suốt giai đoạn tập đi. (2) SEO cho cụm truy vấn lo âu và tầm soát có volume rất lớn: "trẻ 2 tuổi chưa biết nói phải làm sao", "dấu hiệu tự kỷ ở trẻ 18 tháng", "trẻ mấy tháng biết ghép câu", "trẻ 2 tuổi chưa biết chạy có sao không", "M-CHAT là gì". (3) Bài "giai đoạn vàng tầm soát tự kỷ 18-24 tháng" là nội dung trách nhiệm xã hội cao, xây uy tín y khoa cho toàn site nếu viết đúng mực - không hù dọa. (4) Nối luồng hai chiều: từ Phát triển của trẻ (3-12 tháng) khi con vừa qua 1 tuổi, và sang Phát triển của trẻ mầm non khi con qua 3 tuổi; đồng thời dẫn sang Chăm sóc & nuôi dạy khi câu hỏi ngả về hành vi thay vì mốc phát triển.
+                (1) Chuỗi bài trụ cột "Con 18/20/24/30/36 tháng biết làm gì" tiếp nối chuỗi mốc phát triển từ 0-3 tháng và 3-12 tháng — đo bằng tỷ lệ quay lại theo từng mốc tuổi của con. (2) SEO cho cụm truy vấn lo âu và tầm soát có volume rất lớn: "trẻ 2 tuổi chưa biết nói phải làm sao", "dấu hiệu tự kỷ ở trẻ 18 tháng", "trẻ mấy tháng biết ghép câu", "trẻ 2 tuổi chưa biết chạy có sao không", "M-CHAT là gì". (3) Bài "giai đoạn vàng tầm soát tự kỷ 18-24 tháng" là nội dung trách nhiệm xã hội cao — đo bằng tỷ lệ độc giả đi tới hành động khám đúng nơi thay vì chỉ đọc rồi hoang mang. (4) Nối luồng hai chiều: từ Phát triển của trẻ (3-12 tháng) khi con vừa qua 1 tuổi, và sang Phát triển của trẻ mầm non khi con qua 3 tuổi; đồng thời dẫn sang Chăm sóc & nuôi dạy khi câu hỏi ngả về hành vi thay vì mốc phát triển.
                 TEXT,
 
             'pain_points' => <<<'TEXT'
@@ -724,16 +904,25 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => 'tre-tap-di-1-3-tuoi',
             'slug'        => 'dinh-duong-cho-tre',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: biếng ăn SINH LÝ tuổi lên 2, chuyển cháo sang cơm nát/thô, cai sữa công thức, ăn CÙNG mâm cơm gia đình, food jag (kén ăn tạm thời).
+                - KHÔNG viết: kỹ thuật ăn dặm khởi đầu/3 trường phái/an toàn hóc nghẹn cơ bản (đã ở Ăn dặm & dinh dưỡng của nhóm Trẻ nhỏ — chuyên mục này chỉ TIẾP NỐI từ lúc con đã ăn thô cơ bản).
+                - Giải oan bằng CON SỐ: tốc độ tăng cân sau 1 tuổi chậm hẳn so với năm đầu — con ăn ít hơn là điều chỉnh ĐÚNG, không phải "bỏ ăn".
+                - Thực đơn phải tính đến nêm nếp thật của mâm cơm Việt (mắm, mì chính) — không phải công thức tách biệt không nhà nào duy trì nổi.
+                - KPI: đo bằng lượt lưu/in bộ thực đơn tuần và tỷ lệ chia sẻ bài "giải oan biếng ăn sinh lý" trong hội nhóm.
+                - Thực đơn và cảnh nấu ăn nên hình dung cả BỐ là người nấu/cho ăn cuối tuần — không mặc định chỉ mẹ vào bếp.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
-                Dinh dưỡng cho trẻ 1-3 tuổi từ thời điểm con đã qua giai đoạn ăn dặm và bắt đầu ăn theo mâm cơm gia đình: biếng ăn sinh lý tuổi lên 2 — giai đoạn biếng ăn phổ biến nhất đời trẻ vì tốc độ tăng trưởng chậm lại đáng kể so với năm đầu (giải thích cơ chế để cha mẹ hiểu đây không phải "con có bệnh" mà là quy luật tự nhiên), lộ trình chuyển từ cháo - bột nhuyễn sang cơm nát rồi cơm hạt và thức ăn thô dần theo khả năng nhai của con, cai sữa mẹ - sữa công thức hoàn toàn và thay thế bằng sữa tươi - nguồn canxi khác đúng thời điểm, xây thực đơn gia đình cho trẻ ăn CÙNG mâm cơm với cả nhà thay vì nấu riêng (nêm nếm ra sao để vừa nhạt cho con vừa vẫn ngon cho người lớn, phần nào cắt nhỏ - tách riêng), xử lý kén ăn - chọn món - chỉ ăn vài món quen thuộc (food jag), số bữa - lượng ăn tham khảo theo tuổi, ăn vặt lành mạnh giữa các bữa chính, và uống sữa - nước - nước ép đúng mức không thay thế bữa ăn. KHÔNG lấn sân: kỹ thuật ăn dặm khởi đầu 6-12 tháng, ba trường phái ăn dặm, an toàn hóc nghẹn cơ bản (đã thuộc chuyên mục Ăn dặm & dinh dưỡng của nhóm Trẻ nhỏ 3-12 tháng — chuyên mục này chỉ tiếp nối từ điểm con đã ăn thô cơ bản được).
+                Dinh dưỡng cho trẻ 1-3 tuổi từ khi con đã qua ăn dặm và bắt đầu ăn theo mâm cơm gia đình: biếng ăn sinh lý tuổi lên 2 — biếng ăn phổ biến nhất đời trẻ vì tăng trưởng chậm lại so với năm đầu (không phải "con có bệnh" mà là quy luật tự nhiên), lộ trình chuyển từ cháo sang cơm nát rồi cơm hạt theo khả năng nhai, cai sữa mẹ - sữa công thức và thay bằng sữa tươi - nguồn canxi khác, xây thực đơn ăn CÙNG mâm cơm gia đình (nêm nếm vừa nhạt cho con vừa ngon cho người lớn), xử lý kén ăn (food jag), số bữa/lượng ăn tham khảo, và ăn vặt lành mạnh. KHÔNG lấn sân: kỹ thuật ăn dặm khởi đầu 6-12 tháng, 3 trường phái ăn dặm, an toàn hóc nghẹn cơ bản (đã thuộc Ăn dặm & dinh dưỡng — chuyên mục này chỉ tiếp nối từ lúc con đã ăn thô cơ bản).
                 TEXT,
 
             'unique_angle' => <<<'TEXT'
-                Nếu ăn dặm là cuộc chiến kỹ thuật (thô mịn, trường phái), thì dinh dưỡng 1-3 tuổi là cuộc chiến TÂM LÝ — cha mẹ hoảng loạn vì con đột nhiên ăn ít hơn hẳn so với hồi ăn dặm, trong khi đây lại là hiện tượng SINH LÝ BÌNH THƯỜNG gần như mọi trẻ đều trải qua. Ba điểm khác biệt: (1) Giải oan biếng ăn sinh lý bằng con số cụ thể — tốc độ tăng cân của trẻ 1-3 tuổi chỉ bằng một phần nhỏ so với năm đầu đời, nghĩa là nhu cầu năng lượng mỗi kg cân nặng giảm hẳn, con ăn ít hơn là con đang điều chỉnh ĐÚNG theo nhu cầu cơ thể chứ không phải "bỏ ăn"; (2) Hướng dẫn chuyển từ cháo sang cơm nát - ăn thô một cách CỤ THỂ theo độ tuổi và độ cứng thức ăn (thứ nhiều cha mẹ Việt làm sai theo hai hướng: hoặc giữ cháo xay quá lâu khiến con lười nhai, hoặc chuyển cơm hạt quá sớm gây sợ ăn) — mảng gần như không nguồn tiếng Việt nào viết kỹ; (3) Thực đơn "ăn cùng mâm cơm" tính đến thực tế nêm nếm của bữa cơm Việt (nước mắm, mì chính) thay vì công thức tách biệt phức tạp không gia đình nào duy trì nổi hằng ngày khi có ông bà cùng nấu.
+                Nếu ăn dặm là cuộc chiến kỹ thuật, thì dinh dưỡng 1-3 tuổi là cuộc chiến TÂM LÝ — cha mẹ hoảng vì con ăn ít hơn hẳn so với hồi ăn dặm, dù đây là hiện tượng SINH LÝ BÌNH THƯỜNG. Ba điểm khác biệt: (1) Giải oan biếng ăn sinh lý bằng con số cụ thể — tốc độ tăng cân sau 1 tuổi chỉ bằng một phần nhỏ năm đầu, con ăn ít hơn là điều chỉnh ĐÚNG theo nhu cầu cơ thể; (2) Hướng dẫn chuyển từ cháo sang cơm nát CỤ THỂ theo tuổi và độ cứng — cha mẹ Việt hay sai theo hai hướng: giữ cháo xay quá lâu hoặc chuyển cơm hạt quá sớm; (3) Thực đơn "ăn cùng mâm cơm" tính đúng nêm nếp thật của bữa cơm Việt, thay vì công thức tách biệt không nhà nào duy trì nổi khi có ông bà cùng nấu.
                 TEXT,
 
             'content_goals' => <<<'TEXT'
-                (1) SEO cho cụm truy vấn biếng ăn - chuyển thô có volume rất lớn và dai dẳng quanh năm: "trẻ 2 tuổi biếng ăn phải làm sao", "cách cho bé ăn cơm nát", "bé lười nhai chỉ nuốt chửng", "thực đơn cơm cho bé 2 tuổi", "trẻ chỉ ăn vài món phải làm sao". (2) Bộ thực đơn tuần "ăn cùng mâm cơm gia đình" theo độ thô tăng dần là nội dung bookmark - in dán tủ lạnh, nối tiếp thành công của bộ thực đơn ăn dặm ở nhóm tuổi trước. (3) Bài "giải oan biếng ăn sinh lý tuổi lên 2" là nội dung giảm lo âu có khả năng chia sẻ mạnh trong hội nhóm, vì chạm đúng nỗi sợ phổ biến nhất giai đoạn này. (4) Nối luồng hai chiều: tiếp nhận độc giả từ Ăn dặm & dinh dưỡng (nhóm Trẻ nhỏ 3-12 tháng) ngay khi con qua 1 tuổi, và bàn giao sang Dinh dưỡng cho trẻ của nhóm Trẻ mầm non khi con qua 3 tuổi và bắt đầu ăn ở trường.
+                (1) SEO cho cụm truy vấn biếng ăn - chuyển thô có volume rất lớn và dai dẳng quanh năm: "trẻ 2 tuổi biếng ăn phải làm sao", "cách cho bé ăn cơm nát", "bé lười nhai chỉ nuốt chửng", "thực đơn cơm cho bé 2 tuổi", "trẻ chỉ ăn vài món phải làm sao". (2) Bộ thực đơn tuần "ăn cùng mâm cơm gia đình" theo độ thô tăng dần là nội dung bookmark - in dán tủ lạnh — đo bằng lượt lưu, nối tiếp thành công của bộ thực đơn ăn dặm ở nhóm tuổi trước. (3) Bài "giải oan biếng ăn sinh lý tuổi lên 2" là nội dung giảm lo âu — đo bằng tỷ lệ chia sẻ trong hội nhóm, vì chạm đúng nỗi sợ phổ biến nhất giai đoạn này. (4) Nối luồng hai chiều: tiếp nhận độc giả từ Ăn dặm & dinh dưỡng (nhóm Trẻ nhỏ 3-12 tháng) ngay khi con qua 1 tuổi, và bàn giao sang Dinh dưỡng cho trẻ của nhóm Trẻ mầm non khi con qua 3 tuổi và bắt đầu ăn ở trường.
                 TEXT,
 
             'pain_points' => <<<'TEXT'
@@ -758,16 +947,24 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => 'tre-tap-di-1-3-tuoi',
             'slug'        => 'benh-thuong-gap-3',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: bệnh theo mùa dịch nhà trẻ (tay chân miệng, sốt virus, viêm tai giữa), dị ứng thực phẩm mới phát hiện, và TRỌNG TÂM SỐ MỘT: an toàn/sơ cứu tai nạn tại nhà (hóc, ngộ độc, té ngã, bỏng, đuối nước).
+                - KHÔNG viết: bệnh sơ sinh (→ nhóm Trẻ sơ sinh), bệnh 3-12 tháng (→ Bệnh thường gặp của Trẻ nhỏ), ăn uống/biếng ăn (→ Dinh dưỡng cho trẻ).
+                - Khác biệt bắt buộc giữ: nâng an toàn/sơ cứu tại nhà thành TRỌNG TÂM SỐ MỘT (không phải mục phụ) — cha mẹ Việt hầu như chưa từng được dạy sơ cứu, chỉ biết "bế chạy đi viện".
+                - Mỗi loại tai nạn (hóc, ngộ độc, té ngã, bỏng) cần 1 bài riêng có sơ cứu chi tiết từng bước — không gộp chung 1 bài liệt kê nông.
+                - KPI: đo bằng tỷ lệ lưu/in bài "sơ cứu tại nạn tại nhà" và tỷ lệ chia sẻ trong hội nhóm phụ huynh — nội dung có khả năng cứu mạng thực sự.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
-                Các vấn đề sức khỏe và an toàn nổi bật nhất khi con 1-3 tuổi bắt đầu đi nhà trẻ và hiếu động khắp nhà, viết theo logic hành động: nhận biết → mức độ → xử trí tại nhà → ngưỡng đi khám. Trọng tâm bệnh theo mùa dịch nhà trẻ: tay chân miệng (dấu hiệu, phân biệt nhẹ - nặng, cách ly, vệ sinh lớp học), sốt virus - cúm - viêm họng lây lan nhanh khi tiếp xúc đông trẻ; viêm tai giữa (dấu hiệu con kéo tai - quấy khóc đêm, biến chứng nếu bỏ qua); dị ứng thực phẩm mới phát hiện khi con bắt đầu ăn thô đa dạng món trong mâm cơm gia đình (hải sản, trứng, đậu phộng — nguyên tắc thử món và xử trí phản ứng); và mảng TRỌNG TÂM SỐ MỘT của giai đoạn biết đi - hiếu động: an toàn và sơ cứu tai nạn tại nhà (hóc dị vật - sơ cứu cho trẻ trên 1 tuổi, ngộ độc do nuốt nhầm hóa chất - thuốc, té ngã từ ban công - cầu thang - xe đẩy, bỏng nước sôi, đuối nước tại nhà tắm - xô chậu); và lịch tiêm nhắc quan trọng 18-24 tháng (các mũi nhắc dễ bị bỏ sót). KHÔNG lấn sân: bệnh đặc thù sơ sinh (thuộc Bệnh thường gặp của Trẻ sơ sinh 0-3 tháng), bệnh giai đoạn 3-12 tháng (thuộc Bệnh thường gặp của Trẻ nhỏ 3-12 tháng); không viết vấn đề ăn uống - biếng ăn (thuộc Dinh dưỡng cho trẻ).
+                Các vấn đề sức khỏe và an toàn nổi bật khi con 1-3 tuổi bắt đầu đi nhà trẻ và hiếu động khắp nhà, viết theo logic: nhận biết → mức độ → xử trí tại nhà → ngưỡng đi khám. Trọng tâm bệnh theo mùa dịch nhà trẻ: tay chân miệng (dấu hiệu, phân biệt nhẹ - nặng, cách ly), sốt virus - cúm - viêm họng lây lan nhanh khi tiếp xúc đông trẻ; viêm tai giữa (dấu hiệu kéo tai - quấy khóc đêm); dị ứng thực phẩm mới phát hiện khi con ăn thô đa dạng món (hải sản, trứng, đậu phộng); và mảng TRỌNG TÂM SỐ MỘT của giai đoạn hiếu động: an toàn và sơ cứu tai nạn tại nhà (hóc dị vật, ngộ độc do nuốt nhầm, té ngã từ ban công - cầu thang, bỏng, đuối nước); và lịch tiêm nhắc 18-24 tháng. KHÔNG lấn sân: bệnh đặc thù sơ sinh (thuộc Bệnh thường gặp của Trẻ sơ sinh), bệnh giai đoạn 3-12 tháng (thuộc Bệnh thường gặp của Trẻ nhỏ); ăn uống - biếng ăn (thuộc Dinh dưỡng cho trẻ).
                 TEXT,
 
             'unique_angle' => <<<'TEXT'
-                Đây là giai đoạn hai rủi ro sức khỏe tăng vọt cùng lúc: con lần đầu tiếp xúc đông trẻ khác ở nhà trẻ nên bệnh truyền nhiễm lây lan nhanh hơn hẳn, và con đủ nhanh nhẹn - tò mò để tự gây tai nạn trong chính ngôi nhà của mình. Ba điểm khác biệt: (1) Bài tay chân miệng - sốt virus viết theo đúng nhịp MÙA DỊCH nhà trẻ Việt Nam (cao điểm tháng 3-5 và 9-11) kèm hướng dẫn cụ thể khi nào nên cho con nghỉ học, khi nào lớp có ca bệnh thì nên làm gì — thứ mọi phụ huynh có con đi nhà trẻ đều cần mà bài bệnh viện chung chung không đề cập; (2) Nâng an toàn - sơ cứu tai nạn tại nhà lên thành TRỌNG TÂM SỐ MỘT thay vì mục phụ như các nguồn khác — vì tai nạn sinh hoạt là nguyên nhân hàng đầu có thể phòng tránh ở tuổi này, và cha mẹ Việt hầu như chưa từng được dạy sơ cứu hay xử trí ngộ độc tại nhà, chỉ biết "bế chạy đi viện"; (3) Dị ứng thực phẩm được đặt đúng bối cảnh — mốc con bắt đầu ăn thô đa dạng món (hải sản, trứng, các loại hạt) trong mâm cơm gia đình chính là lúc dị ứng lần đầu bộc lộ, viết nối trực tiếp với thời điểm chuyển ăn thô thay vì tách rời.
+                Đây là giai đoạn hai rủi ro sức khỏe tăng vọt cùng lúc: con lần đầu tiếp xúc đông trẻ khác nên bệnh lây lan nhanh hơn hẳn, và con đủ nhanh nhẹn - tò mò để tự gây tai nạn trong chính ngôi nhà mình. Ba điểm khác biệt: (1) Bài tay chân miệng - sốt virus viết theo đúng nhịp MÙA DỊCH nhà trẻ Việt Nam (cao điểm tháng 3-5 và 9-11) kèm hướng dẫn khi nào nên cho con nghỉ học — thứ mọi phụ huynh có con đi nhà trẻ cần mà bài bệnh viện chung chung không đề cập; (2) Nâng an toàn - sơ cứu tại nhà thành TRỌNG TÂM SỐ MỘT thay vì mục phụ — cha mẹ Việt hầu như chưa từng được dạy sơ cứu hay xử trí ngộ độc tại nhà, chỉ biết "bế chạy đi viện"; (3) Dị ứng thực phẩm đặt đúng bối cảnh — mốc con bắt đầu ăn thô đa dạng món trong mâm cơm gia đình chính là lúc dị ứng lần đầu bộc lộ.
                 TEXT,
 
             'content_goals' => <<<'TEXT'
-                (1) SEO cho cụm truy vấn khẩn cấp và theo mùa dịch có volume lớn: "dấu hiệu tay chân miệng ở trẻ", "trẻ đi nhà trẻ hay ốm vặt phải làm sao", "sơ cứu hóc dị vật cho trẻ", "trẻ bị ngộ độc thực phẩm tại nhà", "lịch tiêm nhắc cho trẻ 18 tháng", "trẻ kéo tai quấy khóc đêm". (2) Bài "sơ cứu tai nạn tại nhà" (hóc - ngộ độc - té ngã - bỏng) là nội dung TRÁCH NHIỆM XÃ HỘI cao nhất của cả site, mục tiêu được lưu - in ra dán tủ lạnh và chia sẻ rộng trong hội nhóm phụ huynh — có khả năng cứu mạng thực sự. (3) Trở thành "bộ lọc bình tĩnh" cha mẹ mở khi con vừa đi nhà trẻ về mà sốt - mệt, giảm số chuyến đi viện không cần thiết đồng thời không bỏ sót ca cần cấp cứu thật. (4) Nối luồng: bài tay chân miệng ↔ dấu hiệu cần cách ly ở nhà trẻ, dị ứng thực phẩm ↔ Dinh dưỡng cho trẻ (giới thiệu món mới), và tiếp nối từ Bệnh thường gặp (3-12 tháng) sang Bệnh thường gặp của nhóm Trẻ mầm non khi con qua 3 tuổi.
+                (1) SEO cho cụm truy vấn khẩn cấp và theo mùa dịch có volume lớn: "dấu hiệu tay chân miệng ở trẻ", "trẻ đi nhà trẻ hay ốm vặt phải làm sao", "sơ cứu hóc dị vật cho trẻ", "trẻ bị ngộ độc thực phẩm tại nhà", "lịch tiêm nhắc cho trẻ 18 tháng", "trẻ kéo tai quấy khóc đêm". (2) Bài "sơ cứu tai nạn tại nhà" (hóc - ngộ độc - té ngã - bỏng) là nội dung TRÁCH NHIỆM XÃ HỘI cao nhất của cả site — đo bằng tỷ lệ lưu/in ra và chia sẻ rộng trong hội nhóm phụ huynh, có khả năng cứu mạng thực sự. (3) Trở thành "bộ lọc bình tĩnh" cha mẹ mở khi con vừa đi nhà trẻ về mà sốt - mệt — đo bằng tỷ lệ giảm số chuyến đi viện không cần thiết đồng thời không bỏ sót ca cần cấp cứu thật. (4) Nối luồng: bài tay chân miệng ↔ dấu hiệu cần cách ly ở nhà trẻ, dị ứng thực phẩm ↔ Dinh dưỡng cho trẻ (giới thiệu món mới), và tiếp nối từ Bệnh thường gặp (3-12 tháng) sang Bệnh thường gặp của nhóm Trẻ mầm non khi con qua 3 tuổi.
                 TEXT,
 
             'pain_points' => <<<'TEXT'
@@ -792,12 +989,19 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => null,
             'slug'        => 'tre-mam-non-3-6-tuoi',
 
+            'writer_insights' => <<<'TEXT'
+                - Đây là danh mục CHA — chỉ bài TỔNG QUAN 3 năm mầm non, dẫn vào 4 chuyên mục con + Trường mầm non & tiểu học ở năm cuối. KHÔNG viết chi tiết hành vi/mốc/thực đơn/bệnh ở đây.
+                - Lấp khoảng trống bị bỏ lửng: nội dung Việt viết dày cho 0-3 tuổi rồi nhảy thẳng sang ôn thi lớp 1, bỏ trống chính 3 năm bản lề này.
+                - Trọng tâm đúng của 3 năm: KHÔNG phải chạy đua học chữ/số/tiếng Anh sớm — mà là xây nền tâm lý, cảm xúc, kỹ năng xã hội, vận động tinh.
+                - Giọng trấn an từng năm một: mỗi tuổi (3, 4, 5) có "kịch bản" thay đổi tính khí riêng mà cha mẹ ít được cảnh báo trước.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
-                Danh mục CHA của cụm 3-6 tuổi — chỉ chứa các bài TỔNG QUAN xuyên suốt 3 năm mầm non, không đi sâu vào mảng đã có chuyên mục con: đặc điểm tâm sinh lý nổi bật của tuổi mầm non (trí tưởng tượng bùng nổ, tư duy còn ích kỷ hồn nhiên chưa hiểu góc nhìn người khác, học chủ yếu qua chơi chứ không qua giảng giải, cái tôi lớn dần cùng nhu cầu tự quyết), lộ trình thay đổi theo từng năm học (3-4 tuổi mẫu giáo bé: tách mẹ, làm quen nề nếp lớp; 4-5 tuổi mẫu giáo nhỡ: chơi nhóm phức tạp hơn, ngôn ngữ bùng nổ; 5-6 tuổi mẫu giáo lớn: tiền lớp 1 — sẵn sàng về tâm lý, kỹ năng, nhận thức chứ không chỉ biết chữ biết số), lịch tổng hợp các mốc y tế - hành chính của giai đoạn (khám sức khỏe định kỳ ở trường, tiêm nhắc lại, hồ sơ nhập học), và bài định hướng "3-6 tuổi: đọc gì, khi nào" dẫn vào 4 chuyên mục con (Chăm sóc & nuôi dạy, Phát triển của trẻ, Dinh dưỡng cho trẻ, Bệnh thường gặp) cùng chuyên mục Trường mầm non & tiểu học khi gia đình bắt đầu tính chuyện chọn trường tiểu học ở năm cuối. Chi tiết hành vi - cột mốc phát triển - thực đơn - bệnh tật KHÔNG viết ở đây — đẩy xuống đúng chuyên mục con.
+                Danh mục CHA của cụm 3-6 tuổi — chỉ bài TỔNG QUAN xuyên suốt 3 năm mầm non: đặc điểm tâm sinh lý (trí tưởng tượng bùng nổ, tư duy còn ích kỷ hồn nhiên, học qua chơi, cái tôi lớn dần), lộ trình theo năm học (3-4 tuổi: tách mẹ, làm quen nề nếp; 4-5 tuổi: chơi nhóm phức tạp hơn, ngôn ngữ bùng nổ; 5-6 tuổi: tiền lớp 1 — sẵn sàng tâm lý/kỹ năng/nhận thức, không chỉ biết chữ biết số), lịch mốc y tế - hành chính, và bài định hướng dẫn vào 4 chuyên mục con cùng Trường mầm non & tiểu học ở năm cuối. Chi tiết hành vi - cột mốc phát triển - thực đơn - bệnh tật KHÔNG viết ở đây.
                 TEXT,
 
             'unique_angle' => <<<'TEXT'
-                Giai đoạn 3-6 tuổi bị đa số nội dung mẹ-bé Việt bỏ lửng ở giữa: viết dày cho 0-3 tuổi (giai đoạn khủng hoảng dễ viral) rồi nhảy thẳng sang ôn thi lớp 1, bỏ trống chính 3 năm bản lề hình thành nhân cách và nền tảng học tập của con. Vai trò riêng của danh mục cha: (1) Là "mục lục sống" cho cha mẹ vừa thở phào qua được 2-3 năm tập đi cực nhọc, giúp họ biết vấn đề mới phát sinh (con cãi lại, con hỏi chuyện người lớn, con sắp vào lớp 1) thuộc mảng nào và nên đọc gì trước, thay vì lại mò mẫm từ đầu; (2) Đặt đúng trọng tâm của 3 năm này: đây KHÔNG phải giai đoạn để chạy đua học chữ - học số - học tiếng Anh sớm, mà là giai đoạn xây nền tâm lý, cảm xúc, kỹ năng xã hội và vận động tinh — những thứ quyết định con vào lớp 1 có tự tin hay không, nhiều hơn việc con đã đọc thông viết thạo; (3) Nhìn thấy trước và trấn an từng năm một: mỗi độ tuổi (3, 4, 5 tuổi) có "kịch bản" thay đổi tính khí và nhu cầu khác nhau mà cha mẹ ít được cảnh báo trước, dễ hoang mang tưởng con "tự nhiên đổi tính".
+                Giai đoạn 3-6 tuổi bị đa số nội dung mẹ-bé Việt bỏ lửng ở giữa: viết dày cho 0-3 tuổi rồi nhảy thẳng sang ôn thi lớp 1, bỏ trống 3 năm bản lề hình thành nhân cách và nền tảng học tập. Vai trò riêng của danh mục cha: (1) Là "mục lục sống" cho cha mẹ vừa qua 2-3 năm tập đi cực nhọc, giúp biết vấn đề mới (con cãi lại, hỏi chuyện người lớn, sắp vào lớp 1) thuộc mảng nào; (2) Đặt đúng trọng tâm: đây KHÔNG phải giai đoạn chạy đua học chữ - số - tiếng Anh sớm, mà là xây nền tâm lý, cảm xúc, kỹ năng xã hội, vận động tinh — quyết định con vào lớp 1 tự tin hay không hơn là đã đọc thông viết thạo; (3) Trấn an từng năm một: mỗi tuổi (3, 4, 5) có "kịch bản" thay đổi tính khí riêng mà cha mẹ ít được cảnh báo trước.
                 TEXT,
 
             'content_goals' => <<<'TEXT'
@@ -826,16 +1030,24 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => 'tre-mam-non-3-6-tuoi',
             'slug'        => 'phat-trien-cua-tre-4',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: vận động tinh (cầm bút, cắt kéo), ngôn ngữ, nhận thức (số/chữ qua chơi — KHÔNG ép học sớm), kỹ năng xã hội, sàng lọc chậm nói/tăng động giảm chú ý.
+                - KHÔNG viết: hành vi/kỷ luật hằng ngày (→ Chăm sóc & nuôi dạy), bệnh lý (→ Bệnh thường gặp).
+                - Vận động tinh là mảng bị bỏ quên nhất dù quyết định việc con viết chữ được khi vào lớp 1 — viết thành lộ trình cụ thể theo năm, hoạt động rẻ tiền tại nhà.
+                - Đứng hẳn về phía "sẵn sàng tự nhiên" trong tranh cãi học chữ sớm — không cổ vũ luyện viết/luyện đọc trước tuổi.
+                - KPI: đo bằng tỷ lệ trở thành nguồn phản biện được trích dẫn khi cha mẹ đối thoại với áp lực học sớm từ nhà trường/trung tâm luyện chữ.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
-                Sự phát triển của trẻ mầm non 3-6 tuổi trên 4 trục chính, theo dõi để chuẩn bị đúng cho lớp 1 mà không chạy trước tuổi: vận động tinh (cầm bút đúng cách theo từng độ tuổi, tô màu không lem, cắt kéo theo đường thẳng rồi đường cong, xâu hạt, cài cúc áo — nền tảng viết chữ sau này), ngôn ngữ (vốn từ tăng vọt, phát âm rõ dần và các âm khó hoàn thiện cuối cùng, khả năng kể lại một câu chuyện có đầu có cuối, đặt câu hỏi "tại sao" liên tục), nhận thức (đếm và hiểu số lượng, phân loại - so sánh, nhận diện mặt chữ cái và âm đầu một cách TỰ NHIÊN qua chơi — không phải qua ép học viết sớm), và kỹ năng xã hội - cảm xúc (chơi có luật với bạn, biết chờ đến lượt, chia sẻ đồ chơi, nhận biết cảm xúc của người khác). Mỗi mốc kèm khoảng tuổi bình thường, cách cha mẹ tạo điều kiện tại nhà, và dấu hiệu cần sàng lọc chuyên sâu — đặc biệt chậm nói (khi ngôn ngữ chưa theo kịp bạn cùng lớp) và tăng động giảm chú ý (khi hành vi hiếu động - mất tập trung vượt xa mức thông thường của tuổi mầm non). KHÔNG lấn sân: xử lý hành vi và kỷ luật hằng ngày (thuộc Chăm sóc & nuôi dạy), bệnh lý và khám chữa bệnh (thuộc Bệnh thường gặp).
+                Sự phát triển của trẻ mầm non 3-6 tuổi trên 4 trục chính, theo dõi để chuẩn bị đúng cho lớp 1 mà không chạy trước tuổi: vận động tinh (cầm bút đúng cách theo tuổi, tô màu không lem, cắt kéo, xâu hạt, cài cúc — nền tảng viết chữ sau này), ngôn ngữ (vốn từ tăng vọt, phát âm rõ dần, kể chuyện có đầu có cuối), nhận thức (đếm, phân loại, nhận diện chữ cái TỰ NHIÊN qua chơi — không ép học viết sớm), và kỹ năng xã hội - cảm xúc (chơi có luật, chờ đến lượt, chia sẻ đồ chơi). Mỗi mốc kèm khoảng tuổi bình thường, cách tạo điều kiện tại nhà, và dấu hiệu cần sàng lọc chuyên sâu — đặc biệt chậm nói và tăng động giảm chú ý. KHÔNG lấn sân: xử lý hành vi và kỷ luật hằng ngày (thuộc Chăm sóc & nuôi dạy), bệnh lý và khám chữa bệnh (thuộc Bệnh thường gặp).
                 TEXT,
 
             'unique_angle' => <<<'TEXT'
-                Nội dung phát triển trẻ mầm non tiếng Việt thường rơi vào một trong hai cực: hoặc là bảng mốc khô khan dịch từ CDC không ai áp dụng được, hoặc là quảng cáo trung tâm "phát triển tư duy sớm" đội lốt bài kiến thức. Khác biệt của chuyên mục: (1) Vận động tinh — mảng bị bỏ quên nhất dù ảnh hưởng trực tiếp đến việc con viết chữ khi vào lớp 1 — được viết thành lộ trình cụ thể theo từng năm (3 tuổi cầm bút cả nắm tay, 5 tuổi cầm bút ba ngón), kèm hoạt động rẻ tiền tại nhà (xé giấy, vo đất nặn, cài cúc) thay vì bán bộ đồ chơi giáo dục đắt tiền; (2) Đứng hẳn về phía "sẵn sàng tự nhiên" trong câu chuyện nhận biết chữ - số đang gây tranh cãi dữ dội ở Việt Nam: nêu rõ mốc nhận biết qua chơi là bình thường và đủ, không cổ vũ ép học viết - học đọc trước khi vào lớp 1 như trào lưu luyện chữ đẹp, luyện đọc thông từ 4 tuổi; (3) Dành hẳn một tuyến bài nghiêm túc, không hù dọa, về sàng lọc chậm nói và tăng động giảm chú ý ở đúng độ tuổi các sàng lọc này thường được phát hiện lần đầu — thường là qua nhận xét của giáo viên mầm non chứ không phải cha mẹ.
+                "Cô giáo nhận xét con cầm bút hơi cứng" — một câu góp ý nhỏ trong sổ liên lạc, đủ khiến cha mẹ mầm non lo lắng suốt tuần. Nội dung phát triển trẻ mầm non tiếng Việt không giúp được gì lúc đó: hoặc bảng mốc khô khan dịch từ CDC, hoặc quảng cáo trung tâm "phát triển tư duy sớm" đội lốt bài kiến thức. Khác biệt của chuyên mục: (1) Vận động tinh — mảng bị bỏ quên nhất dù ảnh hưởng trực tiếp việc con viết chữ ở lớp 1 — viết thành lộ trình cụ thể theo từng năm, kèm hoạt động rẻ tiền tại nhà (xé giấy, vo đất nặn, cài cúc) thay vì bán đồ chơi giáo dục đắt tiền; (2) Đứng hẳn về phía "sẵn sàng tự nhiên" trong tranh cãi nhận biết chữ - số đang gay gắt ở Việt Nam: mốc nhận biết qua chơi là bình thường và đủ, không cổ vũ ép học viết - học đọc trước lớp 1; (3) Tuyến bài nghiêm túc, không hù dọa, về sàng lọc chậm nói và tăng động giảm chú ý — thường phát hiện lần đầu qua nhận xét của giáo viên chứ không phải cha mẹ.
                 TEXT,
 
             'content_goals' => <<<'TEXT'
-                (1) SEO cho cụm truy vấn lo âu so sánh rất lớn ở tuổi mầm non: "trẻ 4 tuổi chưa nói rõ có sao không", "cách cầm bút đúng cho trẻ mầm non", "trẻ mầm non học chữ trước khi vào lớp 1 có nên không", "dấu hiệu tăng động giảm chú ý ở trẻ mầm non", "trẻ mấy tuổi biết cắt kéo". (2) Là nguồn tham chiếu trung lập giúp cha mẹ phản biện lại áp lực học chữ sớm từ nhà trường - hội nhóm - trung tâm luyện chữ, giữ đúng lập trường biên tập "phát triển đúng lứa tuổi" xuyên suốt site. (3) Liên kết chặt với Chăm sóc & nuôi dạy khi mốc phát triển giao thoa với hành vi (con hiếu động vừa là mốc cần theo dõi vừa là vấn đề hành vi cần xử lý hằng ngày), và nối mạch với chuyên mục Phát triển của trẻ ở cụm Trẻ tập đi (1-3 tuổi) làm cầu nối liên tục theo tuổi con từ giai đoạn trước. (4) Dẫn độc giả sang Phát triển của trẻ ở cụm Trẻ tiểu học (6-12 tuổi) và sang Trường mầm non & tiểu học ở năm cuối mầm non, đúng lúc câu hỏi "con đã sẵn sàng vào lớp 1 chưa" trở thành mối quan tâm chính.
+                (1) SEO cho cụm truy vấn lo âu so sánh rất lớn ở tuổi mầm non: "trẻ 4 tuổi chưa nói rõ có sao không", "cách cầm bút đúng cho trẻ mầm non", "trẻ mầm non học chữ trước khi vào lớp 1 có nên không", "dấu hiệu tăng động giảm chú ý ở trẻ mầm non", "trẻ mấy tuổi biết cắt kéo". (2) Là nguồn tham chiếu trung lập giúp cha mẹ phản biện lại áp lực học chữ sớm từ nhà trường - hội nhóm - trung tâm luyện chữ — đo bằng tỷ lệ trích dẫn/chia sẻ bài khi có tranh luận học sớm, giữ đúng lập trường biên tập "phát triển đúng lứa tuổi" xuyên suốt site. (3) Liên kết chặt với Chăm sóc & nuôi dạy khi mốc phát triển giao thoa với hành vi (con hiếu động vừa là mốc cần theo dõi vừa là vấn đề hành vi cần xử lý hằng ngày), và nối mạch với chuyên mục Phát triển của trẻ ở cụm Trẻ tập đi (1-3 tuổi) làm cầu nối liên tục theo tuổi con từ giai đoạn trước. (4) Dẫn độc giả sang Phát triển của trẻ ở cụm Trẻ tiểu học (6-12 tuổi) và sang Trường mầm non & tiểu học ở năm cuối mầm non, đúng lúc câu hỏi "con đã sẵn sàng vào lớp 1 chưa" trở thành mối quan tâm chính.
                 TEXT,
 
             'pain_points' => <<<'TEXT'
@@ -860,16 +1072,25 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => 'tre-mam-non-3-6-tuoi',
             'slug'        => 'dinh-duong-cho-tre-2',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: dinh dưỡng khi con ăn bán trú — đọc/đánh giá thực đơn trường, thấp còi VÀ thừa cân, thói quen ăn uống nền tảng, quà vặt cổng trường.
+                - KHÔNG viết: hành vi bữa ăn (tự xúc, ngồi vào bàn — → Chăm sóc & nuôi dạy), bệnh lý tiêu hóa (→ Bệnh thường gặp).
+                - Khác biệt bắt buộc giữ: dạy cha mẹ ĐỌC tờ thực đơn bán trú dán cửa lớp (đối chiếu khẩu phần chuẩn) — hầu như ai cũng lướt qua mà không hiểu.
+                - Xử lý CẢ HAI đầu phổ dinh dưỡng — thấp còi VÀ thừa cân — trong khi nội dung Việt khác chỉ lo "làm sao cho con tăng cân".
+                - KPI: đo bằng tỷ lệ lan truyền trong nhóm phụ huynh cùng lớp/trường và tỷ lệ đọc trọn cả 2 chuyên mục (dinh dưỡng + hành vi bữa ăn).
+                - Kịch bản trao đổi với giáo viên về thực đơn bán trú nên để ngỏ cho cả BỐ đi họp phụ huynh, không mặc định chỉ mẹ.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
-                Dinh dưỡng cho trẻ mầm non 3-6 tuổi trong bối cảnh ăn bán trú ở trường — giai đoạn cha mẹ mất quyền kiểm soát trực tiếp phần lớn bữa ăn của con: đọc hiểu và đánh giá thực đơn bán trú (đối chiếu khẩu phần - 4 nhóm chất theo khuyến nghị Viện Dinh dưỡng, nhận biết thực đơn có đang đơn điệu - thiếu rau - thiếu đạm hay không, cách trao đổi với nhà trường khi thấy chưa hợp lý mà không gây căng thẳng), suy dinh dưỡng thể thấp còi và thừa cân - béo phì ở tuổi mầm non (đọc đúng biểu đồ tăng trưởng của trường phát, phân biệt nguyên nhân mỗi loại, phối hợp cùng lúc giữa bữa ăn ở trường và ở nhà để điều chỉnh), xây thói quen ăn uống lành mạnh mang tính NỀN TẢNG lâu dài (đa dạng thực phẩm thay vì vài món quen thuộc, giảm dần phụ thuộc đồ chiên rán - nước ngọt - trà sữa, đối phó với quà vặt cổng trường mỗi giờ tan học), cân đối dinh dưỡng bữa tối khi con đã ăn 2 bữa chính và bữa phụ ở trường (tránh vừa thừa vừa thiếu chất), và trang bị cho con khả năng TỰ LỰA CHỌN món ăn tương đối lành mạnh khi ở tiệc sinh nhật, nhà bạn, hàng quán — những lúc cha mẹ không có mặt để nhắc. KHÔNG lấn sân: hành vi bữa ăn như tự xúc ăn, ngồi vào bàn, không xem tivi khi ăn (thuộc Chăm sóc & nuôi dạy), bệnh lý tiêu hóa (thuộc Bệnh thường gặp).
+                Dinh dưỡng cho trẻ mầm non 3-6 tuổi trong bối cảnh ăn bán trú — giai đoạn cha mẹ mất quyền kiểm soát trực tiếp phần lớn bữa ăn: đọc hiểu/đánh giá thực đơn bán trú (đối chiếu khẩu phần - 4 nhóm chất, nhận biết thực đơn đơn điệu, cách trao đổi với trường không gây căng thẳng), suy dinh dưỡng thấp còi VÀ thừa cân - béo phì (đọc biểu đồ tăng trưởng, phối hợp bữa trường - bữa nhà), xây thói quen ăn uống NỀN TẢNG lâu dài (đa dạng thực phẩm, giảm đồ chiên rán - nước ngọt, đối phó quà vặt cổng trường), cân đối bữa tối khi con đã ăn 2 bữa ở trường, và trang bị cho con khả năng TỰ CHỌN món lành mạnh khi cha mẹ vắng mặt (tiệc sinh nhật, nhà bạn). KHÔNG lấn sân: hành vi bữa ăn như tự xúc ăn, ngồi vào bàn (thuộc Chăm sóc & nuôi dạy), bệnh lý tiêu hóa (thuộc Bệnh thường gặp).
                 TEXT,
 
             'unique_angle' => <<<'TEXT'
-                Nội dung dinh dưỡng trẻ mầm non tiếng Việt gần như chỉ nói chuyện "ăn ở nhà", trong khi thực tế phần lớn bữa chính của con đang diễn ra ở trường, ngoài tầm mắt cha mẹ — một khoảng trống lớn không mấy nguồn khai thác. Khác biệt: (1) Dạy cha mẹ ĐỌC được tờ thực đơn bán trú dán ở cửa lớp — thứ hầu như ai cũng lướt qua mà không hiểu — đối chiếu với khẩu phần chuẩn, kèm kịch bản trao đổi tế nhị với giáo viên/nhà trường khi thấy bất hợp lý, thay vì im lặng chịu hoặc phàn nàn gay gắt trong nhóm phụ huynh; (2) Xử lý song song cả hai đầu của phổ dinh dưỡng mầm non — thấp còi VÀ thừa cân — trong khi phần lớn nội dung mẹ-bé Việt chỉ tập trung "làm sao cho con tăng cân", bỏ quên thừa cân - béo phì tuổi mầm non đang tăng nhanh ở khu vực thành thị; (3) Chuẩn bị cho con năng lực CHỌN MÓN ăn tương đối lành mạnh khi cha mẹ vắng mặt — ở lớp, ở nhà bạn, ở tiệc sinh nhật — góc nhìn thực dụng khác hẳn các bài chỉ dạy công thức nấu ăn tại nhà, phù hợp với thực tế con dành phần lớn thời gian ban ngày ở trường.
+                Nội dung dinh dưỡng trẻ mầm non tiếng Việt gần như chỉ nói chuyện "ăn ở nhà", trong khi phần lớn bữa chính của con diễn ra ở trường, ngoài tầm mắt cha mẹ. Khác biệt: (1) Dạy cha mẹ ĐỌC tờ thực đơn bán trú dán cửa lớp — thứ ai cũng lướt qua mà không hiểu — đối chiếu khẩu phần chuẩn, kèm kịch bản trao đổi tế nhị với giáo viên/nhà trường; (2) Xử lý song song cả hai đầu phổ dinh dưỡng mầm non — thấp còi VÀ thừa cân — trong khi nội dung mẹ-bé Việt khác chỉ lo "làm sao cho con tăng cân"; (3) Chuẩn bị cho con năng lực CHỌN MÓN lành mạnh khi cha mẹ vắng mặt — ở lớp, nhà bạn, tiệc sinh nhật — góc nhìn thực dụng khác hẳn các bài chỉ dạy công thức nấu tại nhà.
                 TEXT,
 
             'content_goals' => <<<'TEXT'
-                (1) SEO cho cụm truy vấn đặc trưng của phụ huynh có con bán trú: "thực đơn bán trú trường mầm non có đủ chất không", "con thừa cân ở tuổi mầm non phải làm sao", "trẻ mầm non thấp còi nên bổ sung gì", "hạn chế đồ ngọt nước ngọt cho trẻ mầm non", "quà vặt cổng trường có an toàn không". (2) Là nguồn hướng dẫn hiếm hoi giúp cha mẹ chủ động đối thoại với nhà trường về bữa ăn bán trú một cách xây dựng — nội dung có khả năng lan trong nhóm phụ huynh cùng lớp/cùng trường. (3) Liên kết chặt với Chăm sóc & nuôi dạy (khía cạnh hành vi bữa ăn) để tránh trùng lặp nhưng vẫn dẫn độc giả đọc trọn vẹn cả hai, nối mạch dinh dưỡng liên tục từ Dinh dưỡng cho trẻ ở cụm Trẻ tập đi (1-3 tuổi) sang đến Dinh dưỡng cho trẻ ở cụm Trẻ tiểu học (6-12 tuổi). (4) Cung cấp thông tin nền khi gia đình tìm hiểu chính sách bán trú lúc chọn trường tiểu học ở chuyên mục Trường mầm non & tiểu học, và xây uy tín "đứng về phía cha mẹ và đứa trẻ" khi bàn về bữa ăn ở trường mà không đổ lỗi nhà trường.
+                (1) SEO cho cụm truy vấn đặc trưng của phụ huynh có con bán trú: "thực đơn bán trú trường mầm non có đủ chất không", "con thừa cân ở tuổi mầm non phải làm sao", "trẻ mầm non thấp còi nên bổ sung gì", "hạn chế đồ ngọt nước ngọt cho trẻ mầm non", "quà vặt cổng trường có an toàn không". (2) Là nguồn hướng dẫn hiếm hoi giúp cha mẹ chủ động đối thoại với nhà trường về bữa ăn bán trú một cách xây dựng — đo bằng tỷ lệ lan truyền trong nhóm phụ huynh cùng lớp/cùng trường. (3) Liên kết chặt với Chăm sóc & nuôi dạy (khía cạnh hành vi bữa ăn) để tránh trùng lặp nhưng vẫn dẫn độc giả đọc trọn vẹn cả hai, nối mạch dinh dưỡng liên tục từ Dinh dưỡng cho trẻ ở cụm Trẻ tập đi (1-3 tuổi) sang đến Dinh dưỡng cho trẻ ở cụm Trẻ tiểu học (6-12 tuổi). (4) Cung cấp thông tin nền khi gia đình tìm hiểu chính sách bán trú lúc chọn trường tiểu học ở chuyên mục Trường mầm non & tiểu học, và xây uy tín "đứng về phía cha mẹ và đứa trẻ" khi bàn về bữa ăn ở trường mà không đổ lỗi nhà trường.
                 TEXT,
 
             'pain_points' => <<<'TEXT'
@@ -894,12 +1115,20 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => 'tre-mam-non-3-6-tuoi',
             'slug'        => 'benh-thuong-gap-4',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: bệnh hô hấp theo mùa ở lớp bán trú đông đúc, tay chân miệng, sâu răng sữa, cận thị học đường khởi phát sớm, dị ứng/hen theo mùa.
+                - KHÔNG viết: bệnh đặc trưng nhóm tuổi nhỏ hơn, dinh dưỡng/thực đơn (→ Dinh dưỡng cho trẻ).
+                - Trấn an có cơ sở: "con đi học là ốm liên tục" là hệ quả TỰ NHIÊN của tiếp xúc mầm bệnh mới để xây miễn dịch — không phải trường bẩn hay con yếu.
+                - Sâu răng sữa và cận thị sớm là 2 chủ đề gần như bị bỏ trống ở lứa tuổi này — nâng thành tuyến bài riêng đúng "cửa sổ vàng" phòng ngừa.
+                - Kết luận hành động (theo dõi/khám/nghỉ học) luôn nêu sớm và rõ trong bài.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
-                Các vấn đề sức khỏe đặc trưng của trẻ mầm non 3-6 tuổi trong môi trường lớp học bán trú đông đúc (30-40 cháu một lớp, sinh hoạt chung cả ngày): bệnh hô hấp theo mùa dễ lây lan trong tập thể (cúm, viêm họng, viêm phế quản — giải thích vì sao tần suất ốm tăng vọt hẳn so với giai đoạn ở nhà, đặc biệt học kỳ đầu tiên), tay chân miệng (đặc điểm dịch tễ ở nhóm tuổi mầm non, dấu hiệu trở nặng cần nhập viện ngay, quy định cách ly - nghỉ học của nhà trường), sâu răng sữa (nguyên nhân từ tần suất tiếp xúc đồ ngọt cao hơn khi đi học, hệ lụy thật nếu chủ quan nghĩ "răng sữa hỏng cũng sẽ thay"), cận thị học đường khởi phát sớm (dấu hiệu ban đầu ở tuổi mầm non liên quan thời gian dùng thiết bị màn hình, tầm quan trọng của khám mắt định kỳ trước khi vào lớp 1), dị ứng và hen theo mùa (viêm mũi dị ứng, hen phế quản khi giao mùa, cách quản lý khi con ở trường cả ngày không có cha mẹ theo dõi trực tiếp), và một bộ tiêu chí thực dụng giúp cha mẹ quyết định khi nào nên cho con nghỉ học vì bệnh truyền nhiễm, cân bằng giữa trách nhiệm với lớp học và áp lực thực tế của việc xin nghỉ làm. KHÔNG lấn sân: các bệnh đặc trưng của nhóm tuổi nhỏ hơn (sơ sinh, trẻ nhỏ), khía cạnh dinh dưỡng - thực đơn (thuộc Dinh dưỡng cho trẻ).
+                Các vấn đề sức khỏe đặc trưng của trẻ mầm non 3-6 tuổi trong môi trường bán trú đông đúc (30-40 cháu/lớp): bệnh hô hấp theo mùa dễ lây trong tập thể (cúm, viêm họng, viêm phế quản — vì sao tần suất ốm tăng vọt so với ở nhà, đặc biệt học kỳ đầu), tay chân miệng (dịch tễ tuổi mầm non, dấu hiệu trở nặng cần nhập viện, quy định cách ly của trường), sâu răng sữa (do tiếp xúc đồ ngọt nhiều hơn khi đi học, hệ lụy nếu chủ quan nghĩ "răng sữa hỏng cũng thay"), cận thị học đường khởi phát sớm (liên quan thời gian dùng màn hình, khám mắt định kỳ trước lớp 1), dị ứng - hen theo mùa (quản lý khi con ở trường cả ngày không có cha mẹ theo dõi), và bộ tiêu chí quyết định khi nào nên cho con nghỉ học vì bệnh truyền nhiễm. KHÔNG lấn sân: bệnh đặc trưng nhóm tuổi nhỏ hơn, dinh dưỡng - thực đơn (thuộc Dinh dưỡng cho trẻ).
                 TEXT,
 
             'unique_angle' => <<<'TEXT'
-                Bệnh trẻ em ở tuổi mầm non tiếng Việt hoặc viết chung chung không phân biệt độ tuổi, hoặc tập trung vào bệnh nặng hiếm gặp gây hoang mang không cần thiết. Khác biệt: (1) Giải thích thẳng và trấn an có cơ sở về hiện tượng "con đi học là ốm liên tục" khiến hầu như mọi cha mẹ mầm non hoảng hốt trong vài tháng đầu — đây là hệ quả tự nhiên của việc tiếp xúc mầm bệnh mới trong môi trường đông đúc để xây miễn dịch, không phải dấu hiệu trường học mất vệ sinh hay con "yếu hơn bạn"; (2) Đưa quyết định "có cho con nghỉ học không" về đúng một khung thực dụng, đối chiếu tiêu chí y tế rõ ràng với quy định của trường và áp lực xin nghỉ làm thật của cha mẹ — không né tránh mâu thuẫn giữa trách nhiệm cộng đồng và thực tế công việc; (3) Nâng hai chủ đề gần như bị bỏ trống ở lứa tuổi này trên các nguồn tiếng Việt — sâu răng sữa và cận thị học đường sớm — thành tuyến bài riêng, đúng thời điểm "cửa sổ vàng" để phòng ngừa trước khi các vấn đề này trở nặng ở tuổi tiểu học.
+                Bệnh trẻ em tuổi mầm non tiếng Việt hoặc viết chung chung không phân biệt độ tuổi, hoặc tập trung bệnh nặng hiếm gặp gây hoang mang không cần thiết. Khác biệt: (1) Trấn an có cơ sở về "con đi học là ốm liên tục" — hệ quả tự nhiên của tiếp xúc mầm bệnh mới để xây miễn dịch, không phải trường mất vệ sinh hay con yếu hơn bạn; (2) Đưa quyết định "có cho con nghỉ học không" về khung thực dụng, đối chiếu tiêu chí y tế với quy định trường và áp lực xin nghỉ làm thật; (3) Nâng sâu răng sữa và cận thị học đường sớm — hai chủ đề bị bỏ trống ở tuổi này — thành tuyến bài riêng đúng "cửa sổ vàng" phòng ngừa.
                 TEXT,
 
             'content_goals' => <<<'TEXT'
@@ -927,6 +1156,13 @@ class CategoryFoundationSeeder extends Seeder
         [
             'parent_slug' => null,
             'slug'        => 'tre-tieu-hoc-6-12-tuoi',
+
+            'writer_insights' => <<<'TEXT'
+                - Đây là danh mục CHA — chỉ bài TỔNG QUAN 5 năm tiểu học, dẫn vào 4 chuyên mục con. KHÔNG viết bài tập cụ thể, mốc chi tiết, thực đơn, bệnh cụ thể ở đây.
+                - Bước ngoặt lớn nhất: cha mẹ chuyển từ vai trò CHĂM SÓC sang ĐỒNG HÀNH HỌC TẬP — không trường lớp nào dạy cách làm việc này.
+                - Lấp khoảng trống 5 năm dài nhất bị bỏ ngỏ: nội dung Việt tập trung 0-6 tuổi rồi nhảy thẳng sang tuổi dậy thì 13+.
+                - Đặt tên rõ: con hình thành cái tôi riêng, có bạn bè quan trọng hơn cha mẹ trong một số việc — đây là BÌNH THƯỜNG, không phải dấu hiệu xa cách.
+                TEXT,
 
             'core_focus' => <<<'TEXT'
                 Danh mục CHA của cụm 6-12 tuổi — chỉ chứa các bài TỔNG QUAN xuyên suốt 5 năm tiểu học, không đi sâu vào mảng đã có chuyên mục con: bước ngoặt lớn nhất kể từ khi sinh con — từ vai trò "chăm sóc" (cho ăn, dỗ ngủ, tắm rửa) sang vai trò "đồng hành học tập" (kèm bài tập, họp phụ huynh, quản lý thời gian biểu); đặc điểm tâm lý - nhận thức bao trùm cả giai đoạn (tư duy logic cụ thể phát triển mạnh, con bắt đầu có "nhóm bạn thân" và chính kiến riêng, ít phụ thuộc cha mẹ hơn hẳn mầm non, và cuối giai đoạn — khoảng lớp 4-5 — những dấu hiệu dậy thì sớm đầu tiên xuất hiện ở một bộ phận trẻ, đặc biệt bé gái); hành trình 5 năm tiểu học nhìn tổng thể (lớp 1: làm quen nề nếp, học chữ - học số; lớp 2-3: tăng khối lượng bài, bắt đầu có bạn thân - có mâu thuẫn bạn bè; lớp 4-5: áp lực chuyển cấp, tự lập hơn, cơ thể bắt đầu thay đổi); và bài định hướng "con vào lớp 1: cần chuẩn bị gì, đọc gì" dẫn vào 4 chuyên mục con (Chăm sóc & nuôi dạy, Phát triển của trẻ, Dinh dưỡng cho trẻ, Bệnh thường gặp). Chi tiết bài tập về nhà, quản lý màn hình, dấu hiệu dậy thì sớm, cận thị học đường... KHÔNG viết ở đây — đẩy xuống đúng chuyên mục con; chọn trường tiểu học thuộc danh mục Trường mầm non & tiểu học riêng biệt.
@@ -962,12 +1198,21 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => 'tre-tieu-hoc-6-12-tuoi',
             'slug'        => 'cham-soc-nuoi-day-3',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: HÀNH VI/ĐỒNG HÀNH tiểu học — tự học, màn hình/mạng xã hội, tiền tiêu vặt, bắt nạt học đường (cả 2 chiều), thi cử, giới tính/dậy thì.
+                - Ranh giới với "Chăm sóc & nuôi dạy" ở tuổi khác: đây là tuổi con đã hiểu HẬU QUẢ hành động và bắt đầu có đời sống xã hội riêng (bạn bè, mạng xã hội) — khác 1-3 tuổi (phản xạ cảm xúc thuần túy) và 3-6 tuổi (chưa có nhóm bạn cố định/thiết bị riêng).
+                - KHÔNG viết: hành vi tuổi nhỏ hơn (ăn vạ, cai bỉm — thuộc nhóm tuổi trước), chọn trường (→ Trường mầm non & tiểu học).
+                - Dám viết bắt nạt học đường ở CẢ HAI CHIỀU (nạn nhân VÀ người bắt nạt) — điều gần như không nguồn tiếng Việt nào dám viết về chiều thứ hai.
+                - Nghịch lý cốt lõi: con cần cha mẹ RÚT LUI dần khỏi việc học trong khi áp lực xã hội kéo cha mẹ CAN THIỆP sâu hơn — dạy cách buông đúng chỗ.
+                - Kịch bản đồng hành học tập/nói chuyện dậy thì nên có cả góc BỐ — đặc biệt với con trai, nơi bố thường phù hợp hơn để mở đầu chuyện dậy thì, không mặc định đây là việc của mẹ.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
-                Cẩm nang thực hành hằng ngày về đồng hành cùng con 6-12 tuổi cho cha mẹ Việt đi làm: rèn tính tự học - tự giác làm bài tập (không thể kèm sát sao mãi như hồi mẫu giáo, chuyển dần trách nhiệm về phía con), quản lý thời gian màn hình - mạng xã hội - game ở tuổi con bắt đầu xin điện thoại riêng (giới hạn giờ chơi, chọn thời điểm cho con dùng mạng xã hội đầu tiên, giám sát mà không xâm phạm), dạy quản lý tiền tiêu vặt (cho tiền bao nhiêu, dạy tiết kiệm - chi tiêu, xử lý khi con tiêu hoang hay giấu tiền), xử lý bắt nạt học đường ở cả hai chiều — khi con LÀ NẠN NHÂN (nhận biết dấu hiệu con bị bắt nạt mà giấu cha mẹ, cách can thiệp với nhà trường) và khi con LÀ NGƯỜI BẮT NẠT (nhận trách nhiệm mà không hạ nhục con), đồng hành thi cử - kiểm tra định kỳ mà không biến điểm số thành thước đo giá trị con, và bắt đầu nói chuyện giới tính - dậy thì một cách tự nhiên đúng lúc thay vì né tránh hoặc đợi "nước đến chân mới nhảy". Mỗi bài đi từ MỘT tình huống cụ thể có thật, giải thích ngắn gọn vì sao con hành xử vậy theo tâm lý lứa tuổi 6-12, rồi đưa các bước xử lý làm được ngay và cách xây thói quen bền trong vài tuần. KHÔNG lấn sân: hành vi tuổi nhỏ hơn như ăn vạ, cai bỉm (thuộc các nhóm tuổi trước), chọn trường (thuộc Trường mầm non & tiểu học) — chuyên mục này chỉ nói khía cạnh đồng hành học tập TẠI NHÀ.
+                Cẩm nang thực hành hằng ngày về đồng hành cùng con 6-12 tuổi cho cha mẹ Việt đi làm: rèn tự học - tự giác làm bài (chuyển dần trách nhiệm về phía con), quản lý màn hình - mạng xã hội - game khi con xin điện thoại riêng (giới hạn giờ chơi, thời điểm dùng mạng xã hội đầu tiên, giám sát không xâm phạm), dạy quản lý tiền tiêu vặt, xử lý bắt nạt học đường ở CẢ HAI CHIỀU — khi con LÀ NẠN NHÂN (nhận biết dấu hiệu con giấu cha mẹ, cách can thiệp với nhà trường) và khi con LÀ NGƯỜI BẮT NẠT (nhận trách nhiệm mà không hạ nhục con), đồng hành thi cử mà không biến điểm số thành thước đo giá trị con, và nói chuyện giới tính - dậy thì tự nhiên đúng lúc thay vì né tránh. Mỗi bài đi từ MỘT tình huống thật, giải thích ngắn gọn tâm lý lứa tuổi, rồi đưa bước xử lý làm được ngay và cách xây thói quen bền trong vài tuần. KHÔNG lấn sân: hành vi tuổi nhỏ hơn như ăn vạ, cai bỉm (ranh giới: 6-12 tuổi là hành vi con đã HIỂU HẬU QUẢ và có đời sống xã hội/mạng xã hội riêng, khác hẳn phản xạ cảm xúc thuần túy của 1-3 tuổi), chọn trường (thuộc Trường mầm non & tiểu học) — chuyên mục này chỉ nói đồng hành học tập TẠI NHÀ.
                 TEXT,
 
             'unique_angle' => <<<'TEXT'
-                Nội dung nuôi dạy con tiểu học tiếng Việt hoặc là bài giáo dục học thuật khô khan (mẹo học giỏi, phương pháp Phần Lan) hoặc là bài cảnh báo mạng xã hội dịch từ Tây không khớp thực tế lớp học 40-50 học sinh của Việt Nam. Ba điểm khác biệt cụ thể: (1) Xử lý đúng NGHỊCH LÝ của giai đoạn này mà không nguồn nào gọi tên: con cần cha mẹ RÚT LUI dần khỏi việc học (để con tự chịu trách nhiệm) trong khi áp lực xã hội (nhóm lớp, so sánh điểm số, học thêm) lại kéo cha mẹ CAN THIỆP SÂU hơn — chuyên mục dạy cách buông đúng chỗ, giữ đúng chỗ; (2) Dám viết sâu về bắt nạt học đường ở CẢ HAI CHIỀU (bị bắt nạt và là người bắt nạt) — điều gần như không nguồn tiếng Việt nào dám viết về chiều thứ hai vì sợ chạm tự ái phụ huynh, trong khi đây là tình huống thật rất nhiều cha mẹ gặp; (3) Tuổi xin điện thoại riêng và mạng xã hội đầu tiên được viết như một cột mốc CÓ LỘ TRÌNH (từng bước cấp quyền kèm giám sát) thay vì chỉ có hai thái cực "cấm tiệt" hoặc "thả tự do", phù hợp thực tế lớp 4-5 đã có nhóm chat riêng trên điện thoại của bạn bè.
+                "Con lớp 3 tự nhiên có 'hội bạn thân', về nhà không kể chuyện với mẹ như hồi bé nữa" — nghe như dấu hiệu xa cách, nhưng đây chính xác là điều NÊN xảy ra ở tuổi này, chỉ là không ai nói trước với cha mẹ. Nội dung nuôi dạy con tiểu học tiếng Việt hoặc là giáo dục học thuật khô khan (mẹo học giỏi, phương pháp Phần Lan), hoặc là cảnh báo mạng xã hội dịch từ Tây không khớp thực tế lớp học 40-50 học sinh Việt Nam. Ba điểm khác biệt: (1) Xử lý đúng NGHỊCH LÝ của giai đoạn này: con cần cha mẹ RÚT LUI dần khỏi việc học trong khi áp lực xã hội (nhóm lớp, so sánh điểm số, học thêm) lại kéo cha mẹ CAN THIỆP SÂU hơn — dạy cách buông đúng chỗ, giữ đúng chỗ; (2) Dám viết sâu về bắt nạt học đường ở CẢ HAI CHIỀU (bị bắt nạt và là người bắt nạt) — điều gần như không nguồn tiếng Việt nào dám viết về chiều thứ hai vì sợ chạm tự ái phụ huynh; (3) Tuổi xin điện thoại riêng và mạng xã hội đầu tiên viết như một cột mốc CÓ LỘ TRÌNH (từng bước cấp quyền kèm giám sát) thay vì chỉ có hai thái cực "cấm tiệt" hoặc "thả tự do", phù hợp thực tế lớp 4-5 đã có nhóm chat riêng trên điện thoại của bạn bè.
                 TEXT,
 
             'content_goals' => <<<'TEXT'
@@ -996,16 +1241,24 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => 'tre-tieu-hoc-6-12-tuoi',
             'slug'        => 'phat-trien-cua-tre-5',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: tư duy logic theo khối lớp, phát triển cảm xúc-xã hội, dấu hiệu dậy thì sớm (bé gái từ 8-9 tuổi), khó khăn học tập bị hiểu lầm là "lười" (ADHD, dyslexia, dysgraphia).
+                - KHÔNG viết: hành vi/kỷ luật/nề nếp (→ Chăm sóc & nuôi dạy), bệnh lý thể chất như cận thị/béo phì (→ Bệnh thường gặp).
+                - Tách bạch then chốt: TỐC ĐỘ HỌC chậm (đọc chậm 1 giai đoạn) vs KHÓ KHĂN HỌC TẬP cần can thiệp (dyslexia, ADHD) — cha mẹ Việt hay gộp chung thành "con lười/dốt".
+                - Dậy thì sớm viết CẨN TRỌNG có kiểm soát — không hù dọa bằng ca cực đoan, luôn kèm ngưỡng bình thường.
+                - KPI: đo bằng tỷ lệ độc giả được hướng đúng tới chuyên gia (bác sĩ nội tiết/tâm lý giáo dục) thay vì tự dán nhãn hoặc bỏ qua.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
-                Sự phát triển NHẬN THỨC, CẢM XÚC - XÃ HỘI và những dấu hiệu THỂ CHẤT SỚM ở trẻ 6-12 tuổi để cha mẹ theo dõi đúng, không thấp thỏm sai chỗ: phát triển tư duy logic theo giai đoạn thao tác cụ thể ứng với từng khối lớp — từ tư duy cụ thể đầu lớp 1 đến khả năng suy luận nhiều bước ở lớp 5, kỹ năng nền tảng đọc - viết - tính toán và tốc độ đạt được rất khác nhau giữa các trẻ hoàn toàn khỏe mạnh, phát triển cảm xúc - xã hội (hình thành sự tự tin qua trải nghiệm thành công nhỏ, học đồng cảm và hợp tác trong nhóm bạn, học cách đối diện và phục hồi sau thất bại — điểm kém, thua cuộc, bị từ chối kết bạn), dấu hiệu dậy thì sớm cần cha mẹ chú ý mà không hoảng loạn (ở bé gái có thể xuất hiện từ 8-9 tuổi: ngực bắt đầu phát triển, tăng chiều cao đột ngột — ngưỡng nào là bình thường, ngưỡng nào cần khám nội tiết), và các khó khăn phát triển - học tập thường bị hiểu lầm là "lười" hoặc "hư" (tăng động giảm chú ý - ADHD, khó đọc - dyslexia, khó viết - dysgraphia) cần được tầm soát và can thiệp đúng chuyên môn thay vì bị gắn mác đạo đức. KHÔNG lấn sân: hành vi - kỷ luật - nề nếp học tập (thuộc Chăm sóc & nuôi dạy), bệnh lý thể chất như cận thị - cong vẹo cột sống - béo phì (thuộc Bệnh thường gặp).
+                Sự phát triển NHẬN THỨC, CẢM XÚC - XÃ HỘI và dấu hiệu THỂ CHẤT SỚM ở trẻ 6-12 tuổi để cha mẹ theo dõi đúng, không thấp thỏm sai chỗ: tư duy logic theo khối lớp — từ tư duy cụ thể đầu lớp 1 đến suy luận nhiều bước ở lớp 5, kỹ năng đọc - viết - tính toán với tốc độ khác nhau giữa các trẻ khỏe mạnh, phát triển cảm xúc - xã hội (tự tin qua thành công nhỏ, đồng cảm, phục hồi sau thất bại), dấu hiệu dậy thì sớm cần chú ý không hoảng loạn (bé gái có thể từ 8-9 tuổi: ngực phát triển, tăng chiều cao đột ngột — ngưỡng nào bình thường, ngưỡng nào cần khám nội tiết), và khó khăn học tập thường bị hiểu lầm là "lười"/"hư" (ADHD, dyslexia, dysgraphia) cần tầm soát đúng chuyên môn thay vì gắn mác đạo đức. KHÔNG lấn sân: hành vi - kỷ luật - nề nếp học tập (thuộc Chăm sóc & nuôi dạy), bệnh lý thể chất như cận thị - cong vẹo cột sống - béo phì (thuộc Bệnh thường gặp).
                 TEXT,
 
             'unique_angle' => <<<'TEXT'
-                Nội dung phát triển trẻ tiểu học tiếng Việt gần như chỉ có hai dạng: bảng mốc phát triển dịch nguyên từ nguồn Tây không tính đến bối cảnh lớp học 40-50 học sinh của Việt Nam, hoặc bài trường học/trung tâm gia sư viết để quảng bá phương pháp riêng. Ba điểm khác biệt: (1) Tách bạch rõ ràng giữa TỐC ĐỘ HỌC (đọc chậm, viết xấu, tính toán yếu ở một giai đoạn) và KHÓ KHĂN HỌC TẬP CẦN CAN THIỆP (dyslexia, ADHD) — hai thứ cha mẹ Việt hay gộp chung thành "con lười" hoặc "con dốt", trong khi phân biệt đúng sẽ quyết định con có được hỗ trợ kịp thời hay chịu nhãn dán sai suốt nhiều năm; (2) Viết về dậy thì sớm ở bé gái tiểu học một cách CẨN TRỌNG có kiểm soát — không hù dọa phụ huynh bằng các ca cực đoan, luôn kèm ngưỡng bình thường rõ ràng, vì đây là chủ đề rất dễ bị viết theo hướng giật gân gây hoang mang; (3) Đặt phát triển cảm xúc - xã hội (tự tin, đồng cảm, chịu đựng thất bại) ngang hàng với phát triển học thuật — trong khi hầu hết nội dung tiếng Việt về "phát triển trẻ tiểu học" chỉ xoay quanh IQ và thành tích.
+                Nội dung phát triển trẻ tiểu học tiếng Việt gần như chỉ có hai dạng: bảng mốc dịch nguyên từ nguồn Tây không tính bối cảnh lớp học 40-50 học sinh Việt Nam, hoặc bài trung tâm gia sư viết để quảng bá phương pháp riêng. Ba điểm khác biệt: (1) Tách bạch TỐC ĐỘ HỌC (đọc chậm, viết xấu ở một giai đoạn) và KHÓ KHĂN HỌC TẬP CẦN CAN THIỆP (dyslexia, ADHD) — cha mẹ Việt hay gộp chung thành "con lười/dốt", trong khi phân biệt đúng quyết định con được hỗ trợ kịp thời hay chịu nhãn sai nhiều năm; (2) Viết dậy thì sớm ở bé gái CẨN TRỌNG có kiểm soát — không hù dọa bằng ca cực đoan, luôn kèm ngưỡng bình thường; (3) Đặt phát triển cảm xúc - xã hội ngang hàng phát triển học thuật — trong khi nội dung tiếng Việt khác chỉ xoay quanh IQ và thành tích.
                 TEXT,
 
             'content_goals' => <<<'TEXT'
-                (1) SEO cho truy vấn theo dõi phát triển đang tăng nhanh nhưng ít nội dung chất lượng: "trẻ 8 tuổi dậy thì sớm có sao không", "con đọc chậm có phải bị dyslexia", "dấu hiệu tăng động giảm chú ý ở trẻ tiểu học", "trẻ lớp 2 chưa đọc thông viết thạo có đáng lo". (2) Là điểm dừng chân đầu tiên khi cha mẹ nghi ngờ có gì đó "khác thường" ở con — hướng cha mẹ đến đúng chuyên gia (bác sĩ nội tiết, chuyên gia tâm lý giáo dục) thay vì tự dán nhãn hoặc bỏ qua. (3) Liên kết chặt với Chăm sóc & nuôi dạy khi vấn đề là hành vi và với Bệnh thường gặp khi có yếu tố sức khỏe tâm lý (lo âu học tập); lùi về chuyên mục Phát triển của trẻ ở Trẻ mầm non (3-6 tuổi) cho các mốc tiền lớp 1. (4) Xây uy tín bằng cách nói thẳng giới hạn của nội dung không phải y tế — luôn hướng dẫn khi nào cần chuyên gia đánh giá chính thức.
+                (1) SEO cho truy vấn theo dõi phát triển đang tăng nhanh nhưng ít nội dung chất lượng: "trẻ 8 tuổi dậy thì sớm có sao không", "con đọc chậm có phải bị dyslexia", "dấu hiệu tăng động giảm chú ý ở trẻ tiểu học", "trẻ lớp 2 chưa đọc thông viết thạo có đáng lo". (2) Là điểm dừng chân đầu tiên khi cha mẹ nghi ngờ có gì đó "khác thường" ở con — đo bằng tỷ lệ độc giả được hướng tới đúng chuyên gia (bác sĩ nội tiết, chuyên gia tâm lý giáo dục) thay vì tự dán nhãn hoặc bỏ qua. (3) Liên kết chặt với Chăm sóc & nuôi dạy khi vấn đề là hành vi và với Bệnh thường gặp khi có yếu tố sức khỏe tâm lý (lo âu học tập); lùi về chuyên mục Phát triển của trẻ ở Trẻ mầm non (3-6 tuổi) cho các mốc tiền lớp 1. (4) Xây uy tín bằng cách nói thẳng giới hạn của nội dung không phải y tế — luôn hướng dẫn khi nào cần chuyên gia đánh giá chính thức.
                 TEXT,
 
             'pain_points' => <<<'TEXT'
@@ -1030,16 +1283,25 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => 'tre-tieu-hoc-6-12-tuoi',
             'slug'        => 'dinh-duong-cho-tre-3',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: bữa sáng vội trước giờ học, suất ăn bán trú ngoài tầm kiểm soát, đồ ăn vặt cổng trường, phòng ngừa THỪA CÂN học đường (hướng ngược mầm non).
+                - KHÔNG viết: ăn dặm/hành vi ăn uống tuổi nhỏ hơn, bệnh lý liên quan cân nặng như tiểu đường (→ Bệnh thường gặp).
+                - Chuyển hướng nhận thức quan trọng: từ tuổi này nỗi lo chính là THỪA CÂN đô thị hóa, không phải "còi/biếng ăn" như mầm non — nhiều cha mẹ chưa kịp thích nghi.
+                - Thẳng thắn thừa nhận cha mẹ chỉ còn kiểm soát 1-2 bữa/ngày — trọng tâm tối ưu ĐÚNG bữa mình còn nắm quyền, không giả vờ vẫn quản lý toàn bộ như hồi mẫu giáo.
+                - KPI: đo bằng lượt lưu bài "thực đơn bữa sáng 15 phút" và mức độ nhận thức thay đổi về nguy cơ béo phì học đường (khảo sát/bình luận).
+                - Bữa sáng chuẩn bị tối hôm trước là việc BỐ cũng làm được — không phải mặc định của riêng mẹ.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
-                Ăn uống thực tế cho trẻ tiểu học khi phần lớn bữa ăn không còn nằm trong tầm kiểm soát trực tiếp của cha mẹ: bữa sáng trước giờ học (thường bị bỏ qua hoặc ăn vội vì cả nhà gấp giờ đến trường - đến công ty, hệ quả đến khả năng tập trung buổi sáng), suất ăn bán trú ở trường (hiểu cách trường tổ chức thực đơn, cách biết con có ăn đủ không khi không thể tận mắt kiểm tra, trao đổi với nhà trường khi nghi ngờ suất ăn chưa ổn), kiểm soát đồ ăn vặt - nước ngọt ở cổng trường (cám dỗ lớn nhất ở tuổi con đã tự cầm tiền mua được, không còn ai giám sát từng miếng ăn), phòng ngừa thừa cân - béo phì học đường đang tăng nhanh ở đô thị Việt Nam (nguyên nhân: ít vận động do lịch học dày, đồ ăn nhanh - nước ngọt dễ tiếp cận, thói quen ăn uống hình thành từ giai đoạn này sẽ theo trẻ đến tuổi trưởng thành), và nhu cầu vi chất tăng lên khi một số trẻ bắt đầu dậy thì sớm cuối giai đoạn (canxi, sắt, kẽm cho tuổi tăng trưởng nhanh). KHÔNG lấn sân: ăn dặm hay hành vi ăn uống của trẻ nhỏ hơn (các nhóm tuổi trước), bệnh lý liên quan cân nặng như tiểu đường (thuộc Bệnh thường gặp — chuyên mục này chỉ dừng ở phòng ngừa qua ăn uống).
+                Ăn uống thực tế cho trẻ tiểu học khi phần lớn bữa ăn không còn nằm trong tầm kiểm soát trực tiếp của cha mẹ: bữa sáng trước giờ học (thường ăn vội vì cả nhà gấp giờ, ảnh hưởng khả năng tập trung buổi sáng), suất ăn bán trú (hiểu cách trường tổ chức thực đơn, biết con ăn đủ không khi không tận mắt kiểm tra, trao đổi với trường khi nghi ngờ), kiểm soát đồ ăn vặt - nước ngọt cổng trường (con đã tự cầm tiền mua được, không ai giám sát), phòng ngừa thừa cân - béo phì học đường tăng nhanh ở đô thị (ít vận động, đồ ăn nhanh dễ tiếp cận, thói quen hình thành từ đây theo đến trưởng thành), và nhu cầu vi chất tăng khi một số trẻ dậy thì sớm cuối giai đoạn. KHÔNG lấn sân: ăn dặm/hành vi ăn uống tuổi nhỏ hơn, bệnh lý liên quan cân nặng như tiểu đường (thuộc Bệnh thường gặp).
                 TEXT,
 
             'unique_angle' => <<<'TEXT'
-                Nội dung dinh dưỡng học đường tiếng Việt gần như chỉ có hai dạng: bài viết chung chung "cần đủ 4 nhóm chất" không tính đến việc cha mẹ KHÔNG CÒN kiểm soát được bữa trưa của con, và bài quảng cáo sản phẩm bổ sung/sữa học đường. Ba điểm khác biệt: (1) Thẳng thắn thừa nhận cha mẹ chỉ còn kiểm soát được 1-2 bữa/ngày (sáng và tối) — nên trọng tâm là tối ưu ĐÚNG những bữa mình còn nắm quyền, thay vì viết như thể cha mẹ vẫn quản lý toàn bộ như hồi mẫu giáo; (2) Xử lý trực diện "kinh tế cổng trường" — con đã có tiền tiêu vặt và tự mua được đồ ăn vặt, nước ngọt ngay trước mặt trường, nên giải pháp không phải cấm đoán (bất khả thi) mà là dạy con TỰ CHỌN đúng khi không có cha mẹ bên cạnh; (3) Đặt vấn đề thừa cân - béo phì học đường bằng dữ liệu thực tế đô thị Việt Nam (tỷ lệ tăng nhanh ở học sinh tiểu học thành phố) thay vì chỉ lặp lại nỗi lo "con biếng ăn - còi" của giai đoạn mầm non — đây là chuyển hướng quan trọng mà nhiều cha mẹ chưa kịp thích nghi.
+                "Con ăn bán trú cả ngày, tối về hỏi ăn gì con chỉ nhớ mỗi món tráng miệng" — thực tế của phần lớn cha mẹ có con tiểu học, nhưng nội dung dinh dưỡng học đường tiếng Việt vẫn viết như thể cha mẹ tự nấu và quan sát được từng bữa. Ba điểm khác biệt: (1) Thẳng thắn thừa nhận cha mẹ chỉ còn kiểm soát 1-2 bữa/ngày — trọng tâm tối ưu ĐÚNG bữa mình còn nắm quyền; (2) Xử lý trực diện "kinh tế cổng trường" — con đã có tiền tiêu vặt tự mua đồ ăn vặt, giải pháp là dạy con TỰ CHỌN đúng chứ không phải cấm đoán bất khả thi; (3) Đặt vấn đề thừa cân - béo phì học đường bằng dữ liệu đô thị Việt Nam thay vì lặp lại nỗi lo "biếng ăn - còi" của mầm non — chuyển hướng quan trọng nhiều cha mẹ chưa kịp thích nghi.
                 TEXT,
 
             'content_goals' => <<<'TEXT'
-                (1) SEO cho cụm truy vấn đang tăng theo xu hướng đô thị hóa: "thực đơn bữa sáng cho trẻ tiểu học đi học", "con ăn bán trú ở trường có đủ chất không", "cách hạn chế con ăn vặt ở cổng trường", "trẻ tiểu học béo phì phải làm sao". (2) Bài "thực đơn bữa sáng 15 phút trước giờ học" là nội dung bookmark cao — giải pháp cho khung giờ gấp gáp nhất trong ngày của mọi gia đình có con đi học. (3) Xây nhận thức phòng ngừa béo phì học đường như một vấn đề sức khỏe cộng đồng mới nổi tại đô thị Việt Nam, khác hẳn nỗi lo "còi, biếng ăn" thống trị các cụm tuổi nhỏ hơn — giúp site theo kịp vấn đề dinh dưỡng thực tế của từng giai đoạn. (4) Liên kết lùi về Dinh dưỡng cho trẻ (Trẻ mầm non 3-6 tuổi) cho cha mẹ có con nhỏ hơn, và sang Bệnh thường gặp khi vấn đề cân nặng đã thành bệnh lý cần khám.
+                (1) SEO cho cụm truy vấn đang tăng theo xu hướng đô thị hóa: "thực đơn bữa sáng cho trẻ tiểu học đi học", "con ăn bán trú ở trường có đủ chất không", "cách hạn chế con ăn vặt ở cổng trường", "trẻ tiểu học béo phì phải làm sao". (2) Bài "thực đơn bữa sáng 15 phút trước giờ học" là nội dung bookmark cao — đo bằng lượt lưu, giải pháp cho khung giờ gấp gáp nhất trong ngày của mọi gia đình có con đi học. (3) Xây nhận thức phòng ngừa béo phì học đường như một vấn đề sức khỏe cộng đồng mới nổi tại đô thị Việt Nam, khác hẳn nỗi lo "còi, biếng ăn" thống trị các cụm tuổi nhỏ hơn — đo bằng mức thay đổi nhận thức qua khảo sát/bình luận độc giả. (4) Liên kết lùi về Dinh dưỡng cho trẻ (Trẻ mầm non 3-6 tuổi) cho cha mẹ có con nhỏ hơn, và sang Bệnh thường gặp khi vấn đề cân nặng đã thành bệnh lý cần khám.
                 TEXT,
 
             'pain_points' => <<<'TEXT'
@@ -1064,16 +1326,24 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => 'tre-tieu-hoc-6-12-tuoi',
             'slug'        => 'benh-thuong-gap-5',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: cận thị học đường, cong vẹo cột sống, béo phì, VÀ mở rộng có chủ đích: sức khỏe TÂM LÝ (lo âu học tập, biểu hiện thể chất của stress — đau bụng/đau đầu trước giờ thi).
+                - KHÔNG viết: hành vi/kỷ luật (→ Chăm sóc & nuôi dạy), mốc phát triển/dậy thì sớm (→ Phát triển của trẻ).
+                - Đây là category ĐẦU TIÊN trong toàn hành trình site đưa sức khỏe tâm lý vào "bệnh thường gặp" — mọi triệu chứng thể chất do lo âu phải trình bày ngang hàng bệnh thể chất, không phải "con làm nũng".
+                - Luôn khuyến nghị loại trừ nguyên nhân thực thể qua khám TRƯỚC khi kết luận là tâm lý — không được bỏ qua bước này.
+                - KPI: đo bằng tỷ lệ độc giả nhận diện đúng biểu hiện thể chất của lo âu (thay vì chỉ khám tiêu hóa lặp lại vô ích) và mức lan tỏa nhận thức "sức khỏe tâm lý ngang bệnh thể chất".
+                TEXT,
+
             'core_focus' => <<<'TEXT'
-                Các vấn đề sức khỏe THỂ CHẤT và — lần đầu tiên trong hành trình của site — sức khỏe TÂM LÝ của trẻ 6-12 tuổi, giai đoạn con tự lập hơn ở trường khiến cha mẹ khó giám sát sát sao khi có vấn đề: cận thị học đường (tăng mạnh nhất trong giai đoạn này do thời gian nhìn gần khi học - đọc - dùng thiết bị tăng vọt so với mẫu giáo, dấu hiệu nhận biết sớm khi con chưa biết diễn đạt "nhìn mờ", khám mắt định kỳ, phòng ngừa tại nhà và ở lớp), cong vẹo cột sống (do cặp sách quá nặng, bàn ghế không đúng chuẩn, ngồi sai tư thế kéo dài hàng giờ mỗi ngày — cách phát hiện sớm qua quan sát dáng đứng, cách chọn cặp và điều chỉnh tư thế ngồi học), béo phì (biến chứng sức khỏe khi thừa cân kéo dài từ dinh dưỡng học đường không kiểm soát), và ĐIỂM MỞ RỘNG quan trọng của cụm 6-12 tuổi: sức khỏe tâm lý của trẻ — lo âu học tập, căng thẳng trước các kỳ thi - kiểm tra, áp lực điểm số từ nhà trường và chính cha mẹ — những biểu hiện thể chất của stress ở trẻ (đau bụng, đau đầu không rõ nguyên nhân trước ngày thi, mất ngủ, cáu gắt bất thường) mà cha mẹ dễ bỏ qua vì tưởng chỉ là bệnh vặt. KHÔNG lấn sân: hành vi - kỷ luật (thuộc Chăm sóc & nuôi dạy), các mốc phát triển nhận thức - dậy thì sớm (thuộc Phát triển của trẻ).
+                Các vấn đề sức khỏe THỂ CHẤT và — lần đầu tiên trong hành trình của site — sức khỏe TÂM LÝ của trẻ 6-12 tuổi, giai đoạn con tự lập hơn ở trường khiến cha mẹ khó giám sát: cận thị học đường (tăng mạnh nhất giai đoạn này do thời gian nhìn gần tăng vọt, dấu hiệu nhận biết sớm, khám mắt định kỳ), cong vẹo cột sống (cặp sách nặng, bàn ghế sai chuẩn, ngồi sai tư thế kéo dài — cách phát hiện sớm, chọn cặp, điều chỉnh tư thế), béo phì (biến chứng từ dinh dưỡng học đường không kiểm soát), và ĐIỂM MỞ RỘNG quan trọng: sức khỏe tâm lý — lo âu học tập, căng thẳng thi cử, biểu hiện thể chất của stress (đau bụng, đau đầu trước ngày thi, mất ngủ) mà cha mẹ dễ bỏ qua vì tưởng chỉ là bệnh vặt. KHÔNG lấn sân: hành vi - kỷ luật (thuộc Chăm sóc & nuôi dạy), mốc phát triển nhận thức - dậy thì sớm (thuộc Phát triển của trẻ).
                 TEXT,
 
             'unique_angle' => <<<'TEXT'
-                Đây là category ĐẦU TIÊN trong toàn bộ hành trình từ thai kỳ đến nay của site đưa SỨC KHỎE TÂM LÝ của trẻ vào phần "bệnh thường gặp" — một sự mở rộng có chủ đích, không phải ngẫu nhiên: tất cả các cụm tuổi trước (sơ sinh, trẻ nhỏ, tập đi, mầm non) đều xoay quanh bệnh lý thể chất vì trẻ chưa đối mặt áp lực học tập thật sự; nhưng ở tuổi tiểu học, lo âu và stress bắt đầu là những "bệnh" có thật, ảnh hưởng cả thể chất lẫn tinh thần con, và hầu như KHÔNG nội dung "bệnh trẻ em" tiếng Việt nào xếp chung nhóm này — sức khỏe tâm lý luôn bị tách riêng thành chuyên mục tâm lý học đường xa lạ mà cha mẹ ít khi nghĩ đến khi con "kêu đau bụng trước giờ kiểm tra". Ba điểm khác biệt: (1) Dạy cha mẹ nhận ra các biểu hiện THỂ CHẤT của lo âu học tập (đau bụng, đau đầu, buồn nôn sáng đi thi) để không chỉ đưa con đi khám tiêu hóa lặp đi lặp lại mà bỏ sót gốc rễ tâm lý; (2) Cận thị và cong vẹo cột sống được viết gắn liền với NGUYÊN NHÂN HỌC ĐƯỜNG cụ thể (cặp sách, bàn ghế, ánh sáng lớp học, thời lượng màn hình học tập) thay vì bài y khoa chung chung; (3) Mọi nội dung tâm lý đều nhấn mạnh đây là VẤN ĐỀ SỨC KHỎE cần được coi trọng ngang bệnh thể chất, không phải "con làm nũng" hay "con yếu đuối".
+                Đây là category ĐẦU TIÊN trong hành trình từ thai kỳ đến nay của site đưa SỨC KHỎE TÂM LÝ của trẻ vào phần "bệnh thường gặp" — có chủ đích, không ngẫu nhiên: các cụm tuổi trước xoay quanh bệnh lý thể chất vì trẻ chưa đối mặt áp lực học tập thật; ở tuổi tiểu học, lo âu và stress bắt đầu là "bệnh" có thật, nhưng hầu như không nội dung "bệnh trẻ em" tiếng Việt nào xếp chung nhóm này — sức khỏe tâm lý luôn bị tách riêng xa lạ mà cha mẹ ít nghĩ tới khi con "kêu đau bụng trước giờ kiểm tra". Ba điểm khác biệt: (1) Dạy nhận ra biểu hiện THỂ CHẤT của lo âu học tập (đau bụng, đau đầu, buồn nôn sáng đi thi) để không chỉ khám tiêu hóa lặp lại mà bỏ sót gốc rễ tâm lý; (2) Cận thị/cong vẹo cột sống gắn liền NGUYÊN NHÂN HỌC ĐƯỜNG cụ thể (cặp sách, bàn ghế, ánh sáng lớp) thay vì bài y khoa chung chung; (3) Mọi nội dung tâm lý nhấn mạnh đây là VẤN ĐỀ SỨC KHỎE ngang bệnh thể chất, không phải "con làm nũng".
                 TEXT,
 
             'content_goals' => <<<'TEXT'
-                (1) SEO cho cụm truy vấn thể chất tăng mạnh theo tuổi học đường: "trẻ tiểu học cận thị phải làm sao", "dấu hiệu cong vẹo cột sống ở trẻ", "cặp sách nặng bao nhiêu là hại con", đồng thời tiên phong cho cụm truy vấn tâm lý mới nổi: "con lo lắng trước khi thi", "trẻ đau bụng mỗi khi đi học có phải tâm lý", "áp lực học tập ở trẻ tiểu học". (2) Là chuyên mục ĐẦU TIÊN gắn nhãn "sức khỏe tâm lý trẻ em" như một phần bình thường của nội dung sức khỏe con, đặt nền cho các cụm tuổi lớn hơn (tuổi teen) sau này tiếp tục mở rộng. (3) Liên kết chặt với Chăm sóc & nuôi dạy (đồng hành thi cử không tạo áp lực) và Phát triển của trẻ (phân biệt lo âu học tập với ADHD) trong cùng cụm 6-12 tuổi. (4) Xây uy tín y khoa - tâm lý học đường ngay từ giai đoạn này để sang cụm tuổi teen, chủ đề sức khỏe tâm lý được độc giả đã quen tiếp cận nghiêm túc, không né tránh.
+                (1) SEO cho cụm truy vấn thể chất tăng mạnh theo tuổi học đường: "trẻ tiểu học cận thị phải làm sao", "dấu hiệu cong vẹo cột sống ở trẻ", "cặp sách nặng bao nhiêu là hại con", đồng thời tiên phong cho cụm truy vấn tâm lý mới nổi: "con lo lắng trước khi thi", "trẻ đau bụng mỗi khi đi học có phải tâm lý", "áp lực học tập ở trẻ tiểu học". (2) Là chuyên mục ĐẦU TIÊN gắn nhãn "sức khỏe tâm lý trẻ em" như một phần bình thường của nội dung sức khỏe con — đo bằng tỷ lệ độc giả nhận diện đúng biểu hiện thể chất của lo âu thay vì chỉ khám tiêu hóa lặp lại vô ích, đặt nền cho các cụm tuổi lớn hơn (tuổi teen) sau này tiếp tục mở rộng. (3) Liên kết chặt với Chăm sóc & nuôi dạy (đồng hành thi cử không tạo áp lực) và Phát triển của trẻ (phân biệt lo âu học tập với ADHD) trong cùng cụm 6-12 tuổi. (4) Xây uy tín y khoa - tâm lý học đường ngay từ giai đoạn này để sang cụm tuổi teen, chủ đề sức khỏe tâm lý được độc giả đã quen tiếp cận nghiêm túc, không né tránh.
                 TEXT,
 
             'pain_points' => <<<'TEXT'
@@ -1098,16 +1368,24 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => null,
             'slug'        => 'suc-khoe-cha-me',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: sức khỏe thể chất/tinh thần của CHA MẸ (không phải con) sau khi có con — đau lưng/cổ tay, thiếu ngủ mãn tính, trầm cảm/burn-out CẢ BỐ LẪN MẸ.
+                - KHÔNG viết: Sức khỏe mẹ bầu (chỉ 9 tháng thai kỳ) — đây là sức khỏe SAU khi con đã ra đời.
+                - Khác biệt bắt buộc giữ: viết sức khỏe tinh thần NGƯỜI BỐ ngang hàng người mẹ — hầu hết nội dung Việt về "sau sinh" chỉ nhắm vào mẹ.
+                - Mọi gợi ý phải trả lời được "làm gì trong 15 phút rảnh hiếm hoi" — không viết mẹo chung chung bất khả thi với cha mẹ có con nhỏ.
+                - KPI: đo bằng tỷ lệ quay lại của độc giả khi mối lo trực tiếp về con đã dịu và thời gian đọc trung bình.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
                 Sức khỏe thể chất và tinh thần của CHÍNH cha mẹ — không phải con — sau khi đã có con, giai đoạn cha mẹ có xu hướng đặt sức khỏe bản thân xuống cuối danh sách ưu tiên. Nội dung: các vấn đề thể chất phổ biến của người mới làm cha mẹ (đau lưng - đau cổ tay do bế con sai tư thế, thiếu ngủ mãn tính kéo dài nhiều năm, tăng - sụt cân sau sinh không kiểm soát, đau khớp gối khi ngồi xổm chơi cùng con), sức khỏe tinh thần (trầm cảm sau sinh không chỉ ở mẹ mà cả ở bố, burn-out khi lo toan cùng lúc công việc - con cái - nhà cửa, cảm giác cô đơn của người ở nhà chăm con toàn thời gian, áp lực phải làm "cha mẹ hoàn hảo" từ mạng xã hội), và thói quen khám sức khỏe định kỳ bị trì hoãn nhiều năm liền vì luôn ưu tiên đưa con đi khám trước. KHÔNG lấn sân: Sức khỏe mẹ bầu (chỉ trong 9 tháng thai kỳ) — đây là sức khỏe cha mẹ SAU khi con đã ra đời, viết cho cả hai vợ chồng chứ không chỉ mẹ.
                 TEXT,
 
             'unique_angle' => <<<'TEXT'
-                (1) Là chuyên mục hiếm hoi viết sức khỏe tinh thần - thể chất của NGƯỜI BỐ ngang hàng người mẹ — hầu hết nội dung tiếng Việt về "sau sinh" chỉ nhắm vào mẹ, bỏ qua thực tế nhiều ông bố cũng trải qua trầm cảm hay kiệt sức nhưng không có ngôn ngữ để gọi tên hay xin giúp đỡ vì áp lực "đàn ông phải mạnh mẽ". (2) Không viết dạng "mẹo chăm sóc bản thân" chung chung (ngủ đủ giấc, ăn uống lành mạnh) vốn bất khả thi với cha mẹ có con nhỏ — mỗi bài phải trả lời được câu hỏi cụ thể "vậy làm gì trong 15 phút rảnh hiếm hoi giữa ngày". (3) Thẳng thắn gọi tên cảm giác tội lỗi khi "dành thời gian cho bản thân" bị xem là ích kỷ trong văn hóa Việt, nhất là với người mẹ — tiếp cận bằng sự đồng cảm thay vì hô hào "hãy yêu bản thân" sáo rỗng.
+                Sau khi sinh, ai cũng hỏi thăm mẹ và em bé — gần như không ai hỏi "thế bố dạo này có ổn không". Đó chính xác là khoảng trống chuyên mục này lấp vào. (1) Là chuyên mục hiếm hoi viết sức khỏe tinh thần - thể chất của NGƯỜI BỐ ngang hàng người mẹ — hầu hết nội dung tiếng Việt về "sau sinh" chỉ nhắm vào mẹ, bỏ qua thực tế nhiều ông bố cũng trải qua trầm cảm hay kiệt sức nhưng không có ngôn ngữ để gọi tên hay xin giúp đỡ vì áp lực "đàn ông phải mạnh mẽ". (2) Không viết dạng "mẹo chăm sóc bản thân" chung chung (ngủ đủ giấc, ăn uống lành mạnh) vốn bất khả thi với cha mẹ có con nhỏ — mỗi bài phải trả lời được câu hỏi cụ thể "vậy làm gì trong 15 phút rảnh hiếm hoi giữa ngày". (3) Thẳng thắn gọi tên cảm giác tội lỗi khi "dành thời gian cho bản thân" bị xem là ích kỷ trong văn hóa Việt, nhất là với người mẹ — tiếp cận bằng sự đồng cảm thay vì hô hào "hãy yêu bản thân" sáo rỗng.
                 TEXT,
 
             'content_goals' => <<<'TEXT'
-                (1) SEO cho cụm truy vấn còn trống trên thị trường nội dung tiếng Việt: "trầm cảm sau sinh ở nam giới", "đau lưng sau khi bế con nhiều", "làm sao để ngủ đủ khi có con nhỏ", "burn-out làm cha mẹ là gì". (2) Là chuyên mục "chăm sóc người chăm sóc" duy nhất của site — giữ chân độc giả khi các mối lo trực tiếp về con đã dịu bớt nhưng người đọc vẫn cần một chỗ dựa cho chính mình. (3) Liên kết chéo với Hôn nhân (khi cả hai vợ chồng đều kiệt sức, mối quan hệ dễ căng thẳng theo) và Quyền lợi & pháp lý (chế độ nghỉ phép, bảo hiểm y tế). (4) Khai thác mảng ít cạnh tranh SEO vì đa số site sức khỏe chỉ viết cho mẹ bầu hoặc trẻ em, bỏ trống hoàn toàn sức khỏe cha mẹ hậu sinh.
+                (1) SEO cho cụm truy vấn còn trống trên thị trường nội dung tiếng Việt: "trầm cảm sau sinh ở nam giới", "đau lưng sau khi bế con nhiều", "làm sao để ngủ đủ khi có con nhỏ", "burn-out làm cha mẹ là gì". (2) Là chuyên mục "chăm sóc người chăm sóc" duy nhất của site — đo bằng tỷ lệ quay lại của độc giả khi các mối lo trực tiếp về con đã dịu bớt và thời gian đọc trung bình. (3) Liên kết chéo với Hôn nhân (khi cả hai vợ chồng đều kiệt sức, mối quan hệ dễ căng thẳng theo) và Quyền lợi & pháp lý (chế độ nghỉ phép, bảo hiểm y tế). (4) Khai thác mảng ít cạnh tranh SEO vì đa số site sức khỏe chỉ viết cho mẹ bầu hoặc trẻ em, bỏ trống hoàn toàn sức khỏe cha mẹ hậu sinh.
                 TEXT,
 
             'pain_points' => <<<'TEXT'
@@ -1132,16 +1410,24 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => null,
             'slug'        => 'hon-nhan',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: hôn nhân SAU khi có con — duy trì kết nối vợ chồng, bất đồng quan điểm dạy con, "mental load", đời sống chăn gối sau sinh, hàn gắn sau cãi vã vì con.
+                - KHÔNG viết: mâu thuẫn với ông bà nội ngoại (thuộc các bài nuôi dạy con theo tuổi) — chỉ tập trung mối quan hệ HAI VỢ CHỒNG.
+                - Khác biệt: viết riêng cho GIAI ĐOẠN có con nhỏ (không phải hôn nhân nói chung) — biến số con cái đã đổi hoàn toàn quỹ thời gian/năng lượng.
+                - "Mental load" là chủ đề trọng tâm — gọi tên gánh nặng vô hình mà nhiều người chồng không nhận ra vợ đang mang.
+                - KPI: đo bằng thời gian đọc và tỷ lệ độc giả tìm đến ngay sau một trận cãi vã (traffic tăng đột biến theo tình huống).
+                TEXT,
+
             'core_focus' => <<<'TEXT'
                 Nuôi dưỡng mối quan hệ vợ chồng SAU khi có con — giai đoạn hôn nhân dễ tổn thương nhất vì gần như toàn bộ thời gian và năng lượng dồn cho con: duy trì kết nối vợ chồng (date night thực tế với ngân sách và thời gian hạn hẹp, giao tiếp khi cả hai đều kiệt sức), bất đồng quan điểm nuôi dạy con giữa hai vợ chồng (một người nghiêm một người chiều, tranh cãi trước mặt con), chia sẻ việc nhà - chăm con công bằng (gánh nặng vô hình "mental load" thường dồn lên một người), đời sống vợ chồng thay đổi sau sinh, và cách hàn gắn sau những trận cãi vã vì chuyện con cái. KHÔNG lấn sân: mâu thuẫn với ông bà nội ngoại (thuộc các bài nuôi dạy con theo tuổi ở từng danh mục con) — chuyên mục này chỉ tập trung đúng mối quan hệ giữa hai vợ chồng với nhau.
                 TEXT,
 
             'unique_angle' => <<<'TEXT'
-                (1) Viết riêng cho GIAI ĐOẠN sau khi có con thay vì hôn nhân nói chung — khác các trang "giữ lửa hôn nhân" chung chung không tính đến biến số con cái đã thay đổi hoàn toàn quỹ thời gian và năng lượng của hai vợ chồng. (2) Coi "mental load" — gánh nặng vô hình của việc luôn phải nhớ, lên kế hoạch, quản lý mọi việc trong nhà — là chủ đề trọng tâm, gọi tên cảm giác kiệt sức mà nhiều người chồng không nhận ra vợ mình đang mang. (3) Thẳng thắn về đời sống chăn gối sau sinh — chủ đề gần như không ai viết nghiêm túc bằng tiếng Việt ngoài các bài giật tít hoặc né tránh hoàn toàn.
+                Tối nay, sau khi con ngủ, hai vợ chồng lại ngồi cạnh nhau trên sofa — mỗi người một chiếc điện thoại, không nói với nhau câu nào ngoài "con ngủ chưa" và "mai ai đưa con đi học". Không phải vì hết yêu, mà vì năng lượng cả ngày đã dồn hết cho một đứa trẻ. (1) Viết riêng cho GIAI ĐOẠN sau khi có con thay vì hôn nhân nói chung — khác các trang "giữ lửa hôn nhân" chung chung không tính đến biến số con cái đã thay đổi hoàn toàn quỹ thời gian và năng lượng của hai vợ chồng. (2) Coi "mental load" — gánh nặng vô hình của việc luôn phải nhớ, lên kế hoạch, quản lý mọi việc trong nhà — là chủ đề trọng tâm, gọi tên cảm giác kiệt sức mà nhiều người chồng không nhận ra vợ mình đang mang. (3) Thẳng thắn về đời sống chăn gối sau sinh — chủ đề gần như không ai viết nghiêm túc bằng tiếng Việt ngoài các bài giật tít hoặc né tránh hoàn toàn.
                 TEXT,
 
             'content_goals' => <<<'TEXT'
-                (1) SEO cho cụm truy vấn "giữ lửa hôn nhân sau khi có con", "chồng không giúp việc nhà phải làm sao", "hai vợ chồng bất đồng quan điểm dạy con", "quan hệ vợ chồng sau sinh bao lâu thì bình thường". (2) Là nơi hiếm hoi thừa nhận hôn nhân có con nhỏ là một thử thách thật, xây niềm tin biên tập bằng sự trung thực thay vì hình ảnh gia đình hoàn hảo. (3) Liên kết chéo với Sức khỏe cha mẹ (khi kiệt sức ảnh hưởng trực tiếp đến mối quan hệ) và các danh mục "Chăm sóc & nuôi dạy" theo tuổi con (khi bàn về bất đồng quan điểm dạy con cụ thể).
+                (1) SEO cho cụm truy vấn "giữ lửa hôn nhân sau khi có con", "chồng không giúp việc nhà phải làm sao", "hai vợ chồng bất đồng quan điểm dạy con", "quan hệ vợ chồng sau sinh bao lâu thì bình thường". (2) Là nơi hiếm hoi thừa nhận hôn nhân có con nhỏ là một thử thách thật — đo bằng thời gian đọc và tỷ lệ độc giả đến ngay sau một tình huống căng thẳng cụ thể, xây niềm tin biên tập bằng sự trung thực thay vì hình ảnh gia đình hoàn hảo. (3) Liên kết chéo với Sức khỏe cha mẹ (khi kiệt sức ảnh hưởng trực tiếp đến mối quan hệ) và các danh mục "Chăm sóc & nuôi dạy" theo tuổi con (khi bàn về bất đồng quan điểm dạy con cụ thể).
                 TEXT,
 
             'pain_points' => <<<'TEXT'
@@ -1166,16 +1452,24 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => null,
             'slug'        => 'du-lich-gia-dinh',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: du lịch cùng con theo ĐỘ TUỔI cụ thể, chọn điểm đến/thời điểm, đồ mang theo, mẹo di chuyển dài, ngân sách thực tế.
+                - KHÔNG viết: an toàn/tổ chức không gian sống trong nhà (→ Nhà cửa & đời sống), review sản phẩm chi tiết (→ Đánh giá sản phẩm).
+                - Mọi lời khuyên gắn ĐỘ TUỔI CỤ THỂ — không viết chung chung fit-all mọi gia đình.
+                - Ưu tiên điểm đến GẦN, khả thi cuối tuần — không chỉ viết chuyến đi xa mơ mộng khó thực hiện thường xuyên.
+                - KPI: đo bằng tỷ lệ mở rộng thành công của công thức 5 bài đã xuất bản sang điểm đến/độ tuổi mới, và CTR sang Tài chính gia đình.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
                 Du lịch cùng con nhỏ cho gia đình Việt — từ chuyến đi ngắn cuối tuần gần nhà đến kỳ nghỉ dài ngày — với trọng tâm THỰC HÀNH: chọn điểm đến và thời điểm phù hợp theo đúng độ tuổi con (chuyến đi cùng trẻ sơ sinh khác hoàn toàn chuyến đi cùng trẻ mầm non hay tiểu học), danh sách đồ cần mang không thiếu không thừa, mẹo giữ con không quấy khóc trên các chặng di chuyển dài (máy bay, ô tô đường dài), và lập ngân sách cho cả chuyến đi để không vỡ kế hoạch giữa chừng. KHÔNG lấn sân: an toàn - tổ chức không gian sống trong nhà (thuộc Nhà cửa & đời sống); các vấn đề sức khỏe khi đi xa (say tàu xe, sốt khi du lịch) chỉ nhắc sơ lược, chi tiết y khoa thuộc các danh mục Bệnh thường gặp theo tuổi con.
                 TEXT,
 
             'unique_angle' => <<<'TEXT'
-                (1) Mọi lời khuyên đều gắn với ĐỘ TUỔI CỤ THỂ của con thay vì lời khuyên du lịch chung chung fit-all mọi gia đình. (2) Đưa ngân sách thực tế bằng con số cụ thể (một chuyến 2 ngày 1 đêm tốn khoảng bao nhiêu, mẹo tiết kiệm không hy sinh trải nghiệm) thay vì chỉ liệt kê điểm đến đẹp không tính đến chi phí thật. (3) Ưu tiên các ĐIỂM ĐẾN GẦN, khả thi trong một kỳ nghỉ cuối tuần (bán kính vài giờ di chuyển) thay vì chỉ viết các chuyến đi xa mơ mộng mà phần lớn gia đình có con nhỏ khó thực hiện thường xuyên.
+                Chuyến bay đầu tiên của con thường là nỗi lo lớn hơn cả việc chọn điểm đến — cha mẹ tưởng tượng cảnh con khóc ré suốt hai tiếng và cả nhà xuống sân bay trong tình trạng kiệt sức trước khi kỳ nghỉ kịp bắt đầu. Bài "kinh nghiệm du lịch cùng con" tiếng Việt hiện có thường viết chung cho mọi độ tuổi, trong khi nỗi sợ thật của mỗi giai đoạn hoàn toàn khác nhau. (1) Mỗi độ tuổi giải đúng MỘT nỗi sợ cụ thể — dưới 1 tuổi là tai đau lúc cất/hạ cánh (mẹo: cho bú/ngậm ti đúng lúc máy bay đổi độ cao), 1-3 tuổi là ăn vạ giữa sân bay vì lệch giờ ngủ (mẹo: chọn giờ bay trùng giấc ngủ trưa), 3-6 tuổi là say xe đường dài — không viết chung một bài "mẹo du lịch cùng con" cho cả ba nhóm tuổi; (2) Ngân sách nêu bằng con số thật (một chuyến 2 ngày 1 đêm tốn khoảng bao nhiêu) kèm mẹo tiết kiệm cụ thể không hy sinh trải nghiệm — đủ để cha mẹ tự trả lời "đi được không với số tiền này" ngay khi đọc, không phải đoán; (3) Điểm đến ưu tiên trong bán kính vài giờ di chuyển, lặp lại được mỗi 1-2 tháng — vì gắn kết gia đình đến từ TẦN SUẤT đi, không phải từ một chuyến đi xa hoành tráng mỗi năm.
                 TEXT,
 
             'content_goals' => <<<'TEXT'
-                (1) SEO cho cụm truy vấn "du lịch cùng trẻ sơ sinh cần chuẩn bị gì", "địa điểm du lịch gần Hà Nội/TP.HCM cho gia đình có con nhỏ", "mẹo cho bé đi máy bay không khóc", "chi phí du lịch gia đình 4 người". (2) Nuôi 5 bài đã xuất bản (du lịch biển cùng trẻ nhỏ, đồ dùng cần mang, điểm đến gần Hà Nội, mẹo trên máy bay, ngân sách chuyến đi) thành chuỗi nội dung mẫu mực đầu tiên của danh mục, mở rộng thêm các điểm đến và độ tuổi khác theo đúng công thức đã có. (3) Liên kết chéo với Tài chính gia đình (lập ngân sách) và các danh mục theo tuổi con (đồ dùng phù hợp từng giai đoạn).
+                (1) SEO cho cụm truy vấn "du lịch cùng trẻ sơ sinh cần chuẩn bị gì", "địa điểm du lịch gần Hà Nội/TP.HCM cho gia đình có con nhỏ", "mẹo cho bé đi máy bay không khóc", "chi phí du lịch gia đình 4 người". (2) Nuôi 5 bài đã xuất bản (du lịch biển cùng trẻ nhỏ, đồ dùng cần mang, điểm đến gần Hà Nội, mẹo trên máy bay, ngân sách chuyến đi) thành chuỗi nội dung mẫu mực — đo bằng tỷ lệ mở rộng thành công sang điểm đến/độ tuổi mới theo đúng công thức đã có. (3) Liên kết chéo với Tài chính gia đình (lập ngân sách) và các danh mục theo tuổi con (đồ dùng phù hợp từng giai đoạn).
                 TEXT,
 
             'pain_points' => <<<'TEXT'
@@ -1200,16 +1494,24 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => null,
             'slug'        => 'nha-cua-doi-song',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: an toàn nhà theo mốc phát triển con, tổ chức góc chơi/học trong không gian nhỏ, chia việc nhà, chọn nội thất phù hợp trẻ nhỏ.
+                - KHÔNG viết: du lịch/hoạt động ngoài nhà (→ Du lịch gia đình), review sản phẩm chi tiết theo tên (→ Đánh giá sản phẩm).
+                - Giải đúng bài toán KHÔNG GIAN NHỎ (chung cư/nhà phố 50-100m2) — không copy nội dung Tây (nhà rộng, sân vườn).
+                - An toàn trong nhà viết theo ĐÚNG MỐC PHÁT TRIỂN — 6 tháng khác hẳn 3 tuổi, không dùng 1 checklist chung.
+                - KPI: đo bằng tỷ lệ lưu lại các checklist an toàn theo tuổi con và tỷ lệ dùng lại nhiều lần.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
                 Tổ chức không gian sống và vận hành việc nhà cho gia đình có con nhỏ, đặc biệt trong điều kiện nhà chung cư hoặc nhà phố diện tích hạn chế phổ biến ở đô thị Việt Nam: an toàn trong nhà theo từng giai đoạn phát triển của con (khóa tủ thuốc - ổ điện khi con biết bò - biết trèo, chặn cầu thang, bo góc bàn), tổ chức góc chơi - góc học riêng cho con trong không gian nhỏ, sắp xếp việc nhà hiệu quả khi có con mọn để không chiếm hết thời gian dành cho con, và chọn đồ nội thất - thiết bị gia đình phù hợp có trẻ nhỏ (bàn ghế bo góc, vật liệu an toàn, thiết bị tiết kiệm thời gian). KHÔNG lấn sân: du lịch và hoạt động ngoài nhà (thuộc Du lịch gia đình); đánh giá sản phẩm cụ thể chi tiết (thuộc Đánh giá sản phẩm) — ở đây chỉ nêu tiêu chí chọn, không review sản phẩm theo tên.
                 TEXT,
 
             'unique_angle' => <<<'TEXT'
-                (1) Giải quyết đúng bài toán KHÔNG GIAN NHỎ — đa số nội dung "tổ chức nhà cửa" tham khảo từ phương Tây (nhà rộng, có sân vườn, phòng riêng cho từng mục đích) không áp dụng được cho căn hộ 50-100m2 phổ biến ở đô thị Việt Nam. (2) An toàn trong nhà được viết theo ĐÚNG MỐC PHÁT TRIỂN của con — những gì cần làm khi con 6 tháng khác hẳn khi con 3 tuổi — thay vì một danh sách chung chung áp dụng cho mọi độ tuổi. (3) Thẳng thắn nhìn nhận việc nhà là một "cuộc chiến" thật trong hôn nhân có con nhỏ, đưa giải pháp chia việc thực tế thay vì lời khuyên lý tưởng hóa kiểu ảnh mạng xã hội.
+                Tuần trước con chỉ biết bò quanh sàn, tuần này đã bắt gặp con đứng chênh vênh trên mặt bàn sau khi trèo qua hai chiếc ghế xếp cạnh nhau — ngôi nhà cần được nhìn lại từ góc "con có thể trèo tới đâu", không phải góc "đẹp". Nội dung "tổ chức nhà cửa có con nhỏ" tiếng Việt phần lớn dịch từ nguồn Tây (nhà rộng, sân vườn) hoặc thiên về thẩm mỹ hơn an toàn. (1) Mỗi mốc phát triển của con có một checklist an toàn RIÊNG, đổi theo tháng chứ không cố định — biết bò (6-9 tháng): chặn ổ điện, cất phích nước; biết trèo (10-18 tháng): bo góc bàn, rào ban công; biết mở khóa (2-3 tuổi): đổi vị trí tủ thuốc, khóa cửa ra vào; (2) Giải pháp không gian tính đúng cho căn hộ 50-100m2 — góc chơi gọn trong một góc phòng khách chung, đồ nội thất chuyển đổi được theo tuổi con — không copy ảnh nhà rộng có sân vườn kiểu Pinterest; (3) Chia việc nhà theo CA cụ thể (sáng/tối, ai làm gì cố định) thay vì "ai rảnh thì làm" — cách duy nhất thực sự giảm được cảm giác bất công đang âm thầm phá hôn nhân có con nhỏ.
                 TEXT,
 
             'content_goals' => <<<'TEXT'
-                (1) SEO cho cụm truy vấn "cách chống trẻ leo trèo trong nhà", "khóa an toàn ổ điện cho bé", "sắp xếp góc chơi cho con trong nhà nhỏ", "mẹo làm việc nhà nhanh khi có con nhỏ". (2) Là chuyên mục thực dụng gắn liền đời sống hằng ngày, tăng thời gian đọc bằng các checklist an toàn theo tuổi con dễ lưu lại dùng nhiều lần. (3) Liên kết chéo với Hôn nhân (chia sẻ việc nhà công bằng), Du lịch gia đình, và các danh mục an toàn theo tuổi con ở từng giai đoạn phát triển.
+                (1) SEO cho cụm truy vấn "cách chống trẻ leo trèo trong nhà", "khóa an toàn ổ điện cho bé", "sắp xếp góc chơi cho con trong nhà nhỏ", "mẹo làm việc nhà nhanh khi có con nhỏ". (2) Là chuyên mục thực dụng gắn liền đời sống hằng ngày — đo bằng tỷ lệ lưu lại và tần suất dùng lại các checklist an toàn theo tuổi con. (3) Liên kết chéo với Hôn nhân (chia sẻ việc nhà công bằng), Du lịch gia đình, và các danh mục an toàn theo tuổi con ở từng giai đoạn phát triển.
                 TEXT,
 
             'pain_points' => <<<'TEXT'
@@ -1234,16 +1536,24 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => null,
             'slug'        => 'tai-chinh-gia-dinh',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: ngân sách gia đình có con, quỹ dự phòng, bảo hiểm nhân thọ/sức khỏe, tiết kiệm học đại học, dạy con quản lý tiền.
+                - KHÔNG viết: chế độ BHXH/thai sản theo luật (→ Quyền lợi & pháp lý), tư vấn đầu tư chứng khoán/BĐS rủi ro cao.
+                - Mọi con số tính theo MẶT BẰNG THU NHẬP VIỆT NAM — không dùng ví dụ kiểu Mỹ không áp dụng được.
+                - Chỉ tư vấn nền tảng AN TOÀN (quỹ dự phòng, bảo hiểm, tiết kiệm kỷ luật) — không tư vấn làm giàu nhanh/rủi ro cao.
+                - KPI: đo bằng tỷ lệ mở rộng thành công của công thức 5 bài đã xuất bản sang chủ đề tài chính mới, và CTR sang Quyền lợi & pháp lý.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
                 Hoạch định tài chính thực tế cho gia đình Việt sau khi có con — giai đoạn chi phí tăng vọt trong khi thu nhập không tăng ngay: xây ngân sách chi tiêu hằng tháng cho gia đình có con (cân đối giữa nhu cầu của con và các khoản cố định), lập quỹ dự phòng khẩn cấp bắt đầu từ đâu khi thu nhập eo hẹp, đánh giá có cần bảo hiểm nhân thọ - bảo hiểm sức khỏe cho gia đình trẻ không và chọn loại nào phù hợp, tiết kiệm dài hạn cho việc học của con từ mầm non đến đại học ngay từ sớm, và dạy con quản lý tiền tiêu vặt để hình thành thói quen tài chính tốt từ nhỏ. KHÔNG lấn sân: quyền lợi bảo hiểm xã hội - chế độ thai sản theo luật (thuộc Quyền lợi & pháp lý); tư vấn đầu tư chứng khoán - bất động sản phức tạp, ngoài phạm vi biên tập vì rủi ro cao.
                 TEXT,
 
             'unique_angle' => <<<'TEXT'
-                (1) Mọi con số đều tính theo MẶT BẰNG THU NHẬP VIỆT NAM — ngân sách mẫu theo mức lương phổ biến của gia đình trẻ thành thị — thay vì các con số tài chính kiểu Mỹ không áp dụng được. (2) Không tư vấn đầu tư sinh lời cao - rủi ro (chứng khoán, tiền ảo) mà chỉ tập trung nền tảng an toàn: quỹ dự phòng, bảo hiểm, tiết kiệm có kỷ luật, phù hợp đối tượng ưu tiên an toàn tài chính cho con hơn làm giàu nhanh. (3) Đưa "dạy con về tiền" thành một trụ cột ngang hàng với quản lý tài chính người lớn — hiếm chuyên mục tài chính nào viết cho cả phụ huynh lẫn hướng dẫn dạy con cùng lúc.
+                Cuối tháng, mở app ngân hàng kiểm tra số dư và thấy một con số quen thuộc đến nản lòng: gần như bằng không, dù cả hai vợ chồng đều đi làm đều đặn — không phải vì thiếu kỷ luật, mà vì thiếu một hệ thống. Nội dung tài chính cá nhân tiếng Việt hoặc quá chung chung ("hãy tiết kiệm 20% thu nhập") hoặc quá xa vời (ví dụ tính bằng USD, thu nhập nghìn đô). (1) Ngân sách mẫu chia đúng theo mốc thu nhập gia đình trẻ Việt Nam thật (15-25 triệu / 25-40 triệu/tháng) — trả lời thẳng "lương tầm này thì quỹ dự phòng nên bắt đầu từ con số nào" bằng một con số cụ thể, không phải công thức "6 tháng chi tiêu" nghe xa vời; (2) Chỉ tư vấn nền tảng AN TOÀN theo đúng thứ tự ưu tiên — quỹ dự phòng trước, bảo hiểm sau, tiết kiệm dài hạn cuối — không đẩy độc giả vào chứng khoán/tiền ảo dù đang là trend, vì đối tượng ưu tiên an toàn cho con hơn làm giàu nhanh; (3) "Dạy con về tiền tiêu vặt" viết thành trụ cột riêng có mốc tuổi và con số cụ thể (bao nhiêu ở tuổi nào) — điều hiếm nơi nào trả lời rõ ràng thay vì chỉ nói chung chung "dạy con biết tiết kiệm".
                 TEXT,
 
             'content_goals' => <<<'TEXT'
-                (1) SEO cho cụm truy vấn "lập ngân sách gia đình 4 người", "quỹ dự phòng gia đình bao nhiêu là đủ", "có nên mua bảo hiểm nhân thọ cho con", "tiết kiệm cho con học đại học từ khi nào". (2) Duy trì đúng tông của 5 bài đã xuất bản (quỹ dự phòng, dạy con quản lý tiền tiêu vặt, ngân sách chi tiêu gia đình 4 người, bảo hiểm nhân thọ, tiết kiệm học đại học) — thực dụng, có mốc và con số cụ thể — làm khuôn mẫu mở rộng thêm bài mới. (3) Liên kết chéo với Quyền lợi & pháp lý (chế độ BHXH) và Du lịch gia đình (lập ngân sách chuyến đi).
+                (1) SEO cho cụm truy vấn "lập ngân sách gia đình 4 người", "quỹ dự phòng gia đình bao nhiêu là đủ", "có nên mua bảo hiểm nhân thọ cho con", "tiết kiệm cho con học đại học từ khi nào". (2) Duy trì đúng tông của 5 bài đã xuất bản (quỹ dự phòng, dạy con quản lý tiền tiêu vặt, ngân sách chi tiêu gia đình 4 người, bảo hiểm nhân thọ, tiết kiệm học đại học) — thực dụng, có mốc và con số cụ thể — đo bằng tỷ lệ mở rộng thành công sang chủ đề mới theo đúng khuôn mẫu. (3) Liên kết chéo với Quyền lợi & pháp lý (chế độ BHXH) và Du lịch gia đình (lập ngân sách chuyến đi).
                 TEXT,
 
             'pain_points' => <<<'TEXT'
@@ -1268,16 +1578,24 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => null,
             'slug'        => 'quyen-loi-phap-ly',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: chế độ thai sản/nghỉ con ốm, đăng ký khai sinh/BHYT, quyền nuôi con khi ly hôn, chính sách hỗ trợ trẻ em.
+                - KHÔNG viết: tài chính gia đình nói chung (→ Tài chính gia đình), tư vấn pháp lý cá nhân hóa từng trường hợp cụ thể.
+                - Dịch ngôn ngữ luật sang đời thường có VÍ DỤ CỤ THỂ (số ngày, số tiền) — không trích nguyên văn điều luật khô khan.
+                - Mọi thông tin luật phải dẫn đúng căn cứ (tên luật/nghị định, số điều) và cập nhật văn bản hiện hành — đây là chuyên mục duy nhất viết luật nên phải chuẩn xác tuyệt đối.
+                - KPI: đo bằng độ chính xác/không có khiếu nại sai luật, và CTR từ các danh mục theo tuổi con khi có phần thủ tục hành chính liên quan.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
                 Phổ biến quyền lợi và quy định pháp luật liên quan trực tiếp đến cha mẹ và con cái tại Việt Nam, viết dễ hiểu cho người không có nền tảng luật: chế độ thai sản và nghỉ chăm con ốm theo Luật Bảo hiểm xã hội - Luật Lao động (thời gian nghỉ, mức hưởng, thủ tục), đăng ký khai sinh và các giấy tờ cần thiết cho con (giấy khai sinh, nhập hộ khẩu, thẻ bảo hiểm y tế cho trẻ), quyền nuôi con và cấp dưỡng khi ly hôn, các chính sách hỗ trợ trẻ em của nhà nước (tiêm chủng miễn phí, hỗ trợ học phí). KHÔNG lấn sân: tài chính gia đình nói chung (thuộc Tài chính gia đình); tư vấn pháp lý cá nhân hóa cho từng trường hợp cụ thể — chỉ phổ biến quy định chung, luôn khuyến khích gặp luật sư hoặc cơ quan bảo hiểm xã hội khi cần áp dụng cụ thể.
                 TEXT,
 
             'unique_angle' => <<<'TEXT'
-                (1) Dịch ngôn ngữ luật sang ngôn ngữ đời thường có ví dụ cụ thể (số ngày nghỉ, số tiền hưởng theo lương cơ sở) thay vì trích nguyên văn điều luật khô khan. (2) Luôn cập nhật đúng văn bản pháp luật hiện hành và ghi rõ căn cứ — tên luật/nghị định, số điều — để độc giả có thể tự tra cứu hoặc dùng làm căn cứ khi làm việc với công ty hay cơ quan nhà nước. (3) Chủ động viết cả các tình huống nhạy cảm ít ai hỏi công khai (quyền lợi khi mang thai hộ, quyền nuôi con khi ly hôn, quyền lợi của mẹ đơn thân) với thái độ trung lập, không phán xét hoàn cảnh gia đình.
+                Bụng đã to, ngày dự sinh gần kề, nhưng câu hỏi khiến mất ngủ không kém gì chuyện chuẩn bị đồ đi sinh lại là: nghỉ thai sản xong, lương sẽ ra sao — mà hỏi phòng nhân sự thì ngại, sợ ảnh hưởng đánh giá công việc. (1) Dịch ngôn ngữ luật sang ngôn ngữ đời thường có ví dụ cụ thể (số ngày nghỉ, số tiền hưởng theo lương cơ sở) thay vì trích nguyên văn điều luật khô khan. (2) Luôn cập nhật đúng văn bản pháp luật hiện hành và ghi rõ căn cứ — tên luật/nghị định, số điều — để độc giả có thể tự tra cứu hoặc dùng làm căn cứ khi làm việc với công ty hay cơ quan nhà nước. (3) Chủ động viết cả các tình huống nhạy cảm ít ai hỏi công khai (quyền lợi khi mang thai hộ, quyền nuôi con khi ly hôn, quyền lợi của mẹ đơn thân) với thái độ trung lập, không phán xét hoàn cảnh gia đình.
                 TEXT,
 
             'content_goals' => <<<'TEXT'
-                (1) SEO cho cụm truy vấn "chế độ thai sản nghỉ bao nhiêu ngày", "thủ tục làm giấy khai sinh cho con cần gì", "nghỉ con ốm có được hưởng lương không", "quyền nuôi con khi ly hôn". (2) Xây uy tín "có căn cứ pháp lý rõ ràng" cho toàn site — chuyên mục duy nhất viết về luật nên phải chuẩn xác tuyệt đối. (3) Liên kết chéo với hầu hết các danh mục theo tuổi con mỗi khi có phần thủ tục hành chính liên quan (đăng ký khai sinh khi mới sinh, chế độ nghỉ khi con ốm ở các độ tuổi).
+                (1) SEO cho cụm truy vấn "chế độ thai sản nghỉ bao nhiêu ngày", "thủ tục làm giấy khai sinh cho con cần gì", "nghỉ con ốm có được hưởng lương không", "quyền nuôi con khi ly hôn". (2) Xây uy tín "có căn cứ pháp lý rõ ràng" cho toàn site — chuyên mục duy nhất viết về luật nên phải chuẩn xác tuyệt đối. (3) Liên kết chéo với hầu hết các danh mục theo tuổi con mỗi khi có phần thủ tục hành chính liên quan (đăng ký khai sinh khi mới sinh, chế độ nghỉ khi con ốm ở các độ tuổi) — đo bằng CTR từ các danh mục đó sang đây.
                 TEXT,
 
             'pain_points' => <<<'TEXT'
@@ -1301,6 +1619,14 @@ class CategoryFoundationSeeder extends Seeder
         [
             'parent_slug' => null,
             'slug'        => 'truong-mam-non-tieu-hoc',
+
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: khung tiêu chí chọn trường (ngân sách, 3 loại hình, quy trình tuyển sinh, checklist tham quan) — KHÔNG xếp hạng trường cụ thể.
+                - KHÔNG viết: đánh giá/xếp hạng nêu tên một trường cụ thể (rủi ro PR hoặc bôi nhọ).
+                - Luôn quy về NGÂN SÁCH THỰC của gia đình TRƯỚC khi nói triết lý giáo dục — nhiều bài khác bỏ qua bước này.
+                - Thẳng thắn: KHÔNG có trường nào hoàn hảo, một số con sẽ cần đổi trường giữa chừng — đây là chuyện bình thường, không phải "chọn sai".
+                - Dạy "đọc" buổi tham quan trường thay vì tin brochure (giờ đón trả thực tế, tỷ lệ giáo viên nghỉ việc).
+                TEXT,
 
             'core_focus' => <<<'TEXT'
                 Khung tiêu chí chọn trường cho con từ mầm non đến hết tiểu học — quyết định lớn nhất, tốn kém nhất trong 6 năm đầu đời con mà cha mẹ Việt phải đưa ra: xác định ngân sách thực tế theo 3 tuyến (công lập gần như miễn phí, tư thục 3-15 triệu/tháng, quốc tế/song ngữ 15-50+ triệu/tháng), hiểu sự khác biệt thật giữa 3 loại hình (chương trình học, sĩ số lớp, triết lý giáo dục, mức độ can thiệp của phụ huynh được chấp nhận), quy trình tuyển sinh và thời điểm nộp hồ sơ theo lịch năm học (đặc biệt trường tư/quốc tế thường tuyển trước cả năm), danh sách câu hỏi nên hỏi và dấu hiệu cần quan sát khi đi thăm trường thực tế (bữa ăn, sĩ số thực tế so với quảng cáo, thái độ giáo viên với trẻ khi không có phụ huynh theo dõi), và cách xử lý khi con không thích nghi được với trường đã chọn. Định dạng chủ lực: bài khung tiêu chí + checklist tham quan trường + bài giải đáp tình huống chuyển trường. KHÔNG lấn sân: không đánh giá, xếp hạng hay nêu tên một trường cụ thể nào (tránh trở thành bài PR hoặc bôi nhọ trường), chỉ cung cấp khung tiêu chí và quy trình chung để cha mẹ tự áp dụng vào trường họ đang cân nhắc.
@@ -1336,6 +1662,14 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => null,
             'slug'        => 'truong-nang-khieu-ky-nang',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: nhận biết năng khiếu thật vs hứng thú nhất thời, tiêu chí chọn lớp/trung tâm, thử môn mới không tốn kém, dừng môn không phù hợp.
+                - KHÔNG viết: học thêm môn văn hóa (→ Trung tâm học tập), hành vi/kỷ luật hằng ngày (→ Chăm sóc & nuôi dạy).
+                - Dạy phân biệt "hứng thú nhất thời" vs "năng khiếu thật" bằng dấu hiệu quan sát TẠI NHÀ — không cần test chuyên môn tốn tiền.
+                - Bình thường hóa việc con thử — bỏ — thử môn khác, không coi là lãng phí hay "cả thèm chóng chán".
+                - KPI: đo bằng mức giảm cảm giác tội lỗi/áp lực khi so sánh lịch ngoại khóa (khảo sát/bình luận) và tỷ lệ CTR sang Trung tâm học tập.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
                 Giúp cha mẹ chọn đúng hoạt động ngoại khóa/năng khiếu cho con thay vì chạy theo phong trào của bạn bè, đám đông mạng xã hội: cách nhận biết dấu hiệu năng khiếu thật của con theo từng độ tuổi (3-6 tuổi: quan sát qua trò chơi tự do con chọn lặp lại; 6-12 tuổi: qua mức độ kiên trì khi gặp khó chứ không chỉ hứng thú ban đầu), tiêu chí chọn lớp/trung tâm năng khiếu cụ thể (bơi, đàn, vẽ, võ, bóng đá, tiếng Anh, cờ vua...) theo an toàn - chất lượng giáo viên - lộ trình rõ ràng thay vì chọn theo quảng cáo hay "cả lớp đi học", cách thử một môn mới mà không tốn kém (lớp trải nghiệm, mượn dụng cụ trước khi mua), dấu hiệu nên dừng một môn con không phù hợp mà không tạo cảm giác thất bại cho con, và cân bằng số lượng hoạt động ngoại khóa để con vẫn có thời gian chơi tự do - nghỉ ngơi. KHÔNG lấn sân: không viết về học thêm các môn văn hóa (Toán, tiếng Việt, tiếng Anh học thuật — thuộc Trung tâm học tập), không viết hành vi/kỷ luật hằng ngày (thuộc các danh mục Chăm sóc & nuôi dạy theo tuổi).
                 TEXT,
@@ -1345,7 +1679,7 @@ class CategoryFoundationSeeder extends Seeder
                 TEXT,
 
             'content_goals' => <<<'TEXT'
-                (1) SEO cho truy vấn theo môn cụ thể và theo độ tuổi: "con mấy tuổi học bơi được", "có nên cho con học piano từ nhỏ", "dấu hiệu trẻ có năng khiếu hội họa", "con học được 2 tháng đòi nghỉ có nên ép học tiếp". (2) Giảm cảm giác tội lỗi/áp lực của cha mẹ khi so sánh lịch học ngoại khóa của con với con nhà khác — xây niềm tin rằng ít hoạt động nhưng đúng còn hơn nhiều hoạt động theo phong trào. (3) Liên kết chéo với Trung tâm học tập (khi nhu cầu chuyển từ năng khiếu sang học thuật) và với các danh mục Phát triển của trẻ theo từng giai đoạn tuổi.
+                (1) SEO cho truy vấn theo môn cụ thể và theo độ tuổi: "con mấy tuổi học bơi được", "có nên cho con học piano từ nhỏ", "dấu hiệu trẻ có năng khiếu hội họa", "con học được 2 tháng đòi nghỉ có nên ép học tiếp". (2) Giảm cảm giác tội lỗi/áp lực của cha mẹ khi so sánh lịch học ngoại khóa của con với con nhà khác — đo bằng phản hồi định tính (bình luận, khảo sát), xây niềm tin rằng ít hoạt động nhưng đúng còn hơn nhiều hoạt động theo phong trào. (3) Liên kết chéo với Trung tâm học tập (khi nhu cầu chuyển từ năng khiếu sang học thuật) và với các danh mục Phát triển của trẻ theo từng giai đoạn tuổi.
                 TEXT,
 
             'pain_points' => <<<'TEXT'
@@ -1370,6 +1704,14 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => null,
             'slug'        => 'trung-tam-hoc-tap',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: quyết định KHI NÀO con thật sự cần học thêm (vs áp lực so sánh), tiêu chí chọn trung tâm/gia sư, chi phí hợp lý theo thu nhập.
+                - KHÔNG viết: năng khiếu/ngoại khóa phi học thuật (→ Trường năng khiếu & kỹ năng), phương pháp tự học tại nhà hằng ngày (→ Chăm sóc & nuôi dạy).
+                - Phân biệt rạch ròi "con cần học thêm thật" và "cha mẹ lo vì so sánh" bằng dấu hiệu cụ thể từ bài kiểm tra — không phải cảm tính.
+                - Tính chi phí học thêm như khoản chi DÀI HẠN có kế hoạch, đặt trong tổng ngân sách giáo dục — không phải chi tiêu bột phát vì lo âu.
+                - KPI: đo bằng mức giảm hoang mang/tội lỗi khi quyết định chi tiền học thêm (khảo sát/bình luận) và CTR sang Tài chính gia đình.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
                 Hướng dẫn cha mẹ có con tiểu học/THCS quyết định đúng lúc, đúng chỗ khi cần cho con học thêm ngoài giờ chính khóa: nhận biết khi nào con THẬT SỰ cần hỗ trợ thêm (hổng kiến thức cụ thể, chuẩn bị thi chuyển cấp) so với khi nào là áp lực thành tích ảo từ so sánh với bạn bè, tiêu chí chọn trung tâm/gia sư uy tín (chứng chỉ giáo viên, sĩ số lớp, lộ trình học có đo lường được tiến bộ hay không, chính sách học thử/hoàn tiền), so sánh học nhóm tại trung tâm với gia sư 1-kèm-1 theo ngân sách và đặc điểm con, cách sắp xếp lịch học thêm không chồng chéo gây quá tải (đặc biệt khi con đã có lịch năng khiếu), và chi phí học thêm hợp lý theo thu nhập gia đình để không rơi vào vòng xoáy chi tiêu vượt khả năng. KHÔNG lấn sân: không viết về hoạt động năng khiếu/ngoại khóa phi học thuật (thuộc Trường năng khiếu & kỹ năng), không viết phương pháp dạy con tự học tại nhà hằng ngày (thuộc các danh mục Chăm sóc & nuôi dạy theo tuổi).
                 TEXT,
@@ -1379,7 +1721,7 @@ class CategoryFoundationSeeder extends Seeder
                 TEXT,
 
             'content_goals' => <<<'TEXT'
-                (1) SEO cho truy vấn ra quyết định rất thực dụng: "con học kém môn Toán có nên cho học thêm không", "học thêm 1 kèm 1 hay học nhóm tốt hơn", "chi phí học thêm hợp lý là bao nhiêu", "dấu hiệu trung tâm học thêm không uy tín". (2) Giảm cảm giác hoang mang/tội lỗi của cha mẹ khi quyết định có nên chi thêm tiền học cho con hay không. (3) Liên kết với Trẻ tiểu học > Chăm sóc & nuôi dạy (áp lực học tập, đồng hành thi cử) và với Tài chính gia đình (lập ngân sách cho khoản chi học thêm).
+                (1) SEO cho truy vấn ra quyết định rất thực dụng: "con học kém môn Toán có nên cho học thêm không", "học thêm 1 kèm 1 hay học nhóm tốt hơn", "chi phí học thêm hợp lý là bao nhiêu", "dấu hiệu trung tâm học thêm không uy tín". (2) Giảm cảm giác hoang mang/tội lỗi của cha mẹ khi quyết định có nên chi thêm tiền học cho con hay không — đo bằng phản hồi định tính và tỷ lệ đọc trọn bài trước khi quyết định. (3) Liên kết với Trẻ tiểu học > Chăm sóc & nuôi dạy (áp lực học tập, đồng hành thi cử) và với Tài chính gia đình (lập ngân sách cho khoản chi học thêm).
                 TEXT,
 
             'pain_points' => <<<'TEXT'
@@ -1404,6 +1746,14 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => null,
             'slug'        => 'giao-duc-tai-nha',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: homeschool là gì, rào cản pháp lý Việt Nam, ai phù hợp/không phù hợp, xây chương trình, bù đắp tương tác xã hội.
+                - KHÔNG viết: cổ vũ phong trào một chiều, chọn trường truyền thống (→ Trường mầm non & tiểu học).
+                - Trung thực TUYỆT ĐỐI về rào cản pháp lý — không được luật công nhận là hình thức chính quy độc lập, mọi giải pháp hiện tại là "lách" hợp lý.
+                - Nhóm độc giả NHỎ nhưng đặc thù — thành công là giúp người không phù hợp nhận ra rõ ràng "không hợp với mình", tránh thử rồi bỏ giữa chừng gây xáo trộn cho con.
+                - KPI: đo bằng tỷ lệ gắn bó lâu dài của nhóm độc giả nhỏ và tỷ lệ độc giả tự đánh giá đúng mức độ phù hợp trước khi thử.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
                 Cung cấp thông tin trung thực, không cổ vũ một chiều, cho nhóm nhỏ cha mẹ đang cân nhắc hoặc đã chọn giáo dục tại nhà (homeschool) cho con tại Việt Nam: giải thích homeschool là gì và các mô hình phổ biến (tự soạn chương trình, theo chương trình quốc tế online, kết hợp học nhóm homeschool), thực trạng pháp lý tại Việt Nam (giáo dục bắt buộc theo Luật Giáo dục, những vướng mắc thực tế về học bạ - xét tuyển - thi tốt nghiệp mà gia đình homeschool phải tự tìm giải pháp như đăng ký học bạ song song ở trường hoặc thi theo diện tự học), ai thực sự phù hợp với homeschool (gia đình có 1 phụ huynh đủ thời gian, con có tính tự học tốt hoặc có nhu cầu đặc biệt trường không đáp ứng được) và ai không nên theo đuổi, cách xây dựng chương trình học tại nhà có hệ thống, và làm sao để con vẫn có tương tác xã hội đầy đủ khi không đến trường. KHÔNG lấn sân: không viết như một lời cổ vũ phong trào "bỏ trường học ở nhà cho tự do", không lấn nội dung chọn trường truyền thống (thuộc Trường mầm non & tiểu học).
                 TEXT,
@@ -1413,7 +1763,7 @@ class CategoryFoundationSeeder extends Seeder
                 TEXT,
 
             'content_goals' => <<<'TEXT'
-                (1) SEO cho cụm truy vấn ngách nhưng có ý định tìm kiếm rất rõ ràng: "giáo dục tại nhà có hợp pháp ở Việt Nam không", "homeschool là gì", "con không đến trường có được thi đại học không", "cộng đồng homeschool Việt Nam". (2) Trở thành nguồn thông tin trung thực hiếm hoi giữa hai cực đoan cổ vũ/phản đối, xây uy tín với nhóm độc giả nhỏ nhưng gắn bó lâu dài. (3) Với đa số độc giả chỉ đang tò mò (không thực sự theo đuổi), bài viết đóng vai trò giúp họ đưa ra quyết định "không phù hợp với mình" một cách rõ ràng, tránh thử rồi bỏ giữa chừng gây xáo trộn cho con.
+                (1) SEO cho cụm truy vấn ngách nhưng có ý định tìm kiếm rất rõ ràng: "giáo dục tại nhà có hợp pháp ở Việt Nam không", "homeschool là gì", "con không đến trường có được thi đại học không", "cộng đồng homeschool Việt Nam". (2) Trở thành nguồn thông tin trung thực hiếm hoi giữa hai cực đoan cổ vũ/phản đối — đo bằng tỷ lệ quay lại và mức gắn bó lâu dài của nhóm độc giả nhỏ này. (3) Với đa số độc giả chỉ đang tò mò (không thực sự theo đuổi), bài viết đóng vai trò giúp họ đưa ra quyết định "không phù hợp với mình" một cách rõ ràng, tránh thử rồi bỏ giữa chừng gây xáo trộn cho con.
                 TEXT,
 
             'pain_points' => <<<'TEXT'
@@ -1438,16 +1788,24 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => null,
             'slug'        => 'danh-gia-san-pham',
 
+            'writer_insights' => <<<'TEXT'
+                - Phạm vi: SO SÁNH khách quan tối thiểu 2-3 lựa chọn (bỉm, sữa công thức, xe đẩy, đồ chơi...) theo 4 tiêu chí cố định — KHÔNG kết luận "nên mua sản phẩm X".
+                - KHÔNG viết: kỹ thuật sử dụng (→ các danh mục theo tuổi), xếp hạng Top/Best-of (→ Giải thưởng nổi bật), review đơn lẻ 1 sản phẩm.
+                - Vai trò tư vấn viên trung lập — luôn nêu ít nhất 1 nhược điểm mỗi lựa chọn kể cả lựa chọn đắt nhất, dù có Product CTA Box hiển thị giá/link mua.
+                - Neo tiêu chí vào HOÀN CẢNH gia đình Việt cụ thể (nhà không thang máy, con hoạt động nhiều ban đêm) — không dùng thông số kỹ thuật chung chung.
+                - KPI: đo bằng CTR thương mại (nhóm từ khóa "so sánh X và Y" có giá trị chuyển đổi cao nhất site) và traffic dẫn về từ các danh mục theo tuổi con.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
-                So sánh KHÁCH QUAN các nhóm sản phẩm mẹ và bé mà cha mẹ Việt phải quyết định mua thường xuyên nhất: bỉm - tã (theo cân nặng, độ thấm hút, da nhạy cảm), sữa công thức (theo độ tuổi, thành phần, nhu cầu đặc biệt như đạm thủy phân, táo bón), xe đẩy - địu - ghế ăn - cũi (theo không gian nhà, tần suất di chuyển, ngân sách), đồ chơi giáo dục theo độ tuổi, và các thiết bị hỗ trợ khác (máy hâm sữa, máy tiệt trùng, monitor theo dõi trẻ). Mỗi bài đi theo khung 4 tiêu chí thực dụng cố định — giá & chi phí sử dụng lâu dài, công năng thực tế (không phải thông số quảng cáo), độ an toàn (chứng nhận, cảnh báo thu hồi nếu có), đối tượng phù hợp (loại da, cơ địa, hoàn cảnh gia đình nào hợp loại nào) — trình bày dạng bảng ưu - nhược song song giữa các lựa chọn phổ biến trên thị trường Việt Nam (cả hàng nội lẫn hàng nhập, cả phân khúc bình dân lẫn cao cấp), để người đọc tự đối chiếu với hoàn cảnh và tự quyết định, bài viết KHÔNG kết luận "nên mua sản phẩm X". KHÔNG lấn sân: kỹ thuật ăn dặm/dinh dưỡng (thuộc các danh mục Dinh dưỡng theo độ tuổi), hướng dẫn sử dụng an toàn chuyên sâu như cách quấn khăn - lắp ghế ô tô đúng cách (thuộc các danh mục Chăm sóc & nuôi dạy theo độ tuổi), and danh sách "Top sản phẩm tốt nhất" dạng xếp hạng biên tập (thuộc Giải thưởng nổi bật).
+                So sánh KHÁCH QUAN các nhóm sản phẩm mẹ và bé cha mẹ Việt phải quyết định mua thường xuyên nhất: bỉm - tã (cân nặng, độ thấm hút, da nhạy cảm), sữa công thức (độ tuổi, thành phần, nhu cầu đặc biệt), xe đẩy - địu - ghế ăn - cũi (không gian nhà, ngân sách), đồ chơi giáo dục, và thiết bị hỗ trợ khác (máy hâm sữa, máy tiệt trùng, monitor theo dõi trẻ). Mỗi bài theo khung 4 tiêu chí cố định — giá & chi phí lâu dài, công năng thực tế (không phải thông số quảng cáo), độ an toàn (chứng nhận, cảnh báo thu hồi), đối tượng phù hợp — trình bày bảng ưu - nhược song song giữa các lựa chọn phổ biến (hàng nội lẫn nhập, bình dân lẫn cao cấp), để người đọc tự đối chiếu và quyết định, KHÔNG kết luận "nên mua sản phẩm X". KHÔNG lấn sân: kỹ thuật ăn dặm/dinh dưỡng (thuộc Dinh dưỡng theo độ tuổi), hướng dẫn sử dụng an toàn chuyên sâu như quấn khăn - lắp ghế ô tô (thuộc Chăm sóc & nuôi dạy theo độ tuổi), và danh sách "Top sản phẩm tốt nhất" dạng xếp hạng (thuộc Giải thưởng nổi bật).
                 TEXT,
 
             'unique_angle' => <<<'TEXT'
-                Gần như mọi bài "review sản phẩm mẹ và bé" tiếng Việt hiện có đều là bài PR trá hình do nhãn hàng đặt viết hoặc affiliate one-sided chỉ khen một sản phẩm duy nhất — người đọc phải tự lọc thật giả giữa hàng chục bài "top 1 thị trường" mâu thuẫn nhau. Khác biệt của chuyên mục: (1) Vai trò tư vấn viên trung lập chứ không phải người bán hàng — dù site có hạ tầng Product CTA Box hiển thị đầy đủ giá, ảnh, link mua (Shopee/TikTok/nhà cung cấp) ngay trong bài, phần LỜI VĂN không được viết như quảng cáo: luôn nêu ít nhất một nhược điểm thật của mọi lựa chọn kể cả lựa chọn đắt tiền nhất, và không dùng ngôn ngữ cấp trên như "phải mua", "tốt nhất thị trường"; (2) Neo tiêu chí vào HOÀN CẢNH gia đình Việt cụ thể thay vì thông số kỹ thuật chung chung — ví dụ xe đẩy nào hợp nhà không có thang máy, bỉm nào đáng tiền hơn khi con hoạt động nhiều ban đêm, sữa nào hợp khi bà nội muốn tự pha đặc hơn hướng dẫn; (3) Luôn có mục "khi nào KHÔNG cần mua" hoặc "sản phẩm rẻ hơn vẫn đáp ứng đủ" — thẳng thắn nói ra những khoản chi không cần thiết mà marketing hay thổi phồng, xây niềm tin bằng cách chủ động khuyên tiết kiệm.
+                Gần như mọi bài "review sản phẩm mẹ và bé" tiếng Việt hiện có là PR trá hình do nhãn hàng đặt viết hoặc affiliate one-sided chỉ khen một sản phẩm — người đọc phải tự lọc thật giả giữa hàng chục bài "top 1 thị trường" mâu thuẫn nhau. Khác biệt: (1) Vai trò tư vấn viên trung lập, không phải người bán hàng — dù có Product CTA Box hiển thị giá/ảnh/link mua, LỜI VĂN không viết như quảng cáo: luôn nêu ít nhất một nhược điểm thật mỗi lựa chọn kể cả lựa chọn đắt nhất; (2) Neo tiêu chí vào HOÀN CẢNH gia đình Việt cụ thể thay vì thông số chung chung — xe đẩy nào hợp nhà không thang máy, bỉm nào đáng tiền khi con hoạt động nhiều ban đêm; (3) Luôn có mục "khi nào KHÔNG cần mua" — thẳng thắn nói ra khoản chi không cần thiết mà marketing thổi phồng, xây niềm tin bằng cách chủ động khuyên tiết kiệm.
                 TEXT,
 
             'content_goals' => <<<'TEXT'
-                (1) Chiếm traffic tìm kiếm cực lớn ở nhóm truy vấn "so sánh X và Y", "nên mua bỉm/sữa/xe đẩy loại nào" — nhóm từ khóa thương mại (commercial intent) có giá trị chuyển đổi cao nhất trên toàn site, cạnh tranh bằng độ trung thực thay vì bằng ngân sách quảng cáo. (2) Tận dụng hạ tầng Product CTA Box đã có sẵn (catalog giá - ảnh - 4 link affiliate) để tạo doanh thu affiliate thực tế mà không đánh đổi uy tín biên tập — mỗi bài so sánh gắn CTA Box cho TẤT CẢ các lựa chọn được nhắc tới, không riêng một sản phẩm được "ưu ái". (3) Xây danh mục thành điểm dừng chân cuối trước khi ra quyết định mua, nhận traffic dẫn về từ các danh mục theo độ tuổi con (ví dụ từ bài ăn dặm dẫn sang so sánh ghế ăn dặm) và từ Giải thưởng nổi bật (bài Top dẫn độc giả cần so sánh sâu hơn về đây). (4) Xây uy tín dài hạn: độc giả tin vào một bài so sánh trung lập sẽ tin cả các bài khác của site, kể cả các bài không liên quan thương mại.
+                (1) Chiếm traffic tìm kiếm cực lớn ở nhóm truy vấn "so sánh X và Y", "nên mua bỉm/sữa/xe đẩy loại nào" — nhóm từ khóa thương mại (commercial intent) có giá trị chuyển đổi cao nhất trên toàn site — đo bằng CTR sang Product CTA Box, cạnh tranh bằng độ trung thực thay vì bằng ngân sách quảng cáo. (2) Tận dụng hạ tầng Product CTA Box đã có sẵn (catalog giá - ảnh - 4 link affiliate) để tạo doanh thu affiliate thực tế mà không đánh đổi uy tín biên tập — mỗi bài so sánh gắn CTA Box cho TẤT CẢ các lựa chọn được nhắc tới, không riêng một sản phẩm được "ưu ái". (3) Xây danh mục thành điểm dừng chân cuối trước khi ra quyết định mua, nhận traffic dẫn về từ các danh mục theo độ tuổi con (ví dụ từ bài ăn dặm dẫn sang so sánh ghế ăn dặm) và từ Giải thưởng nổi bật (bài Top dẫn độc giả cần so sánh sâu hơn về đây). (4) Xây uy tín dài hạn: độc giả tin vào một bài so sánh trung lập sẽ tin cả các bài khác của site, kể cả các bài không liên quan thương mại.
                 TEXT,
 
             'pain_points' => <<<'TEXT'
@@ -1472,12 +1830,20 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => null,
             'slug'        => 'video',
 
+            'writer_insights' => <<<'TEXT'
+                - LƯU Ý: đây là một ĐỊNH DẠNG cắt ngang, không phải chủ đề — đối tượng phục vụ là ĐỘI SẢN XUẤT NỘI DUNG, không phải cha mẹ đọc giả.
+                - Mọi ý tưởng phải bắt nguồn từ 1 chủ đề ĐÃ có ở danh mục khác — KHÔNG tự phát minh chủ đề nuôi dạy con mới ở đây.
+                - Chỉ chọn nội dung cần CHUYỂN ĐỘNG hoặc CẢM XÚC TRỰC QUAN (thao tác tay, lát cắt đời sống, review hình ảnh) — nếu đọc chữ vẫn hiệu quả tương đương thì không thuộc về đây.
+                - Luôn dẫn nguồn về danh mục chủ đề gốc trong mỗi ý tưởng, và cân nhắc tính khả thi quay dựng thực tế.
+                - Hình ảnh trẻ em nhạy cảm (khóc, ốm, xử lý y tế) phải ghi rõ dùng diễn viên nhí/minh họa — không quay trẻ thật.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
-                Đây KHÔNG phải một chủ đề nội dung mà là một ĐỊNH DẠNG cắt ngang toàn bộ các chủ đề nuôi dạy con của site — kho ý tưởng kịch bản cho đội content khi cần sản xuất video ngắn (dạng Reels/TikTok/Shorts, thường 30 giây đến 3 phút) thay vì bài viết dài. Trọng tâm là xác định LOẠI nội dung nào chuyển thể sang video mới phát huy hết giá trị mà bài viết chữ không làm được: (1) hướng dẫn thao tác tay cần nhìn chuyển động mới hiểu đúng — quấn khăn đúng cách, sơ cứu hóc dị vật/hội chứng ngạt thở, cách bế - địu đúng tư thế, cách vệ sinh rốn sơ sinh, các bài tập vận động tinh cho trẻ; (2) lát cắt đời sống thực tạo đồng cảm nhanh — "một ngày của mẹ bỉm sữa đi làm", "một bữa ăn dặm thực tế không như ảnh minh họa"; (3) review sản phẩm dạng hình ảnh trực quan hơn chữ — mở hộp, so sánh kích thước/độ dày bỉm, thao tác lắp ráp xe đẩy/ghế ăn; (4) mẹo nhanh dạng đếm ngược dễ nhớ (kiểu "3 dấu hiệu con sẵn sàng ăn dặm trong 30 giây"). Mỗi ý tưởng video ghi rõ: chủ đề gốc lấy từ danh mục nào, độ dài đề xuất, và kịch bản khung (mở đầu gây chú ý trong 3 giây - nội dung chính - lời chốt/kêu gọi hành động). KHÔNG lấn sân: không tự phát minh chủ đề nuôi dạy con mới chưa từng có trong các danh mục khác — mọi ý tưởng video phải bắt nguồn từ một chủ đề ĐÃ có định hướng ở danh mục theo độ tuổi/chủ đề tương ứng, chuyên mục này chỉ chọn GÓC VIDEO HÓA và hình thức thể hiện, không cạnh tranh nội dung hay tạo phạm vi kiến thức song song với các danh mục đó.
+                Đây KHÔNG phải một chủ đề mà là một ĐỊNH DẠNG cắt ngang toàn bộ chủ đề nuôi dạy con của site — kho ý tưởng kịch bản cho đội content khi cần sản xuất video ngắn (Reels/TikTok/Shorts, 30 giây - 3 phút) thay vì bài viết dài. Trọng tâm: xác định LOẠI nội dung nào chuyển thể sang video mới phát huy hết giá trị mà bài viết chữ không làm được: (1) thao tác tay cần nhìn chuyển động mới hiểu đúng — quấn khăn, sơ cứu hóc dị vật, bế - địu đúng tư thế, vệ sinh rốn sơ sinh; (2) lát cắt đời sống tạo đồng cảm nhanh — "một ngày của mẹ bỉm sữa đi làm"; (3) review sản phẩm trực quan hơn chữ — mở hộp, so sánh kích thước/độ dày bỉm; (4) mẹo nhanh dạng đếm ngược ("3 dấu hiệu con sẵn sàng ăn dặm trong 30 giây"). Mỗi ý tưởng ghi rõ: chủ đề gốc lấy từ danh mục nào, độ dài đề xuất, và kịch bản khung (mở đầu 3 giây - nội dung chính - lời chốt). KHÔNG lấn sân: không tự phát minh chủ đề nuôi dạy con mới — mọi ý tưởng video phải bắt nguồn từ một chủ đề ĐÃ có định hướng ở danh mục khác, chuyên mục này chỉ chọn GÓC VIDEO HÓA, không cạnh tranh phạm vi kiến thức.
                 TEXT,
 
             'unique_angle' => <<<'TEXT'
-                Khác biệt lớn nhất của danh mục này so với 43 danh mục còn lại: đối tượng phục vụ trực tiếp không phải độc giả cha mẹ mà là BIÊN TẬP VIÊN/ĐỘI SẢN XUẤT NỘI DUNG của chính site — đây là một loại "category nội bộ" định hướng sản xuất, dù vẫn hiển thị công khai như một chuyên mục bình thường (do kỹ thuật, `ArticleFormat::Video` chỉ là một giá trị enum đánh dấu định dạng bài viết, không có module video/embed riêng — bài "thuộc danh mục Video" trên site thực chất vẫn là một bài viết dùng để mô tả/dẫn kịch bản, không phải nơi phát video). Ba nguyên tắc khác biệt: (1) Mỗi ý tưởng phải trả lời được câu "tại sao cái NÀY hợp video hơn hợp bài viết" — nếu một chủ đề đọc chữ vẫn hiệu quả tương đương thì không thuộc về đây; ưu tiên tuyệt đối cho nội dung cần CHUYỂN ĐỘNG hoặc CẢM XÚC TRỰC QUAN; (2) Luôn dẫn nguồn về danh mục chủ đề gốc — một ý tưởng video về "cách bế trẻ sơ sinh" phải ghi rõ đây là góc video hóa của nội dung đã có trong Chăm sóc trẻ sơ sinh, không viết như thể là kiến thức riêng của mục Video; (3) Tư duy sản xuất thực tế — mỗi ý tưởng cân nhắc được tính khả thi quay dựng (có cần diễn viên nhí, có cần sản phẩm thật, có nhạy cảm hình ảnh trẻ em không) chứ không chỉ liệt kê ý tưởng suông.
+                Khác biệt lớn nhất của danh mục này so với 43 danh mục còn lại: đối tượng phục vụ trực tiếp không phải độc giả cha mẹ mà là BIÊN TẬP VIÊN/ĐỘI SẢN XUẤT NỘI DUNG — một loại "category nội bộ" định hướng sản xuất, dù vẫn hiển thị công khai (kỹ thuật: `ArticleFormat::Video` chỉ là enum đánh dấu định dạng, bài "thuộc Video" thực chất vẫn là bài viết mô tả/dẫn kịch bản, không phải nơi phát video). Ba nguyên tắc: (1) Mỗi ý tưởng trả lời được câu "tại sao cái NÀY hợp video hơn bài viết" — ưu tiên tuyệt đối nội dung cần CHUYỂN ĐỘNG hoặc CẢM XÚC TRỰC QUAN; (2) Luôn dẫn nguồn về danh mục chủ đề gốc — không viết như thể là kiến thức riêng của mục Video; (3) Tư duy sản xuất thực tế — cân nhắc khả thi quay dựng (diễn viên nhí, sản phẩm thật, nhạy cảm hình ảnh trẻ em) chứ không chỉ liệt kê ý tưởng suông.
                 TEXT,
 
             'content_goals' => <<<'TEXT'
@@ -1506,12 +1872,20 @@ class CategoryFoundationSeeder extends Seeder
             'parent_slug' => null,
             'slug'        => 'giai-thuong-noi-bat',
 
+            'writer_insights' => <<<'TEXT'
+                - LƯU Ý: đây KHÔNG PHẢI giải thưởng chính thức có hội đồng chấm — là gợi ý biên tập tự tổng hợp, phải nói rõ điều này ngay đầu MỌI bài.
+                - Phạm vi: Top/Best-of theo mùa/dịp hoặc nhu cầu cụ thể — dẫn link sang Đánh giá sản phẩm (so sánh sâu) hoặc Trường mầm non & tiểu học (tiêu chí chi tiết).
+                - KHÔNG viết: so sánh sâu ưu/nhược từng cặp (→ Đánh giá sản phẩm), xếp hạng tiêu cực nhắm vào đối tượng cụ thể.
+                - Tiêu chí xếp hạng phải công khai TRƯỚC danh sách, không giấu ở cuối bài — và ghi rõ thời điểm tổng hợp, cập nhật định kỳ.
+                - Tuyệt đối không nhận phí từ nhãn hàng để xuất hiện/thăng hạng — đây là ranh giới cứng không thỏa hiệp.
+                TEXT,
+
             'core_focus' => <<<'TEXT'
-                Chuyên mục bài "Top 5 / Top 10 / Best-of" do CHÍNH BAN BIÊN TẬP của site tự tổng hợp và xếp hạng theo tiêu chí riêng — KHÔNG PHẢI giải thưởng chính thức có hội đồng chấm giải, không có logo/huy chương trao cho nhãn hàng, không thu phí tham gia từ bất kỳ bên nào. Phạm vi: xếp hạng sản phẩm mẹ và bé theo dịp/mùa (top đồ chơi Trung thu, top quà Tết cho trẻ, top sản phẩm mùa hè chống nóng cho bé), xếp hạng theo nhu cầu cụ thể (top bỉm đáng mua nhất cho bé sơ sinh, top sữa công thức được cha mẹ Việt tin dùng), và tổng hợp lựa chọn phi sản phẩm (top trường mầm non đáng cân nhắc theo tiêu chí công khai — không nêu đánh giá tiêu cực về trường cụ thể, top điểm đến du lịch gia đình theo mùa, top trung tâm năng khiếu theo loại hình). MỌI bài đều bắt buộc mở đầu bằng một đoạn minh bạch nêu rõ: đây là gợi ý biên tập dựa trên tiêu chí gì (ví dụ: giá, độ phổ biến, phản hồi người dùng thu thập được, đánh giá của đội biên tập), không phải kết quả một giải thưởng chính thức, và danh sách có thể thay đổi theo thời gian. KHÔNG lấn sân: so sánh sâu ưu - nhược từng cặp sản phẩm (thuộc Đánh giá sản phẩm, danh mục này chỉ xếp hạng nhanh, dẫn link sang đó để đọc so sánh chi tiết), tiêu chí chọn trường chi tiết (thuộc Trường mầm non & tiểu học).
+                Chuyên mục bài "Top 5 / Top 10 / Best-of" do CHÍNH BAN BIÊN TẬP tự tổng hợp và xếp hạng theo tiêu chí riêng — KHÔNG PHẢI giải thưởng chính thức có hội đồng chấm, không thu phí tham gia từ bất kỳ bên nào. Phạm vi: xếp hạng sản phẩm theo dịp/mùa (đồ chơi Trung thu, quà Tết, sản phẩm chống nóng mùa hè), theo nhu cầu cụ thể (bỉm đáng mua cho bé sơ sinh, sữa công thức được tin dùng), và lựa chọn phi sản phẩm (trường mầm non đáng cân nhắc theo tiêu chí công khai — không đánh giá tiêu cực về trường cụ thể, điểm đến du lịch theo mùa, trung tâm năng khiếu theo loại hình). MỌI bài mở đầu bằng đoạn minh bạch nêu tiêu chí xếp hạng (giá, độ phổ biến, phản hồi thu thập được), không phải kết quả giải thưởng chính thức, và có thể thay đổi theo thời gian. KHÔNG lấn sân: so sánh sâu ưu - nhược từng cặp (thuộc Đánh giá sản phẩm, chỉ dẫn link sang đó), tiêu chí chọn trường chi tiết (thuộc Trường mầm non & tiểu học).
                 TEXT,
 
             'unique_angle' => <<<'TEXT'
-                Rủi ro lớn nhất của định dạng "Top/Best-of" là dễ bị hiểu nhầm thành giải thưởng chính thức hoặc quảng cáo trá hình có trả tiền để lọt danh sách — nhiều trang tiếng Việt lạm dụng chữ "giải thưởng", "bình chọn" để tạo cảm giác uy tín giả. Khác biệt của chuyên mục: (1) Minh bạch tuyệt đối về bản chất — luôn ghi rõ "đây là gợi ý biên tập, không phải giải thưởng chính thức" ngay dòng đầu, không dùng ngôn ngữ như "được trao giải", "đạt danh hiệu" gây hiểu lầm có hội đồng chấm; (2) Tiêu chí xếp hạng công khai trước danh sách, không giấu ở cuối bài — người đọc biết ngay vì sao sản phẩm A đứng trên sản phẩm B trước khi đọc hết; (3) Đóng vai trò "cửa ngõ nhanh" dẫn sang nội dung sâu hơn — mỗi mục trong danh sách link về bài so sánh chi tiết ở Đánh giá sản phẩm hoặc bài tiêu chí chọn trường, phục vụ đúng nhu cầu "cần quyết nhanh" trong khi vẫn để lối cho ai muốn tìm hiểu kỹ đi sâu hơn; (4) Cập nhật định kỳ theo mùa/dịp thay vì viết một lần dùng mãi, giữ tính thời sự thực chất chứ không phải danh hiệu "vĩnh viễn".
+                Rủi ro lớn nhất của định dạng "Top/Best-of" là dễ bị hiểu nhầm thành giải thưởng chính thức hoặc quảng cáo trá hình trả tiền để lọt danh sách. Khác biệt của chuyên mục: (1) Minh bạch tuyệt đối về bản chất — luôn ghi rõ "đây là gợi ý biên tập, không phải giải thưởng chính thức" ngay dòng đầu, không dùng ngôn ngữ như "được trao giải" gây hiểu lầm có hội đồng chấm; (2) Tiêu chí xếp hạng công khai TRƯỚC danh sách, không giấu ở cuối bài; (3) Đóng vai trò "cửa ngõ nhanh" dẫn sang nội dung sâu hơn — mỗi mục link về bài so sánh chi tiết ở Đánh giá sản phẩm, phục vụ nhu cầu "cần quyết nhanh" nhưng vẫn để lối đi sâu; (4) Cập nhật định kỳ theo mùa/dịp, giữ tính thời sự thực chất chứ không phải danh hiệu "vĩnh viễn".
                 TEXT,
 
             'content_goals' => <<<'TEXT'
@@ -1572,7 +1946,8 @@ class CategoryFoundationSeeder extends Seeder
             ->first() ?? new CategoryContentFoundation();
 
         $foundation->fill([
-            'core_focus'     => $definition['core_focus'],
+            'core_focus'      => $definition['core_focus'],
+            'writer_insights' => $definition['writer_insights'],
             'unique_angle'   => $definition['unique_angle'],
             'content_goals'  => $definition['content_goals'],
             'pain_points'    => $definition['pain_points'],

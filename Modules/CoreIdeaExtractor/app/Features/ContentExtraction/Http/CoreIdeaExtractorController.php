@@ -148,7 +148,10 @@ class CoreIdeaExtractorController extends Controller
             'urls.*'                 => ['url', 'max:2048', 'distinct'],
             'topic'                  => ['nullable', 'string', 'max:255'],
             'audience'               => ['nullable', 'string', 'max:500'],
-            'goal'                   => ['nullable', 'string', 'max:500'],
+            // max:2000 khớp giới hạn thật của content_goals (CategoryFoundationData) — field này
+            // được prefill trực tiếp từ foundation.content_goals ở index.blade.php
+            // (applyCategoryFoundation()), không phải input ngắn người tự gõ như audience/constraints.
+            'goal'                   => ['nullable', 'string', 'max:2000'],
             'constraints'            => ['nullable', 'string', 'max:500'],
             'style_sample'           => ['nullable', 'string', 'max:3000'],
             'main_content_selector'  => ['nullable', 'string', 'max:255'],

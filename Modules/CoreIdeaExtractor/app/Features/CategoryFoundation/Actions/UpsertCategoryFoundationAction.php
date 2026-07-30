@@ -29,7 +29,8 @@ class UpsertCategoryFoundationAction
                 ->first() ?? new CategoryContentFoundation();
 
             $foundation->fill([
-                'core_focus'     => $data->core_focus,
+                'core_focus'      => $data->core_focus,
+                'writer_insights' => $data->writer_insights,
                 'unique_angle'   => $data->unique_angle,
                 'content_goals'  => $data->content_goals,
                 'pain_points'    => $data->pain_points,

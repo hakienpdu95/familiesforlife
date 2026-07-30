@@ -24,6 +24,7 @@ class CategoryContentFoundation extends Model
 
     protected $fillable = [
         'core_focus',
+        'writer_insights',
         'unique_angle',
         'content_goals',
         'pain_points',

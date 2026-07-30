@@ -23,6 +23,8 @@ class CategoryFoundationData extends Data
     public function __construct(
         #[Nullable, Max(2000)]
         public readonly ?string $core_focus = null,
+        #[Nullable, Max(1500)]
+        public readonly ?string $writer_insights = null,
         #[Nullable, Max(2000)]
         public readonly ?string $unique_angle = null,
         #[Nullable, Max(2000)]

@@ -36,7 +36,9 @@ class ExtractBatchRequestData extends Data
          */
         #[Nullable, Max(500)]
         public readonly ?string $audience = null,
-        #[Nullable, Max(500)]
+        // max:2000 khớp giới hạn thật của content_goals (CategoryFoundationData) — field này được
+        // prefill trực tiếp từ foundation.content_goals, không phải input ngắn người tự gõ.
+        #[Nullable, Max(2000)]
         public readonly ?string $goal = null,
         #[Nullable, Max(500)]
         public readonly ?string $constraints = null,
