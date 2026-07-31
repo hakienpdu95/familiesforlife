@@ -48,18 +48,27 @@ export default defineConfig(({ mode }) => {
 
           // Event public submission form
           'Modules/Event/resources/assets/js/event-public.js',
+
+          // Anland (/anland) — portal BĐS riêng, CSS/JS KHÔNG dùng chung frontend.css/frontend.js
+          // (theme màu + component khác hẳn trang chủ familiesforlife).
+          'resources/css/anland.css',
+          'resources/js/anland.js',
         ],
 
         refresh: [
           'Modules/Post/resources/views/public/**/*.blade.php',
           'Modules/Event/resources/views/public/**/*.blade.php',
+          'Modules/RealEstate/resources/views/public/anland/**/*.blade.php',
           'resources/views/layouts/frontend.blade.php',
           'resources/views/layouts/partials/frontend-*.blade.php',
           'resources/views/components/frontend/**/*.blade.php',
           'resources/css/frontend.css',
           'resources/js/frontend.js',
+          'resources/css/anland.css',
+          'resources/js/anland.js',
           'Modules/Post/routes/**/*.php',
           'Modules/Event/routes/**/*.php',
+          'Modules/RealEstate/routes/**/*.php',
         ],
 
         buildDirectory: 'build/frontend',

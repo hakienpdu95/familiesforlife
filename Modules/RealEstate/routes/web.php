@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\RealEstate\Features\ListingManagement\Http\RealEstateListingAdminController;
 use Modules\RealEstate\Features\ListingManagement\Http\RealEstateListingApiController;
+use Modules\RealEstate\Features\PublicReading\Http\AnlandHomeController;
 use Modules\RealEstate\Features\PublicReading\Http\PublicRealEstateController;
 
 // ── Admin (Organization) — spec/RealEstateForSale_Technical_Specification.md §7.1 ──────────
@@ -30,6 +31,11 @@ Route::middleware(['auth', 'tenant'])->prefix('dashboard/real-estate')->name('ba
 Route::middleware(['auth', 'tenant'])->prefix('backend/api/real-estate')->name('backend.api.real-estate.')->group(function (): void {
     Route::get('listings', [RealEstateListingApiController::class, 'index'])->name('listings');
 });
+
+// ── Anland — portal BĐS riêng (giao diện/CSS/JS tách biệt trang chủ familiesforlife), KHÔNG
+// middleware auth. Trang chủ /anland CHỈ đọc dữ liệu qua RealEstateListing::publiclyVisible()
+// (tin đã publish) — dùng chung model/enum/route mua-bán+cho-thuê đã có sẵn bên dưới.
+Route::get('anland', [AnlandHomeController::class, 'index'])->name('real-estate.public.anland.home');
 
 // ── Public — §7.1/§0 spec Bán, KHÔNG middleware auth ────────────────────────────────────────
 Route::get('nha-dat-ban', [PublicRealEstateController::class, 'saleIndex'])->name('real-estate.public.sale.index');

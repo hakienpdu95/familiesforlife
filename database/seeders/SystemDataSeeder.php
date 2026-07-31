@@ -23,6 +23,7 @@ use Modules\Post\Database\Seeders\PostDatabaseSeeder;
 use Modules\Post\Database\Seeders\PostDemoSeeder;
 use Modules\Post\Database\Seeders\ProvinceShowcaseCategorySeeder;
 use Modules\Ocop\Database\Seeders\OcopDatabaseSeeder;
+use Modules\RealEstate\Database\Seeders\RealEstateListingDemoSeeder;
 use Modules\ProvinceShowcase\Database\Seeders\ProvinceShowcaseDemoSeeder;
 use Modules\ProvinceShowcase\Database\Seeders\ProvinceSlugBackfillSeeder;
 use Modules\Organization\Database\Seeders\OrganizationRolePermissionSeeder;
@@ -144,6 +145,10 @@ class SystemDataSeeder extends Seeder
             // ── 28. Demo content: bài viết + sự kiện mẫu đã xuất bản (đọc cho trang public) ──
             PostDemoSeeder::class,
             EventDemoSeeder::class,
+
+            // ── 28a. Anland (/anland): tin BĐS mẫu đã publish — PHẢI đứng sau ApprovalDatabaseSeeder
+            // (bước 27, cần moderator@system.local) ──
+            RealEstateListingDemoSeeder::class,
 
             // ── 28b. Province Showcase: 2 category con "du-lich-gia-dinh" (PHẢI đứng sau
             // PostDemoSeeder — cần category cha tồn tại), rồi permission ocop.manage, rồi demo

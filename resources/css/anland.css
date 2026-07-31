@@ -1,0 +1,131 @@
+@import "tailwindcss";
+
+/**
+ * resources/css/anland.css
+ * ────────────────────────────────────────────────────────────────────
+ * Bundle riêng cho portal BĐS Anland (/anland). KHÔNG dùng chung
+ * frontend.css/vite.config.frontend.js input "frontend" — theme màu
+ * (xanh dương/xanh lá, phong cách site rao vặt BĐS) và layout khác hẳn
+ * trang chủ familiesforlife (theme "portal", hồng/tím).
+ *
+ * Build: vite.config.frontend.js (cùng file, khác entry) → public/build/frontend/
+ * Blade: @vite(['resources/css/anland.css','resources/js/anland.js'], 'build/frontend')
+ */
+
+@plugin "daisyui" {
+    themes: anland --default;
+    base:   true;
+    styled: true;
+    utils:  true;
+    logs:   false;
+}
+
+/* Theme "anland" — xanh dương chủ đạo (thanh điều hướng, liên kết), xanh lá cho
+ * hành động chính (Đăng tin, Áp dụng bộ lọc) — phong cách quen thuộc của các
+ * trang rao vặt bất động sản, tách biệt hoàn toàn theme "portal" (trang chủ). */
+@plugin "daisyui/theme" {
+    name: "anland";
+    default: true;
+    prefersdark: false;
+    color-scheme: light;
+
+    --color-base-100: #ffffff;
+    --color-base-200: #f4f6fa;
+    --color-base-300: #e4e8f0;
+    --color-base-content: #1f2937;
+
+    --color-primary: #1a56db;
+    --color-primary-content: #ffffff;
+
+    --color-secondary: #0f766e;
+    --color-secondary-content: #ffffff;
+
+    --color-accent: #16a34a;
+    --color-accent-content: #ffffff;
+
+    --color-neutral: #111827;
+    --color-neutral-content: #ffffff;
+
+    --color-info: #0284c7;
+    --color-success: #16a34a;
+    --color-warning: #d97706;
+    --color-error: #dc2626;
+
+    --radius-box: 0.75rem;
+    --radius-field: 0.5rem;
+    --radius-selector: 0.5rem;
+}
+
+@theme {
+    --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+[x-cloak] { display: none !important; }
+
+.anland-container {
+    width: 100%;
+    max-width: 1200px;
+    margin-inline: auto;
+    padding-inline: 1rem;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────── */
+
+.anland-header {
+    background: var(--color-neutral);
+    color: var(--color-neutral-content);
+}
+
+.anland-header__brand-mark {
+    background: var(--color-accent);
+    color: var(--color-accent-content);
+}
+
+.anland-header__nav-link.is-disabled {
+    pointer-events: none;
+    opacity: .45;
+}
+
+/* ── Hero + search widget ───────────────────────────────────────────── */
+
+.anland-hero {
+    background:
+        radial-gradient(1200px 400px at 15% -10%, rgba(255,255,255,.10), transparent 60%),
+        linear-gradient(135deg, #0b3ea8 0%, #1a56db 55%, #0f766e 100%);
+}
+
+.anland-search-tabs .tab {
+    border-radius: var(--radius-field) var(--radius-field) 0 0;
+}
+
+/* ── Property cards ─────────────────────────────────────────────────── */
+
+.anland-card {
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.anland-card:hover {
+    transform: translateY(-2px);
+}
+
+.anland-card__figure {
+    background:
+        repeating-linear-gradient(135deg, #eef1f7, #eef1f7 12px, #e4e8f0 12px, #e4e8f0 24px);
+}
+
+/* ── Category tiles ─────────────────────────────────────────────────── */
+
+.anland-tile {
+    transition: border-color .15s ease, background-color .15s ease;
+}
+
+.anland-tile:hover {
+    border-color: var(--color-primary);
+    background-color: color-mix(in oklab, var(--color-primary) 6%, white);
+}
+
+/* ── Loan calculator ─────────────────────────────────────────────────── */
+
+.anland-range {
+    accent-color: var(--color-primary);
+}

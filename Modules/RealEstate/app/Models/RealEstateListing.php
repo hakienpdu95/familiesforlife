@@ -3,14 +3,18 @@
 namespace Modules\RealEstate\Models;
 
 use App\Foundation\Models\TenantAwareModel;
+use App\Shared\Tenancy\OrganizationScope;
 use App\Traits\HasTenantMedia;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
 use Modules\Approval\Concerns\HasApproval;
+use Modules\Approval\Enums\ApprovalStatus;
 use Modules\RealEstate\Enums\ApartmentSubtype;
 use Modules\RealEstate\Enums\CompassDirection;
 use Modules\RealEstate\Enums\HouseSubtype;
+use Modules\RealEstate\Enums\InteriorStatus;
 use Modules\RealEstate\Enums\LegalStatus;
 use Modules\RealEstate\Enums\ListingType;
 use Modules\RealEstate\Enums\PropertyType;
@@ -48,6 +52,7 @@ class RealEstateListing extends TenantAwareModel implements HasMedia
         'property_type'         => PropertyType::class,
         'house_subtype'         => HouseSubtype::class,
         'apartment_subtype'     => ApartmentSubtype::class,
+        'interior_status'       => InteriorStatus::class,
         'legal_status'          => LegalStatus::class,
         'direction'             => CompassDirection::class,
         'balcony_direction'     => CompassDirection::class,
@@ -109,6 +114,29 @@ class RealEstateListing extends TenantAwareModel implements HasMedia
             'house_subtype', 'apartment_subtype', 'legal_status', 'direction',
             'balcony_direction', 'project_name', 'apartment_address', 'usage_status',
         ];
+    }
+
+    /**
+     * HasApproval::scopePubliclyVisible() lồng whereHas('approvalSubject', ...) — đúng cho
+     * entity KHÔNG tenant-scoped (PostArticle/Event, không extends TenantAwareModel), nhưng
+     * RealEstateListing VÀ ApprovalSubject đều tenant-scoped (OrganizationScope) nên khách
+     * vãng lai (không có TenantContext — App\Shared\Tenancy\OrganizationScope::apply() mặc
+     * định WHERE 0=1 để chống rò rỉ dữ liệu) sẽ luôn nhận tập rỗng ở CẢ 2 bảng. Trang công khai
+     * (/anland, /nha-dat-ban, /nha-dat-thue) gộp tin từ MỌI Organization nên phải bỏ
+     * OrganizationScope ở cả 2 phía — publiclyVisible() (chỉ tin đã publish) đã là gate an toàn
+     * tương đương, bypass tenant scope ở đây không phải lỗ hổng.
+     *
+     * Đặt tên riêng (KHÔNG ghi đè publiclyVisible()) để không âm thầm đổi hành vi scope gốc của
+     * HasApproval ở những nơi khác trong module còn cần lọc theo tenant hiện tại.
+     */
+    public function scopePublicPortalVisible(Builder $query): Builder
+    {
+        return $query->withoutGlobalScope(OrganizationScope::class)
+            ->whereHas('approvalSubject', function (Builder $q) {
+                $q->withoutGlobalScope(OrganizationScope::class)
+                    ->whereNotNull('public_snapshot')
+                    ->where('status', '!=', ApprovalStatus::Archived);
+            });
     }
 
     // ── Helpers ──────────────────────────────────────────────────────

@@ -46,7 +46,11 @@ class PublicRealEstateController extends Controller
     /** 404 nếu không publiclyVisible() hoặc listing_type khác trang đang xem (§7.3 spec Bán). */
     private function show(string $slug, int $id, ListingType $listingType): View
     {
-        $listing = RealEstateListing::publiclyVisible()
+        // scopePublicPortalVisible() — xem docblock cùng tên trên RealEstateListing.
+        // with('approvalSubject') — publicContent() bên dưới đọc quan hệ này, model đọc
+        // preventLazyLoading() nên phải eager-load trước.
+        $listing = RealEstateListing::publicPortalVisible()
+            ->with('approvalSubject')
             ->where('id', $id)
             ->where('slug', $slug)
             ->where('listing_type', $listingType)
