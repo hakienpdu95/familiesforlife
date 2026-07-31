@@ -28,6 +28,7 @@ use Modules\ProvinceShowcase\Database\Seeders\ProvinceSlugBackfillSeeder;
 use Modules\Organization\Database\Seeders\OrganizationRolePermissionSeeder;
 use Modules\Subscription\Database\Seeders\SubscriptionDatabaseSeeder;
 use Modules\Survey\Database\Seeders\SurveyDatabaseSeeder;
+use Modules\Video\Database\Seeders\VideoDatabaseSeeder;
 
 /**
  * Master Seeder — điểm khởi chạy duy nhất cho toàn bộ dữ liệu mặc định hệ thống.
@@ -134,6 +135,11 @@ class SystemDataSeeder extends Seeder
             // platform_content_editor/platform_content_head (role do ApprovalDatabaseSeeder tạo
             // ở bước 27), cùng nguyên tắc Banner/Page, PHẢI đứng sau bước đó ──
             CoreIdeaExtractorDatabaseSeeder::class,
+
+            // ── 27e. Video: permission video.manage — gán cho platform_ops/platform_content_head
+            // (role do ApprovalDatabaseSeeder tạo ở bước 27), cùng nguyên tắc Banner/Page,
+            // PHẢI đứng sau bước đó (spec/Video_Management_Technical_Specification.md §6.7) ──
+            VideoDatabaseSeeder::class,
 
             // ── 28. Demo content: bài viết + sự kiện mẫu đã xuất bản (đọc cho trang public) ──
             PostDemoSeeder::class,

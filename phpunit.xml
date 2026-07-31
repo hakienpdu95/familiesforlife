@@ -32,6 +32,7 @@
             <directory>Modules/Ocop/tests/Feature</directory>
             <directory>Modules/Banner/tests/Feature</directory>
             <directory>Modules/Page/tests/Feature</directory>
+            <directory>Modules/Video/tests/Feature</directory>
         </testsuite>
     </testsuites>
     <source>

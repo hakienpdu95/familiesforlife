@@ -17,13 +17,16 @@ return new class extends Migration {
             if (!Schema::hasColumn('cie_category_foundations', 'rejected_ideas')) {
                 $table->text('rejected_ideas')->nullable()->after('pain_points');
             }
+            if (!Schema::hasColumn('cie_category_foundations', 'writer_insights')) {
+                $table->text('writer_insights')->nullable()->after('rejected_ideas');
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('cie_category_foundations', function (Blueprint $table) {
-            $cols = array_filter(['pain_points', 'rejected_ideas'], fn($c) => Schema::hasColumn('cie_category_foundations', $c));
+            $cols = array_filter(['pain_points', 'rejected_ideas', 'writer_insights'], fn($c) => Schema::hasColumn('cie_category_foundations', $c));
             if (!empty($cols)) $table->dropColumn(array_values($cols));
         });
     }

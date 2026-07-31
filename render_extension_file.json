@@ -349,11 +349,16 @@
     [
         "cie_category_foundations///add///__///",
         "pain_points///text///__///_NULL///NULL///__///__",
-        "rejected_ideas///text///__///_NULL///NULL///__///__"
+        "rejected_ideas///text///__///_NULL///NULL///__///__",
+        "writer_insights///text///__///_NULL///NULL///__///__"
     ],
     [
         "post_author_profiles///add///__///",
         "job_title///string///150///_NULL///NULL///__///Chức danh/nghề nghiệp chuyên môn (VD: Bác sĩ Nhi khoa) — dùng cho Person schema (E-E-A-T)",
         "credentials///string///255///_NULL///NULL///__///Bằng cấp/chứng chỉ chuyên môn (VD: Thạc sĩ Dinh dưỡng, 10 năm kinh nghiệm)"
+    ],
+    [
+        "cie_layer2_runs///add///__///",
+        "kind///string///30///NOT_NULL///'layer2'///__///__"
     ]
 ]

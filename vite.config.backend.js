@@ -54,6 +54,7 @@ const JS_OUTPUT = {
   'menu':                   'assets/modules/menu.[hash].js',
   'ocop':                   'assets/modules/ocop.[hash].js',
   'realestate':             'assets/modules/realestate.[hash].js',
+  'video':                  'assets/modules/video.[hash].js',
 };
 
 /** CSS asset name → output path.
@@ -158,6 +159,8 @@ const MODULE_ENTRIES = [
   // RealEstate
   'Modules/RealEstate/resources/assets/sass/realestate.scss',
   'Modules/RealEstate/resources/assets/js/realestate.js',
+  // Video
+  'Modules/Video/resources/assets/js/video.js',
 ];
 
 // ─────────────────────────────────────────────────────────────────────

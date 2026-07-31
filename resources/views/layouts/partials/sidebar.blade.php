@@ -235,6 +235,18 @@
         </div>
         @endcan
 
+        {{-- spec/Video_Management_Technical_Specification.md §6.7 — video.manage cấp cho
+             platform_ops/platform_content_head (Modules\Video\Database\Seeders\VideoPermissionSeeder). --}}
+        @can(\App\Enums\PermissionEnum::VIDEO_MANAGE->value)
+        <div class="nav-group">
+            <a href="{{ route('backend.video.items.index') }}"
+               class="nav-link {{ request()->routeIs('backend.video.items.*') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                <span class="nav-label">Video</span>
+            </a>
+        </div>
+        @endcan
+
         {{-- spec/Breaking_News_Ticker_Technical_Specification.md §6.3 — breaking_news.manage
              cấp cho platform_ops/platform_content_head (Modules\Post\Database\Seeders\BreakingNewsPermissionSeeder). --}}
         @can(\App\Enums\PermissionEnum::BREAKING_NEWS_MANAGE->value)

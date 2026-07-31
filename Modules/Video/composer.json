@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/video",
+    "description": "",
+    "authors": [
+        {
+            "name": "KienDH",
+            "email": "bonhuyn@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Video\\": "app/",
+            "Modules\\Video\\Database\\Factories\\": "database/factories/",
+            "Modules\\Video\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Video\\Tests\\": "tests/"
+        }
+    }
+}

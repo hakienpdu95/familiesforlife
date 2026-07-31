@@ -24,5 +24,6 @@
     "Newsletter": true,
     "Page": true,
     "CoreIdeaExtractor": true,
-    "RealEstate": true
+    "RealEstate": true,
+    "Video": true
 }

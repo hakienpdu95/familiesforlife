@@ -172,4 +172,10 @@ enum PermissionEnum: string
     case REAL_ESTATE_CREATE = 'real_estate.create';
     case REAL_ESTATE_EDIT   = 'real_estate.edit';
     case REAL_ESTATE_DELETE = 'real_estate.delete';
+
+    // ══ VIDEO (Thư viện video YouTube độc lập — tài sản nền tảng, không qua quy trình duyệt) ═══
+    // spec/Video_Management_Technical_Specification.md §6.7 — gán cho platform_ops +
+    // platform_content_head (VideoPermissionSeeder), KHÔNG qua config/permissions.php (Lớp B)
+    // — cùng nguyên tắc BANNER_MANAGE/OCOP_MANAGE/PAGE_MANAGE/BREAKING_NEWS_MANAGE.
+    case VIDEO_MANAGE = 'video.manage';
 }

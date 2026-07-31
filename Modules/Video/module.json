@@ -1,0 +1,11 @@
+{
+    "name": "Video",
+    "alias": "video",
+    "description": "Thư viện video YouTube độc lập — CRUD (Tên/Mô tả/Link URL Video/Mã Embed) + trang công khai liệt kê dạng lưới với lightbox phát video (spec/Video_Management_Technical_Specification.md).",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Video\\Providers\\VideoServiceProvider"
+    ],
+    "files": []
+}

@@ -77,9 +77,9 @@ class SecurityHeaders
             "script-src {$scriptSrc}",
             "style-src {$styleSrc}",
             "font-src 'self' https://fonts.bunny.net https://fonts.gstatic.com data:",
-            "img-src 'self' data: blob: https://api.dicebear.com",
+            "img-src 'self' data: blob: https://api.dicebear.com https://i.ytimg.com", // i.ytimg.com — thumbnail video YouTube (Modules/Video)
             "connect-src {$connectSrc}",
-            "frame-src https://challenges.cloudflare.com",
+            "frame-src https://challenges.cloudflare.com https://www.youtube-nocookie.com", // youtube-nocookie.com — lightbox video công khai (Modules/Video, xem config/video.php embed_domain)
             "frame-ancestors 'none'",
             "worker-src 'self' blob:",
             "object-src 'none'",
