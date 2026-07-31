@@ -97,6 +97,7 @@
 
 <x-frontend.event-spotlight :events="$upcomingEvents" />
 <x-frontend.cta-band :categories="$categories" />
+<x-frontend.newsletter-signup />
 @endif
 
 <div class="container">

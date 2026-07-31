@@ -263,6 +263,77 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 
+    /**
+     * newsletterSignup — khối "Đăng ký nhận bản tin" trang chủ
+     * (resources/views/components/frontend/newsletter-signup.blade.php). Submit qua fetch()
+     * JSON tới Modules\Newsletter (route newsletter.public.subscribe,
+     * PublicSubscriptionController::subscribe()) — controller đã có nhánh trả JSON riêng khi
+     * request wantsJson() (Accept: application/json ở đây), lỗi validate (422) Laravel tự trả
+     * JSON {message, errors} mặc định nên không cần xử lý gì thêm ngoài đọc data.errors.
+     *
+     * config.endpoint truyền từ Blade (route() không gọi được trong file JS tĩnh) — cùng cách
+     * loadMoreArticles/loadMoreEvents nhận config ở trên.
+     *
+     * Form chỉ có 1 ô email (đúng spec/content.md) nhưng SubscribeData của Modules\Newsletter
+     * bắt buộc full_name (quyết định đã chốt riêng của module, không đổi ở đây) — tự suy ra 1
+     * giá trị từ phần trước "@" của email lúc submit thay vì hỏi thêm người dùng.
+     */
+    Alpine.data('newsletterSignup', (config) => ({
+        endpoint: config.endpoint,
+        email: '',
+        agreed: false,
+        loading: false,
+        success: false,
+        errorMessage: '',
+
+        get canSubmit() {
+            return this.email !== '' && this.agreed;
+        },
+
+        async submit() {
+            if (!this.canSubmit || this.loading) {
+                return;
+            }
+
+            this.loading = true;
+            this.errorMessage = '';
+
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+                const derivedFullName = this.email.split('@')[0] || 'Subscriber';
+
+                const response = await fetch(this.endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                    },
+                    body: JSON.stringify({ full_name: derivedFullName, email: this.email }),
+                });
+
+                const data = await response.json().catch(() => ({}));
+
+                if (response.ok) {
+                    this.success = true;
+                    return;
+                }
+
+                if (response.status === 422 && data.errors) {
+                    this.errorMessage = Object.values(data.errors).flat()[0] ?? 'Vui lòng kiểm tra lại thông tin đã nhập.';
+                } else if (response.status === 429) {
+                    this.errorMessage = 'Bạn thao tác quá nhanh, vui lòng thử lại sau ít phút.';
+                } else {
+                    this.errorMessage = 'Có lỗi xảy ra, vui lòng thử lại sau.';
+                }
+            } catch (error) {
+                this.errorMessage = 'Lỗi kết nối. Vui lòng thử lại.';
+            } finally {
+                this.loading = false;
+            }
+        },
+    }));
+
 });
 
 document.addEventListener('DOMContentLoaded', () => {

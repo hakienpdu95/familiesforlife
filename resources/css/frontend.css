@@ -62,9 +62,7 @@
 
 [x-cloak] { display: none !important; }
 
-/* ── Portal placeholder / decor helpers ──────────────────────────────
- * .ph  — khối placeholder ảnh bìa khi article chưa có cover_image_url
- * .blob — hình tròn trang trí cho hero/newsletter (xem x-frontend.hero) */
+
 .ph {
     background: repeating-linear-gradient(45deg, #e9e4f5, #e9e4f5 10px, #ded6ef 10px, #ded6ef 20px);
 }
@@ -76,16 +74,6 @@
     pointer-events: none;
 }
 
-/* ══════════════════════════════════════════════════════════════════
- * .container — khối căn giữa nội dung DÙNG CHUNG cho toàn bộ cổng thông
- * tin (trước đây mỗi nơi tự trộn `max-w-6xl mx-auto px-4` (Tailwind
- * utility, home/category/footer/event-spotlight...) với `.container`
- * kiểu Bootstrap riêng của site-header (max-width scale dần tới
- * 1140px) — 2 chuẩn khác nhau, độ rộng khác nhau. Nay thống nhất
- * DUY NHẤT 1 chuẩn: max-width 1200px, căn giữa, gutter 1rem 2 bên —
- * áp dụng mọi nơi kể cả site-header (xem `.site-header .container`
- * bên dưới chỉ còn override `position`, không override lại width/
- * padding/margin nữa). ══════════════════════════════════════════════ */
 .container {
     width: 100%;
     max-width: 1200px;
@@ -93,27 +81,176 @@
     padding-inline: 1rem;
 }
 
-/* ══════════════════════════════════════════════════════════════════
- * site-header — copy 1:1 từ spec/main.css (theme gốc site tham khảo),
- * ghép cùng resources/views/layouts/partials/frontend-header.blade.php
- * (cấu trúc DOM cũng copy 1:1 từ spec/header.html). Nội dung/link bên
- * trong là của familiesforlife (Post/Event category, thương hiệu riêng)
- * — CSS/màu sắc/kích thước giữ NGUYÊN giá trị gốc, không đổi theo theme
- * "portal" (--color-primary...) ở trên.
- *
- * 2 phần KHÔNG có trong spec/main.css (chỉ CSS tĩnh, không có JS gốc
- * đi kèm) nên phải tự bổ sung, đánh dấu rõ trong từng khối:
- *   1. Glyph icon-* thật (spec chỉ @import 1 file fontello.css KHÔNG
- *      được cung cấp) — thay bằng CSS mask tự vẽ.
- *   2. Class bật/tắt tương tác (.is-active cho .btn-expand, .is-open
- *      cho .nav ở mobile) — spec chỉ có phần CSS phản ứng với các class
- *      này, còn phần JS gắn/gỡ class do site gốc tự viết, không có sẵn.
- * ══════════════════════════════════════════════════════════════════ */
+.news-letter.homepage-row {
+    position: relative;
+    display: flex;
+    justify-content: flex-end;
+    overflow: hidden;
+    min-height: 460px;
+    background-color: #f4f4f4;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+}
 
-/* ── Bootstrap grid con (chỉ những class site-header dùng: row/col-12/
- * col-lg-3/col-lg-9) — copy nguyên văn spec/main.css §grid. .container
- * dùng chung 1 chuẩn duy nhất ở trên (1200px) — ở đây chỉ còn override
- * `position` riêng cho site-header (làm mốc absolute cho .m-btn mobile). ── */
+.news-letter.homepage-row .nl-panel {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 460px;
+    padding: 48px 56px;
+}
+
+.news-letter.homepage-row .nl-content,
+.news-letter.homepage-row .loading-newsletter,
+.news-letter.homepage-row .callback-newsletter {
+    width: 100%;
+}
+
+.news-letter.homepage-row .homepage-mobile-small-title {
+    display: none;
+}
+
+.news-letter.homepage-row .nl_title {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    color: #1a1a1a;
+}
+
+.news-letter.homepage-row h2 {
+    margin: 12px 0 28px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #4a4a4a;
+}
+
+.news-letter.homepage-row .clear-float {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.news-letter.homepage-row input.email {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    border-radius: 3px;
+    background: #fff;
+    padding: 14px 16px;
+    font-size: 14px;
+    color: #191919;
+}
+
+.news-letter.homepage-row input[type="submit"] {
+    flex-shrink: 0;
+    border: none;
+    border-top: 1px solid #1a1a1a;
+    border-bottom: 1px solid #1a1a1a;
+    background: transparent;
+    color: #1a1a1a;
+    padding: 9px 2px;
+    font-size: 15px;
+    letter-spacing: 0.03em;
+    text-transform: lowercase;
+    cursor: pointer;
+    transition: opacity 200ms ease;
+}
+
+.news-letter.homepage-row input[type="submit"]:hover {
+    opacity: 0.6;
+}
+
+.news-letter.homepage-row input[type="submit"]:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.news-letter.homepage-row .checkbox-wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 18px;
+    text-align: left;
+    font-size: 12px;
+    color: #4a4a4a;
+}
+
+.news-letter.homepage-row .checkbox-wrapper input.checkbox {
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.news-letter.homepage-row .checkbox-wrapper a {
+    color: #d1637a;
+    text-decoration: none;
+}
+
+.news-letter.homepage-row .checkbox-wrapper a:hover {
+    text-decoration: underline;
+}
+
+.news-letter.homepage-row .error-newsletter {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #c0392b;
+}
+
+.news-letter.homepage-row .callback-newsletter h3 {
+    margin: 0 0 6px;
+    font-size: 26px;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.news-letter.homepage-row .callback-newsletter h4 {
+    margin: 0;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #4a4a4a;
+}
+
+@media screen and (max-width: 961px) {
+    .news-letter.homepage-row {
+        justify-content: center;
+        min-height: 0;
+    }
+
+    .news-letter.homepage-row .nl-panel {
+        max-width: 100%;
+        padding: 32px 24px;
+    }
+
+    .news-letter.homepage-row .homepage-mobile-small-title {
+        display: block;
+        margin: 0 0 6px;
+        font-size: 12px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #4a4a4a;
+    }
+
+    .news-letter.homepage-row .nl_title {
+        font-size: 22px;
+    }
+
+    .news-letter.homepage-row .clear-float {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .news-letter.homepage-row input[type="submit"] {
+        text-align: center;
+    }
+}
+
 .site-header .container { position: relative; }
 
 @media (min-width: 594px) {
@@ -141,7 +278,6 @@
     .site-header .col-lg-9 { flex: 0 0 75%; max-width: 75%; }
 }
 
-/* ── .form-control (Bootstrap base) — copy nguyên văn spec/main.css. ──── */
 .site-header .form-control {
     display: block;
     width: 100%;
@@ -168,7 +304,6 @@
 
 .site-header .form-control::placeholder { color: #757575; opacity: 1; }
 
-/* ── .site-header — copy nguyên văn spec/main.css (dòng 13205-14027). ─── */
 .site-header {
     z-index: 20;
     margin-bottom: 2rem;

@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{-- Cần cho các form AJAX phía frontend (vd x-frontend.newsletter-signup) gửi POST kèm
+         X-CSRF-TOKEN — trước đây trang công khai chưa có form nào submit qua fetch() nên
+         chưa cần thẻ này. --}}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@hasSection('title')@yield('title') — @endif{{ config('app.site_name') }}</title>
     @hasSection('meta_description')
     <meta name="description" content="@yield('meta_description')">
