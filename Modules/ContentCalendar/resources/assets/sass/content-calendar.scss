@@ -1,0 +1,4 @@
+// Modules/ContentCalendar/resources/assets/sass/content-calendar.scss
+// docs/form-ui-spec.md §22.7 — mọi module SCSS dùng TomSelect phải @use 'tom-select'.
+@use 'form-patterns';
+@use 'tom-select';

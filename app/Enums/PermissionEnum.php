@@ -178,4 +178,13 @@ enum PermissionEnum: string
     // platform_content_head (VideoPermissionSeeder), KHÔNG qua config/permissions.php (Lớp B)
     // — cùng nguyên tắc BANNER_MANAGE/OCOP_MANAGE/PAGE_MANAGE/BREAKING_NEWS_MANAGE.
     case VIDEO_MANAGE = 'video.manage';
+
+    // ══ CONTENT CALENDAR (Lịch biên tập & kế hoạch nội dung — hàng đợi ý tưởng đã chọn + lịch
+    // xuất bản, nối giữa CoreIdeaExtractor và Post) ═══
+    // spec/ContentCalendar_Technical_Specification.md §6 — gán cho platform_content_creator/
+    // section_editor/content_editor/content_head (manage) + platform_viewer (view only)
+    // (ContentCalendarPermissionSeeder), KHÔNG qua config/permissions.php (Lớp B) — cùng nguyên
+    // tắc CORE_IDEA_EXTRACTOR_USE/BANNER_MANAGE/OCOP_MANAGE/PAGE_MANAGE.
+    case CONTENT_CALENDAR_VIEW   = 'content_calendar.view';
+    case CONTENT_CALENDAR_MANAGE = 'content_calendar.manage';
 }

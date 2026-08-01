@@ -294,6 +294,25 @@
         </div>
         @endcan
 
+        {{-- spec/ContentCalendar_Technical_Specification.md §6/§13 — content_calendar.view cấp cho
+             platform_content_creator/section_editor/content_editor/content_head/viewer
+             (Modules\ContentCalendar\Database\Seeders\ContentCalendarPermissionSeeder). --}}
+        @can(\App\Enums\PermissionEnum::CONTENT_CALENDAR_VIEW->value)
+        <details {{ request()->routeIs('backend.contentcalendar.*') ? 'open' : '' }}>
+            <summary class="nav-summary {{ request()->routeIs('backend.contentcalendar.*') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 7V3m8 4V3M3 11h18M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"/></svg>
+                <span class="nav-label">Lịch biên tập</span>
+                <svg class="nav-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m9 18 6-6-6-6"/></svg>
+            </summary>
+            <div class="sub-menu">
+                <a href="{{ route('backend.contentcalendar.board') }}"
+                   class="sub-link {{ request()->routeIs('backend.contentcalendar.board') ? 'active' : '' }}">Board</a>
+                <a href="{{ route('backend.contentcalendar.calendar') }}"
+                   class="sub-link {{ request()->routeIs('backend.contentcalendar.calendar') ? 'active' : '' }}">Lịch tháng</a>
+            </div>
+        </details>
+        @endcan
+
 
         {{-- spec/Province_Showcase_Technical_Specification.md §6.1 — ocop.manage cấp cho
              platform_ops/platform_content_head (Modules\Ocop\Database\Seeders\OcopPermissionSeeder).

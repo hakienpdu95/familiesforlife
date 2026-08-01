@@ -1,0 +1,11 @@
+{
+    "name": "ContentCalendar",
+    "alias": "content-calendar",
+    "description": "Lịch biên tập & kế hoạch nội dung nền tảng — cầu nối giữa ý tưởng (CoreIdeaExtractor/Aicem) và bài viết thật (Post): theo dõi ý tưởng đã chọn, người viết, ngày dự kiến đăng, tới khi có PostArticle thật.",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\ContentCalendar\\Providers\\ContentCalendarServiceProvider"
+    ],
+    "files": []
+}
