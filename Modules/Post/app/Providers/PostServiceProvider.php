@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Gate;
 use Modules\Post\Console\Commands\BackfillPostTranslationsCommand;
 use Modules\Post\Console\Commands\MonitorScoutFailedJobsCommand;
 use Modules\Post\Console\Commands\PruneArticleVersionsCommand;
+use Modules\Post\Console\Commands\SyncGoogleAnalyticsStatsCommand;
 use Modules\Post\Jobs\ExpireSponsoredArticlesJob;
 use Modules\Post\Jobs\PruneArticleViewEventsJob;
 use Modules\Post\Jobs\PublishDueTranslationsJob;
@@ -51,6 +52,7 @@ class PostServiceProvider extends ModuleServiceProvider
             BackfillPostTranslationsCommand::class,
             PruneArticleVersionsCommand::class,
             MonitorScoutFailedJobsCommand::class,
+            SyncGoogleAnalyticsStatsCommand::class,
         ]);
 
         // Phase 14 — tự động publish translation đã tới hạn scheduled_at (§7.3).
@@ -70,6 +72,10 @@ class PostServiceProvider extends ModuleServiceProvider
             // spec/Related_Posts_Engine_Technical_Specification.md §6.2 — dọn post_article_view_events
             // cũ hơn behavior_lookback_days, daily cùng nguyên tắc ExpireSponsoredArticlesJob.
             $schedule->job(new PruneArticleViewEventsJob(), 'low')->daily()->withoutOverlapping();
+
+            // spec/ga-dashboard-statistics.md §3.1 — đồng bộ lượt xem GA4 (30 ngày) về
+            // post_article_translations.ga_views_30d, phục vụ cột "Lượt xem GA" + "Top nội dung".
+            $schedule->command(SyncGoogleAnalyticsStatsCommand::class)->hourly()->withoutOverlapping();
         });
     }
 }

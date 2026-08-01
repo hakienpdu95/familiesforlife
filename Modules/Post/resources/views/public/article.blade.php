@@ -116,6 +116,14 @@
                 {{ $article->createdBy?->name ?? 'Ban biên tập' }}
             @endif
             · {{ $translation->published_at?->format('d/m/Y') }}
+            {{-- Freshness (2026-08-01) — tín hiệu "đã rà soát gần đây" cho người đọc lẫn AI answer
+                 engine (spec Content_Freshness_AEO), không chỉ nằm trong JSON-LD/OG meta như trước.
+                 So sánh theo NGÀY (không phải timestamp) để tránh hiện "Cập nhật" giả do các lần
+                 lưu vặt cùng ngày xuất bản. --}}
+            @if($translation->updated_at && $translation->published_at
+                && $translation->updated_at->format('Y-m-d') !== $translation->published_at->format('Y-m-d'))
+            · Cập nhật: {{ $translation->updated_at->format('d/m/Y') }}
+            @endif
         </p>
     </header>
 

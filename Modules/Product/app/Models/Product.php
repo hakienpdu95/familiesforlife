@@ -3,6 +3,8 @@
 namespace Modules\Product\Models;
 
 use App\Foundation\Models\TenantAwareModel;
+use App\Shared\Tenancy\OrganizationScope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Approval\Concerns\HasApproval;
 use Modules\Product\Enums\ProductStatus;
@@ -89,6 +91,18 @@ class Product extends TenantAwareModel
     public function updatedBy(): BelongsTo
     {
         return $this->belongsTo(\App\Models\User::class, 'updated_by');
+    }
+
+    /**
+     * Bypass OrganizationScope cho ĐỌC CÔNG KHAI (Khối sản phẩm nhúng trong bài viết Post đã
+     * publish) — Product vẫn tenant-scoped cho CRUD/RBAC (ProductPolicy, route 'tenant'
+     * middleware không đổi). Khách vãng lai xem trang public không có TenantContext nên
+     * OrganizationScope mặc định trả tập rỗng — cùng lý do RealEstateListing::scopePublicPortalVisible()
+     * tồn tại (xem Modules/RealEstate/app/Models/RealEstateListing.php).
+     */
+    public function scopePublicEmbed(Builder $query): Builder
+    {
+        return $query->withoutGlobalScope(OrganizationScope::class);
     }
 
     /**

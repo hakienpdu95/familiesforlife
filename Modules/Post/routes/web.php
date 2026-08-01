@@ -11,6 +11,7 @@ use Modules\Post\Features\BreakingNews\Http\BreakingNewsApiController;
 use Modules\Post\Features\BreakingNews\Http\BreakingNewsPublicController;
 use Modules\Post\Features\CategoryManagement\Http\CategoryAdminController;
 use Modules\Post\Features\CategoryManagement\Http\CategoryApiController;
+use Modules\Post\Features\ContentAnalytics\Http\ContentAnalyticsDashboardController;
 use Modules\Post\Features\PublicReading\Http\ProductBlockClickController;
 use Modules\Post\Features\PublicReading\Http\PublicArticleController;
 use Modules\Post\Features\PublicReading\Http\PublicCategoryController;
@@ -45,6 +46,13 @@ Route::middleware(['auth'])
         // nhầm "articles/pending-review" nếu resource đăng ký trước (Laravel so khớp theo thứ
         // tự đăng ký, không tự ưu tiên path tường minh hơn wildcard).
         Route::get('articles/pending-review', [ArticleAdminController::class, 'pendingReview'])->name('articles.pending-review');
+
+        // Content Freshness (2026-08-01) — cùng lý do đặt TRƯỚC Route::resource bên dưới như
+        // 'pending-review' ở trên (tránh khớp nhầm "articles/{article}").
+        Route::get('articles/needs-freshness-review', [ArticleAdminController::class, 'needsFreshnessReview'])->name('articles.needs-freshness-review');
+
+        // spec/ga-dashboard-statistics.md §1 — cùng lý do đặt TRƯỚC Route::resource bên dưới.
+        Route::get('articles/analytics', [ContentAnalyticsDashboardController::class, 'index'])->name('articles.analytics');
 
         // PostArticle: chỉ "vỏ" (format/cover/is_featured/categories/tags) — không còn
         // title/status (đã chuyển sang PostArticleTranslation, xem TranslationController).

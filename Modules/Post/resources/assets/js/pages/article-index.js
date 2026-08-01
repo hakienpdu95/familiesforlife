@@ -57,6 +57,16 @@ const COLUMNS = [
         title: 'Ngày tạo', field: 'created_at', width: 110, hozAlign: 'center', sorter: 'string',
     },
     {
+        // spec/ga-dashboard-statistics.md §2.2 — đọc từ ga_views_30d đã đồng bộ sẵn
+        // (SyncGoogleAnalyticsStatsCommand), null khi bài chưa từng sync/ngoài top 1000 GA —
+        // hiển thị "—" chứ không phải "0" để phân biệt "chưa có dữ liệu" với "có dữ liệu, bằng 0".
+        title: 'Lượt xem GA', field: 'ga_views_30d', width: 110, hozAlign: 'center', sorter: 'number',
+        formatter(cell) {
+            const v = cell.getValue();
+            return v == null ? '<span class="text-base-content/25 text-xs">—</span>' : esc(v);
+        },
+    },
+    {
         title: '', field: 'id', width: 110, hozAlign: 'center', headerSort: false, frozen: true,
         formatter(cell) {
             const d = cell.getRow().getData();

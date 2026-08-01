@@ -28,7 +28,12 @@ class ArticleContentRenderer
     public function render(PostArticleTranslation $translation): string
     {
         $blocks = $translation->contentBlocks()
-            ->with(['productBlock.items.product', 'productBlock.items.buttons', 'productBlock.buttons', 'faqBlock.items', 'howtoBlock.steps'])
+            ->with([
+                // publicEmbed() — trang public không có TenantContext (khách vãng lai), OrganizationScope
+                // mặc định trả rỗng cho Product tenant-scoped (xem Product::scopePublicEmbed()).
+                'productBlock.items.product' => fn ($q) => $q->publicEmbed(),
+                'productBlock.items.buttons', 'productBlock.buttons', 'faqBlock.items', 'howtoBlock.steps',
+            ])
             ->get();
 
         return $blocks->map(function ($block) {

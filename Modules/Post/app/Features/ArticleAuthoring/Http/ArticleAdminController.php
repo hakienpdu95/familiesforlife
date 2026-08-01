@@ -21,6 +21,8 @@ use Modules\Post\Features\ArticleAuthoring\Data\ArticleData;
 use Modules\Post\Features\ArticleAuthoring\Data\TranslationData;
 use Modules\Post\Features\ArticleAuthoring\Queries\GetArticleRedirectClickStatsHandler;
 use Modules\Post\Features\ArticleAuthoring\Queries\GetArticleRedirectClickStatsQuery;
+use Modules\Post\Features\ArticleAuthoring\Queries\ListFreshnessReviewTranslationsHandler;
+use Modules\Post\Features\ArticleAuthoring\Queries\ListFreshnessReviewTranslationsQuery;
 use Modules\Post\Features\ArticleAuthoring\Queries\ListPendingReviewTranslationsHandler;
 use Modules\Post\Features\ArticleAuthoring\Queries\ListPendingReviewTranslationsQuery;
 use Modules\Post\Features\ArticleAuthoring\Support\GeoChecklist;
@@ -62,6 +64,21 @@ class ArticleAdminController extends Controller
         $translations = $handler->handle(new ListPendingReviewTranslationsQuery($request->user()));
 
         return view('post::admin.articles.pending-review', compact('translations'));
+    }
+
+    /**
+     * Content Freshness (2026-08-01) — bài xem nhiều nhưng lâu chưa cập nhật, để đội biên tập
+     * chạy "quarterly freshness sprint" (xem ListFreshnessReviewTranslationsHandler). Cùng
+     * quyền viewAny như index() — không phải hàng chờ duyệt xuyên tổ chức nên không giới hạn
+     * riêng theo role như pendingReview() ở trên.
+     */
+    public function needsFreshnessReview(ListFreshnessReviewTranslationsHandler $handler): View
+    {
+        $this->authorize('viewAny', PostArticle::class);
+
+        $translations = $handler->handle(new ListFreshnessReviewTranslationsQuery());
+
+        return view('post::admin.articles.needs-freshness-review', compact('translations'));
     }
 
     public function create(GetCategoryTreeHandler $categoryTreeHandler): View

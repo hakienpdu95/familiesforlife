@@ -9,7 +9,10 @@ use Modules\Post\Models\PostArticle;
 
 class ListArticlesForAdminHandler implements QueryHandlerInterface
 {
-    private const SORTABLE = ['title', 'format', 'created_at'];
+    private const SORTABLE = ['title', 'format', 'created_at', 'ga_views_30d'];
+
+    /** Cột sống ở post_article_translations (bản dịch main_locale), cần leftJoin để sort — xem dưới. */
+    private const SORTABLE_VIA_TRANSLATION = ['title', 'ga_views_30d'];
 
     public function handle(QueryInterface $query): LengthAwarePaginator
     {
@@ -40,14 +43,14 @@ class ListArticlesForAdminHandler implements QueryHandlerInterface
         $sortField = in_array($query->sortField, self::SORTABLE, true) ? $query->sortField : 'created_at';
         $sortDir   = $query->sortDir === 'asc' ? 'asc' : 'desc';
 
-        // 'title' sống ở post_article_translations (bản dịch main_locale), không phải
-        // post_articles — cùng kỹ thuật leftJoin+orderBy đã dùng cho 'province_name' ở
+        // 'title'/'ga_views_30d' sống ở post_article_translations (bản dịch main_locale), không
+        // phải post_articles — cùng kỹ thuật leftJoin+orderBy đã dùng cho 'province_name' ở
         // ListOrganizationsHandler (Modules/Organization) khi cột sort không nằm trên bảng chính.
-        if ($sortField === 'title') {
+        if (in_array($sortField, self::SORTABLE_VIA_TRANSLATION, true)) {
             $q->leftJoin('post_article_translations as sort_trans', function ($join): void {
                 $join->on('sort_trans.article_id', '=', 'post_articles.id')
                      ->on('sort_trans.locale', '=', 'post_articles.main_locale');
-            })->orderBy('sort_trans.title', $sortDir);
+            })->orderBy('sort_trans.' . $sortField, $sortDir);
         } else {
             $q->orderBy('post_articles.' . $sortField, $sortDir);
         }

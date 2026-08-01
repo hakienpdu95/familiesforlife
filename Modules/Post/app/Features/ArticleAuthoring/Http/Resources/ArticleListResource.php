@@ -33,6 +33,10 @@ class ArticleListResource extends JsonResource
             'created_by_name' => $this->createdBy?->name,
             'created_at'      => $this->created_at?->format('d/m/Y'),
 
+            // spec/ga-dashboard-statistics.md §2.2 — cột denormalized đã đồng bộ sẵn
+            // (SyncGoogleAnalyticsStatsCommand), null khi bài chưa từng sync/ngoài top 1000 GA.
+            'ga_views_30d' => $main?->ga_views_30d,
+
             'is_redirect' => $this->isRedirect(),
 
             'show_url'   => route('backend.post.articles.show', $this->resource),

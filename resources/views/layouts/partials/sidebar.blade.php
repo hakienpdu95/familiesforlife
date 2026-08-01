@@ -158,7 +158,12 @@
         </details>
         @endcan
 
-        @can(\App\Enums\PermissionEnum::POST_ARTICLE_VIEW->value)
+        {{-- spec/ga-dashboard-statistics.md §9.9 — mở rộng thêm 'post_analytics.view': không role
+             nào trong 5 role được cấp quyền này (platform_ops/viewer/content_editor/content_head/
+             section_editor) có sẵn POST_ARTICLE_VIEW (đã kiểm tra trực tiếp), nên nếu chỉ gate
+             theo POST_ARTICLE_VIEW như cũ thì cả nhóm menu "Bài viết" sẽ ẩn với họ, khiến link
+             "Thống kê traffic" không bao giờ hiển thị được dù đã có quyền xem trang đó. --}}
+        @if(auth()->user()?->can(\App\Enums\PermissionEnum::POST_ARTICLE_VIEW->value) || auth()->user()?->can('post_analytics.view'))
         <details {{ request()->routeIs('backend.post.*') ? 'open' : '' }}>
             <summary class="nav-summary {{ request()->routeIs('backend.post.*') ? 'active' : '' }}">
                 <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l6 6v10a2 2 0 01-2 2z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 13h6M9 17h6M9 9h1"/></svg>
@@ -168,6 +173,12 @@
             <div class="sub-menu">
                 <a href="{{ route('backend.post.articles.index') }}"
                    class="sub-link {{ request()->routeIs('backend.post.articles.*') ? 'active' : '' }}">Danh sách bài viết</a>
+                <a href="{{ route('backend.post.articles.needs-freshness-review') }}"
+                   class="sub-link {{ request()->routeIs('backend.post.articles.needs-freshness-review') ? 'active' : '' }}">Cần rà soát nội dung</a>
+                @can('post_analytics.view')
+                <a href="{{ route('backend.post.articles.analytics') }}"
+                   class="sub-link {{ request()->routeIs('backend.post.articles.analytics') ? 'active' : '' }}">Thống kê traffic</a>
+                @endcan
                 @can('create', \Modules\Post\Models\PostArticle::class)
                 <a href="{{ route('backend.post.articles.create') }}"
                    class="sub-link {{ request()->routeIs('backend.post.articles.create') ? 'active' : '' }}">Thêm bài viết</a>
@@ -182,7 +193,7 @@
                 @endcan
             </div>
         </details>
-        @endcan
+        @endif
 
         {{-- spec/Newsletter_Technical_Specification.md §12 — platform-wide, không permission
              Spatie riêng (§0 mục 10). Dùng @can('viewAny', ...) đi qua NewsletterPolicy/Gate

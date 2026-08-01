@@ -101,6 +101,11 @@ class RealEstateListing extends TenantAwareModel implements HasMedia
         return $this->belongsTo(\App\Models\User::class, 'updated_by');
     }
 
+    public function province(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Province::class, 'province_code', 'province_code');
+    }
+
     // ── HasApproval contract ─────────────────────────────────────────
 
     /**

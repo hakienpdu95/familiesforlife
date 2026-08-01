@@ -36,7 +36,11 @@ class PublicArticleController extends Controller
             ->where('slug', $slug)
             ->with([
                 'article.categories', 'article.tags', 'article.createdBy.authorProfile',
-                'contentBlocks.productBlock.items.product', 'contentBlocks.productBlock.items.buttons', 'contentBlocks.productBlock.buttons',
+                // publicEmbed() — trang public không có TenantContext, OrganizationScope mặc định
+                // trả rỗng cho Product tenant-scoped (xem Product::scopePublicEmbed()); cần đọc được
+                // để ArticleStructuredDataBuilder::buildOffer() phát sinh Offer.price/priceCurrency.
+                'contentBlocks.productBlock.items.product' => fn ($q) => $q->publicEmbed(),
+                'contentBlocks.productBlock.items.buttons', 'contentBlocks.productBlock.buttons',
                 'contentBlocks.faqBlock.items', 'faqBlocks.items',
                 'contentBlocks.howtoBlock.steps', 'howtoBlocks.steps',
             ])

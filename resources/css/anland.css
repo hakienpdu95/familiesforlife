@@ -8,6 +8,10 @@
  * (xanh dương/xanh lá, phong cách site rao vặt BĐS) và layout khác hẳn
  * trang chủ familiesforlife (theme "portal", hồng/tím).
  *
+ * Giao diện chuyển thể từ spec/thu-vien-nha-dat.html (mockup site rao vặt
+ * BĐS tham khảo) — cùng bảng màu thương hiệu (--az-*), header trắng +
+ * logo dạng khiên, hero gradient xanh dương, card bo góc.
+ *
  * Build: vite.config.frontend.js (cùng file, khác entry) → public/build/frontend/
  * Blade: @vite(['resources/css/anland.css','resources/js/anland.js'], 'build/frontend')
  */
@@ -20,9 +24,9 @@
     logs:   false;
 }
 
-/* Theme "anland" — xanh dương chủ đạo (thanh điều hướng, liên kết), xanh lá cho
- * hành động chính (Đăng tin, Áp dụng bộ lọc) — phong cách quen thuộc của các
- * trang rao vặt bất động sản, tách biệt hoàn toàn theme "portal" (trang chủ). */
+/* Theme "anland" — bảng màu chuyển thể từ spec/thu-vien-nha-dat.html: xanh dương hải quân
+ * (thương hiệu/nav/tiêu đề), xanh lá (hành động chính: Đăng tin, Tìm kiếm), cam (CTA phụ),
+ * xanh ngọc (điểm nhấn trang trí) — tách biệt hoàn toàn theme "portal" (trang chủ). */
 @plugin "daisyui/theme" {
     name: "anland";
     default: true;
@@ -34,30 +38,45 @@
     --color-base-300: #e4e8f0;
     --color-base-content: #1f2937;
 
-    --color-primary: #1a56db;
+    --color-primary: #00306c;
     --color-primary-content: #ffffff;
 
-    --color-secondary: #0f766e;
+    --color-secondary: #4fc3ac;
     --color-secondary-content: #ffffff;
 
-    --color-accent: #16a34a;
+    --color-accent: #48b454;
     --color-accent-content: #ffffff;
 
-    --color-neutral: #111827;
+    --color-neutral: #00306c;
     --color-neutral-content: #ffffff;
 
-    --color-info: #0284c7;
-    --color-success: #16a34a;
-    --color-warning: #d97706;
-    --color-error: #dc2626;
+    --color-info: #00d9f5;
+    --color-success: #3a9646;
+    --color-warning: #f7941d;
+    --color-error: #db2828;
 
-    --radius-box: 0.75rem;
+    --radius-box: 1rem;
     --radius-field: 0.5rem;
     --radius-selector: 0.5rem;
 }
 
 @theme {
     --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Biến màu thương hiệu thô (không map 1:1 vào token daisyUI) — dùng trực tiếp qua
+ * style="color:var(--az-navy)" trong Blade, đúng phong cách tác giả của file mockup gốc. */
+:root {
+    --az-navy: #00306c;
+    --az-navy-2: #0a3d63;
+    --az-green: #48b454;
+    --az-green-dark: #3a9646;
+    --az-teal: #4fc3ac;
+    --az-orange: #f7941d;
+    --az-cyan: #00d9f5;
+    --az-slate: #2f5c80;
+    --az-red: #db2828;
+    --az-price-blue: #1565c0;
 }
 
 [x-cloak] { display: none !important; }
@@ -72,13 +91,15 @@
 /* ── Header ─────────────────────────────────────────────────────────── */
 
 .anland-header {
-    background: var(--color-neutral);
-    color: var(--color-neutral-content);
+    background: #ffffff;
+    color: var(--color-base-content);
+    border-bottom: 1px solid var(--color-base-300);
 }
 
 .anland-header__brand-mark {
-    background: var(--color-accent);
-    color: var(--color-accent-content);
+    background: #ffffff;
+    color: var(--az-navy);
+    border: 2px solid var(--az-navy);
 }
 
 .anland-header__nav-link.is-disabled {
@@ -86,16 +107,29 @@
     opacity: .45;
 }
 
+.anland-header__tagline {
+    border-top: 1px solid var(--color-base-300);
+    color: var(--az-red);
+}
+
 /* ── Hero + search widget ───────────────────────────────────────────── */
 
 .anland-hero {
-    background:
-        radial-gradient(1200px 400px at 15% -10%, rgba(255,255,255,.10), transparent 60%),
-        linear-gradient(135deg, #0b3ea8 0%, #1a56db 55%, #0f766e 100%);
+    background: linear-gradient(120deg, var(--az-cyan) 0%, #059bd6 30%, var(--az-navy-2) 62%, var(--az-navy-2) 100%);
+}
+
+.anland-hero-search {
+    background: var(--az-slate);
 }
 
 .anland-search-tabs .tab {
     border-radius: var(--radius-field) var(--radius-field) 0 0;
+}
+
+.anland-select-pill {
+    border: none;
+    background: transparent;
+    padding: 0;
 }
 
 /* ── Property cards ─────────────────────────────────────────────────── */
@@ -113,19 +147,38 @@
         repeating-linear-gradient(135deg, #eef1f7, #eef1f7 12px, #e4e8f0 12px, #e4e8f0 24px);
 }
 
+/* ── Section headings ───────────────────────────────────────────────── */
+
+.anland-section-title {
+    position: relative;
+    padding-bottom: .625rem;
+}
+
+.anland-section-title::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 3rem;
+    height: 3px;
+    border-radius: 9999px;
+    background: var(--az-teal);
+}
+
 /* ── Category tiles ─────────────────────────────────────────────────── */
 
 .anland-tile {
-    transition: border-color .15s ease, background-color .15s ease;
+    transition: border-color .15s ease, background-color .15s ease, transform .15s ease;
 }
 
 .anland-tile:hover {
-    border-color: var(--color-primary);
-    background-color: color-mix(in oklab, var(--color-primary) 6%, white);
+    border-color: var(--az-navy);
+    background-color: color-mix(in oklab, var(--az-navy) 6%, white);
+    transform: translateY(-2px);
 }
 
 /* ── Loan calculator ─────────────────────────────────────────────────── */
 
 .anland-range {
-    accent-color: var(--color-primary);
+    accent-color: var(--az-navy);
 }

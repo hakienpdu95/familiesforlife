@@ -327,7 +327,10 @@
         "cta_url///string///500///_NULL///NULL///__///__",
         "direct_answer///string///500///_NULL///NULL///__///AEO — câu trả lời trực tiếp hiển thị nổi bật đầu bài (khuyến nghị ~60 từ), khác excerpt (excerpt là mô tả/preview, direct_answer là câu TRẢ LỜI thẳng câu hỏi chính của bài)",
         "__index///unique///__///__///__///locale,slug|uq_post_trans_locale_slug///__",
-        "__index///index///__///__///__///locale,status,published_at|idx_post_trans_status_pub///__"
+        "__index///index///__///__///__///locale,status,published_at|idx_post_trans_status_pub///__",
+        "ga_views_30d///unsignedInteger///__///_NULL///NULL///__///__",
+        "ga_synced_at///timestamp///__///_NULL///NULL///__///__",
+        "__index///index///__///__///__///ga_views_30d///__"
     ],
     [
         "post_categories///add///__///",

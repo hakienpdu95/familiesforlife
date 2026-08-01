@@ -6,6 +6,7 @@ use Modules\Post\Enums\ContentBlockType;
 use Modules\Post\Features\AuthorHub\Support\AuthorRoleResolver;
 use Modules\Post\Models\PostArticle;
 use Modules\Post\Models\PostArticleTranslation;
+use Modules\Post\Models\PostProductBlockItem;
 
 /**
  * AEO/GEO (2026-07-28) — trang bài viết public trước đây KHÔNG render bất kỳ structured data
@@ -28,7 +29,7 @@ class ArticleStructuredDataBuilder
             $this->buildFaqPage($translation),
         ]);
 
-        return array_values(array_merge($nodes, $this->buildHowTos($translation)));
+        return array_values(array_merge($nodes, $this->buildHowTos($translation), $this->buildProducts($translation)));
     }
 
     private function buildArticle(PostArticle $article, PostArticleTranslation $translation, string $canonicalUrl): array
@@ -229,5 +230,78 @@ class ArticleStructuredDataBuilder
             ]))
             ->values()
             ->all();
+    }
+
+    /**
+     * GEO (2026-08-01, nguồn tham khảo aithinkerlab.com/generative-engine-optimization-2026) —
+     * "Khối sản phẩm" trong bài viết trước đây không phát sinh schema Product/Offer nào, dù
+     * đã hiển thị đầy đủ tên/giá/ảnh/link cho người đọc (xem product-block/*.blade.php). 1 node
+     * Product/item — không gộp theo block vì mỗi item là 1 sản phẩm riêng biệt (giống lý do
+     * buildHowTos() không gộp theo bài).
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function buildProducts(PostArticleTranslation $translation): array
+    {
+        return $translation->contentBlocks
+            ->filter(fn ($block) => $block->type === ContentBlockType::Product && $block->productBlock)
+            ->flatMap(fn ($block) => $block->productBlock->items)
+            ->filter(fn (PostProductBlockItem $item) => trim((string) $item->display_title) !== '')
+            ->map(function (PostProductBlockItem $item) {
+                $schema = [
+                    '@context' => 'https://schema.org',
+                    '@type'    => 'Product',
+                    'name'     => $item->display_title,
+                ];
+
+                if ($item->display_image_url) {
+                    $schema['image'] = [$item->display_image_url];
+                }
+
+                if ($item->display_description) {
+                    $schema['description'] = $item->display_description;
+                }
+
+                $offer = $this->buildOffer($item);
+                if ($offer) {
+                    $schema['offers'] = $offer;
+                }
+
+                return $schema;
+            })
+            ->values()
+            ->all();
+    }
+
+    /**
+     * CHỈ phát sinh `offers` khi có giá SỐ THẬT từ Product liên kết (`price` decimal) — bỏ qua
+     * `price_label_override`/`display_price_label` vì đó là chuỗi hiển thị tự do (VD "Liên hệ",
+     * "Giá tốt nhất thị trường"), không đảm bảo đúng định dạng số Offer.price yêu cầu; phát sinh
+     * sai định dạng sẽ khiến Google/AI bỏ qua luôn cả node Product (thà thiếu `offers` còn hơn sai).
+     */
+    private function buildOffer(PostProductBlockItem $item): ?array
+    {
+        $product = $item->product;
+
+        if (! $product || $product->price === null) {
+            return null;
+        }
+
+        $offer = [
+            '@type'         => 'Offer',
+            'price'         => (string) $product->price,
+            'priceCurrency' => $product->currency ?: 'VND',
+        ];
+
+        // Chỉ nhận URL http(s) thật — resolveTargetUrl() có thể trả về tel:/mailto: cho nút liên
+        // hệ, không hợp lệ cho Offer.url (schema.org yêu cầu URL trang mua hàng).
+        $url = $item->buttons->first(fn ($button) => str_starts_with((string) $button->resolveTargetUrl(), 'http'))
+            ?->resolveTargetUrl();
+
+        if ($url) {
+            $offer['url'] = $url;
+        }
+
+        return $offer;
     }
 }

@@ -4,7 +4,9 @@
     <div class="anland-container py-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
         <div>
             <div class="flex items-center gap-2 mb-3">
-                <span class="anland-header__brand-mark w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm">A</span>
+                <span class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 bg-white/10">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M4 21V8l8-5 8 5v13"/><path d="M9 21v-6h6v6"/><path d="M9 12h.01M15 12h.01M12 8h.01"/></svg>
+                </span>
                 <span class="text-lg font-bold">Anland</span>
             </div>
             <p class="text-sm text-neutral-content/70 leading-relaxed">

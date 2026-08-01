@@ -23,21 +23,21 @@ class AnlandHomeController extends Controller
         // listing-card.blade.php gọi publicContent() cho từng tin trong vòng lặp, model đọc
         // preventLazyLoading() nên PHẢI eager-load quan hệ này trước, không thể lazy load.
         $featured = RealEstateListing::publicPortalVisible()
-            ->with('approvalSubject')
+            ->with(['approvalSubject', 'province'])
             ->where('is_featured', true)
             ->latest()
             ->limit(6)
             ->get();
 
         $latestSale = RealEstateListing::publicPortalVisible()
-            ->with('approvalSubject')
+            ->with(['approvalSubject', 'province'])
             ->where('listing_type', ListingType::Sale)
             ->latest()
             ->limit(8)
             ->get();
 
         $latestRent = RealEstateListing::publicPortalVisible()
-            ->with('approvalSubject')
+            ->with(['approvalSubject', 'province'])
             ->where('listing_type', ListingType::Rent)
             ->latest()
             ->limit(4)
@@ -52,11 +52,15 @@ class AnlandHomeController extends Controller
 
         $provinces = Province::where('is_active', true)->orderBy('name')->get(['province_code', 'name']);
 
+        // Badge tin cậy trên hero — tổng tin đã publish, cùng nguồn dữ liệu với categoryCounts.
+        $totalListings = $categoryCounts->sum();
+
         return view('realestate::public.anland.home', [
             'featured'        => $featured,
             'latestSale'      => $latestSale,
             'latestRent'      => $latestRent,
             'categoryCounts'  => $categoryCounts,
+            'totalListings'   => $totalListings,
             'propertyTypes'   => PropertyType::cases(),
             'provinces'       => $provinces,
         ]);
