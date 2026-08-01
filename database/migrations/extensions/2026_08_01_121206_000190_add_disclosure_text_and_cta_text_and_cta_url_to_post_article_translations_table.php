@@ -29,13 +29,22 @@ return new class extends Migration {
             if (!Schema::hasIndex('post_article_translations', 'idx_post_trans_status_pub')) {
                 $table->index(['locale', 'status', 'published_at'], 'idx_post_trans_status_pub');
             }
+            if (!Schema::hasColumn('post_article_translations', 'ga_views_30d')) {
+                $table->unsignedInteger('ga_views_30d')->nullable()->after('direct_answer');
+            }
+            if (!Schema::hasColumn('post_article_translations', 'ga_synced_at')) {
+                $table->timestamp('ga_synced_at')->nullable()->after('ga_views_30d');
+            }
+            if (!Schema::hasIndex('post_article_translations', 'post_article_translations_ga_views_30d_index')) {
+                $table->index('ga_views_30d');
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('post_article_translations', function (Blueprint $table) {
-            $cols = array_filter(['disclosure_text', 'cta_text', 'cta_url', 'direct_answer'], fn($c) => Schema::hasColumn('post_article_translations', $c));
+            $cols = array_filter(['disclosure_text', 'cta_text', 'cta_url', 'direct_answer', 'ga_views_30d', 'ga_synced_at'], fn($c) => Schema::hasColumn('post_article_translations', $c));
             if (!empty($cols)) $table->dropColumn(array_values($cols));
         });
     }

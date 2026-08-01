@@ -664,8 +664,9 @@ document.addEventListener('alpine:init', () => {
                 const promptTopic = this.isBatchResult() ? (this.result.topic ?? null) : (this.topic || null);
                 const coreFocusText = foundation?.core_focus || null;
                 const uniqueAngleText = foundation?.unique_angle || null;
-                const goalText = brief.goal || null;
-                const audienceText = brief.audience || null;
+                const goalText = brief.goal || foundation?.content_goals || null;
+                const audienceText = brief.audience || foundation?.audience || null;
+                const constraintsText = brief.constraints || foundation?.constraints || null;
 
                 const personaAudience = audienceText ? `, chuyên viết cho đối tượng độc giả: ${audienceText}` : '';
                 const personaTopic = promptTopic ? ` về chủ đề "${promptTopic}"` : '';
@@ -683,7 +684,7 @@ document.addEventListener('alpine:init', () => {
                     this.existingArticleTitles.forEach(title => top.push(`- ${title}`));
                 }
                 if (brief.goal) top.push(`Mục tiêu bài viết: ${brief.goal}`);
-                if (brief.constraints) top.push(`Ràng buộc / không muốn: ${brief.constraints}`);
+                if (constraintsText) top.push(`Ràng buộc / không muốn: ${constraintsText}`);
                 if (brief.style_sample) top.push(`Giọng văn mẫu:\n${brief.style_sample}`);
 
                 const FOUNDATION_HINT_MAX_CHARS = 160;
@@ -808,18 +809,32 @@ document.addEventListener('alpine:init', () => {
                     '(Nếu Bước 0 đã đổi sang chuyên mục khác: áp dụng tiêu chí 1-2 theo trọng tâm/góc nhìn của CHUYÊN MỤC MỚI đó — xem trong "Danh sách chuyên mục" ở trên — KHÔNG dùng trọng tâm/góc nhìn ghi trong ngoặc ở 2 dòng trên, vốn chỉ đúng cho chuyên mục đã chọn ban đầu.)',
                     goalText
                         ? `3. Phục vụ mục tiêu ("${goalText}"): ý tưởng có thực sự phục vụ mục tiêu này không?`
-                        : '3. Phục vụ mục tiêu: có phục vụ mục tiêu nội dung đã nêu ở trên không?',
+                        : '3. Phục vụ mục tiêu: chưa có mục tiêu cụ thể được khai báo — đánh giá theo mục tiêu mặc định: '
+                            + 'bài viết phải giúp độc giả giải quyết 1 vấn đề/câu hỏi thực tế của họ, không viết chỉ để có bài.',
                     audienceText
-                        ? `4. Phù hợp đối tượng độc giả ("${audienceText}"): góc độ/độ phức tạp/giọng văn của ý tưởng có thực sự phù hợp với đối tượng này không?`
-                        : '4. Phù hợp đối tượng độc giả: ý tưởng có phù hợp với đối tượng độc giả đã nêu ở trên không?',
+                        ? `4. Phù hợp đối tượng độc giả ("${audienceText}"): góc độ, độ sâu kiến thức và giọng văn của ý tưởng `
+                            + 'có khớp với hoàn cảnh, giai đoạn và mối quan tâm HIỆN TẠI của đúng đối tượng này không '
+                            + '(không hàn lâm quá mức họ cần, cũng không sơ sài dưới mức họ đã biết)?'
+                        : '4. Phù hợp đối tượng độc giả: chưa có mô tả đối tượng — hãy tự suy ra chân dung độc giả phù hợp nhất '
+                            + 'từ dữ liệu nguồn + tên chuyên mục, ghi 1 dòng "Giả định đối tượng: [mô tả ngắn]" ngay trước bảng '
+                            + 'kết quả, rồi đánh giá tiêu chí này theo đúng giả định đó — KHÔNG đánh giá chung chung kiểu '
+                            + '"ai đọc cũng phù hợp".',
+                    ...(constraintsText ? [
+                        `Bộ lọc bắt buộc (ngoài 4 tiêu chí): LOẠI ngay ý tưởng vi phạm ràng buộc đã nêu ở trên ("${constraintsText}"), kể cả khi ý tưởng đó đạt cả 4 tiêu chí.`,
+                    ] : []),
                     'Lưu ý khi đánh giá: nếu nguồn có extraction_confidence thấp hoặc notes cảnh báo nghi vấn paywall, hạ độ tin cậy khi dùng nguồn đó làm căn cứ cho ý tưởng.',
                     '',
-                    'BƯỚC 3 — Trả lời bằng ĐÚNG 1 bảng Markdown dưới đây, có thể kèm 1 dòng "Lưu ý" ngay trước bảng nếu Bước 0 phát '
-                        + 'hiện lệch chủ đề, hoặc 1 dòng lý do ngắn ngay sau bảng nếu chưa đủ 10 ý tưởng (xem "Mục tiêu số lượng" ở '
-                        + 'trên). Không viết giải thích, không mở đầu, không kết luận nào khác:',
+                    'BƯỚC 3 — Trả lời bằng ĐÚNG 1 bảng Markdown dưới đây; chỉ được kèm thêm tối đa các dòng sau: 1 dòng "Lưu ý" '
+                        + 'ngay trước bảng nếu Bước 0 phát hiện lệch chủ đề'
+                        + (audienceText ? '' : ', 1 dòng "Giả định đối tượng" ngay trước bảng (xem tiêu chí 4 ở trên)')
+                        + ', và 1 dòng lý do ngắn ngay sau bảng nếu chưa đủ 10 ý tưởng (xem "Mục tiêu số lượng" ở trên). '
+                        + 'Không viết giải thích, không mở đầu, không kết luận nào khác:',
                     '',
                     'Bảng — Ý tưởng ĐẠT cả 4 tiêu chí, cột: '
                         + '| Ý tưởng | Khớp trọng tâm? | Góc nhìn độc quyền? | Phục vụ mục tiêu? | Phù hợp đối tượng? | Lý do (1 câu, vì sao đạt cả 4) | Đề xuất tiêu đề bài viết |',
+                    'Riêng cột "Đề xuất tiêu đề bài viết": đặt tiêu đề bằng đúng giọng và mức từ ngữ phù hợp với đối tượng độc giả'
+                        + (brief.style_sample ? ' (bám theo cách xưng hô/từ ngữ trong giọng văn mẫu ở trên)' : '')
+                        + ', nêu lợi ích/vấn đề cụ thể — KHÔNG đặt tiêu đề giật gân sai lệch nội dung (clickbait).',
                 );
 
                 return [...top, '', ...middle, '', ...bottom].join('\n');
@@ -966,7 +981,7 @@ document.addEventListener('alpine:init', () => {
                 if (!ctx) return '';
 
                 const lines = [
-                    'Bạn là biên tập viên cần nắm nhanh nội dung 1 nguồn để tham khảo, không cần bối cảnh chuyên mục hay mục tiêu biên tập nào khác.',
+                    'Bạn là biên tập viên cần nắm nhanh nội dung 1 nguồn tham khảo để quyết định nguồn này có đáng dùng cho bài viết sắp tới hay không — tóm tắt trung thực đúng theo nguồn, không thêm nhận xét/đánh giá chủ quan của riêng bạn, không cần bối cảnh chuyên mục hay mục tiêu biên tập nào khác.',
                     '',
                     `Tiêu đề nguồn: "${ctx.title}"`,
                     `Ngôn ngữ nguồn: ${ctx.language}`,
@@ -989,13 +1004,13 @@ document.addEventListener('alpine:init', () => {
                 }
 
                 lines.push(
-                    'Nhiệm vụ: tóm tắt nội dung trên. Chỉ dùng thông tin có trong nội dung nguồn, KHÔNG bịa thêm số liệu/sự kiện/trích dẫn không có trong nguồn. Trả về ĐÚNG 2 phần theo thứ tự dưới đây, không thêm giải thích/mở đầu/kết luận nào khác, không bọc kết quả trong khối code (```):',
+                    'Nhiệm vụ: tóm tắt nội dung trên. Chỉ dùng thông tin có trong nội dung nguồn, KHÔNG bịa thêm số liệu/sự kiện/trích dẫn không có trong nguồn. Giữ NGUYÊN các con số kèm đơn vị, tên riêng và thuật ngữ then chốt như trong nguồn (số liệu sai lệch khi tóm tắt còn tệ hơn không có số liệu). Trả về ĐÚNG 2 phần theo thứ tự dưới đây, không thêm giải thích/mở đầu/kết luận nào khác, không bọc kết quả trong khối code (```):',
                     '',
                     '## Tóm tắt',
-                    'Đoạn văn dưới 100 từ, nắm được nội dung chính.',
+                    'Đoạn văn dưới 100 từ, nắm được nội dung chính: nguồn nói về vấn đề gì, của ai, và kết luận/khuyến nghị chính là gì.',
                     '',
                     '## Ý chính',
-                    '3-5 gạch đầu dòng, mỗi ý 1 câu ngắn, không lặp lại nguyên câu đã có trong đoạn tóm tắt.',
+                    '3-5 gạch đầu dòng, mỗi ý 1 câu ngắn, không lặp lại nguyên câu đã có trong đoạn tóm tắt. Ưu tiên ý có giá trị biên tập (số liệu, khuyến nghị, insight riêng của nguồn) thay vì ý chung chung ai cũng biết.',
                 );
 
                 return lines.join('\n');
@@ -1005,8 +1020,13 @@ document.addEventListener('alpine:init', () => {
                 const ctx = this.singleSourceContext();
                 if (!ctx) return '';
 
+                const brief = this.result?.brief ?? null;
+                const audience = brief?.audience || this.audience || null;
+                const constraints = brief?.constraints || this.constraints || null;
+                const styleSample = brief?.style_sample || this.styleSample || null;
+
                 const lines = [
-                    'Bạn là chuyên gia content đa kênh, cần viết lại 1 nội dung gốc thành nhiều phiên bản cho các nền tảng khác nhau, giữ đúng Ý CHÍNH nhưng đổi giọng văn/độ dài phù hợp từng nền tảng.',
+                    `Bạn là chuyên gia content đa kênh${audience ? `, chuyên viết cho đối tượng độc giả: ${audience}` : ''}, cần viết lại 1 nội dung gốc thành nhiều phiên bản cho các nền tảng khác nhau, giữ đúng Ý CHÍNH nhưng đổi giọng văn/độ dài phù hợp từng nền tảng.`,
                     '',
                     `Tiêu đề nguồn: "${ctx.title}"`,
                     `Ngôn ngữ nguồn: ${ctx.language}`,
@@ -1014,6 +1034,16 @@ document.addEventListener('alpine:init', () => {
 
                 if (ctx.sourceUrl) {
                     lines.push(`URL nguồn: ${ctx.sourceUrl}`);
+                }
+
+                if (audience) {
+                    lines.push(`Đối tượng độc giả chung của MỌI phiên bản: ${audience} — mỗi nền tảng đổi giọng/độ dài theo yêu cầu riêng bên dưới, nhưng cách chọn ý để giữ lại, mức độ chi tiết và cách xưng hô đều phải nhắm đúng đối tượng này.`);
+                }
+                if (constraints) {
+                    lines.push(`Ràng buộc áp dụng cho MỌI phiên bản: ${constraints}`);
+                }
+                if (styleSample) {
+                    lines.push(`Đoạn văn mẫu — chỉ dùng để tham khảo cách xưng hô/từ ngữ quen thuộc với độc giả (yêu cầu giọng riêng của từng nền tảng bên dưới vẫn được ưu tiên hơn):\n${styleSample}`);
                 }
 
                 lines.push(
