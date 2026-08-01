@@ -4,6 +4,7 @@
 @section('content')
 <div x-data="knowledgeDocumentListPage({{ Js::from([
     'apiUrl' => route('backend.api.aicem.knowledge-documents'),
+    'staleAfterDays' => $staleAfterDays,
 ]) }})">
 
     @foreach(['success', 'error'] as $type)

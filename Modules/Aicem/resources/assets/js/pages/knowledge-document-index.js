@@ -14,6 +14,38 @@ function esc(v) {
         .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+/**
+ * Đối chiếu bài context-engineering (animalz.co) — "freshness": module-level mutable (không phải
+ * const trong COLUMNS, vốn được xây dựng 1 lần lúc file load, TRƯỚC khi Alpine.data() factory
+ * chạy và biết serverData.staleAfterDays) — cột formatter đọc biến này bằng closure, được gán giá
+ * trị thật khi Alpine.data() factory chạy (luôn xảy ra trước khi user thấy được bảng, xem init()).
+ * Cùng ngưỡng/công thức tính tuổi với CoreIdeaExtractor::category-foundations.blade.php
+ * (foundationAgeDays/formatFoundationAge/isFoundationStale) — 1 khái niệm freshness, không tạo
+ * 2 cách tính tuổi khác nhau trong cùng hệ thống context engineering.
+ */
+let staleAfterDays = 90;
+
+function ageDays(updatedAt) {
+    if (!updatedAt) return null;
+    return Math.floor((Date.now() - new Date(updatedAt).getTime()) / (1000 * 60 * 60 * 24));
+}
+
+function formatAge(updatedAt) {
+    const days = ageDays(updatedAt);
+    if (days === null) return '<span class="text-base-content/25 text-xs">—</span>';
+    if (days < 1) return 'Hôm nay';
+    if (days === 1) return '1 ngày trước';
+    if (days < 30) return `${days} ngày trước`;
+    const months = Math.floor(days / 30);
+    if (months < 12) return `${months} tháng trước`;
+    return `${Math.floor(months / 12)} năm trước`;
+}
+
+function isStale(updatedAt) {
+    const days = ageDays(updatedAt);
+    return days !== null && days >= staleAfterDays;
+}
+
 const COLUMNS = [
     {
         title: 'Tiêu đề', field: 'title', minWidth: 220, sorter: 'string', frozen: true,
@@ -41,6 +73,16 @@ const COLUMNS = [
     {
         title: 'Version', field: 'current_version', width: 100, hozAlign: 'center', sorter: 'number',
         formatter(cell) { return 'v' + cell.getValue(); },
+    },
+    {
+        title: 'Cập nhật', field: 'updated_at', minWidth: 150, headerSort: false,
+        formatter(cell) {
+            const updatedAt = cell.getValue();
+            const stale = isStale(updatedAt);
+            const badgeClass = stale ? 'badge-warning' : 'badge-ghost';
+            const tooltip = stale ? `title="Đã hơn ${staleAfterDays} ngày chưa cập nhật — cân nhắc ôn lại tri thức này"` : '';
+            return `<span class="badge badge-xs ${badgeClass}" ${tooltip}>${formatAge(updatedAt)}</span>`;
+        },
     },
     {
         title: 'Người tạo', field: 'creator_name', minWidth: 140, headerSort: false,
@@ -131,6 +173,10 @@ document.addEventListener('DOMContentLoaded', () => {
 document.addEventListener('alpine:init', () => {
     Alpine.data('knowledgeDocumentListPage', (serverData = {}) => {
         const { apiUrl = '' } = serverData;
+
+        // Gán module-level staleAfterDays TRƯỚC khi _setup() dựng bảng (COLUMNS đọc biến này qua
+        // closure) — xem docblock chỗ khai báo `let staleAfterDays` ở đầu file.
+        staleAfterDays = serverData.staleAfterDays ?? staleAfterDays;
 
         let tableInst = null;
 

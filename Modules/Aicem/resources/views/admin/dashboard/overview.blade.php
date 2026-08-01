@@ -72,6 +72,56 @@
         </div>
     </div>
 
+    {{-- Đối chiếu bài context-engineering (animalz.co) — "evaluation": tỷ lệ chấp nhận gợi ý là
+         tín hiệu trực tiếp cho biết ngữ cảnh/knowledge base hiện tại có thực sự hữu ích không.
+         Toàn thời gian (không giới hạn theo tháng) — mẫu cần đủ lớn mới có ý nghĩa thống kê. --}}
+    <div class="card bg-base-100 shadow-sm border border-base-200 mb-6">
+        <div class="card-body p-4">
+            <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">
+                Tỷ lệ chấp nhận gợi ý (toàn thời gian)
+            </p>
+            @php($sa = $stats['suggestion_acceptance'])
+            <div class="flex flex-wrap items-center gap-4 mb-3">
+                <div>
+                    <p class="text-2xl font-bold">
+                        {{ $sa['acceptance_rate'] !== null ? number_format($sa['acceptance_rate'], 1) . '%' : '—' }}
+                    </p>
+                    <p class="text-xs text-base-content/40">
+                        {{ $sa['accepted'] }} chấp nhận · {{ $sa['rejected'] }} từ chối
+                        @if($sa['pending'] > 0) · {{ $sa['pending'] }} đang chờ @endif
+                        @if($sa['stale'] > 0) · {{ $sa['stale'] }} đã cũ (stale) @endif
+                    </p>
+                </div>
+            </div>
+            @if(count($sa['by_field']))
+            <div class="overflow-x-auto">
+                <table class="table table-xs">
+                    <thead class="text-xs uppercase tracking-wide text-base-content/40">
+                        <tr>
+                            <th>Field</th>
+                            <th class="text-right">Chấp nhận</th>
+                            <th class="text-right">Từ chối</th>
+                            <th class="text-right">Tỷ lệ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($sa['by_field'] as $row)
+                        <tr>
+                            <td class="font-mono text-xs">{{ $row['field'] }}</td>
+                            <td class="text-right">{{ $row['accepted'] }}</td>
+                            <td class="text-right">{{ $row['rejected'] }}</td>
+                            <td class="text-right">{{ $row['rate'] !== null ? number_format($row['rate'], 1) . '%' : '—' }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @else
+            <p class="text-xs text-base-content/30">Chưa có gợi ý nào được quyết định.</p>
+            @endif
+        </div>
+    </div>
+
     <div class="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
         <div class="card-body p-0">
             <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide p-4 pb-2">20 lượt chạy gần nhất</p>

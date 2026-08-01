@@ -9,6 +9,8 @@
     'categoryFoundationsUrl' => route('backend.coreideaextractor.category-foundations.index'),
     'existingArticlesUrlTemplate' => route('backend.api.coreideaextractor.category-foundations.existing-articles', ['category' => '__UUID__']),
     'categories' => $categoryFoundations,
+    'familyValues' => config('core_idea_extractor.family_values.items', []),
+    'familyValuesRef' => config('core_idea_extractor.family_values.decision_ref'),
     'layer2Url' => route('backend.api.coreideaextractor.layer2'),
     'summarizeUrl' => route('backend.api.coreideaextractor.summarize'),
     'rewriteUrl' => route('backend.api.coreideaextractor.rewrite'),
@@ -337,7 +339,7 @@
 <script>
 document.addEventListener('alpine:init', () => {
     Alpine.data('coreIdeaExtractorPage', (serverData = {}) => {
-        const { apiUrl = '', apiBatchUrl = '', maxUrls = 7, categoryFoundationsUrl = '', existingArticlesUrlTemplate = '', categories = [], layer2Url = '', summarizeUrl = '', rewriteUrl = '' } = serverData;
+        const { apiUrl = '', apiBatchUrl = '', maxUrls = 7, categoryFoundationsUrl = '', existingArticlesUrlTemplate = '', categories = [], familyValues = [], familyValuesRef = '', layer2Url = '', summarizeUrl = '', rewriteUrl = '' } = serverData;
 
         return {
             mode: 'url',
@@ -361,6 +363,8 @@ document.addEventListener('alpine:init', () => {
             categoryFoundationsUrl,
             existingArticlesUrlTemplate,
             categories,
+            familyValues,
+            familyValuesRef,
             selectedCategoryUuid: '',
             existingArticleTitles: [],
             loadingExistingArticles: false,
@@ -446,6 +450,13 @@ document.addEventListener('alpine:init', () => {
                 if (foundation.core_focus) parts.push(`Trọng tâm: ${foundation.core_focus}`);
                 if (foundation.unique_angle) parts.push(`Góc nhìn khác biệt: ${foundation.unique_angle}`);
                 if (foundation.pain_points) parts.push(`Pain points: ${foundation.pain_points}`);
+                if (foundation.objections) parts.push(`Nghi ngờ: ${foundation.objections}`);
+                if (foundation.family_values_focus?.length) {
+                    const labels = foundation.family_values_focus
+                        .map(key => this.familyValues.find(fv => fv.key === key)?.label)
+                        .filter(Boolean);
+                    if (labels.length) parts.push(`Giá trị gia đình: ${labels.join(', ')}`);
+                }
 
                 return parts.join(' — ');
             },
@@ -639,6 +650,26 @@ document.addEventListener('alpine:init', () => {
                 setTimeout(() => { this.copied = false; }, 2000);
             },
 
+            /**
+             * spec/giadinh.md — Hệ giá trị gia đình Việt Nam (Quyết định 1189/QĐ-TTg 02/07/2026),
+             * 4 trụ cột: ấm no/hạnh phúc/tiến bộ/văn minh. Đây là CHUẨN NỀN TẢNG của platform
+             * (familiesforlife), khác mọi field Category Content Foundation khác (core_focus/
+             * pain_points/...) vốn là ngữ cảnh editor tự viết theo TỪNG chuyên mục — khối này CỐ
+             * ĐỊNH, LUÔN xuất hiện ở TOP của mọi prompt bất kể có chọn chuyên mục hay không (đọc từ
+             * config('core_idea_extractor.family_values'), không hardcode lặp lại câu chữ ở đây),
+             * để AI luôn có cùng 1 khung tham chiếu giá trị khi đề xuất ý tưởng cho platform nội
+             * dung gia đình. `family_values_focus` (field theo category, xem đoạn push riêng ngay
+             * sau khi gọi hàm này ở buildLayer2PromptText()) chỉ là lớp ƯU TIÊN bổ sung, không thay
+             * thế khối cố định này.
+             */
+            buildFamilyValuesGroundingLine() {
+                const items = (this.familyValues || [])
+                    .map(fv => `${fv.label} (${fv.description})`)
+                    .join('; ');
+
+                return `Khung giá trị biên tập nền tảng — Hệ giá trị gia đình Việt Nam (${this.familyValuesRef}), 4 giá trị cốt lõi: ${items}. Dùng khung này theo đúng 2 cách: (1) RÀNG BUỘC CỨNG — loại mọi ý tưởng đi ngược bất kỳ giá trị nào (VD cổ suý bất bình đẳng giới, bạo lực gia đình, hủ tục lạc hậu, ứng xử thiếu chuẩn mực giữa các thế hệ, so đo vật chất tạo áp lực lên gia đình khác); (2) LĂNG KÍNH ƯU TIÊN — giữa 2 ý tưởng ngang nhau về chất lượng, chọn ý giúp độc giả tiến gần 1 giá trị cụ thể hơn. KHÔNG ép mọi ý tưởng phải nhắc tên giá trị hay viết theo lối tuyên truyền khô cứng — giá trị phải thể hiện qua lợi ích thực tế mà bài viết mang lại cho gia đình độc giả.`;
+            },
+
             buildLayer2PromptText() {
                 if (!this.result) return null;
 
@@ -654,6 +685,16 @@ document.addEventListener('alpine:init', () => {
                         .map(s => s.language))
                     : new Set(this.result.language && this.result.language !== 'unknown' ? [this.result.language] : []);
                 const hasNonVietnameseSource = [...sourceLanguages].some(lang => lang !== 'vi');
+
+                // Nhận diện nguồn sản phẩm/dịch vụ (content_type_signal 'product'/'product_faq' — spec
+                // v1.12, hoặc declared_content_type publisher tự khai chứa 'product') — nguồn thương mại
+                // là đầu vào hợp lệ để nghiên cứu ý tưởng, nhưng cần thêm chỉ dẫn ở Bước 1 để bài viết
+                // đứng về phía độc giả, không thành bài PR/quảng cáo trá hình cho 1 thương hiệu.
+                const isProductLikeSource = (s) => ['product', 'product_faq'].includes(s?.content_type_signal)
+                    || (s?.declared_content_type || '').toLowerCase().includes('product');
+                const hasProductLikeSource = this.isBatchResult()
+                    ? (this.result.sources ?? []).some(s => s.status === 'success' && isProductLikeSource(s))
+                    : isProductLikeSource(this.result);
 
                 const brief = this.result.brief ?? {
                     audience: this.audience || null,
@@ -671,16 +712,28 @@ document.addEventListener('alpine:init', () => {
                 const personaAudience = audienceText ? `, chuyên viết cho đối tượng độc giả: ${audienceText}` : '';
                 const personaTopic = promptTopic ? ` về chủ đề "${promptTopic}"` : '';
 
+                // Nhãn giá trị gia đình chuyên mục ưu tiên (family_values_focus, §12.10) — tính 1
+                // lần, dùng ở cả TOP (dòng ưu tiên bổ sung) lẫn BƯỚC 1 (chỉ dẫn khai thác trực diện).
+                const familyFocusLabels = (foundation?.family_values_focus ?? [])
+                    .map(key => this.familyValues.find(fv => fv.key === key)?.label)
+                    .filter(Boolean);
+
                 const top = [];
-                top.push(`Bạn là biên tập viên giàu kinh nghiệm${category ? ` của chuyên mục "${category.name}"` : ''}${personaAudience}, đang nghiên cứu ý tưởng bài viết mới${personaTopic}.`);
+                top.push(`Bạn là biên tập viên giàu kinh nghiệm của một nền tảng nội dung dành cho gia đình Việt Nam${category ? `, phụ trách chuyên mục "${category.name}"` : ''}${personaAudience}, đang nghiên cứu ý tưởng bài viết mới${personaTopic}.`);
                 top.push(`Ngày hôm nay: ${new Date().toISOString().slice(0, 10)}.`);
+                top.push(this.buildFamilyValuesGroundingLine());
+                if (familyFocusLabels.length) {
+                    top.push(`Trong 4 giá trị trên, chuyên mục này ưu tiên phục vụ: ${familyFocusLabels.join(', ')} — khi chọn góc khai thác và lợi ích cuối cùng của ý tưởng, hướng về (các) giá trị này trước. Các giá trị còn lại vẫn là ràng buộc nền phải tôn trọng, không phải phạm vi bị loại trừ.`);
+                }
                 if (foundation?.core_focus) top.push(`Trọng tâm nội dung chuyên mục: ${foundation.core_focus}`);
                 if (foundation?.unique_angle) top.push(`Góc nhìn khác biệt của chuyên mục: ${foundation.unique_angle}`);
                 if (foundation?.content_goals) top.push(`Mục tiêu nội dung: ${foundation.content_goals}`);
-                if (foundation?.pain_points) top.push(`Pain points / câu hỏi thường gặp của độc giả (từ nghiên cứu thực tế): ${foundation.pain_points}`);
-                if (foundation?.rejected_ideas) top.push(`Ý tưởng đã cân nhắc và quyết định KHÔNG viết (Decision Log — không đề xuất lại): ${foundation.rejected_ideas}`);
+                if (foundation?.pain_points) top.push(`Pain points / câu hỏi thường gặp của độc giả (từ nghiên cứu thực tế — ý tưởng giá trị nhất thường trả lời TRỰC TIẾP 1 pain point cụ thể trong danh sách này, không chỉ liên quan chung chung tới chủ đề): ${foundation.pain_points}`);
+                if (foundation?.objections) top.push(`Nghi ngờ / lý do độc giả CHƯA tin, CHƯA hành động (ý tưởng nhắm vào nhóm này phải giải toả nghi ngờ bằng bằng chứng/giải thích cụ thể lấy được từ dữ liệu nguồn, không trấn an suông): ${foundation.objections}`);
+                if (foundation?.decision_criteria) top.push(`Tiêu chí độc giả dùng để so sánh/quyết định giữa các lựa chọn (ý tưởng dạng so sánh/hướng dẫn chọn phải bám ĐÚNG các tiêu chí này làm khung đánh giá, không tự nghĩ ra tiêu chí khác thay thế): ${foundation.decision_criteria}`);
+                if (foundation?.rejected_ideas) top.push(`Ý tưởng đã cân nhắc và quyết định KHÔNG viết (Decision Log — không đề xuất lại, kể cả biến thể chỉ đổi cách diễn đạt nhưng cùng góc khai thác): ${foundation.rejected_ideas}`);
                 if (this.existingArticleTitles.length) {
-                    top.push(`Bài đã publish trong chuyên mục này (${this.existingArticleTitles.length} bài, KHÔNG đề xuất trùng):`);
+                    top.push(`Bài đã publish trong chuyên mục này (${this.existingArticleTitles.length} bài — KHÔNG đề xuất trùng hoặc gần giống về góc khai thác + đối tượng, không chỉ so tiêu đề nguyên văn; được phép đề xuất ý ĐÀO SÂU 1 khía cạnh mà bài cũ mới chạm lướt qua, nhưng khi đó phải nêu rõ điểm khác biệt trong cột Lý do):`);
                     this.existingArticleTitles.forEach(title => top.push(`- ${title}`));
                 }
                 if (brief.goal) top.push(`Mục tiêu bài viết: ${brief.goal}`);
@@ -697,7 +750,11 @@ document.addEventListener('alpine:init', () => {
                 };
 
                 if (this.categories.length) {
-                    top.push('Danh sách chuyên mục hiện có trên site (dùng ở Bước 0 để gọi tên chuyên mục phù hợp hơn nếu cần — chỉ chọn tên có trong danh sách, không bịa). Kèm trọng tâm/góc nhìn rút gọn của từng chuyên mục KHÁC chuyên mục đã chọn, dùng làm căn cứ cho Bước 2 nếu Bước 0 đổi sang chuyên mục đó:');
+                    top.push(
+                        category
+                            ? 'Danh sách chuyên mục hiện có trên site (dùng ở Bước 0 để gọi tên chuyên mục phù hợp hơn nếu cần — chỉ chọn tên có trong danh sách, không bịa). Kèm trọng tâm/góc nhìn rút gọn của từng chuyên mục KHÁC chuyên mục đã chọn, dùng làm căn cứ cho Bước 2 nếu Bước 0 đổi sang chuyên mục đó:'
+                            : 'Chưa chọn chuyên mục nào — danh sách chuyên mục hiện có trên site dưới đây dùng ở Bước 0 để XÁC ĐỊNH chuyên mục phù hợp nhất với nguồn (chỉ chọn tên có sẵn trong danh sách, không bịa thêm tên mới), kèm trọng tâm/góc nhìn rút gọn của từng chuyên mục để làm căn cứ đánh giá tiêu chí 1-2 ở Bước 2:'
+                    );
                     this.categories.forEach(cat => {
                         const indent = '  '.repeat(cat.depth);
                         if (category && cat.uuid === category.uuid) {
@@ -730,22 +787,51 @@ document.addEventListener('alpine:init', () => {
                     bottom.push(`Nguồn tham khảo có ngôn ngữ gốc khác tiếng Việt (${[...sourceLanguages].join(', ')}) — LUÔN viết TOÀN BỘ output (ý tưởng, lý do, tiêu đề đề xuất) bằng tiếng Việt tự nhiên cho độc giả Việt Nam, KHÔNG dịch nguyên văn/máy móc câu chữ hay tiêu đề gốc.`);
                 }
 
+                bottom.push('');
+
+                if (category) {
+                    bottom.push(
+                        'BƯỚC 0 — Đối chiếu chủ đề THẬT của nguồn (main_content/title/headings) với trọng tâm/ranh giới "KHÔNG lấn sân" '
+                            + 'của chuyên mục đã chọn. Ưu tiên tạo ý tưởng hữu ích, không dừng lại ở việc báo "không phù hợp":',
+                        '- Khớp chuyên mục (trường hợp thường gặp) → bỏ qua bước này, làm tiếp Bước 1.',
+                        '- Lệch HẲN lĩnh vực (VD nguồn dinh dưỡng/y khoa nhưng chuyên mục là hành vi, hoặc ngược lại) và tìm được 1 tên '
+                            + 'khớp hơn trong "Danh sách chuyên mục" ở trên → viết đúng 1 dòng "Lưu ý: nguồn phù hợp hơn với chuyên mục '
+                            + '\'[tên, copy đúng từ danh sách]\'", rồi làm Bước 1-3 bình thường (đủ 10 ý tưởng như cũ); ở Bước 2, dùng '
+                            + 'trọng tâm/góc nhìn RÚT GỌN của CHÍNH chuyên mục MỚI này (ghi kèm ngay sau tên chuyên mục đó trong "Danh '
+                            + 'sách chuyên mục" ở trên, nếu có) để đánh giá tiêu chí 1-2 thay cho trọng tâm/góc nhìn của chuyên mục đã '
+                            + 'chọn ban đầu — chỉ khi chuyên mục mới không có trọng tâm/góc nhìn kèm theo (chưa cấu hình) mới cần đánh '
+                            + 'giá theo phỏng đoán hợp lý dựa tên gọi + kiến thức chung.',
+                        '- Lệch lĩnh vực nhưng KHÔNG tìm được tên nào khớp hơn → viết 1 dòng "Lưu ý: nguồn thuộc lĩnh vực [X], không có '
+                            + 'chuyên mục nào trên site phù hợp hơn", rồi chỉ đề xuất ở phần giao thoa thật với chuyên mục đã chọn (nếu '
+                            + 'có) — Bảng có thể rất ít hoặc 0 dòng, đây là phương án cuối.',
+                        '',
+                    );
+                } else if (this.categories.length) {
+                    // Người dùng CHƯA chọn chuyên mục (VD nguồn sản phẩm/dịch vụ/chủ đề gia đình rộng,
+                    // chưa biết xếp vào đâu) — khác nhánh trên (đối chiếu LỆCH/KHÔNG so với 1 chuyên mục
+                    // có sẵn), ở đây AI tự XÁC ĐỊNH chuyên mục từ danh sách. Nguồn rộng KHÔNG bị ép vào 1
+                    // chuyên mục duy nhất — được phân bổ ý tưởng theo 2-3 chuyên mục, mỗi ý gắn đúng 1
+                    // chuyên mục qua cột "Chuyên mục đề xuất" (chỉ tồn tại ở chế độ chưa chọn chuyên mục,
+                    // xem header bảng ở Bước 3) — tiêu chí 1-2 ở Bước 2 đánh giá theo chuyên mục CỦA TỪNG Ý.
+                    bottom.push(
+                        'BƯỚC 0 — Chưa chọn chuyên mục nào cho nguồn này. Dựa vào chủ đề THẬT của nguồn (main_content/title/headings), '
+                            + 'xác định chuyên mục từ "Danh sách chuyên mục" ở trên theo đúng 1 trong 3 trường hợp:',
+                        '- Nguồn nghiêng RÕ về 1 chuyên mục → viết đúng 1 dòng "Chuyên mục phù hợp nhất: [tên, copy đúng từ danh '
+                            + 'sách]" ngay trước bảng ở Bước 3; mọi ý tưởng dùng chung chuyên mục này ở cột "Chuyên mục đề xuất".',
+                        '- Nguồn RỘNG hơn 1 chuyên mục (thường gặp với sản phẩm/dịch vụ cho gia đình, hoặc chủ đề chạm nhiều mặt '
+                            + 'đời sống gia đình cùng lúc) → chọn 2-3 chuyên mục liên quan nhất, viết đúng 1 dòng "Nguồn đa chuyên '
+                            + 'mục — phân bổ theo: [các tên, copy đúng từ danh sách]" ngay trước bảng; ở Bước 1 chủ động sinh ý '
+                            + 'tưởng PHỦ ĐỀU các chuyên mục đã chọn (khai thác trọng tâm/góc nhìn rút gọn của TỪNG chuyên mục ghi '
+                            + 'trong danh sách), mỗi ý gắn đúng 1 chuyên mục ở cột "Chuyên mục đề xuất" — KHÔNG ép mọi ý vào 1 '
+                            + 'chuyên mục duy nhất, cũng KHÔNG gắn 1 ý vào nhiều chuyên mục cùng lúc.',
+                        '- Nguồn không khớp chuyên mục nào (kể cả phần giao thoa) → viết "Chuyên mục phù hợp nhất: chưa xác định '
+                            + 'được", chỉ đề xuất ý tưởng ở phần giao thoa thật giữa nguồn và nội dung gia đình (nếu có) — Bảng có '
+                            + 'thể rất ít hoặc 0 dòng, ghi rõ lý do dưới bảng, đây là phương án cuối.',
+                        '',
+                    );
+                }
+
                 bottom.push(
-                    '',
-                    'BƯỚC 0 — Đối chiếu chủ đề THẬT của nguồn (main_content/title/headings) với trọng tâm/ranh giới "KHÔNG lấn sân" '
-                        + 'của chuyên mục đã chọn. Ưu tiên tạo ý tưởng hữu ích, không dừng lại ở việc báo "không phù hợp":',
-                    '- Khớp chuyên mục (trường hợp thường gặp) → bỏ qua bước này, làm tiếp Bước 1.',
-                    '- Lệch HẲN lĩnh vực (VD nguồn dinh dưỡng/y khoa nhưng chuyên mục là hành vi, hoặc ngược lại) và tìm được 1 tên '
-                        + 'khớp hơn trong "Danh sách chuyên mục" ở trên → viết đúng 1 dòng "Lưu ý: nguồn phù hợp hơn với chuyên mục '
-                        + '\'[tên, copy đúng từ danh sách]\'", rồi làm Bước 1-3 bình thường (đủ 10 ý tưởng như cũ); ở Bước 2, dùng '
-                        + 'trọng tâm/góc nhìn RÚT GỌN của CHÍNH chuyên mục MỚI này (ghi kèm ngay sau tên chuyên mục đó trong "Danh '
-                        + 'sách chuyên mục" ở trên, nếu có) để đánh giá tiêu chí 1-2 thay cho trọng tâm/góc nhìn của chuyên mục đã '
-                        + 'chọn ban đầu — chỉ khi chuyên mục mới không có trọng tâm/góc nhìn kèm theo (chưa cấu hình) mới cần đánh '
-                        + 'giá theo phỏng đoán hợp lý dựa tên gọi + kiến thức chung.',
-                    '- Lệch lĩnh vực nhưng KHÔNG tìm được tên nào khớp hơn → viết 1 dòng "Lưu ý: nguồn thuộc lĩnh vực [X], không có '
-                        + 'chuyên mục nào trên site phù hợp hơn", rồi chỉ đề xuất ở phần giao thoa thật với chuyên mục đã chọn (nếu '
-                        + 'có) — Bảng có thể rất ít hoặc 0 dòng, đây là phương án cuối.',
-                    '',
                     'BƯỚC 1 — Sinh ý tưởng: brainstorm RỘNG, liệt kê 20-25 ý tưởng ứng viên đa dạng góc nhìn (chưa lọc) — '
                         + 'không chỉ biến tấu lại vài ý giống nhau. Đa dạng hoá bằng nhiều dạng góc nhìn khác nhau từ dữ liệu nguồn: '
                         + 'theo giai đoạn/độ tuổi, theo vấn đề cụ thể, theo đối tượng đặc thù (VD mẹ đi làm, sinh non, sinh đôi), '
@@ -754,6 +840,18 @@ document.addEventListener('alpine:init', () => {
                         `Trong số 20-25 ý tưởng trên, ưu tiên ít nhất 2-3 ý khai thác ĐÚNG góc nhìn độc quyền của chuyên mục `
                             + `("${uniqueAngleText}") — có thể thử dưới bất kỳ DẠNG nào ở trên (so sánh, checklist, FAQ, sai lầm `
                             + `thường gặp...) miễn vẫn bám sát góc nhìn này, vì đây là nhóm ý tưởng khó bị sao chép nhất.`,
+                    ] : []),
+                    ...(familyFocusLabels.length ? [
+                        `Cũng trong số đó, nếu dữ liệu nguồn có chất liệu phù hợp một cách TỰ NHIÊN, dành 1-2 ý mà lợi ích cuối `
+                            + `cùng của bài nhắm thẳng vào (các) giá trị chuyên mục ưu tiên (${familyFocusLabels.join(', ')}) — `
+                            + `KHÔNG gượng ép gắn giá trị vào ý tưởng khi nguồn không có chất liệu thật cho việc đó.`,
+                    ] : []),
+                    ...(hasProductLikeSource ? [
+                        'Nguồn (hoặc một phần nguồn) là trang sản phẩm/dịch vụ — ý tưởng phải đứng về phía ĐỘC GIẢ: hướng dẫn '
+                            + 'chọn theo tiêu chí, so sánh trung lập, giải đáp lo ngại, sai lầm thường gặp khi mua/sử dụng... '
+                            + 'KHÔNG đề xuất bài PR ca ngợi 1 thương hiệu cụ thể (tên thương hiệu chỉ nhắc khi cần dẫn chứng). '
+                            + 'Tôn trọng điều kiện kinh tế đa dạng của các gia đình: không tạo cảm giác phải chi tiêu vượt khả '
+                            + 'năng mới là chăm lo cho gia đình — ưu tiên góc chi tiêu hợp lý, đáng tiền theo từng điều kiện.',
                     ] : []),
                     'Riêng ý tưởng liên quan sức khoẻ/dinh dưỡng/an toàn trẻ em: KHÔNG đề xuất theo hướng khẳng định chắc chắn '
                         + 'các mẹo dân gian hay claim y khoa chưa được kiểm chứng khoa học — ưu tiên góc nhìn cần tham vấn '
@@ -792,7 +890,8 @@ document.addEventListener('alpine:init', () => {
                 bottom.push(
                     'Mục tiêu số lượng: Bảng 1 cần có ÍT NHẤT 10 ý tưởng đạt cả 4 tiêu chí. Nếu ở Bước 2 chưa đủ 10 ý đạt, quay lại '
                         + 'Bước 1 sinh thêm ý tưởng MỚI ở góc nhìn khác (không lặp ý đã liệt kê) cho đến khi đủ 10 — chỉ dừng dưới 10 '
-                        + 'nếu đã thực sự khai thác hết góc nhìn hợp lý từ dữ liệu nguồn (hoặc do lệch chủ đề ở Bước 0), và khi đó '
+                        + 'nếu đã thực sự khai thác hết góc nhìn hợp lý từ dữ liệu nguồn (hoặc do lệch chủ đề/không xác định được '
+                        + 'chuyên mục phù hợp ở Bước 0), và khi đó '
                         + 'ghi rõ lý do bằng 1 dòng ngắn ngay dưới Bảng 1 (VD: dữ liệu nguồn không đủ sâu để tạo thêm ý tưởng chất '
                         + 'lượng — KHÔNG được bịa ý tưởng yếu/generic chỉ để đủ số lượng).',
                 );
@@ -802,11 +901,21 @@ document.addEventListener('alpine:init', () => {
                     'BƯỚC 2 — Đánh giá TỪNG ý tưởng qua cả 4 tiêu chí (không bỏ qua tiêu chí nào, kể cả khi câu trả lời là "Không"):',
                     coreFocusText
                         ? `1. Khớp trọng tâm ("${coreFocusText}"): ý tưởng có thực sự gắn với trọng tâm này không?`
-                        : '1. Khớp trọng tâm: có gắn với trọng tâm nội dung của chuyên mục này không?',
+                        : (category
+                            ? '1. Khớp trọng tâm: có gắn với trọng tâm nội dung của chuyên mục này không?'
+                            : '1. Khớp trọng tâm: có gắn với trọng tâm của chuyên mục gắn với Ý NÀY (cột "Chuyên mục đề xuất") không '
+                                + '— dùng trọng tâm rút gọn ghi kèm trong "Danh sách chuyên mục"; chuyên mục chưa có trọng tâm kèm theo '
+                                + '→ phỏng đoán hợp lý theo tên gọi; Bước 0 kết luận "chưa xác định được" → đánh giá theo mức độ phù '
+                                + 'hợp chung với nội dung gia đình?'),
                     uniqueAngleText
                         ? `2. Góc nhìn độc quyền ("${uniqueAngleText}"): ý tưởng có thực sự thể hiện góc nhìn này không, hay điều nguồn nào cũng viết được?`
-                        : '2. Góc nhìn độc quyền: đây có phải insight mà chỉ chuyên mục này viết được, không phải điều nguồn nào cũng viết được?',
-                    '(Nếu Bước 0 đã đổi sang chuyên mục khác: áp dụng tiêu chí 1-2 theo trọng tâm/góc nhìn của CHUYÊN MỤC MỚI đó — xem trong "Danh sách chuyên mục" ở trên — KHÔNG dùng trọng tâm/góc nhìn ghi trong ngoặc ở 2 dòng trên, vốn chỉ đúng cho chuyên mục đã chọn ban đầu.)',
+                        : (category
+                            ? '2. Góc nhìn độc quyền: đây có phải insight mà chỉ chuyên mục này viết được, không phải điều nguồn nào cũng viết được?'
+                            : '2. Góc nhìn độc quyền: đây có phải insight mà chuyên mục gắn với ý này (cột "Chuyên mục đề xuất") có '
+                                + 'lợi thế riêng để viết, không phải điều nguồn nào cũng viết được?'),
+                    category
+                        ? '(Nếu Bước 0 đã đổi sang chuyên mục khác: áp dụng tiêu chí 1-2 theo trọng tâm/góc nhìn của CHUYÊN MỤC MỚI đó — xem trong "Danh sách chuyên mục" ở trên — KHÔNG dùng trọng tâm/góc nhìn ghi trong ngoặc ở 2 dòng trên, vốn chỉ đúng cho chuyên mục đã chọn ban đầu.)'
+                        : '(Tiêu chí 1-2 luôn đánh giá theo chuyên mục gắn với TỪNG ý ở cột "Chuyên mục đề xuất" — nguồn đa chuyên mục thì mỗi ý so với đúng chuyên mục của nó, KHÔNG dùng 1 chuyên mục chung cho cả bảng.)',
                     goalText
                         ? `3. Phục vụ mục tiêu ("${goalText}"): ý tưởng có thực sự phục vụ mục tiêu này không?`
                         : '3. Phục vụ mục tiêu: chưa có mục tiêu cụ thể được khai báo — đánh giá theo mục tiêu mặc định: '
@@ -815,26 +924,41 @@ document.addEventListener('alpine:init', () => {
                         ? `4. Phù hợp đối tượng độc giả ("${audienceText}"): góc độ, độ sâu kiến thức và giọng văn của ý tưởng `
                             + 'có khớp với hoàn cảnh, giai đoạn và mối quan tâm HIỆN TẠI của đúng đối tượng này không '
                             + '(không hàn lâm quá mức họ cần, cũng không sơ sài dưới mức họ đã biết)?'
-                        : '4. Phù hợp đối tượng độc giả: chưa có mô tả đối tượng — hãy tự suy ra chân dung độc giả phù hợp nhất '
-                            + 'từ dữ liệu nguồn + tên chuyên mục, ghi 1 dòng "Giả định đối tượng: [mô tả ngắn]" ngay trước bảng '
-                            + 'kết quả, rồi đánh giá tiêu chí này theo đúng giả định đó — KHÔNG đánh giá chung chung kiểu '
-                            + '"ai đọc cũng phù hợp".',
+                        : (category
+                            ? '4. Phù hợp đối tượng độc giả: chưa có mô tả đối tượng — hãy tự suy ra chân dung độc giả phù hợp nhất '
+                                + 'từ dữ liệu nguồn + tên chuyên mục, ghi 1 dòng "Giả định đối tượng: [mô tả ngắn]" ngay trước bảng '
+                                + 'kết quả, rồi đánh giá tiêu chí này theo đúng giả định đó — KHÔNG đánh giá chung chung kiểu '
+                                + '"ai đọc cũng phù hợp".'
+                            : '4. Phù hợp đối tượng độc giả: chưa có mô tả đối tượng — tự suy ra chân dung độc giả theo TỪNG chuyên '
+                                + 'mục đã chọn ở Bước 0 (mỗi chuyên mục 1 dòng "Giả định đối tượng — [tên chuyên mục]: [mô tả ngắn]" '
+                                + 'ngay trước bảng, tối đa 3 dòng), rồi đánh giá mỗi ý theo đúng giả định của chuyên mục gắn với ý '
+                                + 'đó — KHÔNG đánh giá chung chung kiểu "ai đọc cũng phù hợp".'),
+                    'Bộ lọc bắt buộc (ngoài 4 tiêu chí): LOẠI ngay ý tưởng đi ngược bất kỳ giá trị nào trong Hệ giá trị gia '
+                        + 'đình Việt Nam đã nêu ở đầu prompt, hoặc khai thác nỗi sợ hãi/mặc cảm của cha mẹ để tạo chú ý — kể cả '
+                        + 'khi ý tưởng đó đạt cả 4 tiêu chí.',
                     ...(constraintsText ? [
-                        `Bộ lọc bắt buộc (ngoài 4 tiêu chí): LOẠI ngay ý tưởng vi phạm ràng buộc đã nêu ở trên ("${constraintsText}"), kể cả khi ý tưởng đó đạt cả 4 tiêu chí.`,
+                        `Bộ lọc bắt buộc thứ hai: LOẠI ngay ý tưởng vi phạm ràng buộc đã nêu ở trên ("${constraintsText}"), kể cả khi ý tưởng đó đạt cả 4 tiêu chí.`,
                     ] : []),
                     'Lưu ý khi đánh giá: nếu nguồn có extraction_confidence thấp hoặc notes cảnh báo nghi vấn paywall, hạ độ tin cậy khi dùng nguồn đó làm căn cứ cho ý tưởng.',
                     '',
-                    'BƯỚC 3 — Trả lời bằng ĐÚNG 1 bảng Markdown dưới đây; chỉ được kèm thêm tối đa các dòng sau: 1 dòng "Lưu ý" '
-                        + 'ngay trước bảng nếu Bước 0 phát hiện lệch chủ đề'
-                        + (audienceText ? '' : ', 1 dòng "Giả định đối tượng" ngay trước bảng (xem tiêu chí 4 ở trên)')
+                    'BƯỚC 3 — Trả lời bằng ĐÚNG 1 bảng Markdown dưới đây; chỉ được kèm thêm tối đa các dòng sau: '
+                        + (category
+                            ? '1 dòng "Lưu ý" ngay trước bảng nếu Bước 0 phát hiện lệch chủ đề'
+                            : '1 dòng kết luận chuyên mục theo Bước 0 ("Chuyên mục phù hợp nhất: ..." hoặc "Nguồn đa chuyên mục — phân bổ theo: ...") ngay trước bảng')
+                        + (audienceText ? '' : (category
+                            ? ', 1 dòng "Giả định đối tượng" ngay trước bảng (xem tiêu chí 4 ở trên)'
+                            : ', 1-3 dòng "Giả định đối tượng — [chuyên mục]" ngay trước bảng (xem tiêu chí 4 ở trên)'))
                         + ', và 1 dòng lý do ngắn ngay sau bảng nếu chưa đủ 10 ý tưởng (xem "Mục tiêu số lượng" ở trên). '
                         + 'Không viết giải thích, không mở đầu, không kết luận nào khác:',
                     '',
                     'Bảng — Ý tưởng ĐẠT cả 4 tiêu chí, cột: '
-                        + '| Ý tưởng | Khớp trọng tâm? | Góc nhìn độc quyền? | Phục vụ mục tiêu? | Phù hợp đối tượng? | Lý do (1 câu, vì sao đạt cả 4) | Đề xuất tiêu đề bài viết |',
+                        + (category
+                            ? '| Ý tưởng | Khớp trọng tâm? | Góc nhìn độc quyền? | Phục vụ mục tiêu? | Phù hợp đối tượng? | Lý do (1 câu, vì sao đạt cả 4) | Đề xuất tiêu đề bài viết |'
+                            : '| Ý tưởng | Chuyên mục đề xuất | Khớp trọng tâm? | Góc nhìn độc quyền? | Phục vụ mục tiêu? | Phù hợp đối tượng? | Lý do (1 câu, vì sao đạt cả 4) | Đề xuất tiêu đề bài viết |'),
                     'Riêng cột "Đề xuất tiêu đề bài viết": đặt tiêu đề bằng đúng giọng và mức từ ngữ phù hợp với đối tượng độc giả'
                         + (brief.style_sample ? ' (bám theo cách xưng hô/từ ngữ trong giọng văn mẫu ở trên)' : '')
-                        + ', nêu lợi ích/vấn đề cụ thể — KHÔNG đặt tiêu đề giật gân sai lệch nội dung (clickbait).',
+                        + ', nêu lợi ích/vấn đề cụ thể — KHÔNG đặt tiêu đề giật gân sai lệch nội dung (clickbait), không dùng '
+                        + 'nỗi sợ hãi/mặc cảm của cha mẹ ("con bạn sẽ...", "sai lầm khiến con...") làm mồi câu view.',
                 );
 
                 return [...top, '', ...middle, '', ...bottom].join('\n');
@@ -1042,6 +1166,7 @@ document.addEventListener('alpine:init', () => {
                 if (constraints) {
                     lines.push(`Ràng buộc áp dụng cho MỌI phiên bản: ${constraints}`);
                 }
+                lines.push(`Mọi phiên bản sẽ đăng công khai trên kênh của một nền tảng nội dung gia đình Việt Nam — tôn trọng Hệ giá trị gia đình Việt Nam (${(this.familyValues || []).map(fv => fv.label).join(', ')}): không giễu cợt thành viên gia đình theo định kiến giới hay thế hệ, không khai thác nỗi sợ hãi/mặc cảm của cha mẹ để câu tương tác, không cổ suý so đo vật chất giữa các gia đình.`);
                 if (styleSample) {
                     lines.push(`Đoạn văn mẫu — chỉ dùng để tham khảo cách xưng hô/từ ngữ quen thuộc với độc giả (yêu cầu giọng riêng của từng nền tảng bên dưới vẫn được ưu tiên hơn):\n${styleSample}`);
                 }

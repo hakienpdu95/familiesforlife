@@ -1,8 +1,16 @@
 # CoreIdeaExtractor
 
-**Version:** 1.15  
-**Last Updated:** 2026-07-27  
+**Version:** 1.16  
+**Last Updated:** 2026-08-01  
 **Status:** Design Specification (Ready for Implementation)
+
+> **v1.16 (Hệ giá trị gia đình Việt Nam — chuẩn nền tảng cố định trong context engine, + objections/decision_criteria):** 2 thay đổi, cùng nhóm "mở rộng Category Content Foundation" (§12):
+>
+> (1) **`family_values_focus` (field mới, §12.10) — KHÁC BẢN CHẤT mọi field khác trong §12.2:** đối chiếu `spec/giadinh.md` — Hệ giá trị gia đình Việt Nam (4 trụ cột: ấm no/hạnh phúc/tiến bộ/văn minh) do Thủ tướng Chính phủ ban hành qua **Quyết định 1189/QĐ-TTg ngày 02/07/2026** (không phải Nghị định) — là CHUẨN NỀN TẢNG của platform (familiesforlife, nội dung cho gia đình Việt), không phải ngữ cảnh editor tự viết như `core_focus`/`pain_points`/`objections`/... Định nghĩa 4 giá trị (label + mô tả) sống ở `config('core_idea_extractor.family_values')` — NGUỒN SỰ THẬT DUY NHẤT, không hardcode lặp lại ở PHP/blade/JS chỗ khác. Khối này CỐ ĐỊNH, LUÔN được inject vào TOP của "Copy prompt cho AI" (§12.4) bất kể có chọn chuyên mục hay không (`buildFamilyValuesGroundingLine()`), kèm 1 câu chặn cứng "KHÔNG đi ngược các giá trị này" (không cổ suý bất bình đẳng giới/bạo lực gia đình/hủ tục lạc hậu/lối sống thiếu chuẩn mực). Cột mới `family_values_focus` (JSON, mảng key) trên `cie_category_foundations` — editor TICK (không tự viết) giá trị nào chuyên mục ưu tiên phục vụ, validate qua rule `in:...` đọc ĐỘNG từ config (không hardcode 2 nơi). Khi có, thêm 1 dòng ƯU TIÊN bổ sung vào TOP (không thay thế khối cố định). Xem §12.10.
+>
+> (2) **`objections`/`decision_criteria` (field mới, cùng nhóm §12.2):** đối chiếu bài context-engineering (animalz.co) — tách khỏi `pain_points` (vốn chỉ là khó khăn/câu hỏi thực tế): `objections` là LÝ DO CÒN NGHI NGỜ/CHƯA TIN khiến độc giả chưa hành động; `decision_criteria` là TIÊU CHÍ họ dùng để so sánh/chọn giữa các lựa chọn. Gộp chung vào `pain_points` khiến editor bỏ sót 1 trong 2 hoặc viết lẫn lộn. Cùng nhóm validate/quyền/UI với các field ad-hoc khác (không Gate riêng), đưa vào TOP của "Copy prompt cho AI" ngay sau `pain_points`.
+>
+> Cả 2 field mới đều: field text tự do (`objections`/`decision_criteria`) hoặc mảng key cố định (`family_values_focus`) trên `cie_category_foundations` — **không đổi Layer 1/Layer 2 JSON schema (§5, §7)**, thuần field UI/prompt-template như các field §12.2 khác.
 
 > **v1.15 (Tinh chỉnh nhỏ — noise trong thân bài, common_keywords chặt hơn, word_count/publish_date cho lean payload, gộp headings/sections):** 5 điểm nhỏ, không phải bug lớn:
 >
@@ -620,6 +628,88 @@ liệu KHÁCH QUAN, TỰ ĐỘNG: danh sách tiêu đề bài đã publish thậ
 - Ngoài phạm vi (v1.11): không dùng tag/similarity ngữ nghĩa để phát hiện trùng lặp GẦN GIỐNG
   (chỉ liệt kê tiêu đề, để AI tự đánh giá mức độ trùng) — để dành cho lần lặp sau nếu cần chính
   xác hơn.
+
+### 12.10 Hệ giá trị gia đình Việt Nam — chuẩn nền tảng cố định (v1.16)
+
+#### 12.10.1 Bối cảnh
+
+Đối chiếu `spec/giadinh.md`: Hệ giá trị gia đình Việt Nam gồm 4 giá trị cốt lõi — **ấm no, hạnh
+phúc, tiến bộ, văn minh** — do Thủ tướng Chính phủ ban hành qua **Quyết định 1189/QĐ-TTg ngày
+02/07/2026** (không phải văn bản Nghị định). Platform familiesforlife xuất bản nội dung CHO gia
+đình Việt Nam, nên đây không phải 1 nguồn tham khảo bên ngoài như các bài context-engineering đã
+dẫn ở §12.1/§12.4/§12.7/§12.8 (rephrase-it.com, aimagicx.com, promptingguide.ai — 7 bước context
+engineering 2026), mà là **chuẩn biên tập CHÍNH THỨC** của chính platform.
+
+Khác biệt bản chất so với mọi field khác trong §12.2 (`core_focus`/`pain_points`/`objections`/
+`decision_criteria`/`rejected_ideas`/...): những field đó là ngữ cảnh **editor tự viết**, có thể
+sai/thiếu/lệch chuẩn tuỳ người viết. 4 giá trị gia đình thì **cố định, không editor nào được sửa
+lại câu chữ** — vai trò của editor chỉ là chọn giá trị nào áp dụng cho chuyên mục mình phụ trách.
+
+#### 12.10.2 Thiết kế — 2 lớp tách biệt
+
+**Lớp 1 — Khối cố định (grounding), luôn xuất hiện, không thuộc về category nào:**
+
+- Định nghĩa 4 giá trị (`key`, `label`, `description`) + `decision_ref` ("Quyết định 1189/QĐ-TTg
+  ngày 02/07/2026") sống ở `config('core_idea_extractor.family_values')` — **nguồn sự thật DUY
+  NHẤT**, không hardcode lặp lại câu chữ ở PHP/blade/JS chỗ khác (đọc động qua `config(...)` ở mọi
+  nơi cần dùng: rule validate `in:...` ở `CategoryFoundationController::upsert()`, UI checkbox ở
+  `category-foundations.blade.php`, dòng grounding ở `index.blade.php`).
+- `buildFamilyValuesGroundingLine()` (`index.blade.php`) dựng 1 câu liệt kê đủ 4 giá trị kèm mô tả
+  + trích dẫn Quyết định, cộng 1 mệnh đề CHẶN CỨNG ("KHÔNG được đi ngược các giá trị này — không
+  cổ suý bất bình đẳng giới, bạo lực gia đình, hủ tục lạc hậu, lối sống thiếu chuẩn mực giữa các
+  thế hệ"). Push vào TOP của "Copy prompt cho AI" (§12.4) NGAY SAU dòng persona + ngày hôm nay,
+  TRƯỚC mọi field foundation theo category — **LUÔN xuất hiện kể cả khi chưa chọn chuyên mục nào**
+  (khác mọi khối khác trong §12.4 vốn chỉ xuất hiện khi có `foundation`), vì đây là chuẩn áp dụng
+  cho MỌI nội dung của platform, không riêng chuyên mục nào.
+- Không có field DB nào cho lớp này — thuần đọc config + build chuỗi ở client, giống cách
+  `batch.max_urls`/`foundation.stale_after_days` đã được đọc thẳng từ config vào view.
+
+**Lớp 2 — `family_values_focus` (field mới trên `cie_category_foundations`), theo TỪNG category:**
+
+- Cột `family_values_focus` (`json`, nullable, migration
+  `2026_08_01_000002_add_family_values_focus_to_cie_category_foundations_table.php`, sau
+  `decision_criteria`) — lưu **TẬP KEY** (VD `["hanh_phuc","tien_bo"]`), KHÔNG lưu lại nhãn/mô tả
+  (tránh 2 nơi lệch nhau nếu sau này chỉnh câu chữ mô tả trong config). Cast `array` ở
+  `CategoryContentFoundation`.
+- UI: nhóm checkbox trong trang quản lý (`category-foundations.blade.php`) — 4 ô tick tương ứng
+  4 `key` đọc từ `familyValues` (truyền qua `Js::from()` từ config), có chú thích rõ "chuẩn nền
+  tảng cố định — không phải văn bản tự viết" để editor không nhầm đây là 1 field tự do như các ô
+  khác cùng trang. Validate ở `CategoryFoundationController::upsert()`: `family_values_focus.*` =>
+  `in:<danh sách key đọc động từ config>` — không hardcode lại danh sách key trong rule (nếu sau
+  này thêm/bớt giá trị, chỉ cần sửa 1 chỗ duy nhất trong config).
+- Khi category có `family_values_focus`, `buildLayer2PromptText()` thêm 1 dòng RIÊNG (SAU khối cố
+  định ở Lớp 1, TRƯỚC `core_focus`) nêu tên các giá trị chuyên mục này ưu tiên — đóng vai trò
+  **ưu tiên bổ sung** (gợi ý bám sát khi phù hợp), KHÔNG thay thế khối chuẩn cố định (mọi ý tưởng,
+  kể cả chuyên mục không tick giá trị nào, vẫn phải tuân thủ mệnh đề chặn cứng ở Lớp 1).
+- Cùng cơ chế N-N chia sẻ bộ tiêu chí giữa nhiều category đã có (bảng nối
+  `cie_foundation_categories`) — `family_values_focus` là 1 cột trên `CategoryContentFoundation`
+  như mọi field khác, tự động dùng chung khi nhiều category share 1 bộ tiêu chí, không cần xử lý
+  gì thêm.
+
+#### 12.10.3 Vì sao tách 2 lớp thay vì gộp làm 1
+
+Đã cân nhắc phương án đơn giản hơn — chỉ thêm `family_values_focus` (Lớp 2) và để editor tự đọc
+Quyết định 1189 rồi viết mô tả liên quan vào 1 field text tự do (kiểu `core_focus`) — **KHÔNG chọn
+phương án này**: (1) định nghĩa 4 giá trị là VĂN BẢN CHÍNH THỨC, để editor tự diễn giải lại dễ sai
+lệch/thiếu nhất quán giữa các category (đúng vấn đề mà mọi field cố định khác trong hệ thống — VD
+`ExtractionConfidence` enum, `content_type_signal` — đã tránh bằng cách KHÔNG để tự do nhập); (2)
+1 platform nội dung gia đình nên có CÙNG 1 khung tham chiếu giá trị cho MỌI bài viết, kể cả chuyên
+mục chưa từng cấu hình Content Foundation — nếu chỉ đặt ở Lớp 2 (theo category), category chưa có
+foundation sẽ hoàn toàn không có ràng buộc giá trị nào khi sinh ý tưởng.
+
+#### 12.10.4 Ngoài phạm vi (v1.16)
+
+- Không tự động CHẤM ĐIỂM/gắn nhãn ý tưởng AI trả về theo mức độ khớp giá trị nào (VD "ý tưởng này
+  70% thuộc giá trị Tiến bộ") — đó là suy luận ngữ nghĩa (NLP/LLM-judge), ngoài phạm vi rule cú
+  pháp thuần của Layer 1; người biên tập tự đánh giá khi đọc kết quả AI trả về.
+- Không áp dụng khối cố định này vào `buildSummarizePromptText()` ("Tóm tắt nội dung", §content.md
+  mục A) — tool đó CHỦ ĐÍCH trung thực tuyệt đối theo nguồn gốc, không thêm bối cảnh biên tập/giá
+  trị nào (xem chú thích ngay trong hàm: "không cần bối cảnh chuyên mục hay mục tiêu biên tập nào
+  khác"), thêm khối này vào sẽ đi ngược thiết kế đã có của tool đó.
+- Không mở rộng sang `buildRewritePromptText()` ("Tái cấu trúc nội dung", mục B) ở v1.16 — tool đó
+  viết lại nội dung NGUỒN đã có sẵn (đã qua vòng ý tưởng hoá ở Layer 2 nếu xuất phát từ đó) thành
+  nhiều phiên bản theo nền tảng, không phải bước sinh ý tưởng mới; để dành cho lần lặp sau nếu có
+  nhu cầu thực tế.
 
 ---
 

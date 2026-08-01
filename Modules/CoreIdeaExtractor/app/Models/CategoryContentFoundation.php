@@ -28,12 +28,19 @@ class CategoryContentFoundation extends Model
         'unique_angle',
         'content_goals',
         'pain_points',
+        'objections',
+        'decision_criteria',
+        'family_values_focus',
         'rejected_ideas',
         'audience',
         'constraints',
         'style_sample',
         'created_by',
         'updated_by',
+    ];
+
+    protected $casts = [
+        'family_values_focus' => 'array',
     ];
 
     public function getActivitylogOptions(): LogOptions

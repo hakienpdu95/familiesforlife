@@ -57,18 +57,29 @@ class CategoryFoundationController extends Controller
     {
         Gate::authorize('core_idea_extractor.manage_category_foundation', $category);
 
+        // Danh sách key hợp lệ đọc ĐỘNG từ config('core_idea_extractor.family_values.items') —
+        // nguồn sự thật duy nhất, không hardcode lặp lại danh sách 4 giá trị ở đây (xem docblock
+        // config + CategoryFoundationData::$family_values_focus).
+        $validFamilyValueKeys = collect(config('core_idea_extractor.family_values.items', []))
+            ->pluck('key')
+            ->all();
+
         $validated = $request->validate([
-            'core_focus'        => ['nullable', 'string', 'max:2000'],
-            'writer_insights'   => ['nullable', 'string', 'max:1500'],
-            'unique_angle'      => ['nullable', 'string', 'max:2000'],
-            'content_goals'     => ['nullable', 'string', 'max:2000'],
-            'pain_points'       => ['nullable', 'string', 'max:2000'],
-            'rejected_ideas'    => ['nullable', 'string', 'max:2000'],
-            'audience'          => ['nullable', 'string', 'max:500'],
-            'constraints'       => ['nullable', 'string', 'max:500'],
-            'style_sample'      => ['nullable', 'string', 'max:3000'],
-            'category_uuids'    => ['sometimes', 'array'],
-            'category_uuids.*'  => ['string', 'uuid', 'exists:post_categories,uuid'],
+            'core_focus'            => ['nullable', 'string', 'max:2000'],
+            'writer_insights'       => ['nullable', 'string', 'max:1500'],
+            'unique_angle'          => ['nullable', 'string', 'max:2000'],
+            'content_goals'         => ['nullable', 'string', 'max:2000'],
+            'pain_points'           => ['nullable', 'string', 'max:2000'],
+            'objections'            => ['nullable', 'string', 'max:2000'],
+            'decision_criteria'     => ['nullable', 'string', 'max:2000'],
+            'family_values_focus'   => ['nullable', 'array'],
+            'family_values_focus.*' => ['string', 'in:'.implode(',', $validFamilyValueKeys)],
+            'rejected_ideas'        => ['nullable', 'string', 'max:2000'],
+            'audience'              => ['nullable', 'string', 'max:500'],
+            'constraints'           => ['nullable', 'string', 'max:500'],
+            'style_sample'          => ['nullable', 'string', 'max:3000'],
+            'category_uuids'        => ['sometimes', 'array'],
+            'category_uuids.*'      => ['string', 'uuid', 'exists:post_categories,uuid'],
         ]);
 
         $data = CategoryFoundationData::from($validated);
@@ -103,6 +114,9 @@ class CategoryFoundationController extends Controller
                 'unique_angle'   => $foundation->unique_angle,
                 'content_goals'  => $foundation->content_goals,
                 'pain_points'    => $foundation->pain_points,
+                'objections'     => $foundation->objections,
+                'decision_criteria' => $foundation->decision_criteria,
+                'family_values_focus' => $foundation->family_values_focus ?? [],
                 'rejected_ideas' => $foundation->rejected_ideas,
                 'audience'       => $foundation->audience,
                 'constraints'    => $foundation->constraints,

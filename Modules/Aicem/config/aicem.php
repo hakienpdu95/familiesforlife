@@ -24,4 +24,12 @@ return [
         'mid'    => 2_000_000,
     ],
 
+    // Đối chiếu bài context-engineering (animalz.co) — "freshness": knowledge_document là ngữ
+    // cảnh SỐNG (giọng văn/brand guideline có thể lỗi thời), không phải cấu hình tĩnh viết 1 lần.
+    // Chỉ hiển thị NHẮC NHỞ trực quan (badge-warning ở list) khi quá hạn, KHÔNG tự động xoá/chặn
+    // gì — cùng nguyên tắc `core_idea_extractor.foundation.stale_after_days`.
+    'freshness' => [
+        'stale_after_days' => 90,
+    ],
+
 ];

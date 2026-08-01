@@ -22,7 +22,7 @@ class ListCategoryFoundationsAction
     use AsAction;
 
     /**
-     * @return array<int, array{category_id:int, uuid:string, name:string, depth:int, foundation: array{core_focus:?string, writer_insights:?string, unique_angle:?string, content_goals:?string, pain_points:?string, rejected_ideas:?string, audience:?string, constraints:?string, style_sample:?string, updated_at:?string, shared_with: array<int, array{uuid:string, name:string}>}|null}>
+     * @return array<int, array{category_id:int, uuid:string, name:string, depth:int, foundation: array{core_focus:?string, writer_insights:?string, unique_angle:?string, content_goals:?string, pain_points:?string, objections:?string, decision_criteria:?string, family_values_focus: string[], rejected_ideas:?string, audience:?string, constraints:?string, style_sample:?string, updated_at:?string, shared_with: array<int, array{uuid:string, name:string}>}|null}>
      */
     public function handle(): array
     {
@@ -79,6 +79,9 @@ class ListCategoryFoundationsAction
                     'unique_angle'   => $foundation->unique_angle,
                     'content_goals'  => $foundation->content_goals,
                     'pain_points'    => $foundation->pain_points,
+                    'objections'     => $foundation->objections,
+                    'decision_criteria' => $foundation->decision_criteria,
+                    'family_values_focus' => $foundation->family_values_focus ?? [],
                     'rejected_ideas' => $foundation->rejected_ideas,
                     'audience'       => $foundation->audience,
                     'constraints'    => $foundation->constraints,

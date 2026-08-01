@@ -7,6 +7,8 @@
     'upsertUrlTemplate' => route('backend.api.coreideaextractor.category-foundations.upsert', ['category' => '__UUID__']),
     'backUrl' => route('backend.coreideaextractor.index'),
     'staleAfterDays' => $staleAfterDays,
+    'familyValues' => config('core_idea_extractor.family_values.items', []),
+    'familyValuesRef' => config('core_idea_extractor.family_values.decision_ref'),
 ]) }})">
 
     <div class="mb-3 flex items-center justify-between flex-wrap gap-2">
@@ -109,11 +111,43 @@
                         <textarea x-model="cat._form.content_goals" rows="2" placeholder="VD: Tăng traffic tìm kiếm dài hạn, xây uy tín chuyên gia"
                                   class="textarea textarea-bordered textarea-sm w-full"></textarea>
                     </div>
+                    <div class="form-control border border-base-200 rounded-md p-2.5 bg-base-200/30">
+                        <label class="label py-0.5">
+                            <span class="label-text text-xs font-medium">
+                                Hệ giá trị gia đình chuyên mục này ưu tiên phục vụ
+                                <span class="text-base-content/40 font-normal">(chuẩn nền tảng cố định — <span x-text="familyValuesRef"></span>, không phải văn bản tự viết)</span>
+                            </span>
+                        </label>
+                        <div class="flex flex-wrap gap-x-4 gap-y-1.5 mt-0.5">
+                            <template x-for="fv in familyValues" :key="fv.key">
+                                <label class="label cursor-pointer justify-start gap-1.5 py-0" :title="fv.description">
+                                    <input type="checkbox" class="checkbox checkbox-xs" :value="fv.key"
+                                           :checked="cat._form.family_values_focus.includes(fv.key)"
+                                           @change="toggleFamilyValue(cat, fv.key)">
+                                    <span class="label-text text-xs" x-text="fv.label"></span>
+                                </label>
+                            </template>
+                        </div>
+                    </div>
                     <div class="form-control">
                         <label class="label py-0.5">
                             <span class="label-text text-xs font-medium">Pain points / câu hỏi thường gặp của độc giả (dựa trên nghiên cứu thực tế — khảo sát, feedback, câu hỏi lặp lại)</span>
                         </label>
                         <textarea x-model="cat._form.pain_points" rows="2" placeholder="VD: Con hay bị táo bón khi đổi sữa, mẹ không biết phân biệt sữa mát thật/giả"
+                                  class="textarea textarea-bordered textarea-sm w-full"></textarea>
+                    </div>
+                    <div class="form-control">
+                        <label class="label py-0.5">
+                            <span class="label-text text-xs font-medium">Nghi ngờ / lý do chưa hành động (objections — khác pain_points, đây là điều khiến độc giả CHƯA TIN)</span>
+                        </label>
+                        <textarea x-model="cat._form.objections" rows="2" placeholder="VD: Sợ tốn tiền mà không hiệu quả, nghe nhiều quảng cáo sai sự thật nên cảnh giác"
+                                  class="textarea textarea-bordered textarea-sm w-full"></textarea>
+                    </div>
+                    <div class="form-control">
+                        <label class="label py-0.5">
+                            <span class="label-text text-xs font-medium">Tiêu chí quyết định (điều độc giả dùng để so sánh/chọn giữa các lựa chọn)</span>
+                        </label>
+                        <textarea x-model="cat._form.decision_criteria" rows="2" placeholder="VD: Giá cả, có bác sĩ/chuyên gia tư vấn hay không, đánh giá thật từ người dùng khác"
                                   class="textarea textarea-bordered textarea-sm w-full"></textarea>
                     </div>
                     <div class="form-control">
@@ -200,9 +234,9 @@
 <script>
 document.addEventListener('alpine:init', () => {
     Alpine.data('categoryFoundationsPage', (serverData = {}) => {
-        const { listUrl = '', upsertUrlTemplate = '', backUrl = '', staleAfterDays = 180 } = serverData;
+        const { listUrl = '', upsertUrlTemplate = '', backUrl = '', staleAfterDays = 180, familyValues = [], familyValuesRef = '' } = serverData;
 
-        const emptyForm = () => ({ core_focus: '', writer_insights: '', unique_angle: '', content_goals: '', pain_points: '', rejected_ideas: '', audience: '', constraints: '', style_sample: '' });
+        const emptyForm = () => ({ core_focus: '', writer_insights: '', unique_angle: '', content_goals: '', pain_points: '', objections: '', decision_criteria: '', family_values_focus: [], rejected_ideas: '', audience: '', constraints: '', style_sample: '' });
 
         return {
             categories: [],
@@ -210,6 +244,8 @@ document.addEventListener('alpine:init', () => {
             errorMessage: '',
             backUrl,
             staleAfterDays,
+            familyValues,
+            familyValuesRef,
             search: '',
             selectedUuid: null,
             shareQuery: '',
@@ -352,6 +388,13 @@ document.addEventListener('alpine:init', () => {
 
             removeShared(cat, uuid) {
                 cat._sharedWith = cat._sharedWith.filter(u => u !== uuid);
+            },
+
+            toggleFamilyValue(cat, key) {
+                const current = cat._form.family_values_focus || [];
+                cat._form.family_values_focus = current.includes(key)
+                    ? current.filter(k => k !== key)
+                    : [...current, key];
             },
 
             /**

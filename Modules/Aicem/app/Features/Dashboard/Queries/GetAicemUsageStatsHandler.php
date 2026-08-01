@@ -39,6 +39,7 @@ class GetAicemUsageStatsHandler implements QueryHandlerInterface
             ->sum('cost_usd');
 
         return [
+            'suggestion_acceptance' => $this->buildSuggestionAcceptance($organization->id),
             'total_runs_this_month'     => $baseQuery()->count(),
             'succeeded_runs_this_month' => $baseQuery()->where('status', 'succeeded')->count(),
             'failed_runs_this_month'    => $baseQuery()->where('status', 'failed')->count(),
@@ -60,6 +61,56 @@ class GetAicemUsageStatsHandler implements QueryHandlerInterface
                 ->latest()
                 ->limit(20)
                 ->get(),
+        ];
+    }
+
+    /**
+     * Đối chiếu bài context-engineering (animalz.co) — "evaluation": trước đây `AicemSuggestion.
+     * status` chỉ dùng để apply/discard (AcceptSuggestionAction/RejectSuggestionAction), không hề
+     * tổng hợp thành insight nào — không ai biết ngữ cảnh hiện tại có thực sự giúp ích không. Toàn
+     * thời gian (không giới hạn theo tháng như phần còn lại của dashboard) vì mẫu cần đủ lớn mới
+     * có ý nghĩa thống kê — AicemSuggestion không extends TenantAwareModel (xem docblock model),
+     * lọc tay theo organization_id thay vì dựa global scope.
+     */
+    private function buildSuggestionAcceptance(int $organizationId): array
+    {
+        $rows = DB::table('aicem_suggestions')
+            ->where('organization_id', $organizationId)
+            ->selectRaw("COALESCE(field, 'block') as field_key, status, COUNT(*) as cnt")
+            ->groupBy('field_key', 'status')
+            ->get();
+
+        $overall = ['accepted' => 0, 'rejected' => 0, 'pending' => 0, 'stale' => 0];
+        $byField = [];
+
+        foreach ($rows as $row) {
+            $overall[$row->status] = ($overall[$row->status] ?? 0) + $row->cnt;
+            $byField[$row->field_key][$row->status] = ($byField[$row->field_key][$row->status] ?? 0) + $row->cnt;
+        }
+
+        $decided = $overall['accepted'] + $overall['rejected'];
+
+        return [
+            'accepted'        => $overall['accepted'],
+            'rejected'        => $overall['rejected'],
+            'pending'         => $overall['pending'],
+            'stale'           => $overall['stale'],
+            'acceptance_rate' => $decided > 0 ? round($overall['accepted'] / $decided * 100, 1) : null,
+            'by_field'        => collect($byField)
+                ->map(function (array $counts, string $fieldKey): array {
+                    $decided = ($counts['accepted'] ?? 0) + ($counts['rejected'] ?? 0);
+
+                    return [
+                        'field'    => $fieldKey,
+                        'accepted' => $counts['accepted'] ?? 0,
+                        'rejected' => $counts['rejected'] ?? 0,
+                        'pending'  => $counts['pending'] ?? 0,
+                        'rate'     => $decided > 0 ? round(($counts['accepted'] ?? 0) / $decided * 100, 1) : null,
+                    ];
+                })
+                ->sortByDesc(fn (array $r) => $r['accepted'] + $r['rejected'] + $r['pending'])
+                ->values()
+                ->all(),
         ];
     }
 }

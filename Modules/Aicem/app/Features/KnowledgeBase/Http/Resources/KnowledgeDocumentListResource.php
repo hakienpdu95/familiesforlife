@@ -24,6 +24,11 @@ class KnowledgeDocumentListResource extends JsonResource
             'priority'        => $this->priority,
             'current_version' => $this->current_version,
             'creator_name'    => $this->creator?->name,
+            // Đối chiếu bài context-engineering (animalz.co) — "freshness": dùng lại `updated_at`
+            // đã có sẵn (không thêm cột `last_reviewed_at` mới) — cùng nguyên tắc CoreIdeaExtractor
+            // đang dùng cho CategoryContentFoundation, tránh 2 cơ chế freshness khác nhau trong
+            // cùng 1 hệ thống context engineering.
+            'updated_at'      => $this->updated_at?->toIso8601String(),
 
             'edit_url'    => route('backend.aicem.knowledge-documents.edit', $this->resource),
             'destroy_url' => route('backend.aicem.knowledge-documents.destroy', $this->resource),

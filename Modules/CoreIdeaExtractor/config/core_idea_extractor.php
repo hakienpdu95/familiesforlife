@@ -95,6 +95,41 @@ return [
         'max_titles'     => 30,  // số tiêu đề tối đa đưa vào prompt sau khi đã lọc/sort
     ],
 
+    // 2026-08-01 — Hệ giá trị gia đình Việt Nam (spec/giadinh.md), 4 trụ cột theo Quyết định
+    // 1189/QĐ-TTg ngày 02/07/2026. Đây là CHUẨN NỀN TẢNG của toàn platform (familiesforlife),
+    // không phải nội dung editor tự viết — nguồn SỰ THẬT DUY NHẤT ở đây (KHÔNG hardcode lặp lại
+    // ở blade/JS), luôn được đọc qua config('core_idea_extractor.family_values...') để tránh 2
+    // nơi định nghĩa lệch nhau. `key` khớp giá trị lưu trong `family_values_focus` (cột JSON trên
+    // cie_category_foundations) và rule validate 'in:...' ở CategoryFoundationController::upsert().
+    // Khác các field ad-hoc khác (core_focus/pain_points/...): nội dung 4 giá trị này CỐ ĐỊNH,
+    // không sửa qua UI — editor chỉ TICK giá trị nào chuyên mục ưu tiên phục vụ (family_values_focus),
+    // không tự viết lại định nghĩa.
+    'family_values' => [
+        'decision_ref' => 'Quyết định 1189/QĐ-TTg ngày 02/07/2026',
+        'items' => [
+            [
+                'key'         => 'am_no',
+                'label'       => 'Ấm no',
+                'description' => 'Đảm bảo đời sống vật chất, thu nhập ổn định và nhu cầu sinh hoạt cơ bản cho các thành viên.',
+            ],
+            [
+                'key'         => 'hanh_phuc',
+                'label'       => 'Hạnh phúc',
+                'description' => 'Tạo dựng bầu không khí yêu thương, sự gắn kết, chia sẻ và tôn trọng lẫn nhau.',
+            ],
+            [
+                'key'         => 'tien_bo',
+                'label'       => 'Tiến bộ',
+                'description' => 'Thực hiện bình đẳng giới, loại bỏ bạo lực gia đình và hủ tục lạc hậu.',
+            ],
+            [
+                'key'         => 'van_minh',
+                'label'       => 'Văn minh',
+                'description' => 'Xây dựng lối sống ứng xử chuẩn mực, văn hóa giữa các thế hệ trong mái ấm.',
+            ],
+        ],
+    ],
+
     // Ngưỡng "có thể đã cũ" cho Category Content Foundation (core_focus/pain_points/rejected_ideas...)
     // — CHỈ hiển thị nhắc nhở trực quan ở trang quản lý (KHÔNG chặn/xoá/tự động làm gì) để editor để
     // ý ôn lại ngữ cảnh định kỳ, tránh "set và quên" mãi mãi — ngữ cảnh biên tập là tài sản SỐNG, cần

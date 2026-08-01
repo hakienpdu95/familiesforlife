@@ -29,7 +29,8 @@ class KnowledgeDocumentAdminController extends Controller
     public function index(): View
     {
         return view('aicem::admin.knowledge-base.index', [
-            'subjectTypes' => $this->subjectTypeOptions(),
+            'subjectTypes'   => $this->subjectTypeOptions(),
+            'staleAfterDays' => (int) config('aicem.freshness.stale_after_days', 90),
         ]);
     }
 
