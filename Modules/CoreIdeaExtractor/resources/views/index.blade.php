@@ -724,6 +724,25 @@ document.addEventListener('alpine:init', () => {
                     .map(key => this.familyValues.find(fv => fv.key === key)?.label)
                     .filter(Boolean);
 
+                // 2026-08 (tham khảo chapters-agency.com/blog/content-marketing-blog/content-formats-2026)
+                // — định dạng nội dung nên khớp mức độ SẴN SÀNG/nhận thức của độc giả, không chỉ đa
+                // dạng hoá ngẫu nhiên. pain_points/objections/decision_criteria (§12.6/objections-
+                // decision_criteria v1.16) vốn đã phân tầng đúng 3 mức độ này (mới nhận ra vấn đề →
+                // còn nghi ngờ → sắp quyết định) nhưng trước giờ chỉ dùng làm NGUỒN Ý (đưa vào TOP),
+                // chưa từng nối sang lựa chọn ĐỊNH DẠNG ở BƯỚC 1 — đây là gợi ý ưu tiên, KHÔNG phải
+                // giới hạn cứng (khác các ràng buộc "LOẠI ngay" ở Bước 2), vì 1 nguồn cụ thể có thể
+                // không đủ chất liệu cho dạng được gợi ý.
+                const formatHints = [];
+                if (foundation?.pain_points) {
+                    formatHints.push('ý tưởng giải quyết Pain Points → ưu tiên dạng giáo dục/hướng dẫn/checklist (độc giả mới nhận ra vấn đề, cần hiểu rõ và có bước hành động cụ thể)');
+                }
+                if (foundation?.objections) {
+                    formatHints.push('ý tưởng giải toả Nghi ngờ (objections) → ưu tiên dạng FAQ hoặc "bóc trần ngộ nhận" (độc giả còn hoài nghi, cần dẫn chứng cụ thể để tin)');
+                }
+                if (foundation?.decision_criteria) {
+                    formatHints.push('ý tưởng phục vụ Tiêu chí quyết định → ưu tiên dạng so sánh/đối chiếu hoặc "lý do chọn A thay vì B" (độc giả sắp quyết định, cần khung so sánh rõ ràng)');
+                }
+
                 const top = [];
                 top.push(`Bạn là biên tập viên giàu kinh nghiệm của một nền tảng nội dung dành cho gia đình Việt Nam${category ? `, phụ trách chuyên mục "${category.name}"` : ''}${personaAudience}, đang nghiên cứu ý tưởng bài viết mới${personaTopic}.`);
                 top.push(`Ngày hôm nay: ${new Date().toISOString().slice(0, 10)}.`);
@@ -854,6 +873,10 @@ document.addEventListener('alpine:init', () => {
                         + 'khi ≥2 nguồn — tổng hợp điểm chung/khác biệt giữa các nguồn thành 1 nhận định), dạng "lý do chọn A thay vì '
                         + 'B" (giải thích RÕ 1 quyết định/khuyến nghị cụ thể, khác dạng so sánh ở chỗ đây chốt hẳn 1 lựa chọn thay vì '
                         + 'liệt kê ưu nhược 2 bên).',
+                    ...(formatHints.length ? [
+                        `Gợi ý chọn ĐỊNH DẠNG theo mức độ sẵn sàng của độc giả (không bắt buộc, vẫn dùng dạng khác nếu chất liệu `
+                            + `nguồn phù hợp hơn): ${formatHints.join('; ')}.`,
+                    ] : []),
                     ...(uniqueAngleText ? [
                         `Trong số 20-25 ý tưởng trên, ưu tiên ít nhất 2-3 ý khai thác ĐÚNG góc nhìn độc quyền của chuyên mục `
                             + `("${uniqueAngleText}") — có thể thử dưới bất kỳ DẠNG nào ở trên (so sánh, checklist, FAQ, sai lầm `
