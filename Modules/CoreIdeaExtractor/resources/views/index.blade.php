@@ -661,13 +661,19 @@ document.addEventListener('alpine:init', () => {
              * dung gia đình. `family_values_focus` (field theo category, xem đoạn push riêng ngay
              * sau khi gọi hàm này ở buildLayer2PromptText()) chỉ là lớp ƯU TIÊN bổ sung, không thay
              * thế khối cố định này.
+             *
+             * 2026-08 (tham khảo sapient.coffee/posts/2026/context-engineering-2026) — "Distraction/
+             * Pink Elephant Problem": chỉ dẫn thuần phủ định ("KHÔNG làm X") dẫn hướng chú ý model
+             * vào chính X, đôi khi phản tác dụng. Đổi thứ tự: dẫn bằng MỤC TIÊU TÍCH CỰC trước (ý
+             * tưởng giúp gia đình độc giả tiến gần giá trị nào), ranh giới cấm chỉ còn là VÍ DỤ LÀM
+             * RÕ ranh giới đặt SAU, không phải câu mở đầu của cả khối.
              */
             buildFamilyValuesGroundingLine() {
                 const items = (this.familyValues || [])
                     .map(fv => `${fv.label} (${fv.description})`)
                     .join('; ');
 
-                return `Khung giá trị biên tập nền tảng — Hệ giá trị gia đình Việt Nam (${this.familyValuesRef}), 4 giá trị cốt lõi: ${items}. Dùng khung này theo đúng 2 cách: (1) RÀNG BUỘC CỨNG — loại mọi ý tưởng đi ngược bất kỳ giá trị nào (VD cổ suý bất bình đẳng giới, bạo lực gia đình, hủ tục lạc hậu, ứng xử thiếu chuẩn mực giữa các thế hệ, so đo vật chất tạo áp lực lên gia đình khác); (2) LĂNG KÍNH ƯU TIÊN — giữa 2 ý tưởng ngang nhau về chất lượng, chọn ý giúp độc giả tiến gần 1 giá trị cụ thể hơn. KHÔNG ép mọi ý tưởng phải nhắc tên giá trị hay viết theo lối tuyên truyền khô cứng — giá trị phải thể hiện qua lợi ích thực tế mà bài viết mang lại cho gia đình độc giả.`;
+                return `Khung giá trị biên tập nền tảng — Hệ giá trị gia đình Việt Nam (${this.familyValuesRef}), 4 giá trị cốt lõi: ${items}. Mục tiêu: mỗi ý tưởng nên giúp gia đình độc giả tiến gần hơn ÍT NHẤT 1 trong 4 giá trị này thông qua lợi ích THỰC TẾ của nội dung (không phải khẩu hiệu tuyên truyền) — giữa 2 ý tưởng ngang nhau về chất lượng, ưu tiên ý phục vụ giá trị rõ hơn. Ranh giới cứng (loại ngay ý tưởng vi phạm, dù đạt các tiêu chí khác): đi ngược bất kỳ giá trị nào ở trên — VD cổ suý bất bình đẳng giới, bạo lực gia đình, hủ tục lạc hậu, ứng xử thiếu chuẩn mực giữa các thế hệ, hoặc so đo vật chất tạo áp lực lên gia đình khác. KHÔNG ép mọi ý tưởng phải nhắc tên giá trị hay viết theo lối tuyên truyền khô cứng.`;
             },
 
             buildLayer2PromptText() {
@@ -752,8 +758,8 @@ document.addEventListener('alpine:init', () => {
                 if (this.categories.length) {
                     top.push(
                         category
-                            ? 'Danh sách chuyên mục hiện có trên site (dùng ở Bước 0 để gọi tên chuyên mục phù hợp hơn nếu cần — chỉ chọn tên có trong danh sách, không bịa). Kèm trọng tâm/góc nhìn rút gọn của từng chuyên mục KHÁC chuyên mục đã chọn, dùng làm căn cứ cho Bước 2 nếu Bước 0 đổi sang chuyên mục đó:'
-                            : 'Chưa chọn chuyên mục nào — danh sách chuyên mục hiện có trên site dưới đây dùng ở Bước 0 để XÁC ĐỊNH chuyên mục phù hợp nhất với nguồn (chỉ chọn tên có sẵn trong danh sách, không bịa thêm tên mới), kèm trọng tâm/góc nhìn rút gọn của từng chuyên mục để làm căn cứ đánh giá tiêu chí 1-2 ở Bước 2:'
+                            ? 'Danh sách chuyên mục hiện có trên site (dùng ở Bước 0 để gọi tên chuyên mục phù hợp hơn nếu cần — chỉ chọn tên có trong danh sách, không bịa). Kèm trọng tâm/góc nhìn rút gọn + ý tưởng ĐÃ TỪ CHỐI (nếu có) của từng chuyên mục KHÁC chuyên mục đã chọn, dùng làm căn cứ cho Bước 2 nếu Bước 0 đổi sang chuyên mục đó — ý ĐÃ TỪ CHỐI vẫn là ràng buộc cứng dù chuyên mục đó không phải chuyên mục đã chọn ban đầu:'
+                            : 'Chưa chọn chuyên mục nào — danh sách chuyên mục hiện có trên site dưới đây dùng ở Bước 0 để XÁC ĐỊNH chuyên mục phù hợp nhất với nguồn (chỉ chọn tên có sẵn trong danh sách, không bịa thêm tên mới), kèm trọng tâm/góc nhìn rút gọn + ý tưởng ĐÃ TỪ CHỐI (nếu có) của từng chuyên mục để làm căn cứ đánh giá tiêu chí 1-2 ở Bước 2 — ý ĐÃ TỪ CHỐI của 1 chuyên mục vẫn là ràng buộc cứng cho ý tưởng gắn với đúng chuyên mục đó, kể cả ở chế độ đa chuyên mục:'
                     );
                     this.categories.forEach(cat => {
                         const indent = '  '.repeat(cat.depth);
@@ -763,9 +769,17 @@ document.addEventListener('alpine:init', () => {
                         }
                         const hintCoreFocus = truncateForHint(cat.foundation?.core_focus);
                         const hintUniqueAngle = truncateForHint(cat.foundation?.unique_angle);
+                        // rejected_ideas (Decision Log) là RÀNG BUỘC CỨNG (§12.7), không phải ngữ
+                        // cảnh tham khảo như core_focus/unique_angle — thiếu hint này, chế độ "đa
+                        // chuyên mục" (BƯỚC 0 nhánh chưa chọn) có thể đề xuất lại đúng ý đã bị từ
+                        // chối cho 1 chuyên mục KHÁC chuyên mục đang chọn, vì foundation đầy đủ chỉ
+                        // lộ ra cho category đã chọn (biến `foundation` ở trên). Vẫn CẮT NGẮN như 2
+                        // hint kia (progressive disclosure — đủ để cảnh báo, không tải nguyên văn).
+                        const hintRejected = truncateForHint(cat.foundation?.rejected_ideas);
                         const hints = [
                             hintCoreFocus ? `trọng tâm: ${hintCoreFocus}` : null,
                             hintUniqueAngle ? `góc nhìn: ${hintUniqueAngle}` : null,
+                            hintRejected ? `ĐÃ TỪ CHỐI (không đề xuất lại): ${hintRejected}` : null,
                         ].filter(Boolean);
                         top.push(`${indent}- ${cat.name}${hints.length ? ` (${hints.join(' | ')})` : ''}`);
                     });
@@ -835,7 +849,11 @@ document.addEventListener('alpine:init', () => {
                     'BƯỚC 1 — Sinh ý tưởng: brainstorm RỘNG, liệt kê 20-25 ý tưởng ứng viên đa dạng góc nhìn (chưa lọc) — '
                         + 'không chỉ biến tấu lại vài ý giống nhau. Đa dạng hoá bằng nhiều dạng góc nhìn khác nhau từ dữ liệu nguồn: '
                         + 'theo giai đoạn/độ tuổi, theo vấn đề cụ thể, theo đối tượng đặc thù (VD mẹ đi làm, sinh non, sinh đôi), '
-                        + 'dạng so sánh/đối chiếu, dạng checklist/hướng dẫn chọn, dạng sai lầm thường gặp, dạng FAQ.',
+                        + 'dạng so sánh/đối chiếu, dạng checklist/hướng dẫn chọn, dạng sai lầm thường gặp, dạng FAQ, dạng "bóc trần '
+                        + 'ngộ nhận" (chỉ ra 1 quan niệm phổ biến nhưng sai + dẫn chứng đúng), dạng "phát hiện từ dữ liệu" (chỉ dùng '
+                        + 'khi ≥2 nguồn — tổng hợp điểm chung/khác biệt giữa các nguồn thành 1 nhận định), dạng "lý do chọn A thay vì '
+                        + 'B" (giải thích RÕ 1 quyết định/khuyến nghị cụ thể, khác dạng so sánh ở chỗ đây chốt hẳn 1 lựa chọn thay vì '
+                        + 'liệt kê ưu nhược 2 bên).',
                     ...(uniqueAngleText ? [
                         `Trong số 20-25 ý tưởng trên, ưu tiên ít nhất 2-3 ý khai thác ĐÚNG góc nhìn độc quyền của chuyên mục `
                             + `("${uniqueAngleText}") — có thể thử dưới bất kỳ DẠNG nào ở trên (so sánh, checklist, FAQ, sai lầm `
