@@ -1,0 +1,11 @@
+{
+    "name": "VideoIdeaExtractor",
+    "alias": "video-idea-extractor",
+    "description": "Trích xuất dữ liệu thô từ transcript video YouTube dán tay (tiêu đề + nội dung transcript, nhiều video/lần) — công cụ nghiên cứu ý tưởng/chủ đề làm video mới, cùng triết lý Layer 1/2 với CoreIdeaExtractor nhưng input là transcript thay vì URL bài viết. Dùng chung Category Content Foundation qua module ContentFoundation.",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\VideoIdeaExtractor\\Providers\\VideoIdeaExtractorServiceProvider"
+    ],
+    "files": []
+}

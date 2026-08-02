@@ -6,11 +6,11 @@
     'apiUrl' => route('backend.api.coreideaextractor.extract'),
     'apiBatchUrl' => route('backend.api.coreideaextractor.extract-batch'),
     'maxUrls' => config('core_idea_extractor.batch.max_urls', 7),
-    'categoryFoundationsUrl' => route('backend.coreideaextractor.category-foundations.index'),
-    'existingArticlesUrlTemplate' => route('backend.api.coreideaextractor.category-foundations.existing-articles', ['category' => '__UUID__']),
+    'categoryFoundationsUrl' => route('backend.contentfoundation.index'),
+    'existingArticlesUrlTemplate' => route('backend.api.contentfoundation.category-foundations.existing-articles', ['category' => '__UUID__']),
     'categories' => $categoryFoundations,
-    'familyValues' => config('core_idea_extractor.family_values.items', []),
-    'familyValuesRef' => config('core_idea_extractor.family_values.decision_ref'),
+    'familyValues' => config('content_foundation.family_values.items', []),
+    'familyValuesRef' => config('content_foundation.family_values.decision_ref'),
     'layer2Url' => route('backend.api.coreideaextractor.layer2'),
     'summarizeUrl' => route('backend.api.coreideaextractor.summarize'),
     'rewriteUrl' => route('backend.api.coreideaextractor.rewrite'),
@@ -656,7 +656,7 @@ document.addEventListener('alpine:init', () => {
              * (familiesforlife), khác mọi field Category Content Foundation khác (core_focus/
              * pain_points/...) vốn là ngữ cảnh editor tự viết theo TỪNG chuyên mục — khối này CỐ
              * ĐỊNH, LUÔN xuất hiện ở TOP của mọi prompt bất kể có chọn chuyên mục hay không (đọc từ
-             * config('core_idea_extractor.family_values'), không hardcode lặp lại câu chữ ở đây),
+             * config('content_foundation.family_values'), không hardcode lặp lại câu chữ ở đây),
              * để AI luôn có cùng 1 khung tham chiếu giá trị khi đề xuất ý tưởng cho platform nội
              * dung gia đình. `family_values_focus` (field theo category, xem đoạn push riêng ngay
              * sau khi gọi hàm này ở buildLayer2PromptText()) chỉ là lớp ƯU TIÊN bổ sung, không thay

@@ -294,6 +294,32 @@
         </div>
         @endcan
 
+        {{-- spec/CoreIdeaExtractor.md §12 — content_foundation.use cấp cho platform_content_editor/
+             platform_content_head/platform_section_editor
+             (Modules\ContentFoundation\Database\Seeders\ContentFoundationPermissionSeeder). Trang
+             quản lý ngữ cảnh biên tập DÙNG CHUNG bởi CoreIdeaExtractor/VideoIdeaExtractor. --}}
+        @can(\App\Enums\PermissionEnum::CONTENT_FOUNDATION_USE->value)
+        <div class="nav-group">
+            <a href="{{ route('backend.contentfoundation.index') }}"
+               class="nav-link {{ request()->routeIs('backend.contentfoundation.*') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2M5 21H3m4-14h6m-6 4h6m-6 4h4"/></svg>
+                <span class="nav-label">Content Foundation</span>
+            </a>
+        </div>
+        @endcan
+
+        {{-- video_idea_extractor.use cấp cho platform_content_editor/platform_content_head/
+             platform_section_editor (Modules\VideoIdeaExtractor\Database\Seeders\VideoIdeaExtractorPermissionSeeder). --}}
+        @can(\App\Enums\PermissionEnum::VIDEO_IDEA_EXTRACTOR_USE->value)
+        <div class="nav-group">
+            <a href="{{ route('backend.videoideaextractor.index') }}"
+               class="nav-link {{ request()->routeIs('backend.videoideaextractor.*') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                <span class="nav-label">Trích ý video</span>
+            </a>
+        </div>
+        @endcan
+
         {{-- spec/ContentCalendar_Technical_Specification.md §6/§13 — content_calendar.view cấp cho
              platform_content_creator/section_editor/content_editor/content_head/viewer
              (Modules\ContentCalendar\Database\Seeders\ContentCalendarPermissionSeeder). --}}

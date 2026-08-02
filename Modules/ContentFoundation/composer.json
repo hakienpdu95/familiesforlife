@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/content-foundation",
+    "description": "",
+    "authors": [
+        {
+            "name": "KienDH",
+            "email": "bonhuyn@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\ContentFoundation\\": "app/",
+            "Modules\\ContentFoundation\\Database\\Factories\\": "database/factories/",
+            "Modules\\ContentFoundation\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\ContentFoundation\\Tests\\": "tests/"
+        }
+    }
+}

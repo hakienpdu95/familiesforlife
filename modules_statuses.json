@@ -26,5 +26,7 @@
     "CoreIdeaExtractor": true,
     "RealEstate": true,
     "Video": true,
-    "ContentCalendar": true
+    "ContentCalendar": true,
+    "ContentFoundation": true,
+    "VideoIdeaExtractor": true
 }

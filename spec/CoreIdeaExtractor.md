@@ -1,8 +1,27 @@
 # CoreIdeaExtractor
 
-**Version:** 1.19  
-**Last Updated:** 2026-08-01  
+**Version:** 1.20  
+**Last Updated:** 2026-08-02  
 **Status:** Design Specification (Ready for Implementation)
+
+> **v1.20 (Bỏ Bảng 2 — Ý tưởng bị loại, đảo ngược quyết định v1.8 — ghi nhận đúng trạng thái code hiện tại):**
+> theo yêu cầu người dùng, "Copy prompt cho AI" (§12.4) không còn xuất **Bảng 2** (ý tưởng bị loại
+> kèm tiêu chí không đạt + lý do) — chỉ còn ĐÚNG 1 bảng (ý tưởng đạt cả 4 tiêu chí), đảo ngược quyết
+> định đã ghi ở v1.8 (thêm Bảng 2 để "chứng minh bộ lọc thực sự chạy", dựa trên test thật với
+> grok.com/claude.ai). Lần này KHÔNG có test/phản hồi cụ thể đối lập lại lý do v1.8 đã nêu — thuần
+> là quyết định sản phẩm mới của người dùng ưu tiên output gọn hơn, chấp nhận đánh đổi mất khả năng
+> verify bộ lọc có thực sự lọc hay không mà v1.8 từng nhắm tới giải quyết.
+>
+> **Lưu ý quan trọng — spec/code đã LỆCH NHAU trước khi sửa bản này:** khi rà soát để thực hiện thay
+> đổi này, phát hiện `index.blade.php` (`buildLayer2PromptText()`, BƯỚC 3) **đã chỉ có 1 bảng từ
+> trước** (`'Bảng — Ý tưởng ĐẠT cả 4 tiêu chí'`, không có `'Bảng 2'`/`'BỊ LOẠI'` nào trong code) —
+> dù spec v1.8 mô tả đã thêm Bảng 2. Không rõ Bảng 2 bị bỏ khỏi code từ version nào (không có version
+> nào sau v1.8 ghi nhận việc bỏ nó) — đây là 1 trường hợp spec mô tả sai hành vi thật của code trong
+> nhiều version liền, chỉ phát hiện ra khi người dùng yêu cầu bỏ tính năng này. Bản v1.20 này KHÔNG
+> cần sửa code (code đã đúng ý người dùng từ trước) — chỉ sửa lại §12.4 cho khớp đúng thực tế.
+>
+> Cùng thay đổi áp dụng cho module `VideoIdeaExtractor` (module riêng, dùng chung thiết kế prompt
+> nhưng code độc lập) — module đó đã sửa code thật (có Bảng 2 thật, đã bỏ).
 
 > **v1.19 (Nối pain_points/objections/decision_criteria với gợi ý ĐỊNH DẠNG ở BƯỚC 1 — tham khảo chapters-agency.com/blog/content-marketing-blog/content-formats-2026):** bài dẫn (content-marketing của 1 agency, không trích số liệu/nghiên cứu — đã ghi rõ để không nhầm là nguồn học thuật) nêu 1 ý CỐT LÕI đáng dùng dù nguồn không có citation: định dạng nội dung nên khớp mức độ SẴN SÀNG/nhận thức của độc giả, không chỉ đa dạng hoá ngẫu nhiên. `pain_points`/`objections`/`decision_criteria` (§12.6, v1.16) vốn ĐÃ phân tầng đúng 3 mức độ này (mới nhận ra vấn đề → còn nghi ngờ → sắp quyết định) nhưng trước giờ chỉ dùng làm NGUỒN Ý đưa vào TOP — chưa từng nối sang lựa chọn định dạng ở BƯỚC 1. Thêm mảng `formatHints` (`buildLayer2PromptText()`) — với mỗi field đang có giá trị trên `foundation`, ánh xạ sang 1 gợi ý định dạng: `pain_points` → giáo dục/hướng dẫn/checklist; `objections` → FAQ/"bóc trần ngộ nhận" (dạng mới thêm ở v1.18); `decision_criteria` → so sánh/"lý do chọn A thay vì B" (dạng mới thêm ở v1.18). Gộp thành 1 dòng, chèn NGAY SAU danh sách "dạng" chính ở BƯỚC 1 — ghi rõ đây là GỢI Ý ƯU TIÊN, không phải giới hạn cứng (khác nhóm ràng buộc "LOẠI ngay" ở Bước 2), vì 1 nguồn cụ thể có thể không đủ chất liệu cho đúng dạng được gợi ý. Không xuất hiện gì nếu foundation không có field nào trong 3 field trên (kể cả khi chưa chọn category). Không đổi Layer 1/Layer 2 JSON schema (§5, §7).
 
@@ -495,17 +514,17 @@ Module đã có ngữ cảnh ad-hoc (`audience/goal/constraints/style_sample`, �
 - Không tự động kéo tag/bài viết hiện có của category vào prompt (tránh trùng nội dung đã viết) — để dành cho lần lặp sau (§11).
 - Không tự động hoá Layer 2 (gọi AI Provider thật) — module vẫn là công cụ nghiên cứu, copy tay vào chat AI, đúng triết lý hiện có.
 
-### 12.4 "Copy prompt cho AI" — cấu trúc context sandwich (v1.5, hardening v1.6, task 3 bước v1.8)
+### 12.4 "Copy prompt cho AI" — cấu trúc context sandwich (v1.5, hardening v1.6, task 3 bước v1.8, bỏ Bảng 2 v1.20)
 
 Tham khảo https://www.mindstudio.ai/blog/context-sandwich-prompting-method-ai-results +
 https://www.promptingguide.ai/guides/context-engineering-guide: prompt copy ra ở §12.2 dựng
 theo cấu trúc sandwich — **TRÊN** = vai trò biên tập viên + bối cảnh (foundation/ad-hoc, súc
 tích — "more context isn't always better") + ngày hôm nay (dynamic context); **GIỮA** = JSON thô
 ĐẦY ĐỦ đã trích xuất (phần "filling", chỉ để tham khảo — KHÔNG rút gọn `main_content`, xem lý do
-bên dưới); **DƯỚI CÙNG** = nhiệm vụ 3 bước + định dạng output tường minh (2 bảng Markdown —
-kime.ai: bảng được trích dẫn nhiều gấp 4.2x văn xuôi), đặt NGAY TRƯỚC chỗ model bắt đầu sinh câu
-trả lời (khác bản v1.4 để JSON ở cuối). Trang quản lý foundation (§12.2) có thêm gợi ý viết ngắn
-gọn (1-2 câu/field).
+bên dưới); **DƯỚI CÙNG** = nhiệm vụ 3 bước + định dạng output tường minh (1 bảng Markdown duy nhất
+từ v1.20, xem bên dưới — kime.ai: bảng được trích dẫn nhiều gấp 4.2x văn xuôi), đặt NGAY TRƯỚC chỗ
+model bắt đầu sinh câu trả lời (khác bản v1.4 để JSON ở cuối). Trang quản lý foundation (§12.2) có
+thêm gợi ý viết ngắn gọn (1-2 câu/field).
 
 **v1.6 — khoá format cứng:** luôn kết thúc BOTTOM bằng chỉ dẫn không viết giải thích/mở
 đầu/kết luận ngoài các bảng yêu cầu — đặt SAU CÙNG (đúng nguyên tắc sandwich: chỗ model chú ý
@@ -537,15 +556,17 @@ minh:
    → bỏ qua chỉ dẫn này (không có gì để tổng hợp chéo).
 2. **BƯỚC 2 — Đánh giá từng ý tưởng qua cả 3 tiêu chí** (không đổi nội dung 3 câu hỏi so với
    v1.5, chỉ đổi cách dùng: đánh giá tường minh thay vì lọc ngầm).
-3. **BƯỚC 3 — Xuất đúng 2 bảng Markdown**:
-   - **Bảng 1** (ý tưởng đạt cả 3 tiêu chí) — thêm cột **"Lý do"** (1 câu) so với v1.5: không còn
-     Có/Không suông, người viết verify được AI đang dựa vào đâu để kết luận "khớp"/"độc quyền".
-   - **Bảng 2** (ý tưởng bị loại, mới ở v1.8) — liệt kê ý tưởng KHÔNG đạt ít nhất 1 tiêu chí, kèm
-     tiêu chí không đạt + lý do loại — chứng minh bộ lọc thực sự chạy (không phải chỉ ẩn đi),
-     giúp người viết đánh giá bộ lọc đang lỏng hay chặt so với kỳ vọng.
+3. **BƯỚC 3 — Xuất đúng 1 bảng Markdown** (ý tưởng đạt cả 3 tiêu chí) — thêm cột **"Lý do"** (1
+   câu) so với v1.5: không còn Có/Không suông, người viết verify được AI đang dựa vào đâu để kết
+   luận "khớp"/"độc quyền".
+   - **[v1.20 — ĐÃ BỎ] Bảng 2** (ý tưởng bị loại) — bản v1.8 từng thêm bảng này để liệt kê ý tưởng
+     KHÔNG đạt ít nhất 1 tiêu chí kèm tiêu chí không đạt + lý do loại, "chứng minh bộ lọc thực sự
+     chạy" (không phải chỉ ẩn đi). Theo yêu cầu người dùng ở v1.20, bảng này đã bị bỏ — output giờ
+     chỉ còn ý tưởng đạt tiêu chí, đánh đổi mất khả năng verify bộ lọc lỏng/chặt mà v1.8 từng nhắm
+     tới giải quyết.
 
 Dòng khoá format cứng (v1.6) vẫn giữ nguyên, chỉ chuyển thành 1 phần của chỉ dẫn Bước 3 (không
-viết gì ngoài 2 bảng).
+viết gì ngoài bảng — chỉ 1 bảng từ v1.20).
 
 ### 12.5 Cảnh báo kích thước prompt (v1.9)
 

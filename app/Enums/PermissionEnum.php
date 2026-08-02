@@ -158,6 +158,21 @@ enum PermissionEnum: string
     // nguyên tắc BANNER_MANAGE/OCOP_MANAGE/PAGE_MANAGE.
     case CORE_IDEA_EXTRACTOR_USE = 'core_idea_extractor.use';
 
+    // ══ CONTENT FOUNDATION (ngữ cảnh biên tập bền vững theo PostCategory — tách từ
+    // CoreIdeaExtractor để dùng chung bởi mọi công cụ nghiên cứu ý tưởng nội dung, VD
+    // CoreIdeaExtractor/VideoIdeaExtractor) ═══
+    // spec/CoreIdeaExtractor.md §12 — gán cho platform_content_editor/platform_content_head/
+    // platform_section_editor (ContentFoundationPermissionSeeder), KHÔNG qua config/permissions.php
+    // (Lớp B) — cùng nguyên tắc CORE_IDEA_EXTRACTOR_USE.
+    case CONTENT_FOUNDATION_USE = 'content_foundation.use';
+
+    // ══ VIDEO IDEA EXTRACTOR (trích xuất dữ liệu thô từ transcript video dán tay — nghiên cứu ý
+    // tưởng/chủ đề làm video mới, không phải nội dung nền tảng) ═══
+    // Cùng nguyên tắc CORE_IDEA_EXTRACTOR_USE — gán cho platform_content_editor/
+    // platform_content_head/platform_section_editor (VideoIdeaExtractorPermissionSeeder), KHÔNG
+    // qua config/permissions.php (Lớp B).
+    case VIDEO_IDEA_EXTRACTOR_USE = 'video_idea_extractor.use';
+
     // ══ BREAKING NEWS (Tin nóng/tin chạy ghim đầu trang chủ — tài sản nền tảng) ═══
     // spec/Breaking_News_Ticker_Technical_Specification.md §6.3 — gán cho platform_ops +
     // platform_content_head (BreakingNewsPermissionSeeder), KHÔNG qua config/permissions.php

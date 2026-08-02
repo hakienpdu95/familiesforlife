@@ -13,7 +13,9 @@ use Modules\LeadPipelineStage\Database\Seeders\LeadPipelineStageSeeder;
 use Modules\LeadSource\Database\Seeders\LeadSourceSeeder;
 use Modules\Aicem\Database\Seeders\AicemDatabaseSeeder;
 use Modules\Banner\Database\Seeders\BannerDatabaseSeeder;
+use Modules\ContentFoundation\Database\Seeders\ContentFoundationDatabaseSeeder;
 use Modules\CoreIdeaExtractor\Database\Seeders\CoreIdeaExtractorDatabaseSeeder;
+use Modules\VideoIdeaExtractor\Database\Seeders\VideoIdeaExtractorDatabaseSeeder;
 use Modules\Event\Database\Seeders\EventDatabaseSeeder;
 use Modules\Event\Database\Seeders\EventDemoSeeder;
 use Modules\Menu\Database\Seeders\MenuDatabaseSeeder;
@@ -136,6 +138,16 @@ class SystemDataSeeder extends Seeder
             // platform_content_editor/platform_content_head (role do ApprovalDatabaseSeeder tạo
             // ở bước 27), cùng nguyên tắc Banner/Page, PHẢI đứng sau bước đó ──
             CoreIdeaExtractorDatabaseSeeder::class,
+
+            // ── 27d-1. ContentFoundation: permission content_foundation.use — ngữ cảnh biên tập
+            // dùng chung bởi CoreIdeaExtractor/VideoIdeaExtractor, gán cho cùng 3 role (role do
+            // ApprovalDatabaseSeeder tạo ở bước 27), PHẢI đứng sau bước đó ──
+            ContentFoundationDatabaseSeeder::class,
+
+            // ── 27d-2. VideoIdeaExtractor: permission video_idea_extractor.use — nghiên cứu ý
+            // tưởng từ transcript video, dùng chung ContentFoundation, gán cho cùng 3 role (role do
+            // ApprovalDatabaseSeeder tạo ở bước 27), PHẢI đứng sau bước đó ──
+            VideoIdeaExtractorDatabaseSeeder::class,
 
             // ── 27e. Video: permission video.manage — gán cho platform_ops/platform_content_head
             // (role do ApprovalDatabaseSeeder tạo ở bước 27), cùng nguyên tắc Banner/Page,

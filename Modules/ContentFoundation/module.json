@@ -1,0 +1,11 @@
+{
+    "name": "ContentFoundation",
+    "alias": "content-foundation",
+    "description": "Ngữ cảnh biên tập bền vững theo từng PostCategory (Category Content Foundation — spec/CoreIdeaExtractor.md §12), dùng chung bởi mọi công cụ nghiên cứu ý tưởng nội dung (CoreIdeaExtractor, VideoIdeaExtractor...). Tách từ CoreIdeaExtractor để các module đó phụ thuộc 1 chiều vào đây thay vì phụ thuộc chéo lẫn nhau.",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\ContentFoundation\\Providers\\ContentFoundationServiceProvider"
+    ],
+    "files": []
+}
