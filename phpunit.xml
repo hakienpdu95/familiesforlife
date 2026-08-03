@@ -7,31 +7,19 @@
     <testsuites>
         <testsuite name="Unit">
             <directory>tests/Unit</directory>
-            <directory>Modules/Survey/tests/Unit</directory>
-            <directory>Modules/Sop/tests/Unit</directory>
-            <directory>Modules/Subscription/tests/Unit</directory>
-            <directory>Modules/OcopRubric/tests/Unit</directory>
-            <directory>Modules/BusinessSolution/tests/Unit</directory>
-            <directory>Modules/BusinessBlueprint/tests/Unit</directory>
-            <directory>Modules/OrganizationSolution/tests/Unit</directory>
-            <directory>Modules/Deployment/tests/Unit</directory>
+            <directory>Modules/Newsletter/tests/Unit</directory>
+            <directory>Modules/RealEstate/tests/Unit</directory>
         </testsuite>
         <testsuite name="Feature">
             <directory>tests/Feature</directory>
-            <directory>Modules/Survey/tests/Feature</directory>
-            <directory>Modules/Sop/tests/Feature</directory>
-            <directory>Modules/Subscription/tests/Feature</directory>
-            <directory>Modules/OcopRubric/tests/Feature</directory>
-            <directory>Modules/BusinessSolution/tests/Feature</directory>
-            <directory>Modules/BusinessBlueprint/tests/Feature</directory>
-            <directory>Modules/OrganizationSolution/tests/Feature</directory>
-            <directory>Modules/Deployment/tests/Feature</directory>
-            <directory>Modules/SolutionCatalog/tests/Feature</directory>
             <directory>Modules/Approval/tests/Feature</directory>
-            <directory>Modules/Post/tests/Feature</directory>
-            <directory>Modules/Ocop/tests/Feature</directory>
             <directory>Modules/Banner/tests/Feature</directory>
+            <directory>Modules/CoreIdeaExtractor/tests/Feature</directory>
+            <directory>Modules/Newsletter/tests/Feature</directory>
+            <directory>Modules/Ocop/tests/Feature</directory>
             <directory>Modules/Page/tests/Feature</directory>
+            <directory>Modules/Post/tests/Feature</directory>
+            <directory>Modules/RealEstate/tests/Feature</directory>
             <directory>Modules/Video/tests/Feature</directory>
         </testsuite>
     </testsuites>
