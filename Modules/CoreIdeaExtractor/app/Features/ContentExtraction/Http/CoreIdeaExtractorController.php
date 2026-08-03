@@ -209,13 +209,14 @@ class CoreIdeaExtractorController extends Controller
             $notes            = $this->appendLanguageMismatchNote($notes, $extracted['language_mismatch_suspected'], $extracted['language']);
             $selection        = $this->truncateBatchMainContent($extracted['main_content'], $data->topic);
             $mainContent      = $selection['text'];
-            $notes            = $this->appendRelevanceNote($notes, $selection['relevance_applied'], $data->topic);
-            $notes            = $selection['relevance_applied'] ? $notes : $this->appendMainContentTruncationNote(
+            $notes            = $this->appendRelevanceNote($notes, $selection['strategy'] === 'topic', $data->topic);
+            $notes            = $this->appendLeadTailNote($notes, $selection['strategy'] === 'lead_tail');
+            $notes            = $selection['strategy'] === 'none' ? $this->appendMainContentTruncationNote(
                 $notes,
                 mb_strlen($extracted['main_content']),
                 mb_strlen($mainContent),
                 (int) config('core_idea_extractor.batch.max_main_content_chars_per_source', 12000),
-            );
+            ) : $notes;
             $contentHash      = $this->computeContentHash($mainContent);
             $contentReduction = $this->computeContentReduction($rawHtmlChars, $mainContent);
 
@@ -407,26 +408,28 @@ class CoreIdeaExtractorController extends Controller
      * bài viết tự nhiên đứt đoạn (tránh hiểu nhầm nguồn viết lủng củng).
      *
      * Không có `topic`, hoặc bài chỉ có 1 đoạn duy nhất (không tách được), hoặc không đoạn nào
-     * khớp từ khoá → rơi về truncateAtBoundary() như cũ (không đổi hành vi mặc định).
+     * khớp từ khoá → rơi về selectLeadAndTailContent() (giữ đầu+cuối, xem docblock ở đó) thay vì
+     * cắt thẳng theo thứ tự xuất hiện — bài báo/tin tức thường kết luận bằng 1 câu chốt quan
+     * trọng ở CUỐI bài, cắt thẳng sẽ luôn mất đúng phần này (đã gặp thật qua phản hồi người dùng).
      *
-     * @return array{text: string, relevance_applied: bool}
+     * @return array{text: string, strategy: 'topic'|'lead_tail'|'none'}
      */
     private function selectRelevantContent(string $text, int $max, ?string $topic): array
     {
         if (mb_strlen($text) <= $max) {
-            return ['text' => $text, 'relevance_applied' => false];
-        }
-
-        $keywords = $this->extractTopicKeywords($topic);
-
-        if ($keywords === []) {
-            return ['text' => $this->truncateAtBoundary($text, $max), 'relevance_applied' => false];
+            return ['text' => $text, 'strategy' => 'none'];
         }
 
         $paragraphs = preg_split('/\n{2,}/', trim($text)) ?: [];
 
         if (count($paragraphs) <= 1) {
-            return ['text' => $this->truncateAtBoundary($text, $max), 'relevance_applied' => false];
+            return ['text' => $this->truncateAtBoundary($text, $max), 'strategy' => 'none'];
+        }
+
+        $keywords = $this->extractTopicKeywords($topic);
+
+        if ($keywords === []) {
+            return $this->selectLeadAndTailContent($paragraphs, $text, $max);
         }
 
         $scored = array_map(
@@ -459,16 +462,15 @@ class CoreIdeaExtractorController extends Controller
 
         // Không đoạn nào khớp topic vừa đủ ngân sách (VD topic không khớp gì trong bài, hoặc
         // ngân sách quá nhỏ chỉ vừa đúng đoạn mở đầu) → không có gì thực sự được "chọn theo liên
-        // quan", rơi về cắt chuẩn trên TOÀN VĂN BẢN gốc (không giới hạn trong mỗi đoạn lead) để
-        // giữ đúng hành vi mặc định quen thuộc.
+        // quan", rơi về giữ đầu+cuối (xem selectLeadAndTailContent()) thay vì cắt thẳng.
         if (! $addedRelevantParagraph) {
-            return ['text' => $this->truncateAtBoundary($text, $max), 'relevance_applied' => false];
+            return $this->selectLeadAndTailContent($paragraphs, $text, $max);
         }
 
         if (count($selected) === count($paragraphs)) {
             // Mọi đoạn đều khớp topic và vừa ngân sách — thực chất không lược bỏ gì, không phải
             // trường hợp "chọn lọc theo liên quan" thật sự.
-            return ['text' => $this->truncateAtBoundary($text, $max), 'relevance_applied' => false];
+            return $this->selectLeadAndTailContent($paragraphs, $text, $max);
         }
 
         ksort($selected);
@@ -488,9 +490,108 @@ class CoreIdeaExtractorController extends Controller
         $assembled = implode("\n\n", $kept);
 
         return [
-            'text'              => mb_strlen($assembled) <= $max ? $assembled : $this->truncateAtBoundary($assembled, $max),
-            'relevance_applied' => true,
+            'text'     => mb_strlen($assembled) <= $max ? $assembled : $this->truncateAtBoundary($assembled, $max),
+            'strategy' => 'topic',
         ];
+    }
+
+    /**
+     * Fallback "giữ ĐẦU + CUỐI, cắt GIỮA" khi không có/không dùng được `topic` để chọn theo liên
+     * quan — bài báo/tin tức tiếng Việt thường kết luận bằng 1 câu chốt/trích dẫn quan trọng ở
+     * CUỐI bài (thông điệp/ý nghĩa chính); nếu chỉ cắt theo thứ tự xuất hiện (truncateAtBoundary —
+     * luôn giữ đầu, bỏ cuối) sẽ MẤT đúng phần này. Giữ đoạn ĐẦU (mở bài, giữ ngữ cảnh) và đoạn
+     * CUỐI làm 2 điểm neo bắt buộc, lấp ngân sách còn lại bằng các đoạn GIỮA theo ĐÚNG thứ tự
+     * xuất hiện (không có tín hiệu điểm số để ưu tiên đoạn giữa nào hơn đoạn nào, khác nhánh có
+     * topic ở trên). Đoạn bị lược bỏ đánh dấu "[…]" cùng quy ước với nhánh có topic.
+     *
+     * Nếu ngay cả đầu+cuối cộng lại đã vượt ngân sách (đoạn đầu/cuối tự nó đã rất dài), rơi về
+     * truncateAtBoundary() như cũ — không có cách nào giữ được cả 2 đầu mà không vượt trần.
+     *
+     * @param string[] $paragraphs
+     * @return array{text: string, strategy: 'topic'|'lead_tail'|'none'}
+     */
+    private function selectLeadAndTailContent(array $paragraphs, string $fullText, int $max): array
+    {
+        $tailIndex = $this->findTailAnchorIndex($paragraphs);
+        $leadLen   = mb_strlen($paragraphs[0]);
+        $tailLen   = mb_strlen($paragraphs[$tailIndex]);
+
+        if ($tailIndex === 0 || $leadLen + $tailLen + 2 > $max) {
+            return ['text' => $this->truncateAtBoundary($fullText, $max), 'strategy' => 'none'];
+        }
+
+        $selected = [0 => true, $tailIndex => true];
+        $budget   = $max - $leadLen - $tailLen - 2;
+
+        for ($i = 1; $i < $tailIndex; $i++) {
+            $len = mb_strlen($paragraphs[$i]);
+
+            if ($len + 2 > $budget) {
+                continue;
+            }
+
+            $selected[$i] = true;
+            $budget      -= $len + 2;
+        }
+
+        ksort($selected);
+
+        $kept = [];
+        $prev = null;
+
+        foreach (array_keys($selected) as $index) {
+            if ($prev !== null && $index > $prev + 1) {
+                $kept[] = '[…]';
+            }
+
+            $kept[] = $paragraphs[$index];
+            $prev   = $index;
+        }
+
+        return ['text' => implode("\n\n", $kept), 'strategy' => 'lead_tail'];
+    }
+
+    /**
+     * Đoạn CUỐI cùng theo thứ tự mảng thường KHÔNG phải kết luận thật — nhiều CMS chèn thêm 1
+     * đoạn "### Từ khoá:" + danh sách link tag ngay sau khi hết bài (đã gặp thật). Neo "cuối" vào
+     * đúng đoạn NÀY sẽ giữ nhầm danh sách tag thay vì câu kết luận/trích dẫn chốt thật — duyệt
+     * NGƯỢC từ cuối, bỏ qua các đoạn boilerplate dạng này để tìm đúng đoạn văn xuôi thật cuối
+     * cùng. Nếu MỌI đoạn (trừ đoạn đầu) đều là boilerplate, rơi về đoạn cuối cùng theo mảng như cũ
+     * (không có gì tốt hơn để neo).
+     */
+    private function findTailAnchorIndex(array $paragraphs): int
+    {
+        for ($i = count($paragraphs) - 1; $i > 0; $i--) {
+            if (! $this->looksLikeTagListParagraph($paragraphs[$i])) {
+                return $i;
+            }
+        }
+
+        return count($paragraphs) - 1;
+    }
+
+    /** Đoạn dạng "### Từ khoá:"/"Tags:" hoặc gần như chỉ gồm các link Markdown "[text](url)" nối nhau — danh sách tag/từ khoá liên kết, không phải văn xuôi thật của bài. */
+    private function looksLikeTagListParagraph(string $paragraph): bool
+    {
+        $trimmed = trim($paragraph);
+
+        if ($trimmed === '') {
+            return true;
+        }
+
+        if (preg_match('/^#{1,6}\s*(từ khoá|từ khóa|tags?|chủ đề liên quan)\s*:?/ui', $trimmed) === 1) {
+            return true;
+        }
+
+        $linkCharCount = 0;
+
+        if (preg_match_all('/\[[^\]]+\]\([^)]+\)/u', $trimmed, $matches)) {
+            foreach ($matches[0] as $match) {
+                $linkCharCount += mb_strlen($match);
+            }
+        }
+
+        return ($linkCharCount / mb_strlen($trimmed)) > 0.6;
     }
 
     /** @return string[] */
@@ -529,6 +630,18 @@ class CoreIdeaExtractorController extends Controller
         }
 
         $note = "Nội dung nguồn dài hơn giới hạn dán vào chat AI — đã ưu tiên giữ lại các đoạn liên quan tới chủ đề \"{$topic}\" (kể cả ở giữa/cuối bài) thay vì luôn cắt theo thứ tự xuất hiện; đoạn bị lược bỏ được đánh dấu \"[…]\".";
+
+        return $notes ? "{$notes} {$note}" : $note;
+    }
+
+    /** Ghi chú cho biết main_content đã được giữ CẢ đoạn đầu lẫn đoạn cuối (không chỉ đầu) khi không có/không dùng được topic — xem selectLeadAndTailContent(). */
+    private function appendLeadTailNote(?string $notes, bool $leadTailApplied): ?string
+    {
+        if (! $leadTailApplied) {
+            return $notes;
+        }
+
+        $note = 'Nội dung nguồn dài hơn giới hạn dán vào chat AI — đã giữ đoạn MỞ ĐẦU và đoạn KẾT LUẬN (thường chứa nhận định/trích dẫn chốt quan trọng của bài), cắt bớt một số đoạn ở GIỮA nếu cần thay vì luôn cắt bỏ phần cuối; đoạn bị lược bỏ được đánh dấu "[…]".';
 
         return $notes ? "{$notes} {$note}" : $note;
     }

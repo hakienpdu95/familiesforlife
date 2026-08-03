@@ -822,7 +822,7 @@ class ExtractRawContentAction
         foreach ($nodes as $node) {
             $text = trim(preg_replace('/\s+/', ' ', $node->textContent) ?? '');
 
-            if ($text === '' || $this->isDecorativeHeading($text)) {
+            if ($text === '' || $this->isDecorativeHeading($text) || $this->isFollowedByEmptyElement($node)) {
                 continue;
             }
 
@@ -902,6 +902,61 @@ class ExtractRawContentAction
             if ($lower === $phrase || mb_strlen($text) <= mb_strlen($phrase) + 3 && str_contains($lower, $phrase)) {
                 return true;
             }
+        }
+
+        return false;
+    }
+
+    /**
+     * Heading (h1-h3) đứng ngay trước 1 phần tử RỖNG (VD "<p class=\"text\"></p>") — dấu hiệu
+     * widget quảng cáo "bài viết cùng chuyên đề"/series (đã gặp thật: treemvietnam.net.vn dùng
+     * `<h3>Bài viết này trong chuyên đề X</h3><p class="text"></p>` kèm nút "Xem thêm" trỏ sang
+     * trang chuyên đề khác), KHÔNG phải heading nội dung thật — heading nội dung thật LUÔN có đoạn
+     * văn thật ngay sau, không bao giờ để trống. `isDecorativeHeading()` không bắt được trường hợp
+     * này vì lọc theo TEXT của heading (câu quảng cáo ở đây không trùng khớp phrase ngắn nào, do
+     * dài hơn hẳn "chuyên đề"/"liên quan" cộng dồn với tên chuyên đề cụ thể).
+     *
+     * Chỉ xét phần tử anh em kế tiếp NGAY SAU (bỏ qua text node/comment thuần khoảng trắng), không
+     * đệ quy sâu hơn để tránh sai với heading thật đứng liền trước cấu trúc phức tạp. Giới hạn ở
+     * p/span/div và loại trừ phần tử có ảnh/video/iframe/svg bên trong — heading thật đứng ngay
+     * trước 1 <figure>/<img> minh hoạ (không có chữ nhưng có ảnh) KHÔNG bị coi là rỗng.
+     */
+    private function isFollowedByEmptyElement(\DOMNode $node): bool
+    {
+        $sibling = $node->nextSibling;
+
+        while ($sibling !== null) {
+            if ($sibling instanceof \DOMText) {
+                if (trim($sibling->nodeValue ?? '') !== '') {
+                    return false;
+                }
+
+                $sibling = $sibling->nextSibling;
+
+                continue;
+            }
+
+            if ($sibling instanceof \DOMComment) {
+                $sibling = $sibling->nextSibling;
+
+                continue;
+            }
+
+            if (! $sibling instanceof \DOMElement) {
+                return false;
+            }
+
+            if (! in_array($sibling->nodeName, ['p', 'span', 'div'], true)) {
+                return false;
+            }
+
+            foreach (['img', 'picture', 'iframe', 'video', 'svg'] as $mediaTag) {
+                if ($sibling->getElementsByTagName($mediaTag)->length > 0) {
+                    return false;
+                }
+            }
+
+            return trim(preg_replace('/\s+/', ' ', $sibling->textContent) ?? '') === '';
         }
 
         return false;

@@ -328,9 +328,11 @@
             <p x-show="!isBatchResult() && result && result.notes" x-cloak class="text-xs text-warning mb-3" x-text="result?.notes"></p>
             <p x-show="isBatchResult() && result.summary_note" x-cloak class="text-xs text-warning mb-3" x-text="result?.summary_note"></p>
             <p x-show="result && result.content_reduction" x-cloak class="text-xs text-base-content/60 mb-1" x-text="contentReductionText()"></p>
+            <p x-show="!isBatchResult() && result" x-cloak class="text-xs text-base-content/60 mb-1" x-text="jsonPreviewSizeText()"></p>
             <p x-show="isPromptLarge()" x-cloak class="text-xs text-warning mb-3" x-text="promptSizeWarningText()"></p>
 
-            <pre class="bg-base-200 rounded-lg p-4 text-xs overflow-x-auto max-h-[70vh]" x-text="prettyJson()"></pre>
+            <pre class="bg-base-200 rounded-lg p-4 text-xs overflow-x-auto overflow-y-auto max-h-[70vh] border border-base-300"
+                 x-text="prettyJson()"></pre>
         </div>
     </div>
 
@@ -666,6 +668,21 @@ document.addEventListener('alpine:init', () => {
 
                 return `HTML gốc → Markdown đã trích: ${r.raw_html_chars.toLocaleString('vi-VN')} → `
                     + `${r.main_content_chars.toLocaleString('vi-VN')} ký tự (giảm ${r.reduction_percent}%).`;
+            },
+
+            /**
+             * `main_content`/`word_count` đầy đủ ĐÃ có sẵn trong prettyJson() bên dưới (khung
+             * <pre> cuộn được, không hề bị cắt) — nhưng khung JSON dài dễ khiến người xem tưởng
+             * nội dung "dừng" ở đúng đoạn hiện ra trong khung 70vh đầu tiên nếu không cuộn tiếp.
+             * Hiện rõ tổng số từ/ký tự NGAY TRƯỚC khung để người dùng có căn cứ đối chiếu, thay vì
+             * chỉ đoán qua mắt.
+             */
+            jsonPreviewSizeText() {
+                if (!this.result || typeof this.result.word_count !== 'number') return '';
+
+                const chars = (this.result.main_content || '').length;
+
+                return `Đã trích ${this.result.word_count.toLocaleString('vi-VN')} từ (~${chars.toLocaleString('vi-VN')} ký tự) — cuộn xuống trong khung bên dưới để xem toàn bộ, nội dung KHÔNG bị cắt bớt khi hiển thị.`;
             },
 
             estimatedPromptChars() {
