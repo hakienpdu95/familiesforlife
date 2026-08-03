@@ -1058,6 +1058,18 @@ document.addEventListener('alpine:init', () => {
                         + 'nỗi sợ hãi/mặc cảm của cha mẹ ("con bạn sẽ...", "sai lầm khiến con...") làm mồi câu view.',
                     'Nếu KHÔNG còn góc nhìn hợp lý nào để khai thác thêm từ dữ liệu nguồn (KHÔNG được bịa ý tưởng yếu/generic chỉ '
                         + 'để có), điền 1 câu ngắn vào trường `insufficient_reason`; nếu vẫn còn góc nhìn chưa khai thác thì để trống.',
+                    '',
+                    // 2026-08 — nguyên tắc chọn sản phẩm gợi ý (nếu có) cho từng ý tưởng: ưu tiên
+                    // sản phẩm DỄ GIẢI THÍCH, không phải sản phẩm "hay nhất"/có câu chuyện thương
+                    // hiệu ấn tượng nhất — người đọc không hiểu nhanh sản phẩm là gì thì nội dung
+                    // quảng bá không hiệu quả. AI tự do gợi ý theo hiểu biết chung, KHÔNG đối chiếu
+                    // với danh sách sản phẩm thật nào (chủ ý — xem field `suggested_product`).
+                    'Gợi ý sản phẩm: với MỖI ý tưởng ở trên, nếu có 1 loại sản phẩm/dịch vụ phù hợp TỰ NHIÊN có thể gắn vào nội '
+                        + 'dung đó, điền vào trường `suggested_product`. Nguyên tắc chọn: ưu tiên sản phẩm DỄ GIẢI THÍCH NHẤT — '
+                        + 'không phải sản phẩm hay nhất, không phải sản phẩm có câu chuyện thương hiệu ấn tượng nhất, mà là sản '
+                        + 'phẩm một người sáng tạo nội dung có thể giải thích được trong 3 giây. Độc giả không hiểu nhanh sản '
+                        + 'phẩm là gì thì nội dung quảng bá sẽ không hiệu quả. Nếu không có sản phẩm nào phù hợp tự nhiên với ý '
+                        + 'tưởng đó, để trống (null) — KHÔNG gượng ép gắn sản phẩm vào ý tưởng không liên quan.',
                 );
 
                 return [...top, '', ...middle, '', ...bottom].join('\n');

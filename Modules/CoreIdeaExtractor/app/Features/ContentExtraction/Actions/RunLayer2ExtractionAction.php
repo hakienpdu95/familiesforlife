@@ -49,8 +49,9 @@ class RunLayer2ExtractionAction
                         'fits_audience'       => ['type' => 'boolean', 'description' => 'Tiêu chí 4 (Bước 2) — phù hợp đối tượng độc giả đã nêu.'],
                         'reason'              => ['type' => 'string', 'description' => 'Lý do ngắn (1 câu) vì sao ý tưởng đạt cả 4 tiêu chí.'],
                         'suggested_title'     => ['type' => 'string', 'description' => 'Đề xuất tiêu đề bài viết cho ý tưởng này.'],
+                        'suggested_product'   => ['type' => ['string', 'null'], 'description' => 'CHỈ khi có 1 loại sản phẩm/dịch vụ phù hợp TỰ NHIÊN với ý tưởng này (xem nguyên tắc "dễ giải thích trong 3 giây" ở cuối prompt) — tên/mô tả ngắn sản phẩm đó. Null nếu không có sản phẩm nào phù hợp tự nhiên, KHÔNG gượng ép.'],
                     ],
-                    'required' => ['idea', 'category', 'matches_core_focus', 'unique_angle', 'serves_goal', 'fits_audience', 'reason', 'suggested_title'],
+                    'required' => ['idea', 'category', 'matches_core_focus', 'unique_angle', 'serves_goal', 'fits_audience', 'reason', 'suggested_title', 'suggested_product'],
                 ],
             ],
             'category_note' => [
@@ -257,10 +258,13 @@ class RunLayer2ExtractionAction
     private function renderMarkdownTable(array $accepted, ?string $categoryNote, ?string $audienceAssumption, ?string $insufficientReason): string
     {
         $hasCategoryColumn = false;
+        $hasProductColumn  = false;
         foreach ($accepted as $idea) {
             if (! empty($idea['category'])) {
                 $hasCategoryColumn = true;
-                break;
+            }
+            if (! empty($idea['suggested_product'])) {
+                $hasProductColumn = true;
             }
         }
 
@@ -276,12 +280,17 @@ class RunLayer2ExtractionAction
             $lines[] = '';
         }
 
-        $lines[] = $hasCategoryColumn
-            ? '| Ý tưởng | Chuyên mục đề xuất | Khớp trọng tâm? | Góc nhìn độc quyền? | Phục vụ mục tiêu? | Phù hợp đối tượng? | Lý do (1 câu, vì sao đạt cả 4) | Đề xuất tiêu đề bài viết |'
-            : '| Ý tưởng | Khớp trọng tâm? | Góc nhìn độc quyền? | Phục vụ mục tiêu? | Phù hợp đối tượng? | Lý do (1 câu, vì sao đạt cả 4) | Đề xuất tiêu đề bài viết |';
-        $lines[] = $hasCategoryColumn
-            ? '| --- | --- | --- | --- | --- | --- | --- | --- |'
-            : '| --- | --- | --- | --- | --- | --- |';
+        $header = ['Ý tưởng'];
+        if ($hasCategoryColumn) {
+            $header[] = 'Chuyên mục đề xuất';
+        }
+        $header = array_merge($header, ['Khớp trọng tâm?', 'Góc nhìn độc quyền?', 'Phục vụ mục tiêu?', 'Phù hợp đối tượng?', 'Lý do (1 câu, vì sao đạt cả 4)', 'Đề xuất tiêu đề bài viết']);
+        if ($hasProductColumn) {
+            $header[] = 'Sản phẩm gợi ý';
+        }
+
+        $lines[] = '| '.implode(' | ', $header).' |';
+        $lines[] = '| '.implode(' | ', array_fill(0, count($header), '---')).' |';
 
         foreach ($accepted as $idea) {
             $cells = [$this->escapeCell($idea['idea'] ?? '')];
@@ -296,6 +305,10 @@ class RunLayer2ExtractionAction
             $cells[] = 'Có';
             $cells[] = $this->escapeCell($idea['reason'] ?? '');
             $cells[] = $this->escapeCell($idea['suggested_title'] ?? '');
+
+            if ($hasProductColumn) {
+                $cells[] = $this->escapeCell($idea['suggested_product'] ?? '');
+            }
 
             $lines[] = '| '.implode(' | ', $cells).' |';
         }
