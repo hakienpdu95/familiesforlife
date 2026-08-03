@@ -32,6 +32,27 @@ class RunVideoIdeaAiPromptAction
         'required' => ['markdown_output'],
     ];
 
+    /**
+     * 2026-08 — trước đây temperature=0.3 CỨNG cho MỌI kind, dù prompt yêu cầu độ đa dạng sáng tạo
+     * khác hẳn nhau: `titles` đòi "6 KIỂU khác nhau", `hooks` đòi "5 kiểu tâm lý khác nhau" (cần
+     * nhiệt độ CAO hơn để model thực sự tạo ra sự khác biệt giữa các biến thể, không lặp ý tưởng
+     * dưới lốt câu chữ khác nhau — 0.3 quá thấp cho việc này); ngược lại `polish` yêu cầu bám nguyên
+     * văn bản nháp, KHÔNG được sáng tạo thêm chi tiết mới, và `shorts`/`outline` phải TRÍCH ĐÚNG
+     * đoạn/mốc thời gian có thật trong transcript (không phải bịa mới) — 2 nhóm cần nhiệt độ THẤP
+     * để giảm rủi ro hallucinate. `cta` ở giữa: cần vài biến thể nhưng vẫn phải bám giá trị cụ thể
+     * vừa nêu trong nội dung, không tự do sáng tạo như titles/hooks.
+     */
+    private const TEMPERATURE_BY_KIND = [
+        'titles'  => 0.7,
+        'hooks'   => 0.7,
+        'shorts'  => 0.3,
+        'outline' => 0.3,
+        'cta'     => 0.5,
+        'polish'  => 0.2,
+    ];
+
+    private const DEFAULT_TEMPERATURE = 0.3;
+
     public function __construct(
         private readonly AIProviderManager $aiProviderManager,
         private readonly CheckVideoIdeaAiBudgetAction $budget,
@@ -53,7 +74,7 @@ class RunVideoIdeaAiPromptAction
         $options = new AIRequestOptions(
             model: $model,
             responseSchema: self::RESPONSE_SCHEMA,
-            temperature: 0.3,
+            temperature: self::TEMPERATURE_BY_KIND[$kind] ?? self::DEFAULT_TEMPERATURE,
             maxTokens: $maxOutputTokens,
         );
 

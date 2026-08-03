@@ -34,6 +34,20 @@ class RunCoreIdeaAiPromptAction
         'required' => ['markdown_output'],
     ];
 
+    /**
+     * 2026-08 — trước đây temperature=0.3 CỨNG cho cả 2 kind, dù bản chất khác nhau: `summarization`
+     * cần bám sát tuyệt đối nguồn (KHÔNG bịa số liệu/sự kiện — hallucinate ở đây nguy hiểm hơn hẳn
+     * so với thiếu sáng tạo), nên hạ xuống 0.2. `rewrite` cần đổi giọng văn/độ dài khác nhau cho 3
+     * nền tảng (Facebook/LinkedIn/Twitter) — vẫn phải bám ý chính của nguồn, nhưng cần nhiệt độ nhích
+     * lên (0.4) để 3 phiên bản thực sự khác biệt về giọng, không chỉ đổi vài từ.
+     */
+    private const TEMPERATURE_BY_KIND = [
+        'summarization' => 0.2,
+        'rewrite'       => 0.4,
+    ];
+
+    private const DEFAULT_TEMPERATURE = 0.3;
+
     public function __construct(
         private readonly AIProviderManager $aiProviderManager,
         private readonly CheckCoreIdeaAiBudgetAction $budget,
@@ -58,7 +72,7 @@ class RunCoreIdeaAiPromptAction
         $options = new AIRequestOptions(
             model: $model,
             responseSchema: self::RESPONSE_SCHEMA,
-            temperature: 0.3,
+            temperature: self::TEMPERATURE_BY_KIND[$kind] ?? self::DEFAULT_TEMPERATURE,
             maxTokens: $maxOutputTokens,
         );
 

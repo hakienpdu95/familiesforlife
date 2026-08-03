@@ -70,6 +70,14 @@ return [
     'layer2' => [
         'max_prompt_chars'  => 300000,
         'max_output_tokens' => 4096,
+
+        // Goal-based loop (RunLayer2ExtractionAction) — target_idea_count khớp "Mục tiêu số
+        // lượng" đã nêu trong buildLayer2PromptText() (BƯỚC 1). max_loop_iterations chặn chi phí:
+        // tối đa 3 lượt gọi AI/lần bấm "Chạy Layer 2" (1 lượt đầu + tối đa 2 lượt bổ sung nếu
+        // chưa đủ) — đủ dư địa cho hầu hết trường hợp thiếu vài ý, không để 1 lần bấm nút âm thầm
+        // gọi AI vô hạn lượt.
+        'target_idea_count'   => 10,
+        'max_loop_iterations' => 3,
     ],
 
     // 2026-07-30 — 2 tính năng mở rộng (spec/content.md mục A+B): "Tóm tắt nội dung" và "Tái cấu

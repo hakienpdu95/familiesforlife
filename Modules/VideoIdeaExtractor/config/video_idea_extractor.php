@@ -29,10 +29,17 @@ return [
 
     // 2026-08 — tự động hoá "Layer 2" qua nút bấm thủ công (KHÔNG tự động sau Layer 1 — kiểm soát
     // chi phí, cùng nguyên tắc CoreIdeaExtractor). max_prompt_chars chặn payload quá lớn gửi lên
-    // endpoint. max_output_tokens đủ cho 2 bảng Markdown tới ~25 ý tưởng kèm lý do mỗi ý.
+    // endpoint. max_output_tokens đủ cho 1 lượt gọi (~25 ý tưởng có cấu trúc kèm lý do mỗi ý).
     'layer2' => [
         'max_prompt_chars'  => 300000,
         'max_output_tokens' => 4096,
+
+        // Goal-based loop (RunVideoIdeaLayer2Action) — target_idea_count khớp "Mục tiêu số lượng"
+        // đã nêu trong buildLayer2PromptText() (BƯỚC 1). max_loop_iterations chặn chi phí: tối đa
+        // 3 lượt gọi AI/lần bấm "Chạy AI" (1 lượt đầu + tối đa 2 lượt bổ sung nếu chưa đủ) — đủ dư
+        // địa cho hầu hết trường hợp thiếu vài ý, không để 1 lần bấm nút âm thầm gọi AI vô hạn lượt.
+        'target_idea_count'   => 8,
+        'max_loop_iterations' => 3,
     ],
 
     // 2026-08 — 3 tính năng mở rộng thao tác trên ĐÚNG 1 video đã trích xuất (khác Layer 2 — sinh

@@ -891,15 +891,15 @@ document.addEventListener('alpine:init', () => {
                             + 'của chuyên mục đã chọn. Ưu tiên tạo ý tưởng hữu ích, không dừng lại ở việc báo "không phù hợp":',
                         '- Khớp chuyên mục (trường hợp thường gặp) → bỏ qua bước này, làm tiếp Bước 1.',
                         '- Lệch HẲN lĩnh vực (VD nguồn dinh dưỡng/y khoa nhưng chuyên mục là hành vi, hoặc ngược lại) và tìm được 1 tên '
-                            + 'khớp hơn trong "Danh sách chuyên mục" ở trên → viết đúng 1 dòng "Lưu ý: nguồn phù hợp hơn với chuyên mục '
-                            + '\'[tên, copy đúng từ danh sách]\'", rồi làm Bước 1-3 bình thường (đủ 10 ý tưởng như cũ); ở Bước 2, dùng '
-                            + 'trọng tâm/góc nhìn RÚT GỌN của CHÍNH chuyên mục MỚI này (ghi kèm ngay sau tên chuyên mục đó trong "Danh '
-                            + 'sách chuyên mục" ở trên, nếu có) để đánh giá tiêu chí 1-2 thay cho trọng tâm/góc nhìn của chuyên mục đã '
-                            + 'chọn ban đầu — chỉ khi chuyên mục mới không có trọng tâm/góc nhìn kèm theo (chưa cấu hình) mới cần đánh '
-                            + 'giá theo phỏng đoán hợp lý dựa tên gọi + kiến thức chung.',
-                        '- Lệch lĩnh vực nhưng KHÔNG tìm được tên nào khớp hơn → viết 1 dòng "Lưu ý: nguồn thuộc lĩnh vực [X], không có '
-                            + 'chuyên mục nào trên site phù hợp hơn", rồi chỉ đề xuất ở phần giao thoa thật với chuyên mục đã chọn (nếu '
-                            + 'có) — Bảng có thể rất ít hoặc 0 dòng, đây là phương án cuối.',
+                            + 'khớp hơn trong "Danh sách chuyên mục" ở trên → điền vào trường `category_note` ở Bước 3 đúng 1 câu '
+                            + '"Lưu ý: nguồn phù hợp hơn với chuyên mục \'[tên, copy đúng từ danh sách]\'", rồi làm Bước 1-3 bình '
+                            + 'thường (đủ 10 ý tưởng như cũ); ở Bước 2, dùng trọng tâm/góc nhìn RÚT GỌN của CHÍNH chuyên mục MỚI này '
+                            + '(ghi kèm ngay sau tên chuyên mục đó trong "Danh sách chuyên mục" ở trên, nếu có) để đánh giá tiêu chí '
+                            + '1-2 thay cho trọng tâm/góc nhìn của chuyên mục đã chọn ban đầu — chỉ khi chuyên mục mới không có trọng '
+                            + 'tâm/góc nhìn kèm theo (chưa cấu hình) mới cần đánh giá theo phỏng đoán hợp lý dựa tên gọi + kiến thức chung.',
+                        '- Lệch lĩnh vực nhưng KHÔNG tìm được tên nào khớp hơn → điền vào `category_note` đúng 1 câu "Lưu ý: nguồn '
+                            + 'thuộc lĩnh vực [X], không có chuyên mục nào trên site phù hợp hơn", rồi chỉ đề xuất ở phần giao thoa '
+                            + 'thật với chuyên mục đã chọn (nếu có) — trả về rất ít hoặc 0 ý tưởng trong `ideas`, đây là phương án cuối.',
                         '',
                     );
                 } else if (this.categories.length) {
@@ -912,17 +912,17 @@ document.addEventListener('alpine:init', () => {
                     bottom.push(
                         'BƯỚC 0 — Chưa chọn chuyên mục nào cho nguồn này. Dựa vào chủ đề THẬT của nguồn (main_content/title/headings), '
                             + 'xác định chuyên mục từ "Danh sách chuyên mục" ở trên theo đúng 1 trong 3 trường hợp:',
-                        '- Nguồn nghiêng RÕ về 1 chuyên mục → viết đúng 1 dòng "Chuyên mục phù hợp nhất: [tên, copy đúng từ danh '
-                            + 'sách]" ngay trước bảng ở Bước 3; mọi ý tưởng dùng chung chuyên mục này ở cột "Chuyên mục đề xuất".',
+                        '- Nguồn nghiêng RÕ về 1 chuyên mục → điền vào trường `category_note` ở Bước 3 đúng 1 câu "Chuyên mục phù '
+                            + 'hợp nhất: [tên, copy đúng từ danh sách]"; mọi ý tưởng dùng chung chuyên mục này ở trường `category`.',
                         '- Nguồn RỘNG hơn 1 chuyên mục (thường gặp với sản phẩm/dịch vụ cho gia đình, hoặc chủ đề chạm nhiều mặt '
-                            + 'đời sống gia đình cùng lúc) → chọn 2-3 chuyên mục liên quan nhất, viết đúng 1 dòng "Nguồn đa chuyên '
-                            + 'mục — phân bổ theo: [các tên, copy đúng từ danh sách]" ngay trước bảng; ở Bước 1 chủ động sinh ý '
+                            + 'đời sống gia đình cùng lúc) → chọn 2-3 chuyên mục liên quan nhất, điền vào `category_note` đúng 1 câu '
+                            + '"Nguồn đa chuyên mục — phân bổ theo: [các tên, copy đúng từ danh sách]"; ở Bước 1 chủ động sinh ý '
                             + 'tưởng PHỦ ĐỀU các chuyên mục đã chọn (khai thác trọng tâm/góc nhìn rút gọn của TỪNG chuyên mục ghi '
-                            + 'trong danh sách), mỗi ý gắn đúng 1 chuyên mục ở cột "Chuyên mục đề xuất" — KHÔNG ép mọi ý vào 1 '
-                            + 'chuyên mục duy nhất, cũng KHÔNG gắn 1 ý vào nhiều chuyên mục cùng lúc.',
-                        '- Nguồn không khớp chuyên mục nào (kể cả phần giao thoa) → viết "Chuyên mục phù hợp nhất: chưa xác định '
-                            + 'được", chỉ đề xuất ý tưởng ở phần giao thoa thật giữa nguồn và nội dung gia đình (nếu có) — Bảng có '
-                            + 'thể rất ít hoặc 0 dòng, ghi rõ lý do dưới bảng, đây là phương án cuối.',
+                            + 'trong danh sách), mỗi ý gắn đúng 1 chuyên mục ở trường `category` — KHÔNG ép mọi ý vào 1 chuyên mục '
+                            + 'duy nhất, cũng KHÔNG gắn 1 ý vào nhiều chuyên mục cùng lúc.',
+                        '- Nguồn không khớp chuyên mục nào (kể cả phần giao thoa) → điền vào `category_note` "Chuyên mục phù hợp '
+                            + 'nhất: chưa xác định được", chỉ đề xuất ý tưởng ở phần giao thoa thật giữa nguồn và nội dung gia đình '
+                            + '(nếu có) — trả về rất ít hoặc 0 ý tưởng trong `ideas`, điền lý do vào `insufficient_reason`, đây là phương án cuối.',
                         '',
                     );
                 }
@@ -992,12 +992,11 @@ document.addEventListener('alpine:init', () => {
                 }
 
                 bottom.push(
-                    'Mục tiêu số lượng: Bảng 1 cần có ÍT NHẤT 10 ý tưởng đạt cả 4 tiêu chí. Nếu ở Bước 2 chưa đủ 10 ý đạt, quay lại '
-                        + 'Bước 1 sinh thêm ý tưởng MỚI ở góc nhìn khác (không lặp ý đã liệt kê) cho đến khi đủ 10 — chỉ dừng dưới 10 '
-                        + 'nếu đã thực sự khai thác hết góc nhìn hợp lý từ dữ liệu nguồn (hoặc do lệch chủ đề/không xác định được '
-                        + 'chuyên mục phù hợp ở Bước 0), và khi đó '
-                        + 'ghi rõ lý do bằng 1 dòng ngắn ngay dưới Bảng 1 (VD: dữ liệu nguồn không đủ sâu để tạo thêm ý tưởng chất '
-                        + 'lượng — KHÔNG được bịa ý tưởng yếu/generic chỉ để đủ số lượng).',
+                    'Mục tiêu số lượng: cần ÍT NHẤT 10 ý tưởng đạt cả 4 tiêu chí — nhưng KHÔNG cần tự đảm bảo đủ 10 trong LƯỢT NÀY, '
+                        + 'hệ thống sẽ tự động yêu cầu bạn sinh thêm ở lượt sau nếu chưa đủ. Chỉ cần trả về đúng những ý ĐÃ đạt cả 4 '
+                        + 'tiêu chí ở lượt này trong trường `ideas`, không bịa ý tưởng yếu/generic chỉ để có số lượng. Nếu đã thực sự '
+                        + 'khai thác hết góc nhìn hợp lý từ dữ liệu nguồn (hoặc do lệch chủ đề/không xác định được chuyên mục phù hợp '
+                        + 'ở Bước 0) và không còn ý MỚI nào để đề xuất, điền 1 câu lý do ngắn vào trường `insufficient_reason`.',
                 );
 
                 bottom.push(
@@ -1007,7 +1006,7 @@ document.addEventListener('alpine:init', () => {
                         ? `1. Khớp trọng tâm ("${coreFocusText}"): ý tưởng có thực sự gắn với trọng tâm này không?`
                         : (category
                             ? '1. Khớp trọng tâm: có gắn với trọng tâm nội dung của chuyên mục này không?'
-                            : '1. Khớp trọng tâm: có gắn với trọng tâm của chuyên mục gắn với Ý NÀY (cột "Chuyên mục đề xuất") không '
+                            : '1. Khớp trọng tâm: có gắn với trọng tâm của chuyên mục gắn với Ý NÀY (trường `category`) không '
                                 + '— dùng trọng tâm rút gọn ghi kèm trong "Danh sách chuyên mục"; chuyên mục chưa có trọng tâm kèm theo '
                                 + '→ phỏng đoán hợp lý theo tên gọi; Bước 0 kết luận "chưa xác định được" → đánh giá theo mức độ phù '
                                 + 'hợp chung với nội dung gia đình?'),
@@ -1015,11 +1014,11 @@ document.addEventListener('alpine:init', () => {
                         ? `2. Góc nhìn độc quyền ("${uniqueAngleText}"): ý tưởng có thực sự thể hiện góc nhìn này không, hay điều nguồn nào cũng viết được?`
                         : (category
                             ? '2. Góc nhìn độc quyền: đây có phải insight mà chỉ chuyên mục này viết được, không phải điều nguồn nào cũng viết được?'
-                            : '2. Góc nhìn độc quyền: đây có phải insight mà chuyên mục gắn với ý này (cột "Chuyên mục đề xuất") có '
+                            : '2. Góc nhìn độc quyền: đây có phải insight mà chuyên mục gắn với ý này (trường `category`) có '
                                 + 'lợi thế riêng để viết, không phải điều nguồn nào cũng viết được?'),
                     category
                         ? '(Nếu Bước 0 đã đổi sang chuyên mục khác: áp dụng tiêu chí 1-2 theo trọng tâm/góc nhìn của CHUYÊN MỤC MỚI đó — xem trong "Danh sách chuyên mục" ở trên — KHÔNG dùng trọng tâm/góc nhìn ghi trong ngoặc ở 2 dòng trên, vốn chỉ đúng cho chuyên mục đã chọn ban đầu.)'
-                        : '(Tiêu chí 1-2 luôn đánh giá theo chuyên mục gắn với TỪNG ý ở cột "Chuyên mục đề xuất" — nguồn đa chuyên mục thì mỗi ý so với đúng chuyên mục của nó, KHÔNG dùng 1 chuyên mục chung cho cả bảng.)',
+                        : '(Tiêu chí 1-2 luôn đánh giá theo chuyên mục gắn với TỪNG ý ở trường `category` — nguồn đa chuyên mục thì mỗi ý so với đúng chuyên mục của nó, KHÔNG dùng 1 chuyên mục chung cho mọi ý.)',
                     goalText
                         ? `3. Phục vụ mục tiêu ("${goalText}"): ý tưởng có thực sự phục vụ mục tiêu này không?`
                         : '3. Phục vụ mục tiêu: chưa có mục tiêu cụ thể được khai báo — đánh giá theo mục tiêu mặc định: '
@@ -1030,13 +1029,13 @@ document.addEventListener('alpine:init', () => {
                             + '(không hàn lâm quá mức họ cần, cũng không sơ sài dưới mức họ đã biết)?'
                         : (category
                             ? '4. Phù hợp đối tượng độc giả: chưa có mô tả đối tượng — hãy tự suy ra chân dung độc giả phù hợp nhất '
-                                + 'từ dữ liệu nguồn + tên chuyên mục, ghi 1 dòng "Giả định đối tượng: [mô tả ngắn]" ngay trước bảng '
-                                + 'kết quả, rồi đánh giá tiêu chí này theo đúng giả định đó — KHÔNG đánh giá chung chung kiểu '
-                                + '"ai đọc cũng phù hợp".'
+                                + 'từ dữ liệu nguồn + tên chuyên mục, điền vào trường `audience_assumption` ở Bước 3 đúng 1 câu '
+                                + '"Giả định đối tượng: [mô tả ngắn]", rồi đánh giá tiêu chí này theo đúng giả định đó — KHÔNG đánh '
+                                + 'giá chung chung kiểu "ai đọc cũng phù hợp".'
                             : '4. Phù hợp đối tượng độc giả: chưa có mô tả đối tượng — tự suy ra chân dung độc giả theo TỪNG chuyên '
-                                + 'mục đã chọn ở Bước 0 (mỗi chuyên mục 1 dòng "Giả định đối tượng — [tên chuyên mục]: [mô tả ngắn]" '
-                                + 'ngay trước bảng, tối đa 3 dòng), rồi đánh giá mỗi ý theo đúng giả định của chuyên mục gắn với ý '
-                                + 'đó — KHÔNG đánh giá chung chung kiểu "ai đọc cũng phù hợp".'),
+                                + 'mục đã chọn ở Bước 0 (điền vào `audience_assumption` tối đa 3 dòng "Giả định đối tượng — [tên '
+                                + 'chuyên mục]: [mô tả ngắn]", mỗi chuyên mục 1 dòng, nối bằng xuống dòng), rồi đánh giá mỗi ý theo '
+                                + 'đúng giả định của chuyên mục gắn với ý đó — KHÔNG đánh giá chung chung kiểu "ai đọc cũng phù hợp".'),
                     'Bộ lọc bắt buộc (ngoài 4 tiêu chí): LOẠI ngay ý tưởng đi ngược bất kỳ giá trị nào trong Hệ giá trị gia '
                         + 'đình Việt Nam đã nêu ở đầu prompt, hoặc khai thác nỗi sợ hãi/mặc cảm của cha mẹ để tạo chú ý — kể cả '
                         + 'khi ý tưởng đó đạt cả 4 tiêu chí.',
@@ -1045,24 +1044,20 @@ document.addEventListener('alpine:init', () => {
                     ] : []),
                     'Lưu ý khi đánh giá: nếu nguồn có extraction_confidence thấp hoặc notes cảnh báo nghi vấn paywall, hạ độ tin cậy khi dùng nguồn đó làm căn cứ cho ý tưởng.',
                     '',
-                    'BƯỚC 3 — Trả lời bằng ĐÚNG 1 bảng Markdown dưới đây; chỉ được kèm thêm tối đa các dòng sau: '
+                    'BƯỚC 3 — Trả về trường `ideas`: mảng các ý tưởng ĐẠT cả 4 tiêu chí ở Bước 2 trong LƯỢT NÀY (không liệt kê ý '
+                        + 'tưởng bị loại). KHÔNG cần tự đảm bảo đủ số lượng mục tiêu (xem "Mục tiêu số lượng" ở trên) — chỉ cần trả '
+                        + 'đúng những ý đã đạt tiêu chí trong lượt này. Mỗi phần tử gồm: `idea` (tên/nội dung ý tưởng), `category` '
                         + (category
-                            ? '1 dòng "Lưu ý" ngay trước bảng nếu Bước 0 phát hiện lệch chủ đề'
-                            : '1 dòng kết luận chuyên mục theo Bước 0 ("Chuyên mục phù hợp nhất: ..." hoặc "Nguồn đa chuyên mục — phân bổ theo: ...") ngay trước bảng')
-                        + (audienceText ? '' : (category
-                            ? ', 1 dòng "Giả định đối tượng" ngay trước bảng (xem tiêu chí 4 ở trên)'
-                            : ', 1-3 dòng "Giả định đối tượng — [chuyên mục]" ngay trước bảng (xem tiêu chí 4 ở trên)'))
-                        + ', và 1 dòng lý do ngắn ngay sau bảng nếu chưa đủ 10 ý tưởng (xem "Mục tiêu số lượng" ở trên). '
-                        + 'Không viết giải thích, không mở đầu, không kết luận nào khác:',
-                    '',
-                    'Bảng — Ý tưởng ĐẠT cả 4 tiêu chí, cột: '
-                        + (category
-                            ? '| Ý tưởng | Khớp trọng tâm? | Góc nhìn độc quyền? | Phục vụ mục tiêu? | Phù hợp đối tượng? | Lý do (1 câu, vì sao đạt cả 4) | Đề xuất tiêu đề bài viết |'
-                            : '| Ý tưởng | Chuyên mục đề xuất | Khớp trọng tâm? | Góc nhìn độc quyền? | Phục vụ mục tiêu? | Phù hợp đối tượng? | Lý do (1 câu, vì sao đạt cả 4) | Đề xuất tiêu đề bài viết |'),
-                    'Riêng cột "Đề xuất tiêu đề bài viết": đặt tiêu đề bằng đúng giọng và mức từ ngữ phù hợp với đối tượng độc giả'
+                            ? '(luôn để null — đã chọn chuyên mục từ trước, không cần gắn lại)'
+                            : '(tên chuyên mục đề xuất cho ĐÚNG ý này, copy từ "Danh sách chuyên mục" — xem Bước 0)')
+                        + ', `matches_core_focus`/`unique_angle`/`serves_goal`/`fits_audience` (đều phải true — đúng 4 tiêu chí '
+                        + 'Bước 2, vì đây là ý đã đạt), `reason` (lý do ngắn 1 câu), `suggested_title` (đề xuất tiêu đề bài viết).',
+                    'Riêng `suggested_title`: đặt tiêu đề bằng đúng giọng và mức từ ngữ phù hợp với đối tượng độc giả'
                         + (brief.style_sample ? ' (bám theo cách xưng hô/từ ngữ trong giọng văn mẫu ở trên)' : '')
                         + ', nêu lợi ích/vấn đề cụ thể — KHÔNG đặt tiêu đề giật gân sai lệch nội dung (clickbait), không dùng '
                         + 'nỗi sợ hãi/mặc cảm của cha mẹ ("con bạn sẽ...", "sai lầm khiến con...") làm mồi câu view.',
+                    'Nếu KHÔNG còn góc nhìn hợp lý nào để khai thác thêm từ dữ liệu nguồn (KHÔNG được bịa ý tưởng yếu/generic chỉ '
+                        + 'để có), điền 1 câu ngắn vào trường `insufficient_reason`; nếu vẫn còn góc nhìn chưa khai thác thì để trống.',
                 );
 
                 return [...top, '', ...middle, '', ...bottom].join('\n');
@@ -1204,6 +1199,18 @@ document.addEventListener('alpine:init', () => {
                 };
             },
 
+            /**
+             * Chain-of-thought + tự phê bình trước khi chốt — cùng kỹ thuật/lý do selfCheckLine()
+             * bên VideoIdeaExtractor (module song sinh), trước đây CHƯA có ở đây dù 2 tool
+             * buildSummarizePromptText()/buildRewritePromptText() cùng bản chất "1 lần gọi AI,
+             * không hội thoại nhiều lượt" như các tool đã dùng kỹ thuật này bên VideoIdeaExtractor.
+             * Không áp cho buildLayer2PromptText() — quy trình BƯỚC 1→2→3 ở đó đã LÀ 1 dạng suy
+             * luận từng bước tường minh hơn hẳn 1 dòng nhắc chung, thêm vào sẽ chỉ trùng lặp.
+             */
+            selfCheckLine() {
+                return 'Trước khi trả lời, suy nghĩ từng bước trong đầu (KHÔNG hiện ra ngoài): (1) phác thảo nháp nội dung theo đúng yêu cầu, (2) tự rà lại xem có bịa thông tin không có trong nguồn không, có bỏ sót ràng buộc/định dạng đã nêu không, (3) viết lại phần yếu trước khi đưa vào kết quả cuối. CHỈ trả về kết quả cuối cùng đã qua bước (3) — không hiện phần nháp/quá trình suy nghĩ ở trên.';
+            },
+
             buildSummarizePromptText() {
                 const ctx = this.singleSourceContext();
                 if (!ctx) return '';
@@ -1241,6 +1248,8 @@ document.addEventListener('alpine:init', () => {
                 lines.push(
                     '# Nhiệm vụ',
                     'Tóm tắt nội dung trên. Chỉ dùng thông tin có trong nội dung nguồn, KHÔNG bịa thêm số liệu/sự kiện/trích dẫn không có trong nguồn. Giữ NGUYÊN các con số kèm đơn vị, tên riêng và thuật ngữ then chốt như trong nguồn (số liệu sai lệch khi tóm tắt còn tệ hơn không có số liệu).',
+                    '',
+                    this.selfCheckLine(),
                     '',
                     '# Định dạng trả lời',
                     'Trả về ĐÚNG 2 phần theo thứ tự dưới đây, không thêm giải thích/mở đầu/kết luận nào khác, không bọc kết quả trong khối code (```):',
@@ -1306,6 +1315,8 @@ document.addEventListener('alpine:init', () => {
                 lines.push(
                     '# Nhiệm vụ',
                     'Viết lại nội dung trên. Chỉ dùng thông tin có trong nội dung nguồn, KHÔNG bịa thêm số liệu/sự kiện/trích dẫn không có trong nguồn.',
+                    '',
+                    this.selfCheckLine(),
                     '',
                     '# Định dạng trả lời',
                     'Trả về ĐÚNG 3 phần theo thứ tự dưới đây, không thêm giải thích/mở đầu/kết luận nào khác, không bọc kết quả trong khối code (```):',

@@ -576,8 +576,8 @@ document.addEventListener('alpine:init', () => {
                 if (!category && this.categories.length) {
                     bottom.push(
                         'BƯỚC 0 — Chưa chọn chuyên mục nào. Dựa vào chủ đề THẬT của transcript, xác định 1 chuyên mục phù hợp nhất '
-                            + 'từ "Danh sách chuyên mục" ở trên (chỉ chọn tên có sẵn, không bịa thêm) — viết đúng 1 dòng "Chuyên mục '
-                            + 'phù hợp nhất: [tên]" ngay trước bảng ở Bước 3, hoặc "chưa xác định được" nếu không khớp chuyên mục nào.',
+                            + 'từ "Danh sách chuyên mục" ở trên (chỉ chọn tên có sẵn, không bịa thêm) — điền vào trường `category_note` '
+                            + 'ở Bước 3 đúng 1 câu "Chuyên mục phù hợp nhất: [tên]", hoặc "chưa xác định được" nếu không khớp chuyên mục nào.',
                         '',
                     );
                 }
@@ -637,8 +637,8 @@ document.addEventListener('alpine:init', () => {
                             + 'hoặc chung chung tới mức nhóm nào xem cũng được — KHÔNG đánh giá "Có" chỉ vì ý tưởng không mâu thuẫn '
                             + 'với mô tả đối tượng.'
                         : '4. Phù hợp đối tượng khán giả: chưa có mô tả đối tượng — tự suy ra chân dung khán giả phù hợp nhất từ '
-                            + 'transcript + chuyên mục, ghi 1 dòng "Giả định đối tượng: [mô tả ngắn]" ngay trước bảng kết quả, rồi '
-                            + 'đánh giá tiêu chí này theo đúng giả định đó — KHÔNG đánh giá chung chung kiểu "ai xem cũng phù hợp".',
+                            + 'transcript + chuyên mục, điền vào trường `audience_assumption` ở Bước 3 đúng 1 câu "Giả định đối tượng: '
+                            + '[mô tả ngắn]", rồi đánh giá tiêu chí này theo đúng giả định đó — KHÔNG đánh giá chung chung kiểu "ai xem cũng phù hợp".',
                     'Bộ lọc bắt buộc (ngoài 4 tiêu chí): LOẠI ngay ý tưởng đi ngược bất kỳ giá trị nào trong Hệ giá trị gia '
                         + 'đình Việt Nam đã nêu ở đầu prompt, hoặc khai thác nỗi sợ hãi/mặc cảm của cha mẹ để tạo chú ý — kể cả '
                         + 'khi ý tưởng đó đạt cả 4 tiêu chí.',
@@ -646,18 +646,18 @@ document.addEventListener('alpine:init', () => {
                         `Bộ lọc bắt buộc thứ hai: LOẠI ngay ý tưởng vi phạm ràng buộc đã nêu ở trên ("${constraintsText}"), kể cả khi ý tưởng đó đạt cả 4 tiêu chí.`,
                     ] : []),
                     '',
-                    'BƯỚC 3 — Trả lời bằng ĐÚNG 1 bảng Markdown dưới đây (chỉ liệt kê ý tưởng ĐẠT cả 4 tiêu chí, không liệt kê '
-                        + 'ý tưởng bị loại); chỉ được kèm thêm tối đa 1 dòng "Giả định đối tượng" (nếu cần, xem tiêu chí 4) ngay '
-                        + 'trước bảng, và 1 dòng lý do ngắn ngay sau bảng nếu chưa đủ 8 ý tưởng. Không viết giải thích, không mở '
-                        + 'đầu, không kết luận nào khác:',
-                    '',
-                    'Cột: | Ý tưởng | Định dạng gợi ý | Khớp trọng tâm? | Góc nhìn độc quyền? | Phục vụ mục tiêu? | Phù hợp đối tượng? | Lý do (1 câu) | Đề xuất tiêu đề video |',
-                    'Riêng cột "Đề xuất tiêu đề video": đặt tiêu đề bằng đúng giọng phù hợp với đối tượng khán giả'
+                    'BƯỚC 3 — Trả về trường `ideas`: mảng các ý tưởng ĐẠT cả 4 tiêu chí ở Bước 2 trong LƯỢT NÀY (không liệt '
+                        + 'kê ý tưởng bị loại). KHÔNG cần tự đảm bảo đủ số lượng mục tiêu — hệ thống sẽ tự yêu cầu bạn sinh thêm '
+                        + 'ở lượt sau nếu chưa đủ, chỉ cần trả đúng những ý đã đạt tiêu chí trong lượt này. Mỗi phần tử gồm: `idea` '
+                        + '(tên/nội dung ý tưởng), `format_suggestion` (Shorts/video ngắn, video dài, hoặc livestream/Q&A theo Bước 1), '
+                        + '`matches_core_focus`/`unique_angle`/`serves_goal`/`fits_audience` (đều phải true — đúng 4 tiêu chí Bước 2, '
+                        + 'vì đây là ý đã đạt), `reason` (lý do ngắn 1 câu), `suggested_title` (đề xuất tiêu đề video).',
+                    'Riêng `suggested_title`: đặt tiêu đề bằng đúng giọng phù hợp với đối tượng khán giả'
                         + (styleSampleText ? ' (bám theo cách xưng hô/từ ngữ trong giọng văn mẫu ở trên)' : '')
                         + ', nêu lợi ích/vấn đề cụ thể — KHÔNG đặt tiêu đề giật gân sai lệch nội dung (clickbait), không dùng '
-                        + 'nỗi sợ hãi/mặc cảm của cha mẹ làm mồi câu view. Mục tiêu số lượng: bảng cần có ÍT NHẤT 8 ý tưởng đạt '
-                        + 'cả 4 tiêu chí — nếu chưa đủ, quay lại Bước 1 sinh thêm ý tưởng MỚI ở góc nhìn khác cho đến khi đủ, chỉ '
-                        + 'dừng dưới 8 nếu đã thực sự khai thác hết góc nhìn hợp lý (KHÔNG được bịa ý tưởng yếu/generic chỉ để đủ số).',
+                        + 'nỗi sợ hãi/mặc cảm của cha mẹ làm mồi câu view.',
+                    'Nếu KHÔNG còn góc nhìn hợp lý nào để khai thác thêm từ dữ liệu nguồn (KHÔNG được bịa ý tưởng yếu/generic chỉ '
+                        + 'để có), điền 1 câu ngắn vào trường `insufficient_reason`; nếu vẫn còn góc nhìn chưa khai thác thì để trống.',
                 );
 
                 return [...top, '', ...middle, '', ...bottom].join('\n');
