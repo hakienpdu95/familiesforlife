@@ -353,7 +353,10 @@
         "cie_category_foundations///add///__///",
         "pain_points///text///__///_NULL///NULL///__///__",
         "rejected_ideas///text///__///_NULL///NULL///__///__",
-        "writer_insights///text///__///_NULL///NULL///__///__"
+        "writer_insights///text///__///_NULL///NULL///__///__",
+        "objections///text///__///_NULL///NULL///__///__",
+        "decision_criteria///text///__///_NULL///NULL///__///__",
+        "family_values_focus///json///__///_NULL///NULL///__///__"
     ],
     [
         "post_author_profiles///add///__///",
@@ -362,6 +365,10 @@
     ],
     [
         "cie_layer2_runs///add///__///",
+        "kind///string///30///NOT_NULL///'layer2'///__///__"
+    ],
+    [
+        "video_idea_extractor_layer2_runs///add///__///",
         "kind///string///30///NOT_NULL///'layer2'///__///__"
     ]
 ]
