@@ -21,9 +21,18 @@ class ListCategoryFoundationsAction
     use AsAction;
 
     /**
-     * @return array<int, array{category_id:int, uuid:string, name:string, depth:int, foundation: array{core_focus:?string, writer_insights:?string, unique_angle:?string, content_goals:?string, pain_points:?string, objections:?string, decision_criteria:?string, family_values_focus: string[], rejected_ideas:?string, audience:?string, constraints:?string, style_sample:?string, updated_at:?string, shared_with: array<int, array{uuid:string, name:string}>}|null}>
+     * @param bool $withFoundationDetails Mặc định true — trả TOÀN BỘ field foundation cho MỌI
+     *   category (trang quản lý ContentFoundation cần vậy để chuyển qua lại giữa các category tức
+     *   thì, không loading mỗi lần click). Truyền false ở CoreIdeaExtractor/VideoIdeaExtractor —
+     *   2 module đó chỉ dùng ĐÚNG 1 category/phiên làm việc, tải sẵn full text (tới ~19.500 ký tự
+     *   x MỌI category, hiện 52 category) là phí băng thông không cần thiết: chỉ trả bản RÚT GỌN
+     *   (CategoryContentFoundation::toHintArray(), 3 field core_focus/unique_angle/rejected_ideas,
+     *   đã cắt ngắn) cho MỌI category — đủ cho hint "Bước 0" — còn full detail của category THẬT
+     *   SỰ được chọn thì fetch on-demand qua CategoryFoundationController::show() (xem
+     *   applyCategoryFoundation() ở index.blade.php của 2 module).
+     * @return array<int, array{category_id:int, uuid:string, name:string, depth:int, foundation: array<string, mixed>|null}>
      */
-    public function handle(): array
+    public function handle(bool $withFoundationDetails = true): array
     {
         $tree = (new GetCategoryTreeHandler())->handle(new GetCategoryTreeQuery(activeOnly: true));
 
@@ -42,17 +51,30 @@ class ListCategoryFoundationsAction
         $flat = PostCategory::flatten($tree);
 
         // 1 query cho toàn bộ foundation + category liên kết (N-N) — tránh N+1 khi build
-        // `shared_with` cho từng category.
+        // `shared_with` cho từng category. `shared_with` chỉ có ý nghĩa ở bản đầy đủ (toDetailArray)
+        // — bản rút gọn (toHintArray) không dùng tới, nên bỏ luôn eager-load + select cột thừa khi
+        // $withFoundationDetails=false thay vì tải quan hệ N-N không dùng tới.
+        $foundationQuery = CategoryContentFoundation::query();
+
+        if ($withFoundationDetails) {
+            $foundationQuery->with(['categories' => function ($q) {
+                $q->where('is_active', true)->select('post_categories.id', 'post_categories.uuid', 'post_categories.name');
+            }]);
+        } else {
+            $foundationQuery->select(['id', 'core_focus', 'unique_angle', 'rejected_ideas'])
+                ->with(['categories' => function ($q) {
+                    $q->select('post_categories.id');
+                }]);
+        }
+
         $foundationByCategoryId = [];
-        foreach (CategoryContentFoundation::query()->with(['categories' => function ($q) {
-            $q->where('is_active', true)->select('post_categories.id', 'post_categories.uuid', 'post_categories.name');
-        }])->get() as $foundation) {
+        foreach ($foundationQuery->get() as $foundation) {
             foreach ($foundation->categories as $linkedCategory) {
                 $foundationByCategoryId[$linkedCategory->id] = $foundation;
             }
         }
 
-        return array_map(function (array $node) use ($foundationByCategoryId): array {
+        return array_map(function (array $node) use ($foundationByCategoryId, $withFoundationDetails): array {
             /** @var PostCategory $category */
             $category   = $node['category'];
             $foundation = $foundationByCategoryId[$category->id] ?? null;
@@ -62,26 +84,9 @@ class ListCategoryFoundationsAction
                 'uuid'        => $category->uuid,
                 'name'        => $category->name,
                 'depth'       => $node['depth'],
-                'foundation'  => $foundation ? [
-                    'core_focus'      => $foundation->core_focus,
-                    'writer_insights' => $foundation->writer_insights,
-                    'unique_angle'   => $foundation->unique_angle,
-                    'content_goals'  => $foundation->content_goals,
-                    'pain_points'    => $foundation->pain_points,
-                    'objections'     => $foundation->objections,
-                    'decision_criteria' => $foundation->decision_criteria,
-                    'family_values_focus' => $foundation->family_values_focus ?? [],
-                    'rejected_ideas' => $foundation->rejected_ideas,
-                    'audience'       => $foundation->audience,
-                    'constraints'    => $foundation->constraints,
-                    'style_sample'   => $foundation->style_sample,
-                    'updated_at'     => $foundation->updated_at?->toIso8601String(),
-                    'shared_with'    => $foundation->categories
-                        ->reject(fn (PostCategory $linked) => $linked->id === $category->id)
-                        ->map(fn (PostCategory $linked) => ['uuid' => $linked->uuid, 'name' => $linked->name])
-                        ->values()
-                        ->all(),
-                ] : null,
+                'foundation'  => $foundation
+                    ? ($withFoundationDetails ? $foundation->toDetailArray($category->id) : $foundation->toHintArray())
+                    : null,
             ];
         }, $flat);
     }

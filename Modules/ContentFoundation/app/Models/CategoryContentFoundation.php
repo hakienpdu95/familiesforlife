@@ -5,6 +5,7 @@ namespace Modules\ContentFoundation\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Str;
 use Modules\Post\Models\PostCategory;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
@@ -56,6 +57,54 @@ class CategoryContentFoundation extends Model
     {
         return $this->belongsToMany(PostCategory::class, 'content_foundation_categories', 'foundation_id', 'post_category_id')
             ->withTimestamps();
+    }
+
+    /**
+     * Toàn bộ field — dùng khi CHỈ 1 category cần hiển thị/chỉnh sửa đầy đủ (trang quản lý
+     * ContentFoundation tải TẤT CẢ category theo dạng này để chuyển qua lại tức thì; CoreIdeaExtractor/
+     * VideoIdeaExtractor chỉ fetch dạng này ĐÚNG 1 lần cho category vừa chọn — xem
+     * ListCategoryFoundationsAction::handle() và CategoryFoundationController::show()).
+     * Yêu cầu relation `categories` đã được eager-load sẵn ở caller.
+     */
+    public function toDetailArray(int $forCategoryId): array
+    {
+        return [
+            'core_focus'          => $this->core_focus,
+            'writer_insights'     => $this->writer_insights,
+            'unique_angle'        => $this->unique_angle,
+            'content_goals'       => $this->content_goals,
+            'pain_points'         => $this->pain_points,
+            'objections'          => $this->objections,
+            'decision_criteria'   => $this->decision_criteria,
+            'family_values_focus' => $this->family_values_focus ?? [],
+            'rejected_ideas'      => $this->rejected_ideas,
+            'audience'            => $this->audience,
+            'constraints'         => $this->constraints,
+            'style_sample'        => $this->style_sample,
+            'updated_at'          => $this->updated_at?->toIso8601String(),
+            'shared_with'         => $this->categories
+                ->reject(fn (PostCategory $linked) => $linked->id === $forCategoryId)
+                ->map(fn (PostCategory $linked) => ['uuid' => $linked->uuid, 'name' => $linked->name])
+                ->values()
+                ->all(),
+        ];
+    }
+
+    /**
+     * Bản RÚT GỌN chỉ 3 field CoreIdeaExtractor dùng làm "hint" khi liệt kê MỌI category ở Bước 0
+     * (gọi tên chuyên mục phù hợp + cảnh báo ý đã từ chối của category KHÁC category đang chọn) —
+     * xem index.blade.php::buildLayer2PromptText() `truncateForHint()`. Cắt ngắn NGAY TỪ SERVER
+     * (không đợi client tự cắt) để không tải nguyên văn full_text (tới ~2000 ký tự/field) cho MỌI
+     * category chỉ để hiển thị 160 ký tự đầu — đúng tinh thần "Select"/retrieval budget: không kéo
+     * về nhiều hơn mức sẽ thực sự dùng. Không cần `categories` relation (không có shared_with).
+     */
+    public function toHintArray(int $maxHintChars = 160): array
+    {
+        return [
+            'core_focus'     => $this->core_focus ? Str::limit(trim($this->core_focus), $maxHintChars) : null,
+            'unique_angle'   => $this->unique_angle ? Str::limit(trim($this->unique_angle), $maxHintChars) : null,
+            'rejected_ideas' => $this->rejected_ideas ? Str::limit(trim($this->rejected_ideas), $maxHintChars) : null,
+        ];
     }
 
     public function createdBy(): BelongsTo

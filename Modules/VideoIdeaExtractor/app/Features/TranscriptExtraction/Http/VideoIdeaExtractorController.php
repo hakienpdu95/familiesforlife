@@ -28,8 +28,11 @@ class VideoIdeaExtractorController extends Controller
      */
     public function index(ListCategoryFoundationsAction $listCategoryFoundations): View
     {
+        // withFoundationDetails: false — chỉ trả bản rút gọn (core_focus/unique_angle/rejected_ideas
+        // đã cắt) cho MỌI category; full detail của category THẬT SỰ được chọn fetch on-demand qua
+        // applyCategoryFoundation() ở index.blade.php (xem docblock ListCategoryFoundationsAction).
         return view('videoideaextractor::index', [
-            'categoryFoundations' => $listCategoryFoundations->handle(),
+            'categoryFoundations' => $listCategoryFoundations->handle(withFoundationDetails: false),
         ]);
     }
 
@@ -67,7 +70,7 @@ class VideoIdeaExtractorController extends Controller
                 transcript: $truncated,
                 word_count: $extracted['word_count'],
                 extraction_confidence: $confidenceResult['confidence'],
-                notes: $confidenceResult['notes'],
+                notes: $this->mergeTruncationNote($confidenceResult['notes'], $extracted['transcript'], $truncated, $maxTranscriptChars),
             );
         }, $data->videos);
 
@@ -207,5 +210,33 @@ class VideoIdeaExtractorController extends Controller
         }
 
         return $window.'…';
+    }
+
+    /**
+     * `word_count`/`extraction_confidence` (ComputeTranscriptConfidenceAction) được tính trên
+     * transcript ĐÃ LÀM SẠCH nhưng CHƯA CẮT — trong khi `transcript` trả về (và mọi prompt AI ở
+     * runPrompt()/runLayer2() dùng làm CHẤT LIỆU DUY NHẤT) là bản ĐÃ CẮT theo
+     * `max_transcript_chars_per_video`. Video dài (60-90 phút thực tế thường vượt xa trần 20.000 ký
+     * tự/video) khiến 2 con số này lệch nhau: badge/word_count vẫn báo "Cao" (dựa trên TOÀN BỘ
+     * transcript dán vào), nhưng Tiêu đề/Hook/Ý tưởng/Kịch bản sinh ra chỉ dựa trên phần ĐẦU video
+     * — biên tập viên không có cách nào biết phần sau bị bỏ qua nếu không có ghi chú riêng này.
+     */
+    private function mergeTruncationNote(?string $confidenceNote, string $fullTranscript, string $truncatedTranscript, int $maxChars): ?string
+    {
+        $originalLength = mb_strlen($fullTranscript);
+
+        if ($originalLength <= $maxChars) {
+            return $confidenceNote;
+        }
+
+        $percentKept    = (int) round(mb_strlen($truncatedTranscript) / $originalLength * 100);
+        $truncationNote = sprintf(
+            'Transcript gốc dài %s ký tự, đã CẮT BỚT còn ~%d%% (trần %s ký tự/video) trước khi đưa vào AI — mọi Tiêu đề/Hook/Ý tưởng/Kịch bản bên dưới chỉ dựa trên phần ĐẦU video, CHƯA phản ánh nội dung phần sau. Cân nhắc tách video này thành nhiều lượt trích xuất theo từng đoạn nếu cần khai thác trọn vẹn.',
+            number_format($originalLength),
+            $percentKept,
+            number_format($maxChars),
+        );
+
+        return $confidenceNote ? "{$confidenceNote} {$truncationNote}" : $truncationNote;
     }
 }

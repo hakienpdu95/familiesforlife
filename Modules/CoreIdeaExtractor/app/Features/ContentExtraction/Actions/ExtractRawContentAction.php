@@ -1167,6 +1167,16 @@ class ExtractRawContentAction
         $rows = [];
 
         foreach ($table->getElementsByTagName('tr') as $tr) {
+            // getElementsByTagName('tr') quét TẤT CẢ <tr> hậu duệ, kể cả <tr> thuộc 1 <table> LỒNG
+            // bên trong 1 <td> của bảng này — bảng lồng đã được xử lý ĐÚNG riêng (extractBlockText()
+            // gặp thẻ 'table' sẽ gọi đệ quy tableToMarkdown() và nhúng thành bảng Markdown con ngay
+            // trong ô chứa nó), nên các <tr> của bảng con phải bị BỎ QUA ở đây — nếu không, hàng của
+            // bảng con bị đếm THÊM 1 lần nữa như thể là hàng của bảng ngoài, ra bảng Markdown sai
+            // cột/lệch dữ liệu.
+            if ($this->closestTableAncestor($tr) !== $table) {
+                continue;
+            }
+
             $cells = [];
 
             foreach ($tr->childNodes as $cellNode) {
@@ -1197,6 +1207,22 @@ class ExtractRawContentAction
         }
 
         return "\n\n".implode("\n", $lines)."\n\n";
+    }
+
+    /** @return \DOMElement|null <table> gần nhất bao quanh $node — dùng để loại <tr> thuộc bảng lồng ở tableToMarkdown(). */
+    private function closestTableAncestor(\DOMNode $node): ?\DOMElement
+    {
+        $current = $node->parentNode;
+
+        while ($current !== null) {
+            if ($current instanceof \DOMElement && $current->nodeName === 'table') {
+                return $current;
+            }
+
+            $current = $current->parentNode;
+        }
+
+        return null;
     }
 
     private function cleanText(string $text): string
@@ -1464,6 +1490,12 @@ class ExtractRawContentAction
             return (int) round(mb_strlen(preg_replace('/\s+/', '', $text) ?? $text) / 2);
         }
 
-        return str_word_count($text);
+        // str_word_count() CŨ chỉ nhận diện ký tự thuộc từ theo byte Latin cơ bản (a-z/A-Z/'/-),
+        // KHÔNG nhận chuỗi UTF-8 nhiều byte của ký tự có dấu tiếng Việt là 1 phần của từ — 1 từ có
+        // dấu (VD "được") bị tách vụn thành nhiều "từ" riêng, đếm THỪA ~50% cho văn bản tiếng Việt
+        // có dấu (ngôn ngữ chính của platform), khiến ComputeExtractionConfidenceAction phân loại
+        // sai high/medium/low. Đếm theo ranh giới khoảng trắng Unicode-aware — cùng cách
+        // ExtractTranscriptAction::countWords() bên VideoIdeaExtractor đã làm đúng.
+        return count(array_filter(preg_split('/\s+/u', $text) ?: []));
     }
 }

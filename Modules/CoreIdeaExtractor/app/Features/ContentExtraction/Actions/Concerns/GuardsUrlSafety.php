@@ -37,11 +37,29 @@ trait GuardsUrlSafety
         }
     }
 
+    /**
+     * Host toàn ký tự số/hex phân tách bằng dấu chấm (VD "0177.0.0.1" — octal của 127.0.0.1,
+     * "2130706433" — decimal nguyên khối của 127.0.0.1, "0x7f000001") KHÔNG qua được
+     * filter_var(FILTER_VALIDATE_IP) chuẩn ở nhánh trên, NHƯNG cURL/trình duyệt vẫn diễn giải
+     * NHƯ 1 địa chỉ IP thật (browser/cURL tự convert octal/decimal/hex sang IP chuẩn trước khi
+     * kết nối) — trong khi dns_get_record()/gethostbyname() bên dưới lại diễn giải nó theo cách
+     * KHÁC (dns_get_record("0177.0.0.1", ...) trả nhầm "177.0.0.1" — IP public — thay vì
+     * "127.0.0.1" mà octal đó thật sự biểu diễn). IP được KIỂM TRA an toàn (public, hợp lệ) do đó
+     * khác hẳn IP THẬT SỰ cURL sẽ kết nối tới (loopback) — bypass toàn bộ guard bên dưới, dẫn tới
+     * SSRF. Domain thật KHÔNG BAO GIỜ có dạng toàn số/hex như vậy (TLD luôn có chữ) nên chặn
+     * thẳng ở đây, không cần thử phân giải DNS.
+     */
+    private const IP_ENCODED_HOST_PATTERN = '/^(0x[0-9a-f]+|[0-9]+)(\.(0x[0-9a-f]+|[0-9]+)){0,3}$/i';
+
     /** @return string[] */
     private function resolveIps(string $host): array
     {
         if (filter_var($host, FILTER_VALIDATE_IP)) {
             return [$host];
+        }
+
+        if (preg_match(self::IP_ENCODED_HOST_PATTERN, $host)) {
+            return [];
         }
 
         $ips     = [];

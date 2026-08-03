@@ -18,6 +18,7 @@ Route::middleware(['auth', 'can:content_foundation.use'])
     ->name('backend.api.contentfoundation.')
     ->group(function (): void {
         Route::get('category-foundations', [CategoryFoundationController::class, 'list'])->name('category-foundations.list');
+        Route::get('category-foundations/{category}', [CategoryFoundationController::class, 'show'])->name('category-foundations.show');
         Route::put('category-foundations/{category}', [CategoryFoundationController::class, 'upsert'])->name('category-foundations.upsert');
         Route::get('category-foundations/{category}/existing-articles', [CategoryFoundationController::class, 'existingArticles'])->name('category-foundations.existing-articles');
     });

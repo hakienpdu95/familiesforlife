@@ -36,6 +36,28 @@ class CategoryFoundationController extends Controller
     }
 
     /**
+     * Foundation ĐẦY ĐỦ của ĐÚNG 1 category — CoreIdeaExtractor/VideoIdeaExtractor gọi endpoint này
+     * khi người dùng chọn 1 category (applyCategoryFoundation() ở index.blade.php của 2 module đó),
+     * vì list() ở trên chỉ trả bản RÚT GỌN cho 2 module này (xem docblock
+     * ListCategoryFoundationsAction::handle()) — cùng nguyên tắc "fetch riêng theo yêu cầu" đã áp
+     * dụng cho existingArticles() ngay dưới đây.
+     */
+    public function show(PostCategory $category): JsonResponse
+    {
+        $foundation = CategoryContentFoundation::query()
+            ->whereHas('categories', fn ($q) => $q->where('post_categories.id', $category->id))
+            ->with(['categories' => function ($q) {
+                $q->where('is_active', true)->select('post_categories.id', 'post_categories.uuid', 'post_categories.name');
+            }])
+            ->first();
+
+        return response()->json([
+            'category_id' => $category->id,
+            'foundation'  => $foundation?->toDetailArray($category->id),
+        ]);
+    }
+
+    /**
      * spec/CoreIdeaExtractor.md §12.8 — tiêu đề bài ĐÃ publish trong category, fetch RIÊNG theo
      * yêu cầu (không nhét sẵn vào list() ở trên) vì mỗi category có thể có hàng chục/hàng trăm
      * bài — nhét sẵn cho MỌI category ngay lúc tải trang sẽ phình payload ban đầu không cần thiết.
@@ -107,25 +129,7 @@ class CategoryFoundationController extends Controller
 
         return response()->json([
             'category_id' => $category->id,
-            'foundation'  => [
-                'core_focus'      => $foundation->core_focus,
-                'writer_insights' => $foundation->writer_insights,
-                'unique_angle'   => $foundation->unique_angle,
-                'content_goals'  => $foundation->content_goals,
-                'pain_points'    => $foundation->pain_points,
-                'objections'     => $foundation->objections,
-                'decision_criteria' => $foundation->decision_criteria,
-                'family_values_focus' => $foundation->family_values_focus ?? [],
-                'rejected_ideas' => $foundation->rejected_ideas,
-                'audience'       => $foundation->audience,
-                'constraints'    => $foundation->constraints,
-                'style_sample'   => $foundation->style_sample,
-                'updated_at'     => $foundation->updated_at?->toIso8601String(),
-                'shared_with'    => $foundation->categories
-                    ->reject(fn (PostCategory $linked) => $linked->id === $category->id)
-                    ->map(fn (PostCategory $linked) => ['uuid' => $linked->uuid, 'name' => $linked->name])
-                    ->values(),
-            ],
+            'foundation'  => $foundation->toDetailArray($category->id),
         ]);
     }
 }

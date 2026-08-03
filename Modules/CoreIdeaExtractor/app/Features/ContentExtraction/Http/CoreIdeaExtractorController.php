@@ -37,8 +37,12 @@ class CoreIdeaExtractorController extends Controller
      */
     public function index(ListCategoryFoundationsAction $listCategoryFoundations): View
     {
+        // withFoundationDetails: false — chỉ trả bản rút gọn (core_focus/unique_angle/rejected_ideas
+        // đã cắt) cho MỌI category, đủ cho hint "Bước 0" ở buildLayer2PromptText(); full detail của
+        // category THẬT SỰ được chọn fetch on-demand qua applyCategoryFoundation() ở index.blade.php
+        // (xem docblock ListCategoryFoundationsAction).
         return view('coreideaextractor::index', [
-            'categoryFoundations' => $listCategoryFoundations->handle(),
+            'categoryFoundations' => $listCategoryFoundations->handle(withFoundationDetails: false),
         ]);
     }
 
@@ -101,6 +105,12 @@ class CoreIdeaExtractorController extends Controller
         // có thể xảy ra), sections sẽ "rò rỉ" phần nội dung đã bị cắt bỏ ra ngoài, không nhất quán
         // với main_content THẬT SỰ trả về.
         $finalMainContent = $this->truncateMainContent($extracted['main_content']);
+        $notes            = $this->appendMainContentTruncationNote(
+            $notes,
+            mb_strlen($extracted['main_content']),
+            mb_strlen($finalMainContent),
+            (int) config('core_idea_extractor.max_main_content_chars', 20000),
+        );
         $contentReduction = $this->computeContentReduction($rawHtmlChars, $finalMainContent);
 
         $result = $this->buildResult(
@@ -200,6 +210,12 @@ class CoreIdeaExtractorController extends Controller
             $selection        = $this->truncateBatchMainContent($extracted['main_content'], $data->topic);
             $mainContent      = $selection['text'];
             $notes            = $this->appendRelevanceNote($notes, $selection['relevance_applied'], $data->topic);
+            $notes            = $selection['relevance_applied'] ? $notes : $this->appendMainContentTruncationNote(
+                $notes,
+                mb_strlen($extracted['main_content']),
+                mb_strlen($mainContent),
+                (int) config('core_idea_extractor.batch.max_main_content_chars_per_source', 12000),
+            );
             $contentHash      = $this->computeContentHash($mainContent);
             $contentReduction = $this->computeContentReduction($rawHtmlChars, $mainContent);
 
@@ -513,6 +529,35 @@ class CoreIdeaExtractorController extends Controller
         }
 
         $note = "Nội dung nguồn dài hơn giới hạn dán vào chat AI — đã ưu tiên giữ lại các đoạn liên quan tới chủ đề \"{$topic}\" (kể cả ở giữa/cuối bài) thay vì luôn cắt theo thứ tự xuất hiện; đoạn bị lược bỏ được đánh dấu \"[…]\".";
+
+        return $notes ? "{$notes} {$note}" : $note;
+    }
+
+    /**
+     * `word_count`/`headingCount`/`confidence` (ComputeExtractionConfidenceAction) được tính trên
+     * main_content ĐÃ TRÍCH nhưng CHƯA CẮT (`$extracted['main_content']`/`$extracted['word_count']`)
+     * — trong khi field `main_content` trả về (và mọi prompt AI ở buildSummarizePromptText()/
+     * buildRewritePromptText()/buildLayer2 dùng làm CHẤT LIỆU DUY NHẤT) là bản ĐÃ CẮT theo
+     * max_main_content_chars (1 URL) hoặc max_main_content_chars_per_source (batch). Khi
+     * selectRelevantContent() KHÔNG áp dụng chọn lọc theo topic (rơi về truncateAtBoundary() —
+     * không có topic, chỉ 1 đoạn, hoặc không đoạn nào khớp từ khoá) hoặc ở chế độ 1 URL (không có
+     * bước chọn theo topic nào), việc cắt diễn ra HOÀN TOÀN ÂM THẦM: badge/word_count vẫn phản ánh
+     * TOÀN BỘ bài, trong khi AI chỉ thấy phần ĐẦU. Gọi hàm này SAU appendRelevanceNote() và chỉ khi
+     * relevance CHƯA được áp dụng, để 2 note không trùng lặp cùng nói về 1 lần cắt.
+     */
+    private function appendMainContentTruncationNote(?string $notes, int $originalLength, int $finalLength, int $maxChars): ?string
+    {
+        if ($originalLength <= $maxChars) {
+            return $notes;
+        }
+
+        $percentKept = (int) round($finalLength / $originalLength * 100);
+        $note        = sprintf(
+            'Nội dung nguồn dài %s ký tự, đã CẮT BỚT còn ~%d%% (trần %s ký tự) trước khi đưa vào AI theo thứ tự xuất hiện (giữ phần đầu, bỏ phần sau) — mọi tóm tắt/viết lại/ý tưởng sinh ra bên dưới chỉ dựa trên phần ĐÃ GIỮ, CHƯA phản ánh phần bị cắt.',
+            number_format($originalLength),
+            $percentKept,
+            number_format($maxChars),
+        );
 
         return $notes ? "{$notes} {$note}" : $note;
     }
