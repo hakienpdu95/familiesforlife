@@ -1,8 +1,78 @@
 # CoreIdeaExtractor
 
-**Version:** 1.21  
+**Version:** 1.23  
 **Last Updated:** 2026-08-04  
 **Status:** Design Specification (Ready for Implementation)
+
+> **v1.23 (Đối chiếu thepromptwarrior.com/p/5-prompt-frameworks-level-prompts — cùng chủ đề v1.22,
+> nguồn khác — KHÔNG áp dụng gì, 2/5 kỹ thuật hoá ra ĐÃ CÓ SẴN dưới tên khác):** bài liệt kê 5
+> framework — RTF (Role/Task/Format), Chain-of-Thought ("Let's think step-by-step"), RISEN (định
+> nghĩa KHÁC bản ở §v1.22/`giadinh.md`: ở đây là Role/Instructions/Steps/End goal/Narrowing, không
+> phải Role/Input/Scenario/Expectation/Nuance), RODES (Role/Objective/Details/Examples/**Sense
+> Check**), Chain of Density (tóm tắt lặp 5 vòng, mỗi vòng nhồi thêm thực thể cụ thể mà giữ nguyên
+> độ dài, để tăng "độ đậm đặc" thông tin).
+>
+> Đối chiếu phát hiện: **Chain-of-Thought và "Sense Check" (RODES) đã có sẵn trong codebase dưới
+> tên `selfCheckLine()`** (`index.blade.php`, dùng cho `buildSummarizePromptText()`/
+> `buildRewritePromptText()` ở cả `CoreIdeaExtractor` và `VideoIdeaExtractor` — module song sinh) —
+> đúng kỹ thuật "phác thảo nháp trong đầu (ẩn) → tự rà lại xem có bịa/bỏ sót ràng buộc không → viết
+> lại phần yếu → chỉ trả kết quả cuối", cùng docblock giải thích rõ vì sao KHÔNG áp dòng này cho
+> `buildLayer2PromptText()` (BƯỚC 1→2→3 ở đó đã LÀ 1 dạng chain-of-thought tường minh hơn hẳn 1
+> dòng nhắc chung — thêm vào sẽ trùng lặp, không phải thiếu sót). Tức là 2/5 kỹ thuật cốt lõi nhất
+> của nguồn này đã được áp dụng từ trước, có chủ đích, có tài liệu — không phải khoảng trống.
+>
+> RTF là tập con của Role/Task/Format đã có ở mọi tool (xem v1.22). RISEN (Steps/End goal/
+> Narrowing) trùng hoàn toàn BƯỚC 0-3/`goalText`/`constraintsText` đã có. Chain of Density (lặp 5
+> vòng tăng mật độ) là kỹ thuật DUY NHẤT chưa có tương đương — nhưng đây là suy luận ẩn bên trong 1
+> lượt gọi model, không kiểm chứng được model có thực sự lặp đủ 5 vòng nội bộ hay không (hộp đen),
+> và KHÔNG có phản hồi/test thật nào cho thấy `buildSummarizePromptText()` hiện tại ra tóm tắt quá
+> chung chung/thiếu thực thể cụ thể — thêm vào lúc này là suy đoán thiếu bằng chứng, đúng loại rủi
+> ro "framework flourish" mà module đã từ chối nhiều lần trước đây (v1.6, v1.8, v1.18, v1.22).
+>
+> Không đổi Layer 1/Layer 2 JSON schema (§5, §7), không đổi code.
+
+> **v1.22 (Đối chiếu `spec/giadinh.md` — "6 framework cấu trúc prompt AI cho marketing" —
+> KHÔNG áp dụng gì, prompt hiện tại đã vượt qua từng framework):** nguồn là bài blog marketing
+> (không trích số liệu/nghiên cứu, thuần kinh nghiệm cá nhân người viết qua ~1 năm dùng thử) liệt
+> kê 6 khung cấu trúc PROMPT — C.O.R.E. (Context/Objective/Role/Example), C.R.E.A.T.E. (+ Audience/
+> Tone/End Goal), R.I.S.E.N. (Role/Input/Scenario/Expectation/Nuance — cho phân tích/thought
+> leadership), P.A.R.A. (Problem/Analysis/Recommendation/Action — cho problem-solving), D.A.R.E.
+> (Describe/Act/Resonate/Elevate — cho storytelling), R.O.A.D. (Recognize/Options/Analyze/Decide —
+> cho ra quyết định chiến lược) — nhắm tới người viết prompt ad-hoc, 1 lần, cho các tác vụ
+> marketing rời rạc (LinkedIn post, sales page, whitepaper, crisis response...). Đối chiếu với
+> `buildLayer2PromptText()` (§12.4, áp dụng song song cho cả `CoreIdeaExtractor` và
+> `VideoIdeaExtractor`) qua từng framework:
+>
+> - **C.O.R.E./C.R.E.A.T.E.:** cả 4+2 thành phần (Context/Objective/Role/Example/Audience/Tone/
+>   End Goal) ĐÃ có, cụ thể hoá theo domain hơn hẳn mức generic của framework — Role qua khối
+>   "# Vai trò & Bối cảnh" (persona biên tập viên/kênh video); Context qua Hệ giá trị gia đình Việt
+>   Nam (§12.10) + Category Content Foundation (§12.2); Objective/End Goal qua `goalText` (tiêu chí
+>   3, BƯỚC 2); Audience qua khối riêng tách biệt (không chỉ mệnh đề phụ trong persona như trước
+>   v1.21); Tone qua `styleSampleText` (ví dụ giọng văn THẬT trích từ editor, mạnh hơn 1 tính từ mô
+>   tả tone chung chung như framework đề xuất); Example qua cấu trúc bảng cứng quy định ở BƯỚC 3.
+>   Không có khoảng trống nào để vá.
+> - **R.I.S.E.N.:** "Nuance" (đa góc nhìn) là thành phần duy nhất chưa map thẳng vào chỗ nào — nhưng
+>   framework này tự nhận "Best for analysis & thought leadership", khác bản chất với nhiệm vụ hiện
+>   tại là BRAINSTORM đa dạng (đã có cơ chế riêng cho việc này: 20-25 ý ứng viên đa dạng dạng/góc
+>   nhìn ở BƯỚC 1, lọc qua 4 tiêu chí ở BƯỚC 2), không phải phân tích 1 luận điểm duy nhất cần cân
+>   nhắc nhiều phía — áp Nuance vào đây sẽ làm sai lệch mục đích module chứ không phải vá lỗ hổng.
+> - **P.A.R.A./R.O.A.D.:** 2 framework cho problem-solving/ra quyết định chiến lược (VD tối ưu tỉ lệ
+>   mở email, chọn kênh quảng cáo) — không có tính năng tương ứng trong CoreIdeaExtractor/
+>   VideoIdeaExtractor (2 module chỉ sinh Ý TƯỞNG bài viết/video, không chẩn đoán vấn đề kinh doanh
+>   hay so sánh phương án chiến lược); cũng không có module nào khác trong codebase phù hợp hơn
+>   (`Aicem` dùng Context Engineering Framework riêng — xem §6, `AICEM_Technical_Specification.md`
+>   — không phải prompt ad-hoc dạng này). Ngoài phạm vi, không có nơi áp dụng.
+> - **D.A.R.E.:** storytelling đầy đủ (Describe/Act/Resonate/Elevate) vượt xa phạm vi module hiện
+>   tại (chỉ dừng ở gợi ý Ý TƯỞNG + tiêu đề đề xuất, KHÔNG viết nội dung bài/video đầy đủ — xem §11/
+>   §12.3 "Ngoài phạm vi"). Phần duy nhất chạm storytelling là ràng buộc tiêu đề đề xuất — đã có,
+>   dạng ràng buộc PHỦ ĐỊNH (không giật gân/không lợi dụng nỗi sợ hãi) chứ không cần thêm chỉ dẫn
+>   "Resonate/Elevate" tích cực nào mới, vì module không viết nội dung để "resonate" trọn vẹn.
+>
+> **Kết luận:** nguồn không đưa vào codebase nội dung kỹ thuật mới nào — không phải vì framework
+> sai, mà vì prompt hiện tại (kết quả 21 version tinh chỉnh dựa trên test thật với Grok/Claude, xem
+> lịch sử §12.4 từ v1.5-v1.21) đã đạt/vượt từng thành phần của cả 6 framework một cách cụ thể hoá
+> theo đúng domain (gia đình Việt Nam) thay vì dừng ở mức generic mà framework mô tả. KHÔNG đổi
+> Layer 1/Layer 2 JSON schema (§5, §7), không đổi code.
 
 > **v1.21 (Vá lỗ hổng ngữ cảnh biên tập + đổi khối "Gợi ý sản phẩm" + tách định dạng output theo
 > đường đi):** 3 nhóm thay đổi, áp dụng SONG SONG cho `CoreIdeaExtractor` và `VideoIdeaExtractor`.
