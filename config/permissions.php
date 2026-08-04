@@ -50,6 +50,9 @@ return [
         P::POST_ARTICLE_PUBLISH->value,
         // AICEM: View (full) — xem knowledge base/lịch sử, không tự chạy workflow
         P::AICEM_VIEW->value,
+        // Pension Calculator: View only — CEO nắm platform đang dùng tham số nào, không sửa
+        // (spec/bhxh/PensionCalculator_Technical_Specification.md §9.3)
+        P::PENSION_CALCULATOR_VIEW->value,
     ],
 
     R::SALES->value => [
@@ -240,6 +243,9 @@ return [
         P::MENU_MANAGE->value,
         // AICEM: Config — provider, API key, hạn mức chi phí theo Organization
         P::AICEM_CONFIG->value,
+        // Pension Calculator: Full manage — thêm giai đoạn tham số/hệ số trượt giá/tỷ lệ hưởng
+        // (spec/bhxh/PensionCalculator_Technical_Specification.md §5/§9.3)
+        P::PENSION_CALCULATOR_MANAGE->value,
     ],
 
     R::VIEWER->value => [

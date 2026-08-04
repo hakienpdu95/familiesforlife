@@ -353,6 +353,20 @@
         </div>
         @endcan
 
+        {{-- spec/bhxh/PensionCalculator_Technical_Specification.md §5/§9.3 — Lớp A, qua
+             config/permissions.php + RoleEnum: pension_calculator.manage (System_Admin, sửa
+             được) / pension_calculator.view (CEO, chỉ xem) — cùng nguyên tắc PRODUCT_VIEW/
+             REAL_ESTATE_VIEW ở trên (khác nhóm Lớp B của Banner/OCOP/Page). --}}
+        @if(auth()->user()?->hasAnyPermission(['pension_calculator.manage', 'pension_calculator.view']))
+        <div class="nav-group">
+            <a href="{{ route('backend.pension-calculator.index') }}"
+               class="nav-link {{ request()->routeIs('backend.pension-calculator.*') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 7h6m-6 4h6m-6 4h4M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z"/></svg>
+                <span class="nav-label">Tính lương hưu BHXH</span>
+            </a>
+        </div>
+        @endif
+
         {{-- spec/Event_Management_Technical_Specification.md §9 — event.view cấp cho
              platform_content_editor/head/ops (Modules\Event\Database\Seeders\EventPermissionSeeder). --}}
         @can(\App\Enums\PermissionEnum::EVENT_VIEW->value)

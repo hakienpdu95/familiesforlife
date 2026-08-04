@@ -1,0 +1,11 @@
+{
+    "name": "PensionCalculator",
+    "alias": "pension-calculator",
+    "description": "Bảng tính minh hoạ lương hưu BHXH tự nguyện — công cụ công khai ước tính mức đóng/mức bình quân/điều kiện hưởng lương hưu theo Nghị định 159/2025/NĐ-CP (spec/bhxh/PensionCalculator_Technical_Specification.md). Không lưu dữ liệu cá nhân người dùng, tính toán 100% phía client.",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\PensionCalculator\\Providers\\PensionCalculatorServiceProvider"
+    ],
+    "files": []
+}

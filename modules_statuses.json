@@ -28,5 +28,6 @@
     "Video": true,
     "ContentCalendar": true,
     "ContentFoundation": true,
-    "VideoIdeaExtractor": true
+    "VideoIdeaExtractor": true,
+    "PensionCalculator": true
 }

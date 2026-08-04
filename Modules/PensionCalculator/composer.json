@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/pension-calculator",
+    "description": "",
+    "authors": [
+        {
+            "name": "KienDH",
+            "email": "bonhuyn@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\PensionCalculator\\": "app/",
+            "Modules\\PensionCalculator\\Database\\Factories\\": "database/factories/",
+            "Modules\\PensionCalculator\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\PensionCalculator\\Tests\\": "tests/"
+        }
+    }
+}

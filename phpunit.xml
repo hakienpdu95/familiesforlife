@@ -18,6 +18,7 @@
             <directory>Modules/Newsletter/tests/Feature</directory>
             <directory>Modules/Ocop/tests/Feature</directory>
             <directory>Modules/Page/tests/Feature</directory>
+            <directory>Modules/PensionCalculator/tests/Feature</directory>
             <directory>Modules/Post/tests/Feature</directory>
             <directory>Modules/RealEstate/tests/Feature</directory>
             <directory>Modules/Video/tests/Feature</directory>

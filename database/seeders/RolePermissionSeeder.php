@@ -85,6 +85,9 @@ class RolePermissionSeeder extends Seeder
                 // Assessment: view + results
                 P::ASSESSMENT_VIEW->value,
                 P::ASSESSMENT_RESULTS->value,
+
+                // Pension Calculator: view only (spec/bhxh/PensionCalculator_Technical_Specification.md §9.3)
+                P::PENSION_CALCULATOR_VIEW->value,
             ],
 
             // ─────────────────────────────────────────────────────────
@@ -217,6 +220,9 @@ class RolePermissionSeeder extends Seeder
 
                 // Menu: Full manage (điều hướng header/footer)
                 P::MENU_MANAGE->value,
+
+                // Pension Calculator: full manage (spec/bhxh/PensionCalculator_Technical_Specification.md §5/§9.3)
+                P::PENSION_CALCULATOR_MANAGE->value,
             ],
 
             // ─────────────────────────────────────────────────────────

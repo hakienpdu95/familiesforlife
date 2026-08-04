@@ -202,4 +202,13 @@ enum PermissionEnum: string
     // tắc CORE_IDEA_EXTRACTOR_USE/BANNER_MANAGE/OCOP_MANAGE/PAGE_MANAGE.
     case CONTENT_CALENDAR_VIEW   = 'content_calendar.view';
     case CONTENT_CALENDAR_MANAGE = 'content_calendar.manage';
+
+    // ══ PENSION CALCULATOR (Bảng tính minh hoạ lương hưu BHXH tự nguyện — tham số pháp lý
+    // dùng chung toàn platform, công cụ public không auth) ═══
+    // spec/bhxh/PensionCalculator_Technical_Specification.md §0/§5 — Lớp A, qua
+    // config/permissions.php + RoleEnum (System_Admin: sửa được; CEO: chỉ xem) — đây là dữ
+    // liệu tuân thủ pháp luật ảnh hưởng độ chính xác 1 công cụ công khai toàn platform, đúng
+    // bản chất "cấu hình hệ thống" hơn "nội dung biên tập theo category" (khác Lớp B).
+    case PENSION_CALCULATOR_MANAGE = 'pension_calculator.manage';
+    case PENSION_CALCULATOR_VIEW   = 'pension_calculator.view';
 }
