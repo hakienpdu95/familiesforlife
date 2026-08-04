@@ -49,9 +49,26 @@ class RunLayer2ExtractionAction
                         'fits_audience'       => ['type' => 'boolean', 'description' => 'Tiêu chí 4 (Bước 2) — phù hợp đối tượng độc giả đã nêu.'],
                         'reason'              => ['type' => 'string', 'description' => 'Lý do ngắn (1 câu) vì sao ý tưởng đạt cả 4 tiêu chí.'],
                         'suggested_title'     => ['type' => 'string', 'description' => 'Đề xuất tiêu đề bài viết cho ý tưởng này.'],
-                        'suggested_product'   => ['type' => ['string', 'null'], 'description' => 'CHỈ khi có 1 loại sản phẩm/dịch vụ phù hợp TỰ NHIÊN với ý tưởng này (xem nguyên tắc "dễ giải thích trong 3 giây" ở cuối prompt) — tên/mô tả ngắn sản phẩm đó. Null nếu không có sản phẩm nào phù hợp tự nhiên, KHÔNG gượng ép.'],
                     ],
-                    'required' => ['idea', 'category', 'matches_core_focus', 'unique_angle', 'serves_goal', 'fits_audience', 'reason', 'suggested_title', 'suggested_product'],
+                    'required' => ['idea', 'category', 'matches_core_focus', 'unique_angle', 'serves_goal', 'fits_audience', 'reason', 'suggested_title'],
+                ],
+            ],
+            // 2026-08-04 — thay field `suggested_product` (1 chuỗi nullable trên TỪNG ý tưởng) bằng
+            // danh sách RIÊNG cấp kết quả, tối thiểu 5 mục cho CẢ BỘ ý tưởng (yêu cầu người dùng —
+            // xem khối "Gợi ý sản phẩm" ở cuối buildLayer2PromptText()). Lý do đổi: bản per-idea xét
+            // từng ý độc lập nên phần lớn trả null, thực tế cho ra 0-2 sản phẩm/lần chạy; và không
+            // diễn đạt được trường hợp 1 sản phẩm phục vụ nhiều ý tưởng cùng lúc.
+            'suggested_products' => [
+                'type' => 'array',
+                'description' => 'TỐI THIỂU 5 loại sản phẩm/dịch vụ gắn được TỰ NHIÊN vào (các) ý tưởng ở `ideas` — xem đầy đủ nguyên tắc chọn + 5 ràng buộc ở khối "Gợi ý sản phẩm" cuối prompt. Trả ÍT hơn 5 (hoặc mảng rỗng) khi thực sự không có sản phẩm nào phù hợp tự nhiên, KHÔNG bịa cho đủ số.',
+                'items' => [
+                    'type' => 'object',
+                    'properties' => [
+                        'product'               => ['type' => 'string', 'description' => 'Tên LOẠI sản phẩm/dịch vụ (VD "ghế ăn dặm có đai an toàn") — không nêu tên thương hiệu, không nêu giá.'],
+                        'why_easy_to_explain'   => ['type' => 'string', 'description' => 'Vì sao người sáng tạo nội dung giải thích được sản phẩm này trong 3 giây (1 câu ngắn).'],
+                        'for_ideas'             => ['type' => 'string', 'description' => 'Tên (các) ý tưởng ở `ideas` dùng được sản phẩm này, copy đúng text `idea`; nhiều ý thì ngăn cách bằng dấu chấm phẩy.'],
+                    ],
+                    'required' => ['product', 'why_easy_to_explain', 'for_ideas'],
                 ],
             ],
             'category_note' => [
@@ -67,8 +84,11 @@ class RunLayer2ExtractionAction
                 'description' => 'CHỈ khi đã cố hết sức nhưng KHÔNG thể tạo thêm ý tưởng mới đạt tiêu chí trong lượt này (đã khai thác hết góc nhìn hợp lý, hoặc do lệch chủ đề/không xác định được chuyên mục phù hợp ở Bước 0): 1 câu lý do ngắn. Null nếu vẫn còn góc nhìn để khai thác.',
             ],
         ],
-        'required' => ['ideas'],
+        'required' => ['ideas', 'suggested_products'],
     ];
+
+    /** Sàn số lượng sản phẩm gợi ý — khớp con số nêu trong prompt (buildLayer2PromptText). */
+    private const MIN_SUGGESTED_PRODUCTS = 5;
 
     private const CRITERIA_KEYS = ['matches_core_focus', 'unique_angle', 'serves_goal', 'fits_audience'];
 
@@ -101,6 +121,8 @@ class RunLayer2ExtractionAction
 
         $accepted           = [];
         $seenNormalized     = [];
+        $products           = [];
+        $seenProducts       = [];
         $totalCostUsd       = 0.0;
         $modelUsed          = $model;
         $categoryNote       = null;
@@ -165,6 +187,26 @@ class RunLayer2ExtractionAction
                 $insufficientReason = (string) $decoded['insufficient_reason'];
             }
 
+            // Gom sản phẩm qua MỌI lượt (không chỉ lượt 1): mỗi lượt sinh thêm ý tưởng mới thì cũng
+            // có thể mở ra loại sản phẩm mới. Dedup theo tên đã chuẩn hoá để 1 sản phẩm model lặp
+            // lại ở lượt sau không thành 2 dòng — buildFollowUpPrompt() đã liệt kê sản phẩm đã có
+            // để model tự tránh, đây là lưới phụ.
+            foreach ((is_array($decoded['suggested_products'] ?? null) ? $decoded['suggested_products'] : []) as $product) {
+                if (! is_array($product)) {
+                    continue;
+                }
+
+                $name = trim((string) ($product['product'] ?? ''));
+                $key  = mb_strtolower($name);
+
+                if ($name === '' || isset($seenProducts[$key])) {
+                    continue;
+                }
+
+                $seenProducts[$key] = true;
+                $products[]         = $product;
+            }
+
             $addedThisRound = 0;
 
             foreach ($ideas as $idea) {
@@ -205,7 +247,7 @@ class RunLayer2ExtractionAction
                 break;
             }
 
-            $currentPrompt = $this->buildFollowUpPrompt($prompt, $accepted, $targetCount - count($accepted));
+            $currentPrompt = $this->buildFollowUpPrompt($prompt, $accepted, $targetCount - count($accepted), $products);
         }
 
         if (count($accepted) < $targetCount && $insufficientReason === null) {
@@ -218,7 +260,7 @@ class RunLayer2ExtractionAction
         }
 
         return [
-            'markdown_output' => $this->renderMarkdownTable($accepted, $categoryNote, $audienceAssumption, $insufficientReason),
+            'markdown_output' => $this->renderMarkdownTable($accepted, $products, $categoryNote, $audienceAssumption, $insufficientReason),
             'model_used'      => $modelUsed,
             'cost_usd'        => $totalCostUsd,
             'loop_iterations' => $iteration,
@@ -231,7 +273,7 @@ class RunLayer2ExtractionAction
      * Luôn nối vào PROMPT GỐC (không nối chồng lên $currentPrompt của lượt trước) để độ dài prompt
      * không phình to tích luỹ qua từng lượt — chỉ tăng đúng bằng danh sách ý đã đạt.
      */
-    private function buildFollowUpPrompt(string $originalPrompt, array $accepted, int $remaining): string
+    private function buildFollowUpPrompt(string $originalPrompt, array $accepted, int $remaining, array $products): string
     {
         $existingList = implode("\n", array_map(
             static function (array $idea): string {
@@ -242,10 +284,20 @@ class RunLayer2ExtractionAction
             $accepted,
         ));
 
+        // `suggested_products` nằm trong `required` của schema nên lượt nào model cũng phải trả
+        // trường này — nói rõ đã gom được gì để nó chỉ bổ sung sản phẩm MỚI (hoặc trả mảng rỗng khi
+        // đã đủ), thay vì lặp lại 5 dòng cũ mỗi lượt cho tốn token rồi bị dedup vứt đi.
+        $productNote = $products === []
+            ? "\n\nVề `suggested_products`: chưa gom được sản phẩm nào ở (các) lượt trước — lượt này cần đề xuất tối thiểu ".self::MIN_SUGGESTED_PRODUCTS.' sản phẩm theo đúng ràng buộc đã nêu ở cuối prompt.'
+            : "\n\nVề `suggested_products`, đã có sẵn các sản phẩm sau — KHÔNG lặp lại:\n"
+                .implode("\n", array_map(static fn (array $p): string => '- '.($p['product'] ?? ''), $products))
+                ."\n(Tổng đang có ".count($products).'/'.self::MIN_SUGGESTED_PRODUCTS.' tối thiểu.) Chỉ bổ sung sản phẩm MỚI khác loại nếu các ý tưởng mới ở lượt này mở ra loại sản phẩm chưa có; nếu không có gì mới, trả về mảng rỗng.';
+
         return $originalPrompt."\n\n# Bổ sung — vòng lặp tiếp theo\n"
             ."Bạn đã đề xuất các ý tưởng sau ở (các) lượt trước, ĐÃ đạt cả 4 tiêu chí — GIỮ NGUYÊN, KHÔNG lặp lại trong câu trả lời này:\n"
             .$existingList
-            ."\n\nCần thêm ÍT NHẤT {$remaining} ý tưởng MỚI, KHÔNG trùng hoặc gần giống bất kỳ ý nào ở trên (kể cả biến thể chỉ đổi cách diễn đạt nhưng cùng góc khai thác) — vẫn đi qua đủ Bước 1 (đa dạng góc nhìn) và Bước 2 (đánh giá cả 4 tiêu chí + 2 bộ lọc bắt buộc) như đã mô tả ở trên, chỉ trả về những ý MỚI đạt tiêu chí trong câu trả lời này ở trường `ideas`.";
+            ."\n\nCần thêm ÍT NHẤT {$remaining} ý tưởng MỚI, KHÔNG trùng hoặc gần giống bất kỳ ý nào ở trên (kể cả biến thể chỉ đổi cách diễn đạt nhưng cùng góc khai thác) — vẫn đi qua đủ Bước 1 (đa dạng góc nhìn) và Bước 2 (đánh giá cả 4 tiêu chí + 2 bộ lọc bắt buộc) như đã mô tả ở trên, chỉ trả về những ý MỚI đạt tiêu chí trong câu trả lời này ở trường `ideas`."
+            .$productNote;
     }
 
     /**
@@ -255,16 +307,13 @@ class RunLayer2ExtractionAction
      * `category` (chế độ chưa chọn chuyên mục) — khớp đúng 2 biến thể cột mà BƯỚC 3 của prompt mô
      * tả (có/không chuyên mục đã chọn), không cần Action biết trước đang ở chế độ nào.
      */
-    private function renderMarkdownTable(array $accepted, ?string $categoryNote, ?string $audienceAssumption, ?string $insufficientReason): string
+    private function renderMarkdownTable(array $accepted, array $products, ?string $categoryNote, ?string $audienceAssumption, ?string $insufficientReason): string
     {
         $hasCategoryColumn = false;
-        $hasProductColumn  = false;
         foreach ($accepted as $idea) {
             if (! empty($idea['category'])) {
                 $hasCategoryColumn = true;
-            }
-            if (! empty($idea['suggested_product'])) {
-                $hasProductColumn = true;
+                break;
             }
         }
 
@@ -285,10 +334,11 @@ class RunLayer2ExtractionAction
             $header[] = 'Chuyên mục đề xuất';
         }
         $header = array_merge($header, ['Khớp trọng tâm?', 'Góc nhìn độc quyền?', 'Phục vụ mục tiêu?', 'Phù hợp đối tượng?', 'Lý do (1 câu, vì sao đạt cả 4)', 'Đề xuất tiêu đề bài viết']);
-        if ($hasProductColumn) {
-            $header[] = 'Sản phẩm gợi ý';
-        }
 
+        // Heading cho bảng 1: từ 2026-08-04 output có thể gồm 2 bảng (ý tưởng + sản phẩm), không
+        // còn 1 bảng trần như trước — đặt tên đúng bố cục mà nhánh `forExternalChat` của
+        // buildLayer2PromptText() yêu cầu chat AI ngoài trả về, để 2 đường đi nhìn giống nhau.
+        $lines[] = '## Ý tưởng';
         $lines[] = '| '.implode(' | ', $header).' |';
         $lines[] = '| '.implode(' | ', array_fill(0, count($header), '---')).' |';
 
@@ -306,10 +356,6 @@ class RunLayer2ExtractionAction
             $cells[] = $this->escapeCell($idea['reason'] ?? '');
             $cells[] = $this->escapeCell($idea['suggested_title'] ?? '');
 
-            if ($hasProductColumn) {
-                $cells[] = $this->escapeCell($idea['suggested_product'] ?? '');
-            }
-
             $lines[] = '| '.implode(' | ', $cells).' |';
         }
 
@@ -318,7 +364,45 @@ class RunLayer2ExtractionAction
             $lines[] = $insufficientReason;
         }
 
-        return implode("\n", $lines);
+        return implode("\n", array_merge($lines, $this->renderProductLines($products)));
+    }
+
+    /**
+     * Bảng 2 — sản phẩm gợi ý cho CẢ BỘ ý tưởng (không còn là 1 cột của bảng ý tưởng như trước
+     * 2026-08-04). Bỏ hẳn cả khối khi model không đề xuất được sản phẩm nào — trang chủ đề thuần
+     * kiến thức/tâm lý hoàn toàn có thể không gắn với đồ dùng nào, prompt đã cho phép trả ít hơn
+     * sàn kèm lý do thay vì bịa. Khi có nhưng CHƯA đủ sàn thì thêm 1 dòng nhắc để người biên tập
+     * biết đây là giới hạn của chất liệu nguồn, không phải lỗi hiển thị.
+     *
+     * @return string[]
+     */
+    private function renderProductLines(array $products): array
+    {
+        if ($products === []) {
+            return [];
+        }
+
+        $lines = ['', '## Sản phẩm gợi ý cho cả bộ ý tưởng'];
+        $lines[] = '| # | Sản phẩm/dịch vụ | Vì sao dễ giải thích trong 3 giây | Dùng cho ý tưởng nào |';
+        $lines[] = '| --- | --- | --- | --- |';
+
+        foreach (array_values($products) as $index => $product) {
+            $lines[] = '| '.($index + 1)
+                .' | '.$this->escapeCell($product['product'] ?? '')
+                .' | '.$this->escapeCell($product['why_easy_to_explain'] ?? '')
+                .' | '.$this->escapeCell($product['for_ideas'] ?? '').' |';
+        }
+
+        if (count($products) < self::MIN_SUGGESTED_PRODUCTS) {
+            $lines[] = '';
+            $lines[] = sprintf(
+                'Chỉ gợi ý được %d/%d sản phẩm — dữ liệu nguồn không có thêm loại sản phẩm nào gắn tự nhiên với các ý tưởng trên.',
+                count($products),
+                self::MIN_SUGGESTED_PRODUCTS,
+            );
+        }
+
+        return $lines;
     }
 
     private function escapeCell(mixed $text): string

@@ -1,8 +1,50 @@
 # CoreIdeaExtractor
 
-**Version:** 1.20  
-**Last Updated:** 2026-08-02  
+**Version:** 1.21  
+**Last Updated:** 2026-08-04  
 **Status:** Design Specification (Ready for Implementation)
+
+> **v1.21 (Vá lỗ hổng ngữ cảnh biên tập + đổi khối "Gợi ý sản phẩm" + tách định dạng output theo
+> đường đi):** 3 nhóm thay đổi, áp dụng SONG SONG cho `CoreIdeaExtractor` và `VideoIdeaExtractor`.
+>
+> **(1) Hệ giá trị gia đình (§12.10) — khối grounding từ 1 câu dài thành khối nhiều dòng.**
+> `buildFamilyValuesGroundingLine()` → `buildFamilyValuesGroundingLines()` (trả mảng dòng), cộng
+> `buildFamilyValuesBoundaryLine()` bản NÉN cho các tool KHÔNG sinh ý tưởng (Tái cấu trúc nội dung
+> bên CoreIdeaExtractor; 6 tool tiêu đề/hook/Shorts/dàn ý/CTA/biên tập lời nói bên
+> VideoIdeaExtractor — nhóm này trước đây hoàn toàn không có khung giá trị nào dù chính chúng sinh
+> ra câu chữ ĐĂNG THẬT). Thêm `FAMILY_VALUE_EDITORIAL_NOTES` — lớp diễn giải theo `key` của riêng
+> module, KHÔNG phải câu chữ văn bản gốc (config vẫn là nguồn sự thật duy nhất cho label/
+> description/decision_ref): 4 định nghĩa trong config viết ở tầng CHÍNH SÁCH nên model không tự
+> bắc cầu sang 1 ý tưởng cụ thể, đó là lý do nó hay trả ý tưởng dạng khẩu hiệu. 6 lỗ hổng được vá:
+> phép thử "thế nào là PHỤC VỤ giá trị"; khung này là ĐỊNH HƯỚNG NỘI BỘ, cấm đề xuất bài phân tích/
+> trích dẫn Quyết định 1189 (rủi ro model bịa điều khoản văn bản pháp quy); đa dạng mô hình gia
+> đình; cạm bẫy gán vai trò theo giới (cách vi phạm giá trị Tiến bộ phổ biến nhất mà không hề "cổ
+> suý" gì); phân biệt phong tục với hủ tục; cách xử lý khi 2 giá trị xung đột (an toàn thân thể/
+> tinh thần + bình đẳng giới là mức sàn). Ranh giới cứng mở rộng khỏi "cha mẹ" sang MỌI thành viên.
+>
+> **(2) Lỗ hổng ngữ cảnh khác trong 2 blade.** CoreIdeaExtractor: `writer_insights` trước đây bị bỏ
+> quên hoàn toàn dù endpoint `show()` vẫn trả về và VideoIdeaExtractor đã dùng; thêm khối "đối
+> tượng độc giả" tường minh (trước chỉ là mệnh đề phụ trong persona); vá fallback
+> `foundation.style_sample` (chọn chuyên mục SAU khi trích xuất thì mất giọng văn mẫu); mở rộng
+> nhóm chủ đề rủi ro sang thai kỳ/người cao tuổi/sức khoẻ tinh thần + tách riêng bạo lực gia đình/
+> xâm hại/trầm cảm sau sinh; nguồn ngoại phải chuyển cả BỐI CẢNH chứ không chỉ ngôn ngữ; 2 tool
+> Tóm tắt/Tái cấu trúc nhận cảnh báo `extraction_confidence`/paywall và yêu cầu giữ nguyên MỨC ĐỘ
+> CHẮC CHẮN của nguồn. VideoIdeaExtractor: danh sách chuyên mục ở Bước 0 giờ dùng hint
+> `toHintArray()` (trọng tâm/góc nhìn/ý ĐÃ TỪ CHỐI) vốn server đã trả sẵn nhưng blade bỏ phí; sửa
+> 1 TIỀN ĐỀ SAI trong prompt — `existing-articles` trả tiêu đề BÀI VIẾT nhưng 2 prompt "Kịch bản
+> đầy đủ"/"Mô tả & Tag SEO" giới thiệu chúng là "danh sách video CÓ THẬT của kênh", khiến kịch bản
+> mời người xem "xem tiếp video [tên]" không tồn tại (giờ chuyển sang gợi ý theo CHỦ ĐỀ); thêm ràng
+> buộc phẩm giá cho thumbnail (trước đây ràng buộc chỉ áp cho tiêu đề, không phủ sang hình).
+>
+> **(3) "Gợi ý sản phẩm" + định dạng output — xem §12.4.1 và §12.11.** Theo yêu cầu người dùng:
+> sản phẩm gợi ý đổi từ field per-idea `suggested_product` (1 chuỗi nullable, thực tế cho ra 0-2
+> sản phẩm/lần chạy vì mỗi ý xét độc lập) sang danh sách RIÊNG cấp kết quả `suggested_products`,
+> **tối thiểu 5** cho cả bộ ý tưởng, render thành bảng Markdown thứ 2. Đồng thời tách định dạng
+> output theo ĐƯỜNG ĐI: nút "Chạy AI" trong app giữ structured output + PHP render bảng, còn nút
+> "Copy prompt cho AI" (dán sang Grok/Claude) yêu cầu thẳng 2 bảng Markdown thay vì mô tả theo tên
+> field — trước đây 2 đường dùng chung 1 bản mô tả field nên chat AI ngoài trả về đúng 1 khối JSON
+> thô. Sửa cả `RunLayer2ExtractionAction` và `RunVideoIdeaLayer2Action` (schema + vòng lặp gom sản
+> phẩm + renderer).
 
 > **v1.20 (Bỏ Bảng 2 — Ý tưởng bị loại, đảo ngược quyết định v1.8 — ghi nhận đúng trạng thái code hiện tại):**
 > theo yêu cầu người dùng, "Copy prompt cho AI" (§12.4) không còn xuất **Bảng 2** (ý tưởng bị loại
@@ -566,7 +608,27 @@ minh:
      tới giải quyết.
 
 Dòng khoá format cứng (v1.6) vẫn giữ nguyên, chỉ chuyển thành 1 phần của chỉ dẫn Bước 3 (không
-viết gì ngoài bảng — chỉ 1 bảng từ v1.20).
+viết gì ngoài bảng — chỉ 1 bảng từ v1.20, 2 bảng từ v1.21 khi có sản phẩm gợi ý).
+
+#### 12.4.1 Hai đường đi, hai định dạng output (v1.21)
+
+Cùng 1 chuỗi prompt (`buildLayer2PromptText()`) phục vụ 2 đường đi có cơ chế định dạng khác hẳn
+nhau — trước v1.21 cả hai dùng chung 1 bản mô tả theo TÊN FIELD, nên đường thứ hai bị hỏng:
+
+| | Nút "Chạy Layer 2 bằng AI" (trong app) | Nút "Copy prompt cho AI" (dán sang Grok/Claude) |
+|---|---|---|
+| Ép định dạng | `RESPONSE_SCHEMA` (structured output) ở Action | Không có gì ép |
+| Ai dựng bảng | PHP (`renderMarkdownTable()`) | Chính model |
+| Prompt mô tả | theo tên field (`ideas`, `suggested_products`…) | theo BẢNG 1 / BẢNG 2 Markdown |
+
+Cờ `forExternalChat` (mặc định `false`) chọn nhánh; `copyPromptForAi()` truyền `true`. Nhánh
+external còn (a) ánh xạ `category_note`/`audience_assumption`/`insufficient_reason` — vốn được nhắc
+như "trường" ở Bước 0/Bước 2 — thành DÒNG CHỮ THƯỜNG đặt trước/sau bảng 1, đúng vị trí PHP đang
+render, và (b) sửa lại "Mục tiêu số lượng": lời hứa *"hệ thống sẽ tự yêu cầu bạn sinh thêm ở lượt
+sau"* chỉ đúng với vòng lặp goal-based trong app, ở chat ngoài là 1 lượt hỏi đáp duy nhất nên phải
+yêu cầu đủ số lượng ngay trong câu trả lời. Bố cục 2 bảng của 2 nhánh được giữ GIỐNG NHAU có chủ ý
+(kể cả quy tắc cột "Chuyên mục đề xuất" chỉ xuất hiện khi chưa chọn chuyên mục) — người biên tập
+không phải học 2 bố cục cho cùng 1 việc.
 
 ### 12.5 Cảnh báo kích thước prompt (v1.9)
 
@@ -666,9 +728,14 @@ liệu KHÁCH QUAN, TỰ ĐỘNG: danh sách tiêu đề bài đã publish thậ
   (chỉ liệt kê tiêu đề, để AI tự đánh giá mức độ trùng) — để dành cho lần lặp sau nếu cần chính
   xác hơn.
 
-### 12.10 Hệ giá trị gia đình Việt Nam — chuẩn nền tảng cố định (v1.16)
+### 12.10 Hệ giá trị gia đình Việt Nam — chuẩn nền tảng cố định (v1.16, khối grounding mở rộng v1.21)
 
 #### 12.10.1 Bối cảnh
+
+> **Đính chính tham chiếu (v1.21):** các dòng bên dưới trỏ `spec/giadinh.md` — file đó hiện KHÔNG
+> chứa nội dung hệ giá trị (nội dung trong file là 1 bài tiếng Anh về inference pipeline của LLM,
+> không liên quan). Tham chiếu đúng cho định nghĩa 4 giá trị là chính mục §12.10 này + config nêu
+> ở Lớp 1. Chưa rõ file bị ghi đè từ lúc nào.
 
 Đối chiếu `spec/giadinh.md`: Hệ giá trị gia đình Việt Nam gồm 4 giá trị cốt lõi — **ấm no, hạnh
 phúc, tiến bộ, văn minh** — do Thủ tướng Chính phủ ban hành qua **Quyết định 1189/QĐ-TTg ngày
@@ -687,14 +754,24 @@ lại câu chữ** — vai trò của editor chỉ là chọn giá trị nào á
 **Lớp 1 — Khối cố định (grounding), luôn xuất hiện, không thuộc về category nào:**
 
 - Định nghĩa 4 giá trị (`key`, `label`, `description`) + `decision_ref` ("Quyết định 1189/QĐ-TTg
-  ngày 02/07/2026") sống ở `config('core_idea_extractor.family_values')` — **nguồn sự thật DUY
-  NHẤT**, không hardcode lặp lại câu chữ ở PHP/blade/JS chỗ khác (đọc động qua `config(...)` ở mọi
-  nơi cần dùng: rule validate `in:...` ở `CategoryFoundationController::upsert()`, UI checkbox ở
-  `category-foundations.blade.php`, dòng grounding ở `index.blade.php`).
-- `buildFamilyValuesGroundingLine()` (`index.blade.php`) dựng 1 câu liệt kê đủ 4 giá trị kèm mô tả
-  + trích dẫn Quyết định, cộng 1 mệnh đề CHẶN CỨNG ("KHÔNG được đi ngược các giá trị này — không
-  cổ suý bất bình đẳng giới, bạo lực gia đình, hủ tục lạc hậu, lối sống thiếu chuẩn mực giữa các
-  thế hệ"). Push vào TOP của "Copy prompt cho AI" (§12.4) NGAY SAU dòng persona + ngày hôm nay,
+  ngày 02/07/2026") sống ở `config('content_foundation.family_values')` (v1.21 đính chính đường
+  dẫn: khối này đã chuyển sang module `ContentFoundation` khi tách module, spec cũ ghi
+  `core_idea_extractor.family_values`) — **nguồn sự thật DUY NHẤT**, không hardcode lặp lại câu chữ
+  ở PHP/blade/JS chỗ khác (đọc động qua `config(...)` ở mọi nơi cần dùng: rule validate `in:...` ở
+  `CategoryFoundationController::upsert()`, UI checkbox ở `category-foundations.blade.php`, khối
+  grounding ở `index.blade.php`).
+- `buildFamilyValuesGroundingLines()` (`index.blade.php`; tới v1.20 tên là
+  `buildFamilyValuesGroundingLine()` và chỉ trả về ĐÚNG 1 câu) dựng khối nhiều dòng: liệt kê đủ 4
+  giá trị kèm mô tả gốc + 1 dòng diễn giải "ở tầng biên tập" cho mỗi giá trị
+  (`FAMILY_VALUE_EDITORIAL_NOTES`, map theo `key` — KHÔNG phải câu chữ văn bản gốc nên không vi
+  phạm nguyên tắc "nguồn sự thật duy nhất" ở trên; thêm/bớt giá trị trong config vẫn chạy, key lạ
+  chỉ đơn giản không có dòng diễn giải), phép thử "thế nào là PHỤC VỤ giá trị", mệnh đề "đây là
+  khung NỘI BỘ, không phải chất liệu viết vào bài" (cấm đề xuất bài phân tích/trích dẫn Quyết định
+  — model rất dễ bịa điều khoản của 1 văn bản pháp quy), đa dạng mô hình gia đình, cạm bẫy gán vai
+  trò theo giới, phân biệt phong tục với hủ tục, cách xử lý khi 2 giá trị xung đột, và cuối cùng
+  mới tới mệnh đề CHẶN CỨNG (đúng thứ tự "mục tiêu tích cực trước, ranh giới cấm sau" đã chốt ở
+  v1.17 — Pink Elephant Problem). Ranh giới cứng áp cho MỌI thành viên gia đình, không riêng cha mẹ.
+  Push vào TOP của "Copy prompt cho AI" (§12.4) NGAY SAU dòng persona + ngày hôm nay,
   TRƯỚC mọi field foundation theo category — **LUÔN xuất hiện kể cả khi chưa chọn chuyên mục nào**
   (khác mọi khối khác trong §12.4 vốn chỉ xuất hiện khi có `foundation`), vì đây là chuẩn áp dụng
   cho MỌI nội dung của platform, không riêng chuyên mục nào.
@@ -747,6 +824,14 @@ foundation sẽ hoàn toàn không có ràng buộc giá trị nào khi sinh ý 
   viết lại nội dung NGUỒN đã có sẵn (đã qua vòng ý tưởng hoá ở Layer 2 nếu xuất phát từ đó) thành
   nhiều phiên bản theo nền tảng, không phải bước sinh ý tưởng mới; để dành cho lần lặp sau nếu có
   nhu cầu thực tế.
+  - **Cập nhật v1.21:** nhu cầu thực tế đã xuất hiện và tool này GIỜ CÓ khung giá trị — nhưng ở bản
+    NÉN (`buildFamilyValuesBoundaryLine()`), không phải khối grounding đầy đủ: 3 phiên bản Facebook/
+    LinkedIn/Twitter đăng CÔNG KHAI nên cần ranh giới, còn phép thử "phục vụ giá trị nào" thì vô
+    nghĩa vì không có ý tưởng nào được sinh ra ở đây. Cùng bản nén đó cũng được dùng cho 6 tool sinh
+    câu chữ đăng thật bên `VideoIdeaExtractor` (tiêu đề/hook/Shorts/dàn ý/CTA/biên tập lời nói).
+    `buildSummarizePromptText()` VẪN giữ nguyên quyết định không áp dụng (gạch đầu dòng trên), chỉ
+    nhận thêm 1 chỉ dẫn về giữ MỨC ĐỘ CHẮC CHẮN của nguồn — đó là tiêu chí trung thực với nguồn,
+    không phải bối cảnh biên tập.
 
 ---
 
