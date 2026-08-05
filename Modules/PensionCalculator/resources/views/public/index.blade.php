@@ -37,7 +37,7 @@
         {{-- Bước 1 --}}
         <div class="card bg-base-100 shadow-sm border border-base-200">
             <div class="card-body py-4 px-4">
-                <h2 class="font-semibold text-base-content mb-3">Bước 1 — Thông tin cơ bản</h2>
+                <h2 class="flex items-center gap-2 font-semibold text-base-content mb-3"><span class="badge badge-primary badge-sm w-5 h-5 p-0 justify-center font-bold">1</span> Thông tin cơ bản</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div class="form-control">
                         <label class="label py-0.5"><span class="label-text text-xs font-medium">Giới tính</span></label>
@@ -79,7 +79,7 @@
         <div class="card bg-base-100 shadow-sm border border-base-200">
             <div class="card-body py-4 px-4">
                 <div class="flex items-center justify-between flex-wrap gap-2 mb-1">
-                    <h2 class="font-semibold text-base-content">Bước 2 — Dòng thời gian đóng BHXH tự nguyện</h2>
+                    <h2 class="flex items-center gap-2 font-semibold text-base-content"><span class="badge badge-primary badge-sm w-5 h-5 p-0 justify-center font-bold">2</span> Dòng thời gian đóng BHXH tự nguyện</h2>
                     <button type="button" class="btn btn-primary btn-xs" @click="addRow()">+ Thêm giai đoạn</button>
                 </div>
 
@@ -94,7 +94,7 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="table table-sm">
+                    <table class="table table-sm table-zebra">
                         <thead>
                             <tr>
                                 <th>Từ</th>
@@ -127,7 +127,7 @@
                                                :max="currentParameterPeriod.reference_level * currentParameterPeriod.ceiling_multiplier">
                                     </td>
                                     <td>
-                                        <select class="select select-bordered select-xs" x-model="row.supportGroup">
+                                        <select class="select select-bordered select-xs w-full min-w-36" x-model="row.supportGroup">
                                             <option value="none">Không thuộc diện hỗ trợ</option>
                                             <template x-for="tier in currentParameterPeriod.support_tiers" :key="tier.group_key">
                                                 <option :value="tier.group_key" x-text="supportGroupLabel(tier.group_key)"></option>
@@ -158,9 +158,9 @@
         {{-- Bước 3 — §10.5 breakdown --}}
         <div class="card bg-base-100 shadow-sm border border-base-200">
             <div class="card-body py-4 px-4">
-                <h2 class="font-semibold text-base-content mb-3">Bước 3 — Mức bình quân thu nhập tháng đóng BHXH (Mbq)</h2>
+                <h2 class="flex items-center gap-2 font-semibold text-base-content mb-3"><span class="badge badge-primary badge-sm w-5 h-5 p-0 justify-center font-bold">3</span> Mức bình quân thu nhập tháng đóng BHXH (Mbq)</h2>
                 <div class="overflow-x-auto">
-                    <table class="table table-sm">
+                    <table class="table table-sm table-zebra">
                         <thead>
                             <tr>
                                 <th>Giai đoạn</th>
@@ -213,30 +213,35 @@
         {{-- Bước 4 --}}
         <div class="card bg-base-100 shadow-sm border border-base-200">
             <div class="card-body py-4 px-4">
-                <h2 class="font-semibold text-base-content mb-3">Bước 4 — Điều kiện hưởng lương hưu</h2>
+                <h2 class="flex items-center gap-2 font-semibold text-base-content mb-3"><span class="badge badge-primary badge-sm w-5 h-5 p-0 justify-center font-bold">4</span> Điều kiện hưởng lương hưu</h2>
                 <p class="text-sm">Nhánh áp dụng: <span class="font-medium" x-text="pensionEligibility.branchLabel"></span></p>
                 <p class="text-sm mt-1">Số năm đóng tích luỹ: <span x-text="(pensionEligibility.monthsAccumulated/12).toFixed(1)"></span> năm / cần <span x-text="pensionEligibility.monthsRequired/12"></span> năm.</p>
 
+                {{-- Lưu ý DaisyUI .alert mặc định display:flex (hàng ngang) — nếu để nhiều thẻ
+                     con cấp cao nhất (p/ul/p...) không bọc trong 1 wrapper, chúng sẽ bị xếp
+                     THÀNH CÁC CỘT cạnh nhau thay vì xếp chồng dọc (bug đã gặp 2026-08-05, xem
+                     git blame). Mọi alert có >1 khối con phải bọc trong 1 <div> duy nhất. --}}
                 <template x-if="!pensionEligibility.eligibleByYears">
-                    <div class="alert alert-warning text-sm mt-2">
-                        <p>Còn thiếu <span x-text="pensionEligibility.yearsShort"></span> năm <span x-text="pensionEligibility.monthsShortRemainder || 0"></span> tháng để đủ điều kiện. Có 3 hướng cân nhắc:</p>
-                        <ul class="list-disc pl-4 mt-1 space-y-0.5">
-                            <li><strong>Tiếp tục đóng BHXH tự nguyện</strong> tới khi đủ số năm — xem bảng minh hoạ ước tính ở cuối Bước 5 (dựa trên mức thu nhập bạn giả định, không áp hệ số trượt giá tương lai).</li>
-                            <li>Đóng bù 1 lần cho thời gian còn thiếu (Điều 7 Nghị định 159) — chỉ áp dụng nếu đã đủ tuổi nghỉ hưu VÀ số tháng thiếu ≤ 60 tháng.</li>
-                            <li>Chờ hưởng trợ cấp hằng tháng khi đủ tuổi (Điều 14 Nghị định 159) — dành cho người không muốn/không đủ điều kiện đóng bù.</li>
-                        </ul>
-                        <p class="mt-1 text-xs">2 phương án cuối (đóng bù 1 lần / trợ cấp hằng tháng) công cụ <strong>CHƯA tính được số cụ thể</strong> — công thức cần mức trợ cấp hưu trí xã hội hằng tháng (Điều 21 Luật Bảo hiểm xã hội 2024) hiện chưa có nguồn xác minh (spec §14 mục 5), không phải giới hạn kỹ thuật mà là thiếu số liệu pháp luật, nên KHÔNG bịa số.</p>
+                    <div class="alert alert-info items-start text-sm mt-2">
+                        <div class="space-y-1.5">
+                            <p>Còn thiếu <span class="font-semibold" x-text="pensionEligibility.yearsShort"></span> năm <span class="font-semibold" x-text="pensionEligibility.monthsShortRemainder || 0"></span> tháng để đủ điều kiện. Có 3 hướng cân nhắc:</p>
+                            <ul class="list-disc pl-4 space-y-0.5">
+                                <li><strong>Tiếp tục đóng BHXH tự nguyện</strong> tới khi đủ số năm — xem bảng minh hoạ ước tính ở cuối Bước 5 (dựa trên mức thu nhập bạn giả định, không áp hệ số trượt giá tương lai).</li>
+                                <li>Đóng bù 1 lần cho thời gian còn thiếu (Điều 7 Nghị định 159) — chỉ áp dụng nếu đã đủ tuổi nghỉ hưu VÀ số tháng thiếu ≤ 60 tháng.</li>
+                                <li>Chờ hưởng trợ cấp hằng tháng khi đủ tuổi (Điều 14 Nghị định 159) — dành cho người không muốn/không đủ điều kiện đóng bù.</li>
+                            </ul>
+                            <p class="text-xs opacity-80">2 phương án cuối (đóng bù 1 lần / trợ cấp hằng tháng) công cụ <strong>CHƯA tính được số cụ thể</strong> — công thức cần mức trợ cấp hưu trí xã hội hằng tháng (Điều 21 Luật Bảo hiểm xã hội 2024) hiện chưa có nguồn xác minh (spec §14 mục 5), không phải giới hạn kỹ thuật mà là thiếu số liệu pháp luật, nên KHÔNG bịa số.</p>
+                        </div>
                     </div>
                 </template>
                 <template x-if="pensionEligibility.eligibleByYears && !pensionEligibility.ageVerified">
                     <div class="alert alert-info text-sm mt-2">
-                        Đã đủ số năm đóng theo nhánh này. Điều kiện tuổi tra theo <span x-text="pensionEligibility.ageRequirementNote"></span> — công cụ CHƯA có bảng tuổi nghỉ hưu đã xác minh nên không thể tự xác nhận bạn đã đủ tuổi hay chưa, vui lòng đối chiếu thêm quy định tuổi nghỉ hưu hiện hành.
+                        <span>Đã đủ số năm đóng theo nhánh này. Điều kiện tuổi tra theo <span x-text="pensionEligibility.ageRequirementNote"></span> — công cụ CHƯA có bảng tuổi nghỉ hưu đã xác minh nên không thể tự xác nhận bạn đã đủ tuổi hay chưa, vui lòng đối chiếu thêm quy định tuổi nghỉ hưu hiện hành.</span>
                     </div>
                 </template>
                 <template x-if="pensionEligibility.eligibleByYears && pensionEligibility.ageVerified">
                     <div class="alert text-sm mt-2" :class="pensionEligibility.ageOk ? 'alert-success' : 'alert-warning'">
-                        <span x-text="pensionEligibility.ageRequirementNote"></span> —
-                        <span x-text="pensionEligibility.ageOk ? 'đã đủ tuổi.' : (currentAge !== null ? ('hiện ' + currentAge + ' tuổi, chưa đủ.') : 'vui lòng nhập năm sinh để kiểm tra.')"></span>
+                        <span><span x-text="pensionEligibility.ageRequirementNote"></span> — <span x-text="pensionEligibility.ageOk ? 'đã đủ tuổi.' : (currentAge !== null ? ('hiện ' + currentAge + ' tuổi, chưa đủ.') : 'vui lòng nhập năm sinh để kiểm tra.')"></span></span>
                     </div>
                 </template>
             </div>
@@ -245,7 +250,7 @@
         {{-- Bước 5 --}}
         <div class="card bg-base-100 shadow-sm border border-base-200">
             <div class="card-body py-4 px-4">
-                <h2 class="font-semibold text-base-content mb-3">Bước 5 — Ước tính lương hưu hằng tháng</h2>
+                <h2 class="flex items-center gap-2 font-semibold text-base-content mb-3"><span class="badge badge-primary badge-sm w-5 h-5 p-0 justify-center font-bold">5</span> Ước tính lương hưu hằng tháng</h2>
 
                 <template x-if="estimatedMonthlyPension.value !== null">
                     <p class="text-2xl font-bold text-primary" x-text="formatVnd(estimatedMonthlyPension.value) + ' / tháng'"></p>
@@ -280,7 +285,7 @@
                 <button type="button" class="btn btn-ghost btn-xs w-fit mb-2" @click="resetProjectionIncomes()">Đặt lại theo mức gần nhất</button>
 
                 <div class="overflow-x-auto">
-                    <table class="table table-sm">
+                    <table class="table table-sm table-zebra">
                         <thead>
                             <tr>
                                 <th>Kịch bản</th>
@@ -347,8 +352,12 @@
                 <p class="text-xs text-base-content/50 mb-3">
                     Giả định tiếp tục đóng đúng <span x-text="formatVnd(projectionIncomes.current)"></span>/tháng cho các tháng còn thiếu, hệ số trượt giá của các năm chưa tới lấy CỐ ĐỊNH bằng hệ số năm hiện tại (<span x-text="currentYear"></span>: hệ số <span x-text="Number(currentYearCoefficient).toFixed(2)"></span>) — không phải hệ số chính thức cho các năm đó (chưa được BHXH Việt Nam công bố), chỉ minh hoạ tương đối.
                 </p>
-                <div class="overflow-x-auto">
-                    <table class="table table-sm">
+
+                {{-- Bảng cuộn riêng trong khung cao tối đa — tránh kéo dài cả trang khi số năm
+                     còn thiếu lớn (VD 13-15 năm ra 13-15 dòng); phần tổng kết (Mbq/lương hưu) để
+                     RIÊNG ngoài vùng cuộn (dưới đây) để luôn nhìn thấy, không bị cuộn mất. --}}
+                <div class="overflow-x-auto overflow-y-auto max-h-72 border border-base-200 rounded-lg">
+                    <table class="table table-sm table-zebra table-pin-rows">
                         <thead>
                             <tr>
                                 <th>Năm</th>
@@ -371,25 +380,25 @@
                                 </tr>
                             </template>
                         </tbody>
-                        <tfoot>
-                            <tr class="font-semibold border-t-2 border-base-300">
-                                <td colspan="5">Mức bình quân thu nhập (Mbq) dự kiến khi đủ điều kiện (<span x-text="projectPensionFor(projectionIncomes.current).eligibleAtLabel"></span>)</td>
-                                <td class="text-right" x-text="formatVnd(projectPensionFor(projectionIncomes.current).projectedMbq)"></td>
-                            </tr>
-                            <tr class="font-semibold">
-                                <td colspan="5">Lương hưu ước tính hằng tháng sau khi đủ điều kiện</td>
-                                <td class="text-right text-primary">
-                                    <template x-if="projectPensionFor(projectionIncomes.current).needsVerifiedRateTable">
-                                        <span class="text-warning text-xs">Chưa xác minh tỷ lệ hưởng</span>
-                                    </template>
-                                    <template x-if="!projectPensionFor(projectionIncomes.current).needsVerifiedRateTable">
-                                        <span class="text-lg" x-text="formatVnd(projectPensionFor(projectionIncomes.current).projectedPension)"></span>
-                                    </template>
-                                </td>
-                            </tr>
-                        </tfoot>
                     </table>
                 </div>
+
+                <div class="stats stats-vertical sm:stats-horizontal shadow-sm border border-base-200 w-full mt-3">
+                    <div class="stat py-2 px-4">
+                        <div class="stat-title text-xs">Mbq dự kiến khi đủ điều kiện (<span x-text="projectPensionFor(projectionIncomes.current).eligibleAtLabel"></span>)</div>
+                        <div class="stat-value text-lg" x-text="formatVnd(projectPensionFor(projectionIncomes.current).projectedMbq)"></div>
+                    </div>
+                    <div class="stat py-2 px-4">
+                        <div class="stat-title text-xs">Lương hưu ước tính hằng tháng sau khi đủ điều kiện</div>
+                        <template x-if="projectPensionFor(projectionIncomes.current).needsVerifiedRateTable">
+                            <div class="stat-value text-warning text-sm">Chưa xác minh tỷ lệ hưởng</div>
+                        </template>
+                        <template x-if="!projectPensionFor(projectionIncomes.current).needsVerifiedRateTable">
+                            <div class="stat-value text-primary text-lg" x-text="formatVnd(projectPensionFor(projectionIncomes.current).projectedPension)"></div>
+                        </template>
+                    </div>
+                </div>
+
                 <p class="text-xs text-base-content/40 mt-2">Muốn xem theo mức đóng khác (thấp hơn/cao hơn) — sửa ô "Giữ nguyên mức gần nhất" ở bảng minh hoạ phía trên, bảng chi tiết này sẽ tự cập nhật theo.</p>
             </div>
         </div>
@@ -493,7 +502,7 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="table table-sm">
+                    <table class="table table-sm table-zebra">
                         <thead>
                             <tr>
                                 <th rowspan="2" class="align-bottom">Mục tiêu lương hưu/tháng</th>
