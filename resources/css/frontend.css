@@ -54,6 +54,15 @@
     --radius-box: 0.75rem;
     --radius-field: 0.5rem;
     --radius-selector: 1rem;
+
+    /* BUG phát hiện 2026-08-05: theme tuỳ biến (không phải "light"/"dark" có sẵn của daisyUI)
+     * không tự kế thừa --border/--depth/--noise từ theme mặc định — thiếu 3 biến này khiến
+     * `.input`/`.select`/`.checkbox`... (mọi component daisyUI dùng var(--border) cho viền)
+     * bị border-width fallback về 0 (Tailwind preflight reset), tức MẤT VIỀN khi không focus,
+     * trên toàn bộ frontend công khai dùng theme "portal". Giá trị dưới khớp mặc định daisyUI. */
+    --border: 1px;
+    --depth: 1;
+    --noise: 0;
 }
 
 @theme {

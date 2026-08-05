@@ -53,25 +53,64 @@
                 </div>
 
                 <label class="label cursor-pointer justify-start gap-2 mt-2 py-1">
-                    <input type="checkbox" class="checkbox checkbox-sm" x-model="hasMandatoryHistory">
+                    <input type="checkbox" class="checkbox checkbox-sm" x-model="hasMandatoryHistory" @change="if (hasMandatoryHistory && mandatoryRows.length === 0) addMandatoryRow()">
                     <span class="label-text text-sm">Đã có thời gian đóng BHXH bắt buộc trước đó</span>
                 </label>
 
-                <div x-show="hasMandatoryHistory" x-cloak class="grid grid-cols-1 sm:grid-cols-2 gap-3 pl-6">
-                    <div class="form-control">
-                        <label class="label py-0.5"><span class="label-text text-xs font-medium">Tổng số tháng đã đóng bắt buộc</span></label>
-                        <input type="number" min="0" class="input input-bordered input-sm" x-model.number="mandatoryMonths">
+                {{-- Nhiều giai đoạn bắt buộc TÁCH RỜI (VD: đi làm công ty → nghỉ đóng tự nguyện →
+                     đi làm lại) — bổ sung theo yêu cầu người dùng 2026-08-05, trước đây chỉ cho
+                     nhập 1 tổng gộp duy nhất, không khớp thực tế nhiều người có 2+ giai đoạn bắt
+                     buộc xen kẽ tự nguyện. Mỗi giai đoạn tự khai mức bình quân RIÊNG (vẫn KHÔNG
+                     tự tính hộ theo Điều 72/73 — quá phức tạp, cần hệ số trượt giá LƯƠNG riêng
+                     ngoài phạm vi module), công cụ chỉ gộp có trọng số theo số tháng từng giai
+                     đoạn (xem mandatoryAverageIncome getter). --}}
+                <div x-show="hasMandatoryHistory" x-cloak class="pl-6 space-y-2">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <p class="text-xs text-base-content/50">Nhập từng giai đoạn bắt buộc (có thể nhiều giai đoạn tách rời) — mỗi giai đoạn tự khai mức bình quân tiền lương riêng theo sổ BHXH.</p>
+                        <button type="button" class="btn btn-primary btn-xs" @click="addMandatoryRow()">+ Thêm giai đoạn bắt buộc</button>
                     </div>
-                    <div class="form-control">
-                        <label class="label py-0.5"><span class="label-text text-xs font-medium">Mức bình quân tiền lương bắt buộc (tự khai, đ/tháng)</span></label>
-                        <input type="number" min="0" step="1000" class="input input-bordered input-sm" x-model.number="mandatoryAverageIncome">
+                    <div class="overflow-x-auto">
+                        <table class="table table-sm table-zebra">
+                            <thead>
+                                <tr>
+                                    <th>Từ</th>
+                                    <th>Đến</th>
+                                    <th>Mức bình quân tiền lương (đ/tháng, tự khai)</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="(row, idx) in mandatoryRows" :key="idx">
+                                    <tr>
+                                        <td class="whitespace-nowrap">
+                                            <div class="flex gap-1">
+                                                <input type="number" min="1" max="12" class="input input-bordered input-xs w-14" x-model.number="row.fromMonth" placeholder="Tháng">
+                                                <input type="number" class="input input-bordered input-xs w-20" x-model.number="row.fromYear" placeholder="Năm">
+                                            </div>
+                                        </td>
+                                        <td class="whitespace-nowrap">
+                                            <div class="flex gap-1">
+                                                <input type="number" min="1" max="12" class="input input-bordered input-xs w-14" x-model.number="row.toMonth" placeholder="Tháng">
+                                                <input type="number" class="input input-bordered input-xs w-20" x-model.number="row.toYear" placeholder="Năm">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <input type="number" min="0" step="1000" class="input input-bordered input-xs w-36" x-model.number="row.averageIncome">
+                                        </td>
+                                        <td><button type="button" class="btn btn-ghost btn-xs text-error" @click="removeMandatoryRow(row)" x-show="mandatoryRows.length > 1">Xoá</button></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
                     </div>
-                    <label class="label cursor-pointer justify-start gap-2 sm:col-span-2 py-1">
+                    <p class="text-xs text-base-content/50">Tổng: <span class="font-medium" x-text="totalMandatoryMonths"></span> tháng — bình quân gộp (có trọng số theo tháng): <span class="font-medium" x-text="formatVnd(mandatoryAverageIncome)"></span>/tháng.</p>
+
+                    <label class="label cursor-pointer justify-start gap-2 py-1">
                         <input type="checkbox" class="checkbox checkbox-sm" x-model="hasSevereWorkCapacityReduction">
                         <span class="label-text text-sm">Suy giảm khả năng lao động ≥ 61% (nghỉ hưu sớm, nhánh (b) Điều 11.2.b)</span>
                     </label>
                 </div>
-                <p class="text-xs text-base-content/40 mt-1">Module này KHÔNG tự tính mức bình quân tiền lương BHXH bắt buộc (Điều 72/73 Luật) — vui lòng tự khai theo hồ sơ/sổ BHXH.</p>
+                <p class="text-xs text-base-content/40 mt-1">Module này KHÔNG tự tính mức bình quân tiền lương BHXH bắt buộc cho từng giai đoạn (Điều 72/73 Luật, cần hệ số trượt giá LƯƠNG riêng — ngoài phạm vi module) — vui lòng tự khai theo hồ sơ/sổ BHXH; công cụ chỉ gộp các giai đoạn bạn nhập có trọng số theo số tháng.</p>
             </div>
         </div>
 
@@ -155,6 +194,50 @@
             </div>
         </div>
 
+        {{-- Tổng quan quá trình đóng BHXH — gộp Bước 1 (bắt buộc) + Bước 2 (tự nguyện) theo
+             THỜI GIAN thật, chỉ để xem/kiểm tra trực quan khi 2 loại xen kẽ nhau (VD: đi làm công
+             ty → nghỉ đóng tự nguyện → đi làm lại) — bổ sung theo yêu cầu người dùng 2026-08-05.
+             Sửa dữ liệu vẫn ở đúng bảng gốc (Bước 1/Bước 2), khối này không có input riêng. --}}
+        <template x-if="hasMandatoryHistory && combinedTimeline.length">
+        <div class="card bg-base-100 shadow-sm border border-base-200">
+            <div class="card-body py-4 px-4">
+                <h2 class="font-semibold text-base-content mb-1">Tổng quan quá trình đóng BHXH</h2>
+                <p class="text-xs text-base-content/50 mb-3">Gộp cả 2 bảng ở trên, sắp theo đúng thời gian thật — giúp kiểm tra nhanh trình tự "bắt buộc → tự nguyện → bắt buộc..." có đúng như ngoài đời không. Muốn sửa, quay lại đúng bảng gốc (Bước 1 cho giai đoạn Bắt buộc, Bước 2 cho giai đoạn Tự nguyện).</p>
+
+                <template x-if="timelineOverlaps.length">
+                    <div class="alert alert-warning text-sm mb-3">
+                        <span>Phát hiện <span x-text="timelineOverlaps.length"></span> cặp giai đoạn bị TRÙNG thời gian giữa Bắt buộc và Tự nguyện — kiểm tra lại ngày tháng ở Bước 1/Bước 2 (một người không thể vừa đóng bắt buộc vừa đóng tự nguyện cùng lúc).</span>
+                    </div>
+                </template>
+
+                <div class="overflow-x-auto">
+                    <table class="table table-sm table-zebra">
+                        <thead>
+                            <tr>
+                                <th>Loại</th>
+                                <th>Từ</th>
+                                <th>Đến</th>
+                                <th class="text-right">Số tháng</th>
+                                <th class="text-right">Mức thu nhập/lương (đ/tháng)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="(seg, idx) in combinedTimeline" :key="idx">
+                                <tr>
+                                    <td><span class="badge badge-sm" :class="seg.badgeClass" x-text="seg.typeLabel"></span></td>
+                                    <td x-text="String(seg.fromMonth).padStart(2, '0') + '/' + seg.fromYear"></td>
+                                    <td x-text="String(seg.toMonth).padStart(2, '0') + '/' + seg.toYear"></td>
+                                    <td class="text-right" x-text="seg.months"></td>
+                                    <td class="text-right" x-text="formatVnd(seg.income)"></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        </template>
+
         {{-- Bước 3 — §10.5 breakdown --}}
         <div class="card bg-base-100 shadow-sm border border-base-200">
             <div class="card-body py-4 px-4">
@@ -188,15 +271,15 @@
                                 </tr>
                             </template>
                             <tr x-show="hasMandatoryHistory" x-cloak class="font-medium">
-                                <td>BHXH bắt buộc (tự khai)</td>
-                                <td class="text-right" x-text="mandatoryMonths"></td>
+                                <td>BHXH bắt buộc (tự khai, gộp <span x-text="sortedMandatoryRows().length"></span> giai đoạn)</td>
+                                <td class="text-right" x-text="totalMandatoryMonths"></td>
                                 <td>—</td>
-                                <td class="text-right" x-text="formatVnd(mandatoryAverageIncome * mandatoryMonths)"></td>
-                                <td class="text-right" x-text="formatVnd(mandatoryAverageIncome * mandatoryMonths)"></td>
+                                <td class="text-right" x-text="formatVnd(mandatoryTotalAmount)"></td>
+                                <td class="text-right" x-text="formatVnd(mandatoryTotalAmount)"></td>
                             </tr>
                             <tr class="font-semibold border-t-2 border-base-300">
                                 <td>Tổng</td>
-                                <td class="text-right" x-text="totalVoluntaryMonths + (hasMandatoryHistory ? mandatoryMonths : 0)"></td>
+                                <td class="text-right" x-text="totalVoluntaryMonths + totalMandatoryMonths"></td>
                                 <td></td>
                                 <td></td>
                                 <td class="text-right" x-text="averageMonthlyIncome === null ? '—' : formatVnd(averageMonthlyIncome) + ' (Mbq)'"></td>
@@ -449,12 +532,24 @@
                     <template x-if="optimizer.result?.achievable === false">
                         <div class="alert alert-warning text-sm">Mục tiêu vượt quá khả năng tối đa — kể cả đóng ở mức trần cũng chỉ đạt tối đa <span x-text="formatVnd(optimizer.result.maxPossiblePension)"></span>/tháng.</div>
                     </template>
+                    {{-- Đồng bộ trình bày kết quả với khối stat của tab "Ước tính lương hưu" (thay
+                         vì các dòng <p> rời rạc trước đây) — bổ sung theo yêu cầu người dùng
+                         2026-08-05 (rà soát đồng bộ UI/UX toàn trang). --}}
                     <template x-if="optimizer.result?.achievable === true">
-                        <div class="space-y-1 text-sm">
-                            <p>Mức thu nhập chọn đóng tối thiểu cần: <span class="font-bold text-primary" x-text="formatVnd(optimizer.result.requiredIncome)"></span></p>
-                            <p>Mức đóng ròng hằng tháng tương ứng: <span x-text="formatVnd(optimizer.result.monthlyContribution.net)"></span></p>
-                            <p>Tổng chi phí đóng ước tính (danh nghĩa, không chiết khấu/lạm phát): <span x-text="formatVnd(optimizer.result.totalCostEstimate)"></span></p>
-                            <p class="text-warning" x-show="optimizer.result.willExhaustSupport" x-cloak>Trong quá trình đóng sẽ chạm mốc hết hỗ trợ nhà nước 120 tháng — <span x-text="optimizer.result.monthsWithoutSupport"></span> tháng cuối tính đủ 22%, không còn hỗ trợ.</p>
+                        <div>
+                            <div class="stats stats-vertical sm:stats-horizontal shadow-sm border border-base-200 w-full">
+                                <div class="stat py-3 px-4">
+                                    <div class="stat-title text-xs">Mức thu nhập chọn đóng tối thiểu cần</div>
+                                    <div class="stat-value text-lg text-primary" x-text="formatVnd(optimizer.result.requiredIncome)"></div>
+                                    <div class="stat-desc" x-text="'Mức đóng ròng/tháng: ' + formatVnd(optimizer.result.monthlyContribution.net)"></div>
+                                </div>
+                                <div class="stat py-3 px-4">
+                                    <div class="stat-title text-xs">Tổng chi phí đóng ước tính</div>
+                                    <div class="stat-value text-lg" x-text="formatVnd(optimizer.result.totalCostEstimate)"></div>
+                                    <div class="stat-desc">Danh nghĩa, chưa chiết khấu/lạm phát</div>
+                                </div>
+                            </div>
+                            <p class="text-warning text-xs mt-2" x-show="optimizer.result.willExhaustSupport" x-cloak>Trong quá trình đóng sẽ chạm mốc hết hỗ trợ nhà nước 120 tháng — <span x-text="optimizer.result.monthsWithoutSupport"></span> tháng cuối tính đủ 22%, không còn hỗ trợ.</p>
                         </div>
                     </template>
                 </div>
@@ -592,8 +687,7 @@ document.addEventListener('alpine:init', () => {
         gender: 'male',
         birthYear: null,
         hasMandatoryHistory: false,
-        mandatoryMonths: 0,
-        mandatoryAverageIncome: 0,
+        mandatoryRows: [],
         hasSevereWorkCapacityReduction: false,
         contributionRows: [],
 
@@ -761,6 +855,88 @@ document.addEventListener('alpine:init', () => {
                 .sort((a, b) => this.rowStart(a) - this.rowStart(b));
         },
 
+        // ── Bước 1 — nhiều giai đoạn BHXH BẮT BUỘC tách rời (yêu cầu người dùng 2026-08-05:
+        // VD đi làm công ty 3 năm → nghỉ đóng tự nguyện 4 năm → đi làm lại) — tái dùng rowMonths/
+        // rowStart chung (đã tổng quát theo fromYear/fromMonth/toYear/toMonth, không riêng gì
+        // Bước 2). Mỗi giai đoạn tự khai `averageIncome` RIÊNG — module vẫn KHÔNG tự tính hộ
+        // theo Điều 72/73 (cần hệ số trượt giá LƯƠNG bắt buộc, ngoài phạm vi), chỉ gộp các giai
+        // đoạn có trọng số theo số tháng (xem mandatoryAverageIncome bên dưới).
+        addMandatoryRow() {
+            this.mandatoryRows.push({
+                fromYear: this.currentYear - 1,
+                fromMonth: 1,
+                toYear: this.currentYear,
+                toMonth: 12,
+                averageIncome: 0,
+            });
+        },
+
+        removeMandatoryRow(row) {
+            this.mandatoryRows = this.mandatoryRows.filter((r) => r !== row);
+        },
+
+        sortedMandatoryRows() {
+            return [...this.mandatoryRows]
+                .filter((r) => this.rowMonths(r) > 0)
+                .sort((a, b) => this.rowStart(a) - this.rowStart(b));
+        },
+
+        get totalMandatoryMonths() {
+            if (!this.hasMandatoryHistory) return 0;
+            return this.sortedMandatoryRows().reduce((sum, r) => sum + this.rowMonths(r), 0);
+        },
+
+        get mandatoryTotalAmount() {
+            if (!this.hasMandatoryHistory) return 0;
+            return this.sortedMandatoryRows().reduce((sum, r) => sum + this.rowMonths(r) * Number(r.averageIncome || 0), 0);
+        },
+
+        // Bình quân gộp CÓ TRỌNG SỐ theo số tháng của từng giai đoạn — giản lược hợp lý (mỗi
+        // giai đoạn đã là 1 mức bình quân tự khai theo sổ BHXH), KHÔNG áp hệ số trượt giá LƯƠNG
+        // riêng giữa các giai đoạn (ngoài phạm vi module, xem comment ở addMandatoryRow).
+        get mandatoryAverageIncome() {
+            return this.totalMandatoryMonths > 0 ? this.mandatoryTotalAmount / this.totalMandatoryMonths : 0;
+        },
+
+        // ── Tổng quan quá trình đóng BHXH — GỘP bắt buộc + tự nguyện, sắp theo THỜI GIAN thật
+        // (yêu cầu người dùng 2026-08-05: "nối tiếp bắt buộc → tự nguyện → bắt buộc..." khó theo
+        // dõi khi 2 bảng tách rời) — chỉ để XEM/kiểm tra trực quan, không phải input riêng, vẫn
+        // sửa dữ liệu ở 2 bảng gốc (Bước 1/Bước 2) như cũ.
+        get combinedTimeline() {
+            const mandatory = this.sortedMandatoryRows().map((r) => ({
+                typeLabel: 'Bắt buộc',
+                badgeClass: 'badge-info',
+                fromMonth: r.fromMonth, fromYear: r.fromYear, toMonth: r.toMonth, toYear: r.toYear,
+                start: this.rowStart(r), end: r.toYear * 12 + r.toMonth,
+                months: this.rowMonths(r),
+                income: Number(r.averageIncome || 0),
+            }));
+            const voluntary = this.sortedRows().map((r) => ({
+                typeLabel: 'Tự nguyện',
+                badgeClass: 'badge-secondary',
+                fromMonth: r.fromMonth, fromYear: r.fromYear, toMonth: r.toMonth, toYear: r.toYear,
+                start: this.rowStart(r), end: r.toYear * 12 + r.toMonth,
+                months: this.rowMonths(r),
+                income: Number(r.income || 0),
+            }));
+            return [...mandatory, ...voluntary].sort((a, b) => a.start - b.start);
+        },
+
+        // Phát hiện 2 giai đoạn (bắt buộc/tự nguyện) chồng lấn ngày tháng — lỗi nhập liệu hay gặp
+        // khi quản lý 2 bảng tách rời cho 1 dòng thời gian thật. Không tự sửa, chỉ cảnh báo.
+        get timelineOverlaps() {
+            const timeline = this.combinedTimeline;
+            const overlaps = [];
+            for (let i = 0; i < timeline.length; i++) {
+                for (let j = i + 1; j < timeline.length; j++) {
+                    const a = timeline[i];
+                    const b = timeline[j];
+                    if (a.start <= b.end && b.start <= a.end) overlaps.push([a, b]);
+                }
+            }
+            return overlaps;
+        },
+
         // §5.2 Nghị định 159 — tối đa 120 tháng hỗ trợ theo thời gian THỰC ĐÓNG (§11 edge case 1)
         supportMonthsUsedBeforeRow(row) {
             let total = 0;
@@ -866,10 +1042,10 @@ document.addEventListener('alpine:init', () => {
             const totalVoluntaryMonths = this.totalVoluntaryMonths;
             const totalAdjustedVoluntary = breakdown.reduce((sum, b) => sum + b.adjustedTotal, 0);
 
-            if (this.hasMandatoryHistory && this.mandatoryMonths > 0) {
-                const totalMonths = totalVoluntaryMonths + Number(this.mandatoryMonths);
+            if (this.hasMandatoryHistory && this.totalMandatoryMonths > 0) {
+                const totalMonths = totalVoluntaryMonths + this.totalMandatoryMonths;
                 if (totalMonths <= 0) return null;
-                const totalAmount = Number(this.mandatoryAverageIncome) * Number(this.mandatoryMonths) + totalAdjustedVoluntary;
+                const totalAmount = this.mandatoryTotalAmount + totalAdjustedVoluntary;
                 return totalAmount / totalMonths;
             }
 
@@ -899,7 +1075,7 @@ document.addEventListener('alpine:init', () => {
 
         get pensionEligibility() {
             const totalVoluntaryMonths = this.totalVoluntaryMonths;
-            const totalMandatoryMonths = this.hasMandatoryHistory ? Number(this.mandatoryMonths || 0) : 0;
+            const totalMandatoryMonths = this.totalMandatoryMonths;
             const totalCombinedMonths = totalVoluntaryMonths + totalMandatoryMonths;
             const rows = this.sortedRows();
             const earliestStart = rows.length ? this.rowStart(rows[0]) : null;
@@ -969,7 +1145,7 @@ document.addEventListener('alpine:init', () => {
 
             let pension = (rate / 100) * mbq;
 
-            if (this.hasMandatoryHistory && Number(this.mandatoryMonths || 0) >= 20 * 12 && this.currentParameterPeriod) {
+            if (this.hasMandatoryHistory && this.totalMandatoryMonths >= 20 * 12 && this.currentParameterPeriod) {
                 pension = Math.max(pension, Number(this.currentParameterPeriod.reference_level));
             }
 
@@ -1015,8 +1191,8 @@ document.addEventListener('alpine:init', () => {
             const elig = this.pensionEligibility;
             const additionalMonthsNeeded = Math.max(0, elig.monthsRequired - elig.monthsAccumulated);
 
-            const mandatoryMonths = this.hasMandatoryHistory ? Number(this.mandatoryMonths || 0) : 0;
-            const mandatoryAmount = mandatoryMonths * Number(this.mandatoryAverageIncome || 0);
+            const mandatoryMonths = this.totalMandatoryMonths;
+            const mandatoryAmount = this.mandatoryTotalAmount;
             const currentVoluntaryAdjusted = breakdown.reduce((sum, b) => sum + b.adjustedTotal, 0);
             const currentTotalMonths = this.totalVoluntaryMonths + mandatoryMonths;
 

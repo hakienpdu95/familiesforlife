@@ -58,6 +58,12 @@
     --radius-box: 1rem;
     --radius-field: 0.5rem;
     --radius-selector: 0.5rem;
+
+    /* Cùng bug với theme "portal" (xem frontend.css, phát hiện 2026-08-05) — theme tuỳ biến
+     * thiếu --border/--depth/--noise làm input/select/checkbox mất viền khi không focus. */
+    --border: 1px;
+    --depth: 1;
+    --noise: 0;
 }
 
 @theme {
