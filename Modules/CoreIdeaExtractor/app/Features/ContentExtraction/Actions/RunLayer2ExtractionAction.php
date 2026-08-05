@@ -29,6 +29,19 @@ use Modules\CoreIdeaExtractor\Features\ContentExtraction\Exceptions\AiBudgetExce
  * VÒNG LẶP + RENDER bảng Markdown cuối cùng từ dữ liệu có cấu trúc (model không còn tự format
  * bảng). Cùng thiết kế schema với RunVideoIdeaLayer2Action bên VideoIdeaExtractor, có thêm field
  * `category` per-idea (chỉ dùng ở chế độ CHƯA chọn chuyên mục — BƯỚC 0 nhánh "chưa chọn").
+ *
+ * 2026-08-05 — PROMPT CACHING cho vòng lặp (gap-analysis đối chiếu leewayhertz.com/prompt-
+ * engineering + spec §12 changelog): hạ tầng `AIRequestOptions`/`AnthropicProvider` đã hỗ trợ
+ * `role=system` + `cacheable=true` (dùng bởi Modules/Aicem/BuildPromptAction) nhưng module này
+ * trước đó CHỈ gửi 1 message `role=user` duy nhất — mỗi lượt lặp gửi lại NGUYÊN VĂN $prompt gốc
+ * (persona + Category Content Foundation + JSON Layer 1, có thể hàng chục nghìn ký tự) dù nội
+ * dung đó KHÔNG đổi giữa các lượt trong cùng 1 lần chạy. Giờ tách: $prompt gốc → 1 message
+ * `system` cacheable=true (gửi y hệt mọi lượt, Anthropic tính phí cache-read rẻ hơn nhiều từ lượt
+ * 2 trở đi); phần đổi mỗi lượt (đoạn "Bổ sung — vòng lặp tiếp theo" hoặc lời mở đầu lượt 1) →
+ * message `user`. KHÔNG đổi nội dung/ý nghĩa prompt — chỉ đổi vai trò message + cách nối chuỗi
+ * (buildFollowUpPrompt() không còn nối vào $originalPrompt, chỉ trả đúng đoạn bổ sung). OpenAI bỏ
+ * qua cờ `cacheable` an toàn (xem OpenAIProvider::complete()) nên không ảnh hưởng tenant dùng
+ * OpenAI, chỉ đơn giản không được hưởng caching (đúng hành vi cũ).
  */
 class RunLayer2ExtractionAction
 {
@@ -41,16 +54,22 @@ class RunLayer2ExtractionAction
                 'items' => [
                     'type' => 'object',
                     'properties' => [
-                        'idea'               => ['type' => 'string', 'description' => 'Tên/nội dung ý tưởng bài viết, đủ cụ thể để hiểu góc khai thác.'],
-                        'category'           => ['type' => ['string', 'null'], 'description' => 'CHỈ khi Bước 0 áp dụng nhánh "chưa chọn chuyên mục": tên chuyên mục đề xuất cho ĐÚNG ý tưởng này (copy đúng từ "Danh sách chuyên mục"). Null nếu đã chọn 1 chuyên mục từ trước.'],
-                        'matches_core_focus'  => ['type' => 'boolean', 'description' => 'Tiêu chí 1 (Bước 2) — khớp trọng tâm nội dung chuyên mục.'],
-                        'unique_angle'        => ['type' => 'boolean', 'description' => 'Tiêu chí 2 (Bước 2) — thể hiện góc nhìn độc quyền của chuyên mục.'],
-                        'serves_goal'         => ['type' => 'boolean', 'description' => 'Tiêu chí 3 (Bước 2) — phục vụ mục tiêu bài viết đã nêu.'],
-                        'fits_audience'       => ['type' => 'boolean', 'description' => 'Tiêu chí 4 (Bước 2) — phù hợp đối tượng độc giả đã nêu.'],
-                        'reason'              => ['type' => 'string', 'description' => 'Lý do ngắn (1 câu) vì sao ý tưởng đạt cả 4 tiêu chí.'],
-                        'suggested_title'     => ['type' => 'string', 'description' => 'Đề xuất tiêu đề bài viết cho ý tưởng này.'],
+                        'idea' => ['type' => 'string', 'description' => 'Tên/nội dung ý tưởng bài viết, đủ cụ thể để hiểu góc khai thác.'],
+                        'category' => ['type' => ['string', 'null'], 'description' => 'CHỈ khi Bước 0 áp dụng nhánh "chưa chọn chuyên mục": tên chuyên mục đề xuất cho ĐÚNG ý tưởng này (copy đúng từ "Danh sách chuyên mục"). Null nếu đã chọn 1 chuyên mục từ trước.'],
+                        'matches_core_focus' => ['type' => 'boolean', 'description' => 'Tiêu chí 1 (Bước 2) — khớp trọng tâm nội dung chuyên mục.'],
+                        'unique_angle' => ['type' => 'boolean', 'description' => 'Tiêu chí 2 (Bước 2) — thể hiện góc nhìn độc quyền của chuyên mục.'],
+                        'serves_goal' => ['type' => 'boolean', 'description' => 'Tiêu chí 3 (Bước 2) — phục vụ mục tiêu bài viết đã nêu.'],
+                        'fits_audience' => ['type' => 'boolean', 'description' => 'Tiêu chí 4 (Bước 2) — phù hợp đối tượng độc giả đã nêu.'],
+                        'reason' => ['type' => 'string', 'description' => 'Lý do ngắn (1 câu) vì sao ý tưởng đạt cả 4 tiêu chí.'],
+                        'suggested_title' => ['type' => 'string', 'description' => 'Đề xuất tiêu đề bài viết cho ý tưởng này.'],
+                        // 2026-08-05 — explainability/auditability (gap đối chiếu tigergraph.com/
+                        // blog/context-engineering-vs-prompt-engineering, spec §12 changelog): mỗi
+                        // nguồn trong payload MIDDLE đã có `title`/`url` định danh rõ, nhưng trước
+                        // đây model không bị bắt buộc trích dẫn đã dùng nguồn nào cho từng ý tưởng
+                        // — biên tập viên không tự kiểm chứng lại được khi chạy batch nhiều nguồn.
+                        'source_reference' => ['type' => 'string', 'description' => 'Nguồn đã dùng làm căn cứ chính cho ý tưởng này — copy đúng `title` (và `url` nếu có) của (các) nguồn tương ứng trong "Dữ liệu nguồn"; tổng hợp từ nhiều nguồn thì liệt kê cách nhau bằng dấu chấm phẩy.'],
                     ],
-                    'required' => ['idea', 'category', 'matches_core_focus', 'unique_angle', 'serves_goal', 'fits_audience', 'reason', 'suggested_title'],
+                    'required' => ['idea', 'category', 'matches_core_focus', 'unique_angle', 'serves_goal', 'fits_audience', 'reason', 'suggested_title', 'source_reference'],
                 ],
             ],
             // 2026-08-04 — thay field `suggested_product` (1 chuỗi nullable trên TỪNG ý tưởng) bằng
@@ -64,9 +83,9 @@ class RunLayer2ExtractionAction
                 'items' => [
                     'type' => 'object',
                     'properties' => [
-                        'product'               => ['type' => 'string', 'description' => 'Tên LOẠI sản phẩm/dịch vụ (VD "ghế ăn dặm có đai an toàn") — không nêu tên thương hiệu, không nêu giá.'],
-                        'why_easy_to_explain'   => ['type' => 'string', 'description' => 'Vì sao người sáng tạo nội dung giải thích được sản phẩm này trong 3 giây (1 câu ngắn).'],
-                        'for_ideas'             => ['type' => 'string', 'description' => 'Tên (các) ý tưởng ở `ideas` dùng được sản phẩm này, copy đúng text `idea`; nhiều ý thì ngăn cách bằng dấu chấm phẩy.'],
+                        'product' => ['type' => 'string', 'description' => 'Tên LOẠI sản phẩm/dịch vụ (VD "ghế ăn dặm có đai an toàn") — không nêu tên thương hiệu, không nêu giá.'],
+                        'why_easy_to_explain' => ['type' => 'string', 'description' => 'Vì sao người sáng tạo nội dung giải thích được sản phẩm này trong 3 giây (1 câu ngắn).'],
+                        'for_ideas' => ['type' => 'string', 'description' => 'Tên (các) ý tưởng ở `ideas` dùng được sản phẩm này, copy đúng text `idea`; nhiều ý thì ngăn cách bằng dấu chấm phẩy.'],
                     ],
                     'required' => ['product', 'why_easy_to_explain', 'for_ideas'],
                 ],
@@ -92,6 +111,13 @@ class RunLayer2ExtractionAction
 
     private const CRITERIA_KEYS = ['matches_core_focus', 'unique_angle', 'serves_goal', 'fits_audience'];
 
+    /**
+     * Lượt gọi ĐẦU TIÊN không có "Bổ sung — vòng lặp tiếp theo" để làm user turn (chưa có ý nào
+     * đã đạt) — cần 1 câu mở đầu ngắn để đóng vai trò user turn bắt buộc của API, toàn bộ nội
+     * dung thật (persona/nhiệm vụ/BƯỚC 0-3) đã nằm trong system message rồi.
+     */
+    private const KICKOFF_MESSAGE = 'Thực hiện đúng theo hướng dẫn ở trên, bắt đầu từ BƯỚC 0.';
+
     public function __construct(
         private readonly AIProviderManager $aiProviderManager,
         private readonly CheckCoreIdeaAiBudgetAction $budget,
@@ -100,13 +126,13 @@ class RunLayer2ExtractionAction
     /** @return array{markdown_output: string, model_used: string, cost_usd: float, loop_iterations: int} */
     public function handle(Organization $organization, string $prompt): array
     {
-        $config   = $organization->ai_provider_config ?? config('ai.default');
+        $config = $organization->ai_provider_config ?? config('ai.default');
         $provider = $config['provider'] ?? 'anthropic';
-        $model    = $config['model'] ?? config('ai.default.model');
+        $model = $config['model'] ?? config('ai.default.model');
 
         $maxOutputTokens = (int) config('core_idea_extractor.layer2.max_output_tokens', 4096);
-        $targetCount     = (int) config('core_idea_extractor.layer2.target_idea_count', 10);
-        $maxIterations   = max(1, (int) config('core_idea_extractor.layer2.max_loop_iterations', 3));
+        $targetCount = (int) config('core_idea_extractor.layer2.target_idea_count', 10);
+        $maxIterations = max(1, (int) config('core_idea_extractor.layer2.max_loop_iterations', 3));
 
         // 2026-08 — nâng từ 0.3 lên 0.7: BƯỚC 1 của prompt yêu cầu brainstorm RỘNG 20-25 ý tưởng
         // đa dạng góc nhìn — nhiệt độ thấp (0.3) dễ ra nhiều ý tưởng chỉ khác câu chữ nhưng cùng
@@ -119,17 +145,20 @@ class RunLayer2ExtractionAction
             maxTokens: $maxOutputTokens,
         );
 
-        $accepted           = [];
-        $seenNormalized     = [];
-        $products           = [];
-        $seenProducts       = [];
-        $totalCostUsd       = 0.0;
-        $modelUsed          = $model;
-        $categoryNote       = null;
+        $accepted = [];
+        $seenNormalized = [];
+        $products = [];
+        $seenProducts = [];
+        $totalCostUsd = 0.0;
+        $modelUsed = $model;
+        $categoryNote = null;
         $audienceAssumption = null;
         $insufficientReason = null;
-        $currentPrompt      = $prompt;
-        $iteration          = 0;
+        // Lượt 1: chưa có gì để nối thêm → dùng KICKOFF_MESSAGE làm user turn. Từ lượt 2: chỉ
+        // đúng đoạn "Bổ sung" (không còn nối chồng $prompt gốc) — $prompt gốc đã tách sang system
+        // message cacheable, gửi y hệt mọi lượt để Anthropic tính phí cache-read.
+        $userTurn = self::KICKOFF_MESSAGE;
+        $iteration = 0;
 
         // Gọi AI đồng bộ trong request (nút bấm thủ công, không phải job nền) — nới execution
         // time limit rộng hơn bản 1-lần-gọi cũ vì giờ có thể chạy tới $maxIterations lượt liên
@@ -139,7 +168,9 @@ class RunLayer2ExtractionAction
         while ($iteration < $maxIterations) {
             $iteration++;
 
-            $estimatedInputTokens = (int) ceil(mb_strlen($currentPrompt) / 4);
+            // Ước lượng thô cho budget pre-check (chưa biết cache-read rẻ hơn cache-write tới đâu
+            // — dùng tổng độ dài system+user làm cận trên an toàn, giống hành vi ước lượng cũ).
+            $estimatedInputTokens = (int) ceil((mb_strlen($prompt) + mb_strlen($userTurn)) / 4);
 
             try {
                 $this->budget->ensureWithinBudget($organization, $estimatedInputTokens, $maxOutputTokens, $provider, $model);
@@ -158,24 +189,25 @@ class RunLayer2ExtractionAction
             }
 
             $response = $this->aiProviderManager->complete($organization, [
-                ['role' => 'user', 'content' => $currentPrompt],
+                ['role' => 'system', 'content' => $prompt, 'cacheable' => true],
+                ['role' => 'user', 'content' => $userTurn],
             ], $options);
 
             $this->budget->recordActualCost($organization, $response->costUsd);
             $totalCostUsd += $response->costUsd;
-            $modelUsed     = $response->modelUsed;
+            $modelUsed = $response->modelUsed;
 
             // Log riêng cho dashboard Aicem ("Tổng quan") — 1 lần bấm "Chạy Layer 2" giờ có thể
             // tương ứng NHIỀU dòng nếu vòng lặp chạy >1 lượt (mỗi lượt gọi AI thật ghi 1 dòng).
             DB::table('cie_layer2_runs')->insert([
                 'organization_id' => $organization->id,
-                'cost_usd'        => $response->costUsd,
-                'model_used'      => $response->modelUsed,
-                'created_at'      => now(),
+                'cost_usd' => $response->costUsd,
+                'model_used' => $response->modelUsed,
+                'created_at' => now(),
             ]);
 
             $decoded = json_decode($response->content, associative: true);
-            $ideas   = is_array($decoded['ideas'] ?? null) ? $decoded['ideas'] : [];
+            $ideas = is_array($decoded['ideas'] ?? null) ? $decoded['ideas'] : [];
 
             if (! empty($decoded['category_note'])) {
                 $categoryNote = (string) $decoded['category_note'];
@@ -197,14 +229,14 @@ class RunLayer2ExtractionAction
                 }
 
                 $name = trim((string) ($product['product'] ?? ''));
-                $key  = mb_strtolower($name);
+                $key = mb_strtolower($name);
 
                 if ($name === '' || isset($seenProducts[$key])) {
                     continue;
                 }
 
                 $seenProducts[$key] = true;
-                $products[]         = $product;
+                $products[] = $product;
             }
 
             $addedThisRound = 0;
@@ -214,7 +246,7 @@ class RunLayer2ExtractionAction
                     continue;
                 }
 
-                $ideaText   = trim((string) ($idea['idea'] ?? ''));
+                $ideaText = trim((string) ($idea['idea'] ?? ''));
                 $normalized = mb_strtolower($ideaText);
 
                 // Dedup CHÍNH XÁC theo văn bản (sau lowercase/trim) — chặn lưới an toàn cho
@@ -247,7 +279,7 @@ class RunLayer2ExtractionAction
                 break;
             }
 
-            $currentPrompt = $this->buildFollowUpPrompt($prompt, $accepted, $targetCount - count($accepted), $products);
+            $userTurn = $this->buildFollowUpPrompt($accepted, $targetCount - count($accepted), $products);
         }
 
         if (count($accepted) < $targetCount && $insufficientReason === null) {
@@ -261,19 +293,19 @@ class RunLayer2ExtractionAction
 
         return [
             'markdown_output' => $this->renderMarkdownTable($accepted, $products, $categoryNote, $audienceAssumption, $insufficientReason),
-            'model_used'      => $modelUsed,
-            'cost_usd'        => $totalCostUsd,
+            'model_used' => $modelUsed,
+            'cost_usd' => $totalCostUsd,
             'loop_iterations' => $iteration,
         ];
     }
 
     /**
-     * Prompt gốc do client build sẵn (buildLayer2PromptText()) GIỮ NGUYÊN — chỉ NỐI THÊM đoạn yêu
-     * cầu bổ sung cho vòng lặp tiếp theo, không cần hiểu cấu trúc TOP/MIDDLE/BOTTOM bên trong.
-     * Luôn nối vào PROMPT GỐC (không nối chồng lên $currentPrompt của lượt trước) để độ dài prompt
-     * không phình to tích luỹ qua từng lượt — chỉ tăng đúng bằng danh sách ý đã đạt.
+     * Đoạn "Bổ sung" cho vòng lặp tiếp theo — KHÔNG còn nối vào $prompt gốc (2026-08-05, xem
+     * docblock class): $prompt gốc đã là system message cacheable riêng, gửi y hệt mọi lượt; hàm
+     * này chỉ trả đúng phần THAY ĐỔI theo lượt (danh sách ý đã đạt + sản phẩm đã có) để làm user
+     * turn, không cần hiểu cấu trúc TOP/MIDDLE/BOTTOM của prompt gốc.
      */
-    private function buildFollowUpPrompt(string $originalPrompt, array $accepted, int $remaining, array $products): string
+    private function buildFollowUpPrompt(array $accepted, int $remaining, array $products): string
     {
         $existingList = implode("\n", array_map(
             static function (array $idea): string {
@@ -293,7 +325,7 @@ class RunLayer2ExtractionAction
                 .implode("\n", array_map(static fn (array $p): string => '- '.($p['product'] ?? ''), $products))
                 ."\n(Tổng đang có ".count($products).'/'.self::MIN_SUGGESTED_PRODUCTS.' tối thiểu.) Chỉ bổ sung sản phẩm MỚI khác loại nếu các ý tưởng mới ở lượt này mở ra loại sản phẩm chưa có; nếu không có gì mới, trả về mảng rỗng.';
 
-        return $originalPrompt."\n\n# Bổ sung — vòng lặp tiếp theo\n"
+        return "# Bổ sung — vòng lặp tiếp theo\n"
             ."Bạn đã đề xuất các ý tưởng sau ở (các) lượt trước, ĐÃ đạt cả 4 tiêu chí — GIỮ NGUYÊN, KHÔNG lặp lại trong câu trả lời này:\n"
             .$existingList
             ."\n\nCần thêm ÍT NHẤT {$remaining} ý tưởng MỚI, KHÔNG trùng hoặc gần giống bất kỳ ý nào ở trên (kể cả biến thể chỉ đổi cách diễn đạt nhưng cùng góc khai thác) — vẫn đi qua đủ Bước 1 (đa dạng góc nhìn) và Bước 2 (đánh giá cả 4 tiêu chí + 2 bộ lọc bắt buộc) như đã mô tả ở trên, chỉ trả về những ý MỚI đạt tiêu chí trong câu trả lời này ở trường `ideas`."
@@ -333,7 +365,7 @@ class RunLayer2ExtractionAction
         if ($hasCategoryColumn) {
             $header[] = 'Chuyên mục đề xuất';
         }
-        $header = array_merge($header, ['Khớp trọng tâm?', 'Góc nhìn độc quyền?', 'Phục vụ mục tiêu?', 'Phù hợp đối tượng?', 'Lý do (1 câu, vì sao đạt cả 4)', 'Đề xuất tiêu đề bài viết']);
+        $header = array_merge($header, ['Khớp trọng tâm?', 'Góc nhìn độc quyền?', 'Phục vụ mục tiêu?', 'Phù hợp đối tượng?', 'Lý do (1 câu, vì sao đạt cả 4)', 'Đề xuất tiêu đề bài viết', 'Nguồn căn cứ']);
 
         // Heading cho bảng 1: từ 2026-08-04 output có thể gồm 2 bảng (ý tưởng + sản phẩm), không
         // còn 1 bảng trần như trước — đặt tên đúng bố cục mà nhánh `forExternalChat` của
@@ -355,6 +387,7 @@ class RunLayer2ExtractionAction
             $cells[] = 'Có';
             $cells[] = $this->escapeCell($idea['reason'] ?? '');
             $cells[] = $this->escapeCell($idea['suggested_title'] ?? '');
+            $cells[] = $this->escapeCell($idea['source_reference'] ?? '');
 
             $lines[] = '| '.implode(' | ', $cells).' |';
         }

@@ -1,8 +1,125 @@
 # CoreIdeaExtractor
 
-**Version:** 1.23  
-**Last Updated:** 2026-08-04  
+**Version:** 1.26  
+**Last Updated:** 2026-08-05  
 **Status:** Design Specification (Ready for Implementation)
+
+> **v1.26 (Đối chiếu tigergraph.com/blog/context-engineering-vs-prompt-engineering — 1 khoảng
+> trống thật ÁP DỤNG, phần còn lại không áp dụng được hoặc đã có sẵn):** bài phân biệt "prompt
+> engineering" (cách model DÙNG thông tin — instruction, ví dụ, format) với "context engineering"
+> (chất lượng/độ đầy đủ của THÔNG TIN được đưa vào — retrieval, freshness, structured/unstructured
+> grounding, memory, explainability). Đối chiếu 6 trục chính của "context engineering" theo bài:
+>
+> - **Structured context grounding**: đã có từ v1.4 — Category Content Foundation (core_focus,
+>   unique_angle, pain_points, objections, decision_criteria) là dữ liệu CÓ CẤU TRÚC từ DB model,
+>   không phải văn bản tự do.
+> - **Data freshness**: đã có — so `date_modified` giữa các nguồn (§12), tiêm "Ngày hôm nay" vào
+>   TOP mọi prompt.
+> - **Agent memory qua nhiều bước**: đã có — goal-based loop (`RunLayer2ExtractionAction`/
+>   `RunVideoIdeaLayer2Action`) giữ trạng thái `$accepted`/`$products` xuyên suốt các lượt lặp.
+> - **Context window composition/relevance ranking**: đã có ở mức cơ bản — `truncateForHint()`
+>   (progressive disclosure, §12.6) + cảnh báo kích thước (§12.5); chưa có thuật toán ranking phức
+>   tạp nhưng KHÔNG có bằng chứng cần tới mức đó ở quy mô dữ liệu hiện tại.
+> - **Retrieval architecture (vector/graph search)**: KHÔNG áp dụng — bài viết đến từ 1 công ty
+>   graph database (TigerGraph), đề xuất tự nhiên nghiêng về giải pháp graph DB; module này chạy
+>   trên Laravel/MySQL thông thường, việc đưa vào 1 tầng vector-search/knowledge-graph riêng cho 2
+>   module content-tooling nội bộ là quá mức cần thiết (over-engineering) so với quy mô dữ liệu
+>   thực tế (vài chục category, không phải hàng triệu thực thể quan hệ phức tạp).
+> - **Explainability & Auditability**: **KHOẢNG TRỐNG THẬT, ĐÃ ÁP DỤNG.** Mỗi nguồn trong payload
+>   MIDDLE (`buildAiPayload()`) đã có `title` (và `url` khi ở chế độ batch của CoreIdeaExtractor)
+>   định danh rõ ràng, nhưng model trước đây KHÔNG bị bắt buộc trích dẫn đã dùng nguồn nào cho từng
+>   ý tưởng — khi chạy batch nhiều nguồn/nhiều video, biên tập viên không tự kiểm chứng lại được ý
+>   tưởng X dựa vào nguồn nào. Đã thêm field bắt buộc `source_reference` vào `RESPONSE_SCHEMA` của
+>   cả 2 Action (`RunLayer2ExtractionAction`, `RunVideoIdeaLayer2Action`) + cột "Nguồn căn cứ" mới
+>   trong `renderMarkdownTable()` và trong mô tả BẢNG 1 ở nhánh `forExternalChat` của
+>   `buildLayer2PromptText()` (cả 2 module) — model phải copy đúng `title`/`url` của (các) nguồn
+>   đã dùng, ngăn cách bằng dấu chấm phẩy nếu tổng hợp nhiều nguồn.
+>
+> Đổi `RESPONSE_SCHEMA` (thêm field `source_reference`, required) — khác các version trước chỉ ghi
+> chú không đổi schema. Test `Modules/CoreIdeaExtractor/tests/Feature/CoreIdeaExtractorTest.php`
+> (38 test) vẫn pass — cột mới fallback rỗng nếu field vắng mặt, không phá vỡ hành vi cũ.
+
+> **v1.25 (Đối chiếu 2 framework do người dùng cung cấp trực tiếp — PROMPT của Sarah Hartman-
+> Caverly (Penn State Berks) và CLEAR của Leo S. Lo (UVA Libraries) — KHÔNG áp dụng gì, cả 2 đã
+> được đáp ứng đầy đủ bởi thiết kế hiện tại):**
+>
+> **PROMPT** (Persona/Requirements/Organization/Medium/Purpose/Tone) — đối chiếu từng chữ cái:
+> - Persona: `top.push('Bạn là biên tập viên giàu kinh nghiệm...')` (`index.blade.php`) — đã có từ
+>   bản đầu tiên (§12.4).
+> - Requirements: toàn bộ BƯỚC 1/2/3 + `RESPONSE_SCHEMA` (required fields, boolean 4 tiêu chí) CHÍNH
+>   LÀ "define parameters for output" ở mức chi tiết hơn ví dụ minh hoạ của framework.
+> - Organization: BƯỚC 3 quy định thứ tự "ĐÚNG 2 bảng Markdown theo thứ tự dưới đây" — đúng "describe
+>   the structure of the output".
+> - Medium: rẽ nhánh `forExternalChat` (Markdown 2 bảng khi copy sang chat ngoài, JSON Schema khi
+>   gọi qua app) — đúng "describe the format of the output", còn chi tiết hơn ví dụ của framework
+>   (framework chỉ nói 1 format, code này phải phục vụ 2 format cho cùng 1 nội dung).
+> - Purpose: `goalText`/`brief.goal` ("Phục vụ mục tiêu") — đúng "rhetorical purpose"; `audienceText`
+>   ("Phù hợp đối tượng độc giả") — đúng "intended audience", còn tách RIÊNG thành 1/4 tiêu chí đánh
+>   giá bắt buộc (BƯỚC 2 tiêu chí 4) thay vì chỉ nêu 1 lần ở đầu như ví dụ của framework.
+> - Tone: gộp vào tiêu chí 4 ("giọng văn của ý tưởng có khớp với hoàn cảnh... của đúng đối tượng
+>   này không", `index.blade.php:1150`) thay vì tách riêng — hợp lý vì tone phụ thuộc audience, tách
+>   riêng sẽ trùng lặp; `styleSampleText` (giọng văn mẫu THẬT trích từ editor) ở `buildRewritePromptText()`
+>   còn cụ thể hơn 1 tính từ mô tả tone ("academic") như ví dụ của framework — đã ghi nhận từ v1.22.
+>
+> **CLEAR** (Concise/Logical/Explicit/Adaptive/Reflective) — đây là checklist QUY TRÌNH cho người
+> viết prompt, không phải kỹ thuật nhúng vào prompt runtime, nên đối chiếu với QUY TRÌNH phát triển
+> module thay vì với văn bản prompt:
+> - Concise: prompt Layer 2 dài (TOP/MIDDLE/BOTTOM đầy đủ ngữ cảnh) nhưng đã có cơ chế tự cảnh báo
+>   độ dài (§12.5, `isPromptLarge()`) thay vì cắt mù quáng — độ dài là có chủ đích (ngữ cảnh chuyên
+>   mục/decision log), không phải "superfluous language".
+> - Logical: cấu trúc TOP → MIDDLE → BOTTOM/BƯỚC 0-3 tuần tự đã là "structured logically like
+>   instructions".
+> - Explicit: `RESPONSE_SCHEMA` + BƯỚC 3 mô tả định dạng output chi tiết tới từng cột bảng.
+> - Adaptive: chính bảng changelog này (v1.5 → v1.25, 25 lần điều chỉnh dựa trên đối chiếu/phản hồi
+>   thật) LÀ hành vi "Adaptive" trong thực tế, chỉ chưa từng gọi tên vậy.
+> - Reflective: `selfCheckLine()` (tự rà lại bịa/bỏ sót trước khi trả lời, dùng cho tool tóm
+>   tắt/viết lại) là dạng runtime của "Reflective"; ở cấp quy trình, mọi entry changelog đối chiếu
+>   framework bên ngoài (v1.16 trở đi) là "Reflective" ở cấp phát triển module.
+>
+> Không đổi Layer 1/Layer 2 JSON schema (§5, §7), không đổi code — khác v1.24 (2 khoảng trống thật
+> đã áp dụng), lần đối chiếu này xác nhận độ phủ đã đủ, không phát sinh việc mới.
+
+> **v1.24 (Đối chiếu leewayhertz.com/prompt-engineering — 2 kỹ thuật ÁP DỤNG THẬT, phần còn lại đã
+> có sẵn dưới tên khác hoặc từ chối có lý do):** bài liệt kê ~16 kỹ thuật prompt engineering
+> (zero-shot, few-shot, chain-of-thought, self-consistency, least-to-most, generated knowledge,
+> directional stimulus, ReAct, multimodal CoT, graph prompting, prompt chaining, tree-of-thoughts,
+> ART, APE, active-prompt, role-specific prompting).
+>
+> Đối chiếu phát hiện: chain-of-thought (BƯỚC 0-3 + `selfCheckLine()`), role prompting (persona ở
+> TOP mọi prompt), prompt chaining dạng nhẹ (goal-based loop §RunLayer2ExtractionAction) đã có sẵn
+> từ các version trước (xem v1.22/v1.23) — không lặp lại phân tích ở đây.
+>
+> **2 khoảng trống thật, ĐÃ áp dụng version này:**
+> 1. **Few-shot examples** — trước đây TOÀN BỘ prompt (cả `CoreIdeaExtractor` lẫn `VideoIdeaExtractor`)
+>    là instruction-based thuần, không có 1 ví dụ input→output nào minh hoạ mức độ cụ thể cần có ở
+>    cột "Lý do" (Bước 2). Đã thêm 2 dòng ví dụ (1 ý tưởng ĐẠT + 1 ý tưởng BỊ LOẠI, cùng lý do mẫu)
+>    vào cuối BƯỚC 2 của `buildLayer2PromptText()` — chủ đề minh hoạ (ăn dặm) cố tình chọn KHÔNG
+>    liên quan chuyên mục thật đang xử lý, có ghi rõ "chỉ minh hoạ" để model không chép nhầm thành
+>    ý tưởng thật hoặc suy diễn ngược chuyên mục hiện tại phải giống ví dụ.
+> 2. **Prompt caching cho vòng lặp goal-based** — hạ tầng (`AIRequestOptions`/`AnthropicProvider::
+>    splitSystemMessages()`) đã hỗ trợ `role=system` + `cacheable=true` từ Phase 6 Aicem
+>    (`Modules/Aicem/BuildPromptAction`), nhưng `RunLayer2ExtractionAction`/`RunVideoIdeaLayer2Action`
+>    trước đó CHỈ gửi 1 message `role=user` — mỗi lượt lặp (`max_loop_iterations`, tối đa 3) gửi lại
+>    NGUYÊN VĂN prompt gốc (có thể hàng chục nghìn ký tự) dù nội dung không đổi giữa các lượt. Đã
+>    tách: prompt gốc → 1 message `system` cacheable=true (gửi y hệt mọi lượt, Anthropic tính phí
+>    cache-read rẻ hơn từ lượt 2); đoạn "Bổ sung — vòng lặp tiếp theo" (hoặc câu mở đầu lượt 1) →
+>    message `user`, không còn nối chuỗi vào prompt gốc. KHÔNG đổi nội dung/ý nghĩa prompt, chỉ đổi
+>    vai trò message. OpenAI bỏ qua cờ `cacheable` an toàn (đã có sẵn cơ chế lọc ở `OpenAIProvider`),
+>    không ảnh hưởng tenant dùng OpenAI.
+>
+> **Từ chối áp dụng (có lý do):** ReAct/ART (Automatic Reasoning and Tool-Use) cần hạ tầng tool-use
+> loop — `AIProviderManager`/`AIRequestOptions` hiện chỉ hỗ trợ 1 lệnh gọi JSON-schema đơn, không có
+> vòng lặp gọi tool giữa các bước suy luận; thêm vào đòi hỏi thiết kế lại toàn bộ tầng AI Provider,
+> ngoài phạm vi 2 module này. Tree-of-Thoughts (khám phá song song nhiều nhánh suy luận) tốn thêm
+> N lần gọi model mỗi nhánh mà không có bằng chứng BƯỚC 1→2→3 hiện tại (1 nhánh suy luận tường minh)
+> đang cho kết quả kém — cùng loại rủi ro "framework flourish" đã từ chối nhiều lần (v1.6, v1.8,
+> v1.18, v1.22, v1.23). APE (Automatic Prompt Engineer)/Active-Prompt là kỹ thuật META (tự động hoá
+> VIỆC VIẾT prompt qua 1 pipeline tối ưu riêng), không phải kỹ thuật áp trực tiếp vào 1 prompt —
+> không có hạ tầng đánh giá/tối ưu prompt tự động, ngoài phạm vi. Multimodal CoT/Graph Prompting
+> không áp dụng được: pipeline 2 module này thuần văn bản (Layer 1 trích xuất text, không xử lý
+> ảnh/video frame trực tiếp).
+>
+> Không đổi Layer 1/Layer 2 JSON schema (§5, §7).
 
 > **v1.23 (Đối chiếu thepromptwarrior.com/p/5-prompt-frameworks-level-prompts — cùng chủ đề v1.22,
 > nguồn khác — KHÔNG áp dụng gì, 2/5 kỹ thuật hoá ra ĐÃ CÓ SẴN dưới tên khác):** bài liệt kê 5

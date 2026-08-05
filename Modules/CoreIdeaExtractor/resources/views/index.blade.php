@@ -969,7 +969,7 @@ document.addEventListener('alpine:init', () => {
                 const ideaTableColumns = '| Ý tưởng | '
                     + (category ? '' : 'Chuyên mục đề xuất | ')
                     + 'Khớp trọng tâm? | Góc nhìn độc quyền? | Phục vụ mục tiêu? | Phù hợp đối tượng? '
-                    + '| Lý do (1 câu, vì sao đạt cả 4) | Đề xuất tiêu đề bài viết |';
+                    + '| Lý do (1 câu, vì sao đạt cả 4) | Đề xuất tiêu đề bài viết | Nguồn căn cứ |';
 
                 const bottom = [
                     '# Nhiệm vụ',
@@ -1174,6 +1174,16 @@ document.addEventListener('alpine:init', () => {
                     ] : []),
                     'Lưu ý khi đánh giá: nếu nguồn có extraction_confidence thấp hoặc notes cảnh báo nghi vấn paywall, hạ độ tin cậy khi dùng nguồn đó làm căn cứ cho ý tưởng.',
                     '',
+                    // Few-shot minh hoạ mức độ cụ thể cần có ở cột "Lý do" — gap đối chiếu
+                    // leewayhertz.com/prompt-engineering (2026-08-05, spec §12 changelog): toàn bộ
+                    // prompt trước đây thuần instruction-based, không có ví dụ input→output nào.
+                    // Dùng chủ đề ăn dặm làm ví dụ vì đủ phổ quát để không lẫn với chuyên mục thật
+                    // đang xử lý — nói rõ đây là MINH HOẠ để model không chép nhầm thành ý tưởng
+                    // thật hoặc suy diễn ngược chuyên mục hiện tại phải giống ví dụ.
+                    'Ví dụ minh hoạ CÁCH đánh giá (chủ đề bên dưới KHÔNG liên quan chuyên mục đang xử lý, chỉ minh hoạ mức độ cụ thể cần có ở cột "Lý do"):',
+                    '- Ý tưởng ĐẠT cả 4 tiêu chí: "Vì sao bé 6 tháng từ chối thìa nhưng lại tự bốc ăn ngon lành — 5 dấu hiệu bé đã sẵn sàng ăn dặm kiểu BLW". Lý do đạt: "Trả lời trực diện 1 pain point cụ thể (con từ chối đút thìa) bằng góc nhìn khác thường (ăn dặm chỉ huy — BLW), đúng giai đoạn 6 tháng, không chỉ liệt kê kiến thức chung về ăn dặm."',
+                    '- Ý tưởng BỊ LOẠI (chỉ đạt tiêu chí 1, hỏng tiêu chí 2): "Ăn dặm là gì và tại sao quan trọng". Lý do loại: "Kiến thức nền chung chung, không trả lời pain point/nghi ngờ cụ thể nào của đối tượng đã nêu, không thể hiện góc nhìn độc quyền của chuyên mục — nguồn/trang nào cũng viết được nội dung này."',
+                    '',
                     ...(forExternalChat
                         ? [
                             'BƯỚC 3 — Trình bày kết quả bằng ĐÚNG 2 bảng Markdown theo thứ tự dưới đây. TUYỆT ĐỐI KHÔNG trả về '
@@ -1186,7 +1196,9 @@ document.addEventListener('alpine:init', () => {
                             '',
                             'BẢNG 1 — tiêu đề "## Ý tưởng", chỉ liệt kê ý tưởng ĐẠT cả 4 tiêu chí ở Bước 2 (không liệt kê ý bị '
                                 + 'loại), cột theo ĐÚNG thứ tự sau: ' + ideaTableColumns + ' — 4 cột tiêu chí đều điền "Có" (vì đây '
-                                + 'là những ý đã đạt).',
+                                + 'là những ý đã đạt). Cột "Nguồn căn cứ": copy đúng `title` (và `url` nếu có) của (các) nguồn trong '
+                                + '"Dữ liệu nguồn" ở trên đã dùng làm căn cứ chính cho ý tưởng này — tổng hợp từ nhiều nguồn thì liệt '
+                                + 'kê cách nhau bằng dấu chấm phẩy — để biên tập viên tự kiểm chứng lại được nguồn gốc.',
                             '',
                             'BẢNG 2 — tiêu đề "## Sản phẩm gợi ý cho cả bộ ý tưởng", cột theo ĐÚNG thứ tự sau: | # | Sản '
                                 + 'phẩm/dịch vụ | Vì sao dễ giải thích trong 3 giây | Dùng cho ý tưởng nào | — cột cuối copy tên ý '
@@ -1202,7 +1214,9 @@ document.addEventListener('alpine:init', () => {
                                     : '(tên chuyên mục đề xuất cho ĐÚNG ý này, copy từ "Danh sách chuyên mục" — xem Bước 0)')
                                 + ', `matches_core_focus`/`unique_angle`/`serves_goal`/`fits_audience` (đều phải true — đúng 4 tiêu '
                                 + 'chí Bước 2, vì đây là ý đã đạt), `reason` (lý do ngắn 1 câu), `suggested_title` (đề xuất tiêu đề '
-                                + 'bài viết).',
+                                + 'bài viết), `source_reference` (copy đúng `title`/`url` của (các) nguồn trong "Dữ liệu nguồn" ở trên '
+                                + 'đã dùng làm căn cứ chính — nhiều nguồn thì ngăn cách bằng dấu chấm phẩy — để biên tập viên tự kiểm '
+                                + 'chứng lại nguồn gốc của từng ý tưởng).',
                             'Nếu KHÔNG còn góc nhìn hợp lý nào để khai thác thêm từ dữ liệu nguồn (KHÔNG được bịa ý tưởng yếu/'
                                 + 'generic chỉ để có), điền 1 câu ngắn vào trường `insufficient_reason`; nếu vẫn còn góc nhìn chưa '
                                 + 'khai thác thì để trống.',

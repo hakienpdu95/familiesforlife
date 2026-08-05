@@ -757,6 +757,14 @@ document.addEventListener('alpine:init', () => {
                         + 'lỗi nhận dạng) thì hạ độ tin cậy khi dùng chính video đó làm căn cứ cho ý tưởng — nhất là với số liệu và '
                         + 'khẳng định chuyên môn trích từ nó.',
                     '',
+                    // Few-shot minh hoạ mức độ cụ thể cần có ở cột "Lý do" — đồng bộ với
+                    // CoreIdeaExtractor (2026-08-05, gap đối chiếu leewayhertz.com/prompt-
+                    // engineering, spec §12 changelog). Chủ đề ăn dặm chỉ mang tính minh hoạ,
+                    // không liên quan chuyên mục/video đang xử lý.
+                    'Ví dụ minh hoạ CÁCH đánh giá (chủ đề bên dưới KHÔNG liên quan chuyên mục đang xử lý, chỉ minh hoạ mức độ cụ thể cần có ở cột "Lý do"):',
+                    '- Ý tưởng ĐẠT cả 4 tiêu chí: "Vì sao bé 6 tháng từ chối thìa nhưng lại tự bốc ăn ngon lành — 5 dấu hiệu bé đã sẵn sàng ăn dặm kiểu BLW" (Shorts). Lý do đạt: "Trả lời trực diện 1 pain point cụ thể (con từ chối đút thìa) bằng góc nhìn khác thường (ăn dặm chỉ huy — BLW), đúng giai đoạn 6 tháng, không chỉ liệt kê kiến thức chung về ăn dặm."',
+                    '- Ý tưởng BỊ LOẠI (chỉ đạt tiêu chí 1, hỏng tiêu chí 2): "Ăn dặm là gì và tại sao quan trọng". Lý do loại: "Kiến thức nền chung chung, không trả lời pain point/nghi ngờ cụ thể nào của đối tượng đã nêu, không thể hiện góc nhìn độc quyền của chuyên mục — kênh/video nào cũng làm được nội dung này."',
+                    '',
                     ...(forExternalChat
                         ? [
                             'BƯỚC 3 — Trình bày kết quả bằng ĐÚNG 2 bảng Markdown theo thứ tự dưới đây. TUYỆT ĐỐI KHÔNG trả về '
@@ -769,9 +777,12 @@ document.addEventListener('alpine:init', () => {
                             '',
                             'BẢNG 1 — tiêu đề "## Ý tưởng", chỉ liệt kê ý tưởng ĐẠT cả 4 tiêu chí ở Bước 2 (không liệt kê ý bị '
                                 + 'loại), cột theo ĐÚNG thứ tự sau: | Ý tưởng | Định dạng gợi ý | Khớp trọng tâm? | Góc nhìn độc '
-                                + 'quyền? | Phục vụ mục tiêu? | Phù hợp đối tượng? | Lý do (1 câu) | Đề xuất tiêu đề video | — 4 cột '
-                                + 'tiêu chí đều điền "Có" (vì đây là những ý đã đạt), cột "Định dạng gợi ý" điền Shorts/video ngắn, '
-                                + 'video dài, hoặc livestream/Q&A theo Bước 1.',
+                                + 'quyền? | Phục vụ mục tiêu? | Phù hợp đối tượng? | Lý do (1 câu) | Đề xuất tiêu đề video | Nguồn '
+                                + 'căn cứ | — 4 cột tiêu chí đều điền "Có" (vì đây là những ý đã đạt), cột "Định dạng gợi ý" điền '
+                                + 'Shorts/video ngắn, video dài, hoặc livestream/Q&A theo Bước 1. Cột "Nguồn căn cứ": copy đúng '
+                                + '`title` của (các) video trong "Dữ liệu nguồn" ở trên đã dùng làm căn cứ chính cho ý tưởng này '
+                                + '(module này không có `url`, chỉ có tiêu đề video tự nhập) — tổng hợp từ nhiều video thì liệt kê '
+                                + 'cách nhau bằng dấu chấm phẩy.',
                             '',
                             'BẢNG 2 — tiêu đề "## Sản phẩm gợi ý cho cả bộ ý tưởng", cột theo ĐÚNG thứ tự sau: | # | Sản '
                                 + 'phẩm/dịch vụ | Vì sao dễ giải thích trong 3 giây | Dùng cho ý tưởng nào | — cột cuối copy tên ý '
@@ -784,7 +795,9 @@ document.addEventListener('alpine:init', () => {
                                 + 'phần tử gồm: `idea` (tên/nội dung ý tưởng), `format_suggestion` (Shorts/video ngắn, video dài, '
                                 + 'hoặc livestream/Q&A theo Bước 1), `matches_core_focus`/`unique_angle`/`serves_goal`/'
                                 + '`fits_audience` (đều phải true — đúng 4 tiêu chí Bước 2, vì đây là ý đã đạt), `reason` (lý do '
-                                + 'ngắn 1 câu), `suggested_title` (đề xuất tiêu đề video).',
+                                + 'ngắn 1 câu), `suggested_title` (đề xuất tiêu đề video), `source_reference` (copy đúng `title` của '
+                                + '(các) video trong "Dữ liệu nguồn" ở trên đã dùng làm căn cứ chính — nhiều video thì ngăn cách bằng '
+                                + 'dấu chấm phẩy).',
                             'Nếu KHÔNG còn góc nhìn hợp lý nào để khai thác thêm từ dữ liệu nguồn (KHÔNG được bịa ý tưởng yếu/'
                                 + 'generic chỉ để có), điền 1 câu ngắn vào trường `insufficient_reason`; nếu vẫn còn góc nhìn chưa '
                                 + 'khai thác thì để trống.',

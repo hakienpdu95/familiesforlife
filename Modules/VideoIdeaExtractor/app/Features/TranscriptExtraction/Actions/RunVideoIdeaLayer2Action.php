@@ -27,6 +27,11 @@ use Modules\VideoIdeaExtractor\Features\TranscriptExtraction\Exceptions\AiBudget
  * (buildLayer2PromptText()), action này chỉ thêm phần ĐIỀU KHIỂN VÒNG LẶP + RENDER bảng Markdown
  * cuối cùng từ dữ liệu có cấu trúc (không còn để model tự format bảng — cột 4 tiêu chí luôn "Có"
  * vì chỉ ý ĐÃ ĐẠT mới được render, không cần model tự đảm bảo tính nhất quán format).
+ *
+ * 2026-08-05 — PROMPT CACHING cho vòng lặp (đồng bộ với RunLayer2ExtractionAction bên
+ * CoreIdeaExtractor, xem docblock đầy đủ ở đó): $prompt gốc → 1 message `system` cacheable=true
+ * (gửi y hệt mọi lượt), phần đổi mỗi lượt (đoạn "Bổ sung" hoặc lời mở đầu lượt 1) → message
+ * `user`. Không đổi nội dung/ý nghĩa prompt, chỉ đổi vai trò message + cách nối chuỗi.
  */
 class RunVideoIdeaLayer2Action
 {
@@ -39,16 +44,20 @@ class RunVideoIdeaLayer2Action
                 'items' => [
                     'type' => 'object',
                     'properties' => [
-                        'idea'               => ['type' => 'string', 'description' => 'Tên/nội dung ý tưởng video, đủ cụ thể để hiểu góc khai thác.'],
-                        'format_suggestion'  => ['type' => 'string', 'description' => 'Định dạng gợi ý theo Bước 1: Shorts/video ngắn, video dài, hoặc livestream/Q&A.'],
-                        'matches_core_focus'  => ['type' => 'boolean', 'description' => 'Tiêu chí 1 (Bước 2) — khớp trọng tâm nội dung chuyên mục/chủ đề.'],
-                        'unique_angle'        => ['type' => 'boolean', 'description' => 'Tiêu chí 2 (Bước 2) — thể hiện góc nhìn độc quyền của chuyên mục.'],
-                        'serves_goal'         => ['type' => 'boolean', 'description' => 'Tiêu chí 3 (Bước 2) — phục vụ mục tiêu video đã nêu.'],
-                        'fits_audience'       => ['type' => 'boolean', 'description' => 'Tiêu chí 4 (Bước 2) — phù hợp đối tượng khán giả đã nêu.'],
-                        'reason'              => ['type' => 'string', 'description' => 'Lý do ngắn (1 câu) vì sao ý tưởng đạt cả 4 tiêu chí.'],
-                        'suggested_title'     => ['type' => 'string', 'description' => 'Đề xuất tiêu đề video cho ý tưởng này.'],
+                        'idea' => ['type' => 'string', 'description' => 'Tên/nội dung ý tưởng video, đủ cụ thể để hiểu góc khai thác.'],
+                        'format_suggestion' => ['type' => 'string', 'description' => 'Định dạng gợi ý theo Bước 1: Shorts/video ngắn, video dài, hoặc livestream/Q&A.'],
+                        'matches_core_focus' => ['type' => 'boolean', 'description' => 'Tiêu chí 1 (Bước 2) — khớp trọng tâm nội dung chuyên mục/chủ đề.'],
+                        'unique_angle' => ['type' => 'boolean', 'description' => 'Tiêu chí 2 (Bước 2) — thể hiện góc nhìn độc quyền của chuyên mục.'],
+                        'serves_goal' => ['type' => 'boolean', 'description' => 'Tiêu chí 3 (Bước 2) — phục vụ mục tiêu video đã nêu.'],
+                        'fits_audience' => ['type' => 'boolean', 'description' => 'Tiêu chí 4 (Bước 2) — phù hợp đối tượng khán giả đã nêu.'],
+                        'reason' => ['type' => 'string', 'description' => 'Lý do ngắn (1 câu) vì sao ý tưởng đạt cả 4 tiêu chí.'],
+                        'suggested_title' => ['type' => 'string', 'description' => 'Đề xuất tiêu đề video cho ý tưởng này.'],
+                        // 2026-08-05 — explainability/auditability, đồng bộ với RunLayer2ExtractionAction
+                        // bên CoreIdeaExtractor (gap đối chiếu tigergraph.com/blog/context-engineering-
+                        // vs-prompt-engineering, spec §12 changelog CoreIdeaExtractor.md).
+                        'source_reference' => ['type' => 'string', 'description' => 'Nguồn đã dùng làm căn cứ chính cho ý tưởng này — copy đúng `title` của (các) video tương ứng trong "Dữ liệu nguồn" (module này không có `url`, chỉ có tiêu đề video tự nhập); tổng hợp từ nhiều video thì liệt kê cách nhau bằng dấu chấm phẩy.'],
                     ],
-                    'required' => ['idea', 'format_suggestion', 'matches_core_focus', 'unique_angle', 'serves_goal', 'fits_audience', 'reason', 'suggested_title'],
+                    'required' => ['idea', 'format_suggestion', 'matches_core_focus', 'unique_angle', 'serves_goal', 'fits_audience', 'reason', 'suggested_title', 'source_reference'],
                 ],
             ],
             // 2026-08-04 — thay field `suggested_product` (1 chuỗi nullable trên TỪNG ý tưởng) bằng
@@ -61,9 +70,9 @@ class RunVideoIdeaLayer2Action
                 'items' => [
                     'type' => 'object',
                     'properties' => [
-                        'product'             => ['type' => 'string', 'description' => 'Tên LOẠI sản phẩm/dịch vụ (VD "ghế ăn dặm có đai an toàn") — không nêu tên thương hiệu, không nêu giá.'],
+                        'product' => ['type' => 'string', 'description' => 'Tên LOẠI sản phẩm/dịch vụ (VD "ghế ăn dặm có đai an toàn") — không nêu tên thương hiệu, không nêu giá.'],
                         'why_easy_to_explain' => ['type' => 'string', 'description' => 'Vì sao người sáng tạo nội dung giải thích được sản phẩm này trong 3 giây (1 câu ngắn).'],
-                        'for_ideas'           => ['type' => 'string', 'description' => 'Tên (các) ý tưởng ở `ideas` dùng được sản phẩm này, copy đúng text `idea`; nhiều ý thì ngăn cách bằng dấu chấm phẩy.'],
+                        'for_ideas' => ['type' => 'string', 'description' => 'Tên (các) ý tưởng ở `ideas` dùng được sản phẩm này, copy đúng text `idea`; nhiều ý thì ngăn cách bằng dấu chấm phẩy.'],
                     ],
                     'required' => ['product', 'why_easy_to_explain', 'for_ideas'],
                 ],
@@ -89,6 +98,9 @@ class RunVideoIdeaLayer2Action
 
     private const CRITERIA_KEYS = ['matches_core_focus', 'unique_angle', 'serves_goal', 'fits_audience'];
 
+    /** Xem CoreIdeaExtractor\RunLayer2ExtractionAction::KICKOFF_MESSAGE — cùng lý do. */
+    private const KICKOFF_MESSAGE = 'Thực hiện đúng theo hướng dẫn ở trên, bắt đầu từ BƯỚC 0.';
+
     public function __construct(
         private readonly AIProviderManager $aiProviderManager,
         private readonly CheckVideoIdeaAiBudgetAction $budget,
@@ -97,13 +109,13 @@ class RunVideoIdeaLayer2Action
     /** @return array{markdown_output: string, model_used: string, cost_usd: float, loop_iterations: int} */
     public function handle(Organization $organization, string $prompt): array
     {
-        $config   = $organization->ai_provider_config ?? config('ai.default');
+        $config = $organization->ai_provider_config ?? config('ai.default');
         $provider = $config['provider'] ?? 'anthropic';
-        $model    = $config['model'] ?? config('ai.default.model');
+        $model = $config['model'] ?? config('ai.default.model');
 
         $maxOutputTokens = (int) config('video_idea_extractor.layer2.max_output_tokens', 4096);
-        $targetCount     = (int) config('video_idea_extractor.layer2.target_idea_count', 8);
-        $maxIterations   = max(1, (int) config('video_idea_extractor.layer2.max_loop_iterations', 3));
+        $targetCount = (int) config('video_idea_extractor.layer2.target_idea_count', 8);
+        $maxIterations = max(1, (int) config('video_idea_extractor.layer2.max_loop_iterations', 3));
 
         // 2026-08 — nâng từ 0.3 lên 0.7: BƯỚC 1 của prompt yêu cầu brainstorm RỘNG 15-20 ý tưởng
         // đa dạng góc nhìn (theo giai đoạn/vấn đề/định dạng khác nhau) — nhiệt độ thấp (0.3) dễ ra
@@ -117,17 +129,20 @@ class RunVideoIdeaLayer2Action
             maxTokens: $maxOutputTokens,
         );
 
-        $accepted           = [];
-        $seenNormalized     = [];
-        $products           = [];
-        $seenProducts       = [];
-        $totalCostUsd       = 0.0;
-        $modelUsed          = $model;
-        $categoryNote       = null;
+        $accepted = [];
+        $seenNormalized = [];
+        $products = [];
+        $seenProducts = [];
+        $totalCostUsd = 0.0;
+        $modelUsed = $model;
+        $categoryNote = null;
         $audienceAssumption = null;
         $insufficientReason = null;
-        $currentPrompt      = $prompt;
-        $iteration          = 0;
+        // Lượt 1: chưa có gì để nối thêm → dùng KICKOFF_MESSAGE làm user turn. Từ lượt 2: chỉ
+        // đúng đoạn "Bổ sung" (không còn nối chồng $prompt gốc) — $prompt gốc đã tách sang system
+        // message cacheable, gửi y hệt mọi lượt để Anthropic tính phí cache-read.
+        $userTurn = self::KICKOFF_MESSAGE;
+        $iteration = 0;
 
         // Gọi AI đồng bộ trong request (nút bấm thủ công, không phải job nền) — nới execution
         // time limit rộng hơn bản 1-lần-gọi cũ vì giờ có thể chạy tới $maxIterations lượt liên
@@ -137,7 +152,9 @@ class RunVideoIdeaLayer2Action
         while ($iteration < $maxIterations) {
             $iteration++;
 
-            $estimatedInputTokens = (int) ceil(mb_strlen($currentPrompt) / 4);
+            // Ước lượng thô cho budget pre-check (chưa biết cache-read rẻ hơn cache-write tới đâu
+            // — dùng tổng độ dài system+user làm cận trên an toàn, giống hành vi ước lượng cũ).
+            $estimatedInputTokens = (int) ceil((mb_strlen($prompt) + mb_strlen($userTurn)) / 4);
 
             try {
                 $this->budget->ensureWithinBudget($organization, $estimatedInputTokens, $maxOutputTokens, $provider, $model);
@@ -156,26 +173,27 @@ class RunVideoIdeaLayer2Action
             }
 
             $response = $this->aiProviderManager->complete($organization, [
-                ['role' => 'user', 'content' => $currentPrompt],
+                ['role' => 'system', 'content' => $prompt, 'cacheable' => true],
+                ['role' => 'user', 'content' => $userTurn],
             ], $options);
 
             $this->budget->recordActualCost($organization, $response->costUsd);
             $totalCostUsd += $response->costUsd;
-            $modelUsed     = $response->modelUsed;
+            $modelUsed = $response->modelUsed;
 
             // Ghi log mỗi LƯỢT gọi thật (không phải mỗi lần bấm nút) — đúng tinh thần cột `kind`
             // hiện có: audit/tách chi phí theo tính năng, giờ 1 lần bấm "Chạy AI" có thể tương
             // ứng NHIỀU dòng nếu vòng lặp chạy >1 lượt.
             DB::table('video_idea_extractor_layer2_runs')->insert([
                 'organization_id' => $organization->id,
-                'kind'            => 'layer2',
-                'cost_usd'        => $response->costUsd,
-                'model_used'      => $response->modelUsed,
-                'created_at'      => now(),
+                'kind' => 'layer2',
+                'cost_usd' => $response->costUsd,
+                'model_used' => $response->modelUsed,
+                'created_at' => now(),
             ]);
 
             $decoded = json_decode($response->content, associative: true);
-            $ideas   = is_array($decoded['ideas'] ?? null) ? $decoded['ideas'] : [];
+            $ideas = is_array($decoded['ideas'] ?? null) ? $decoded['ideas'] : [];
 
             if (! empty($decoded['category_note'])) {
                 $categoryNote = (string) $decoded['category_note'];
@@ -196,14 +214,14 @@ class RunVideoIdeaLayer2Action
                 }
 
                 $name = trim((string) ($product['product'] ?? ''));
-                $key  = mb_strtolower($name);
+                $key = mb_strtolower($name);
 
                 if ($name === '' || isset($seenProducts[$key])) {
                     continue;
                 }
 
                 $seenProducts[$key] = true;
-                $products[]         = $product;
+                $products[] = $product;
             }
 
             $addedThisRound = 0;
@@ -213,7 +231,7 @@ class RunVideoIdeaLayer2Action
                     continue;
                 }
 
-                $ideaText   = trim((string) ($idea['idea'] ?? ''));
+                $ideaText = trim((string) ($idea['idea'] ?? ''));
                 $normalized = mb_strtolower($ideaText);
 
                 // Dedup CHÍNH XÁC theo văn bản (sau lowercase/trim) — chặn lưới an toàn cho
@@ -247,7 +265,7 @@ class RunVideoIdeaLayer2Action
                 break;
             }
 
-            $currentPrompt = $this->buildFollowUpPrompt($prompt, $accepted, $targetCount - count($accepted), $products);
+            $userTurn = $this->buildFollowUpPrompt($accepted, $targetCount - count($accepted), $products);
         }
 
         if (count($accepted) < $targetCount && $insufficientReason === null) {
@@ -261,19 +279,19 @@ class RunVideoIdeaLayer2Action
 
         return [
             'markdown_output' => $this->renderMarkdownTable($accepted, $products, $categoryNote, $audienceAssumption, $insufficientReason),
-            'model_used'      => $modelUsed,
-            'cost_usd'        => $totalCostUsd,
+            'model_used' => $modelUsed,
+            'cost_usd' => $totalCostUsd,
             'loop_iterations' => $iteration,
         ];
     }
 
     /**
-     * Prompt gốc do client build sẵn (buildLayer2PromptText()) GIỮ NGUYÊN — chỉ NỐI THÊM đoạn yêu
-     * cầu bổ sung cho vòng lặp tiếp theo, không cần hiểu cấu trúc TOP/MIDDLE/BOTTOM bên trong.
-     * Luôn nối vào PROMPT GỐC (không nối chồng lên $currentPrompt của lượt trước) để độ dài prompt
-     * không phình to tích luỹ qua từng lượt — chỉ tăng đúng bằng danh sách ý đã đạt.
+     * Đoạn "Bổ sung" cho vòng lặp tiếp theo — KHÔNG còn nối vào $prompt gốc (2026-08-05, xem
+     * docblock class): $prompt gốc đã là system message cacheable riêng, gửi y hệt mọi lượt; hàm
+     * này chỉ trả đúng phần THAY ĐỔI theo lượt (danh sách ý đã đạt + sản phẩm đã có) để làm user
+     * turn, không cần hiểu cấu trúc TOP/MIDDLE/BOTTOM của prompt gốc.
      */
-    private function buildFollowUpPrompt(string $originalPrompt, array $accepted, int $remaining, array $products): string
+    private function buildFollowUpPrompt(array $accepted, int $remaining, array $products): string
     {
         $existingList = implode("\n", array_map(
             static fn (array $idea) => '- '.($idea['idea'] ?? ''),
@@ -289,7 +307,7 @@ class RunVideoIdeaLayer2Action
                 .implode("\n", array_map(static fn (array $p): string => '- '.($p['product'] ?? ''), $products))
                 ."\n(Tổng đang có ".count($products).'/'.self::MIN_SUGGESTED_PRODUCTS.' tối thiểu.) Chỉ bổ sung sản phẩm MỚI khác loại nếu các ý tưởng mới ở lượt này mở ra loại sản phẩm chưa có; nếu không có gì mới, trả về mảng rỗng.';
 
-        return $originalPrompt."\n\n# Bổ sung — vòng lặp tiếp theo\n"
+        return "# Bổ sung — vòng lặp tiếp theo\n"
             ."Bạn đã đề xuất các ý tưởng sau ở (các) lượt trước, ĐÃ đạt cả 4 tiêu chí — GIỮ NGUYÊN, KHÔNG lặp lại trong câu trả lời này:\n"
             .$existingList
             ."\n\nCần thêm ÍT NHẤT {$remaining} ý tưởng MỚI, KHÔNG trùng hoặc gần giống bất kỳ ý nào ở trên (kể cả biến thể chỉ đổi cách diễn đạt nhưng cùng góc khai thác) — vẫn đi qua đủ Bước 1 (đa dạng góc nhìn) và Bước 2 (đánh giá cả 4 tiêu chí + 2 bộ lọc bắt buộc) như đã mô tả ở trên, chỉ trả về những ý MỚI đạt tiêu chí trong câu trả lời này ở trường `ideas`."
@@ -319,8 +337,8 @@ class RunVideoIdeaLayer2Action
         // còn 1 bảng trần như trước — đặt tên đúng bố cục mà nhánh `forExternalChat` của
         // buildLayer2PromptText() yêu cầu chat AI ngoài trả về, để 2 đường đi nhìn giống nhau.
         $lines[] = '## Ý tưởng';
-        $lines[] = '| Ý tưởng | Định dạng gợi ý | Khớp trọng tâm? | Góc nhìn độc quyền? | Phục vụ mục tiêu? | Phù hợp đối tượng? | Lý do (1 câu) | Đề xuất tiêu đề video |';
-        $lines[] = '| --- | --- | --- | --- | --- | --- | --- | --- |';
+        $lines[] = '| Ý tưởng | Định dạng gợi ý | Khớp trọng tâm? | Góc nhìn độc quyền? | Phục vụ mục tiêu? | Phù hợp đối tượng? | Lý do (1 câu) | Đề xuất tiêu đề video | Nguồn căn cứ |';
+        $lines[] = '| --- | --- | --- | --- | --- | --- | --- | --- | --- |';
 
         foreach ($accepted as $idea) {
             $cells = [
@@ -332,6 +350,7 @@ class RunVideoIdeaLayer2Action
                 'Có',
                 $this->escapeCell($idea['reason'] ?? ''),
                 $this->escapeCell($idea['suggested_title'] ?? ''),
+                $this->escapeCell($idea['source_reference'] ?? ''),
             ];
 
             $lines[] = '| '.implode(' | ', $cells).' |';
