@@ -2304,5 +2304,51 @@
         "model_used///string///100///NOT_NULL///__///__///__",
         "created_at///timestamp///__///_NULL///NULL///__///__",
         "__index///index///__///__///__///organization_id,created_at|video_idea_extractor_layer2_runs_org_created_idx///__"
+    ],
+    [
+        "pension_parameter_periods///__///__///",
+        "effective_from///date///__///NOT_NULL///__///->unique()///__",
+        "rural_poverty_line///decimal///15,2///NOT_NULL///__///__///__",
+        "reference_level///decimal///15,2///NOT_NULL///__///__///__",
+        "contribution_rate_percent///decimal///5,2///NOT_NULL///22.00///__///__",
+        "ceiling_multiplier///unsignedTinyInteger///__///NOT_NULL///20///__///__",
+        "source_document///string///__///NOT_NULL///__///__///__",
+        "notes///text///__///_NULL///NULL///__///__",
+        "created_by///unsignedBigInteger///__///_NULL///NULL///->constrained('users')->onDelete('set null')///__",
+        "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
+        "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật"
+    ],
+    [
+        "pension_support_tiers///__///__///",
+        "period_id///unsignedBigInteger///__///NOT_NULL///__///->constrained('pension_parameter_periods')->onDelete('cascade')///__",
+        "group_key///string///__///NOT_NULL///__///__///__",
+        "support_percent///decimal///5,2///NOT_NULL///__///__///__",
+        "__index///unique///__///__///__///period_id,group_key///__",
+        "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
+        "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật"
+    ],
+    [
+        "pension_price_index_coefficients///__///__///",
+        "settlement_year///unsignedSmallInteger///__///NOT_NULL///__///__///__",
+        "contribution_year///unsignedSmallInteger///__///NOT_NULL///__///__///__",
+        "coefficient///decimal///4,2///NOT_NULL///__///__///__",
+        "source_document///string///__///NOT_NULL///__///__///__",
+        "created_by///unsignedBigInteger///__///_NULL///NULL///->constrained('users')->onDelete('set null')///__",
+        "__index///unique///__///__///__///settlement_year,contribution_year|pension_price_index_coef_year_unique///__",
+        "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
+        "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật"
+    ],
+    [
+        "pension_rate_brackets///__///__///",
+        "gender///string///__///NOT_NULL///__///__///__",
+        "min_years_for_base_rate///unsignedTinyInteger///__///NOT_NULL///__///__///__",
+        "base_rate_percent///decimal///5,2///NOT_NULL///__///__///__",
+        "increment_percent_per_year///decimal///5,2///NOT_NULL///__///__///__",
+        "max_rate_percent///decimal///5,2///NOT_NULL///75.00///__///__",
+        "effective_from///date///__///NOT_NULL///__///__///__",
+        "source_document///string///__///NOT_NULL///__///__///__",
+        "notes///text///__///_NULL///NULL///__///__",
+        "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
+        "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật"
     ]
 ]

@@ -273,8 +273,8 @@
             <div class="card-body py-4 px-4">
                 <h2 class="font-semibold text-base-content mb-1">Minh hoạ: nếu tiếp tục đóng đến khi đủ điều kiện</h2>
                 <p class="text-xs text-base-content/50 mb-3">
-                    Giả định 3 mức thu nhập chọn đóng cho các tháng CÒN THIẾU (mặc định lấy từ mức gần nhất bạn đã nhập ở Bước 2, có thể sửa tay).
-                    Các tháng đóng thêm dùng NGUYÊN giá trị thu nhập bạn nhập — KHÔNG áp hệ số trượt giá cho năm chưa tới (coi hệ số = 1, vì chưa có hệ số nào được BHXH Việt Nam công bố cho các năm sau này) — chỉ mang tính minh hoạ tương đối, KHÔNG phải dự báo chính xác.
+                    Giả định 3 mức thu nhập chọn đóng cho các tháng CÒN THIẾU (mặc định tự đồng bộ theo mức gần nhất bạn đã nhập ở Bước 2, có thể sửa tay — 1 khi đã tự sửa thì không tự đồng bộ nữa cho tới khi bấm "Đặt lại theo mức gần nhất").
+                    Các tháng đóng thêm áp hệ số trượt giá CỐ ĐỊNH bằng hệ số của năm hiện tại (chưa có hệ số nào được BHXH Việt Nam công bố cho các năm sau này) — chỉ mang tính minh hoạ tương đối, KHÔNG phải dự báo chính xác.
                 </p>
 
                 <button type="button" class="btn btn-ghost btn-xs w-fit mb-2" @click="resetProjectionIncomes()">Đặt lại theo mức gần nhất</button>
@@ -301,7 +301,7 @@
                                     <td x-text="scenario.label"></td>
                                     <td class="text-right">
                                         <input type="number" step="1000" class="input input-bordered input-xs w-32 text-right"
-                                               x-model.number="projectionIncomes[scenario.key]">
+                                               x-model.number="projectionIncomes[scenario.key]" @input="projectionIncomesTouched = true">
                                     </td>
                                     <template x-if="!projectPensionFor(projectionIncomes[scenario.key]).blocked">
                                     <td class="text-right" x-text="formatVnd(projectPensionFor(projectionIncomes[scenario.key]).monthlyContribution.net)"></td>
@@ -331,6 +331,66 @@
                     </table>
                 </div>
                 <p class="text-xs text-base-content/40 mt-2">"Dự kiến đủ điều kiện vào" tính từ số tháng còn thiếu theo nhánh điều kiện đang áp dụng (Bước 4) — KHÔNG tính lại điều kiện tuổi (xem lại phần cảnh báo tuổi ở Bước 4 cho mốc thời gian này).</p>
+            </div>
+        </div>
+        </template>
+
+        {{-- Bảng minh hoạ CHI TIẾT THEO NĂM cho kịch bản "giữ nguyên mức đóng gần nhất" — bổ
+             sung theo yêu cầu người dùng 2026-08-05: xem từng năm còn thiếu sẽ đóng bao nhiêu
+             tháng, luỹ kế ra sao, và lương hưu ước tính khi đủ điều kiện. Hệ số trượt giá cho
+             các năm chưa tới lấy CỐ ĐỊNH bằng hệ số của năm hiện tại (xem currentYearCoefficient)
+             — KHÔNG phải hệ số đã được BHXH Việt Nam công bố cho các năm đó (chưa tồn tại). --}}
+        <template x-if="!pensionEligibility.eligibleByYears && !projectPensionFor(projectionIncomes.current).blocked && projectPensionFor(projectionIncomes.current).yearlyRows.length">
+        <div class="card bg-base-100 shadow-sm border border-base-200">
+            <div class="card-body py-4 px-4">
+                <h2 class="font-semibold text-base-content mb-1">Bảng minh hoạ chi tiết theo năm — giữ nguyên mức đóng hiện tại</h2>
+                <p class="text-xs text-base-content/50 mb-3">
+                    Giả định tiếp tục đóng đúng <span x-text="formatVnd(projectionIncomes.current)"></span>/tháng cho các tháng còn thiếu, hệ số trượt giá của các năm chưa tới lấy CỐ ĐỊNH bằng hệ số năm hiện tại (<span x-text="currentYear"></span>: hệ số <span x-text="Number(currentYearCoefficient).toFixed(2)"></span>) — không phải hệ số chính thức cho các năm đó (chưa được BHXH Việt Nam công bố), chỉ minh hoạ tương đối.
+                </p>
+                <div class="overflow-x-auto">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Năm</th>
+                                <th class="text-right">Số tháng đóng thêm trong năm</th>
+                                <th class="text-right">Luỹ kế số tháng đóng</th>
+                                <th class="text-right">Hệ số áp dụng</th>
+                                <th class="text-right">Thành tiền trong năm (đã điều chỉnh)</th>
+                                <th class="text-right">Luỹ kế thu nhập điều chỉnh</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="row in projectPensionFor(projectionIncomes.current).yearlyRows" :key="row.year">
+                                <tr>
+                                    <td x-text="row.year"></td>
+                                    <td class="text-right" x-text="row.months"></td>
+                                    <td class="text-right" x-text="row.cumulativeMonths"></td>
+                                    <td class="text-right" x-text="Number(row.coefficient).toFixed(2)"></td>
+                                    <td class="text-right" x-text="formatVnd(row.amount)"></td>
+                                    <td class="text-right" x-text="formatVnd(row.cumulativeAdjusted)"></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                        <tfoot>
+                            <tr class="font-semibold border-t-2 border-base-300">
+                                <td colspan="5">Mức bình quân thu nhập (Mbq) dự kiến khi đủ điều kiện (<span x-text="projectPensionFor(projectionIncomes.current).eligibleAtLabel"></span>)</td>
+                                <td class="text-right" x-text="formatVnd(projectPensionFor(projectionIncomes.current).projectedMbq)"></td>
+                            </tr>
+                            <tr class="font-semibold">
+                                <td colspan="5">Lương hưu ước tính hằng tháng sau khi đủ điều kiện</td>
+                                <td class="text-right text-primary">
+                                    <template x-if="projectPensionFor(projectionIncomes.current).needsVerifiedRateTable">
+                                        <span class="text-warning text-xs">Chưa xác minh tỷ lệ hưởng</span>
+                                    </template>
+                                    <template x-if="!projectPensionFor(projectionIncomes.current).needsVerifiedRateTable">
+                                        <span class="text-lg" x-text="formatVnd(projectPensionFor(projectionIncomes.current).projectedPension)"></span>
+                                    </template>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <p class="text-xs text-base-content/40 mt-2">Muốn xem theo mức đóng khác (thấp hơn/cao hơn) — sửa ô "Giữ nguyên mức gần nhất" ở bảng minh hoạ phía trên, bảng chi tiết này sẽ tự cập nhật theo.</p>
             </div>
         </div>
         </template>
@@ -539,9 +599,17 @@ document.addEventListener('alpine:init', () => {
 
         // Bảng minh hoạ "nếu tiếp tục đóng đến khi đủ điều kiện" (mở rộng theo yêu cầu người
         // dùng) — 3 mức thu nhập giả định (thấp hơn/giữ nguyên/cao hơn mức gần nhất đã nhập),
-        // KHÔNG áp hệ số trượt giá tương lai (coi = 1, dùng giá trị hiện tại — chưa có hệ số nào
-        // được công bố cho các năm chưa tới), chỉ mang tính minh hoạ tương đối.
+        // hệ số trượt giá tương lai lấy hệ số năm hiện tại (currentYearCoefficient), chỉ mang
+        // tính minh hoạ tương đối.
         projectionIncomes: { lower: 1500000, current: 1500000, higher: 1500000 },
+
+        // BUG phát hiện 2026-08-05: projectionIncomes chỉ tính 1 lần lúc init() từ dòng Bước 2
+        // lúc đó — nếu người dùng SỬA income ở Bước 2 sau đó mà không bấm nút "Đặt lại theo mức
+        // gần nhất", projectionIncomes.current bị CŨ (VD vẫn = chuẩn nghèo mặc định), làm loãng
+        // Mbq của bảng minh hoạ xuống sai lệch rất nhiều. Cờ này theo dõi người dùng đã tự tay
+        // sửa projectionIncomes hay chưa — CHỈ auto re-sync (xem $watch trong init()) khi CHƯA
+        // từng tự sửa, để vẫn tôn trọng "có thể sửa tay" như thiết kế gốc.
+        projectionIncomesTouched: false,
 
         // Bảng minh hoạ theo tuổi bắt đầu tham gia (khuôn ví dụ đại lý BHXH "NAM 37T, NỮ 37T") —
         // nhiều mục tiêu lương hưu, so sánh Nam/Nữ. Số năm đóng NHẬP TAY (không tự suy từ tuổi
@@ -557,6 +625,19 @@ document.addEventListener('alpine:init', () => {
         init() {
             if (this.contributionRows.length === 0) this.addRow();
             this.resetProjectionIncomes();
+
+            // Auto re-sync projectionIncomes mỗi khi Bước 2 đổi (thêm/xoá/sửa dòng), CHỪNG NÀO
+            // người dùng chưa tự tay sửa projectionIncomes — sửa BUG stale value nêu trên. Dùng
+            // getter `contributionRowsSignature` (JSON.stringify) làm khoá theo dõi vì $watch chỉ
+            // bắt được thay đổi REFERENCE, còn sửa 1 field bên trong 1 phần tử mảng không tự đổi
+            // reference của mảng.
+            this.$watch('contributionRowsSignature', () => {
+                if (!this.projectionIncomesTouched) this.resetProjectionIncomes();
+            });
+        },
+
+        get contributionRowsSignature() {
+            return JSON.stringify(this.contributionRows);
         },
 
         // ── Helpers ──────────────────────────────────────────────────
@@ -570,13 +651,20 @@ document.addEventListener('alpine:init', () => {
             return `${m}/${y}`;
         },
 
-        // month tuyệt đối (yearMonthIndex 1 = 01/0001) → nhãn "MM/YYYY", dùng để hiển thị mốc
-        // "dự kiến đủ điều kiện vào tháng nào" ở bảng minh hoạ (§ mở rộng — xem projectPensionFor).
-        monthsFromNowLabel(monthsAhead) {
-            if (monthsAhead <= 0) return 'Ngay bây giờ';
+        // month tuyệt đối (offset tính từ tháng hiện tại, offset=1 → tháng kế tiếp) → {year, month}
+        // — tách riêng khỏi monthsFromNowLabel để tái dùng cho bảng minh hoạ theo năm (yearlyRows
+        // trong projectPensionFor, yêu cầu người dùng 2026-08-05).
+        monthYearForOffset(monthsAhead) {
             const absoluteIndex = this.currentYear * 12 + this.currentMonth + monthsAhead;
             const year = Math.floor((absoluteIndex - 1) / 12);
             const month = ((absoluteIndex - 1) % 12) + 1;
+            return { year, month };
+        },
+
+        // "dự kiến đủ điều kiện vào tháng nào" ở bảng minh hoạ (§ mở rộng — xem projectPensionFor).
+        monthsFromNowLabel(monthsAhead) {
+            if (monthsAhead <= 0) return 'Ngay bây giờ';
+            const { year, month } = this.monthYearForOffset(monthsAhead);
             return `${String(month).padStart(2, '0')}/${year}`;
         },
 
@@ -610,6 +698,18 @@ document.addEventListener('alpine:init', () => {
         coefficientFor(settlementYear, contributionYear) {
             return (this.referenceData.price_index_coefficients || [])
                 .find((c) => c.settlement_year === settlementYear && c.contribution_year === contributionYear) ?? null;
+        },
+
+        // Hệ số trượt giá của NĂM HIỆN TẠI (settlement_year = contribution_year = năm hiện tại)
+        // — theo yêu cầu người dùng 2026-08-05: dùng hệ số này CỐ ĐỊNH cho mọi tháng đóng thêm
+        // ở các năm CHƯA TỚI trong bảng minh hoạ (projectPensionFor), thay vì bỏ qua điều chỉnh
+        // (trước đây coi hệ số tương lai = 1 do chưa có hệ số công bố cho năm chưa tới — về mặt
+        // số học 2 cách cho CÙNG kết quả với dữ liệu đã seed, vì hệ số của năm settlement trùng
+        // năm đóng luôn = 1.00 theo quy định, nhưng viết tường minh để đúng ý nghĩa nghiệp vụ và
+        // vẫn đúng nếu sau này hệ số năm hiện tại được công bố khác 1.00).
+        get currentYearCoefficient() {
+            const coef = this.coefficientFor(this.currentYear, this.currentYear);
+            return coef ? coef.coefficient : 1;
         },
 
         // ── Bước 2 — dòng thời gian đóng góp ────────────────────────
@@ -870,8 +970,9 @@ document.addEventListener('alpine:init', () => {
         // ── Bảng minh hoạ "nếu tiếp tục đóng đến khi đủ điều kiện" ──────
         // Mở rộng theo yêu cầu: dù CHƯA đủ điều kiện (Bước 4), vẫn ước tính tương đối lương hưu
         // NẾU tiếp tục đóng thêm ở 1 trong 3 mức thu nhập giả định cho tới khi đủ số năm yêu
-        // cầu. KHÔNG áp hệ số trượt giá cho các năm tương lai (coi = 1, dùng nguyên giá trị danh
-        // nghĩa hôm nay — chưa có hệ số nào được BHXH Việt Nam công bố cho năm chưa tới).
+        // cầu. Hệ số trượt giá cho các năm tương lai lấy CỐ ĐỊNH bằng hệ số năm hiện tại
+        // (currentYearCoefficient) — chưa có hệ số nào được BHXH Việt Nam công bố cho năm chưa
+        // tới, xem projectPensionFor().
         get projectionBaseIncome() {
             const rows = this.sortedRows();
             if (!rows.length) return this.currentParameterPeriod ? Number(this.currentParameterPeriod.rural_poverty_line) : 1500000;
@@ -890,6 +991,9 @@ document.addEventListener('alpine:init', () => {
                 current: Math.min(ceiling, Math.max(floor, base)),
                 higher: Math.min(ceiling, round(base * 1.3)),
             };
+            // Bấm "Đặt lại" nghĩa là người dùng muốn quay về auto-sync theo Bước 2 — mở lại cờ
+            // để $watch trong init() tiếp tục tự động cập nhật cho tới lần tự sửa tay kế tiếp.
+            this.projectionIncomesTouched = false;
         },
 
         projectPensionFor(scenarioIncome) {
@@ -907,9 +1011,11 @@ document.addEventListener('alpine:init', () => {
             const currentVoluntaryAdjusted = breakdown.reduce((sum, b) => sum + b.adjustedTotal, 0);
             const currentTotalMonths = this.totalVoluntaryMonths + mandatoryMonths;
 
+            // hệ số tương lai = hệ số của năm hiện tại (currentYearCoefficient — cố định cho mọi
+            // năm chưa tới, theo yêu cầu người dùng 2026-08-05; xem comment tại getter đó)
+            const futureCoefficient = this.currentYearCoefficient;
             const projectedTotalMonths = currentTotalMonths + additionalMonthsNeeded;
-            // hệ số tương lai = 1 (giá trị hiện tại, không trượt giá — theo yêu cầu)
-            const projectedNumerator = mandatoryAmount + currentVoluntaryAdjusted + (additionalMonthsNeeded * scenarioIncome * 1);
+            const projectedNumerator = mandatoryAmount + currentVoluntaryAdjusted + (additionalMonthsNeeded * scenarioIncome * futureCoefficient);
             const projectedMbq = projectedTotalMonths > 0 ? projectedNumerator / projectedTotalMonths : null;
 
             const projectedYears = Math.floor((elig.monthsAccumulated + additionalMonthsNeeded) / 12);
@@ -923,6 +1029,28 @@ document.addEventListener('alpine:init', () => {
                 }
             }
 
+            // Bảng minh hoạ chi tiết THEO TỪNG NĂM cho số tháng còn thiếu (yêu cầu người dùng
+            // 2026-08-05) — gộp các tháng đóng thêm theo năm dương lịch (tính từ tháng kế tiếp
+            // tháng hiện tại), mỗi năm dùng NGUYÊN mức thu nhập kịch bản × futureCoefficient.
+            const yearlyRows = [];
+            let cumulativeMonths = currentTotalMonths;
+            let cumulativeAdjusted = mandatoryAmount + currentVoluntaryAdjusted;
+            for (let offset = 1; offset <= additionalMonthsNeeded; offset++) {
+                const { year } = this.monthYearForOffset(offset);
+                let row = yearlyRows[yearlyRows.length - 1];
+                if (!row || row.year !== year) {
+                    row = { year, months: 0, coefficient: futureCoefficient, amount: 0 };
+                    yearlyRows.push(row);
+                }
+                const monthAmount = scenarioIncome * futureCoefficient;
+                row.months += 1;
+                row.amount += monthAmount;
+                cumulativeMonths += 1;
+                cumulativeAdjusted += monthAmount;
+                row.cumulativeMonths = cumulativeMonths;
+                row.cumulativeAdjusted = cumulativeAdjusted;
+            }
+
             return {
                 blocked: false,
                 additionalMonthsNeeded,
@@ -933,6 +1061,7 @@ document.addEventListener('alpine:init', () => {
                 projectedPension,
                 needsVerifiedRateTable: rate === null,
                 monthlyContribution: this.monthlyContributionForIncome(scenarioIncome, 'other', this.supportMonthsUsed, period),
+                yearlyRows,
             };
         },
 
