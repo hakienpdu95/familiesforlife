@@ -1,14 +1,59 @@
 # Module Bảng tính Minh hoạ Lương hưu BHXH Tự nguyện (Pension Calculator)
 **Đặc tả Kỹ thuật Chi tiết — Sẵn sàng Triển khai (có mục cần xác minh pháp lý trước khi code)**
 
-**Phiên bản:** 1.4 — module đã TRIỂN KHAI (xem `Modules/PensionCalculator`). **§14 mục 1 (tỷ lệ hưởng lương hưu) — mục chặn go-live DUY NHẤT — đã RESOLVED**: có văn bản Luật Bảo hiểm xã hội 2024 thật (`spec/bhxh/41-2024-qh15.pdf`), đối chiếu Điều 66/98/99/102/104 xác nhận đúng công thức, đã seed `pension_rate_brackets`. Toàn bộ tính năng ước tính lương hưu (Bước 5, §7.1, §15.6) nay ra số thật thay vì "chưa xác minh". Chỉ còn mục 5 (một phần — mức trợ cấp hưu trí xã hội cụ thể, Phase 2) và mục 7 (reference_level 2.530.000, không liên quan Luật 2024) — xem §14.
-**Ngày:** 2026-08-04
+**Phiên bản:** 1.5  
+**Ngày:** 2026-08-05
 **Framework:** Laravel 13 (PHP 8.4) + NWIDART Modules + Lorisleiva Actions
 **Module mới:** `Modules/PensionCalculator`
-**Nguồn tài liệu đầu vào:** `spec/bhxh/bhxh.md` (bài tổng hợp mức đóng BHXH tự nguyện, thuvienphapluat.vn), `spec/bhxh/159-cp.signed.pdf` (Nghị định 159/2025/NĐ-CP ngày 25/06/2025 — quy định chi tiết và hướng dẫn thi hành một số điều của Luật Bảo hiểm xã hội về bảo hiểm xã hội tự nguyện, hiệu lực từ 01/07/2025), `spec/bhxh/BHXHVN_340-BHXH-CSXH_03022026.pdf` (Công văn 340/BHXH-CSXH ngày 03/02/2026 của BHXH Việt Nam — hệ số điều chỉnh tiền lương/thu nhập tháng đã đóng BHXH, cột "thu nhập" dùng cho BHXH tự nguyện theo khoản 2 Điều 10 Nghị định 159/2025/NĐ-CP, xem §6.6/§14 mục 6), `spec/bhxh/41-2024-qh15.pdf` (Luật Bảo hiểm xã hội 2024, số 41/2024/QH15, Công báo số 987+988 ngày 25-8-2024 — nguồn Điều 66/98/99/102/104/21/22, xem §14), `spec/bhxh/1.png`–`3.png` (ví dụ minh hoạ cách tính mức bình quân tiền lương đóng BHXH có áp hệ số trượt giá — nguồn cũ, xem cảnh báo ở §2.3), `spec/bhxh/minhhoa.png` (ảnh minh hoạ marketing của 1 đại lý BHXH — ĐÃ đối chiếu và loại bỏ vì tỷ lệ ngụ ý vượt trần 75% hợp pháp, xem §15.6)
-**Module liên quan:** `Modules/Post` (nhúng/link từ bài viết), `Modules/RealEstate` (tiền lệ kiến trúc — công cụ tính khoản vay `anlandLoanCalculator`, xem §0)
+**Nguồn tài liệu đầu vào:** `spec/bhxh/bhxh.md` (bài tổng hợp mức đóng BHXH tự nguyện, thuvienphapluat.vn), `spec/bhxh/159-cp.signed.pdf` (Nghị định 159/2025/NĐ-CP ngày 25/06/2025 — quy định chi tiết và hướng dẫn thi hành một số điều của Luật Bảo hiểm xã hội về bảo hiểm xã hội tự nguyện, hiệu lực từ 01/07/2025), `spec/bhxh/BHXHVN_340-BHXH-CSXH_03022026.pdf` (Công văn 340/BHXH-CSXH ngày 03/02/2026 của BHXH Việt Nam — hệ số điều chỉnh tiền lương/thu nhập tháng đã đóng BHXH, cột "thu nhập" dùng cho BHXH tự nguyện theo khoản 2 Điều 10 Nghị định 159/2025/NĐ-CP, xem §6.6/§14 mục 6), `spec/bhxh/41-2024-qh15.pdf` (Luật Bảo hiểm xã hội 2024, số 41/2024/QH15, Công báo số 987+988 ngày 25-8-2024 — nguồn Điều 66/98/99/102/104/21/22, xem §14), `spec/bhxh/1.png`–`3.png` (ví dụ minh hoạ cách tính mức bình quân tiền lương đóng BHXH có áp hệ số trượt giá — nguồn cũ, xem cảnh báo ở §2.3), `spec/bhxh/minhhoa.png` (ảnh minh hoạ marketing của 1 đại lý BHXH — ĐÃ đối chiếu và loại bỏ vì tỷ lệ ngụ ý vượt trần 75% hợp pháp, xem §15.6), `spec/giadinh.md` (Quyết định 1193/QĐ-UBND ngày 18/3/2026 của UBND TP. Hà Nội — Danh mục bài toán lớn 2026-2030, xem v1.5)
+**Module liên quan:** `Modules/Post` (nhúng/link từ bài viết, v1.5 thêm widget "Bài viết liên quan"), `Modules/RealEstate` (tiền lệ kiến trúc — công cụ tính khoản vay `anlandLoanCalculator`, xem §0)
 
-> **v1.4 — đã seed tỷ lệ hưởng lương hưu thật (RESOLVED mục chặn go-live):** xem chi tiết đối chiếu Điều 66/98/99/102/104 ở §14 (khối cập nhật đầu mục). Tóm tắt: Điều 66 (bắt buộc) và Điều 99 (tự nguyện) dùng CHUNG 1 công thức 45%+2%/năm (nữ 15 năm/nam 20 năm), trần 75%, cộng nhánh phụ nam 15-19 năm dùng 40%+1%/năm — đã seed 3 dòng `pension_rate_brackets` dùng chung cho mọi nhánh eligibility. Đã kiểm chứng cross-check với chính văn bản Luật (nữ 20 năm=55%, nam 20 năm=45%, trần chạm ở nữ 30/nam 35 năm) và test toàn bộ luồng Bước 5 + 2 bảng minh hoạ (§7.1/§15.6) ra số thật.
+> **v1.5 (đối chiếu `spec/giadinh.md` — Quyết định 1193/QĐ-UBND, bài toán #27 "an sinh xã hội đa
+> tầng" + bài toán #30 "thích ứng già hóa dân số" — module này là match trực tiếp duy nhất trong
+> toàn bộ 30 module của platform, xác nhận qua khảo sát toàn codebase 2026-08-05):** thêm 6 tính
+> năng bám sát câu hỏi KHCN/sản phẩm mới nêu trong quyết định, KHÔNG đổi công thức nghiệp vụ (§6):
+>
+> **Bài toán #27:**
+> 1. **Mô tả điều kiện nhóm hỗ trợ** (`supportGroupDescription()`, khối `<details>` gấp gọn sau
+>    Bước 2) — trả lời câu hỏi "công cụ nào giúp xác định SỚM nhóm dễ bị tổn thương". Chỉ giải
+>    thích khái niệm + hướng xác nhận chính thức (giấy chứng nhận hộ nghèo/cận nghèo từ UBND xã,
+>    danh mục 53 dân tộc thiểu số của Ủy ban Dân tộc) — KHÔNG tự đặt ngưỡng thu nhập/tiêu chí
+>    chuẩn nghèo đa chiều cụ thể (Nghị định 07/2021/NĐ-CP, văn bản riêng ngoài phạm vi đã seed).
+> 2. **Cảnh báo chủ động** (`looksEligibleForSupport()`) — nudge khi thu nhập chọn đóng ≤ 110%
+>    chuẩn nghèo mà đang chọn "Không thuộc diện hỗ trợ".
+> 3. **Nút "In / Lưu PDF kết quả"** (`window.print()` + CSS `print:hidden` trên mọi nút tương
+>    tác) — cầu nối sang quy trình hành chính thật cho 2 việc công cụ CHƯA tính được (đóng bù 1
+>    lần/trợ cấp hằng tháng, xem Bước 4) — không có server-side PDF, giữ đúng "100% tính phía
+>    trình duyệt".
+> 4. **Thống kê ẩn danh, opt-in** (`pension_usage_logs`, migration mới) — trả lời "hệ thống phân
+>    tích và dự báo nhu cầu an sinh xã hội". Mặc định TẮT (checkbox ở cuối Bước 5), CHỈ gửi 7
+>    trường đã ẩn danh sẵn (giới tính/nhánh điều kiện/đủ-chưa đủ năm/số năm làm tròn) khi người
+>    dùng tự bấm nút — KHÔNG BAO GIỜ có thu nhập/tuổi/ngày tháng cụ thể/IP/session. Đã cập nhật
+>    disclaimer đầu trang (§10.3 pattern) thêm câu thứ 3 công khai chính xác tính năng này, giữ
+>    đúng nguyên tắc minh bạch tuyệt đối đã áp dụng cho mọi phần khác của công cụ. Xem thống kê
+>    tổng hợp tại `PensionParameterAdminController::buildUsageStats()` (card mới ở trang admin).
+>
+> **Bài toán #30:**
+> 5. **Chế độ chữ to/dễ đọc** (`largeTextMode`, toggle đầu trang + `<style>` override
+>    `.text-xs`/`.text-sm`/`.btn-xs` khi bật) — trả lời "phổ cập kỹ năng số, thu hẹp khoảng cách"
+>    cho người cao tuổi/hạn chế thao tác web. Mặc định TẮT, không lưu lựa chọn (giữ nhất quán
+>    "không lưu trữ gì" của toàn công cụ).
+> 6. **Widget "Bài viết liên quan"** (`PensionCalculatorController::fetchRelatedArticles()`) — trả
+>    lời "hệ sinh thái kinh tế phục vụ xã hội già hóa": nối trang công cụ với chuyên mục Post có
+>    slug `nguoi-cao-tuoi` (hằng số `RELATED_CONTENT_CATEGORY_SLUG`, KHÔNG phải config — quyết
+>    định TẠO chuyên mục này thuộc về biên tập viên qua `CategoryAdminController` có sẵn của
+>    `Post`, module này không tự seed category). Chuyên mục chưa tồn tại → widget tự ẩn, không
+>    lỗi. Nếu tòa soạn tạo chuyên mục này, hạ tầng `CoreIdeaExtractor` đã sẵn sàng sinh ý tưởng
+>    bài viết ngay (Category Content Foundation áp dụng như mọi category khác).
+>
+> **Không áp dụng / cần cân nhắc riêng (ghi nhận, không phải thiếu sót):** "hệ thống dự báo cung-
+> cầu lao động" (#30) và "nền tảng kết nối việc làm vùng" (#30) đòi hỏi dữ liệu thị trường lao
+> động hoàn toàn ngoài phạm vi 1 công cụ ước tính lương hưu — không có nguồn dữ liệu nào trong
+> platform để làm việc này có ý nghĩa, tránh xây tính năng rỗng dữ liệu.
+>
+> Không đổi Layer công thức (§6), không đổi schema `pension_parameter_periods`/`pension_support_
+> tiers`/`pension_price_index_coefficients`/`pension_rate_brackets` — chỉ thêm bảng mới
+> `pension_usage_logs` (độc lập, không FK tới bảng nào).
 
 ---
 

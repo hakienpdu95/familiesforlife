@@ -4,10 +4,30 @@
 @section('meta_description', 'Công cụ ước tính mức đóng, mức bình quân thu nhập và lương hưu hằng tháng khi tham gia Bảo hiểm xã hội tự nguyện — dựa trên Nghị định 159/2025/NĐ-CP, tính toán ngay trên trình duyệt, không lưu thông tin bạn nhập.')
 
 @section('content')
+{{-- Bài toán #30 (spec/giadinh.md — Quyết định 1193/QĐ-UBND, "phổ cập kỹ năng số, thu hẹp
+     khoảng cách" cho người cao tuổi): công cụ vốn tối ưu cho người rành thao tác web (bảng dày
+     đặc, chữ nhỏ text-xs/text-sm). "Chế độ chữ to/dễ đọc" phóng to CHỮ TO TOÀN BỘ mà không phải
+     sửa lại từng class ở mọi nơi — override có target class cụ thể, chỉ áp khi bật, không đổi
+     giao diện mặc định của ai khác. --}}
+<style>
+    .pension-large-text { font-size: 1.1875rem; line-height: 1.6; }
+    .pension-large-text .text-xs { font-size: 1rem !important; }
+    .pension-large-text .text-sm { font-size: 1.125rem !important; }
+    .pension-large-text .text-lg { font-size: 1.375rem !important; }
+    .pension-large-text .text-2xl { font-size: 2rem !important; }
+    .pension-large-text .btn-xs, .pension-large-text .input-xs, .pension-large-text .select-xs { font-size: 1rem !important; height: 2.25rem !important; }
+</style>
 <div class="max-w-5xl mx-auto px-4 py-8"
-     x-data="pensionCalculator({{ Js::from($referenceData) }})">
+     x-data="pensionCalculator({{ Js::from($referenceData) }})"
+     :class="{ 'pension-large-text': largeTextMode }">
 
-    <h1 class="text-2xl sm:text-3xl font-bold text-base-content mb-2">Bảng tính minh hoạ lương hưu BHXH tự nguyện</h1>
+    <div class="flex items-start justify-between flex-wrap gap-2 mb-2">
+        <h1 class="text-2xl sm:text-3xl font-bold text-base-content">Bảng tính minh hoạ lương hưu BHXH tự nguyện</h1>
+        <label class="label cursor-pointer gap-2 print:hidden shrink-0">
+            <span class="label-text text-sm">Chữ to, dễ đọc</span>
+            <input type="checkbox" class="toggle toggle-sm toggle-primary" x-model="largeTextMode">
+        </label>
+    </div>
     <p class="text-sm text-base-content/60 mb-4">Nhập dòng thời gian đóng góp thực tế của bạn để xem ước tính mức đóng, mức bình quân thu nhập và lương hưu hằng tháng.</p>
 
     {{-- §10.3 — Disclaimer bắt buộc, thường trực, 2 câu tách riêng --}}
@@ -16,6 +36,7 @@
         <div class="space-y-1.5">
             <p>Công cụ ước tính mang tính tham khảo dựa trên Nghị định 159/2025/NĐ-CP, tính toán ngay trên trình duyệt của bạn — không gửi hoặc lưu trữ thông tin thu nhập bạn nhập.</p>
             <p class="font-semibold text-warning-content bg-warning/20 rounded px-2 py-1">Đây <u>không phải</u> công cụ của Bảo hiểm xã hội Việt Nam và <u>không thay thế</u> hồ sơ/quyết định hưởng chế độ chính thức — số liệu thực tế do cơ quan Bảo hiểm xã hội Việt Nam xác định khi giải quyết hồ sơ, có thể khác kết quả ước tính ở đây do thay đổi chính sách, hệ số trượt giá, hoặc sai lệch thông tin bạn tự nhập.</p>
+            <p class="text-xs opacity-80">Ở cuối Bước 5 có 1 lựa chọn TỰ NGUYỆN (mặc định tắt) để đóng góp vài con số tổng hợp, ẩn danh (giới tính, đủ/chưa đủ điều kiện, số năm còn thiếu — không có thu nhập/tuổi/ngày tháng) giúp Nhà nước nắm nhu cầu an sinh xã hội; không bật thì không có gì được gửi đi.</p>
         </div>
     </div>
 
@@ -26,9 +47,17 @@
     <template x-if="currentParameterPeriod">
     <div>
 
-    <div role="tablist" class="tabs tabs-boxed w-fit mb-5">
-        <a role="tab" class="tab" :class="{ 'tab-active': activeTab === 'estimate' }" @click="activeTab = 'estimate'">Ước tính lương hưu</a>
-        <a role="tab" class="tab" :class="{ 'tab-active': activeTab === 'optimize' }" @click="activeTab = 'optimize'">Dự báo &amp; Tối ưu mức đóng</a>
+    <div class="flex items-center justify-between flex-wrap gap-2 mb-5 print:hidden">
+        <div role="tablist" class="tabs tabs-boxed w-fit">
+            <a role="tab" class="tab" :class="{ 'tab-active': activeTab === 'estimate' }" @click="activeTab = 'estimate'">Ước tính lương hưu</a>
+            <a role="tab" class="tab" :class="{ 'tab-active': activeTab === 'optimize' }" @click="activeTab = 'optimize'">Dự báo &amp; Tối ưu mức đóng</a>
+        </div>
+        {{-- Bài toán #27 (spec/giadinh.md) — "nền tảng điều phối nguồn lực xã hội hóa": cầu nối
+             giữa công cụ số và quy trình hành chính thật — người dùng in/lưu PDF kết quả để mang
+             tới UBND xã/phường hoặc cơ quan BHXH xin tư vấn thêm cho 2 việc công cụ CHƯA tính
+             được (đóng bù 1 lần / trợ cấp hằng tháng, xem Bước 4). Dùng window.print() thuần —
+             không có server-side PDF nào, giữ đúng nguyên tắc "100% tính phía trình duyệt". --}}
+        <button type="button" class="btn btn-ghost btn-sm" @click="window.print()">🖨️ In / Lưu PDF kết quả</button>
     </div>
 
     {{-- ══════════════════════════════ TAB 1: ƯỚC TÍNH (MVP, §7) ══════════════════════════════ --}}
@@ -67,7 +96,7 @@
                 <div x-show="hasMandatoryHistory" x-cloak class="pl-6 space-y-2">
                     <div class="flex items-center justify-between flex-wrap gap-2">
                         <p class="text-xs text-base-content/50">Nhập từng giai đoạn bắt buộc (có thể nhiều giai đoạn tách rời) — mỗi giai đoạn tự khai mức bình quân tiền lương riêng theo sổ BHXH.</p>
-                        <button type="button" class="btn btn-primary btn-xs" @click="addMandatoryRow()">+ Thêm giai đoạn bắt buộc</button>
+                        <button type="button" class="btn print:hidden btn-primary btn-xs" @click="addMandatoryRow()">+ Thêm giai đoạn bắt buộc</button>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="table table-sm table-zebra">
@@ -97,7 +126,7 @@
                                         <td>
                                             <input type="number" min="0" step="1000" class="input input-bordered input-xs w-36" x-model.number="row.averageIncome">
                                         </td>
-                                        <td><button type="button" class="btn btn-ghost btn-xs text-error" @click="removeMandatoryRow(row)" x-show="mandatoryRows.length > 1">Xoá</button></td>
+                                        <td><button type="button" class="btn print:hidden btn-ghost btn-xs text-error" @click="removeMandatoryRow(row)" x-show="mandatoryRows.length > 1">Xoá</button></td>
                                     </tr>
                                 </template>
                             </tbody>
@@ -119,7 +148,7 @@
             <div class="card-body py-4 px-4">
                 <div class="flex items-center justify-between flex-wrap gap-2 mb-1">
                     <h2 class="flex items-center gap-2 font-semibold text-base-content"><span class="badge badge-primary badge-sm w-5 h-5 p-0 justify-center font-bold">2</span> Dòng thời gian đóng BHXH tự nguyện</h2>
-                    <button type="button" class="btn btn-primary btn-xs" @click="addRow()">+ Thêm giai đoạn</button>
+                    <button type="button" class="btn print:hidden btn-primary btn-xs" @click="addRow()">+ Thêm giai đoạn</button>
                 </div>
 
                 {{-- §10.6 — thanh tiến trình 120 tháng hỗ trợ --}}
@@ -172,6 +201,7 @@
                                                 <option :value="tier.group_key" x-text="supportGroupLabel(tier.group_key)"></option>
                                             </template>
                                         </select>
+                                        <p class="text-xs text-warning mt-0.5 max-w-40" x-show="looksEligibleForSupport(row)" x-cloak>Mức thu nhập này gần chuẩn nghèo — bạn có thể thuộc diện được hỗ trợ thêm, xem điều kiện ở khối phía dưới bảng.</p>
                                     </td>
                                     <td class="text-right whitespace-nowrap">
                                         <template x-if="monthlyContributionFor(row).missingPeriod">
@@ -184,13 +214,29 @@
                                             </div>
                                         </template>
                                     </td>
-                                    <td><button type="button" class="btn btn-ghost btn-xs text-error" @click="removeRow(row)" x-show="contributionRows.length > 1">Xoá</button></td>
+                                    <td><button type="button" class="btn print:hidden btn-ghost btn-xs text-error" @click="removeRow(row)" x-show="contributionRows.length > 1">Xoá</button></td>
                                 </tr>
                             </template>
                         </tbody>
                     </table>
                 </div>
                 <p class="text-xs text-base-content/40 mt-1">Mức thu nhập hợp lệ: <span x-text="formatVnd(currentParameterPeriod.rural_poverty_line)"></span> – <span x-text="formatVnd(currentParameterPeriod.reference_level * currentParameterPeriod.ceiling_multiplier)"></span> (§6.1). Có thể để trống 1 khoảng thời gian giữa 2 giai đoạn nếu bạn nghỉ đóng.</p>
+
+                {{-- Bài toán #27 (spec/giadinh.md) — "xác định sớm nhóm dễ bị tổn thương": nhiều
+                     người đủ điều kiện hộ nghèo/cận nghèo/dân tộc thiểu số nhưng không biết nên bỏ
+                     qua mục hỗ trợ, vì dropdown "Nhóm hỗ trợ" trước đây chỉ có tên nhãn. Thêm khối
+                     gấp gọn giải thích từng nhóm — dùng chung cho cả 3 nơi có dropdown này (Bước 2,
+                     tab Dự báo & Tối ưu, Bảng minh hoạ theo tuổi). --}}
+                <details class="collapse collapse-arrow bg-base-200 mt-2 text-xs">
+                    <summary class="collapse-title min-h-0 py-2 font-medium">Bạn có thuộc nhóm được Nhà nước hỗ trợ thêm không? Xem điều kiện từng nhóm</summary>
+                    <div class="collapse-content">
+                        <ul class="space-y-1.5 pt-1">
+                            <template x-for="key in ['poor_household', 'near_poor_household', 'ethnic_minority', 'other']" :key="key">
+                                <li><span class="font-medium" x-text="supportGroupLabel(key) + ':'"></span> <span x-text="supportGroupDescription(key)"></span></li>
+                            </template>
+                        </ul>
+                    </div>
+                </details>
             </div>
         </div>
 
@@ -349,6 +395,26 @@
                 <template x-if="estimatedMonthlyPension.reason === 'not_eligible_years'">
                     <div class="alert alert-ghost text-sm border border-base-200">Chưa đủ điều kiện năm đóng (Bước 4) nên chưa thể ước tính lương hưu.</div>
                 </template>
+
+                {{-- Bài toán #27 (spec/giadinh.md) — "hệ thống phân tích và dự báo nhu cầu an
+                     sinh xã hội": TỰ NGUYỆN đóng góp 7 con số tổng hợp (giới tính, có/không lịch
+                     sử bắt buộc, có/không dùng nhóm hỗ trợ, nhánh điều kiện, đủ/chưa đủ năm, số
+                     năm tích luỹ/cần — làm tròn, KHÔNG có thu nhập/tuổi/ngày tháng cụ thể) để giúp
+                     cơ quan an sinh nắm xu hướng nhu cầu tổng thể — mặc định KHÔNG gửi gì, chỉ
+                     gửi khi bạn tự bấm nút dưới đây. --}}
+                <div class="mt-3 pt-3 border-t border-base-200 print:hidden" x-show="pensionEligibility" x-cloak>
+                    <label class="label cursor-pointer justify-start gap-2 py-0">
+                        <input type="checkbox" class="checkbox checkbox-sm" x-model="usageOptIn">
+                        <span class="label-text text-xs">Đóng góp dữ liệu ẩn danh (không có thu nhập/tuổi/ngày tháng) giúp Nhà nước nắm nhu cầu an sinh xã hội tổng thể</span>
+                    </label>
+                    <template x-if="usageOptIn">
+                        <div class="mt-1.5 flex items-center gap-2">
+                            <button type="button" class="btn btn-ghost btn-xs" @click="submitUsageLog()" :disabled="usageLogStatus === 'sending'">Gửi đóng góp ẩn danh</button>
+                            <span class="text-xs text-success" x-show="usageLogStatus === 'sent'" x-cloak>Đã gửi, cảm ơn bạn!</span>
+                            <span class="text-xs text-error" x-show="usageLogStatus === 'error'" x-cloak>Gửi lỗi, thử lại sau.</span>
+                        </div>
+                    </template>
+                </div>
             </div>
         </div>
 
@@ -365,7 +431,7 @@
                     Các tháng đóng thêm áp hệ số trượt giá CỐ ĐỊNH bằng hệ số của năm hiện tại (chưa có hệ số nào được BHXH Việt Nam công bố cho các năm sau này) — chỉ mang tính minh hoạ tương đối, KHÔNG phải dự báo chính xác.
                 </p>
 
-                <button type="button" class="btn btn-ghost btn-xs w-fit mb-2" @click="resetProjectionIncomes()">Đặt lại theo mức gần nhất</button>
+                <button type="button" class="btn print:hidden btn-ghost btn-xs w-fit mb-2" @click="resetProjectionIncomes()">Đặt lại theo mức gần nhất</button>
 
                 <div class="overflow-x-auto">
                     <table class="table table-sm table-zebra">
@@ -523,7 +589,7 @@
                     </label>
                 </div>
 
-                <button type="button" class="btn btn-primary btn-sm w-fit mt-3" @click="runOptimizer()">Tính TN tối thiểu</button>
+                <button type="button" class="btn print:hidden btn-primary btn-sm w-fit mt-3" @click="runOptimizer()">Tính TN tối thiểu</button>
 
                 <div class="mt-4" x-show="optimizer.result" x-cloak>
                     <template x-if="optimizer.result?.needsVerifiedRateTable">
@@ -593,7 +659,7 @@
                 </div>
 
                 <div class="flex items-center gap-2 mb-2">
-                    <button type="button" class="btn btn-ghost btn-xs" @click="illustration.targets.push(illustration.targets.length ? illustration.targets[illustration.targets.length - 1] + 500000 : 10000000)">+ Thêm mục tiêu lương hưu</button>
+                    <button type="button" class="btn print:hidden btn-ghost btn-xs" @click="illustration.targets.push(illustration.targets.length ? illustration.targets[illustration.targets.length - 1] + 500000 : 10000000)">+ Thêm mục tiêu lương hưu</button>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -652,7 +718,7 @@
                                         <td colspan="3" class="text-warning text-xs">Vượt mức trần đóng tối đa</td>
                                     </template>
 
-                                    <td><button type="button" class="btn btn-ghost btn-xs text-error" @click="illustration.targets.splice(idx, 1)" x-show="illustration.targets.length > 1">Xoá</button></td>
+                                    <td><button type="button" class="btn print:hidden btn-ghost btn-xs text-error" @click="illustration.targets.splice(idx, 1)" x-show="illustration.targets.length > 1">Xoá</button></td>
                                 </tr>
                             </template>
                         </tbody>
@@ -665,6 +731,30 @@
 
     </div>
     </template>
+
+    {{-- Bài toán #30 (spec/giadinh.md — "hệ sinh thái kinh tế phục vụ xã hội già hóa") — nối
+         công cụ tính lương hưu với nội dung biên tập cùng chủ đề (nếu tòa soạn đã tạo chuyên mục
+         "{{ \Modules\PensionCalculator\Features\PublicEstimation\Http\PensionCalculatorController::RELATED_CONTENT_CATEGORY_SLUG }}"
+         qua Post\CategoryAdminController có sẵn) — biến 1 tool đơn lẻ thành hệ sinh thái tool +
+         content. Không có bài nào thì $relatedArticles rỗng, khối này tự ẩn hoàn toàn, không lỗi.
+         Đặt NGOÀI x-data (không cần Alpine) — luôn hiển thị bất kể đang ở tab nào. --}}
+    @if($relatedArticles->isNotEmpty())
+    <div class="card bg-base-100 shadow-sm border border-base-200 print:hidden">
+        <div class="card-body py-4 px-4">
+            <h2 class="font-semibold text-base-content mb-3">Bài viết liên quan</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                @foreach($relatedArticles as $translation)
+                <a href="{{ route('post.public.article', ['slug' => $translation->slug, 'id' => $translation->article_id]) }}" class="block p-3 rounded-lg border border-base-200 hover:border-primary transition-colors">
+                    <p class="font-medium text-sm text-base-content">{{ $translation->title }}</p>
+                    @if($translation->excerpt)
+                    <p class="text-xs text-base-content/50 mt-1 line-clamp-2">{{ $translation->excerpt }}</p>
+                    @endif
+                </a>
+                @endforeach
+            </div>
+        </div>
+    </div>
+    @endif
 
 </div>
 @endsection
@@ -683,6 +773,15 @@ document.addEventListener('alpine:init', () => {
         currentMonth: new Date().getMonth() + 1,
 
         activeTab: 'estimate',
+
+        // Bài toán #30 — chế độ chữ to/dễ đọc (xem <style> đầu file), mặc định TẮT vì đa số người
+        // dùng không cần; chỉ 1 checkbox đơn giản, không lưu lựa chọn (không có cơ chế lưu thiết
+        // lập nào khác trong tool này, giữ nhất quán "không lưu trữ gì" của toàn công cụ).
+        largeTextMode: false,
+
+        // Bài toán #27 — opt-in thống kê ẩn danh, mặc định TẮT (xem submitUsageLog()).
+        usageOptIn: false,
+        usageLogStatus: null, // null | 'sending' | 'sent' | 'error'
 
         gender: 'male',
         birthYear: null,
@@ -778,6 +877,34 @@ document.addEventListener('alpine:init', () => {
                 ethnic_minority: 'Dân tộc thiểu số',
                 other: 'Người tham gia khác',
             }[key] ?? key;
+        },
+
+        // Bài toán #27 (spec/giadinh.md — Quyết định 1193/QĐ-UBND, nhóm an sinh xã hội): "công
+        // cụ nào giúp xác định SỚM các nhóm dân cư có nguy cơ dễ bị tổn thương" — trước đây
+        // dropdown chỉ có tên nhãn, không giải thích AI đủ điều kiện, nên nhiều người bỏ qua hỗ
+        // trợ mình đủ tiêu chuẩn. Mô tả dưới đây CHỈ giải thích khái niệm + hướng xác nhận chính
+        // thức (không tự đặt ra ngưỡng thu nhập/tiêu chí chuẩn nghèo đa chiều cụ thể — đó thuộc
+        // Nghị định 07/2021/NĐ-CP, văn bản RIÊNG ngoài phạm vi đã seed của module này, xem
+        // spec/bhxh/bhxh.md — tránh bịa số liệu pháp lý không có nguồn).
+        supportGroupDescription(key) {
+            return {
+                poor_household: 'Áp dụng nếu bạn ĐÃ ĐƯỢC UBND cấp xã/phường công nhận và cấp giấy chứng nhận hộ nghèo theo chuẩn nghèo đa chiều hiện hành (Nghị định 07/2021/NĐ-CP), HOẶC đang thường trú tại xã đảo/đặc khu theo danh sách của Chính phủ — không tự đánh giá theo mức thu nhập, cần có xác nhận chính thức từ địa phương.',
+                near_poor_household: 'Áp dụng nếu bạn ĐÃ ĐƯỢC UBND cấp xã/phường công nhận và cấp giấy chứng nhận hộ cận nghèo theo chuẩn nghèo đa chiều hiện hành (Nghị định 07/2021/NĐ-CP) — cần có xác nhận chính thức từ địa phương, không tự đánh giá theo mức thu nhập.',
+                ethnic_minority: 'Áp dụng nếu bạn thuộc 1 trong 53 dân tộc thiểu số theo Danh mục thành phần các dân tộc Việt Nam do Ủy ban Dân tộc công bố (không phải dân tộc Kinh).',
+                other: 'Áp dụng nếu bạn KHÔNG thuộc 3 nhóm trên — vẫn được Nhà nước hỗ trợ ở mức thấp nhất (20%), không cần giấy tờ xác nhận gì thêm.',
+            }[key] ?? '';
+        },
+
+        // Bài toán #27 — cảnh báo CHỦ ĐỘNG (không chỉ chờ người dùng tự mở khối giải thích ở
+        // trên): mức thu nhập chọn đóng càng SÁT chuẩn nghèo nông thôn thì càng có khả năng
+        // thuộc diện hộ nghèo/cận nghèo trong đời thực — heuristic đơn giản: trong vòng 10% so
+        // với chuẩn nghèo (period.rural_poverty_line), CHỈ nudge khi đang chọn "Không thuộc diện
+        // hỗ trợ" (không nudge người đã tự chọn đúng nhóm rồi).
+        looksEligibleForSupport(row) {
+            const period = this.currentParameterPeriod;
+            if (!period || row.supportGroup !== 'none') return false;
+
+            return Number(row.income || 0) <= Number(period.rural_poverty_line) * 1.1;
         },
 
         periodFor(year, month) {
@@ -1150,6 +1277,39 @@ document.addEventListener('alpine:init', () => {
             }
 
             return { value: pension, reason: null, rate };
+        },
+
+        // Bài toán #27 — gửi 7 con số TỔNG HỢP, ẨN DANH khi người dùng tự bấm nút (usageOptIn
+        // phải bật trước — xem checkbox ở Bước 5). KHÔNG gửi thu nhập/tuổi/ngày tháng cụ thể nào,
+        // chỉ gửi field đã được PHP validate chặt theo allowlist (logUsage()).
+        async submitUsageLog() {
+            const elig = this.pensionEligibility;
+
+            this.usageLogStatus = 'sending';
+
+            try {
+                const response = await fetch('{{ route('pension-calculator.public.log-usage') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        gender: this.gender,
+                        has_mandatory_history: this.hasMandatoryHistory,
+                        uses_support_group: this.sortedRows().some((r) => r.supportGroup !== 'none'),
+                        eligibility_branch: elig.branch,
+                        eligible_by_years: elig.eligibleByYears,
+                        years_accumulated: Math.floor(elig.monthsAccumulated / 12),
+                        years_required: Math.round(elig.monthsRequired / 12),
+                    }),
+                });
+
+                this.usageLogStatus = response.ok ? 'sent' : 'error';
+            } catch {
+                this.usageLogStatus = 'error';
+            }
         },
 
         // ── Bảng minh hoạ "nếu tiếp tục đóng đến khi đủ điều kiện" ──────

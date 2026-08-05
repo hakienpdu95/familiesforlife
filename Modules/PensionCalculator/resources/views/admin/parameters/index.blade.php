@@ -31,6 +31,37 @@
         <a href="{{ route('pension-calculator.public.index') }}" target="_blank" class="btn btn-ghost btn-sm">Xem trang công khai ↗</a>
     </div>
 
+    {{-- Bài toán #27 (spec/giadinh.md — Quyết định 1193/QĐ-UBND, "hệ thống phân tích và dự báo
+         nhu cầu an sinh xã hội") — tóm tắt thô từ dữ liệu ẩn danh, opt-in (pension_usage_logs).
+         0 dòng là bình thường (chưa ai bật đóng góp) — không phải lỗi. --}}
+    <div class="card bg-base-100 shadow-sm border border-base-200 mb-5">
+        <div class="card-body py-4 px-4">
+            <h2 class="font-semibold text-base-content mb-1">Nhu cầu an sinh xã hội — thống kê ẩn danh (opt-in)</h2>
+            <p class="text-xs text-base-content/50 mb-3">Chỉ tính trên lượt người dùng TỰ NGUYỆN bấm "Đóng góp dữ liệu ẩn danh" ở cuối Bước 5 trang công khai — không đại diện cho toàn bộ người dùng công cụ.</p>
+            <div class="stats stats-vertical sm:stats-horizontal shadow-sm border border-base-200 w-full">
+                <div class="stat py-3 px-4">
+                    <div class="stat-title text-xs">Tổng lượt đóng góp</div>
+                    <div class="stat-value text-lg">{{ number_format($usageStats['total']) }}</div>
+                </div>
+                <div class="stat py-3 px-4">
+                    <div class="stat-title text-xs">Đã đủ điều kiện năm đóng</div>
+                    <div class="stat-value text-lg">{{ $usageStats['total'] > 0 ? number_format($usageStats['eligible_count'] / $usageStats['total'] * 100, 1) : '—' }}%</div>
+                </div>
+                <div class="stat py-3 px-4">
+                    <div class="stat-title text-xs">Trung bình còn thiếu (nhóm chưa đủ)</div>
+                    <div class="stat-value text-lg">{{ $usageStats['avg_years_short'] !== null ? $usageStats['avg_years_short'].' năm' : '—' }}</div>
+                </div>
+            </div>
+            @if($usageStats['branch_counts'])
+            <p class="text-xs text-base-content/50 mt-2">Theo nhánh điều kiện (a/b/c/d, xem Bước 4 trang công khai):
+                @foreach($usageStats['branch_counts'] as $branch => $count)
+                    {{ $branch }}: {{ $count }}{{ !$loop->last ? ', ' : '' }}
+                @endforeach
+            </p>
+            @endif
+        </div>
+    </div>
+
     {{-- ── Giai đoạn tham số ─────────────────────────────────────────── --}}
     <div class="card bg-base-100 shadow-sm border border-base-200 mb-5">
         <div class="card-body py-4 px-4">

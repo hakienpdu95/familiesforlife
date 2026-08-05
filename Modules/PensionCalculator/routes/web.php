@@ -14,6 +14,13 @@ Route::get('api/pension-calculator/reference-data', [PensionCalculatorController
     ->middleware('throttle:60,1') // chỉ đọc dữ liệu công khai, không nhận input cá nhân — throttle chống scrape/abuse thô, không phải bảo mật dữ liệu nhạy cảm
     ->name('pension-calculator.public.reference-data');
 
+// Bài toán #27 (spec/giadinh.md) — log thống kê TỔNG HỢP, ẨN DANH, opt-in (xem migration
+// pension_usage_logs + PensionCalculatorController::logUsage()). Throttle chặt hơn reference-data
+// vì đây là ghi (write), không phải đọc — 10 lần/phút đủ cho 1 người dùng thật gửi vài lần.
+Route::post('api/pension-calculator/log-usage', [PensionCalculatorController::class, 'logUsage'])
+    ->middleware('throttle:10,1')
+    ->name('pension-calculator.public.log-usage');
+
 // ── Admin — quản lý tham số ──────────────────────────────────────────────
 // index() dùng 'permission:...|...' (Spatie — user cần BẤT KỲ permission nào trong danh sách)
 // để CEO (chỉ có pension_calculator.view, §9.3) cũng xem được, còn create/store vẫn khoá riêng

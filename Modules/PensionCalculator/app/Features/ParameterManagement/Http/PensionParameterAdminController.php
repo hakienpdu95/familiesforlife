@@ -5,6 +5,7 @@ namespace Modules\PensionCalculator\Features\ParameterManagement\Http;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Modules\PensionCalculator\Enums\SupportGroupKey;
 use Modules\PensionCalculator\Features\ParameterManagement\Actions\SaveParameterPeriodAction;
@@ -28,7 +29,40 @@ class PensionParameterAdminController extends Controller
             'periods' => PensionParameterPeriod::with('supportTiers')->orderByDesc('effective_from')->get(),
             'coefficients' => PensionPriceIndexCoefficient::orderByDesc('settlement_year')->orderBy('contribution_year')->get(),
             'rateBrackets' => PensionRateBracket::orderBy('gender')->orderBy('min_years_for_base_rate')->get(),
+            'usageStats' => $this->buildUsageStats(),
         ]);
+    }
+
+    /**
+     * Bài toán #27 (spec/giadinh.md) — tóm tắt thô từ `pension_usage_logs` (thống kê ẩn danh,
+     * opt-in — xem PublicEstimation\Http\PensionCalculatorController::logUsage()). Chỉ tổng hợp
+     * COUNT/AVG trên các cột đã ẩn danh sẵn, không có truy vấn nào lộ ra 1 bản ghi đơn lẻ.
+     *
+     * @return array{total:int, eligible_count:int, avg_years_short:float|null, branch_counts:array<string,int>}
+     */
+    private function buildUsageStats(): array
+    {
+        $total = DB::table('pension_usage_logs')->count();
+        $eligible = DB::table('pension_usage_logs')->where('eligible_by_years', true)->count();
+
+        $avgYearsShort = DB::table('pension_usage_logs')
+            ->where('eligible_by_years', false)
+            ->selectRaw('AVG(years_required - years_accumulated) as avg_short')
+            ->value('avg_short');
+
+        $branchCounts = DB::table('pension_usage_logs')
+            ->select('eligibility_branch')
+            ->selectRaw('COUNT(*) as total')
+            ->groupBy('eligibility_branch')
+            ->pluck('total', 'eligibility_branch')
+            ->all();
+
+        return [
+            'total' => $total,
+            'eligible_count' => $eligible,
+            'avg_years_short' => $avgYearsShort !== null ? round((float) $avgYearsShort, 1) : null,
+            'branch_counts' => $branchCounts,
+        ];
     }
 
     public function createPeriod(): View
