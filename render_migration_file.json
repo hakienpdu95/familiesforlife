@@ -2351,5 +2351,16 @@
         "notes///text///__///_NULL///NULL///__///__",
         "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
         "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật"
+    ],
+    [
+        "pension_usage_logs///__///__///",
+        "gender///enum///[male,female]///NOT_NULL///__///__///__",
+        "has_mandatory_history///boolean///__///NOT_NULL///false///__///__",
+        "uses_support_group///boolean///__///NOT_NULL///false///__///__",
+        "eligibility_branch///string///1///NOT_NULL///__///__///__",
+        "eligible_by_years///boolean///__///NOT_NULL///false///__///__",
+        "years_accumulated///unsignedSmallInteger///__///NOT_NULL///__///__///__",
+        "years_required///unsignedSmallInteger///__///NOT_NULL///__///__///__",
+        "created_at///timestamp///__///NOT_NULL///__///__///__"
     ]
 ]

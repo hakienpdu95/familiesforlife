@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/n8n",
+    "description": "",
+    "authors": [
+        {
+            "name": "KienDH",
+            "email": "bonhuyn@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\N8n\\": "app/",
+            "Modules\\N8n\\Database\\Factories\\": "database/factories/",
+            "Modules\\N8n\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\N8n\\Tests\\": "tests/"
+        }
+    }
+}

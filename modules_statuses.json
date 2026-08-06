@@ -29,5 +29,6 @@
     "ContentCalendar": true,
     "ContentFoundation": true,
     "VideoIdeaExtractor": true,
-    "PensionCalculator": true
+    "PensionCalculator": true,
+    "N8n": true
 }

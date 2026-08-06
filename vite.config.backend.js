@@ -166,6 +166,8 @@ const MODULE_ENTRIES = [
   // ContentCalendar
   'Modules/ContentCalendar/resources/assets/sass/content-calendar.scss',
   'Modules/ContentCalendar/resources/assets/js/content-calendar.js',
+  // N8n
+  'Modules/N8n/resources/assets/js/n8n.js',
 ];
 
 // ─────────────────────────────────────────────────────────────────────

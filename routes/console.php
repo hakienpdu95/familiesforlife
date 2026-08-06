@@ -4,6 +4,7 @@ use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 use Modules\Auth\Models\SocialAccount;
+use Modules\N8n\Features\Maintenance\Actions\PurgeOldN8nLogsAction;
 use Modules\Survey\Jobs\PurgeDeletedResponsesJob;
 
 Artisan::command('inspire', function () {
@@ -29,6 +30,13 @@ Schedule::command('kc:expire-items')
 Schedule::command('media:cleanup-orphans')
     ->name('media:cleanup-orphans')
     ->everyFourHours()
+    ->onOneServer();
+
+// N8n: xoá n8n_inbound_logs/n8n_outbound_logs cũ hơn config('n8n.log_retain_days', 30)
+// (spec/N8n_Integration_Technical_Specification.md §5.7).
+Schedule::call(PurgeOldN8nLogsAction::make())
+    ->name('n8n:purge-logs')
+    ->dailyAt('03:30')
     ->onOneServer();
 
 // Social Auth: xóa token đã hết hạn > 30 ngày (giảm dữ liệu nhạy cảm lưu trữ)

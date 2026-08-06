@@ -1,0 +1,12 @@
+{
+    "name": "N8n",
+    "alias": "n8n",
+    "description": "Tích hợp n8n — quản lý kết nối 2 chiều (inbound webhook có xác thực + outbound service gọi theo kết nối đặt tên). Module hệ thống, không thuộc tổ chức nào; điểm mở rộng dùng event chuẩn của Laravel (N8nWebhookReceived). Xem spec/N8n_Integration_Technical_Specification.md.",
+    "keywords": ["automation", "webhook", "n8n"],
+    "priority": 0,
+    "providers": [
+        "Modules\\N8n\\Providers\\N8nServiceProvider",
+        "Modules\\N8n\\Providers\\RouteServiceProvider"
+    ],
+    "files": []
+}

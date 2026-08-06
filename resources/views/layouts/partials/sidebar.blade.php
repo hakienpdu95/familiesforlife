@@ -572,6 +572,32 @@
             </details>
             @endcan
 
+            {{-- spec/N8n_Integration_Technical_Specification.md §6 — Platform Roles (Lớp A),
+                 KHÔNG PermissionEnum/Organization Roles (N8nConnection không thuộc tổ chức nào).
+                 Đặt cùng nhóm với "Quản lý Subscription" — không xuất hiện trong sidebar của
+                 bất kỳ tổ chức nào. super-admin tự bypass qua Gate::before nhưng check thẳng
+                 hasRole() ở đây (KHÔNG qua Gate) để không phụ thuộc ambient Spatie team context
+                 — cùng lý do đã áp dụng cho "Quản lý nhân sự Platform" ở trên. --}}
+            @if(auth()->user()?->isPlatformOps() || auth()->user()?->isPlatformViewer() || auth()->user()?->hasRole('super-admin'))
+            <details {{ request()->routeIs('backend.n8n.*') ? 'open' : '' }}>
+                <summary class="nav-summary {{ request()->routeIs('backend.n8n.*') ? 'active' : '' }}">
+                    <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    <span class="nav-label">Tích hợp n8n</span>
+                    <svg class="nav-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m9 18 6-6-6-6"/></svg>
+                </summary>
+                <div class="sub-menu">
+                    <a href="{{ route('backend.n8n.connections.index') }}"
+                       class="sub-link {{ request()->routeIs('backend.n8n.connections.*') ? 'active' : '' }}">
+                        Kết nối
+                    </a>
+                    <a href="{{ route('backend.n8n.logs.index') }}"
+                       class="sub-link {{ request()->routeIs('backend.n8n.logs.*') ? 'active' : '' }}">
+                        Log
+                    </a>
+                </div>
+            </details>
+            @endif
+
             @can(\App\Enums\PermissionEnum::WORKFLOW_MONITOR->value)
             <details {{ request()->routeIs('workflows.*') ? 'open' : '' }}>
                 <summary class="nav-summary {{ request()->routeIs('workflows.*') ? 'active' : '' }}">
