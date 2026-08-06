@@ -1,8 +1,18 @@
 # CoreIdeaExtractor
 
-**Version:** 1.27  
+**Version:** 1.28  
 **Last Updated:** 2026-08-06  
 **Status:** Design Specification (Ready for Implementation)
+
+> **v1.28 (Rà lại toàn bộ chuỗi ngữ cảnh biên tập sau khi thêm khung ứng xử — vá 12 lỗ hổng):** khung
+> §12.11 ở v1.27 chạy được nhưng rà lại cả chuỗi (đối tượng độc giả → khung giá trị → khung ứng xử →
+> BƯỚC 1 sinh ý → BƯỚC 2 lọc) lộ ra 12 lỗ hổng, đáng chú ý nhất là 2 lỗi LOGIC chứ không phải câu chữ:
+> (1) câu chữ gốc của tiêu chí "con với cha mẹ" có mệnh đề *"phù hợp với độ tuổi, giới tính"* mâu
+> thuẫn trực diện với giá trị Tiến bộ (bình đẳng giới) ở khối đứng ngay cạnh, mà prompt không có luật
+> nào xử lý xung đột GIỮA 2 KHUNG; (2) mỗi cặp quan hệ có hai phía nhưng không chỗ nào nói độc giả
+> đứng ở phía nào, nên sinh ra ý tưởng nhắc nghĩa vụ của thành viên KHÔNG đọc bài. Chi tiết đầy đủ 9
+> lỗ hổng + lý do từng cái là lỗi thật: §12.11.4. Áp cho cả `CoreIdeaExtractor` và
+> `VideoIdeaExtractor`; không đổi DB schema, không đổi Layer 1/Layer 2 JSON schema (§5, §7).
 
 > **v1.27 (`spec/giadinh.md` đổi nội dung lần nữa — "Bộ tiêu chí ứng xử trong gia đình", 4 cặp quan
 > hệ vợ chồng/cha mẹ-con/con-cha mẹ/anh chị em):** khung KHÁC bản chất với 4 giá trị `family_values`
@@ -958,7 +968,9 @@ lại câu chữ** — vai trò của editor chỉ là chọn giá trị nào á
   `core_idea_extractor.family_values`) — **nguồn sự thật DUY NHẤT**, không hardcode lặp lại câu chữ
   ở PHP/blade/JS chỗ khác (đọc động qua `config(...)` ở mọi nơi cần dùng: rule validate `in:...` ở
   `CategoryFoundationController::upsert()`, UI checkbox ở `category-foundations.blade.php`, khối
-  grounding ở `index.blade.php`).
+  grounding ở `index.blade.php`). Chỉ dẫn cần TRỎ THẲNG tới 1 giá trị cụ thể (VD nguồn thương mại →
+  giá trị "Ấm no") đọc nhãn qua helper `familyValueLabel(key, fallback)`, KHÔNG viết cứng chuỗi nhãn
+  vào prompt — v1.28 mới vá 3 chỗ vi phạm chính nguyên tắc này, xem §12.11.4-B4.
 - `buildFamilyValuesGroundingLines()` (`index.blade.php`; tới v1.20 tên là
   `buildFamilyValuesGroundingLine()` và chỉ trả về ĐÚNG 1 câu) dựng khối nhiều dòng: liệt kê đủ 4
   giá trị kèm mô tả gốc + 1 dòng diễn giải "ở tầng biên tập" cho mỗi giá trị
@@ -973,7 +985,10 @@ lại câu chữ** — vai trò của editor chỉ là chọn giá trị nào á
   Push vào TOP của "Copy prompt cho AI" (§12.4) NGAY SAU dòng persona + ngày hôm nay,
   TRƯỚC mọi field foundation theo category — **LUÔN xuất hiện kể cả khi chưa chọn chuyên mục nào**
   (khác mọi khối khác trong §12.4 vốn chỉ xuất hiện khi có `foundation`), vì đây là chuẩn áp dụng
-  cho MỌI nội dung của platform, không riêng chuyên mục nào.
+  cho MỌI nội dung của platform, không riêng chuyên mục nào. Hệ quả của thứ tự này: khối đứng TRƯỚC
+  mục mô tả đối tượng độc giả, nên mọi mệnh đề trong khối nhắc tới mô tả đối tượng phải diễn đạt
+  KHÔNG PHỤ THUỘC THỨ TỰ ("mô tả đối tượng độc giả **trong prompt này**", không phải "ở trên") —
+  v1.28 vá 2 mệnh đề vi phạm, xem §12.11.4-B1.
 - Không có field DB nào cho lớp này — thuần đọc config + build chuỗi ở client, giống cách
   `batch.max_urls`/`foundation.stale_after_days` đã được đọc thẳng từ config vào view.
 
@@ -1032,7 +1047,7 @@ foundation sẽ hoàn toàn không có ràng buộc giá trị nào khi sinh ý 
     nhận thêm 1 chỉ dẫn về giữ MỨC ĐỘ CHẮC CHẮN của nguồn — đó là tiêu chí trung thực với nguồn,
     không phải bối cảnh biên tập.
 
-### 12.11 Bộ tiêu chí ứng xử trong gia đình — khung thứ 2, tách riêng khỏi §12.10 (v1.27)
+### 12.11 Bộ tiêu chí ứng xử trong gia đình — khung thứ 2, tách riêng khỏi §12.10 (v1.27, vá lỗ hổng ngữ cảnh v1.28)
 
 #### 12.11.1 Bối cảnh
 
@@ -1072,11 +1087,20 @@ lại** trong config — trùng vai trò với 4 giá trị nền đã có ở `
   Lines()` ở TOP của "Copy prompt cho AI" — LUÔN xuất hiện kể cả chưa chọn chuyên mục, cùng vị trí
   và thứ tự "mục tiêu tích cực trước, ranh giới cấm sau" đã chốt cho §12.10. Không đề xuất ý tưởng
   trích dẫn/copy nguyên văn khẩu hiệu tuyên truyền vào tiêu đề — mục "Khẩu hiệu tuyên truyền" của
-  văn bản gốc CHỦ ĐÍCH không được đưa vào chất liệu bài viết.
+  văn bản gốc CHỦ ĐÍCH không được đưa vào chất liệu bài viết. Dòng mở khối KHÔNG viết cứng tên
+  khung mà chỉ nội suy `decision_ref` (khác dòng tương ứng ở §12.10, nơi `familyValuesRef` thuần số
+  hiệu văn bản nên phải có tên khung đứng trước) — xem §12.11.4-A6. Từ v1.28 khối này bắt buộc có
+  thêm 2 dòng: **VỊ TRÍ CỦA ĐỘC GIẢ/KHÁN GIẢ** và **luật xử lý xung đột giữa 2 khung** (§12.11.4-A1,
+  A2); dòng ranh giới cứng chỉ nêu phần KHÔNG trùng với ranh giới ở khối §12.10 (§12.11.4-A3).
 - `buildFamilyConductBoundaryLine()` — bản NÉN, dùng ở `buildRewritePromptText()` (CoreIdeaExtractor)
   và `singleVideoContextLines()` (VideoIdeaExtractor, dùng chung bởi cả 8 tool sinh câu chữ đăng
   thật: tiêu đề/hook/Shorts/dàn ý/CTA/biên tập lời nói/kịch bản đầy đủ/SEO) — cùng cơ chế
-  `buildFamilyValuesBoundaryLine()`.
+  `buildFamilyValuesBoundaryLine()`. Liệt kê theo TÊN CẶP QUAN HỆ (nối bằng ` / `), KHÔNG theo nhãn
+  khẩu hiệu (§12.11.4-A5), và cũng chỉ nêu phần không trùng dòng ranh giới giá trị đứng ngay trước
+  nó.
+- Thực thi ở BƯỚC 2: bộ lọc bắt buộc nêu CẢ 2 khung và có 1 câu hỏi rà riêng cho các cách vi phạm
+  mang tính vai trò (§12.11.4-A4) — ranh giới ở Lớp 1 mà không có chốt kiểm ở bước đánh giá thì chỉ
+  được "đọc" 1 lần rồi bỏ.
 
 **Lớp 2 — `family_conduct_focus` (cột mới trên `content_foundations`), theo TỪNG category:**
 
@@ -1087,12 +1111,112 @@ lại** trong config — trùng vai trò với 4 giá trị nền đã có ở `
   index.blade.php`), cạnh nhóm `family_values_focus`.
 - Khi category có `family_conduct_focus`, prompt thêm 1 dòng ưu tiên bổ sung SAU khối cố định Lớp 1
   — không thay thế khối cố định, category không tick vẫn phải tôn trọng cả 4 cặp quan hệ khi ý
-  tưởng liên quan.
+  tưởng liên quan. Dòng này (và gợi ý tương ứng ở BƯỚC 1) hiển thị dạng `relationship (label)` qua
+  biến `familyConductFocusNames`, KHÔNG phải nhãn đứng một mình (§12.11.4-A5), và nêu rõ độc giả/
+  khán giả của chuyên mục mặc định đứng ở phía nào của cặp quan hệ đó.
 
 #### 12.11.3 Ngoài phạm vi (v1.27)
 
 - Không áp dụng vào `buildSummarizePromptText()` — cùng lý do đã áp cho `family_values` ở §12.10.4.
 - Không tự động chấm điểm/gắn nhãn mức khớp cặp quan hệ nào — cùng lý do §12.10.4.
+
+#### 12.11.4 Vá lỗ hổng ngữ cảnh sau khi rà lại toàn bộ prompt (v1.28)
+
+Bản v1.27 dựng đủ 2 lớp và chạy được, nhưng rà lại toàn bộ chuỗi ngữ cảnh biên tập (đối tượng độc
+giả → khung giá trị → khung ứng xử → BƯỚC 1 sinh ý → BƯỚC 2 lọc) lộ ra 12 lỗ hổng (6 thuộc khung ứng
+xử, 6 thuộc khung giá trị/ngữ cảnh đối tượng). Áp cho CẢ 2 module
+(`CoreIdeaExtractor` + `VideoIdeaExtractor`), diễn đạt riêng theo bài viết/video.
+
+**A. Thuộc khung ứng xử (§12.11):**
+
+- **A1 — VỊ TRÍ của độc giả trong cặp quan hệ (nặng nhất).** Mỗi cặp quan hệ có HAI phía đối xứng,
+  nhưng độc giả của 1 bài chỉ đứng ở MỘT phía. v1.27 chỉ nói "bám đúng chuẩn ứng xử của mối quan hệ
+  đó" mà không nói viết TỪ phía nào → sinh ra ý tưởng nhắc nghĩa vụ của thành viên KHÔNG đọc bài
+  (chuyên mục nuôi dạy con, độc giả là cha mẹ, nhưng ý tưởng lại là "con cái cần hiếu thảo hơn").
+  Nội dung đúng chuẩn mực nhưng nói với người không có mặt — không ai dùng được. Thêm dòng bắt buộc
+  ở Lớp 1: xác định phía của độc giả từ mô tả đối tượng rồi viết TỪ phía đó, kèm lưu ý 1 độc giả
+  thường ở NHIỀU vị trí cùng lúc (vừa là con, vừa là cha/mẹ, vừa là dâu/rể) nên ý tưởng chạm đúng
+  chỗ hai vai trò kéo nhau thường giá trị hơn. Bản VideoIdeaExtractor thêm lý lẽ riêng của video:
+  người xem nhận ra "cái này không nói với mình" trong vài giây đầu là thoát ngay.
+- **A2 — Xung đột giữa 2 khung, chưa có luật xử lý.** Câu chữ GỐC của tiêu chí "con với cha mẹ, ông
+  bà" có mệnh đề con phụ giúp việc nhà *"phù hợp với độ tuổi, **giới tính**"* — đi ngược trực diện
+  giá trị **Tiến bộ** (bình đẳng giới) ở §12.10 và `FAMILY_VALUE_EDITORIAL_NOTES.tien_bo` ("không
+  củng cố khuôn mẫu việc này vốn của ai"), 2 khối này lại đứng NGAY CẠNH NHAU trong cùng 1 prompt.
+  Để mâu thuẫn trần thì model thường chọn theo mệnh đề nghe "chính thức" hơn. **Không sửa câu chữ
+  gốc** (config là nguồn sự thật duy nhất, và §12.10.3 đã từ chối việc để ai diễn giải lại văn bản)
+  — hoá giải ở TẦNG ÁP DỤNG: chia việc nhà theo độ tuổi/sức khoẻ/quỹ thời gian, không lấy giới tính
+  làm căn cứ, kèm câu "đây là cách nền tảng ÁP DỤNG văn bản, không phải sửa văn bản". Đồng thời bổ
+  sung luật chung: khi 2 khung kéo ngược nhau, mức sàn ở §12.10 (an toàn thân thể/tinh thần của mọi
+  thành viên + bình đẳng giới) được ưu tiên. §12.10 trước đó chỉ có luật cho xung đột GIỮA 2 GIÁ TRỊ,
+  chưa có luật nào cho xung đột GIỮA 2 KHUNG.
+- **A3 — Trùng lặp ranh giới cứng.** v1.27 lặp lại bạo lực/"đòn roi dạy con"/phán xét gia đình khác
+  — vốn đã nằm trong ranh giới cứng của khối §12.10 đứng ngay trên. Trùng lặp trong cùng 1 prompt
+  làm loãng chú ý (đúng lo ngại đã dẫn ở §12.10) và tốn token vô ích (§12.5). Chỉ giữ phần THỰC SỰ
+  bổ sung — các cách vi phạm mang tính VAI TRÒ: gán hiếu thảo/chung thuỷ/gương mẫu với hy sinh VÔ
+  ĐIỀU KIỆN của một thành viên; lấy thứ bậc trong nhà biện minh cho áp đặt; dùng áp lực đạo đức
+  ("làm con phải...", "làm dâu phải...") thay cho lý lẽ thực tế. Ghi rõ "bổ sung cho ranh giới ở
+  khối giá trị, không lặp lại" để người sửa sau không nhét lại phần đã có.
+- **A4 — Khung ứng xử không có chốt kiểm ở BƯỚC 2.** Bộ lọc bắt buộc chỉ thực thi §12.10 bằng 3 câu
+  hỏi cụ thể, còn ranh giới §12.11 chỉ được "đọc" 1 lần ở TOP rồi không ai hỏi lại — lệch hẳn mức độ
+  thực thi giữa 2 khung dù cả hai đều tự nhận là "LOẠI ngay". Thêm ĐÚNG 1 câu hỏi (d) gộp 2 cách vi
+  phạm hay lọt lưới nhất (lệch vị trí độc giả + đòi hy sinh vô điều kiện) thay vì thêm 4 câu song
+  song với §12.10 — thêm 4 câu sẽ phình bộ lọc và loãng chú ý, đúng thứ A3 vừa cắt.
+- **A5 — Nhãn khẩu hiệu thay cho tên cặp quan hệ.** v1.27 in `label` đứng một mình ("chuyên mục này
+  ưu tiên: Chung thủy, nghĩa tình") buộc model tự map ngược về cặp quan hệ — đúng thứ nó hay map
+  sai, trong khi CẶP QUAN HỆ mới là thông tin quyết định góc viết. Tệ hơn: nối 4 nhãn bằng dấu phẩy
+  trong khi mỗi nhãn đã chứa dấu phẩy → ra 1 chuỗi 8 tính từ không đọc được là 4 cặp. Sửa 3 chỗ:
+  dòng ưu tiên + gợi ý BƯỚC 1 dùng `relationship (label)` nối bằng `; ` (biến
+  `familyConductFocusNames`), bản nén dùng `relationship` nối bằng ` / `, tóm tắt foundation trên UI
+  dùng `relationship`.
+- **A6 — Tên khung lặp + ngoặc lồng ngoặc (chỉ thấy khi render).** Dòng mở khối bọc
+  `Bộ tiêu chí ứng xử trong gia đình (${familyConductStandardsRef})` y hệt dòng tương ứng ở §12.10,
+  nhưng `decision_ref` của khung này ĐÃ chứa tên khung → render ra
+  *"Bộ tiêu chí ứng xử trong gia đình (Bộ tiêu chí ứng xử trong gia đình (khung chuẩn chung...))"*.
+  Bất đối xứng này là bản chất: `familyValuesRef` thuần số hiệu văn bản nên cần tên khung đứng
+  trước, `familyConductStandardsRef` thì không (§12.11.1 — khung này không có số hiệu để trích).
+
+**B. Phát hiện cùng lượt rà, thuộc §12.10 / ngữ cảnh đối tượng:**
+
+- **B1 — Tham chiếu ngược sai hướng trong khối §12.10.** 2 mệnh đề nói "mô tả đối tượng độc giả **ở
+  trên**"/"**đã nêu**" trong khi khối giá trị được push TRƯỚC khối mô tả đối tượng — chỉ đúng nhờ ăn
+  may là câu persona ở dòng đầu có nhắc lướt qua đối tượng, và sai hẳn khi chưa khai báo đối tượng
+  nào. Đổi thành "trong prompt này" (không phụ thuộc thứ tự khối, nên đổi vị trí khối về sau vẫn
+  đúng) — sửa trong `buildFamilyValuesGroundingLines()` của cả 2 module.
+- **B2 — Lỗ hổng THỨ TỰ khi chưa khai báo đối tượng.** Nhánh "chưa có mô tả đối tượng" trước đó CHỈ
+  tồn tại ở tiêu chí 4 của BƯỚC 2: model brainstorm 20-25 ý ở BƯỚC 1 mà không có điểm neo độc giả
+  nào, rồi tới BƯỚC 2 mới tự nghĩ ra chân dung và lấy chính chân dung vừa nghĩ ra để loại bớt ý vừa
+  sinh → hoặc loại oan hàng loạt, hoặc (thường hơn) tự nới chân dung cho vừa với ý đã sinh, tức tiêu
+  chí 4 thành hình thức. Thêm nhánh `else` ở khối đối tượng: dựng chân dung TRƯỚC khi brainstorm,
+  cấm nới lại chân dung cho vừa ý đã nghĩ; cách GHI vào `audience_assumption` vẫn để nguyên ở tiêu
+  chí 4 (chỗ duy nhất phân biệt 1 chuyên mục vs đa chuyên mục).
+- **B3 — Khối đối tượng thiếu chiều "vị trí trong gia đình".** Mô tả đối tượng vốn chi phối 3 việc
+  (chọn vấn đề / chọn độ sâu / chọn cách xưng hô) — thêm việc thứ 4: xác định nhóm này đang ở VAI
+  nào trong gia đình, làm điểm neo cho A1.
+- **B4 — Hardcode nhãn giá trị `"ấm no"` trong prompt.** 2 chỗ ở CoreIdeaExtractor, 1 chỗ ở
+  VideoIdeaExtractor viết thẳng chuỗi `"ấm no"`, vi phạm đúng nguyên tắc §12.10.2 ("câu chữ chính
+  thức chỉ đọc từ config, KHÔNG hardcode lặp lại"): đổi nhãn trong config sẽ khiến prompt trỏ tới 1
+  giá trị không còn tồn tại mà không ai phát hiện. Thêm helper `familyValueLabel(key, fallback)`
+  đọc động, có fallback để chỉ dẫn vẫn đọc được nếu config bỏ/đổi key.
+- **B5 — "dành 1-2 ý" đọc như nới lỏng yêu cầu giá trị.** Khối §12.10 yêu cầu MỌI ý tưởng phục vụ ít
+  nhất 1 giá trị; gợi ý ở BƯỚC 1 lại nói "dành 1-2 ý nhắm thẳng vào giá trị chuyên mục ưu tiên" — dễ
+  đọc thành "chỉ 1-2 ý cần có giá trị". Thêm 1 mệnh đề làm rõ 2 thứ này không xung đột.
+- **B6 — "chi tiêu = làm tròn nghĩa vụ gia đình" chưa bị chặn ở nơi luôn hiệu lực.** Đây là cách vi
+  phạm §12.11 bằng ngôn ngữ thương mại, phổ biến trong nội dung gia đình Việt ("mua quà đắt mới là
+  có hiếu", "đầu tư mạnh mới là yêu con"). Ban đầu đặt trong khối `hasProductLikeSource` của
+  CoreIdeaExtractor — chỉ chạy khi nguồn LÀ trang sản phẩm, trong khi mục "gợi ý tối thiểu 5 sản
+  phẩm" thì LUÔN chạy ở cả 2 module. Chuyển vào ràng buộc của danh sách sản phẩm (luôn hiệu lực) ở
+  cả 2 module.
+
+**Đã cân nhắc, CHƯA làm — kích thước 2 khối grounding cố định.** Sau khi vá, với 1 nguồn ngắn thì 2
+khối §12.10 + §12.11 chiếm ~35% prompt (≈4.300 + ≈5.300 ký tự). Phần chỉ dẫn tự viết đã được nén
+(dòng dài nhất 945 → 625 ký tự, theo đúng nguyên tắc "không nhồi 1 đoạn quá dài" đã chốt cho §12.10);
+phần còn lại là `principles[]` nguyên văn của cả 4 cặp quan hệ (≈2.600 ký tự) — không nén được mà
+không diễn giải lại văn bản, đúng thứ §12.10.3 đã từ chối. Lựa chọn duy nhất để giảm tiếp là
+**progressive disclosure**: chỉ in đầy đủ `principles` của cặp quan hệ mà category đã tick ở
+`family_conduct_focus`, các cặp còn lại chỉ liệt kê tên + nhãn. Việc đó đi ngược §12.11.2 hiện tại
+("Lớp 1 luôn liệt kê đủ 4 cặp, focus chỉ là ưu tiên bổ sung chứ không phải giới hạn") nên là quyết
+định thiết kế, không tự đổi. Với nguồn thật (5-7 URL) tỷ lệ này tụt xuống thấp hơn nhiều vì JSON
+nguồn lớn hơn hẳn.
 
 ---
 

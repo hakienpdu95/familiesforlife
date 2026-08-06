@@ -510,10 +510,12 @@ document.addEventListener('alpine:init', () => {
                     if (labels.length) parts.push(`Giá trị gia đình: ${labels.join(', ')}`);
                 }
                 if (foundation.family_conduct_focus?.length) {
-                    const labels = foundation.family_conduct_focus
-                        .map(key => this.familyConductStandards.find(fc => fc.key === key)?.label)
+                    // Hiển thị TÊN CẶP QUAN HỆ (ngắn, nhận diện được ngay) chứ không phải nhãn khẩu
+                    // hiệu — cùng lý do đã nêu ở familyConductFocusNames trong buildLayer2PromptText.
+                    const relationships = foundation.family_conduct_focus
+                        .map(key => this.familyConductStandards.find(fc => fc.key === key)?.relationship)
                         .filter(Boolean);
-                    if (labels.length) parts.push(`Tiêu chí ứng xử: ${labels.join(', ')}`);
+                    if (relationships.length) parts.push(`Tiêu chí ứng xử: ${relationships.join(', ')}`);
                 }
 
                 return parts.join(' — ');
@@ -767,6 +769,12 @@ document.addEventListener('alpine:init', () => {
              * con cái/dâu rể; (4) không cảnh báo cạm bẫy gán vai trò theo giới — cách vi phạm giá
              * trị Tiến bộ phổ biến nhất mà không hề "cổ suý" gì; (5) không phân biệt phong tục và
              * hủ tục, cũng không nói gì khi 2 giá trị xung đột nhau.
+             *
+             * 2026-08-06 — 2 mệnh đề trỏ "mô tả đối tượng độc giả Ở TRÊN"/"ĐÃ NÊU" đổi thành "trong
+             * prompt này": khối này được push TRƯỚC khối mô tả đối tượng độc giả (xem thứ tự trong
+             * buildLayer2PromptText), nên hướng tham chiếu cũ sai — chỉ đúng nhờ ăn may là câu persona
+             * ở dòng đầu có nhắc lướt qua đối tượng, và sai hẳn khi chưa khai báo đối tượng nào. Cách
+             * diễn đạt mới không phụ thuộc thứ tự các khối nên đổi vị trí về sau vẫn đúng.
              */
             buildFamilyValuesGroundingLines() {
                 const items = (this.familyValues || []).map(fv => {
@@ -780,8 +788,8 @@ document.addEventListener('alpine:init', () => {
                     ...items,
                     'Cách dùng: mỗi ý tưởng nên giúp gia đình độc giả tiến gần hơn ÍT NHẤT 1 trong các giá trị trên bằng lợi ích THỰC TẾ. Phép thử: sau khi đọc bài, gia đình đó HIỂU KHÁC ĐI, LÀM KHÁC ĐI hoặc QUYẾT ĐỊNH KHÁC ĐI điều gì cụ thể? Không trả lời được nghĩa là ý tưởng mới chạm tới chủ đề chứ chưa phục vụ giá trị. Giữa 2 ý tưởng ngang nhau về chất lượng, ưu tiên ý phục vụ giá trị rõ hơn.',
                     'Khung này là ĐỊNH HƯỚNG NỘI BỘ cho người biên tập, KHÔNG phải chất liệu để viết vào bài: không đề xuất ý tưởng phân tích/trích dẫn/diễn giải lại văn bản Quyết định (kể cả nhắc số hiệu), tuyệt đối không bịa điều khoản hay số liệu của văn bản này; cũng không gắn nhãn giá trị vào tiêu đề kiểu "Xây dựng gia đình văn minh: ..." — giá trị thể hiện qua nội dung có ích, không qua khẩu hiệu.',
-                    'Chân dung gia đình độc giả rất đa dạng: vợ chồng chưa/không có con, gia đình 1 con hoặc nhiều con, cha hoặc mẹ đơn thân, nhiều thế hệ sống chung hoặc đã ở riêng, nhà có người cao tuổi/người bệnh/người khuyết tật, cha mẹ đi làm xa, mức thu nhập và điều kiện thành thị/nông thôn khác nhau. Trừ khi mô tả đối tượng độc giả ở trên nói khác, KHÔNG mặc định một mô hình (đủ cha mẹ + con nhỏ, sống thành phố, dư dả) là chuẩn, và không đề xuất ý tưởng khiến gia đình khác mô hình đó thấy mình bất thường.',
-                    'Cạm bẫy ngầm hay gặp nhất với giá trị Tiến bộ: gán mặc định việc chăm con/bếp núc/nội trợ cho người mẹ và việc kiếm tiền/quyết định lớn cho người bố ngay từ cách đặt vấn đề của ý tưởng. Chỉ nhắm riêng 1 giới khi mô tả đối tượng độc giả đã nêu rõ như vậy, hoặc khi nội dung thực sự đặc thù sinh học (mang thai, sinh nở, cho con bú) — còn lại nói với "cha mẹ"/"gia đình" và để cả hai cùng là người thực hiện.',
+                    'Chân dung gia đình độc giả rất đa dạng: vợ chồng chưa/không có con, gia đình 1 con hoặc nhiều con, cha hoặc mẹ đơn thân, nhiều thế hệ sống chung hoặc đã ở riêng, nhà có người cao tuổi/người bệnh/người khuyết tật, cha mẹ đi làm xa, mức thu nhập và điều kiện thành thị/nông thôn khác nhau. Trừ khi mô tả đối tượng độc giả trong prompt này nói khác, KHÔNG mặc định một mô hình (đủ cha mẹ + con nhỏ, sống thành phố, dư dả) là chuẩn, và không đề xuất ý tưởng khiến gia đình khác mô hình đó thấy mình bất thường.',
+                    'Cạm bẫy ngầm hay gặp nhất với giá trị Tiến bộ: gán mặc định việc chăm con/bếp núc/nội trợ cho người mẹ và việc kiếm tiền/quyết định lớn cho người bố ngay từ cách đặt vấn đề của ý tưởng. Chỉ nhắm riêng 1 giới khi mô tả đối tượng độc giả trong prompt này nêu rõ như vậy, hoặc khi nội dung thực sự đặc thù sinh học (mang thai, sinh nở, cho con bú) — còn lại nói với "cha mẹ"/"gia đình" và để cả hai cùng là người thực hiện.',
                     'Phân biệt truyền thống và hủ tục: phong tục chỉ khác biệt về nếp sống (thờ cúng tổ tiên, lễ Tết, quan hệ họ hàng, thứ bậc xưng hô) là chất liệu văn hoá đáng tôn trọng; chỉ xếp vào "hủ tục cần loại bỏ" những thực hành gây hại thật cho sức khoẻ, quyền lợi, sự an toàn hoặc bình đẳng của thành viên (VD ép sinh con trai, kiêng khem sau sinh gây hại, đòn roi để dạy con). Không mặc định cái cũ là lạc hậu, cũng không tô hồng thực hành gây hại chỉ vì nó "truyền thống".',
                     'Khi 2 giá trị kéo ngược nhau (VD tăng ca kiếm thêm thu nhập ↔ thời gian bên gia đình; giữ hoà khí với người lớn tuổi ↔ bình đẳng giới), KHÔNG đạt giá trị này bằng cách hy sinh giá trị kia — trình bày đánh đổi thật để mỗi gia đình tự chọn theo hoàn cảnh của họ. Riêng an toàn thân thể/tinh thần của các thành viên và bình đẳng giới là mức sàn, không phải thứ để đánh đổi.',
                     'Ranh giới cứng (LOẠI ngay ý tưởng vi phạm, dù đạt mọi tiêu chí khác): đi ngược bất kỳ giá trị nào ở trên — cổ suý bất bình đẳng giới, bạo lực gia đình (kể cả dưới dạng "đòn roi để dạy con"), hủ tục gây hại, ứng xử thiếu chuẩn mực giữa các thế hệ, so đo vật chất tạo áp lực lên gia đình khác; khai thác nỗi sợ hãi/mặc cảm của BẤT KỲ thành viên nào (cha mẹ, con cái, ông bà, dâu rể) để tạo chú ý; hoặc phán xét lựa chọn sống của gia đình khác. KHÔNG ép mọi ý tưởng phải nhắc tên giá trị hay viết theo lối tuyên truyền khô cứng.',
@@ -798,6 +806,20 @@ document.addEventListener('alpine:init', () => {
                 const labels = (this.familyValues || []).map(fv => fv.label).join(', ');
 
                 return `Ranh giới giá trị bắt buộc — ${subject} sẽ đăng công khai trên một nền tảng nội dung gia đình Việt Nam, tôn trọng Hệ giá trị gia đình Việt Nam (${labels}): không giễu cợt bất kỳ thành viên nào trong gia đình theo định kiến giới hay thế hệ, không mặc định việc chăm con/nội trợ là của mẹ và kiếm tiền/quyết định là của bố, không khai thác nỗi sợ hãi/mặc cảm của cha mẹ (hay của con cái, ông bà) để câu tương tác, không cổ suý so đo vật chất giữa các gia đình, không mặc định một mô hình gia đình duy nhất (đủ cha mẹ, có con, khá giả) là chuẩn mực.`;
+            },
+
+            /**
+             * Nhãn CHÍNH THỨC của ĐÚNG 1 giá trị, tra theo `key` — dùng cho những chỉ dẫn cần TRỎ
+             * THẲNG tới 1 giá trị cụ thể thay vì cả 4 (VD nguồn thương mại phải bám giá trị về điều
+             * kiện vật chất). Trước 2026-08-06 các chỗ đó viết thẳng chuỗi "ấm no" vào prompt, vi
+             * phạm đúng nguyên tắc "câu chữ chính thức chỉ đọc từ config, KHÔNG hardcode lặp lại"
+             * nêu ở docblock buildFamilyValuesGroundingLines(): đổi nhãn trong config sẽ khiến prompt
+             * trỏ tới 1 giá trị không còn tồn tại mà không ai phát hiện. `fallback` giữ cho chỉ dẫn
+             * vẫn đọc được nếu config bỏ/đổi key (cùng tinh thần "key lạ chỉ đơn giản không có dòng
+             * diễn giải" ở FAMILY_VALUE_EDITORIAL_NOTES).
+             */
+            familyValueLabel(key, fallback) {
+                return (this.familyValues || []).find(fv => fv.key === key)?.label || fallback;
             },
 
             /**
@@ -823,6 +845,26 @@ document.addEventListener('alpine:init', () => {
              * khác nội dung: liệt kê theo CẶP QUAN HỆ thay vì GIÁ TRỊ. Dùng chung phép thử "phục vụ
              * chuẩn mực" và thứ tự "mục tiêu tích cực trước, ranh giới cấm sau" (Pink Elephant
              * Problem) đã chốt ở §12.10 cho khối family_values.
+             *
+             * 2026-08-06 — vá 3 lỗ hổng ngữ cảnh của bản đầu (v1.27):
+             * (1) VỊ TRÍ ĐỘC GIẢ: mỗi cặp quan hệ có HAI phía đối xứng, nhưng độc giả của bài chỉ
+             *     đứng ở MỘT phía. Bản đầu chỉ nói "bám đúng chuẩn của mối quan hệ đó" mà không nói
+             *     viết TỪ phía nào, nên model dễ sinh ý tưởng nhắc nghĩa vụ của người KHÔNG đọc bài
+             *     (bài trong chuyên mục nuôi dạy con — độc giả là cha mẹ — lại thành bài đòi con cái
+             *     phải hiếu thảo). Đây là lỗi ngữ cảnh biên tập nặng nhất của khối này: nội dung
+             *     đúng chuẩn mực nhưng nói với người không có mặt.
+             * (2) XUNG ĐỘT VỚI KHỐI GIÁ TRỊ: câu chữ GỐC của tiêu chí "con với cha mẹ" có mệnh đề
+             *     phụ giúp việc nhà "phù hợp với độ tuổi, giới tính" — đi ngược trực diện với giá
+             *     trị Tiến bộ (bình đẳng giới) và với FAMILY_VALUE_EDITORIAL_NOTES.tien_bo ("không
+             *     củng cố khuôn mẫu việc này vốn của ai") ở khối ngay trên. Không sửa câu chữ gốc
+             *     (config là nguồn sự thật duy nhất) — hoá giải ở TẦNG ÁP DỤNG, và nói rõ thứ tự ưu
+             *     tiên, vì để mâu thuẫn trần trong cùng 1 prompt thì model thường chọn theo mệnh đề
+             *     nghe "chính thức" hơn. §12.10 đã có luật xử lý xung đột GIỮA 2 GIÁ TRỊ nhưng chưa
+             *     có luật nào cho xung đột GIỮA 2 KHUNG.
+             * (3) TRÙNG LẶP RANH GIỚI: bản đầu lặp lại bạo lực/đòn roi/phán xét gia đình khác — vốn
+             *     đã có trong ranh giới cứng của khối giá trị ngay trên. Trùng lặp trong cùng 1
+             *     prompt làm loãng chú ý (đúng lo ngại đã dẫn ở §12.10) và tốn token vô ích (§12.5),
+             *     nên chỉ giữ phần THỰC SỰ bổ sung: các cách vi phạm mang tính VAI TRÒ.
              */
             buildFamilyConductGroundingLines() {
                 const items = (this.familyConductStandards || []).map(fc => {
@@ -833,22 +875,38 @@ document.addEventListener('alpine:init', () => {
                 });
 
                 return [
-                    `Khung ứng xử biên tập nền tảng — Bộ tiêu chí ứng xử trong gia đình (${this.familyConductStandardsRef}). Phần sau dấu "→" là cách áp dụng vào nội dung, KHÔNG phải câu chữ của văn bản gốc:`,
+                    // `familyConductStandardsRef` ĐÃ chứa tên khung ("Bộ tiêu chí ứng xử trong gia
+                    // đình (khung chuẩn chung, ...)") nên KHÔNG bọc thêm tên như dòng tương ứng ở
+                    // khối giá trị — ở đó `familyValuesRef` thuần số hiệu văn bản ("Quyết định
+                    // 1189/QĐ-TTg...") nên phải có tên khung đứng trước. Bản đầu bọc y hệt khối giá
+                    // trị, render ra tên lặp 2 lần kèm ngoặc lồng ngoặc.
+                    `Khung ứng xử biên tập nền tảng — ${this.familyConductStandardsRef}, áp dụng CÙNG LÚC với khung giá trị ở trên (khung giá trị nói ĐÍCH ĐẾN của một gia đình, khung này nói CÁCH các thành viên đối xử với nhau để tới đó). Phần sau dấu "→" là cách áp dụng vào nội dung, KHÔNG phải câu chữ của văn bản gốc:`,
                     ...items,
-                    'Cách dùng: khi ý tưởng liên quan tới 1 mối quan hệ cụ thể trong gia đình (vợ chồng, cha mẹ-con, ông bà-cháu, anh chị em), ưu tiên bám đúng chuẩn ứng xử của MỐI QUAN HỆ đó thay vì lời khuyên chung chung "mọi thành viên". Không phải mọi ý tưởng đều cần gắn với 1 cặp quan hệ — bỏ qua khối này nếu chủ đề không liên quan tới ứng xử giữa các thành viên.',
+                    'Cách dùng: khi ý tưởng liên quan tới 1 mối quan hệ cụ thể trong gia đình, bám đúng chuẩn ứng xử của MỐI QUAN HỆ đó thay vì lời khuyên chung chung cho "mọi thành viên". Không phải mọi ý tưởng đều gắn với 1 cặp quan hệ — chủ đề không liên quan tới ứng xử giữa các thành viên thì bỏ qua khối này, KHÔNG gán ghép cho có.',
+                    'VỊ TRÍ CỦA ĐỘC GIẢ: mỗi cặp trên có HAI phía, độc giả của bài chỉ đứng ở MỘT phía — xác định phía đó từ mô tả đối tượng độc giả trong prompt này, rồi viết TỪ phía đó về việc CHÍNH HỌ làm được. Bài cho cha mẹ thì bàn cách cha mẹ đồng hành với con, KHÔNG chuyển thành bài đòi con cái phải hiếu thảo; ý tưởng nhắc nghĩa vụ của thành viên KHÔNG đọc bài thì không ai dùng được, dù đạo lý đúng hết. Lưu ý thêm: 1 độc giả thường ở NHIỀU vị trí cùng lúc (vừa là con, vừa là cha/mẹ, vừa là dâu/rể) — ý tưởng chạm đúng chỗ hai vai trò kéo nhau (VD vừa nuôi con nhỏ vừa chăm cha mẹ già) thường giá trị hơn ý tưởng chỉ nói tới 1 vai trò.',
+                    'Khi khung này và khung giá trị kéo ngược nhau, mức sàn ở khối giá trị (an toàn thân thể/tinh thần của mọi thành viên và bình đẳng giới) được ưu tiên, không phải thứ mang ra đánh đổi để giữ đúng chữ. Chỗ dễ vướng nhất: câu chữ gốc nhắc việc con phụ giúp gia đình "phù hợp với độ tuổi, giới tính" — ở tầng biên tập, chia việc nhà theo ĐỘ TUỔI, sức khoẻ và quỹ thời gian, KHÔNG lấy giới tính làm căn cứ (không đề xuất ý tưởng mặc định con gái học nội trợ / con trai làm việc nặng). Đây là cách nền tảng ÁP DỤNG văn bản, không phải sửa văn bản.',
                     'Khung này là ĐỊNH HƯỚNG NỘI BỘ cho người biên tập, KHÔNG phải chất liệu để viết vào bài: không đề xuất ý tưởng phân tích/trích dẫn lại nguyên văn tiêu chí hay khẩu hiệu tuyên truyền (VD "Vợ chồng chung thuỷ, nghĩa tình: ..."), tuyệt đối không bịa số hiệu/ngày ban hành văn bản này (chuẩn ứng xử theo khung chung, không phải 1 văn bản có số hiệu cố định) — chuẩn mực thể hiện qua nội dung có ích, không qua khẩu hiệu.',
-                    'Ranh giới cứng (LOẠI ngay ý tưởng vi phạm, dù đạt mọi tiêu chí khác): cổ suý bất kỳ hình thức bạo lực/áp đặt nào giữa các thành viên (kể cả "đòn roi dạy con", "gia trưởng để giữ nề nếp"), gán hiếu thảo/chung thuỷ/gương mẫu với việc HY SINH VÔ ĐIỀU KIỆN quyền lợi chính đáng của bản thân, hoặc dùng áp lực đạo đức ("con cái phải...", "vợ chồng phải...") để phán xét gia đình không theo đúng khuôn mẫu.',
+                    'Ranh giới cứng RIÊNG của khung này (bổ sung cho ranh giới ở khối giá trị, không lặp lại) — LOẠI ngay ý tưởng: gán hiếu thảo/chung thuỷ/gương mẫu/lễ phép với việc một thành viên HY SINH VÔ ĐIỀU KIỆN sức khoẻ, tài chính, việc học hay sự an toàn của mình; lấy thứ bậc trong nhà để biện minh cho áp đặt ("gia trưởng để giữ nề nếp", "người lớn nói thì con phải nghe"); hoặc dùng áp lực đạo đức ("làm con phải...", "làm vợ phải...", "làm dâu phải...") thay cho lý lẽ thực tế để độc giả tự quyết.',
                 ];
             },
 
             /**
              * Bản NÉN — cùng vai trò và cùng lý do tồn tại với buildFamilyValuesBoundaryLine() (tool
              * viết-lại/copy đăng thật không cần phép thử đầy đủ, chỉ cần ranh giới không được vượt).
+             *
+             * 2026-08-06 — 3 sửa cùng lý do với khối đầy đủ ở trên: (1) liệt kê theo TÊN CẶP QUAN HỆ
+             * chứ không theo nhãn khẩu hiệu — bản đầu nối 4 nhãn bằng dấu phẩy trong khi bản thân mỗi
+             * nhãn đã chứa dấu phẩy ("Chung thủy, nghĩa tình"), ra 1 chuỗi 8 tính từ không đọc được
+             * là 4 cặp; (2) bỏ phần trùng với buildFamilyValuesBoundaryLine() (bạo lực, phán xét gia
+             * đình khác) — 2 dòng này luôn đứng CẠNH NHAU trong prompt nên trùng lặp là thấy ngay;
+             * (3) thêm ràng buộc VỊ TRÍ ĐỘC GIẢ, vì tool viết lại còn dễ lệch vai hơn tool sinh ý
+             * tưởng: rút gọn mạnh cho mạng xã hội hay biến 1 nội dung viết cho cha mẹ thành câu khuyên
+             * chung "con cái nên..." cho dễ viral.
              */
             buildFamilyConductBoundaryLine(subject = 'nội dung') {
-                const labels = (this.familyConductStandards || []).map(fc => fc.label).join(', ');
+                const relationships = (this.familyConductStandards || []).map(fc => fc.relationship).join(' / ');
 
-                return `Ranh giới ứng xử gia đình bắt buộc — ${subject} sẽ đăng công khai, tôn trọng Bộ tiêu chí ứng xử trong gia đình (${labels}): không cổ suý bạo lực/áp đặt giữa các thành viên, không gán hiếu thảo/chung thuỷ/gương mẫu với hy sinh vô điều kiện quyền lợi chính đáng của bản thân, không dùng áp lực đạo đức để phán xét gia đình khác khuôn mẫu, không copy nguyên văn khẩu hiệu tuyên truyền vào tiêu đề/nội dung.`;
+                return `Ranh giới ứng xử gia đình (bổ sung cho ranh giới giá trị ở trên, không lặp lại) — khi ${subject} có nhắc tới quan hệ giữa các thành viên trong gia đình (${relationships}), theo Bộ tiêu chí ứng xử trong gia đình: giữ đúng VỊ TRÍ của người đọc như trong nội dung gốc, không đổi thành lời khuyên nhắc nghĩa vụ của thành viên khác thay họ; không gán hiếu thảo/chung thuỷ/gương mẫu với hy sinh vô điều kiện sức khoẻ, tài chính hay sự an toàn của một thành viên; không lấy thứ bậc trong nhà hoặc áp lực đạo đức ("làm con phải...", "làm vợ phải...") thay cho lý lẽ thực tế; không copy nguyên văn khẩu hiệu tuyên truyền vào câu chữ đăng thật.`;
             },
 
             /**
@@ -918,9 +976,16 @@ document.addEventListener('alpine:init', () => {
                     .filter(Boolean);
 
                 // Cùng cơ chế cho family_conduct_focus (§12.11) — chuyên mục ưu tiên cặp quan hệ
-                // nào trong Bộ tiêu chí ứng xử trong gia đình.
-                const familyConductFocusLabels = (foundation?.family_conduct_focus ?? [])
-                    .map(key => this.familyConductStandards.find(fc => fc.key === key)?.label)
+                // nào trong Bộ tiêu chí ứng xử trong gia đình. 2026-08-06: lấy "TÊN CẶP QUAN HỆ
+                // (nhãn)" chứ không chỉ nhãn — nhãn đứng một mình ("Hiếu thảo, lễ phép") buộc model
+                // tự map ngược về cặp quan hệ nào, đúng thứ nó hay map sai, trong khi cặp quan hệ mới
+                // là thông tin quyết định GÓC VIẾT (viết cho ai, ở vị trí nào trong gia đình).
+                const familyConductFocusNames = (foundation?.family_conduct_focus ?? [])
+                    .map(key => {
+                        const standard = this.familyConductStandards.find(fc => fc.key === key);
+
+                        return standard ? `${standard.relationship} (${standard.label})` : null;
+                    })
                     .filter(Boolean);
 
                 // 2026-08 (tham khảo chapters-agency.com/blog/content-marketing-blog/content-formats-2026)
@@ -953,8 +1018,8 @@ document.addEventListener('alpine:init', () => {
                     top.push(`Trong các giá trị trên, chuyên mục này ưu tiên phục vụ: ${familyFocusLabels.join(', ')} — khi chọn góc khai thác và lợi ích cuối cùng của ý tưởng, hướng về (các) giá trị này trước. Các giá trị còn lại vẫn là ràng buộc nền phải tôn trọng, không phải phạm vi bị loại trừ.`);
                 }
                 top.push(...this.buildFamilyConductGroundingLines());
-                if (familyConductFocusLabels.length) {
-                    top.push(`Trong các cặp quan hệ trên, chuyên mục này ưu tiên: ${familyConductFocusLabels.join(', ')} — khi phù hợp với chủ đề, ưu tiên khai thác góc nhìn của (các) mối quan hệ này trước. Các cặp quan hệ còn lại vẫn áp dụng khi ý tưởng liên quan tới chúng.`);
+                if (familyConductFocusNames.length) {
+                    top.push(`Trong các cặp quan hệ trên, chuyên mục này ưu tiên: ${familyConductFocusNames.join('; ')} — khi chủ đề cho phép, khai thác góc nhìn của (các) mối quan hệ này trước, và mặc định độc giả của chuyên mục đứng ở phía nào của cặp quan hệ đó theo mô tả đối tượng độc giả trong prompt này. Các cặp quan hệ còn lại vẫn áp dụng khi ý tưởng liên quan tới chúng — đây là ưu tiên, không phải giới hạn.`);
                 }
                 // Đối tượng độc giả trước giờ CHỈ xuất hiện thoáng qua trong câu persona (1 mệnh đề
                 // phụ `personaAudience`) và ở tiêu chí 4 của BƯỚC 2 — không có chỉ dẫn nào về cách
@@ -963,7 +1028,17 @@ document.addEventListener('alpine:init', () => {
                 // pain_points/objections/decision_criteria bên dưới đều mô tả CHÍNH nhóm độc giả
                 // này — đọc chúng trước khi biết độc giả là ai thì mất điểm neo.
                 if (audienceText) {
-                    top.push(`Đối tượng độc giả của chuyên mục: ${audienceText} — mô tả này chi phối 3 việc khi đề xuất ý tưởng: (1) CHỌN VẤN ĐỀ: chỉ đề xuất vấn đề nhóm này đang thực sự gặp ở giai đoạn HIỆN TẠI của họ, không phải giai đoạn đã qua hay còn quá xa; (2) CHỌN ĐỘ SÂU: không hàn lâm quá mức họ cần, cũng không sơ sài dưới mức họ đã biết; (3) CHỌN CÁCH XƯNG HÔ/VÍ DỤ: bám bối cảnh sinh hoạt, điều kiện kinh tế và quỹ thời gian thực tế của nhóm này. KHÔNG mở rộng sang nhóm độc giả khác cho "an toàn" — ý tưởng nhắm đúng 1 nhóm cụ thể luôn tốt hơn ý tưởng chung chung ai đọc cũng được. Mọi mô tả pain points/nghi ngờ/tiêu chí quyết định bên dưới đều nói về CHÍNH nhóm này.`);
+                    top.push(`Đối tượng độc giả của chuyên mục: ${audienceText} — mô tả này chi phối 4 việc khi đề xuất ý tưởng: (1) CHỌN VẤN ĐỀ: chỉ đề xuất vấn đề nhóm này đang thực sự gặp ở giai đoạn HIỆN TẠI của họ, không phải giai đoạn đã qua hay còn quá xa; (2) CHỌN ĐỘ SÂU: không hàn lâm quá mức họ cần, cũng không sơ sài dưới mức họ đã biết; (3) CHỌN CÁCH XƯNG HÔ/VÍ DỤ: bám bối cảnh sinh hoạt, điều kiện kinh tế và quỹ thời gian thực tế của nhóm này; (4) CHỌN VỊ TRÍ TRONG GIA ĐÌNH: nhóm này đang ở vai nào (cha/mẹ, con đã trưởng thành, ông/bà, vợ/chồng, dâu/rể...) — đó là phía mà mọi ý tưởng phải viết TỪ đó, theo đúng khối ứng xử ở trên. KHÔNG mở rộng sang nhóm độc giả khác cho "an toàn" — ý tưởng nhắm đúng 1 nhóm cụ thể luôn tốt hơn ý tưởng chung chung ai đọc cũng được. Mọi mô tả pain points/nghi ngờ/tiêu chí quyết định bên dưới đều nói về CHÍNH nhóm này.`);
+                } else {
+                    // Lỗ hổng THỨ TỰ (vá 2026-08-06): nhánh "chưa có mô tả đối tượng" trước giờ chỉ
+                    // tồn tại ở tiêu chí 4 của BƯỚC 2 — nghĩa là model brainstorm 20-25 ý ở BƯỚC 1
+                    // khi chưa có bất kỳ điểm neo độc giả nào, rồi tới BƯỚC 2 mới tự nghĩ ra chân
+                    // dung và lấy chính chân dung vừa nghĩ ra để loại bớt ý vừa sinh. Kết quả: hoặc
+                    // loại oan hàng loạt, hoặc (thường hơn) model tự nới chân dung cho vừa với ý đã
+                    // sinh — tức tiêu chí 4 thành hình thức. Đưa việc dựng chân dung lên TRƯỚC khi
+                    // brainstorm; cách GHI vào `audience_assumption` vẫn để nguyên ở tiêu chí 4
+                    // (chỗ duy nhất phân biệt trường hợp 1 chuyên mục vs đa chuyên mục).
+                    top.push('Chưa có mô tả đối tượng độc giả nào — TRƯỚC khi brainstorm ở BƯỚC 1, tự dựng chân dung độc giả cụ thể nhất có thể từ dữ liệu nguồn + tên chuyên mục: giai đoạn gia đình họ đang ở, vị trí của họ trong gia đình (cha/mẹ, con đã trưởng thành, ông/bà, vợ/chồng...), điều kiện sinh hoạt và quỹ thời gian. Rồi brainstorm CHO chính chân dung đó — KHÔNG brainstorm cho "gia đình Việt Nam nói chung" rồi mới nghĩ tới độc giả lúc đánh giá, cũng KHÔNG nới lại chân dung cho vừa với những ý đã nghĩ ra. Chân dung này được ghi lại ở BƯỚC 3 (xem tiêu chí 4 của BƯỚC 2 để biết cách ghi).');
                 }
                 // writer_insights đứng TRƯỚC core_focus/unique_angle theo đúng vai trò thiết kế của
                 // field (5-7 gạch đầu dòng tóm tắt nhanh, "đọc trước khi đọc hết core_focus/
@@ -1125,20 +1200,23 @@ document.addEventListener('alpine:init', () => {
                     ...(familyFocusLabels.length ? [
                         `Cũng trong số đó, nếu dữ liệu nguồn có chất liệu phù hợp một cách TỰ NHIÊN, dành 1-2 ý mà lợi ích cuối `
                             + `cùng của bài nhắm thẳng vào (các) giá trị chuyên mục ưu tiên (${familyFocusLabels.join(', ')}) — `
-                            + `KHÔNG gượng ép gắn giá trị vào ý tưởng khi nguồn không có chất liệu thật cho việc đó.`,
+                            + `KHÔNG gượng ép gắn giá trị vào ý tưởng khi nguồn không có chất liệu thật cho việc đó. Lưu ý đây `
+                            + `KHÔNG phải nới lỏng yêu cầu ở khối giá trị đầu prompt (MỌI ý tưởng vẫn phải phục vụ ít nhất 1 giá `
+                            + `trị bằng lợi ích thực tế): 1-2 ý này là phần nhắm THẲNG vào giá trị chuyên mục ưu tiên.`,
                     ] : []),
-                    ...(familyConductFocusLabels.length ? [
+                    ...(familyConductFocusNames.length ? [
                         `Tương tự, nếu nguồn có chất liệu phù hợp TỰ NHIÊN, dành 1-2 ý khai thác đúng góc ứng xử của (các) cặp `
-                            + `quan hệ chuyên mục ưu tiên (${familyConductFocusLabels.join(', ')}) — KHÔNG gượng ép nếu nguồn `
-                            + `không thật sự liên quan tới mối quan hệ gia đình nào.`,
+                            + `quan hệ chuyên mục ưu tiên (${familyConductFocusNames.join('; ')}), viết TỪ phía độc giả của chuyên `
+                            + `mục — KHÔNG gượng ép nếu nguồn không thật sự liên quan tới mối quan hệ gia đình nào.`,
                     ] : []),
                     ...(hasProductLikeSource ? [
                         'Nguồn (hoặc một phần nguồn) là trang sản phẩm/dịch vụ — ý tưởng phải đứng về phía ĐỘC GIẢ: hướng dẫn '
                             + 'chọn theo tiêu chí, so sánh trung lập, giải đáp lo ngại, sai lầm thường gặp khi mua/sử dụng... '
                             + 'KHÔNG đề xuất bài PR ca ngợi 1 thương hiệu cụ thể (tên thương hiệu chỉ nhắc khi cần dẫn chứng). '
-                            + 'Bám giá trị "ấm no" đã nêu ở đầu prompt: ưu tiên góc chi tiêu hợp lý theo từng điều kiện, và luôn '
-                            + 'nêu được phương án cho gia đình eo hẹp (cách tận dụng đồ đang có, tiêu chí tối thiểu cần đạt) — '
-                            + 'không tạo cảm giác phải chi tiêu vượt khả năng mới là chăm lo cho gia đình. Cũng KHÔNG đề xuất ý '
+                            + `Bám giá trị "${this.familyValueLabel('am_no', 'điều kiện vật chất của gia đình')}" đã nêu ở đầu `
+                            + 'prompt: ưu tiên góc chi tiêu hợp lý theo từng điều kiện, và luôn nêu được phương án cho gia đình '
+                            + 'eo hẹp (cách tận dụng đồ đang có, tiêu chí tối thiểu cần đạt) — không tạo cảm giác phải chi tiêu '
+                            + 'vượt khả năng mới là chăm lo cho gia đình. Cũng KHÔNG đề xuất ý '
                             + 'tưởng xoay quanh mức giá/khuyến mãi cụ thể đọc được từ trang nguồn: giá đổi liên tục, bài viết sẽ '
                             + 'sai ngay sau khi đăng.',
                     ] : []),
@@ -1243,13 +1321,23 @@ document.addEventListener('alpine:init', () => {
                                 + 'mục đã chọn ở Bước 0 (điền vào `audience_assumption` tối đa 3 dòng "Giả định đối tượng — [tên '
                                 + 'chuyên mục]: [mô tả ngắn]", mỗi chuyên mục 1 dòng, nối bằng xuống dòng), rồi đánh giá mỗi ý theo '
                                 + 'đúng giả định của chuyên mục gắn với ý đó — KHÔNG đánh giá chung chung kiểu "ai đọc cũng phù hợp".'),
+                    // 2026-08-06 — bộ lọc này trước giờ CHỈ thực thi khung giá trị (§12.10), trong khi
+                    // khung ứng xử (§12.11) cũng có ranh giới cứng ở đầu prompt mà không có chốt kiểm
+                    // nào ở bước đánh giá: ranh giới chỉ được "đọc" 1 lần ở TOP rồi không ai hỏi lại,
+                    // trong khi ranh giới giá trị được hỏi lại bằng 3 câu cụ thể — lệch hẳn về mức độ
+                    // thực thi giữa 2 khung. Thêm (d) đúng 1 câu, gộp 2 cách vi phạm mang tính VAI TRÒ
+                    // hay lọt lưới nhất (lệch vị trí độc giả + đòi hy sinh vô điều kiện) thay vì thêm
+                    // 4 câu song song với khung giá trị (sẽ phình bộ lọc và loãng chú ý).
                     'Bộ lọc bắt buộc (ngoài 4 tiêu chí): LOẠI ngay ý tưởng vượt bất kỳ ranh giới cứng nào của Hệ giá trị gia '
-                        + 'đình Việt Nam đã nêu ở đầu prompt — kể cả khi ý tưởng đó đạt cả 4 tiêu chí. Rà đúng 3 câu hỏi sau cho '
-                        + 'TỪNG ý tưởng, vì đây là 3 cách vi phạm dễ lọt lưới nhất: (a) ý tưởng có lấy nỗi sợ hãi/mặc cảm/cảm '
-                        + 'giác có lỗi của một thành viên trong gia đình làm động lực đọc không? (b) cách đặt vấn đề có ngầm gán '
-                        + 'việc chăm sóc - nội trợ cho người mẹ, việc kiếm tiền - quyết định cho người bố không (trong khi mô tả '
-                        + 'đối tượng độc giả không hề giới hạn như vậy)? (c) ý tưởng có ngầm coi một mô hình gia đình hoặc một '
-                        + 'mức chi tiêu là chuẩn mực, khiến gia đình khác thấy mình thua kém không?',
+                        + 'đình Việt Nam HOẶC của Bộ tiêu chí ứng xử trong gia đình đã nêu ở đầu prompt — kể cả khi ý tưởng đó '
+                        + 'đạt cả 4 tiêu chí. Rà đúng 4 câu hỏi sau cho TỪNG ý tưởng, vì đây là 4 cách vi phạm dễ lọt lưới nhất: '
+                        + '(a) ý tưởng có lấy nỗi sợ hãi/mặc cảm/cảm giác có lỗi của một thành viên trong gia đình làm động lực '
+                        + 'đọc không? (b) cách đặt vấn đề có ngầm gán việc chăm sóc - nội trợ cho người mẹ, việc kiếm tiền - '
+                        + 'quyết định cho người bố không (trong khi mô tả đối tượng độc giả không hề giới hạn như vậy)? (c) ý '
+                        + 'tưởng có ngầm coi một mô hình gia đình hoặc một mức chi tiêu là chuẩn mực, khiến gia đình khác thấy '
+                        + 'mình thua kém không? (d) ý tưởng có đang nói với độc giả về nghĩa vụ của thành viên KHÁC thay vì việc '
+                        + 'chính họ làm được (VD bài cho cha mẹ nhưng nội dung là đòi con cái phải hiếu thảo), hoặc đòi một thành '
+                        + 'viên hy sinh vô điều kiện sức khoẻ/tài chính/việc học của mình để giữ hoà khí gia đình không?',
                     ...(constraintsText ? [
                         `Bộ lọc bắt buộc thứ hai: LOẠI ngay ý tưởng vi phạm ràng buộc đã nêu ở trên ("${constraintsText}"), kể cả khi ý tưởng đó đạt cả 4 tiêu chí.`,
                     ] : []),
@@ -1333,10 +1421,13 @@ document.addEventListener('alpine:init', () => {
                     'Ràng buộc cho danh sách này: (1) nêu LOẠI sản phẩm (VD "ghế ăn dặm có đai an toàn"), KHÔNG nêu tên thương '
                         + 'hiệu cụ thể và KHÔNG nêu giá/khuyến mãi; (2) 5 sản phẩm phải KHÁC LOẠI nhau, không phải 5 biến thể của '
                         + 'cùng 1 thứ; (3) mỗi sản phẩm phải gắn được với ít nhất 1 ý tưởng CÓ THẬT trong danh sách ý tưởng ở trên '
-                        + '— không gợi ý sản phẩm chung chung không liên quan ý nào; (4) bám giá trị "ấm no" đã nêu ở đầu prompt: '
+                        + `— không gợi ý sản phẩm chung chung không liên quan ý nào; (4) bám giá trị `
+                        + `"${this.familyValueLabel('am_no', 'điều kiện vật chất của gia đình')}" đã nêu ở đầu prompt: `
                         + 'trong danh sách phải có ÍT NHẤT 1-2 phương án chi phí thấp hoặc tận dụng đồ gia đình thường đã có, không '
-                        + 'phải toàn món tốn kém; (5) đây là gợi ý theo hiểu biết chung của bạn, KHÔNG phải tra cứu từ danh mục sản '
-                        + 'phẩm có thật nào — đừng khẳng định sản phẩm đang được bán ở đâu hay có sẵn hàng.',
+                        + 'phải toàn món tốn kém, và KHÔNG quy việc chi tiêu/mua sắm thành thước đo làm tròn nghĩa vụ trong gia '
+                        + 'đình ("mua quà đắt mới là có hiếu", "đầu tư mạnh mới là yêu con") — đó chính là cách vi phạm khung ứng '
+                        + 'xử ở đầu prompt bằng ngôn ngữ thương mại; (5) đây là gợi ý theo hiểu biết chung của bạn, KHÔNG phải tra '
+                        + 'cứu từ danh mục sản phẩm có thật nào — đừng khẳng định sản phẩm đang được bán ở đâu hay có sẵn hàng.',
                     'Nếu thực sự không tìm đủ 5 loại sản phẩm phù hợp TỰ NHIÊN (VD chủ đề thuần kiến thức/tâm lý, không gắn với '
                         + 'đồ dùng nào), liệt kê ít hơn và ghi 1 dòng lý do ngắn ngay sau danh sách — KHÔNG gượng ép nhét sản phẩm '
                         + 'không liên quan vào cho đủ số.',
