@@ -2281,6 +2281,7 @@
         "objections///text///__///_NULL///NULL///__///__",
         "decision_criteria///text///__///_NULL///NULL///__///__",
         "family_values_focus///json///__///_NULL///NULL///__///__",
+        "family_conduct_focus///json///__///_NULL///NULL///__///__",
         "rejected_ideas///text///__///_NULL///NULL///__///__",
         "audience///string///500///_NULL///NULL///__///__",
         "constraints///string///500///_NULL///NULL///__///__",

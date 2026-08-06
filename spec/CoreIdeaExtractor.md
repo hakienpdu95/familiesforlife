@@ -1,8 +1,17 @@
 # CoreIdeaExtractor
 
-**Version:** 1.26  
-**Last Updated:** 2026-08-05  
+**Version:** 1.27  
+**Last Updated:** 2026-08-06  
 **Status:** Design Specification (Ready for Implementation)
+
+> **v1.27 (`spec/giadinh.md` đổi nội dung lần nữa — "Bộ tiêu chí ứng xử trong gia đình", 4 cặp quan
+> hệ vợ chồng/cha mẹ-con/con-cha mẹ/anh chị em):** khung KHÁC bản chất với 4 giá trị `family_values`
+> ở §12.10 (mục tiêu xã hội tổng thể) — đây là quy tắc hành vi theo TỪNG vai trò trong gia đình, nên
+> tách thành khối Lớp 1 + Lớp 2 riêng (`family_conduct_standards`/`family_conduct_focus`), cùng cơ
+> chế 2 lớp đã có ở §12.10 chứ không gộp chung. Xem §12.11. `decision_ref` KHÔNG trích số hiệu/ngày
+> ban hành cụ thể (bộ tiêu chí này ban hành/cập nhật theo từng địa phương/năm, không có 1 văn bản
+> gốc số hiệu cố định như Quyết định 1189/QĐ-TTg) — đúng nguyên tắc "không bịa chi tiết văn bản pháp
+> quy" đã áp dụng cho `family_values`.
 
 > **v1.26 (Đối chiếu tigergraph.com/blog/context-engineering-vs-prompt-engineering — 1 khoảng
 > trống thật ÁP DỤNG, phần còn lại không áp dụng được hoặc đã có sẵn):** bài phân biệt "prompt
@@ -919,10 +928,13 @@ liệu KHÁCH QUAN, TỰ ĐỘNG: danh sách tiêu đề bài đã publish thậ
 
 #### 12.10.1 Bối cảnh
 
-> **Đính chính tham chiếu (v1.21):** các dòng bên dưới trỏ `spec/giadinh.md` — file đó hiện KHÔNG
-> chứa nội dung hệ giá trị (nội dung trong file là 1 bài tiếng Anh về inference pipeline của LLM,
-> không liên quan). Tham chiếu đúng cho định nghĩa 4 giá trị là chính mục §12.10 này + config nêu
-> ở Lớp 1. Chưa rõ file bị ghi đè từ lúc nào.
+> **Đính chính tham chiếu (v1.21, cập nhật v1.27):** các dòng bên dưới trỏ `spec/giadinh.md` — file
+> này đã bị ghi đè nội dung NHIỀU LẦN qua các version (nguồn gốc mỗi lần đổi không rõ): 1 bài tiếng
+> Anh về inference pipeline của LLM (tại thời điểm v1.21), rồi "6 framework cấu trúc prompt AI cho
+> marketing" (tại thời điểm v1.22, xem đối chiếu ngay dưới đây), và tại thời điểm v1.27 lại là "Bộ
+> tiêu chí ứng xử trong gia đình" (4 cặp quan hệ — xem §12.11, một khung KHÁC với 4 giá trị ở đây).
+> Tham chiếu đúng cho định nghĩa 4 giá trị VẪN là chính mục §12.10 này + config nêu ở Lớp 1 — không
+> đổi qua bất kỳ lần ghi đè nào của file.
 
 Đối chiếu `spec/giadinh.md`: Hệ giá trị gia đình Việt Nam gồm 4 giá trị cốt lõi — **ấm no, hạnh
 phúc, tiến bộ, văn minh** — do Thủ tướng Chính phủ ban hành qua **Quyết định 1189/QĐ-TTg ngày
@@ -1019,6 +1031,68 @@ foundation sẽ hoàn toàn không có ràng buộc giá trị nào khi sinh ý 
     `buildSummarizePromptText()` VẪN giữ nguyên quyết định không áp dụng (gạch đầu dòng trên), chỉ
     nhận thêm 1 chỉ dẫn về giữ MỨC ĐỘ CHẮC CHẮN của nguồn — đó là tiêu chí trung thực với nguồn,
     không phải bối cảnh biên tập.
+
+### 12.11 Bộ tiêu chí ứng xử trong gia đình — khung thứ 2, tách riêng khỏi §12.10 (v1.27)
+
+#### 12.11.1 Bối cảnh
+
+`spec/giadinh.md` (nội dung tại thời điểm v1.27) chứa "Bộ tiêu chí ứng xử trong gia đình": 4 cặp quan hệ — **vợ, chồng**
+(chung thủy, nghĩa tình), **cha mẹ với con/ông bà với cháu** (gương mẫu, yêu thương), **con với cha
+mẹ/ông bà** (hiếu thảo, lễ phép), **anh, chị, em** (hòa thuận, chia sẻ) — kèm mục "Khẩu hiệu tuyên
+truyền". Khác `family_values` ở §12.10 (Quyết định 1189/QĐ-TTg, 1 số hiệu cố định), bộ tiêu chí này
+**không có 1 văn bản gốc số hiệu cố định duy nhất** — được ban hành/cập nhật theo từng địa phương và
+từng năm, bản chất là 1 khung nội dung chuẩn dùng chung hơn là 1 quyết định cụ thể có thể trích dẫn
+số hiệu/ngày tháng. `decision_ref` vì vậy chỉ mô tả đây là "khung chuẩn chung", **không bịa số
+hiệu/ngày ban hành** — đúng nguyên tắc đã né ở §12.10 (mô hình rất dễ bịa điều khoản văn bản pháp quy
+khi được yêu cầu trích dẫn chính xác 1 thứ không tồn tại ở dạng đó).
+
+Khác biệt bản chất với §12.10: `family_values` là **mục tiêu xã hội tổng thể** (ấm no/hạnh phúc/tiến
+bộ/văn minh), áp cho MỌI nội dung không phân biệt vai trò; bộ tiêu chí ứng xử là **quy tắc hành vi
+cụ thể theo TỪNG cặp quan hệ** trong gia đình — 1 bài viết về "vợ chồng chia sẻ việc nhà" cần bám
+chuẩn khác với 1 bài về "con cái chăm sóc cha mẹ già". Vì khác bản chất, **tách thành khối Lớp 1
+riêng** (`family_conduct_standards`) thay vì gộp vào `family_values` — tránh làm loãng vai trò
+"theo vai trò cụ thể" vốn là giá trị lớn nhất của bộ tiêu chí này.
+
+Mục "Tiêu chí ứng xử chung" (Tôn trọng, bình đẳng, yêu thương, chia sẻ) của văn bản gốc **không lặp
+lại** trong config — trùng vai trò với 4 giá trị nền đã có ở `family_values`.
+
+#### 12.11.2 Thiết kế — 2 lớp, cùng cơ chế §12.10.2
+
+**Lớp 1 — khối cố định, luôn xuất hiện, không thuộc category nào:**
+
+- 4 cặp quan hệ (`key`, `relationship`, `label`, `principles[]`) + `decision_ref` sống ở
+  `config('content_foundation.family_conduct_standards')` — nguồn sự thật duy nhất, đọc động ở mọi
+  nơi cần dùng (rule validate `in:...`, UI checkbox, khối grounding).
+- `FAMILY_CONDUCT_EDITORIAL_NOTES` (map theo `key`, cùng vai trò `FAMILY_VALUE_EDITORIAL_NOTES` ở
+  §12.10.2) dịch "chuẩn mực" → "gợi ý áp dụng vào bài viết cụ thể", vì lý do y hệt: câu chữ ở tầng
+  quy phạm ("hiếu thảo, lễ phép") không tự bắc cầu sang góc bài viết, và dễ kéo model về hướng rao
+  giảng đạo lý/khẩu hiệu.
+- `buildFamilyConductGroundingLines()` (CoreIdeaExtractor + VideoIdeaExtractor, code trùng lặp có
+  chủ đích như mọi hàm dùng chung khác giữa 2 module) push NGAY SAU khối `buildFamilyValuesGrounding
+  Lines()` ở TOP của "Copy prompt cho AI" — LUÔN xuất hiện kể cả chưa chọn chuyên mục, cùng vị trí
+  và thứ tự "mục tiêu tích cực trước, ranh giới cấm sau" đã chốt cho §12.10. Không đề xuất ý tưởng
+  trích dẫn/copy nguyên văn khẩu hiệu tuyên truyền vào tiêu đề — mục "Khẩu hiệu tuyên truyền" của
+  văn bản gốc CHỦ ĐÍCH không được đưa vào chất liệu bài viết.
+- `buildFamilyConductBoundaryLine()` — bản NÉN, dùng ở `buildRewritePromptText()` (CoreIdeaExtractor)
+  và `singleVideoContextLines()` (VideoIdeaExtractor, dùng chung bởi cả 8 tool sinh câu chữ đăng
+  thật: tiêu đề/hook/Shorts/dàn ý/CTA/biên tập lời nói/kịch bản đầy đủ/SEO) — cùng cơ chế
+  `buildFamilyValuesBoundaryLine()`.
+
+**Lớp 2 — `family_conduct_focus` (cột mới trên `content_foundations`), theo TỪNG category:**
+
+- Cột `family_conduct_focus` (`json`, nullable) — lưu TẬP KEY (VD `["vo_chong","anh_chi_em"]`),
+  cùng nguyên tắc không lưu lại nhãn/mô tả như `family_values_focus`. Cast `array` ở
+  `CategoryContentFoundation`.
+- UI: nhóm checkbox thứ 2 (4 ô) trong `category-foundations` (`ContentFoundation/resources/views/
+  index.blade.php`), cạnh nhóm `family_values_focus`.
+- Khi category có `family_conduct_focus`, prompt thêm 1 dòng ưu tiên bổ sung SAU khối cố định Lớp 1
+  — không thay thế khối cố định, category không tick vẫn phải tôn trọng cả 4 cặp quan hệ khi ý
+  tưởng liên quan.
+
+#### 12.11.3 Ngoài phạm vi (v1.27)
+
+- Không áp dụng vào `buildSummarizePromptText()` — cùng lý do đã áp cho `family_values` ở §12.10.4.
+- Không tự động chấm điểm/gắn nhãn mức khớp cặp quan hệ nào — cùng lý do §12.10.4.
 
 ---
 

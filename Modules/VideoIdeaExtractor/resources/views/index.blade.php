@@ -11,6 +11,8 @@
     'categories' => $categoryFoundations,
     'familyValues' => config('content_foundation.family_values.items', []),
     'familyValuesRef' => config('content_foundation.family_values.decision_ref'),
+    'familyConductStandards' => config('content_foundation.family_conduct_standards.items', []),
+    'familyConductStandardsRef' => config('content_foundation.family_conduct_standards.decision_ref'),
     'layer2Url' => route('backend.api.videoideaextractor.layer2'),
     'titlesUrl' => route('backend.api.videoideaextractor.titles'),
     'hooksUrl' => route('backend.api.videoideaextractor.hooks'),
@@ -221,7 +223,8 @@ document.addEventListener('alpine:init', () => {
         const {
             apiBatchUrl = '', maxVideos = 5, categoryFoundationsUrl = '', existingArticlesUrlTemplate = '',
             categoryFoundationDetailUrlTemplate = '',
-            categories = [], familyValues = [], familyValuesRef = '', layer2Url = '',
+            categories = [], familyValues = [], familyValuesRef = '',
+            familyConductStandards = [], familyConductStandardsRef = '', layer2Url = '',
             titlesUrl = '', hooksUrl = '', shortsUrl = '',
             outlineUrl = '', ctaUrl = '', polishUrl = '', maxDraftChars = 12000,
         } = serverData;
@@ -229,7 +232,7 @@ document.addEventListener('alpine:init', () => {
         return {
             videos: [{ title: '', transcript: '' }],
             topic: '', audience: '', goal: '', constraints: '', styleSample: '',
-            categories, familyValues, familyValuesRef,
+            categories, familyValues, familyValuesRef, familyConductStandards, familyConductStandardsRef,
             categoryFoundationsUrl, existingArticlesUrlTemplate, categoryFoundationDetailUrlTemplate, maxVideos, layer2Url,
             maxDraftChars,
             // 2 nhóm tool tách theo GIAI ĐOẠN làm việc, không phải theo kiểu output: `pickKinds` là
@@ -360,6 +363,12 @@ document.addEventListener('alpine:init', () => {
                         .map(key => this.familyValues.find(fv => fv.key === key)?.label)
                         .filter(Boolean);
                     if (labels.length) parts.push(`Giá trị gia đình: ${labels.join(', ')}`);
+                }
+                if (foundation.family_conduct_focus?.length) {
+                    const labels = foundation.family_conduct_focus
+                        .map(key => this.familyConductStandards.find(fc => fc.key === key)?.label)
+                        .filter(Boolean);
+                    if (labels.length) parts.push(`Tiêu chí ứng xử: ${labels.join(', ')}`);
                 }
 
                 return parts.join(' — ');
@@ -517,6 +526,42 @@ document.addEventListener('alpine:init', () => {
             },
 
             /**
+             * spec/CoreIdeaExtractor.md §12.11 — Bộ tiêu chí ứng xử trong gia đình, bản dùng cho
+             * VideoIdeaExtractor. Code trùng lặp có chủ đích với CoreIdeaExtractor (cùng lý do đã
+             * nêu ở buildFamilyValuesGroundingLines() phía trên: chỉnh sửa độc lập theo nhu cầu
+             * riêng của video/bài viết).
+             */
+            FAMILY_CONDUCT_EDITORIAL_NOTES: {
+                vo_chong: 'nội dung giúp vợ chồng đối thoại/thoả thuận CỤ THỂ (phân công việc nhà, chi tiêu, nuôi dạy con, thời gian riêng), không hô khẩu hiệu "chung thuỷ, nghĩa tình" chung chung, và không ngầm định một bên (thường là vợ) phải nhẫn nhịn để giữ hoà khí bằng mọi giá',
+                cha_me_ong_ba_voi_con_chau: 'nội dung gợi ý cách làm gương và đồng hành CỤ THỂ theo từng độ tuổi/giai đoạn của con cháu, không rao giảng đạo lý một chiều từ trên xuống hay áp đặt kỳ vọng con cháu phải "nghe lời" thay vì được lắng nghe',
+                con_voi_cha_me_ong_ba: 'nội dung gợi ý cách thể hiện hiếu thảo bằng hành động phù hợp HOÀN CẢNH THẬT của người xem (thời gian, tài chính, khoảng cách địa lý với cha mẹ/ông bà), không tạo cảm giác tội lỗi hay áp lực tài chính cho người chưa đủ điều kiện',
+                anh_chi_em: 'nội dung giúp xử lý mâu thuẫn thật giữa anh chị em (thừa kế, chăm sóc cha mẹ già, chênh lệch điều kiện kinh tế) theo hướng công bằng, không mặc định người lớn tuổi hơn trong nhà luôn phải nhường nhịn hoặc gánh vác nhiều hơn',
+            },
+
+            buildFamilyConductGroundingLines() {
+                const items = (this.familyConductStandards || []).map(fc => {
+                    const note = this.FAMILY_CONDUCT_EDITORIAL_NOTES[fc.key];
+                    const principles = (fc.principles || []).join(' ');
+
+                    return `- ${fc.relationship} (${fc.label}): ${principles}${note ? ` → Ở tầng biên tập: ${note}.` : ''}`;
+                });
+
+                return [
+                    `Khung ứng xử biên tập nền tảng — Bộ tiêu chí ứng xử trong gia đình (${this.familyConductStandardsRef}). Phần sau dấu "→" là cách áp dụng vào nội dung, KHÔNG phải câu chữ của văn bản gốc:`,
+                    ...items,
+                    'Cách dùng: khi ý tưởng liên quan tới 1 mối quan hệ cụ thể trong gia đình (vợ chồng, cha mẹ-con, ông bà-cháu, anh chị em), ưu tiên bám đúng chuẩn ứng xử của MỐI QUAN HỆ đó thay vì lời khuyên chung chung "mọi thành viên". Không phải mọi ý tưởng đều cần gắn với 1 cặp quan hệ — bỏ qua khối này nếu chủ đề không liên quan tới ứng xử giữa các thành viên.',
+                    'Khung này là ĐỊNH HƯỚNG NỘI BỘ cho người biên tập, KHÔNG phải chất liệu để viết vào bài: không đề xuất ý tưởng phân tích/trích dẫn lại nguyên văn tiêu chí hay khẩu hiệu tuyên truyền (VD "Vợ chồng chung thuỷ, nghĩa tình: ..."), tuyệt đối không bịa số hiệu/ngày ban hành văn bản này (chuẩn ứng xử theo khung chung, không phải 1 văn bản có số hiệu cố định) — chuẩn mực thể hiện qua nội dung có ích, không qua khẩu hiệu.',
+                    'Ranh giới cứng (LOẠI ngay ý tưởng vi phạm, dù đạt mọi tiêu chí khác): cổ suý bất kỳ hình thức bạo lực/áp đặt nào giữa các thành viên (kể cả "đòn roi dạy con", "gia trưởng để giữ nề nếp"), gán hiếu thảo/chung thuỷ/gương mẫu với việc HY SINH VÔ ĐIỀU KIỆN quyền lợi chính đáng của bản thân, hoặc dùng áp lực đạo đức ("con cái phải...", "vợ chồng phải...") để phán xét gia đình không theo đúng khuôn mẫu.',
+                ];
+            },
+
+            buildFamilyConductBoundaryLine(subject = 'nội dung') {
+                const labels = (this.familyConductStandards || []).map(fc => fc.label).join(', ');
+
+                return `Ranh giới ứng xử gia đình bắt buộc — ${subject} sẽ lên sóng công khai, tôn trọng Bộ tiêu chí ứng xử trong gia đình (${labels}): không cổ suý bạo lực/áp đặt giữa các thành viên, không gán hiếu thảo/chung thuỷ/gương mẫu với hy sinh vô điều kiện quyền lợi chính đáng của bản thân, không dùng áp lực đạo đức để phán xét gia đình khác khuôn mẫu, không copy nguyên văn khẩu hiệu tuyên truyền vào tiêu đề/nội dung.`;
+            },
+
+            /**
              * Cấu trúc sandwich TOP/MIDDLE/BOTTOM như CoreIdeaExtractor::buildLayer2PromptText() —
              * viết riêng (không import chung 1 hàm JS) để chỉnh sửa độc lập với prompt bài viết.
              * Khác biệt chính: persona kênh video, thêm cột "Định dạng gợi ý" (tham khảo
@@ -551,6 +596,10 @@ document.addEventListener('alpine:init', () => {
                     .map(key => this.familyValues.find(fv => fv.key === key)?.label)
                     .filter(Boolean);
 
+                const familyConductFocusLabels = (foundation?.family_conduct_focus ?? [])
+                    .map(key => this.familyConductStandards.find(fc => fc.key === key)?.label)
+                    .filter(Boolean);
+
                 // Nối pain_points/objections/decision_criteria với gợi ý DẠNG video theo mức độ sẵn
                 // sàng của khán giả (mới nhận ra vấn đề → còn nghi ngờ → sắp quyết định) — cùng
                 // nguyên tắc formatHints v1.19 bên CoreIdeaExtractor, ánh xạ sang dạng VIDEO thay vì
@@ -575,6 +624,10 @@ document.addEventListener('alpine:init', () => {
                 top.push(...this.buildFamilyValuesGroundingLines());
                 if (familyFocusLabels.length) {
                     top.push(`Trong các giá trị trên, chuyên mục này ưu tiên phục vụ: ${familyFocusLabels.join(', ')} — khi chọn góc khai thác và lợi ích cuối cùng của ý tưởng, hướng về (các) giá trị này trước. Các giá trị còn lại vẫn là ràng buộc nền phải tôn trọng, không phải phạm vi bị loại trừ.`);
+                }
+                top.push(...this.buildFamilyConductGroundingLines());
+                if (familyConductFocusLabels.length) {
+                    top.push(`Trong các cặp quan hệ trên, chuyên mục này ưu tiên: ${familyConductFocusLabels.join(', ')} — khi phù hợp với chủ đề, ưu tiên khai thác góc nhìn của (các) mối quan hệ này trước. Các cặp quan hệ còn lại vẫn áp dụng khi ý tưởng liên quan tới chúng.`);
                 }
                 // Đối tượng khán giả trước giờ CHỈ xuất hiện thoáng qua trong câu persona (1 mệnh đề
                 // phụ) — không có chỉ dẫn nào về cách DÙNG nó, nên model dễ hiểu thành nhãn trang trí.
@@ -681,6 +734,11 @@ document.addEventListener('alpine:init', () => {
                         `Cũng trong số đó, nếu dữ liệu nguồn có chất liệu phù hợp một cách TỰ NHIÊN, dành 1-2 ý mà lợi ích cuối `
                             + `cùng của video nhắm thẳng vào (các) giá trị chuyên mục ưu tiên (${familyFocusLabels.join(', ')}) — `
                             + `KHÔNG gượng ép gắn giá trị vào ý tưởng khi nguồn không có chất liệu thật cho việc đó.`,
+                    ] : []),
+                    ...(familyConductFocusLabels.length ? [
+                        `Tương tự, nếu nguồn có chất liệu phù hợp TỰ NHIÊN, dành 1-2 ý khai thác đúng góc ứng xử của (các) cặp `
+                            + `quan hệ chuyên mục ưu tiên (${familyConductFocusLabels.join(', ')}) — KHÔNG gượng ép nếu nguồn `
+                            + `không thật sự liên quan tới mối quan hệ gia đình nào.`,
                     ] : []),
                     // Cùng phạm vi rủi ro với bản CoreIdeaExtractor: 1 kênh gia đình còn làm nội
                     // dung cho thai phụ, người cao tuổi và sức khoẻ tinh thần, không riêng trẻ em.
@@ -900,6 +958,7 @@ document.addEventListener('alpine:init', () => {
                 // Khung giá trị bản NÉN cho cả 6 tool: đây mới là nơi sinh ra câu chữ lên sóng, nên
                 // ranh giới phải có mặt ngay tại chỗ, không thể chỉ tồn tại ở prompt sinh ý tưởng.
                 lines.push(this.buildFamilyValuesBoundaryLine('mọi phương án đề xuất bên dưới'));
+                lines.push(this.buildFamilyConductBoundaryLine('mọi phương án đề xuất bên dưới'));
 
                 // Layer 1 của module không có field `language` (RawTranscriptData) nên không bật/tắt
                 // theo điều kiện được như bên CoreIdeaExtractor — nêu vô điều kiện, vô hại khi

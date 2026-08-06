@@ -2,6 +2,7 @@
 
 namespace Modules\ContentFoundation\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -33,6 +34,7 @@ class CategoryContentFoundation extends Model
         'objections',
         'decision_criteria',
         'family_values_focus',
+        'family_conduct_focus',
         'rejected_ideas',
         'audience',
         'constraints',
@@ -43,6 +45,7 @@ class CategoryContentFoundation extends Model
 
     protected $casts = [
         'family_values_focus' => 'array',
+        'family_conduct_focus' => 'array',
     ];
 
     public function getActivitylogOptions(): LogOptions
@@ -69,20 +72,21 @@ class CategoryContentFoundation extends Model
     public function toDetailArray(int $forCategoryId): array
     {
         return [
-            'core_focus'          => $this->core_focus,
-            'writer_insights'     => $this->writer_insights,
-            'unique_angle'        => $this->unique_angle,
-            'content_goals'       => $this->content_goals,
-            'pain_points'         => $this->pain_points,
-            'objections'          => $this->objections,
-            'decision_criteria'   => $this->decision_criteria,
+            'core_focus' => $this->core_focus,
+            'writer_insights' => $this->writer_insights,
+            'unique_angle' => $this->unique_angle,
+            'content_goals' => $this->content_goals,
+            'pain_points' => $this->pain_points,
+            'objections' => $this->objections,
+            'decision_criteria' => $this->decision_criteria,
             'family_values_focus' => $this->family_values_focus ?? [],
-            'rejected_ideas'      => $this->rejected_ideas,
-            'audience'            => $this->audience,
-            'constraints'         => $this->constraints,
-            'style_sample'        => $this->style_sample,
-            'updated_at'          => $this->updated_at?->toIso8601String(),
-            'shared_with'         => $this->categories
+            'family_conduct_focus' => $this->family_conduct_focus ?? [],
+            'rejected_ideas' => $this->rejected_ideas,
+            'audience' => $this->audience,
+            'constraints' => $this->constraints,
+            'style_sample' => $this->style_sample,
+            'updated_at' => $this->updated_at?->toIso8601String(),
+            'shared_with' => $this->categories
                 ->reject(fn (PostCategory $linked) => $linked->id === $forCategoryId)
                 ->map(fn (PostCategory $linked) => ['uuid' => $linked->uuid, 'name' => $linked->name])
                 ->values()
@@ -101,19 +105,19 @@ class CategoryContentFoundation extends Model
     public function toHintArray(int $maxHintChars = 160): array
     {
         return [
-            'core_focus'     => $this->core_focus ? Str::limit(trim($this->core_focus), $maxHintChars) : null,
-            'unique_angle'   => $this->unique_angle ? Str::limit(trim($this->unique_angle), $maxHintChars) : null,
+            'core_focus' => $this->core_focus ? Str::limit(trim($this->core_focus), $maxHintChars) : null,
+            'unique_angle' => $this->unique_angle ? Str::limit(trim($this->unique_angle), $maxHintChars) : null,
             'rejected_ideas' => $this->rejected_ideas ? Str::limit(trim($this->rejected_ideas), $maxHintChars) : null,
         ];
     }
 
     public function createdBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'created_by');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function updatedBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'updated_by');
+        return $this->belongsTo(User::class, 'updated_by');
     }
 }

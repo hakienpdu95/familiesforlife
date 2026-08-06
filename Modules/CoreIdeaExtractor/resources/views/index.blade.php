@@ -12,6 +12,8 @@
     'categories' => $categoryFoundations,
     'familyValues' => config('content_foundation.family_values.items', []),
     'familyValuesRef' => config('content_foundation.family_values.decision_ref'),
+    'familyConductStandards' => config('content_foundation.family_conduct_standards.items', []),
+    'familyConductStandardsRef' => config('content_foundation.family_conduct_standards.decision_ref'),
     'layer2Url' => route('backend.api.coreideaextractor.layer2'),
     'summarizeUrl' => route('backend.api.coreideaextractor.summarize'),
     'rewriteUrl' => route('backend.api.coreideaextractor.rewrite'),
@@ -343,7 +345,12 @@
 <script>
 document.addEventListener('alpine:init', () => {
     Alpine.data('coreIdeaExtractorPage', (serverData = {}) => {
-        const { apiUrl = '', apiBatchUrl = '', maxUrls = 7, categoryFoundationsUrl = '', existingArticlesUrlTemplate = '', categoryFoundationDetailUrlTemplate = '', categories = [], familyValues = [], familyValuesRef = '', layer2Url = '', summarizeUrl = '', rewriteUrl = '' } = serverData;
+        const {
+            apiUrl = '', apiBatchUrl = '', maxUrls = 7, categoryFoundationsUrl = '', existingArticlesUrlTemplate = '',
+            categoryFoundationDetailUrlTemplate = '', categories = [], familyValues = [], familyValuesRef = '',
+            familyConductStandards = [], familyConductStandardsRef = '',
+            layer2Url = '', summarizeUrl = '', rewriteUrl = '',
+        } = serverData;
 
         return {
             mode: 'url',
@@ -370,6 +377,8 @@ document.addEventListener('alpine:init', () => {
             categories,
             familyValues,
             familyValuesRef,
+            familyConductStandards,
+            familyConductStandardsRef,
             selectedCategoryUuid: '',
             existingArticleTitles: [],
             loadingExistingArticles: false,
@@ -499,6 +508,12 @@ document.addEventListener('alpine:init', () => {
                         .map(key => this.familyValues.find(fv => fv.key === key)?.label)
                         .filter(Boolean);
                     if (labels.length) parts.push(`Giá trị gia đình: ${labels.join(', ')}`);
+                }
+                if (foundation.family_conduct_focus?.length) {
+                    const labels = foundation.family_conduct_focus
+                        .map(key => this.familyConductStandards.find(fc => fc.key === key)?.label)
+                        .filter(Boolean);
+                    if (labels.length) parts.push(`Tiêu chí ứng xử: ${labels.join(', ')}`);
                 }
 
                 return parts.join(' — ');
@@ -786,6 +801,57 @@ document.addEventListener('alpine:init', () => {
             },
 
             /**
+             * spec/CoreIdeaExtractor.md §12.11 — Bộ tiêu chí ứng xử trong gia đình (spec/giadinh.md),
+             * 4 cặp quan hệ (vợ chồng / cha mẹ-ông bà với con cháu / con với cha mẹ-ông bà / anh chị
+             * em). KHÁC bản chất với `family_values` (giá trị xã hội tổng thể): đây là quy tắc hành
+             * vi CỤ THỂ theo TỪNG vai trò trong gia đình — nên giữ khối RIÊNG (§12.11 đã cân nhắc và
+             * không gộp vào family_values). Cùng nguyên tắc dịch "chuẩn mực" → "gợi ý áp dụng vào bài
+             * viết cụ thể" như FAMILY_VALUE_EDITORIAL_NOTES ở trên, vì lý do y hệt: 1 chuẩn mực viết
+             * ở tầng quy phạm ("hiếu thảo, lễ phép") không tự bắc cầu sang góc bài viết cụ thể, và dễ
+             * kéo model về hướng rao giảng đạo lý/khẩu hiệu thay vì nội dung có ích.
+             */
+            FAMILY_CONDUCT_EDITORIAL_NOTES: {
+                vo_chong: 'nội dung giúp vợ chồng đối thoại/thoả thuận CỤ THỂ (phân công việc nhà, chi tiêu, nuôi dạy con, thời gian riêng), không hô khẩu hiệu "chung thuỷ, nghĩa tình" chung chung, và không ngầm định một bên (thường là vợ) phải nhẫn nhịn để giữ hoà khí bằng mọi giá',
+                cha_me_ong_ba_voi_con_chau: 'nội dung gợi ý cách làm gương và đồng hành CỤ THỂ theo từng độ tuổi/giai đoạn của con cháu, không rao giảng đạo lý một chiều từ trên xuống hay áp đặt kỳ vọng con cháu phải "nghe lời" thay vì được lắng nghe',
+                con_voi_cha_me_ong_ba: 'nội dung gợi ý cách thể hiện hiếu thảo bằng hành động phù hợp HOÀN CẢNH THẬT của người đọc (thời gian, tài chính, khoảng cách địa lý với cha mẹ/ông bà), không tạo cảm giác tội lỗi hay áp lực tài chính cho người chưa đủ điều kiện',
+                anh_chi_em: 'nội dung giúp xử lý mâu thuẫn thật giữa anh chị em (thừa kế, chăm sóc cha mẹ già, chênh lệch điều kiện kinh tế) theo hướng công bằng, không mặc định người lớn tuổi hơn trong nhà luôn phải nhường nhịn hoặc gánh vác nhiều hơn',
+            },
+
+            /**
+             * Bản ĐẦY ĐỦ — cùng cấu trúc và vị trí trong prompt với buildFamilyValuesGroundingLines()
+             * (push NGAY SAU khối đó ở TOP, LUÔN xuất hiện bất kể có chọn chuyên mục hay không), chỉ
+             * khác nội dung: liệt kê theo CẶP QUAN HỆ thay vì GIÁ TRỊ. Dùng chung phép thử "phục vụ
+             * chuẩn mực" và thứ tự "mục tiêu tích cực trước, ranh giới cấm sau" (Pink Elephant
+             * Problem) đã chốt ở §12.10 cho khối family_values.
+             */
+            buildFamilyConductGroundingLines() {
+                const items = (this.familyConductStandards || []).map(fc => {
+                    const note = this.FAMILY_CONDUCT_EDITORIAL_NOTES[fc.key];
+                    const principles = (fc.principles || []).join(' ');
+
+                    return `- ${fc.relationship} (${fc.label}): ${principles}${note ? ` → Ở tầng biên tập: ${note}.` : ''}`;
+                });
+
+                return [
+                    `Khung ứng xử biên tập nền tảng — Bộ tiêu chí ứng xử trong gia đình (${this.familyConductStandardsRef}). Phần sau dấu "→" là cách áp dụng vào nội dung, KHÔNG phải câu chữ của văn bản gốc:`,
+                    ...items,
+                    'Cách dùng: khi ý tưởng liên quan tới 1 mối quan hệ cụ thể trong gia đình (vợ chồng, cha mẹ-con, ông bà-cháu, anh chị em), ưu tiên bám đúng chuẩn ứng xử của MỐI QUAN HỆ đó thay vì lời khuyên chung chung "mọi thành viên". Không phải mọi ý tưởng đều cần gắn với 1 cặp quan hệ — bỏ qua khối này nếu chủ đề không liên quan tới ứng xử giữa các thành viên.',
+                    'Khung này là ĐỊNH HƯỚNG NỘI BỘ cho người biên tập, KHÔNG phải chất liệu để viết vào bài: không đề xuất ý tưởng phân tích/trích dẫn lại nguyên văn tiêu chí hay khẩu hiệu tuyên truyền (VD "Vợ chồng chung thuỷ, nghĩa tình: ..."), tuyệt đối không bịa số hiệu/ngày ban hành văn bản này (chuẩn ứng xử theo khung chung, không phải 1 văn bản có số hiệu cố định) — chuẩn mực thể hiện qua nội dung có ích, không qua khẩu hiệu.',
+                    'Ranh giới cứng (LOẠI ngay ý tưởng vi phạm, dù đạt mọi tiêu chí khác): cổ suý bất kỳ hình thức bạo lực/áp đặt nào giữa các thành viên (kể cả "đòn roi dạy con", "gia trưởng để giữ nề nếp"), gán hiếu thảo/chung thuỷ/gương mẫu với việc HY SINH VÔ ĐIỀU KIỆN quyền lợi chính đáng của bản thân, hoặc dùng áp lực đạo đức ("con cái phải...", "vợ chồng phải...") để phán xét gia đình không theo đúng khuôn mẫu.',
+                ];
+            },
+
+            /**
+             * Bản NÉN — cùng vai trò và cùng lý do tồn tại với buildFamilyValuesBoundaryLine() (tool
+             * viết-lại/copy đăng thật không cần phép thử đầy đủ, chỉ cần ranh giới không được vượt).
+             */
+            buildFamilyConductBoundaryLine(subject = 'nội dung') {
+                const labels = (this.familyConductStandards || []).map(fc => fc.label).join(', ');
+
+                return `Ranh giới ứng xử gia đình bắt buộc — ${subject} sẽ đăng công khai, tôn trọng Bộ tiêu chí ứng xử trong gia đình (${labels}): không cổ suý bạo lực/áp đặt giữa các thành viên, không gán hiếu thảo/chung thuỷ/gương mẫu với hy sinh vô điều kiện quyền lợi chính đáng của bản thân, không dùng áp lực đạo đức để phán xét gia đình khác khuôn mẫu, không copy nguyên văn khẩu hiệu tuyên truyền vào tiêu đề/nội dung.`;
+            },
+
+            /**
              * `forExternalChat` — CÙNG 1 prompt phục vụ 2 đường đi khác hẳn nhau về ĐỊNH DẠNG TRẢ
              * LỜI, trước 2026-08-04 dùng chung 1 bản mô tả theo field JSON cho cả hai:
              * - false (nút "Chạy Layer 2 bằng AI"): server ép structured output qua
@@ -851,6 +917,12 @@ document.addEventListener('alpine:init', () => {
                     .map(key => this.familyValues.find(fv => fv.key === key)?.label)
                     .filter(Boolean);
 
+                // Cùng cơ chế cho family_conduct_focus (§12.11) — chuyên mục ưu tiên cặp quan hệ
+                // nào trong Bộ tiêu chí ứng xử trong gia đình.
+                const familyConductFocusLabels = (foundation?.family_conduct_focus ?? [])
+                    .map(key => this.familyConductStandards.find(fc => fc.key === key)?.label)
+                    .filter(Boolean);
+
                 // 2026-08 (tham khảo chapters-agency.com/blog/content-marketing-blog/content-formats-2026)
                 // — định dạng nội dung nên khớp mức độ SẴN SÀNG/nhận thức của độc giả, không chỉ đa
                 // dạng hoá ngẫu nhiên. pain_points/objections/decision_criteria (§12.6/objections-
@@ -879,6 +951,10 @@ document.addEventListener('alpine:init', () => {
                 top.push(...this.buildFamilyValuesGroundingLines());
                 if (familyFocusLabels.length) {
                     top.push(`Trong các giá trị trên, chuyên mục này ưu tiên phục vụ: ${familyFocusLabels.join(', ')} — khi chọn góc khai thác và lợi ích cuối cùng của ý tưởng, hướng về (các) giá trị này trước. Các giá trị còn lại vẫn là ràng buộc nền phải tôn trọng, không phải phạm vi bị loại trừ.`);
+                }
+                top.push(...this.buildFamilyConductGroundingLines());
+                if (familyConductFocusLabels.length) {
+                    top.push(`Trong các cặp quan hệ trên, chuyên mục này ưu tiên: ${familyConductFocusLabels.join(', ')} — khi phù hợp với chủ đề, ưu tiên khai thác góc nhìn của (các) mối quan hệ này trước. Các cặp quan hệ còn lại vẫn áp dụng khi ý tưởng liên quan tới chúng.`);
                 }
                 // Đối tượng độc giả trước giờ CHỈ xuất hiện thoáng qua trong câu persona (1 mệnh đề
                 // phụ `personaAudience`) và ở tiêu chí 4 của BƯỚC 2 — không có chỉ dẫn nào về cách
@@ -1050,6 +1126,11 @@ document.addEventListener('alpine:init', () => {
                         `Cũng trong số đó, nếu dữ liệu nguồn có chất liệu phù hợp một cách TỰ NHIÊN, dành 1-2 ý mà lợi ích cuối `
                             + `cùng của bài nhắm thẳng vào (các) giá trị chuyên mục ưu tiên (${familyFocusLabels.join(', ')}) — `
                             + `KHÔNG gượng ép gắn giá trị vào ý tưởng khi nguồn không có chất liệu thật cho việc đó.`,
+                    ] : []),
+                    ...(familyConductFocusLabels.length ? [
+                        `Tương tự, nếu nguồn có chất liệu phù hợp TỰ NHIÊN, dành 1-2 ý khai thác đúng góc ứng xử của (các) cặp `
+                            + `quan hệ chuyên mục ưu tiên (${familyConductFocusLabels.join(', ')}) — KHÔNG gượng ép nếu nguồn `
+                            + `không thật sự liên quan tới mối quan hệ gia đình nào.`,
                     ] : []),
                     ...(hasProductLikeSource ? [
                         'Nguồn (hoặc một phần nguồn) là trang sản phẩm/dịch vụ — ý tưởng phải đứng về phía ĐỘC GIẢ: hướng dẫn '
@@ -1530,6 +1611,7 @@ document.addEventListener('alpine:init', () => {
                     lines.push(`Ràng buộc áp dụng cho MỌI phiên bản: ${constraints}`);
                 }
                 lines.push(this.buildFamilyValuesBoundaryLine('mọi phiên bản viết lại dưới đây'));
+                lines.push(this.buildFamilyConductBoundaryLine('mọi phiên bản viết lại dưới đây'));
                 // Rút gọn mạnh (bản Twitter/X chỉ 40-50 từ) là lúc sắc thái "có thể/nên hỏi bác sĩ"
                 // dễ bốc hơi nhất, biến 1 khuyến nghị có điều kiện thành lời khuyên chắc nịch đăng
                 // công khai — rủi ro cao hơn hẳn so với bài gốc. Chỉ dẫn này đặt ở phần ngữ cảnh

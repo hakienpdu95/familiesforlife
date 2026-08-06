@@ -15,8 +15,10 @@ use Spatie\LaravelData\Data;
  * TIN khiến độc giả chưa hành động; decision_criteria là TIÊU CHÍ họ dùng để so sánh/chọn giữa các
  * lựa chọn; family_values_focus là TẬP KEY (con của danh sách CỐ ĐỊNH
  * config('content_foundation.family_values.items')) cho biết chuyên mục ưu tiên phục vụ giá trị
- * nào trong Hệ giá trị gia đình Việt Nam. Validate danh sách key hợp lệ nằm ở
- * CategoryFoundationController::upsert() ('in:...' đọc động từ config).
+ * nào trong Hệ giá trị gia đình Việt Nam; family_conduct_focus (spec §12.11) cùng cơ chế cho 4 cặp
+ * quan hệ của Bộ tiêu chí ứng xử trong gia đình (config('content_foundation.family_conduct_
+ * standards.items')). Validate danh sách key hợp lệ nằm ở CategoryFoundationController::upsert()
+ * ('in:...' đọc động từ config).
  */
 class CategoryFoundationData extends Data
 {
@@ -37,6 +39,8 @@ class CategoryFoundationData extends Data
         public readonly ?string $decision_criteria = null,
         #[Nullable]
         public readonly ?array $family_values_focus = null,
+        #[Nullable]
+        public readonly ?array $family_conduct_focus = null,
         #[Nullable, Max(2000)]
         public readonly ?string $rejected_ideas = null,
         #[Nullable, Max(500)]

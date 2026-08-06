@@ -8,6 +8,8 @@
     'staleAfterDays' => $staleAfterDays,
     'familyValues' => config('content_foundation.family_values.items', []),
     'familyValuesRef' => config('content_foundation.family_values.decision_ref'),
+    'familyConductStandards' => config('content_foundation.family_conduct_standards.items', []),
+    'familyConductStandardsRef' => config('content_foundation.family_conduct_standards.decision_ref'),
 ]) }})">
 
     <div class="mb-3 flex items-center justify-between flex-wrap gap-2">
@@ -128,6 +130,24 @@
                             </template>
                         </div>
                     </div>
+                    <div class="form-control border border-base-200 rounded-md p-2.5 bg-base-200/30">
+                        <label class="label py-0.5">
+                            <span class="label-text text-xs font-medium">
+                                Bộ tiêu chí ứng xử trong gia đình chuyên mục này ưu tiên
+                                <span class="text-base-content/40 font-normal">(chuẩn nền tảng cố định — <span x-text="familyConductStandardsRef"></span>, không phải văn bản tự viết)</span>
+                            </span>
+                        </label>
+                        <div class="flex flex-wrap gap-x-4 gap-y-1.5 mt-0.5">
+                            <template x-for="fc in familyConductStandards" :key="fc.key">
+                                <label class="label cursor-pointer justify-start gap-1.5 py-0" :title="`${fc.relationship}: ${fc.label}`">
+                                    <input type="checkbox" class="checkbox checkbox-xs" :value="fc.key"
+                                           :checked="cat._form.family_conduct_focus.includes(fc.key)"
+                                           @change="toggleFamilyConduct(cat, fc.key)">
+                                    <span class="label-text text-xs"><span x-text="fc.relationship"></span> — <span x-text="fc.label"></span></span>
+                                </label>
+                            </template>
+                        </div>
+                    </div>
                     <div class="form-control">
                         <label class="label py-0.5">
                             <span class="label-text text-xs font-medium">Pain points / câu hỏi thường gặp của độc giả (dựa trên nghiên cứu thực tế — khảo sát, feedback, câu hỏi lặp lại)</span>
@@ -233,9 +253,13 @@
 <script>
 document.addEventListener('alpine:init', () => {
     Alpine.data('categoryFoundationsPage', (serverData = {}) => {
-        const { listUrl = '', upsertUrlTemplate = '', staleAfterDays = 180, familyValues = [], familyValuesRef = '' } = serverData;
+        const {
+            listUrl = '', upsertUrlTemplate = '', staleAfterDays = 180,
+            familyValues = [], familyValuesRef = '',
+            familyConductStandards = [], familyConductStandardsRef = '',
+        } = serverData;
 
-        const emptyForm = () => ({ core_focus: '', writer_insights: '', unique_angle: '', content_goals: '', pain_points: '', objections: '', decision_criteria: '', family_values_focus: [], rejected_ideas: '', audience: '', constraints: '', style_sample: '' });
+        const emptyForm = () => ({ core_focus: '', writer_insights: '', unique_angle: '', content_goals: '', pain_points: '', objections: '', decision_criteria: '', family_values_focus: [], family_conduct_focus: [], rejected_ideas: '', audience: '', constraints: '', style_sample: '' });
 
         return {
             categories: [],
@@ -244,6 +268,8 @@ document.addEventListener('alpine:init', () => {
             staleAfterDays,
             familyValues,
             familyValuesRef,
+            familyConductStandards,
+            familyConductStandardsRef,
             search: '',
             selectedUuid: null,
             shareQuery: '',
@@ -391,6 +417,13 @@ document.addEventListener('alpine:init', () => {
             toggleFamilyValue(cat, key) {
                 const current = cat._form.family_values_focus || [];
                 cat._form.family_values_focus = current.includes(key)
+                    ? current.filter(k => k !== key)
+                    : [...current, key];
+            },
+
+            toggleFamilyConduct(cat, key) {
+                const current = cat._form.family_conduct_focus || [];
+                cat._form.family_conduct_focus = current.includes(key)
                     ? current.filter(k => k !== key)
                     : [...current, key];
             },

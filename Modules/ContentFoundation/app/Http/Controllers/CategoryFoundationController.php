@@ -53,7 +53,7 @@ class CategoryFoundationController extends Controller
 
         return response()->json([
             'category_id' => $category->id,
-            'foundation'  => $foundation?->toDetailArray($category->id),
+            'foundation' => $foundation?->toDetailArray($category->id),
         ]);
     }
 
@@ -85,22 +85,30 @@ class CategoryFoundationController extends Controller
             ->pluck('key')
             ->all();
 
+        // spec/CoreIdeaExtractor.md §12.11 — cùng nguyên tắc, cho 4 cặp quan hệ của Bộ tiêu chí
+        // ứng xử trong gia đình.
+        $validFamilyConductKeys = collect(config('content_foundation.family_conduct_standards.items', []))
+            ->pluck('key')
+            ->all();
+
         $validated = $request->validate([
-            'core_focus'            => ['nullable', 'string', 'max:2000'],
-            'writer_insights'       => ['nullable', 'string', 'max:1500'],
-            'unique_angle'          => ['nullable', 'string', 'max:2000'],
-            'content_goals'         => ['nullable', 'string', 'max:2000'],
-            'pain_points'           => ['nullable', 'string', 'max:2000'],
-            'objections'            => ['nullable', 'string', 'max:2000'],
-            'decision_criteria'     => ['nullable', 'string', 'max:2000'],
-            'family_values_focus'   => ['nullable', 'array'],
+            'core_focus' => ['nullable', 'string', 'max:2000'],
+            'writer_insights' => ['nullable', 'string', 'max:1500'],
+            'unique_angle' => ['nullable', 'string', 'max:2000'],
+            'content_goals' => ['nullable', 'string', 'max:2000'],
+            'pain_points' => ['nullable', 'string', 'max:2000'],
+            'objections' => ['nullable', 'string', 'max:2000'],
+            'decision_criteria' => ['nullable', 'string', 'max:2000'],
+            'family_values_focus' => ['nullable', 'array'],
             'family_values_focus.*' => ['string', 'in:'.implode(',', $validFamilyValueKeys)],
-            'rejected_ideas'        => ['nullable', 'string', 'max:2000'],
-            'audience'              => ['nullable', 'string', 'max:500'],
-            'constraints'           => ['nullable', 'string', 'max:500'],
-            'style_sample'          => ['nullable', 'string', 'max:3000'],
-            'category_uuids'        => ['sometimes', 'array'],
-            'category_uuids.*'      => ['string', 'uuid', 'exists:post_categories,uuid'],
+            'family_conduct_focus' => ['nullable', 'array'],
+            'family_conduct_focus.*' => ['string', 'in:'.implode(',', $validFamilyConductKeys)],
+            'rejected_ideas' => ['nullable', 'string', 'max:2000'],
+            'audience' => ['nullable', 'string', 'max:500'],
+            'constraints' => ['nullable', 'string', 'max:500'],
+            'style_sample' => ['nullable', 'string', 'max:3000'],
+            'category_uuids' => ['sometimes', 'array'],
+            'category_uuids.*' => ['string', 'uuid', 'exists:post_categories,uuid'],
         ]);
 
         $data = CategoryFoundationData::from($validated);
@@ -129,7 +137,7 @@ class CategoryFoundationController extends Controller
 
         return response()->json([
             'category_id' => $category->id,
-            'foundation'  => $foundation->toDetailArray($category->id),
+            'foundation' => $foundation->toDetailArray($category->id),
         ]);
     }
 }

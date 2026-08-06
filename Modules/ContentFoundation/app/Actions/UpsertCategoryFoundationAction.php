@@ -26,22 +26,23 @@ class UpsertCategoryFoundationAction
         return DB::transaction(function () use ($category, $data, $otherCategoryIds, $userId) {
             $foundation = CategoryContentFoundation::query()
                 ->whereHas('categories', fn ($q) => $q->where('post_categories.id', $category->id))
-                ->first() ?? new CategoryContentFoundation();
+                ->first() ?? new CategoryContentFoundation;
 
             $foundation->fill([
-                'core_focus'      => $data->core_focus,
+                'core_focus' => $data->core_focus,
                 'writer_insights' => $data->writer_insights,
-                'unique_angle'   => $data->unique_angle,
-                'content_goals'  => $data->content_goals,
-                'pain_points'    => $data->pain_points,
-                'objections'     => $data->objections,
+                'unique_angle' => $data->unique_angle,
+                'content_goals' => $data->content_goals,
+                'pain_points' => $data->pain_points,
+                'objections' => $data->objections,
                 'decision_criteria' => $data->decision_criteria,
                 'family_values_focus' => $data->family_values_focus,
+                'family_conduct_focus' => $data->family_conduct_focus,
                 'rejected_ideas' => $data->rejected_ideas,
-                'audience'       => $data->audience,
-                'constraints'    => $data->constraints,
-                'style_sample'   => $data->style_sample,
-                'updated_by'     => $userId,
+                'audience' => $data->audience,
+                'constraints' => $data->constraints,
+                'style_sample' => $data->style_sample,
+                'updated_by' => $userId,
             ]);
 
             if (! $foundation->exists) {

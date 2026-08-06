@@ -27,6 +27,7 @@ return new class extends Migration
             $table->text('objections')->nullable();
             $table->text('decision_criteria')->nullable();
             $table->json('family_values_focus')->nullable();
+            $table->json('family_conduct_focus')->nullable();
             $table->text('rejected_ideas')->nullable();
             $table->string('audience', 500)->nullable();
             $table->string('constraints', 500)->nullable();
