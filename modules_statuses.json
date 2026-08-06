@@ -30,5 +30,6 @@
     "ContentFoundation": true,
     "VideoIdeaExtractor": true,
     "PensionCalculator": true,
-    "N8n": true
+    "N8n": true,
+    "ContentOutlines": true
 }

@@ -1,0 +1,12 @@
+{
+    "name": "ContentOutlines",
+    "alias": "content-outlines",
+    "description": "Soạn prompt research/dàn ý nội dung (SEO content outline) để dán sang AI ngoài — không gọi AI Provider trong app. Tái dùng Modules\\ContentFoundation cho ngữ cảnh biên tập theo chuyên mục. Xem spec/ContentOutlines_Technical_Specification.md.",
+    "keywords": ["content", "seo", "outline"],
+    "priority": 0,
+    "providers": [
+        "Modules\\ContentOutlines\\Providers\\ContentOutlinesServiceProvider",
+        "Modules\\ContentOutlines\\Providers\\RouteServiceProvider"
+    ],
+    "files": []
+}

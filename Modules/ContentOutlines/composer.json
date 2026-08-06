@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/contentoutlines",
+    "description": "",
+    "authors": [
+        {
+            "name": "KienDH",
+            "email": "bonhuyn@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\ContentOutlines\\": "app/",
+            "Modules\\ContentOutlines\\Database\\Factories\\": "database/factories/",
+            "Modules\\ContentOutlines\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\ContentOutlines\\Tests\\": "tests/"
+        }
+    }
+}

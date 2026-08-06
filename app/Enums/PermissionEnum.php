@@ -173,6 +173,13 @@ enum PermissionEnum: string
     // qua config/permissions.php (Lớp B).
     case VIDEO_IDEA_EXTRACTOR_USE = 'video_idea_extractor.use';
 
+    // ══ CONTENT OUTLINES (soạn prompt research/dàn ý nội dung SEO để dán sang AI ngoài — không
+    // gọi AI Provider trong app, khác CORE_IDEA_EXTRACTOR_USE/VIDEO_IDEA_EXTRACTOR_USE) ═══
+    // spec/ContentOutlines_Technical_Specification.md §6 — gán cho platform_content_editor/
+    // platform_content_head/platform_section_editor (ContentOutlinesPermissionSeeder), KHÔNG qua
+    // config/permissions.php (Lớp B) — cùng nguyên tắc CORE_IDEA_EXTRACTOR_USE.
+    case CONTENT_OUTLINES_USE = 'content_outlines.use';
+
     // ══ BREAKING NEWS (Tin nóng/tin chạy ghim đầu trang chủ — tài sản nền tảng) ═══
     // spec/Breaking_News_Ticker_Technical_Specification.md §6.3 — gán cho platform_ops +
     // platform_content_head (BreakingNewsPermissionSeeder), KHÔNG qua config/permissions.php

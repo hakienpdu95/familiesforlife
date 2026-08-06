@@ -168,6 +168,8 @@ const MODULE_ENTRIES = [
   'Modules/ContentCalendar/resources/assets/js/content-calendar.js',
   // N8n
   'Modules/N8n/resources/assets/js/n8n.js',
+  // ContentOutlines
+  'Modules/ContentOutlines/resources/assets/js/content-outlines.js',
 ];
 
 // ─────────────────────────────────────────────────────────────────────
