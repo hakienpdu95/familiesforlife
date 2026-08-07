@@ -19,6 +19,10 @@ Route::middleware(['auth', 'can:content_outlines.use'])
         Route::put('{outline}', [ContentOutlineController::class, 'update'])->name('update'); // = "Sinh lại"
         Route::delete('{outline}', [ContentOutlineController::class, 'destroy'])->name('destroy');
         Route::post('{outline}/link-article', [ContentOutlineController::class, 'linkArticle'])->name('link-article');
+        // §4.17 (v1.14) — "Bước 2": lưu outline đã duyệt + sinh prompt viết bài.
+        Route::post('{outline}/article-prompt', [ContentOutlineController::class, 'generateArticlePrompt'])->name('generate-article-prompt');
+        // §4.20 (v1.16) — "Bước 3": lưu bài viết đã dán + sinh prompt soát lỗi/sửa.
+        Route::post('{outline}/review-prompt', [ContentOutlineController::class, 'generateReviewPrompt'])->name('generate-review-prompt');
     });
 
 // JSON backend cho Tabulator (session-based auth, cùng guard trang quản trị).

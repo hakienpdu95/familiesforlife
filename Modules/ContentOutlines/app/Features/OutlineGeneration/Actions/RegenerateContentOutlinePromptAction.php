@@ -3,7 +3,7 @@
 namespace Modules\ContentOutlines\Features\OutlineGeneration\Actions;
 
 use Lorisleiva\Actions\Concerns\AsAction;
-use Modules\ContentOutlines\Features\OutlineGeneration\Actions\Concerns\ResolvesCategoryContext;
+use Modules\ContentOutlines\Features\Concerns\ResolvesCategoryContext;
 use Modules\ContentOutlines\Features\OutlineGeneration\Data\ContentOutlineInputData;
 use Modules\ContentOutlines\Models\ContentOutline;
 
@@ -20,6 +20,15 @@ use Modules\ContentOutlines\Models\ContentOutline;
  * - Xác nhận (confirm dialog) trước khi submit thuộc trách nhiệm UI (edit.blade.php +
  *   content-outlines.js `confirm()` trước khi submit form) — Action này KHÔNG tự chặn, vì Action
  *   không biết gì về việc người dùng đã xác nhận hay chưa ở tầng trình duyệt.
+ *
+ * §4.24 (v1.20/v1.21, rà soát rủi ro nội bộ) — TUYỆT ĐỐI KHÔNG đụng `approved_outline`/
+ * `article_draft_prompt` (§4.17, Feature `ArticleDrafting` — "Bước 2") lẫn `drafted_article`/
+ * `review_prompt` (§4.20, Feature `ArticleReview` — "Bước 3") — CỐ Ý không đưa 4 field này vào
+ * mảng update() dưới đây, CÙNG lý do/CÙNG cơ chế với `linked_post_article_id` ở trên (sinh lại
+ * outline là thao tác trên NỘI DUNG NGHIÊN CỨU, không tự động lan sang nội dung của 2 bước sau đã
+ * được sinh dựa trên outline CŨ). Hệ quả CHỦ Ý: outline mới có thể không còn khớp với Bước 2/3 đã
+ * có — module KHÔNG tự xoá/cảnh báo ngầm trong Action này (biên tập viên có thể có lý do chính
+ * đáng giữ lại); cảnh báo thuộc trách nhiệm UI, xem `edit.blade.php`/`show.blade.php` (§4.24).
  */
 class RegenerateContentOutlinePromptAction
 {
@@ -43,6 +52,7 @@ class RegenerateContentOutlinePromptAction
             'post_category_id' => $input->post_category_id,
             'target_audience' => $input->target_audience,
             'content_goal' => $input->content_goal,
+            'cta_url' => $input->cta_url,
             'tone_style' => $input->tone_style,
             'competitor_urls' => $input->competitor_urls,
             'desired_word_count' => $input->desired_word_count,

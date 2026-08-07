@@ -28,6 +28,8 @@ class UpdateContentOutlineRequest extends FormRequest
             'post_category_uuid' => ['nullable', 'string', 'uuid', 'exists:post_categories,uuid'],
             'target_audience' => ['nullable', 'string', 'max:500'],
             'content_goal' => ['nullable', 'string', 'max:2000'],
+            // §4.18 (v1.15) — cùng rule StoreContentOutlineRequest.
+            'cta_url' => ['nullable', 'url', 'max:500'],
             'tone_style' => ['nullable', 'string', 'max:2000'],
             'competitor_urls' => ['nullable', 'string', 'max:2000'],
             'desired_word_count' => ['nullable', 'integer', 'min:100', 'max:20000'],
@@ -54,6 +56,7 @@ class UpdateContentOutlineRequest extends FormRequest
             'post_category_id' => $categoryId,
             'target_audience' => $this->input('target_audience') ?: null,
             'content_goal' => $this->input('content_goal') ?: null,
+            'cta_url' => $this->input('cta_url') ?: null,
             'tone_style' => $this->input('tone_style') ?: null,
             'competitor_urls' => $this->input('competitor_urls') ?: null,
             'desired_word_count' => $this->input('desired_word_count') ?: null,

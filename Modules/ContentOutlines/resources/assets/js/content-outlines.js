@@ -21,14 +21,18 @@ function countWords(text) {
 }
 
 // ── show.blade.php — copy/download prompt, xem trước Markdown collapsible ──
+// §4.17 (v1.14) — tổng quát hoá theo `elId` (trước đó hardcode 'content-outline-prompt') vì
+// trang show giờ có 2 khối prompt độc lập (outline + "Bước 2" viết bài) dùng CÙNG UX — tránh
+// nhân đôi 3 hàm này cho khối thứ 2.
+//
 // Hiệu ứng 3 trạng thái nút: idle ("Copy prompt") → đang copy ("Đang copy prompt...", disabled,
 // spinner) → thành công ("Đã copy!", màu success, tự trở lại idle sau 1.5s). `btnEl` truyền qua
 // onclick="...(this)" ở blade — fallback lấy theo id nếu gọi tay (VD từ console) không có `this`.
-window.contentOutlineCopyPrompt = async function (btnEl) {
-    const el = document.getElementById('content-outline-prompt');
+window.contentOutlineCopyPrompt = async function (elId, btnEl, btnFallbackId) {
+    const el = document.getElementById(elId);
     if (!el) return;
 
-    const btn = btnEl || document.getElementById('content-outline-copy-btn');
+    const btn = btnEl || (btnFallbackId ? document.getElementById(btnFallbackId) : null);
     const idleHtml = btn ? btn.innerHTML : null;
 
     if (btn) {
@@ -66,8 +70,9 @@ window.contentOutlineCopyPrompt = async function (btnEl) {
 };
 
 // §4.5 (v1.1) — download .md client-side, không round-trip server (nội dung đã có sẵn trong DOM).
-window.contentOutlineDownloadPrompt = function (filename) {
-    const el = document.getElementById('content-outline-prompt');
+// §4.17 (v1.14) — tổng quát hoá theo `elId`, cùng lý do đã ghi ở contentOutlineCopyPrompt().
+window.contentOutlineDownloadPrompt = function (elId, filename) {
+    const el = document.getElementById(elId);
     if (!el) return;
 
     const blob = new Blob([el.value], { type: 'text/markdown;charset=utf-8' });
@@ -84,8 +89,9 @@ window.contentOutlineDownloadPrompt = function (filename) {
 // §4.5 (v1.1) — gom mỗi <h2> (Str::markdown() render CommonMark chuẩn, phẳng) + các node theo
 // sau nó vào 1 <details><summary> — chỉ chạy 1 LẦN (kiểm tra data-collapsible-applied) vì tab
 // "Xem trước" có thể được click lại nhiều lần trong 1 session xem trang.
-window.contentOutlineMakeCollapsible = function () {
-    const container = document.getElementById('content-outline-preview');
+// §4.17 (v1.14) — tổng quát hoá theo `containerId`, cùng lý do đã ghi ở contentOutlineCopyPrompt().
+window.contentOutlineMakeCollapsible = function (containerId) {
+    const container = document.getElementById(containerId);
     if (!container || container.dataset.collapsibleApplied) return;
 
     const children = Array.from(container.children);
@@ -124,14 +130,20 @@ window.contentOutlineMakeCollapsible = function () {
 
 // §4.2 (v1.1) — confirm trước khi "Sinh lại" (GHI ĐÈ prompt cũ, không thể khôi phục) — form gắn
 // data-confirm-regenerate="1" ở edit.blade.php, KHÔNG áp cho form tạo mới (create.blade.php).
+// §4.17 (v1.14) — tổng quát hoá thành querySelectorAll + data-confirm-message tuỳ chỉnh, vì form
+// "Bước 2" (show.blade.php) cũng cần confirm CÙNG lý do (ghi đè article_draft_prompt) nhưng chỉ
+// khi ĐÃ có prompt cũ — blade chỉ gắn attribute này có điều kiện, JS không tự quyết định.
 document.addEventListener('DOMContentLoaded', () => {
-    const form = document.querySelector('form[data-confirm-regenerate]');
-    if (!form) return;
+    document.querySelectorAll('form[data-confirm-regenerate]').forEach((form) => {
+        const message = form.dataset.confirmRegenerate === '1'
+            ? 'Sinh lại sẽ GHI ĐÈ prompt hiện tại bằng prompt mới — KHÔNG thể khôi phục lại prompt cũ (không versioning). Tiếp tục?'
+            : form.dataset.confirmRegenerate;
 
-    form.addEventListener('submit', (e) => {
-        if (!window.confirm('Sinh lại sẽ GHI ĐÈ prompt hiện tại bằng prompt mới — KHÔNG thể khôi phục lại prompt cũ (không versioning). Tiếp tục?')) {
-            e.preventDefault();
-        }
+        form.addEventListener('submit', (e) => {
+            if (!window.confirm(message)) {
+                e.preventDefault();
+            }
+        });
     });
 });
 

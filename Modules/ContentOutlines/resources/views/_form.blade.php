@@ -135,6 +135,17 @@
                     </div>
 
                     <div class="form-control">
+                        <label class="label py-0 pb-1.5">
+                            <span class="label-text font-medium">CTA URL</span>
+                            <span class="label-text-alt text-xs text-base-content/40">URL thật để chèn vào câu CTA cuối outline/bài viết</span>
+                        </label>
+                        <input type="url" name="cta_url" value="{{ old('cta_url', $outline?->cta_url) }}"
+                               class="input input-bordered input-sm w-full font-mono text-xs @error('cta_url') input-error @enderror"
+                               maxlength="500" placeholder="https://...">
+                        @error('cta_url')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="form-control">
                         <label class="label py-0 pb-1.5"><span class="label-text font-medium">Giọng văn</span></label>
                         <textarea name="tone_style" x-model="fields.tone_style" rows="2" maxlength="2000"
                                   class="textarea textarea-bordered textarea-sm w-full @error('tone_style') textarea-error @enderror"></textarea>

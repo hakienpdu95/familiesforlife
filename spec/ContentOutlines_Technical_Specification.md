@@ -1,11 +1,157 @@
 # Module Dàn ý Nội dung (ContentOutlines)
 
-**Phiên bản:** 1.11
+**Phiên bản:** 1.21
 **Ngày:** 2026-08-07
 **Framework:** Laravel 13 (PHP 8.4) + NWIDART Modules + Lorisleiva Actions
 **Module mới:** `Modules/ContentOutlines` (tạo bằng `php artisan module:make ContentOutlines`)
 **Module phụ thuộc:** `Modules\ContentFoundation` (ngữ cảnh biên tập theo `PostCategory`, 1 chiều — cùng cách `CoreIdeaExtractor`/`VideoIdeaExtractor` phụ thuộc module này). Không tích hợp `app/Services/AI/` (xem §0).
-**Trạng thái:** v1.11 — đã vá 5 rủi ro sau review v1.0 (§4.1-§4.5) + áp dụng 2 điểm checklist content-marketing (§4.6) + 3 điểm phương pháp luận outline tổng quát (§4.7) + 4 điểm SEO content outline chuyên biệt (§4.8) + mô hình internal-link Pillar↔Cluster (§4.9) + CTA/độ tin cậy dữ liệu (§4.10) + answer-first/AI answer engine/chặn bịa số liệu/list lead-in/sai số ±10% (§4.11) + structure archetype/intent map 3 câu hỏi/Content-H3/differentiation note/FAQ nguồn PAA thật/anchor text (§4.12) + gợi ý Schema markup/alt text hình ảnh (§4.13) + từ khoá gần đầu/Meta 140-160/keyword trong 150 từ đầu/chặn nhồi từ khoá (§4.14). Chưa qua vòng tinh chỉnh dựa trên phản hồi sử dụng thật DÀI HẠN (khác `CoreIdeaExtractor.md` đã qua 28 version).
+**Trạng thái:** v1.21 — đã vá 5 rủi ro sau review v1.0 (§4.1-§4.5) + áp dụng 2 điểm checklist content-marketing (§4.6) + 3 điểm phương pháp luận outline tổng quát (§4.7) + 4 điểm SEO content outline chuyên biệt (§4.8) + mô hình internal-link Pillar↔Cluster (§4.9) + CTA/độ tin cậy dữ liệu (§4.10) + answer-first/AI answer engine/chặn bịa số liệu/list lead-in/sai số ±10% (§4.11) + structure archetype/intent map 3 câu hỏi/Content-H3/differentiation note/FAQ nguồn PAA thật/anchor text (§4.12) + gợi ý Schema markup/alt text hình ảnh (§4.13) + từ khoá gần đầu/Meta 140-160/keyword trong 150 từ đầu/chặn nhồi từ khoá (§4.14) + kiểm kê SERP feature/khớp định dạng featured snippet/gom nhóm heading lặp lại đối thủ (§4.15) + H2 "Kết luận" (§4.16) + Feature `ArticleDrafting` — "Bước 2" sinh prompt viết bài từ outline đã duyệt (§4.17) + `cta_url` thật/hook mở bài/format scannable/chọn tiêu đề mạnh nhất (§4.18) + before-after example/2-3 phương án Meta/chặn case study bịa/cấm cliché mở bài (§4.19) + Feature `ArticleReview` — "Bước 3" sinh prompt soát lỗi/sửa bài đã viết (§4.20) + gợi ý ý tưởng infographic (§4.21) + gợi ý vị trí chèn câu chuyện/case study/testimonial THẬT của biên tập viên (§4.22) + nêu tên chuyên gia/tổ chức uy tín THẬT nếu biết (§4.23) + cảnh báo cascade khi regenerate + stepper/collapsible UX trang Show (§4.24) + **ghi rõ hành vi cascade vào §4.2 canonical + `<details>` mặc định đóng khi CHƯA DÙNG** (§4.24 mở rộng). Chưa qua vòng tinh chỉnh dựa trên phản hồi sử dụng thật DÀI HẠN (khác `CoreIdeaExtractor.md` đã qua 28 version).
+
+> **v1.21 (theo dõi đề xuất ưu tiên của người dùng sau v1.20 — 3 điểm "ưu tiên cao" đối chiếu lại,
+> xem §4.24):** người dùng hỏi "đã fix chưa" 5 đề xuất ưu tiên. Kết quả rà soát: (1) "Ghi rõ hành
+> vi cascade trong spec" — v1.20 CHỈ ghi ở §4.24 (mục rà soát rủi ro), CHƯA cập nhật §4.2 (nơi
+> CANONICAL cho hành vi Regenerate) — ĐÃ SỬA, thêm bullet đầy đủ vào §4.2 + sửa câu mô tả
+> `data-confirm-regenerate="1"` đã LỖI THỜI (thực tế đã đổi thành message ĐỘNG từ v1.20). (2) "Soft
+> warning cho Bước 2/3" — ĐÃ CÓ từ v1.14/v1.16 (xác nhận lại, không đổi). (3) "Regenerate tuyệt đối
+> không đụng field Bước 2/3" — ĐÃ ĐÚNG trong code từ trước, verify lại bằng test sống (tạo outline →
+> Bước 2/3 → regenerate outline với input khác hẳn → xác nhận 4 field GIỮ NGUYÊN) — bổ sung docblock
+> `RegenerateContentOutlinePromptAction` nêu rõ tường minh (trước đó chỉ suy luận được từ việc field
+> KHÔNG xuất hiện trong `update()`, chưa có câu khẳng định trực tiếp). (4) "Refactor 3 depth giảm
+> duplication" — CHƯA làm (đúng, người dùng đánh dấu "ưu tiên trung bình", không yêu cầu làm ngay).
+> (5) "Collapsible mặc định ĐÓNG các khối CHƯA DÙNG" — v1.20 có collapsible nhưng default-open logic
+> KHÔNG khớp yêu cầu này (Bước 3 luôn mở bất kể đã dùng hay chưa) — ĐÃ SỬA: cả Bước 2/3 cùng 1 quy
+> tắc nhất quán, `<details>` mở CHỈ khi đã có kết quả (`article_draft_prompt`/`review_prompt`), đóng
+> khi chưa dùng.
+
+> **v1.20 (rà soát rủi ro nội bộ do người dùng thực hiện — 5 điểm, xem §4.24):** không đối chiếu
+> nguồn ngoài — người dùng tự rà soát spec/code và nêu 5 rủi ro. Kết quả: (1) **Instruction
+> overload ở `detailed`** — GHI NHẬN là rủi ro cần THEO DÕI sau khi có dữ liệu sử dụng thật, KHÔNG
+> code ngay (đúng đề xuất của người dùng — "cân nhắc giảm nếu thấy AI bỏ sót", điều kiện chưa xảy
+> ra). (2) **Maintainability 3 biến thể BOTTOM** (sửa 1 chỉ dẫn chung phải sửa 3 nơi) — GHI NHẬN
+> là technical debt, người dùng tự đánh dấu "không bắt buộc v1" — CHƯA refactor (rủi ro thay đổi
+> hành vi 3 template lớn cùng lúc, cần 1 quyết định riêng nếu muốn làm). (3) **Cascade khi
+> Regenerate Outline** — XÁC NHẬN ĐÚNG là gap thật (Regenerate không đụng `approved_outline`/
+> `article_draft_prompt`/`drafted_article`/`review_prompt`, nhưng KHÔNG có cảnh báo rõ) — ĐÃ SỬA:
+> confirm dialog ở `edit.blade.php` đổi message khi Bước 2/3 đã có + icon ⚠ trên nút "Sửa & Sinh
+> lại" ở `show.blade.php`. (4) **Soft warning cho Bước 2/3** — KHÔNG PHẢI gap: đã có từ v1.14
+> (`BuildArticleDraftPromptAction::WORD_COUNT_WARNING_THRESHOLD`) và v1.16
+> (`BuildArticleReviewPromptAction::WORD_COUNT_WARNING_THRESHOLD`) + banner tương ứng ở
+> `show.blade.php` — đã verify lại code, thông báo phản hồi người dùng thông tin này đã lỗi thời.
+> (5) **UX trang Show quá tải** — ĐÃ SỬA: thêm stepper Bước 1→2→3 (badge màu theo trạng thái hoàn
+> thành, có anchor link) + bọc Bước 2/Bước 3 trong `<details>` (thu gọn được, Bước 2 tự thu gọn khi
+> đã có Bước 3, Bước 3 luôn mở vì là bước cuối).
+
+> **v1.19 (đối chiếu tofuhq.com/post/prompt-engineering-for-blog-posts — 1 điểm nhỏ ÁP DỤNG, xem
+> §4.23):** nguồn liệt kê kỹ thuật prompt engineering cho blog post ở quy mô team/nhiều brand.
+> Brainstorming (10 ý tưởng chủ đề, keyword theo funnel stage) thuộc phạm vi `CoreIdeaExtractor`,
+> không phải module này (cùng lý do đã từ chối "Foundation Prompts" ở §4.21); Writing stage
+> (word count/audience/tone/CTA/persona) đã có tương đương; "Company-Specific Data Integration"
+> (testimonial/case study thật) ĐÃ áp dụng ở §4.22 (v1.18), nguồn này chỉ xác nhận lại; "Example-
+> Based Anchoring" (viết theo style 1 tác giả cụ thể) không cần cơ chế mới — đã làm được qua
+> `tone_style` (free text) + `competitor_urls` có sẵn. 1 điểm THẬT áp dụng: mở rộng "Độ tin cậy dữ
+> liệu" (`standard`/`detailed`) thêm yêu cầu nêu TÊN chuyên gia/tổ chức uy tín THẬT nếu biết, thay
+> vì chỉ nói chung "nghiên cứu cho thấy" — cùng guardrail "không chắc thì bỏ qua, không tự bịa
+> tên". TỪ CHỐI rõ "mention keyword ít nhất 3 lần" của nguồn — MÂU THUẪN với quyết định đã chốt ở
+> §4.14/§4.21 (không có ngưỡng lặp từ khoá bắt buộc) — giữ nguyên quyết định cũ.
+
+> **v1.18 (đối chiếu checkcopywriting.com/write-blog-with-ai — 1 điểm nhỏ ÁP DỤNG, xem §4.22):**
+> nguồn là bài chia sẻ quy trình cá nhân (3 giai đoạn: Preparation/Drafting/Finalization) — phần
+> lớn đã có cơ chế tương đương hoặc thuộc tầng THỦ CÔNG ngoài AI (đọc to bắt lỗi giọng máy móc ≈
+> "robotic" đã có §4.20; Grammarly/Quetext/Ubersuggest là tool ngoài, §0; "AI editing chỉ nên gợi ý,
+> không tự viết lại để giữ giọng văn" ≈ "precise edits, không full rewrite" đã có §4.20; "section-
+> by-section có gate phê duyệt" — CÙNG kỹ thuật đã đối chiếu và TỪ CHỐI ở §4.21, nguồn này chỉ xác
+> nhận lại, không đổi quyết định). 1 điểm THẬT áp dụng, CẢ 3 `outline_depth` (chỉ `standard`/
+> `detailed` có bước để gắn vào): nguồn nhấn mạnh chèn personal story/testimonial thật/case study
+> có số liệu đo được/dữ liệu độc quyền làm yếu tố khác biệt LỚN NHẤT so với nội dung AI khai thác
+> chung — mở rộng "differentiation note" đã có (§4.12) thêm 1 câu mời biên tập viên tự điền nội
+> dung THẬT của họ vào vị trí phù hợp (không tự tạo nội dung thay thế).
+
+> **v1.17 (đối chiếu blog.qolaba.ai/.../blog-writing-prompts-from-outline-to-publication — 1 điểm
+> nhỏ ÁP DỤNG, xem §4.21):** nguồn mô tả pipeline 5 giai đoạn (Foundation/Outlining/Drafting-
+> Editing/SEO/Collaborative Publishing). Đối chiếu: Foundation Prompts (ý tưởng chủ đề TRƯỚC KHI
+> có topic) thuộc phạm vi `CoreIdeaExtractor`/`VideoIdeaExtractor`, không phải module này; Strategic
+> Outlining + SEO tích hợp xuyên suốt đã có cơ chế tương đương. 1 điểm THẬT áp dụng: bước làm rõ
+> nội dung heading (`standard`/`detailed`) thêm gợi ý Ý TƯỞNG INFOGRAPHIC khi phần đó có nhiều số
+> liệu/bước liên tiếp phù hợp minh hoạ trực quan. Đã hỏi người dùng 1 câu quyết định phạm vi: nguồn
+> khuyến nghị soạn bài theo TỪNG SECTION riêng (nhiều prompt/section) — người dùng xác nhận GIỮ mô
+> hình "1 prompt viết cả bài" hiện tại, KHÔNG thêm "Bước 2b". Cũng TỪ CHỐI rõ "mật độ từ khoá 1-2%"
+> của nguồn vì MÂU THUẪN trực tiếp với quyết định đã chốt ở §4.14 (không có ngưỡng % bắt buộc) —
+> giữ nguyên quyết định cũ, không để 2 nguồn mâu thuẫn cùng tồn tại trong 1 module.
+
+> **v1.16 (đối chiếu junia.ai/blog/ai-blog-writing-prompts — 4 điểm nhỏ ÁP DỤNG + 1 Feature mới,
+> xem §4.19/§4.20):** nguồn liệt kê 8 loại prompt cho quy trình viết blog bằng AI — phần lớn đã có
+> cơ chế tương đương. Đã hỏi người dùng 2 câu quyết định phạm vi: (1) 4 điểm nhỏ ÁP DỤNG NGAY, CẢ 3
+> `outline_depth`, không đổi kiến trúc: gợi ý "before-after comparison" làm 1 loại ví dụ (bước làm
+> rõ heading); 2-3 phương án Meta Title/Description (thay vì 1 phương án); mở rộng "Không bịa số
+> liệu" thêm "case study"; cấm cụ thể cụm mở đầu sáo rỗng kiểu "trong thế giới hiện đại ngày nay"
+> (ArticleDrafting). (2) 3 prompt REVIEW của nguồn (SEO Optimization/Readability Editing/Final
+> Editing — đều review 1 bài ĐÃ VIẾT XONG) hé lộ khoảng trống THẬT: module dừng ở "Bước 2 — viết
+> bài", chưa có "Bước 3 — soát lỗi/sửa". Người dùng xác nhận MUỐN thêm — đã triển khai Feature
+> `ArticleReview` (§4.20): field mới `drafted_article`/`review_prompt`, gộp 3 loại prompt review
+> của nguồn thành 1 prompt duy nhất (giữ mô hình "sinh 1 prompt, chạy 1 lần"), yêu cầu đề xuất SỬA
+> CHÍNH XÁC từng đoạn — KHÔNG viết lại toàn bài (đúng tinh thần "precise edits, without full
+> rewrites" của nguồn). Không gọi AI Provider trong app (§0 mục 1 không đổi).
+
+> **v1.15 (đối chiếu "10-step AI prompt chain viết pillar post" người dùng cung cấp trực tiếp, kèm
+> 1 đoạn quảng cáo sản phẩm bên thứ 3 — KHÔNG xác nhận/tích hợp sản phẩm đó, chỉ đối chiếu kỹ
+> thuật, xem §4.18):** nguồn là 1 chuỗi 10 prompt tách rời (setup persona → audience deep-dive →
+> competitive analysis → headline brainstorm → outline → hook/intro → core content → conclusion/CTA
+> → SEO metadata/social snippets → final assembly). Phần lớn đã có cơ chế tương đương (persona,
+> audience, competitive analysis+USP, outline, meta title/description, final assembly Markdown-
+> only). Đã hỏi người dùng 2 câu quyết định phạm vi trước khi áp dụng: (1) 4 điểm nhỏ ÁP DỤNG — CẢ
+> 3 `outline_depth`/không đổi kiến trúc: field mới `cta_url` (URL CTA thật, khác `content_goal` chỉ
+> định hướng LOẠI CTA) nhúng vào câu chuyển tiếp cuối outline (bước CTA, §4.10) + cuối bài viết
+> (ArticleDrafting, §4.17); chỉ dẫn viết hook mở bài (Bước 2 — ArticleDrafting); yêu cầu định dạng
+> dễ scan (đoạn ngắn/bullet/bold) (Bước 2); yêu cầu chọn tiêu đề MẠNH NHẤT + lý do (bước brainstorm
+> tiêu đề, Bước 1). (2) Social snippet (X/LinkedIn) + tags — TỪ CHỐI, xem "Ngoài phạm vi" dưới đây.
+
+> **v1.14 (Feature `ArticleDrafting` — "Bước 2: viết bài từ outline", xem §4.17):** người dùng yêu
+> cầu rõ: sau khi có outline (từ prompt "Bước 1" hiện có), bước tiếp theo là viết bài DỰA TRÊN
+> outline đó — nhưng vẫn CHỈ sinh prompt (không gọi AI Provider trong app, giữ đúng §0). Khác v1.13
+> (chỉ thêm 1 khối text TĨNH có placeholder tay vào CUỐI prompt outline): v1.14 thêm 1 FEATURE thật
+> — 2 cột DB mới (`approved_outline`: biên tập viên dán outline THẬT nhận từ AI ngoài;
+> `article_draft_prompt`: prompt viết bài đã sinh, nhúng SẴN outline đó — không còn placeholder
+> tay) + `BuildArticleDraftPromptAction` + `SaveApprovedOutlineAndBuildArticlePromptAction` + route/
+> Controller/UI riêng ("Bước 2" ở `show.blade.php`). Khối "## Bước tiếp theo" tĩnh của v1.13 bị XOÁ
+> (superseded — 2 nơi cùng hướng dẫn "viết bài từ outline" theo 2 cách khác nhau dễ gây nhầm lẫn).
+> Refactor kèm theo: tách `estimateWordCount()`/`buildFamilyValuesBlock()` → trait
+> `BuildsSharedPromptBlocks`, dời `ResolvesCategoryContext` → `Features/Concerns/` (cả 2 dùng chung
+> bởi `OutlineGeneration` VÀ `ArticleDrafting` — điểm dùng thứ 2 xuất hiện, cùng nguyên tắc extract
+> đã áp dụng ở §4.6). Không đổi hành vi/schema của Feature `OutlineGeneration` ngoài việc revert
+> phần template tĩnh v1.13.
+
+> **v1.13 (đối chiếu framework "2-bước Outline → Draft" người dùng cung cấp trực tiếp, không kèm
+> URL — 2 điểm ÁP DỤNG, xem §4.16):** nguồn mô tả 2 prompt tách rời: Prompt 1 sinh outline (persona/
+> audience/goal/format H2-H3+3 bullet/intro+conclusion) và Prompt 2 dùng outline đã duyệt để viết
+> bài hoàn chỉnh (word count/tone/style guideline: active voice, tránh fluff, actionable takeaway
+> mỗi phần). Phần lớn field của Prompt 1 (persona, audience, goal, format H2/H3+bullet) đã có cơ chế
+> tương đương từ v1.0. 2 điểm THẬT chưa có, áp dụng CẢ 3 `outline_depth`: (1) "brief introduction and
+> conclusion section" hé lộ khoảng trống: module có "Luận điểm chính" (mở đầu) nhưng CHƯA có H2
+> "Kết luận" khép lại Dàn ý — thêm yêu cầu này vào bước dựng H2; (2) Prompt 2 (viết bài từ outline đã
+> duyệt) hoàn toàn CHƯA có — thêm 1 khối "## Bước tiếp theo" ở cuối prompt, là 1 PROMPT MẪU TĨNH
+> (không tự chạy AI) để biên tập viên copy sang lượt chat MỚI, tái dùng nguyên field đã có
+> (`target_keyword`/`desired_word_count`/`tone_style`/`language`), kèm cảnh báo rõ AI không cần xử
+> lý khối này trong câu trả lời hiện tại. KHÔNG áp dụng: chạy Prompt 2 thật trong app (đòi hỏi gọi AI
+> Provider, ngoài phạm vi §0). Không đổi DB schema/signature Action (chỉ đổi tham số nội bộ của
+> `buildBottom()` private).
+
+> **v1.12 (đối chiếu writerush.ai/serp-based-outline-creation — 3 điểm ÁP DỤNG, xem §4.15):** nguồn
+> là bài hướng dẫn "SERP-based outline creation" chuyên biệt cho quy trình phân tích SERP trước khi
+> dựng outline — phần lớn kỹ thuật (review top 5-10 trang, PAA, tìm kiếm liên quan, content gap,
+> EEAT, semantic SEO) đã có cơ chế tương đương từ v1.0-v1.11. 3 điểm THẬT chưa có, áp dụng CẢ 3
+> `outline_depth`: (1) bước Research thêm yêu cầu ghi chú CỤ THỂ các SERP feature đang xuất hiện
+> cho từ khoá (loại featured snippet: đoạn văn/danh sách/bảng/không có, video, hình ảnh, local
+> pack, product panel, "Things to know"...) — trước đây chỉ nói chung "research SERP"; (2) mở
+> rộng "answer-first" (đã có §4.11) thêm yêu cầu khớp ĐÚNG định dạng câu trả lời (đoạn văn/danh
+> sách/bảng) với định dạng featured snippet quan sát được ở Bước 1 cho câu hỏi tương ứng; (3) bước
+> Research thêm yêu cầu nhóm các H2/H3 LẶP LẠI giữa nhiều trang đối thủ thành 1 danh sách chủ đề
+> độc giả chắc chắn kỳ vọng thấy, dùng làm input bắt buộc-tham chiếu cho bước dựng H2/H3 + self-
+> check. KHÔNG áp dụng: bảng theo dõi đối thủ có cấu trúc cột cố định (content type/format/angle/
+> FAQ/CTA mỗi trang) — mục đích cốt lõi (gom nhóm heading lặp lại + xác định gap) đã đạt qua (3)
+> mà không cần thêm 1 section output mới hiển thị bảng research thô, khác tinh thần "output chỉ
+> gồm artifact đã tổng hợp" hiện tại; đánh giá mức đầu tư nội dung đối thủ đã có ở "Đánh giá độ
+> khó cạnh tranh" (`detailed`, §4.8) — mở rộng thêm 1 câu SERP feature vào ĐÚNG bước đó thay vì
+> tạo section mới trùng lặp. Không đổi DB schema/signature Action.
 
 > **v1.11 (đối chiếu moodymedia.io/blog/how-to-write-for-seo — 4 điểm ÁP DỤNG, xem §4.14):** nguồn
 > là bài SEO writing beginner-guide tổng hợp trích dẫn Google Search Central/Ahrefs/Semrush/
@@ -185,6 +331,7 @@
 - egcreativecontent.com/importance-of-seo-content-outlines — 3 thành phần cốt lõi (câu trả lời rõ ràng sau mỗi subheading, danh sách/bảng, internal+external link) + quy trình chuẩn bị (audience/keyword/search intent/câu hỏi liên quan).
 - blog.hubspot.com/marketing/how-to-write-blog-post-outline — 7 bước + cấu trúc outline mẫu (H1 chứa keyword, H2/H3 theo intent, mỗi heading kèm bullet/ví dụ/thống kê/internal link/CTA, EEAT).
 - LinkedIn — "13-step SEO content writing framework" (Rahul Karle) — đặc biệt Bước 1 (câu hỏi thật trước keyword), Bước 2 (research đối thủ tìm khoảng trống), Bước 8 (trả lời câu hỏi chính SỚM), Bước 12 ("information gain" — thêm thứ độc giả không tìm thấy ở nơi khác).
+- writerush.ai/serp-based-outline-creation (v1.12, §4.15) — quy trình "SERP-based outline creation" chuyên biệt: kiểm kê SERP feature (featured snippet/PAA/tìm kiếm liên quan/video/local pack/product panel), gom nhóm heading lặp lại giữa nhiều trang đối thủ, khớp định dạng câu trả lời với định dạng featured snippet đang thắng.
 
 ---
 
@@ -223,6 +370,12 @@ Schema::create('content_outlines', function (Blueprint $table) {
     // đã áp dụng ở CoreIdeaExtractor §12.2/index.blade.php `brief.audience || foundation?.audience`).
     $table->string('target_audience', 500)->nullable();
     $table->text('content_goal')->nullable();
+
+    // §4.18 (v1.15) — URL CTA THẬT (khác content_goal — chỉ định hướng LOẠI CTA chung), dùng để
+    // nhúng thẳng vào câu chuyển tiếp cuối outline (bước CTA) + cuối bài viết (ArticleDrafting).
+    // Migration RIÊNG, thêm SAU khi bảng đã tồn tại.
+    $table->string('cta_url', 500)->nullable();
+
     $table->text('tone_style')->nullable();
 
     $table->text('competitor_urls')->nullable(); // 1 URL/dòng, tự do — KHÔNG validate url() từng dòng (§8.1 lý do)
@@ -240,6 +393,21 @@ Schema::create('content_outlines', function (Blueprint $table) {
     $table->text('additional_notes')->nullable();
 
     $table->longText('generated_prompt'); // snapshot prompt đã sinh — ghi đè khi sinh lại (§0 mục "phi mục tiêu")
+
+    // §4.17 (v1.14) — Feature ArticleDrafting ("Bước 2"). approved_outline: biên tập viên dán tay
+    // outline THẬT nhận về từ AI ngoài sau khi chạy generated_prompt (module không tự lưu được kết
+    // quả AI trả về ở "Bước 1" vì AI chạy NGOÀI app, §0 mục 1/2 — phải dán lại). article_draft_prompt:
+    // snapshot prompt viết bài đã sinh (nhúng SẴN approved_outline) — ghi đè khi sinh lại, CÙNG
+    // nguyên tắc không-versioning với generated_prompt. Migration RIÊNG, thêm SAU khi bảng đã tồn tại.
+    $table->longText('approved_outline')->nullable();
+    $table->longText('article_draft_prompt')->nullable();
+
+    // §4.20 (v1.16) — Feature ArticleReview ("Bước 3"). drafted_article: biên tập viên dán bài
+    // viết ĐÃ VIẾT XONG (từ AI ngoài chạy article_draft_prompt, hoặc viết tay). review_prompt:
+    // snapshot prompt soát lỗi/sửa đã sinh — ghi đè khi sinh lại, cùng nguyên tắc không-versioning.
+    $table->longText('drafted_article')->nullable();
+    $table->longText('review_prompt')->nullable();
+
     $table->foreignId('linked_post_article_id')->nullable()->constrained('post_articles')->nullOnDelete();
 
     $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
@@ -339,8 +507,9 @@ Khi `CategoryContentFoundation` đầy đủ + `competitor_urls` dài + `additio
 ### 4.2 Hành vi Regenerate — 3 điểm chốt rõ
 
 - **`linked_post_article_id` GIỮ NGUYÊN** khi "Sinh lại" — `RegenerateContentOutlinePromptAction::handle()` CỐ Ý không đưa field này vào mảng `update()`, nên Eloquent không đụng tới giá trị hiện tại. Lý do: sinh lại prompt là thao tác trên NỘI DUNG nghiên cứu, không liên quan gì tới việc outline đã được gắn vào bài viết nào.
+- **`approved_outline`/`article_draft_prompt`/`drafted_article`/`review_prompt` GIỮ NGUYÊN** khi "Sinh lại" outline (v1.20/v1.21) — CÙNG lý do/CÙNG cơ chế với `linked_post_article_id`: `RegenerateContentOutlinePromptAction::handle()` CỐ Ý không đưa 4 field này (thuộc "Bước 2"/"Bước 3", §4.17/§4.20) vào mảng `update()`. **Hệ quả CHỦ Ý cần biết:** outline MỚI sau khi sinh lại có thể KHÔNG còn khớp với nội dung "Bước 2"/"Bước 3" đã sinh dựa trên outline CŨ trước đó — module KHÔNG tự động xoá/cập nhật lại 2 bước đó, biên tập viên phải TỰ quyết định sinh lại Bước 2/3 nếu cần (không có cơ chế tự động phát hiện "outline đã đổi từ lúc sinh Bước 2/3" — không lưu snapshot/timestamp riêng cho từng bước để so sánh). Được CẢNH BÁO ở tầng UI (không phải ở Action) — xem bullet "Confirm dialog" ngay dưới.
 - **`updated_by`/`updated_at` LUÔN cập nhật** — `updated_by` set thủ công trong mảng update(), `updated_at` tự động qua Eloquent timestamps ở MỌI lần gọi `update()` (kể cả khi nội dung field không đổi thực chất).
-- **Confirm dialog trước khi submit** — `edit.blade.php` gắn `data-confirm-regenerate="1"` trên `<form>`, `content-outlines.js` chặn submit bằng `window.confirm()` nếu người dùng không xác nhận — cảnh báo rõ: ghi đè prompt hiện tại, KHÔNG thể khôi phục (không versioning, §1).
+- **Confirm dialog trước khi submit** — `edit.blade.php` gắn `data-confirm-regenerate="<message>"` trên `<form>` (v1.20 — ĐỘNG, không còn cố định `"1"`): message MẶC ĐỊNH (chỉ cảnh báo ghi đè `generated_prompt`, không thể khôi phục) khi outline CHƯA có Bước 2/3; đổi sang message CẢNH BÁO CASCADE (nêu rõ Bước 2/3 đã có sẽ không tự cập nhật theo outline mới) khi `approved_outline`/`article_draft_prompt`/`drafted_article`/`review_prompt` bất kỳ field nào đã có giá trị — `content-outlines.js` chặn submit bằng `window.confirm()` nếu người dùng không xác nhận (§1, §4.24).
 
 ### 4.3 Xoá dữ liệu (rủi ro trung bình)
 
@@ -519,6 +688,256 @@ Nguồn là bài SEO writing beginner-guide tổng hợp trích dẫn Google Sea
 
 ---
 
+### 4.15 Kiểm kê SERP feature, khớp định dạng featured snippet, gom nhóm heading lặp lại (v1.12, đối chiếu writerush.ai/serp-based-outline-creation)
+
+Nguồn là bài hướng dẫn "SERP-based outline creation" — chuyên biệt cho ĐÚNG chủ đề "phân tích SERP trước khi dựng outline" mà module này phục vụ (khác các nguồn tổng quát hơn ở §4.6/§4.7/§4.9). Đối chiếu: repeated H2/H3 topics, question-format headings, step-by-step/comparison/list content structure, PAA, "related searches", EEAT, semantic SEO expansion (search intent/keyword mapping/topical relevance/internal linking) — tất cả đã có cơ chế tương đương từ v1.0-v1.11 (answer-first §4.11; PAA nguồn thật §4.12; structure archetype §4.12; EEAT §4.6/§4.10/§4.11/§4.14; secondary_keywords/semantic từ v1.0). Nguồn không nêu tool/API cụ thể để tự động crawl SERP (chỉ nói AI có thể tự làm việc này) — khớp đúng model "AI ngoài tự research" đã chốt ở §0, không cần thêm gì.
+
+3 điểm THẬT chưa có, đã thêm vào CẢ 3 `outline_depth`, không đổi signature/DB:
+
+**(1) Kiểm kê SERP feature:**
+- Nguồn liệt kê rõ các SERP feature cần quan sát khi phân tích 1 từ khoá: loại featured snippet (đoạn văn/danh sách/bảng), PAA, "related searches", và các feature khác (video, hình ảnh, local pack, product/shopping panel, "Things to know"). Module trước đây chỉ yêu cầu chung "research SERP"/"research 5-10 trang", không tách riêng các feature cụ thể này.
+- Thêm vào bước Research (`brief`: Bước 1; `standard`: Bước 1; `detailed`: Bước 1 + Bước 2 "Đánh giá độ khó cạnh tranh"): yêu cầu ghi chú NGẮN các SERP feature đang xuất hiện cho từ khoá mục tiêu (khi quan sát được) — dùng để outline khai thác đúng định dạng Google đang ưu tiên hiển thị. KHÔNG bắt buộc — nếu AI không có khả năng research thật, bỏ qua (cùng nguyên tắc "không bịa dữ liệu" nhất quán toàn module, giống ước tính khối lượng tìm kiếm §4.8).
+
+**(2) Khớp định dạng câu trả lời với định dạng featured snippet đang thắng:**
+- Nguồn: "Keep definitions and explanations tight when Featured Snippets are present" + "match section depth to what's ranking" — gợi ý outline nên phản ánh ĐÚNG định dạng (không chỉ nội dung) mà Google hiện đang chọn hiển thị cho câu hỏi đó.
+- Mở rộng chỉ dẫn "answer-first" đã có (§4.11 — mở đầu H2/H3 bằng câu trả lời trực tiếp) thêm 1 điều kiện: nếu Bước Research quan sát được featured snippet đang hiển thị dạng danh sách/bảng cho câu hỏi tương ứng, format câu trả lời mở đầu ĐÚNG dạng đó (danh sách/bảng) thay vì đoạn văn — tăng khả năng được Google chọn thay thế snippet hiện tại. Áp dụng bước dựng H2/H3 ở CẢ 3 depth (bước 4/brief, bước 7/standard, bước 8/detailed).
+
+**(3) Gom nhóm heading lặp lại giữa nhiều trang đối thủ:**
+- Nguồn (Bước 3 "Reviewing top 5-10 organic results"): "Group similar headings together" + "Repeated topics show what users likely expect from a complete guide" — đây là kỹ thuật lõi của "SERP-based outline creation", biến quan sát rời rạc từng trang thành 1 pattern rõ ràng.
+- Thêm vào bước Research (`standard`/`detailed` — `brief` không cần vì research đã rút gọn "không yêu cầu 5-10 trang"): yêu cầu nhóm các H2/H3 LẶP LẠI giữa nhiều trang đã research thành 1 danh sách ngắn chủ đề độc giả chắc chắn kỳ vọng thấy trong 1 bài đầy đủ.
+- Bước dựng H2/H3 (`standard`: Bước 7; `detailed`: Bước 8) nối thêm ràng buộc: PHẢI bao quát các chủ đề LẶP LẠI đã ghi nhận đó — nếu chủ động bỏ qua 1 chủ đề lặp lại phổ biến, phải nêu rõ lý do (tránh outline thiếu sót so với kỳ vọng thị trường mà không có chủ ý).
+- Self-check (`standard`: Bước 13; `detailed`: Bước 15) mở rộng: kiểm tra đã bao quát chủ đề LẶP LẠI đã ghi ở Bước 1 chưa, và đã khai thác đúng định dạng SERP feature quan sát được chưa.
+
+**KHÔNG áp dụng** (2 điểm của nguồn không map vào cơ chế mới, đã có cơ chế tương đương hoặc ngoài phạm vi):
+- **Bảng theo dõi đối thủ có cấu trúc cột cố định** (page title/content type/format/angle/heading structure/examples/FAQ/CTA cho MỖI trang, nguồn gọi là "tracking sheet") — mục đích cốt lõi của bảng này (gom nhóm heading lặp lại + xác định content gap) đã đạt được qua điểm (3) ở trên mà không cần thêm 1 section output mới hiển thị bảng research thô cho MỖI trang đối thủ — khác tinh thần "output chỉ gồm ARTIFACT đã tổng hợp" (title/USP/outline/FAQ/Meta...) hiện tại của module, và sẽ làm phình prompt/output đáng kể nếu áp cho 5-15 trang (đúng loại rủi ro "prompt length" đã né tránh nhiều lần, §4.1). Đánh giá mức đầu tư nội dung đối thủ (độ dài/số H2-H3/backlink) đã có sẵn ở "Đánh giá độ khó cạnh tranh" (`detailed`, §4.8) — SERP feature được gộp THÊM vào ĐÚNG bước đó (điểm (1) ở trên) thay vì tạo section mới trùng lặp mục đích.
+- **Validation checklist 4 câu hỏi cuối** ("match search intent? answer completely? natural order? better than competitors?") — đã có cơ chế tương đương từ trước qua self-check (§4.8/§4.11/§4.12, nay mở rộng thêm ở điểm (3)) + USP (§4.8, "vì sao đọc bài NÀY") — không cần thêm 1 bước riêng lặp lại 4 câu hỏi tương tự.
+
+---
+
+### 4.16 H2 "Kết luận" + prompt mẫu Bước 2 viết bài từ outline (v1.13, đối chiếu framework "2-bước Outline → Draft" người dùng cung cấp trực tiếp, không kèm URL)
+
+Nguồn mô tả 1 quy trình 2 prompt tách rời — Prompt 1 sinh outline (persona "expert professional writer", input working title/audience/main goal, format Markdown H2+H3 với 3 bullet/heading, "brief introduction and conclusion section"), Prompt 2 dán outline đã duyệt vào để viết bài hoàn chỉnh (persona "professional subject matter expert", word count, tone, style guideline: câu chủ động, tránh từ sáo rỗng, actionable takeaway mỗi phần). Đối chiếu Prompt 1: persona/audience/goal/format H2-H3+bullet đều đã có cơ chế tương đương từ v1.0 (persona "SEO Content Strategist", `target_audience`/`content_goal`, 2-5 điểm/H3 tuỳ depth §4.7/§3.2) — không đổi gì thêm.
+
+2 điểm THẬT chưa có, áp dụng CẢ 3 `outline_depth`, không đổi DB schema/signature `handle()` (chỉ đổi tham số nội bộ của `buildBottom()` — private method, không ảnh hưởng caller):
+
+**(1) H2 "Kết luận" khép lại Dàn ý:**
+- Nguồn: outline nên có "a brief introduction and conclusion section" — module đã có phần mở đầu tương đương (Luận điểm chính, §4.7, đặt từ khoá trong 100-150 từ đầu, §4.14) nhưng CHƯA có yêu cầu nào cho 1 phần KHÉP LẠI Dàn ý.
+- Thêm vào bước dựng H2 (`brief`: Bước 4; `standard`: Bước 7; `detailed`: Bước 8): Dàn ý nên khép lại bằng 1 H2 "Kết luận" ngắn tóm lại luận điểm chính (không lặp nguyên văn) — trước khi chuyển sang FAQ.
+- Phân biệt rõ với 2 khái niệm đã có: khác **CTA** (§4.10 — CTA là hành động/bước tiếp theo cho độc giả, đặt ở mục riêng CUỐI toàn prompt, ngoài Dàn ý; Kết luận là tóm lại thông điệp, nằm TRONG Dàn ý); khác **"So sánh/kết luận"** (1 trong 4 structure archetype, §4.12 — đó là KIỂU BÀI tổng thể cho 1 số từ khoá "vs"/"nên chọn", không phải MỌI outline đều dùng archetype này) — nếu archetype đã chọn tự nhiên có phần khuyến nghị/tổng kết riêng, dùng LUÔN phần đó làm kết luận, không ép thêm H2 trùng lặp (đã ghi rõ trong text bước dựng H2 ở `standard`/`detailed`).
+
+**(2) Prompt mẫu "Bước tiếp theo" (Prompt 2 — viết bài từ outline đã duyệt):**
+- Nguồn: sau khi có outline đã duyệt, dán vào 1 prompt riêng (persona subject-matter-expert, word count, tone, style guideline) để AI viết bài hoàn chỉnh — module trước đây dừng lại hoàn toàn ở outline (đúng §0/§1), không đưa ra gợi ý bước kế tiếp nào cho editor.
+- Thêm 1 khối `## Bước tiếp theo (tuỳ chọn — KHÔNG cần xử lý trong câu trả lời của lượt chat này)` ở CUỐI mỗi prompt (`BuildContentOutlinePromptAction::buildDraftPromptTemplate()`) — 1 đoạn **văn bản tĩnh** (không tự chạy AI trong app, KHÔNG vi phạm §0 mục 1) chứa sẵn 1 prompt mẫu để biên tập viên tự copy sang 1 LƯỢT CHAT MỚI sau khi đã đọc/sửa outline, dùng để viết bài hoàn chỉnh từ outline đã duyệt.
+- Prompt mẫu tái dùng NGUYÊN field đã có trong `ContentOutlineInputData` — KHÔNG thêm field input mới: `target_keyword` (persona/chủ đề), `desired_word_count` (word count, fallback "độ dài hợp lý theo outline" nếu null), `tone_style` với fallback `foundation?->style_sample` (tone — cùng cách TOP đã resolve, §3.2), `language` (vi/en). Phải TỰ CHỨA đủ các giá trị này (không thể chỉ viết "theo yêu cầu đã nêu ở trên") vì prompt mẫu này được dùng ở 1 lượt chat HOÀN TOÀN MỚI, không còn ngữ cảnh phần "Thông tin đầu vào" phía trên.
+- Style guideline của nguồn (active voice, tránh fluff, actionable takeaway mỗi phần, không bịa số liệu, không nhồi từ khoá) đưa NGUYÊN vào trong prompt mẫu này — vì các quy tắc này áp cho VĂN XUÔI hoàn chỉnh (bài viết sẽ được viết ra), không áp được cho chính outline hiện tại (outline là heading+bullet, không phải câu văn liền mạch) — do đó KHÔNG thêm vào dòng "Lưu ý EEAT" của outline hiện tại.
+- **Cảnh báo an toàn quan trọng**: khối này mở đầu bằng 1 câu chặn rõ — AI đang xử lý prompt outline KHÔNG được tự ý viết luôn bài đầy đủ hoặc lặp lại khối mẫu này trong câu trả lời của lượt chat hiện tại — phòng rủi ro AI đọc thấy "viết thành 1 bài hoàn chỉnh..." trong prompt mẫu rồi hiểu lầm thực hiện luôn, gây ra kết quả ngoài tầm kiểm soát (vi phạm §0 mục 1/§1 "Phi mục tiêu" — module chỉ sinh outline, không sinh bài viết).
+- Implementation: `buildBottom()` đổi signature nhận thêm `ContentOutlineInputData $input, ?CategoryContentFoundation $foundation` (trước đó chỉ nhận `$contentRole` rút gọn) — chèn qua placeholder `{{DRAFT_PROMPT_TEMPLATE}}` đặt sau khối "Định dạng output" ở cả 3 nowdoc (cùng kỹ thuật `str_replace()` post-nowdoc đã dùng cho `{{ROLE_LINK_NOTE}}`, §4.9). `handle()` (public, `AsAction`) giữ NGUYÊN signature — chỉ đổi lời gọi nội bộ tới `buildBottom()`, không ảnh hưởng `CreateContentOutlineAction`/`RegenerateContentOutlinePromptAction`.
+
+**KHÔNG áp dụng:**
+- **Chạy Prompt 2 thật trong app** (thêm nút "Viết bài từ outline" gọi `AIProviderManager`) — đòi hỏi gọi AI Provider trong app, ngoài phạm vi đã chốt ở §0 mục 1; Prompt 2 ở đây CHỈ là văn bản mẫu tĩnh nằm trong `generated_prompt`, người dùng tự copy đi chạy ở AI ngoài, giống cách toàn bộ module hoạt động.
+- **Cấu trúc outline "chính thức" theo bullet cố định 3 điểm/heading** — module đã có cơ chế tương đương linh hoạt hơn theo `outline_depth` (2-3/3-5 điểm/H3, §4.7) — không cần đổi cứng thành đúng 3.
+
+---
+
+### 4.17 Feature `ArticleDrafting` — "Bước 2: viết bài từ outline" (v1.14)
+
+Người dùng yêu cầu rõ: sau khi có prompt sinh outline ("Bước 1", đã có từ v1.0), bước tiếp theo là **viết bài dựa trên outline đó** — nhưng mục tiêu VẪN CHỈ là sinh prompt (không gọi AI Provider trong app, giữ nguyên §0). Khác các version trước (chỉ sửa TEXT trong prompt hiện có), đây là **1 Feature thật**: cần outline THẬT (không phải placeholder) làm input, nên cần lưu trữ + Action + UI riêng.
+
+**Vì sao KHÔNG tái dùng nguyên khối "## Bước tiếp theo" của v1.13**: khối đó là 1 đoạn text TĨNH chèn cuối `generated_prompt`, chứa placeholder `[Dán outline vào đây]` để biên tập viên tự điền TAY mỗi lần muốn dùng — không có nơi lưu outline thật, không tách biệt được với prompt "Bước 1", và annotator phải tự nhớ xoá cảnh báo "KHÔNG cần xử lý" khi copy dùng riêng. v1.14 thay bằng 1 luồng lưu-rồi-sinh: dán outline → lưu vào DB → sinh 1 prompt ĐỘC LẬP đã nhúng SẴN outline đó. **Khối tĩnh v1.13 bị XOÁ** — giữ cả 2 sẽ tạo 2 nguồn hướng dẫn "viết bài từ outline" khác nhau trong cùng 1 bản ghi, dễ gây nhầm lẫn cho biên tập viên không biết dùng cái nào.
+
+**Thiết kế:**
+
+1. **2 field mới trên `content_outlines`** (§2.1, migration riêng):
+   - `approved_outline` (longText, nullable) — biên tập viên dán outline Markdown mà AI ngoài trả về sau khi chạy `generated_prompt` (đã đọc/sửa lại nếu cần) vào đây.
+   - `article_draft_prompt` (longText, nullable) — snapshot prompt viết bài đã sinh, ghi đè khi sinh lại — CÙNG nguyên tắc không-versioning với `generated_prompt` (§0/§4.2).
+
+2. **`BuildArticleDraftPromptAction`** (`Features/ArticleDrafting/Actions/`) — `handle(ContentOutlineInputData $input, ?CategoryContentFoundation $foundation, string $approvedOutline): string`. Tái dùng NGUYÊN `ContentOutlineInputData` (không tạo DTO mới) — hydrate trực tiếp từ `ContentOutline` model đã lưu qua `ContentOutlineInputData::from($contentOutline)` (Spatie Laravel Data tự map theo tên property/cột trùng nhau — đã verify hoạt động đúng qua tinker khi viết spec này). Sinh 1 prompt gồm: persona người viết (khác persona "SEO Content Strategist" của Bước 1 — đây là persona VIẾT, không phải RESEARCH) → outline đã duyệt nhúng NGUYÊN VĂN → yêu cầu bài viết (giữ đúng cấu trúc outline, độ dài/ngôn ngữ/giọng văn lấy từ field đã có, câu chủ động/tránh fluff/actionable takeaway/không bịa số liệu/không nhồi từ khoá — kế thừa các guardrail đã có ở prompt outline) → khối "Hệ giá trị gia đình Việt Nam" (LUÔN chèn, CÙNG nguồn `config('content_foundation.family_values')` với prompt outline — bài viết THẬT là nơi rủi ro vi phạm giá trị gia đình cao nhất) → "Lưu ý EEAT" ngắn → "Định dạng output" (1 bài Markdown hoàn chỉnh, không thêm lời dẫn). `WORD_COUNT_WARNING_THRESHOLD = 10000` — ngưỡng RIÊNG (cao hơn 6.000 của outline) vì prompt này CHỦ ĐỘNG nhúng nguyên outline dài, dài hơn là BÌNH THƯỜNG chứ không phải phình do lỗi.
+
+3. **`SaveApprovedOutlineAndBuildArticlePromptAction`** (`Features/ArticleDrafting/Actions/`) — `handle(ContentOutline $outline, string $approvedOutline, int $updatedBy): ContentOutline`. Resolve `$foundation` qua `ResolvesCategoryContext` (dùng lại `$outline->post_category_id`), build prompt, rồi `update()`: `approved_outline`, `article_draft_prompt`, `updated_by`. **KHÔNG đụng** `generated_prompt`/`linked_post_article_id` — bước này ĐỘC LẬP với vòng sinh/sinh lại outline (§4.2), cùng nguyên tắc `linked_post_article_id` giữ nguyên khi regenerate outline.
+
+4. **Refactor kèm theo** (extract khi có điểm dùng THỨ 2, cùng nguyên tắc đã áp dụng cho `ResolvesCategoryContext` ở §4.6):
+   - `BuildsSharedPromptBlocks` (trait mới, `Features/Concerns/`) — chứa `estimateWordCount()` (static) + `buildFamilyValuesBlock()`, tách từ `BuildContentOutlinePromptAction` vì `BuildArticleDraftPromptAction` cần CÙNG 2 hàm này. Cả 2 Action `use BuildsSharedPromptBlocks;` — hành vi giống tuyệt đối bản gốc, gọi tĩnh qua tên lớp cụ thể (VD `BuildContentOutlinePromptAction::estimateWordCount()`) vẫn hoạt động bình thường (PHP trait method thừa hưởng như method riêng của lớp).
+   - `ResolvesCategoryContext` — dời từ `Features/OutlineGeneration/Actions/Concerns/` lên `Features/Concerns/` (dùng chung `OutlineGeneration` + `ArticleDrafting`).
+   - `BuildContentOutlinePromptAction::buildBottom()` **revert** về signature gốc trước v1.13 (`$depth`/`$contentRole`/`$hasExistingArticles`, KHÔNG còn nhận `$input`/`$foundation`) — vì placeholder `{{DRAFT_PROMPT_TEMPLATE}}`/`buildDraftPromptTemplate()` của v1.13 đã XOÁ.
+
+5. **UI (`show.blade.php`)** — thêm card "Bước 2 — Viết bài từ outline": `<textarea name="approved_outline">` (prefill giá trị đã lưu) trong 1 `<form>` POST tới route mới, nút "Lưu & Sinh prompt viết bài" (đổi thành "...Sinh LẠI..." nếu đã có prompt cũ, kèm `data-confirm-regenerate` với message riêng — CHỈ gắn khi `article_draft_prompt` đã tồn tại). Nếu đã có `article_draft_prompt`: hiện CÙNG UX với prompt outline (toggle Prompt thô/Xem trước Markdown, Copy, Download .md, banner cảnh báo dài) — tái dùng 3 hàm JS đã tổng quát hoá theo `elId`/`containerId` (`contentOutlineCopyPrompt`/`contentOutlineDownloadPrompt`/`contentOutlineMakeCollapsible`, trước đó hardcode ID của khối outline) thay vì viết lại 3 hàm mới cho khối thứ 2.
+
+6. **Route/Controller** — `POST {outline}/article-prompt` → `ContentOutlineController::generateArticlePrompt()` (gate CÙNG `content_outlines.use`, KHÔNG cần permission mới — đây là hành động trên CÙNG resource `ContentOutline`, không phải tính năng độc lập). `show()` load thêm `articlePromptWordCount`/`articlePromptIsLong`/`articlePromptHtml` (rỗng an toàn nếu chưa sinh lần nào).
+
+**KHÔNG áp dụng:**
+- **Gọi AI Provider trong app để viết bài thật** — đây vẫn là ranh giới đã chốt ở §0 mục 1, không đổi vì yêu cầu người dùng CHỈ RÕ "mục tiêu vẫn là sinh prompt tạo bài viết... thôi". Nếu tương lai cần chạy AI thật, đó là quyết định phạm vi RIÊNG cần hỏi lại (cost/budget/model — xem 4 câu hỏi đã hỏi và bị từ chối ở phần trao đổi trước khi chốt v1.14).
+- **Tự động tạo/cập nhật `PostArticle` từ `article_draft_prompt`/kết quả AI trả về** — giữ đúng non-goal §1 "Không tự động tạo PostArticle từ outline"; `linked_post_article_id` (§4.4) vẫn chỉ là liên kết THAM CHIẾU thủ công, không liên quan tới Feature này.
+- **Versioning nhiều bản `article_draft_prompt`** — CÙNG quyết định không-versioning đã áp dụng cho `generated_prompt` (§1/§4.2) — sinh lại ghi đè, không giữ lịch sử.
+- **Badge "dài" cho `article_draft_prompt` ở trang danh sách** (`ContentOutlineListResource.is_long_prompt` hiện chỉ tính `generated_prompt`) — chỉ cảnh báo ở trang `show` (nơi biên tập viên thực sự đọc/copy prompt này); thêm badge riêng ở danh sách là engineering chưa có nhu cầu thật, để mở cho version sau nếu cần.
+
+---
+
+### 4.18 CTA URL thật, hook mở bài, format scannable, chọn tiêu đề mạnh nhất (v1.15, đối chiếu "10-step AI prompt chain viết pillar post")
+
+Nguồn là 1 chuỗi 10 prompt tách rời cho việc viết TOÀN BỘ 1 bài pillar post từ đầu — kèm theo 1 đoạn quảng bá sản phẩm bên thứ 3 (tool tự động chạy chuỗi 10 prompt đó trong ChatGPT/Claude/Gemini). **Không xác nhận, không đánh giá, không tích hợp sản phẩm đó** — nó vi phạm trực tiếp §0 mục 1 (không tự gọi AI trong app) nếu module tự động hoá chuỗi prompt, và không có cách nào kiểm chứng 1 công cụ bên thứ 3 từ 1 đoạn quảng cáo. Chỉ đối chiếu KỸ THUẬT trong 10 bước, đã hỏi người dùng phạm vi trước khi áp dụng (xem changelog v1.15 ở đầu file).
+
+Đối chiếu 10 bước: Setup/persona (≈ TOP + persona ArticleDrafting); Audience deep-dive (≈ `target_audience`/pain_points + intent map 3 câu hỏi §4.12); Competitive analysis + unique angle (≈ USP §4.8 + differentiation note §4.12); Outline creation (core module); Meta title/description (đã có); Final assembly Markdown-only (≈ "Định dạng output" đã có). 4 điểm THẬT chưa có, ĐÃ ÁP DỤNG:
+
+**(1) `cta_url` — URL CTA thật:**
+- Field mới `cta_url` (string 500, nullable) trên `content_outlines` + `ContentOutlineInputData` — khác `content_goal` (chỉ định hướng LOẠI CTA chung, VD "thu hút đăng ký tư vấn") — đây là 1 URL CỤ THỂ để nhúng THẲNG vào câu văn.
+- Validate `url()` thật (khác `competitor_urls` — free text cho phép kèm ghi chú) vì sẽ chèn trực tiếp vào câu CTA.
+- TOP (`BuildContentOutlinePromptAction::buildTop()`) thêm dòng "CTA URL" nếu có giá trị.
+- Bước CTA (CẢ 3 `outline_depth`, đã có từ §4.10) nối thêm: nếu có "CTA URL" ở trên, viết CTA dưới dạng 1 câu chuyển tiếp TỰ NHIÊN mời truy cập ĐÚNG URL đó (không dán trơ URL).
+- `BuildArticleDraftPromptAction` — đoạn kết bài PHẢI mời truy cập ĐÚNG `cta_url` (nếu có) bằng 1 câu chuyển tiếp tự nhiên nêu rõ lợi ích; nếu không có, giữ chỉ dẫn CTA chung như v1.14 (fallback, không bắt buộc phải có `cta_url` mới dùng được module).
+
+**(2) Hook mở bài (`BuildArticleDraftPromptAction` — Bước 2, KHÔNG áp cho outline Bước 1):**
+- Nguồn có 1 prompt riêng "Hook & Introduction" (150 từ, mở bằng hook chạm đúng pain point, nêu rõ đọc xong biết/làm được gì) — module trước đây chỉ có yêu cầu chung "triển khai đầy đủ outline thành bài viết", chưa có chỉ dẫn CỤ THỂ cho đoạn MỞ BÀI.
+- Thêm bullet "Đoạn mở bài" vào "Yêu cầu bài viết" của `BuildArticleDraftPromptAction`: mở bằng 1 hook chạm đúng vấn đề/nỗi đau chính của đối tượng đọc, nêu rõ đọc xong bài sẽ biết/làm được gì — KHÔNG mở đầu vòng vo. Không đặt ở outline (Bước 1) vì outline chỉ có "Luận điểm chính" (thesis, 1-2 câu tóm ý) — đây là chỉ dẫn cho VĂN XUÔI mở bài thật, chỉ có ý nghĩa ở bước VIẾT.
+
+**(3) Format scannable (`BuildArticleDraftPromptAction` — Bước 2):**
+- Nguồn (Core Content step): "short paragraphs, bullets, and bold phrases" — module trước đây có "list lead-in" (§4.11, đã có) nhưng chưa có chỉ dẫn TỔNG QUÁT về độ dài đoạn văn + in đậm cụm từ quan trọng.
+- Thêm bullet: ưu tiên đoạn văn NGẮN (2-4 câu/đoạn), dùng bullet cho danh sách, in đậm (bold) cụm từ/khái niệm quan trọng.
+
+**(4) Chọn tiêu đề mạnh nhất + lý do (`BuildContentOutlinePromptAction` — bước brainstorm tiêu đề, CẢ 3 depth):**
+- Nguồn (Headline Brainstorm): "Indicate the strongest one and why" — module trước đây chỉ yêu cầu đề xuất 1-2/2-3 phương án, không yêu cầu AI tự CHỌN 1 + giải thích.
+- Thêm vào bước đề xuất tiêu đề (brief Bước 2/standard Bước 5/detailed Bước 6): đánh dấu rõ phương án MẠNH NHẤT (dự đoán CTR cao nhất) + 1 câu lý do.
+
+**KHÔNG áp dụng (đã hỏi người dùng, từ chối rõ):**
+- **Gọi AI Provider trong app để tự động chạy chuỗi prompt** (bản chất sản phẩm quảng cáo trong nguồn) — vi phạm §0 mục 1, không đổi.
+- **Social snippet (X/Twitter 280 ký tự, LinkedIn 120 từ) + 10-15 tags** — người dùng xác nhận KHÔNG muốn thêm; đây là artifact PHÂN PHỐI/QUẢNG BÁ, khác tầng "outline + bài viết cho 1 bài" mà module phục vụ — cùng lý do đã từ chối phần lớn checklist content-marketing tổng thể ở §4.6/§9.
+- **Audience deep-dive như 1 bước/section riêng** — đã có cơ chế tương đương đủ tốt (`target_audience` + pain_points từ foundation + intent map 3 câu hỏi §4.12); thêm 1 bước/mục output riêng chỉ để tạo lại persona chi tiết là dư thừa.
+
+---
+
+### 4.19 Before-after example, 2-3 phương án Meta, chặn bịa case study, cấm cliché mở bài (v1.16, đối chiếu junia.ai/blog/ai-blog-writing-prompts)
+
+Nguồn liệt kê 8 loại prompt cho quy trình viết blog bằng AI (Outline/First Draft/Introduction Rewriting/Examples Enhancement/SEO Optimization/Readability Editing/Metadata Creation/Final Editing). Đối chiếu: Outline (core module), First Draft (≈ ArticleDrafting §4.17), audience/intent/keyword (đã có từ v1.0). 4 điểm THẬT chưa có ở lớp PROMPT-LEVEL, ĐÃ ÁP DỤNG, CẢ 3 `outline_depth` trừ khi ghi chú riêng, không đổi signature/DB:
+
+**(1) Before-after comparison làm 1 loại ví dụ:**
+- Nguồn (Examples Enhancement Prompt) nêu riêng "one before-and-after comparison" như 1 dạng ví dụ mạnh — module trước đây chỉ nói chung "ví dụ/số liệu".
+- Thêm vào bước "Làm rõ nội dung mỗi heading" (`standard`: Bước 8, `detailed`: Bước 9): gợi ý "so sánh trước/sau (before-after)" làm 1 loại ví dụ, khi phù hợp chủ đề.
+
+**(2) 2-3 phương án Meta Title/Description:**
+- Nguồn (Metadata Creation Prompt) yêu cầu "5 meta title + 5 description options" để chọn — module trước đây chỉ sinh 1 phương án MỖI loại (khoá "chặt" ngay từ đầu).
+- Đổi bước Meta (CẢ 3 depth) từ "Meta Title (...) + Meta Description (...)" → "2-3 phương án Meta Title (...) + 2-3 phương án Meta Description (...)" để biên tập viên tự chọn. Chọn 2-3 (không phải 5 như nguồn) để cân bằng với ràng buộc prompt-length đã có (§4.1) — 5×2 phương án sẽ làm phình đáng kể phần Meta so với giá trị thêm được.
+
+**(3) Chặn bịa case study:**
+- Nguồn (Examples Enhancement Prompt) cấm riêng "fake case studies" cạnh "fake statistics" — module trước đây (Lưu ý EEAT, §4.11) chỉ cấm số liệu.
+- Mở rộng câu "Không bịa số liệu" (CẢ 3 depth) thêm "case study": "...nếu không chắc 1 số liệu/thống kê/case study/ví dụ thực tế cụ thể, ghi rõ [cần biên tập viên xác minh]..."
+
+**(4) Cấm cliché mở đầu (chỉ `BuildArticleDraftPromptAction` — Bước 2, KHÔNG áp cho outline Bước 1):**
+- Nguồn (Introduction Rewriting Prompt) cấm CỤ THỂ cụm "in today's fast-paced world" — 1 cliché rất phổ biến của văn bản do AI viết, không chỉ nói chung "tránh sáo rỗng". Module trước đây (v1.15, §4.18) chỉ nói chung "không mở đầu vòng vo", chưa cấm cụm cụ thể + chưa ràng buộc VỊ TRÍ.
+- Sửa bullet "Đoạn mở bài": nêu vấn đề trong 1-2 câu ĐẦU (thay vì chỉ nói chung), cấm cụ thể cụm "trong thế giới hiện đại ngày nay"/"trong bối cảnh phát triển như hiện nay"/"chúng ta đều biết rằng" hoặc tương đương. Đặt ở ArticleDrafting (không phải outline) vì đây là chỉ dẫn cho VĂN XUÔI mở bài thật, chỉ có ý nghĩa ở bước VIẾT.
+- Đồng thời mở rộng "Không bịa số liệu" của `BuildArticleDraftPromptAction` thêm "case study" (đồng bộ với điểm (3) ở outline).
+
+**KHÔNG áp dụng ở lớp OUTLINE/ArticleDrafting** (3 prompt review của nguồn — xem §4.20 cho quyết định về lớp NÀY): SEO Optimization Prompt/Readability Editing Prompt/Final Editing Prompt đều REVIEW 1 bài ĐÃ VIẾT XONG — khác lớp "sinh outline TRƯỚC KHI viết" (§0) hoặc "sinh bài MỚI từ outline" (§4.17); đã tách thành Feature `ArticleReview` riêng (§4.20) sau khi hỏi người dùng.
+
+### 4.20 Feature `ArticleReview` — "Bước 3: soát lỗi/sửa bài" (v1.16)
+
+3 loại prompt REVIEW của nguồn junia.ai (SEO Optimization/Readability Editing/Final Editing) đều vận hành trên 1 bài viết ĐÃ VIẾT XONG — khác hẳn "Bước 1" (sinh outline TRƯỚC KHI viết) và "Bước 2" (sinh bài MỚI từ outline, §4.17). Module trước đây (v1.15) dừng lại ở "Bước 2", chưa có cơ chế nào cho việc SOÁT LỖI/SỬA 1 bài đã có. Đã hỏi người dùng trước khi triển khai (xem changelog v1.16) — xác nhận MUỐN thêm, quy mô tương tự `ArticleDrafting` (§4.17).
+
+**Thiết kế** (đối xứng hoàn toàn với §4.17, chỉ đổi input/output/nội dung prompt):
+
+1. **2 field mới trên `content_outlines`** (§2.1): `drafted_article` (longText, nullable) — biên tập viên dán bài viết ĐÃ VIẾT XONG (từ AI ngoài chạy `article_draft_prompt`, hoặc viết tay — KHÔNG bắt buộc phải qua "Bước 2" của module này) vào đây; `review_prompt` (longText, nullable) — snapshot prompt soát lỗi/sửa đã sinh, ghi đè khi sinh lại (không versioning, cùng §0/§4.2).
+
+2. **`BuildArticleReviewPromptAction`** (`Features/ArticleReview/Actions/`) — `handle(ContentOutlineInputData $input, ?CategoryContentFoundation $foundation, string $draftedArticle): string`. Tái dùng NGUYÊN `ContentOutlineInputData` + `BuildsSharedPromptBlocks` (giống §4.17). GỘP 3 loại prompt review của nguồn thành 1 prompt duy nhất (giữ mô hình "sinh 1 prompt, chạy 1 lần" đã chốt ở §0 — KHÔNG tách 3 lượt gọi AI riêng như nguồn có thể ngụ ý): (1) **Đánh giá SEO** — khớp tiêu đề/ý định tìm kiếm, heading chưa rõ, từ khoá gượng/nhồi, gợi ý 2-3 câu hỏi FAQ; (2) **Đánh giá độ dễ đọc** — câu/đoạn dài, filler, chuyển đoạn yếu, kèm CẢNH BÁO không đơn giản hoá quá mức làm mất chính xác kỹ thuật (đúng nguyên văn cảnh báo của nguồn); (3) **Rà soát cuối** — đoạn chưa rõ/lặp ý/thiếu dẫn chứng/thiếu ví dụ/giọng máy móc ("robotic"). Kết thúc bằng **"Đề xuất sửa"** — yêu cầu đoạn văn THAY THẾ CỤ THỂ cho MỖI vấn đề, đúng tinh thần "request precise edits, without full rewrites" của nguồn (Final Editing Prompt) — khác hẳn `BuildArticleDraftPromptAction` (sinh bài MỚI), Action này SỬA bài đã có. `WORD_COUNT_WARNING_THRESHOLD = 12000` — ngưỡng RIÊNG, cao hơn cả `BuildArticleDraftPromptAction` (10.000) vì nhúng nguyên 1 bài viết hoàn chỉnh thường dài hơn 1 outline.
+
+3. **`SaveDraftedArticleAndBuildReviewPromptAction`** (`Features/ArticleReview/Actions/`) — `handle(ContentOutline $outline, string $draftedArticle, int $updatedBy): ContentOutline`. Resolve `$foundation` qua `ResolvesCategoryContext` (dùng chung, §4.17), build prompt, `update()`: `drafted_article`, `review_prompt`, `updated_by`. KHÔNG đụng `generated_prompt`/`approved_outline`/`article_draft_prompt`/`linked_post_article_id` — bước ĐỘC LẬP với "Bước 1"/"Bước 2".
+
+4. **UI (`show.blade.php`)** — card "Bước 3 — Soát lỗi/Sửa bài", đối xứng UI với "Bước 2": `<textarea name="drafted_article">` (prefill), nút "Lưu & Sinh (lại) prompt soát lỗi" (`data-confirm-regenerate` khi đã có `review_prompt`), hiện kết quả với CÙNG UX toggle/copy/download/banner (tái dùng 3 hàm JS đã tổng quát hoá từ §4.17, chỉ đổi `elId`/`containerId` thành `content-outline-review-*`).
+
+5. **Route/Controller** — `POST {outline}/review-prompt` → `ContentOutlineController::generateReviewPrompt()` (gate CÙNG `content_outlines.use`, không permission mới — cùng lý do §4.17 mục 6).
+
+**KHÔNG áp dụng:**
+- **Gọi AI Provider trong app để tự động soát/sửa** — giữ đúng §0 mục 1, không đổi dù mục đích là "sửa bài".
+- **Tách 3 loại review (SEO/readability/final-edit) thành 3 prompt/3 lượt sinh riêng** — nguồn không bắt buộc tách rời (khác các nguồn "kiến trúc N-bước tách rời" đã từ chối ở §4.11/§4.12) — gộp 1 prompt vừa giữ đúng mô hình module, vừa tiết kiệm số lượt copy-paste cho biên tập viên.
+- **Tự động áp dụng đề xuất sửa vào `drafted_article`/`PostArticle`** — Action chỉ SINH PROMPT gợi ý, không tự sửa nội dung nào — biên tập viên đọc đề xuất rồi tự áp dụng (hoặc không) vào bài viết thật.
+
+---
+
+### 4.21 Gợi ý ý tưởng infographic (v1.17, đối chiếu blog.qolaba.ai/.../blog-writing-prompts-from-outline-to-publication)
+
+Nguồn mô tả pipeline 5 giai đoạn cho quy trình viết blog bằng AI: Foundation Prompts (ý tưởng chủ đề/hook) → Strategic Outlining → Strategic Drafting & Editing → SEO Optimization → Collaborative Publishing. Đối chiếu: Foundation Prompts (sinh 10 chủ đề blog, hook mở bài TRƯỚC KHI đã chọn topic) thuộc phạm vi `CoreIdeaExtractor`/`VideoIdeaExtractor` (module này CHỈ bắt đầu SAU KHI đã có `topic`/`target_keyword` — field bắt buộc từ v1.0); Strategic Outlining đã có cơ chế tương đương đầy đủ hơn (structure archetype, USP, benchmark độ sâu...); "SEO tích hợp xuyên suốt, không phải bước cuối" đúng triết lý module đã theo từ v1.0 (Meta/schema/FAQ đều nằm TRONG quy trình dựng outline, không phải 1 bước audit riêng ở cuối).
+
+1 điểm THẬT áp dụng, chỉ `standard`/`detailed` (có bước "làm rõ nội dung heading" để gắn vào — `brief` không có), không đổi signature/DB:
+
+**Gợi ý ý tưởng infographic:**
+- Nguồn (Format Optimization Prompts): "Create a compelling infographic concept to illustrate these key statistics" — khác alt text cho 1 ảnh ĐƠN đã có (§4.13) — đây là gợi ý Ý TƯỞNG minh hoạ dạng infographic khi 1 phần có NHIỀU số liệu/bước liên tiếp.
+- Thêm vào bước "Làm rõ nội dung mỗi heading" (`standard`: Bước 8, `detailed`: Bước 9): nếu phần đó có nhiều số liệu/bước liên tiếp phù hợp minh hoạ trực quan, gợi ý luôn 1 Ý TƯỞNG infographic ngắn (VD "infographic 5 bước...") — chỉ cần Ý TƯỞNG, không cần thiết kế/ảnh thật (cùng nguyên tắc "chỉ gợi ý, không sinh asset thật" đã áp dụng cho Schema markup §4.13/alt text §4.13).
+
+**Đã hỏi người dùng 1 câu quyết định phạm vi trước khi chốt — 2 điểm TỪ CHỐI rõ:**
+- **"Draft section-by-section" + Section Expansion Prompt** ("Expand section 3 into 250 words...") — nguồn khuyến nghị soạn TỪNG SECTION riêng qua NHIỀU lượt prompt để tránh lặp ý + giữ quyền kiểm soát sáng tạo, khác model "1 prompt viết cả bài, 1 lần" của `BuildArticleDraftPromptAction` (§4.17). Người dùng xác nhận GIỮ model hiện tại, KHÔNG thêm "Bước 2b: mở rộng 1 section" — lý do: đòi hỏi tách `approved_outline`/`drafted_article` (text tự do người dùng dán vào) thành từng section 1 cách MÁY MÓC (fragile với Markdown tuỳ ý, dễ vỡ nếu outline không theo cấu trúc chuẩn) + tăng số lượt copy-paste cho biên tập viên (N section = N lượt, thay vì 1) — đổi lấy lợi ích ("tránh lặp ý") mà outline đã có cơ chế tương đương (self-check "có phần nào trùng lặp/dư không", §4.8).
+- **Mật độ từ khoá 1-2%** (Pre-Publication SEO Checklist của nguồn) — **MÂU THUẪN TRỰC TIẾP** với quyết định đã chốt ở §4.14 (đối chiếu moodymedia.io/Google Search Central: "không có ngưỡng % bắt buộc, tránh nhồi từ khoá"). GIỮ quyết định §4.14 — không áp dụng số % cụ thể của nguồn này, tránh 2 nguồn tham khảo mâu thuẫn cùng tồn tại trong 1 module (nếu tương lai có bằng chứng thực tế mạnh hơn ủng hộ 1 ngưỡng % cụ thể, cần 1 quyết định RIÊNG thay đổi §4.14, không lặng lẽ ghi đè qua nguồn này).
+
+**KHÔNG áp dụng khác:**
+- **Collaborative Publishing** (real-time collaborative editing, version control, vai trò writer/editor/SEO-specialist/SME riêng, multi-modal workspace, publishing workflow management) — module KHÔNG có owner-based ACL/versioning/real-time editing (đã chốt §2.1/§9) — đây là mô tả 1 SẢN PHẨM/PLATFORM khác hẳn tầng "sinh prompt cho 1 bài" của module này.
+- **Hemingway Editor** (tool đo readability cụ thể được nguồn nhắc tên) — tool ngoài, module không tích hợp tool ngoài (§0) — biên tập viên tự dùng độc lập nếu cần, module chỉ hướng dẫn AI viết dễ đọc qua chỉ dẫn văn bản (§4.9's Examples Enhancement/readability đã có từ trước).
+- **Performance Measurement** (metrics hiệu suất/tỷ lệ chuyển đổi/backlink) — thuộc tầng ĐO LƯỜNG hậu-publish, khác tầng "sinh outline/bài viết/soát lỗi" mà module phục vụ — cùng lý do đã loại "chấm điểm content đã publish" ở §4.10.
+
+---
+
+### 4.22 Gợi ý vị trí chèn nội dung gốc (personal story/case study/testimonial thật) (v1.18, đối chiếu checkcopywriting.com/write-blog-with-ai)
+
+Nguồn là bài chia sẻ quy trình cá nhân của 1 người viết blog dùng AI (3 giai đoạn: Preparation/Drafting/Finalization) — không phải bài kỹ thuật SEO/prompt-engineering chuyên biệt như đa số nguồn trước, nhưng khớp sát tầng "viết blog bằng AI thực tế" mà module phục vụ. Đối chiếu: phần lớn kỹ thuật ĐÃ có cơ chế tương đương hoặc thuộc tầng THỦ CÔNG ngoài AI:
+
+- "Đọc to bài viết để bắt câu nghe như máy" (Finalization) ≈ kiểm tra "robotic tone" đã có ở Rà soát cuối (§4.20).
+- "AI editing chỉ nên gợi ý sửa, không tự viết lại — giữ đúng giọng văn tác giả" ≈ "request precise edits, without full rewrites" đã có ở `BuildArticleReviewPromptAction` (§4.20).
+- "Xử lý TỪNG SECTION, có gate phê duyệt trước khi qua section tiếp theo" — CÙNG kỹ thuật đã đối chiếu và TỪ CHỐI ở §4.21 (nguồn qolaba.ai) — nguồn này chỉ XÁC NHẬN LẠI kỹ thuật tương tự, KHÔNG thay đổi quyết định đã chốt (lý do giữ nguyên: fragile parsing + tăng số lượt copy-paste).
+- Grammarly/Quetext (kiểm tra đạo văn)/Ubersuggest (nghiên cứu từ khoá) — tool ngoài, module không tích hợp tool ngoài (§0).
+- "Tránh ảnh AI-generated, tránh testimonial giả, tránh tiêu đề AI tự chọn không qua xét duyệt người" — đều đã đúng tinh thần module: chỉ GỢI Ý (alt text/schema/tiêu đề), không tự sinh asset thật, luôn cần biên tập viên xét duyệt cuối.
+
+1 điểm THẬT áp dụng, CẢ 3 `outline_depth` (chỉ `standard`/`detailed` có bước "làm rõ nội dung heading" để gắn vào), không đổi signature/DB:
+
+**Gợi ý vị trí chèn nội dung gốc:**
+- Nguồn nhấn mạnh: personal story, testimonial THẬT (không phải do AI tạo), case study có số liệu đo được, dữ liệu/nghiên cứu độc quyền của công ty — là yếu tố khác biệt LỚN NHẤT so với nội dung AI khai thác chung từ internet (không thể bị scrape/tái tạo lại bởi AI khác, cải thiện cả hiệu suất thuật toán và mức độ tin tưởng của độc giả).
+- Mở rộng "differentiation note" đã có (§4.12 — "với MỖI H2, thêm 1 câu ghi rõ phần này làm KHÁC gì so với đối thủ") thêm 1 câu: nếu 1 H2 có thể thuyết phục hơn hẳn với 1 câu chuyện/case study/testimonial THẬT của chính biên tập viên (kinh nghiệm cá nhân, khách hàng thật, dữ liệu nội bộ), đánh dấu rõ gợi ý vị trí đó để biên tập viên tự điền — KHÔNG tự tạo nội dung thay thế.
+- Khác hướng với "Không bịa case study" đã có (§4.19, `Lưu ý EEAT`) — đó là GUARDRAIL cấm AI tự bịa; đây là lời MỜI chủ động, khuyến khích biên tập viên chủ động ĐIỀN nội dung thật của họ vào — 2 cơ chế bổ trợ nhau, không trùng lặp.
+
+---
+
+### 4.23 Nêu tên chuyên gia/tổ chức uy tín thật nếu biết (v1.19, đối chiếu tofuhq.com/post/prompt-engineering-for-blog-posts)
+
+Nguồn liệt kê kỹ thuật prompt engineering cho blog post ở quy mô team/nhiều brand (brainstorming, writing parameters, advanced techniques). Đối chiếu: **Brainstorming** (10 ý tưởng chủ đề, keyword research chia theo funnel stage top/middle/bottom, "high-performing post" process, "Expert Citation Process") — phần "10 ý tưởng chủ đề"/"keyword theo funnel stage" thuộc phạm vi `CoreIdeaExtractor` (module này bắt đầu SAU KHI đã có `topic`/`target_keyword`, cùng lý do đã từ chối "Foundation Prompts" ở §4.21) — riêng "Expert Citation Process" (hỏi tên chuyên gia đầu ngành + nghiên cứu của họ) tách được thành 1 chi tiết PROMPT-LEVEL áp dụng ở tầng Research, xem dưới. **Writing stage** (word count/audience/tone/structure/CTA/persona) đã có cơ chế tương đương đầy đủ. **Company-Specific Data Integration** (customer review/G2 testimonial/case study thật để giảm cảm giác "do AI viết") — ĐÃ áp dụng ở §4.22 (v1.18, đối chiếu checkcopywriting.com) — nguồn này chỉ XÁC NHẬN LẠI, không đổi quyết định. **Example-Based Anchoring** (viết theo structure/style của 1 tác giả cụ thể qua link) — KHÔNG cần cơ chế mới: đã làm được qua `tone_style` (free text, người dùng tự mô tả "viết theo phong cách X, giữ format pros/cons") + `competitor_urls` (tham khảo cấu trúc) đã có sẵn — không có field nào thiếu để hỗ trợ kỹ thuật này.
+
+1 điểm THẬT áp dụng, chỉ `standard`/`detailed` (nơi có câu "Độ tin cậy dữ liệu"), không đổi signature/DB:
+
+**Nêu tên chuyên gia/tổ chức uy tín thật:**
+- Nguồn (Expert Citation Process): hỏi AI tên chuyên gia đầu ngành trong lĩnh vực + top 3 bài nghiên cứu của họ + tóm tắt — thay vì chỉ nói chung "nghiên cứu cho thấy".
+- Mở rộng "Độ tin cậy dữ liệu" đã có (§4.7/§4.10 — "gợi ý trích dẫn 2-3 nguồn uy tín khác nhau") thêm: nếu biết, ưu tiên nêu TÊN chuyên gia/tổ chức uy tín THẬT trong lĩnh vực, không chỉ nói chung — cùng guardrail nhất quán với "không bịa số liệu": không chắc thì bỏ qua, KHÔNG tự bịa tên (chuyên gia giả là rủi ro EEAT nghiêm trọng hơn cả số liệu giả — gắn danh tính THẬT vào nội dung sai sự thật).
+
+**KHÔNG áp dụng:**
+- **"Mention keyword x, y, z ít nhất 3 lần xuyên suốt bài"** (SEO Integration của nguồn) — MÂU THUẪN với quyết định đã chốt ở §4.14/§4.21 (không có ngưỡng lặp từ khoá bắt buộc, tránh nhồi từ khoá) — GIỮ quyết định cũ, không áp dụng số lần lặp cụ thể của nguồn này, cùng lý do đã từ chối "mật độ 1-2%" ở §4.21.
+- **Brainstorming stage** (10 ý tưởng chủ đề, keyword theo funnel stage, "high-performing post" process) — thuộc phạm vi `CoreIdeaExtractor`/`VideoIdeaExtractor`, không phải `ContentOutlines` (module này CHỈ bắt đầu SAU KHI đã chọn topic).
+- **Positive framing principle** ("specify 'family-friendly' rather than 'avoid inappropriate content'") — đây là nguyên tắc VIẾT PROMPT dành cho NGƯỜI VIẾT prompt (áp dụng khi lập trình viên soạn văn bản `BuildContentOutlinePromptAction`), không phải 1 chỉ dẫn cần đưa vào NỘI DUNG prompt sinh ra cho AI — đã tự nhiên áp dụng qua việc review văn bản hiện có, không cần 1 mục riêng.
+
+---
+
+### 4.24 Rà soát rủi ro nội bộ — cascade khi regenerate + UX trang Show (v1.20)
+
+Người dùng tự rà soát spec/code (không đối chiếu nguồn ngoài) và nêu 5 rủi ro. Xử lý từng điểm:
+
+**(1) Prompt Complexity / Instruction Overload ở `detailed` (rủi ro cao nhất hiện tại, THEO DÕI — không code):**
+- Đúng thực tế: `detailed` đã tích luỹ RẤT NHIỀU chỉ dẫn qua 20 version (structure archetype, answer-first, SERP feature, Content-H3, differentiation note, before-after, infographic, testimonial thật, tên chuyên gia, ±10%...).
+- Rủi ro: AI ngoài "instruction overload" → bỏ sót 1 số yêu cầu quan trọng — KHÁC rủi ro "Prompt length" đã ghi ở §4.1 (đó là tổng SỐ TỪ, đây là SỐ LƯỢNG chỉ dẫn riêng biệt — 1 prompt có thể ngắn về từ nhưng dày đặc chỉ dẫn).
+- **Quyết định:** GHI NHẬN vào spec (đoạn này), KHÔNG cắt giảm chỉ dẫn nào ngay — người dùng tự đề xuất "theo dõi thực tế... cân nhắc giảm NẾU thấy AI bỏ sót", đây là hành động CÓ ĐIỀU KIỆN dựa trên dữ liệu sử dụng thật chưa có, cùng nguyên tắc "không thêm/bớt engineering khi chưa có bằng chứng cần" đã áp dụng nhiều lần trong module. Để mở cho version sau nếu người dùng quan sát AI ngoài bỏ sót chỉ dẫn thật.
+
+**(2) Maintainability của 3 biến thể BOTTOM (technical debt, KHÔNG bắt buộc v1 — không code):**
+- Đúng thực tế: sửa 1 chỉ dẫn CHUNG (VD dòng EEAT) phải sửa lặp lại ở CẢ 3 `buildBottomBrief()`/`buildBottomStandard()`/`buildBottomDetailed()` (đã xảy ra nhiều lần — §4.16/§4.19/§4.23 đều phải `replace_all` qua 2-3 vị trí gần giống nhau).
+- Người dùng tự đề xuất 2 hướng (không bắt buộc): extract khối chung thành constant/Markdown partial, HOẶC 1 template chính + flag `outline_depth` bật/tắt section.
+- **Quyết định:** GHI NHẬN là technical debt CÓ THẬT, CHƯA refactor — đây là thay đổi cấu trúc 3 template lớn cùng lúc (rủi ro làm lệch nội dung nếu refactor sai), cần 1 quyết định RIÊNG (có thể cần xem lại toàn bộ 3 template để đảm bảo không bỏ sót câu nào khi tách) — không làm ngầm trong 1 lượt rà soát rủi ro chung. Để mở cho version sau nếu người dùng muốn ưu tiên.
+
+**(3) Cascade behavior khi Regenerate Outline (XÁC NHẬN ĐÚNG — ĐÃ SỬA):**
+- Đúng thực tế: `RegenerateContentOutlinePromptAction` (§4.2) CHỈ update `generated_prompt` + input fields + `updated_by` — KHÔNG đụng `approved_outline`/`article_draft_prompt`/`drafted_article`/`review_prompt` (giữ nguyên, đúng như người dùng suy luận từ code). Rủi ro thật: outline MỚI có thể không còn khớp với Bước 2/3 đã sinh dựa trên outline CŨ, nhưng UI trước đây KHÔNG cảnh báo riêng về việc này.
+- **Đã sửa:** `edit.blade.php` tính `$hasDownstream` (`filled($outline->article_draft_prompt) || filled($outline->review_prompt)`), đổi `data-confirm-regenerate` từ `"1"` (message mặc định) sang message CỤ THỂ cảnh báo cascade khi `$hasDownstream` true — tái dùng CHÍNH cơ chế `data-confirm-regenerate="<message>"` đã tổng quát hoá từ §4.17, không cần sửa JS. `show.blade.php` thêm icon ⚠ + `title` tooltip trên nút "Sửa & Sinh lại" khi `$hasDownstreamSteps` true — cảnh báo NGAY tại trang xem, trước khi bấm vào trang sửa.
+- **Chủ động KHÔNG làm:** tự động XOÁ/CLEAR `article_draft_prompt`/`review_prompt` khi regenerate outline — người dùng có thể có lý do chính đáng giữ lại (VD outline chỉ sửa nhẹ, Bước 2/3 vẫn còn phù hợp) — chỉ CẢNH BÁO, để biên tập viên tự quyết định, cùng triết lý "soft warning không chặn" đã áp dụng cho độ dài prompt (§4.1).
+
+**(4) Soft warning độ dài cho Bước 2 & 3 (KHÔNG PHẢI gap — thông tin đã lỗi thời):**
+- Người dùng nêu: "chưa có tương đương [`WORD_COUNT_WARNING_THRESHOLD`] cho `article_draft_prompt` và `review_prompt`".
+- **Verify lại code:** ĐÃ CÓ từ trước — `BuildArticleDraftPromptAction::WORD_COUNT_WARNING_THRESHOLD = 10000` (§4.17, v1.14) + `BuildArticleReviewPromptAction::WORD_COUNT_WARNING_THRESHOLD = 12000` (§4.20, v1.16), cả 2 đều có banner cảnh báo tương ứng (`$articlePromptIsLong`/`$reviewPromptIsLong`) ở `show.blade.php` từ khi 2 Feature đó ra đời. KHÔNG có thay đổi code cho điểm này — chỉ ghi lại ở đây để xác nhận với người rà soát rằng thông tin trong báo cáo đã lỗi thời (module đã tự vá điểm này song song với việc thêm 2 Feature, không phải bỏ sót).
+
+**(5) UX trang Show quá tải (3 khối prompt lớn + 3 textarea, ĐÃ SỬA):**
+- Đúng thực tế: 3 card "Bước 1/2/3" xếp dọc, mỗi card có textarea input + (khi đã sinh) khối kết quả với 2 chế độ xem — tổng chiều cao trang lớn khi cả 3 bước đã có nội dung.
+- **Đã sửa — stepper điều hướng:** thêm dải badge "Bước 1 ✓ → Bước 2[ ✓] → Bước 3[ ✓]" ngay dưới tiêu đề trang, mỗi badge là anchor link (`#buoc-1`/`#buoc-2`/`#buoc-3`) + đổi màu (`badge-success` khi bước đó đã có kết quả, `badge-ghost` khi chưa) — cho biên tập viên thấy NGAY tiến độ 3 bước mà không cần cuộn hết trang.
+- **Đã sửa — collapsible:** bọc nội dung card "Bước 2"/"Bước 3" (mô tả + form + khối kết quả) trong `<details>` (native HTML, không cần thư viện JS mới) — `<summary>` hiện tiêu đề bước + badge "Đã sinh" nếu đã có prompt. Bước 2 mặc định `open` TRỪ khi `review_prompt` đã có (ngụ ý biên tập viên đã tiến sang Bước 3, tự thu gọn Bước 2 để giảm chiều cao trang — vẫn mở lại được bất kỳ lúc nào, KHÔNG mất nội dung). Bước 3 LUÔN mở (bước cuối, không có bước sau để "đẩy" nó vào nền). Bước 1 (card "Prompt đã sinh") GIỮ NGUYÊN không bọc `<details>` — đây là artifact chính người dùng cần thấy ngay khi vào trang, không cần thu gọn.
+- Không đổi hành vi JS đã có (`contentOutlineCopyPrompt`/`contentOutlineDownloadPrompt`/`contentOutlineMakeCollapsible`) — `<details>` là thuần HTML/CSS, không xung đột với Alpine `x-show`/tabs bên trong.
+
+---
+
 ## 5. Module `ContentFoundation` — điểm tích hợp
 
 - **Picker chuyên mục ở form**: dùng `Modules\ContentFoundation\Actions\ListCategoryFoundationsAction::handle(withFoundationDetails: false)` — cùng cách `CoreIdeaExtractor` tải danh sách rút gọn lúc mở trang (§12.2 tài liệu tham khảo).
@@ -535,27 +954,42 @@ Modules/ContentOutlines/
     Models/
       ContentOutline.php
     Features/
+      Concerns/                                  // §4.17 (v1.14) — dùng chung ≥2 Feature, dời/tách lên đây
+        BuildsSharedPromptBlocks.php             // estimateWordCount() + buildFamilyValuesBlock() — tách từ BuildContentOutlinePromptAction khi BuildArticleDraftPromptAction cần cùng 2 hàm
+        ResolvesCategoryContext.php              // dời từ OutlineGeneration/Actions/Concerns/ — foundation + existing article titles (§4.6, v1.2), giờ dùng chung OutlineGeneration + ArticleDrafting
       OutlineGeneration/
         Actions/
-          BuildContentOutlinePromptAction.php   // §3/§4.1
+          BuildContentOutlinePromptAction.php   // §3/§4.1 — use BuildsSharedPromptBlocks
           CreateContentOutlineAction.php        // validate input → build prompt → lưu bản ghi
           RegenerateContentOutlinePromptAction.php // sửa input → build lại prompt → ghi đè generated_prompt (§4.2)
           LinkContentOutlineToArticleAction.php // gắn/gỡ linked_post_article_id (§4.4 — 1-1)
-          Concerns/
-            ResolvesCategoryContext.php         // dùng chung Create/Regenerate — foundation + existing article titles (§4.6, v1.2)
         Data/
-          ContentOutlineInputData.php            // §3.1 — DTO input dùng chung Create/Regenerate, có outline_depth
+          ContentOutlineInputData.php            // §3.1 — DTO input dùng chung Create/Regenerate/ArticleDrafting, có outline_depth
         Http/
           Requests/
             StoreContentOutlineRequest.php
             UpdateContentOutlineRequest.php
-          ContentOutlineController.php           // trang list/create/edit/show + store/update/destroy/link
+          ContentOutlineController.php           // trang list/create/edit/show + store/update/destroy/link/generateArticlePrompt (§4.17)/generateReviewPrompt (§4.20)
           ContentOutlineApiController.php         // JSON Tabulator cho trang danh sách
           Resources/
             ContentOutlineListResource.php        // + is_long_prompt (§4.1)
         Queries/
           ListContentOutlinesForAdminQuery.php
           ListContentOutlinesForAdminHandler.php
+      ArticleDrafting/                           // §4.17 (v1.14) — "Bước 2": sinh prompt viết bài từ outline đã duyệt
+        Actions/
+          BuildArticleDraftPromptAction.php       // use BuildsSharedPromptBlocks — persona viết + outline nhúng sẵn + guardrail + family values
+          SaveApprovedOutlineAndBuildArticlePromptAction.php // use ResolvesCategoryContext — lưu approved_outline + build + ghi đè article_draft_prompt
+        Http/
+          Requests/
+            StoreApprovedOutlineRequest.php
+      ArticleReview/                              // §4.20 (v1.16) — "Bước 3": sinh prompt soát lỗi/sửa cho bài đã viết xong
+        Actions/
+          BuildArticleReviewPromptAction.php       // use BuildsSharedPromptBlocks — SEO+readability+final-edit gộp 1 prompt, yêu cầu precise edits
+          SaveDraftedArticleAndBuildReviewPromptAction.php // use ResolvesCategoryContext — lưu drafted_article + build + ghi đè review_prompt
+        Http/
+          Requests/
+            StoreDraftedArticleRequest.php
     Providers/
       ContentOutlinesServiceProvider.php   // Gate::define không cần (dùng permission string trực tiếp, cùng CoreIdeaExtractor) — chỉ đăng ký RouteServiceProvider
       RouteServiceProvider.php
@@ -564,6 +998,9 @@ Modules/ContentOutlines/
       xxxx_create_content_outlines_table.php
       xxxx_add_outline_depth_to_content_outlines_table.php   // §4.1 — migration riêng, sau khi bảng đã tồn tại
       xxxx_add_content_role_to_content_outlines_table.php    // §4.9 — migration riêng, sau outline_depth
+      xxxx_add_article_drafting_fields_to_content_outlines_table.php // §4.17 (v1.14) — approved_outline + article_draft_prompt
+      xxxx_add_cta_url_to_content_outlines_table.php // §4.18 (v1.15) — URL CTA thật
+      xxxx_add_article_review_fields_to_content_outlines_table.php // §4.20 (v1.16) — drafted_article + review_prompt
     seeders/
       ContentOutlinesPermissionSeeder.php   // content_outlines.use → platform_content_editor/head/section_editor (§7)
   resources/
@@ -571,8 +1008,8 @@ Modules/ContentOutlines/
       index.blade.php    // danh sách (Tabulator) + modal xoá hiện label/topic (§4.3)
       create.blade.php / edit.blade.php  // dùng chung _form.blade.php
       _form.blade.php    // + outline_depth + ước lượng độ dài client-side (§4.1)
-      show.blade.php      // prompt thô/preview Markdown collapsible + copy + download .md (§4.5) + banner cảnh báo dài (§4.1) + gắn bài viết (§4.4)
-    assets/js/content-outlines.js
+      show.blade.php      // prompt thô/preview Markdown collapsible + copy + download .md (§4.5) + banner cảnh báo dài (§4.1) + gắn bài viết (§4.4) + card "Bước 2 — Viết bài từ outline" (§4.17) + card "Bước 3 — Soát lỗi/Sửa bài" (§4.20) + stepper Bước 1→2→3 + <details> collapsible Bước 2/3 (§4.24)
+    assets/js/content-outlines.js  // §4.17 — 3 hàm copy/download/collapsible tổng quát hoá theo elId/containerId, dùng chung 2 khối prompt
   routes/
     web.php
   tests/
@@ -580,6 +1017,8 @@ Modules/ContentOutlines/
       ContentOutlineAdminTest.php
     Unit/
       BuildContentOutlinePromptActionTest.php
+      BuildArticleDraftPromptActionTest.php      // §4.17 (v1.14)
+      BuildArticleReviewPromptActionTest.php     // §4.20 (v1.16)
   module.json
 ```
 
@@ -592,6 +1031,8 @@ Modules/ContentOutlines/
 - **Permission mới**: `content_outlines.use` (`App\Enums\PermissionEnum::CONTENT_OUTLINES_USE`) — seed qua `ContentOutlinesPermissionSeeder`, gán cho `platform_content_editor`/`platform_content_head`/`platform_section_editor` — **CÙNG NHÓM CHÍNH XÁC** với `CORE_IDEA_EXTRACTOR_USE`/`VIDEO_IDEA_EXTRACTOR_USE`/`CONTENT_FOUNDATION_USE` (không phải permission mới độc lập theo `config/permissions.php` Lớp B).
 - Route gate phẳng bằng middleware `can:content_outlines.use` (không cần Policy riêng theo model — §2.1 đã chốt không có owner-based ACL, §4.3 ghi rõ rủi ro đi kèm).
 - Sidebar: đặt cùng nhóm "Trích ý bài viết"/"Content Foundation"/"Trích ý video" (route `backend.contentoutlines.index`, nhãn **"Dàn ý nội dung"**), gate bằng `@can(\App\Enums\PermissionEnum::CONTENT_OUTLINES_USE->value)`.
+- **§4.17 (v1.14)** — route `generate-article-prompt` ("Bước 2") dùng CHUNG permission `content_outlines.use`, KHÔNG seed permission mới — đây là hành động trên CÙNG resource `ContentOutline` (cùng ai xem/sửa outline thì cũng dùng được "Bước 2"), không phải tính năng độc lập cần phân quyền riêng.
+- **§4.20 (v1.16)** — route `generate-review-prompt` ("Bước 3") cùng lý do, dùng CHUNG `content_outlines.use`.
 
 ---
 
@@ -608,6 +1049,9 @@ Modules/ContentOutlines/
 'post_category_uuid'   => ['nullable', 'string', 'uuid', 'exists:post_categories,uuid'],
 'target_audience'      => ['nullable', 'string', 'max:500'],
 'content_goal'         => ['nullable', 'string', 'max:2000'],
+// §4.18 (v1.15) — URL DUY NHẤT dùng để chèn vào câu CTA, KHÁC competitor_urls (free text) —
+// validate url() thật vì sẽ nhúng thẳng vào câu văn cuối outline/bài viết.
+'cta_url'              => ['nullable', 'url', 'max:500'],
 'tone_style'           => ['nullable', 'string', 'max:2000'],
 // KHÔNG validate 'url' cho từng dòng competitor_urls — người dùng có thể dán URL kèm ghi chú
 // (VD "https://... (bài này thiếu ví dụ thực tế)"), ép format URL thuần sẽ cản việc đó; đây là
@@ -624,6 +1068,21 @@ Modules/ContentOutlines/
 
 `UpdateContentOutlineRequest` — cùng rules, dùng khi sửa input rồi "Sinh lại" (`RegenerateContentOutlinePromptAction`, §4.2).
 
+**§4.17 (v1.14) — `StoreApprovedOutlineRequest`:**
+
+```php
+// max:50000 là ngưỡng AN TOÀN CỨNG (chặn dán nhầm cả 1 trang web/tài liệu không liên quan) —
+// KHÁC BuildArticleDraftPromptAction::WORD_COUNT_WARNING_THRESHOLD (soft warning, không chặn).
+'approved_outline' => ['required', 'string', 'max:50000'],
+```
+
+**§4.20 (v1.16) — `StoreDraftedArticleRequest`:**
+
+```php
+// max:100000 — cao hơn StoreApprovedOutlineRequest (1 BÀI VIẾT hoàn chỉnh thường dài hơn 1 outline).
+'drafted_article' => ['required', 'string', 'max:100000'],
+```
+
 ### 8.2 Routes (`routes/web.php`)
 
 ```php
@@ -639,6 +1098,10 @@ Route::middleware(['auth', 'can:content_outlines.use'])
         Route::put('{outline}', [ContentOutlineController::class, 'update'])->name('update'); // = "Sinh lại"
         Route::delete('{outline}', [ContentOutlineController::class, 'destroy'])->name('destroy');
         Route::post('{outline}/link-article', [ContentOutlineController::class, 'linkArticle'])->name('link-article');
+        // §4.17 (v1.14) — "Bước 2": lưu approved_outline + sinh article_draft_prompt.
+        Route::post('{outline}/article-prompt', [ContentOutlineController::class, 'generateArticlePrompt'])->name('generate-article-prompt');
+        // §4.20 (v1.16) — "Bước 3": lưu drafted_article + sinh review_prompt.
+        Route::post('{outline}/review-prompt', [ContentOutlineController::class, 'generateReviewPrompt'])->name('generate-review-prompt');
     });
 
 Route::middleware(['auth', 'can:content_outlines.use'])
@@ -654,14 +1117,15 @@ Route::middleware(['auth', 'can:content_outlines.use'])
 ### 8.3 Views
 
 - `index.blade.php` — `@extends('layouts.backend')`, Tabulator danh sách (cột: label + badge "dài" nếu vượt ngưỡng §4.1, topic, target_keyword, category, ngày tạo, người tạo, đã gắn bài viết?), nút "Tạo dàn ý mới"; modal xoá hiện RÕ label/topic (§4.3).
-- `create.blade.php`/`edit.blade.php` dùng chung `_form.blade.php` (picker category qua JS gọi `ContentFoundation` API, cùng pattern `CoreIdeaExtractor`; field `outline_depth` + ước lượng độ dài client-side, §4.1). `edit.blade.php` gắn `data-confirm-regenerate` (§4.2).
-- `show.blade.php` — toggle "Prompt thô" (textarea readonly, dùng Copy)/"Xem trước Markdown" (`Str::markdown()`, collapsible theo `## `, §4.5); nút "Copy"/"Download .md"; banner cảnh báo khi prompt vượt ngưỡng độ dài (§4.1); nút "Sửa & Sinh lại" (điều hướng `edit`); form "Gắn vào bài viết" (1-1, §4.4, dán UUID `PostArticle`, gọi `link-article`).
+- `create.blade.php`/`edit.blade.php` dùng chung `_form.blade.php` (picker category qua JS gọi `ContentFoundation` API, cùng pattern `CoreIdeaExtractor`; field `outline_depth` + ước lượng độ dài client-side, §4.1; field `cta_url` §4.18 v1.15, đặt cạnh "Mục tiêu bài viết"). `edit.blade.php` gắn `data-confirm-regenerate` (§4.2) — message ĐỘNG cảnh báo cascade Bước 2/3 khi đã có (§4.24, v1.20).
+- `show.blade.php` — toggle "Prompt thô" (textarea readonly, dùng Copy)/"Xem trước Markdown" (`Str::markdown()`, collapsible theo `## `, §4.5); nút "Copy"/"Download .md"; banner cảnh báo khi prompt vượt ngưỡng độ dài (§4.1); nút "Sửa & Sinh lại" (điều hướng `edit`); form "Gắn vào bài viết" (1-1, §4.4, dán UUID `PostArticle`, gọi `link-article`); hiện `cta_url` ở panel chi tiết nếu có (§4.18, v1.15). **§4.17 (v1.14)** — thêm card "Bước 2 — Viết bài từ outline": `<textarea name="approved_outline">` (prefill `$outline->approved_outline`) trong `<form>` POST `generate-article-prompt`, `data-confirm-regenerate="<message riêng>"` CHỈ gắn khi `article_draft_prompt` đã tồn tại; nếu đã có `article_draft_prompt` — hiện CÙNG UX toggle/copy/download/banner với khối outline, dùng 3 hàm JS đã tổng quát hoá theo `elId`/`containerId` (`content-outline-article-prompt`/`content-outline-article-preview`/`content-outline-article-copy-btn`). **§4.20 (v1.16)** — thêm card "Bước 3 — Soát lỗi/Sửa bài", đối xứng hoàn toàn với card "Bước 2" (`<textarea name="drafted_article">`, `data-confirm-regenerate` khi đã có `review_prompt`, hiện kết quả với `elId`/`containerId` `content-outline-review-*`).
 
 ---
 
-## 9. Ngoài phạm vi (v1 - v1.11)
+## 9. Ngoài phạm vi (v1 - v1.21)
 
-- Gọi AI Provider trong app (§0).
+- Gọi AI Provider trong app (§0) — **kể cả cho Feature `ArticleDrafting`/"Bước 2" (§4.17, v1.14) và `ArticleReview`/"Bước 3" (§4.20, v1.16)**: dù mục đích cuối là "viết bài"/"soát lỗi", module VẪN CHỈ sinh 1 prompt, không tự chạy AI. Đã hỏi rõ người dùng trước khi triển khai cả 2 lần — cả 2 lần xác nhận mục tiêu CHỈ là sinh prompt.
+- **Tự động áp dụng đề xuất sửa từ `review_prompt` vào `drafted_article`/`PostArticle`** (§4.20, v1.16) — Action chỉ SINH đề xuất, biên tập viên tự đọc và áp dụng (hoặc không) — không có cơ chế "apply fix" tự động nào.
 - Tự fetch/crawl nội dung `competitor_urls`.
 - Tự tạo `PostArticle` từ outline.
 - Versioning nhiều bản outline theo thời gian (§4.2 — "Sinh lại" ghi đè, không giữ lịch sử).
@@ -678,14 +1142,28 @@ Route::middleware(['auth', 'can:content_outlines.use'])
 - **Tích hợp tool SEO ngoài** (Ahrefs/SEMrush/Surfer SEO/Clearscope/Google Search Console, đối chiếu tangence.in/blog/seo-content-creation, §4.13) — module chỉ SINH prompt text, không gọi API/tool ngoài nào (§0); các tool này người dùng tự dùng độc lập nếu cần.
 - **Audit/cập nhật content ĐÃ PUBLISH theo lịch cố định (6-12 tháng)** (đối chiếu tangence.in, §4.13) — thuộc tầng vận hành HẬU-publish, khác tầng "sinh outline trước khi viết" mà module này phục vụ; cùng lý do đã loại "chấm điểm content đã publish" ở §4.10.
 - **Kiến trúc so sánh 4 nguồn (Google Search Central/Ahrefs/Semrush/Bruce Clay/SEO.com) + workflow tự học SEO cho beginner** (đối chiếu moodymedia.io/blog/how-to-write-for-seo, §4.14) — nội dung giáo dục/định hướng nghề nghiệp, không phải chỉ dẫn kỹ thuật cho 1 outline cụ thể; chỉ lấy 4 điểm on-page cụ thể (từ khoá gần đầu, Meta 140-160+CTA, keyword trong 150 từ đầu, chặn nhồi từ khoá).
-- Đối chiếu framework/nguồn bổ sung khác ngoài các nguồn đã dẫn ở §0/§4.6/§4.7/§4.9/§4.10/§4.11/§4.12/§4.13/§4.14 — để mở cho các vòng tinh chỉnh sau dựa trên phản hồi sử dụng thật (cùng tinh thần "Adaptive" đã áp dụng cho `CoreIdeaExtractor.md`, xem changelog module đó).
+- **Tự động tạo/cập nhật `PostArticle` từ `article_draft_prompt`/kết quả AI trả về** (§4.17, v1.14) — giữ đúng non-goal "Tự tạo `PostArticle` từ outline" đã có từ v1.0, mở rộng sang cả kết quả của "Bước 2".
+- **Versioning nhiều bản `article_draft_prompt`** (§4.17, v1.14) — cùng quyết định không-versioning đã áp dụng cho `generated_prompt`.
+- **Social snippet (X/Twitter, LinkedIn) + tags cho mạng xã hội** (đối chiếu "10-step AI prompt chain", §4.18, v1.15) — người dùng xác nhận KHÔNG muốn thêm khi được hỏi trực tiếp; đây là artifact PHÂN PHỐI/QUẢNG BÁ, khác tầng "outline + bài viết cho 1 bài" mà module phục vụ, cùng lý do đã từ chối phần lớn checklist content-marketing tổng thể ở §4.6.
+- **Tự động hoá chạy chuỗi 10 prompt trong AI ngoài** (bản chất sản phẩm quảng cáo bên thứ 3 trong nguồn của §4.18) — vi phạm trực tiếp §0 mục 1 (không gọi AI Provider trong app); module KHÔNG xác nhận/đánh giá/tích hợp bất kỳ công cụ bên thứ 3 nào được quảng cáo trong các nguồn tham khảo.
+- **"Draft section-by-section" + Section Expansion Prompt** (đối chiếu blog.qolaba.ai, §4.21) — người dùng xác nhận GIỮ model "1 prompt viết cả bài" hiện tại, KHÔNG thêm "Bước 2b" tách theo section — lý do đầy đủ ở §4.21.
+- **Mật độ từ khoá theo % cụ thể (1-2%)** (đối chiếu blog.qolaba.ai, §4.21) — MÂU THUẪN với §4.14 (đã chốt "không có ngưỡng % bắt buộc") — giữ nguyên §4.14, không áp dụng.
+- **Collaborative Publishing** (real-time editing/version control/vai trò team riêng, đối chiếu blog.qolaba.ai, §4.21) — mô tả 1 sản phẩm/platform khác hẳn tầng "sinh prompt cho 1 bài" của module.
+- **Grammarly/Quetext (đạo văn)/Ubersuggest (từ khoá)** (đối chiếu checkcopywriting.com, §4.22) — tool ngoài, module không tích hợp tool ngoài (§0); biên tập viên tự dùng độc lập nếu cần.
+- **"Mention keyword ít nhất 3 lần xuyên suốt bài"** (đối chiếu tofuhq.com, §4.23) — MÂU THUẪN với §4.14/§4.21 (không có ngưỡng lặp từ khoá bắt buộc) — giữ nguyên quyết định cũ, không áp dụng.
+- **Extract 3 biến thể BOTTOM thành constant/partial chung** (§4.24, v1.20 — technical debt đã ghi nhận) — CHƯA làm, để mở cho version sau nếu người dùng muốn ưu tiên; cần 1 quyết định RIÊNG (rủi ro lệch nội dung khi refactor 3 template lớn cùng lúc).
+- **Cắt giảm chỉ dẫn ở `detailed` để giảm instruction overload** (§4.24, v1.20) — CHƯA làm, đây là hành động CÓ ĐIỀU KIỆN chờ dữ liệu sử dụng thật cho thấy AI ngoài bỏ sót chỉ dẫn — không cắt giảm khi chưa có bằng chứng.
+- **Tự động XOÁ/CLEAR Bước 2/3 khi regenerate outline** (§4.24, v1.20) — chủ động KHÔNG làm, chỉ CẢNH BÁO — biên tập viên có thể có lý do chính đáng giữ lại Bước 2/3 dù outline đã đổi nhẹ.
+- Đối chiếu framework/nguồn bổ sung khác ngoài các nguồn đã dẫn ở §0/§4.6/§4.7/§4.9/§4.10/§4.11/§4.12/§4.13/§4.14/§4.15/§4.18/§4.19/§4.21/§4.22/§4.23 — để mở cho các vòng tinh chỉnh sau dựa trên phản hồi sử dụng thật (cùng tinh thần "Adaptive" đã áp dụng cho `CoreIdeaExtractor.md`, xem changelog module đó).
 
 ---
 
 ## 10. Testing
 
-- **`BuildContentOutlinePromptActionTest` (Unit)**: input tối thiểu (chỉ topic+keyword) → prompt vẫn hợp lệ, các khối optional bị bỏ đúng cách khi field null; input đầy đủ + có `$foundation` → MIDDLE xuất hiện đủ các gợi ý map từ `pain_points`/`objections`/`decision_criteria`; `$foundation = null` → MIDDLE chỉ còn khối "Hệ giá trị gia đình" (vẫn LUÔN xuất hiện, §3.2); `language = 'en'` → TOP ghi "English". **(v1.1 bổ sung)**: `outline_depth = 'brief'` → field foundation bị cắt đúng ngưỡng (300 ký tự) + số `competitor_urls` bị giới hạn đúng (3); `outline_depth = 'detailed'` → BOTTOM có "Đánh giá độ khó cạnh tranh"; `estimateWordCount()` đếm đúng với chuỗi tiếng Việt có dấu. **(v1.2 bổ sung)**: `existingArticleTitles` không rỗng → khối "Bài viết đã có trong chuyên mục" xuất hiện, cắt đúng theo `outline_depth`; rỗng → không xuất hiện khối; "Lưu ý EEAT" xuất hiện ở CẢ 3 `outline_depth`. **(v1.3 bổ sung)**: bước "luận điểm chính" + mục `## Luận điểm chính` + chỉ dẫn "dạng ngữ pháp" (song song) xuất hiện ở CẢ 3 `outline_depth`; chỉ dẫn "3-5 điểm/H3" chỉ xuất hiện ở `standard`/`detailed` (không phải `brief`). **(v1.5 bổ sung)**: bước "USP" + mục `## USP` + ghi chú "khối lượng tìm kiếm" + named flow pattern ("giải quyết vấn đề") xuất hiện ở CẢ 3 `outline_depth`; chỉ dẫn benchmark "BẰNG hoặc NHIỀU HƠN" chỉ ở `standard`/`detailed`; self-check mở rộng ("từ khoá mục tiêu có ở tiêu đề", "bao quát các chủ đề phụ chính") chỉ ở `standard`/`detailed`. **(v1.6 bổ sung)**: `content_role = null` → không có ghi chú vai trò/placeholder rò ra ngoài; `content_role = 'pillar'`/`'cluster'` → dòng "Vai trò nội dung" ở TOP CẢ 3 depth, nhưng ghi chú "Vai trò TRỤ CỘT"/"Vai trò CỤM" ở BOTTOM chỉ xuất hiện ở `standard`/`detailed` (không ở `brief`); nội dung ghi chú đổi đúng theo `$hasExistingArticles` (có/không có bài trong "Bài viết đã có trong chuyên mục" để link tới/lên/ngang). **(v1.7 bổ sung)**: mục `## CTA` + "Độ tin cậy dữ liệu" + mốc "12 tháng" xuất hiện ở CẢ 3 `outline_depth`. **(v1.8 bổ sung)**: "answer-first" + "trả lời TRỰC TIẾP" ở bước H2 xuất hiện CẢ 3 `outline_depth`; "AI answer engine" ở bước research xuất hiện CẢ 3 `outline_depth`; "Không bịa số liệu"/"cần biên tập viên xác minh" xuất hiện CẢ 3 `outline_depth`; "danh sách/bullet"/"không thả bullet trơ trọi" chỉ ở `standard`/`detailed` (không ở `brief` — không có bước "làm rõ nội dung heading"); "±10%"/"kể cả phần mở đầu" chỉ ở `detailed` (không ở `brief`/`standard` — không có bước ước lượng số từ mỗi phần). **(v1.9 bổ sung)**: "structure archetype" + "## Kiểu bài" + liệt kê 4 kiểu bài chỉ ở `standard`/`detailed` (không ở `brief`); "BẮT ĐẦU đọc" + "bỏ bài này đi tìm bài khác" (intent map 3 câu hỏi) chỉ ở `standard`/`detailed`; "nhãn chung" (Label H3) + "400 từ" chỉ ở `standard`/`detailed`; "đối thủ điển hình" (differentiation note mỗi H2) chỉ ở `standard`/`detailed`; "THẬT quan sát được" (FAQ nguồn PAA thật) ở CẢ 3 `outline_depth`; "anchor text" chỉ ở `standard`/`detailed`. **(v1.10 bổ sung)**: "Schema markup" + "FAQPage" xuất hiện ở CẢ 3 `outline_depth`; "HowTo"/"ItemList" (theo structure archetype) chỉ ở `standard`/`detailed` (không ở `brief` — không có bước chọn kiểu bài); "alt text" chỉ ở `standard`/`detailed` (không ở `brief` — không có bước "làm rõ nội dung heading"). **(v1.11 bổ sung)**: "GẦN ĐẦU" xuất hiện ở CẢ 3 `outline_depth`; "140-160 ký tự" + "lời mời hành động" xuất hiện ở CẢ 3 `outline_depth`; "100-150 từ đầu bài" xuất hiện ở CẢ 3 `outline_depth`; "Mật độ từ khoá" + "keyword stuffing" xuất hiện ở CẢ 3 `outline_depth`.
-- **`ContentOutlineAdminTest` (Feature)**: user có `content_outlines.use` tạo được outline, `generated_prompt` lưu đúng khớp kết quả `BuildContentOutlinePromptAction`; user KHÔNG có permission → 403 mọi route; sửa input rồi update → `generated_prompt` được ghi đè (khác giá trị cũ); `link-article` gắn đúng `linked_post_article_id`; xoá outline → không còn trong danh sách. **(v1.1 bổ sung)**: update (regenerate) KHÔNG đổi `linked_post_article_id` đã gắn từ trước; update LUÔN cập nhật `updated_by`.
+- **`BuildContentOutlinePromptActionTest` (Unit)**: input tối thiểu (chỉ topic+keyword) → prompt vẫn hợp lệ, các khối optional bị bỏ đúng cách khi field null; input đầy đủ + có `$foundation` → MIDDLE xuất hiện đủ các gợi ý map từ `pain_points`/`objections`/`decision_criteria`; `$foundation = null` → MIDDLE chỉ còn khối "Hệ giá trị gia đình" (vẫn LUÔN xuất hiện, §3.2); `language = 'en'` → TOP ghi "English". **(v1.1 bổ sung)**: `outline_depth = 'brief'` → field foundation bị cắt đúng ngưỡng (300 ký tự) + số `competitor_urls` bị giới hạn đúng (3); `outline_depth = 'detailed'` → BOTTOM có "Đánh giá độ khó cạnh tranh"; `estimateWordCount()` đếm đúng với chuỗi tiếng Việt có dấu. **(v1.2 bổ sung)**: `existingArticleTitles` không rỗng → khối "Bài viết đã có trong chuyên mục" xuất hiện, cắt đúng theo `outline_depth`; rỗng → không xuất hiện khối; "Lưu ý EEAT" xuất hiện ở CẢ 3 `outline_depth`. **(v1.3 bổ sung)**: bước "luận điểm chính" + mục `## Luận điểm chính` + chỉ dẫn "dạng ngữ pháp" (song song) xuất hiện ở CẢ 3 `outline_depth`; chỉ dẫn "3-5 điểm/H3" chỉ xuất hiện ở `standard`/`detailed` (không phải `brief`). **(v1.5 bổ sung)**: bước "USP" + mục `## USP` + ghi chú "khối lượng tìm kiếm" + named flow pattern ("giải quyết vấn đề") xuất hiện ở CẢ 3 `outline_depth`; chỉ dẫn benchmark "BẰNG hoặc NHIỀU HƠN" chỉ ở `standard`/`detailed`; self-check mở rộng ("từ khoá mục tiêu có ở tiêu đề", "bao quát các chủ đề phụ chính") chỉ ở `standard`/`detailed`. **(v1.6 bổ sung)**: `content_role = null` → không có ghi chú vai trò/placeholder rò ra ngoài; `content_role = 'pillar'`/`'cluster'` → dòng "Vai trò nội dung" ở TOP CẢ 3 depth, nhưng ghi chú "Vai trò TRỤ CỘT"/"Vai trò CỤM" ở BOTTOM chỉ xuất hiện ở `standard`/`detailed` (không ở `brief`); nội dung ghi chú đổi đúng theo `$hasExistingArticles` (có/không có bài trong "Bài viết đã có trong chuyên mục" để link tới/lên/ngang). **(v1.7 bổ sung)**: mục `## CTA` + "Độ tin cậy dữ liệu" + mốc "12 tháng" xuất hiện ở CẢ 3 `outline_depth`. **(v1.8 bổ sung)**: "answer-first" + "trả lời TRỰC TIẾP" ở bước H2 xuất hiện CẢ 3 `outline_depth`; "AI answer engine" ở bước research xuất hiện CẢ 3 `outline_depth`; "Không bịa số liệu"/"cần biên tập viên xác minh" xuất hiện CẢ 3 `outline_depth`; "danh sách/bullet"/"không thả bullet trơ trọi" chỉ ở `standard`/`detailed` (không ở `brief` — không có bước "làm rõ nội dung heading"); "±10%"/"kể cả phần mở đầu" chỉ ở `detailed` (không ở `brief`/`standard` — không có bước ước lượng số từ mỗi phần). **(v1.9 bổ sung)**: "structure archetype" + "## Kiểu bài" + liệt kê 4 kiểu bài chỉ ở `standard`/`detailed` (không ở `brief`); "BẮT ĐẦU đọc" + "bỏ bài này đi tìm bài khác" (intent map 3 câu hỏi) chỉ ở `standard`/`detailed`; "nhãn chung" (Label H3) + "400 từ" chỉ ở `standard`/`detailed`; "đối thủ điển hình" (differentiation note mỗi H2) chỉ ở `standard`/`detailed`; "THẬT quan sát được" (FAQ nguồn PAA thật) ở CẢ 3 `outline_depth`; "anchor text" chỉ ở `standard`/`detailed`. **(v1.10 bổ sung)**: "Schema markup" + "FAQPage" xuất hiện ở CẢ 3 `outline_depth`; "HowTo"/"ItemList" (theo structure archetype) chỉ ở `standard`/`detailed` (không ở `brief` — không có bước chọn kiểu bài); "alt text" chỉ ở `standard`/`detailed` (không ở `brief` — không có bước "làm rõ nội dung heading"). **(v1.11 bổ sung)**: "GẦN ĐẦU" xuất hiện ở CẢ 3 `outline_depth`; "140-160 ký tự" + "lời mời hành động" xuất hiện ở CẢ 3 `outline_depth`; "100-150 từ đầu bài" xuất hiện ở CẢ 3 `outline_depth`; "Mật độ từ khoá" + "keyword stuffing" xuất hiện ở CẢ 3 `outline_depth`. **(v1.12 bổ sung)**: "SERP feature" xuất hiện ở CẢ 3 `outline_depth` (bước Research); "LẶP LẠI" (gom nhóm heading đối thủ) chỉ ở `standard`/`detailed`; khớp định dạng featured snippet (câu "format câu trả lời mở đầu ĐÚNG dạng đó") xuất hiện ở CẢ 3 `outline_depth` (mở rộng answer-first). **(v1.13 bổ sung)**: H2 "Kết luận" (câu "Dàn ý nên khép lại bằng 1 H2 \"Kết luận\"") xuất hiện ở CẢ 3 `outline_depth`. **(v1.14 — REVERT, xem §4.17)**: khối "## Bước tiếp theo"/placeholder `{{DRAFT_PROMPT_TEMPLATE}}` của v1.13 KHÔNG còn xuất hiện trong `generated_prompt` ở CẢ 3 `outline_depth` (test v1.13 cho case này bị XOÁ, không phải bỏ sót); `estimateWordCount()` (đã dời sang `BuildsSharedPromptBlocks`, gọi qua `BuildContentOutlinePromptAction::estimateWordCount()`) vẫn hoạt động giống cũ. **(v1.15 bổ sung, §4.18)**: `cta_url` có giá trị → TOP có dòng "CTA URL:", bước CTA (CẢ 3 depth) có câu "mời truy cập ĐÚNG URL đó"; `cta_url = null` → không có dòng "CTA URL:" ở TOP, bước CTA giữ nguyên chỉ dẫn chung (không lỗi/không thừa câu); bước brainstorm tiêu đề (CẢ 3 depth) có câu "MẠNH NHẤT". **(v1.16 bổ sung, §4.19)**: "before-after" xuất hiện ở bước làm rõ heading chỉ `standard`/`detailed` (không ở `brief` — không có bước đó); "2-3 phương án Meta Title"/"2-3 phương án Meta Description" xuất hiện ở CẢ 3 `outline_depth` (thay cho 1 phương án cũ); "case study" xuất hiện trong câu "Không bịa số liệu" ở CẢ 3 `outline_depth`. **(v1.17 bổ sung, §4.21)**: "infographic" xuất hiện ở bước làm rõ heading chỉ `standard`/`detailed` (không ở `brief` — không có bước đó, giống pattern "alt text"/"before-after"). **(v1.18 bổ sung, §4.22)**: "testimonial THẬT" xuất hiện ở bước làm rõ heading (câu mở rộng differentiation note) chỉ `standard`/`detailed` (không ở `brief` — không có bước đó, cùng pattern). **(v1.19 bổ sung, §4.23)**: "TÊN chuyên gia" xuất hiện trong câu "Độ tin cậy dữ liệu" chỉ `standard`/`detailed` (không ở `brief` — dòng EEAT rút gọn của `brief` không có câu "trích dẫn 2-3 nguồn" để gắn vào, cùng tinh thần rút gọn §4.1 — KHÔNG phải bỏ sót).
+- **`BuildArticleDraftPromptActionTest` (Unit, v1.14, §4.17)**: `handle()` với `$approvedOutline` bất kỳ → prompt trả về CHỨA NGUYÊN VĂN outline đó (không cắt/biến đổi); `desired_word_count = null` → dùng câu fallback "độ dài hợp lý theo outline"; có `tone_style` (hoặc fallback `foundation?->style_sample`) → xuất hiện dòng "Giọng văn"; `language = 'en'` → ghi "English"; `$foundation = null` → vẫn còn khối "Hệ giá trị gia đình Việt Nam" (LUÔN xuất hiện, cùng nguyên tắc §3.2); có "Lưu ý EEAT" + "Định dạng output" ở MỌI trường hợp; `estimateWordCount()` (qua `BuildsSharedPromptBlocks`) đếm đúng trên prompt đã sinh. **(v1.15 bổ sung, §4.18)**: `input->cta_url` có giá trị → prompt CHỨA NGUYÊN VĂN URL đó trong câu chuyển tiếp kết bài; `cta_url = null` → dùng câu fallback CTA chung (không lỗi); LUÔN có bullet "Đoạn mở bài" (hook) + bullet "scannable" (đoạn ngắn/bullet/bold) bất kể input. **(v1.16 bổ sung, §4.19)**: prompt LUÔN cấm cụ thể cụm "trong thế giới hiện đại ngày nay" (hoặc tương đương) trong bullet "Đoạn mở bài"; "case study" xuất hiện trong câu "Không bịa số liệu".
+- **`BuildArticleReviewPromptActionTest` (Unit, v1.16, §4.20)**: `handle()` với `$draftedArticle` bất kỳ → prompt trả về CHỨA NGUYÊN VĂN bài viết đó; LUÔN có đủ 4 mục "Đánh giá SEO"/"Đánh giá độ dễ đọc"/"Rà soát cuối"/"Đề xuất sửa"; có câu "KHÔNG viết lại toàn bộ bài" (precise edits, không full rewrite); `search_intent = null` → dùng câu fallback "chưa xác định trước — bạn tự đánh giá"; `$foundation = null` → vẫn còn khối "Hệ giá trị gia đình Việt Nam"; `estimateWordCount()` (qua `BuildsSharedPromptBlocks`) đếm đúng trên prompt đã sinh.
+- **`ContentOutlineAdminTest` (Feature)**: user có `content_outlines.use` tạo được outline, `generated_prompt` lưu đúng khớp kết quả `BuildContentOutlinePromptAction`; user KHÔNG có permission → 403 mọi route; sửa input rồi update → `generated_prompt` được ghi đè (khác giá trị cũ); `link-article` gắn đúng `linked_post_article_id`; xoá outline → không còn trong danh sách. **(v1.1 bổ sung)**: update (regenerate) KHÔNG đổi `linked_post_article_id` đã gắn từ trước; update LUÔN cập nhật `updated_by`. **(v1.14 bổ sung, §4.17)**: `POST generate-article-prompt` với `approved_outline` hợp lệ → `approved_outline`/`article_draft_prompt` được lưu đúng, `article_draft_prompt` khớp kết quả `BuildArticleDraftPromptAction`, `updated_by` cập nhật; gọi LẦN 2 với outline khác → `article_draft_prompt` bị GHI ĐÈ (khác giá trị cũ), `generated_prompt`/`linked_post_article_id` KHÔNG đổi; thiếu `approved_outline` → validation error; user KHÔNG có `content_outlines.use` → 403. **(v1.15 bổ sung, §4.18)**: `cta_url` không phải URL hợp lệ (VD "abc") → validation error khi store/update; `cta_url` hợp lệ → lưu đúng, hiển thị đúng ở `show.blade.php`. **(v1.16 bổ sung, §4.20)**: `POST generate-review-prompt` với `drafted_article` hợp lệ → `drafted_article`/`review_prompt` lưu đúng, khớp kết quả `BuildArticleReviewPromptAction`, `updated_by` cập nhật; gọi LẦN 2 → `review_prompt` GHI ĐÈ, `generated_prompt`/`approved_outline`/`article_draft_prompt`/`linked_post_article_id` KHÔNG đổi; thiếu `drafted_article` → validation error; user KHÔNG có permission → 403.
 
 ---
 
@@ -707,3 +1185,13 @@ Route::middleware(['auth', 'can:content_outlines.use'])
 14. **(v1.9)** §4.12 — sửa nội dung văn bản `standard`/`detailed` BOTTOM: chèn bước mới "Chọn kiểu bài (structure archetype)" trước bước dựng H2/H3 (renumbering các bước sau đó) + mục output `## Kiểu bài`; mở rộng bước "Xác nhận ý định tìm kiếm" thành đoạn 3 câu hỏi; bước "Dựng cấu trúc H2/H3" thêm quy tắc Content-H3/Label-H3 + ngưỡng 400 từ; bước "Làm rõ nội dung heading" thêm differentiation note mỗi H2; bước "Gợi ý internal link" thêm anchor text. CẢ 3 biến thể BOTTOM (kể cả `brief`): bước FAQ thêm yêu cầu nguồn PAA thật. Không đổi signature/DB.
 15. **(v1.10)** §4.13 — sửa nội dung văn bản 3 biến thể BOTTOM: bước Meta (CẢ 3 depth) thêm gợi ý loại Schema markup (Article/BlogPosting mặc định, +FAQPage nếu có khối FAQ, +HowTo/+ItemList theo structure archetype ở `standard`/`detailed`); bước "Làm rõ nội dung heading" (`standard`/`detailed`) thêm yêu cầu alt text ngắn cho mỗi hình ảnh gợi ý. Không đổi signature/DB.
 16. **(v1.11)** §4.14 — sửa nội dung văn bản 3 biến thể BOTTOM: bước tiêu đề (H1) + bước Meta đổi "chứa từ khoá" → "chứa từ khoá ĐẶT GẦN ĐẦU"; Meta Description đổi ngưỡng "≤155" → "140-160" ký tự + thêm yêu cầu câu chủ động + lời mời hành động; bước thesis thêm yêu cầu từ khoá trong 100-150 từ đầu bài; nối thêm "Mật độ từ khoá" vào dòng Lưu ý EEAT. CẢ 3 biến thể BOTTOM (kể cả `brief`). Không đổi signature/DB.
+17. **(v1.12)** §4.15 — sửa nội dung văn bản 3 biến thể BOTTOM: bước Research (CẢ 3 depth) thêm yêu cầu ghi chú SERP feature quan sát được; bước dựng H2/H3 mở rộng answer-first thêm yêu cầu khớp định dạng featured snippet; bước Research (`standard`/`detailed`) thêm yêu cầu gom nhóm heading LẶP LẠI giữa đối thủ + bước dựng H2/H3 + self-check tham chiếu lại danh sách đó. Không đổi signature/DB.
+18. **(v1.13)** §4.16 — sửa nội dung văn bản 3 biến thể BOTTOM: bước dựng H2 thêm yêu cầu H2 "Kết luận" khép lại Dàn ý (CẢ 3 depth). Ban đầu CÒN thêm 1 khối "## Bước tiếp theo" tĩnh (`buildDraftPromptTemplate()`) + placeholder `{{ROLE_LINK_NOTE}}`-style `{{DRAFT_PROMPT_TEMPLATE}}` — **đã REVERT ở bước 19 dưới đây (v1.14)**, không triển khai riêng bước này nữa nếu làm lại từ đầu (ghi lại để hiểu TẠI SAO `buildBottom()` từng đổi signature rồi đổi lại).
+19. **(v1.14)** §4.17 — Feature `ArticleDrafting` thật: (a) migration `approved_outline`/`article_draft_prompt`; (b) tách `BuildsSharedPromptBlocks` (estimateWordCount/buildFamilyValuesBlock) + dời `ResolvesCategoryContext` lên `Features/Concerns/`; (c) revert `BuildContentOutlinePromptAction::buildBottom()` về signature gốc + XOÁ `buildDraftPromptTemplate()`/placeholder `{{DRAFT_PROMPT_TEMPLATE}}` (supersede v1.13 phần đó); (d) `BuildArticleDraftPromptAction` + `SaveApprovedOutlineAndBuildArticlePromptAction` (Feature mới); (e) `StoreApprovedOutlineRequest` + `ContentOutlineController::generateArticlePrompt()` + route `POST {outline}/article-prompt`; (f) `show.blade.php` thêm card "Bước 2" + tổng quát hoá 3 hàm JS copy/download/collapsible theo `elId`/`containerId`. Không đổi permission (dùng chung `content_outlines.use`).
+20. **(v1.15)** §4.18 — đã hỏi người dùng phạm vi trước khi làm (áp dụng 4/6 điểm, từ chối social snippet + tự động hoá AI): (a) migration `cta_url`; (b) `ContentOutlineInputData`/`StoreContentOutlineRequest`/`UpdateContentOutlineRequest`/`CreateContentOutlineAction`/`RegenerateContentOutlinePromptAction` thêm field `cta_url` (validate `url()`); (c) `BuildContentOutlinePromptAction`: TOP thêm dòng "CTA URL", bước CTA (CẢ 3 depth) + bước brainstorm tiêu đề (CẢ 3 depth, "MẠNH NHẤT" + lý do) sửa nội dung văn bản; (d) `BuildArticleDraftPromptAction` thêm bullet "Đoạn mở bài" (hook) + bullet "scannable" (đoạn ngắn/bullet/bold) + bullet "Đoạn kết bài" (dùng `cta_url` nếu có, fallback CTA chung nếu không); (e) `_form.blade.php` thêm input `cta_url`; `show.blade.php` hiện `cta_url` ở panel chi tiết nếu có. Không đổi permission, không đổi signature `handle()` của 2 Build*PromptAction (chỉ đổi NỘI DUNG text sinh ra).
+21. **(v1.16)** §4.19/§4.20 — đã hỏi người dùng phạm vi trước khi làm (4 điểm nhỏ áp dụng ngay + 1 Feature mới sau khi xác nhận). §4.19 (sửa text, không đổi DB): bước làm rõ heading (`standard`/`detailed`) thêm "before-after"; bước Meta (CẢ 3 depth) đổi "1 phương án" → "2-3 phương án"; "Không bịa số liệu" (CẢ 3 depth ở outline + `BuildArticleDraftPromptAction`) thêm "case study"; bullet "Đoạn mở bài" (`BuildArticleDraftPromptAction`) cấm cụ thể cụm cliché + ràng buộc vị trí 1-2 câu đầu. §4.20 (Feature mới, đối xứng §4.17): (a) migration `drafted_article`/`review_prompt`; (b) `BuildArticleReviewPromptAction` (gộp SEO+readability+final-edit thành 1 prompt, yêu cầu precise edits) + `SaveDraftedArticleAndBuildReviewPromptAction` (Feature `ArticleReview` mới); (c) `StoreDraftedArticleRequest` + `ContentOutlineController::generateReviewPrompt()` + route `POST {outline}/review-prompt`; (d) `show.blade.php` thêm card "Bước 3", tái dùng NGUYÊN 3 hàm JS đã tổng quát hoá ở v1.14 (chỉ đổi `elId`/`containerId`). Không đổi permission (dùng chung `content_outlines.use`), không đổi signature/hành vi của `OutlineGeneration`/`ArticleDrafting` đã có.
+22. **(v1.17)** §4.21 — đã hỏi người dùng 1 câu quyết định phạm vi trước khi làm ("Draft section-by-section" — từ chối). Sửa nội dung văn bản, không đổi DB/signature: bước "Làm rõ nội dung mỗi heading" (`standard`/`detailed`) thêm gợi ý ý tưởng infographic khi phần đó có nhiều số liệu/bước liên tiếp. Từ chối rõ 2 điểm của nguồn (section-by-section drafting, mật độ từ khoá 1-2% — mâu thuẫn §4.14) — ghi lại lý do đầy đủ ở §4.21 để không phải xem lại nguồn này lần sau.
+23. **(v1.18)** §4.22 — nguồn xác nhận lại (không đổi) quyết định "từ chối section-by-section" đã chốt ở §4.21. Sửa nội dung văn bản, không đổi DB/signature: mở rộng "differentiation note" (bước "Làm rõ nội dung mỗi heading", `standard`/`detailed`) thêm 1 câu mời biên tập viên tự điền personal story/case study/testimonial THẬT vào vị trí phù hợp. Ghi lại đầy đủ lý do các điểm KHÔNG áp dụng (đã có cơ chế tương đương hoặc tool ngoài) ở §4.22 để không phải xem lại nguồn này lần sau.
+24. **(v1.19)** §4.23 — sửa nội dung văn bản, không đổi DB/signature: mở rộng câu "Độ tin cậy dữ liệu" (`standard`/`detailed`) thêm yêu cầu nêu TÊN chuyên gia/tổ chức uy tín THẬT nếu biết. Từ chối rõ "mention keyword ít nhất 3 lần" (mâu thuẫn §4.14/§4.21) + xác nhận Brainstorming/Example-Based Anchoring không cần cơ chế mới — ghi lại đầy đủ lý do ở §4.23.
+25. **(v1.20)** §4.24 — rà soát rủi ro nội bộ (không đối chiếu nguồn ngoài), không đổi DB/signature: (a) `edit.blade.php` tính `$hasDownstream`, đổi `data-confirm-regenerate` thành message cảnh báo cascade Bước 2/3 khi đã có; (b) `show.blade.php` thêm `$hasDownstreamSteps`, icon ⚠ + tooltip trên nút "Sửa & Sinh lại", stepper Bước 1→2→3 (badge màu theo trạng thái + anchor link `#buoc-1`/`#buoc-2`/`#buoc-3`), bọc card "Bước 2"/"Bước 3" trong `<details>` (Bước 2 tự thu gọn khi đã có `review_prompt`, Bước 3 luôn mở). Xác nhận 2 điểm KHÔNG cần code (instruction overload — theo dõi; maintainability 3 BOTTOM — technical debt không bắt buộc) + 1 điểm đã lỗi thời (soft warning Bước 2/3 đã có từ v1.14/v1.16) — ghi lại đầy đủ ở §4.24 để không phải rà soát lại các điểm đã xử lý.
+26. **(v1.21)** §4.24 (mở rộng) — theo dõi lại 3/5 đề xuất "ưu tiên cao" của người dùng sau v1.20, không đổi DB/signature: (a) thêm bullet đầy đủ vào §4.2 (canonical) về hành vi GIỮ NGUYÊN 4 field Bước 2/3 khi regenerate + sửa câu mô tả `data-confirm-regenerate="1"` đã lỗi thời (thực tế đã ĐỘNG từ v1.20); (b) `RegenerateContentOutlinePromptAction` thêm docblock khẳng định TƯỜNG MINH việc loại trừ 4 field (trước đó chỉ suy luận được từ code, chưa có câu khẳng định trực tiếp) + verify bằng test sống; (c) `show.blade.php` đổi quy tắc mặc định mở/đóng `<details>` Bước 2/3 thành NHẤT QUÁN cho cả 2 (mở CHỈ khi đã có kết quả, đóng khi chưa dùng — trước đó Bước 3 luôn mở, không khớp yêu cầu "đóng mặc định khối chưa dùng").

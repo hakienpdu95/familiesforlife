@@ -25,6 +25,9 @@ class StoreContentOutlineRequest extends FormRequest
             'post_category_uuid' => ['nullable', 'string', 'uuid', 'exists:post_categories,uuid'],
             'target_audience' => ['nullable', 'string', 'max:500'],
             'content_goal' => ['nullable', 'string', 'max:2000'],
+            // §4.18 (v1.15) — URL DUY NHẤT dùng để chèn vào câu CTA, KHÁC competitor_urls (danh
+            // sách text tự do cho AI đọc) — validate url() thật vì sẽ nhúng thẳng vào câu văn.
+            'cta_url' => ['nullable', 'url', 'max:500'],
             'tone_style' => ['nullable', 'string', 'max:2000'],
             // KHÔNG validate 'url' cho từng dòng — text tự do CHO AI đọc, không phải link app tự
             // bấm được (§7.1 — người dùng có thể dán URL kèm ghi chú).
@@ -57,6 +60,7 @@ class StoreContentOutlineRequest extends FormRequest
             'post_category_id' => $categoryId,
             'target_audience' => $this->input('target_audience') ?: null,
             'content_goal' => $this->input('content_goal') ?: null,
+            'cta_url' => $this->input('cta_url') ?: null,
             'tone_style' => $this->input('tone_style') ?: null,
             'competitor_urls' => $this->input('competitor_urls') ?: null,
             'desired_word_count' => $this->input('desired_word_count') ?: null,

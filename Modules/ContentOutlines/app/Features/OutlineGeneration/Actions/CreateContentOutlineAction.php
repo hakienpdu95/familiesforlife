@@ -3,7 +3,7 @@
 namespace Modules\ContentOutlines\Features\OutlineGeneration\Actions;
 
 use Lorisleiva\Actions\Concerns\AsAction;
-use Modules\ContentOutlines\Features\OutlineGeneration\Actions\Concerns\ResolvesCategoryContext;
+use Modules\ContentOutlines\Features\Concerns\ResolvesCategoryContext;
 use Modules\ContentOutlines\Features\OutlineGeneration\Data\ContentOutlineInputData;
 use Modules\ContentOutlines\Models\ContentOutline;
 
@@ -29,6 +29,7 @@ class CreateContentOutlineAction
             'post_category_id' => $input->post_category_id,
             'target_audience' => $input->target_audience,
             'content_goal' => $input->content_goal,
+            'cta_url' => $input->cta_url,
             'tone_style' => $input->tone_style,
             'competitor_urls' => $input->competitor_urls,
             'desired_word_count' => $input->desired_word_count,

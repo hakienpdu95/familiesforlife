@@ -370,5 +370,10 @@
     [
         "video_idea_extractor_layer2_runs///add///__///",
         "kind///string///30///NOT_NULL///'layer2'///__///__"
+    ],
+    [
+        "content_outlines///add///__///",
+        "outline_depth///string///10///NOT_NULL///'standard'///__///__",
+        "content_role///string///10///_NULL///NULL///__///__"
     ]
 ]

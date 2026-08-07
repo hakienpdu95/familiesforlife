@@ -30,9 +30,22 @@
 </div>
 @endif
 
+@php
+    // §4.24 (v1.20) — rủi ro "cascade khi regenerate outline": RegenerateContentOutlinePromptAction
+    // CHỈ ghi đè generated_prompt (§4.2), KHÔNG đụng approved_outline/article_draft_prompt/
+    // drafted_article/review_prompt — outline mới có thể không còn khớp với Bước 2/3 đã sinh
+    // trước đó (viết dựa trên outline CŨ). Cảnh báo rõ trong confirm dialog khi Bước 2/3 đã có,
+    // KHÔNG tự xoá/cảnh báo ngầm (người dùng có thể có lý do chính đáng giữ Bước 2/3 cũ).
+    $hasDownstream = filled($outline->article_draft_prompt) || filled($outline->review_prompt);
+    $regenerateMessage = $hasDownstream
+        ? 'Sinh lại sẽ GHI ĐÈ outline hiện tại — KHÔNG thể khôi phục (không versioning). Outline này ĐÃ có Bước 2 (viết bài)/Bước 3 (soát lỗi) — nội dung đó KHÔNG tự cập nhật theo outline mới và có thể không còn khớp. Tiếp tục?'
+        : '1';
+@endphp
+
 {{-- §4.2 (v1.1) — data-confirm-regenerate đọc bởi content-outlines.js: xác nhận trước khi
-     GHI ĐÈ generated_prompt (không thể khôi phục lại prompt cũ, khác create không cần confirm). --}}
-<form method="POST" action="{{ route('backend.contentoutlines.update', $outline) }}" data-confirm-regenerate="1" novalidate>
+     GHI ĐÈ generated_prompt (không thể khôi phục lại prompt cũ, khác create không cần confirm).
+     §4.24 (v1.20) — message ĐỔI thành cảnh báo cascade khi Bước 2/3 đã có (xem @php ở trên). --}}
+<form method="POST" action="{{ route('backend.contentoutlines.update', $outline) }}" data-confirm-regenerate="{{ $regenerateMessage }}" novalidate>
     @csrf
     @method('PUT')
     @include('contentoutlines::_form', ['outline' => $outline])

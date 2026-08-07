@@ -21,6 +21,7 @@ class ContentOutlineInputData extends Data
         public readonly ?int $post_category_id = null,
         public readonly ?string $target_audience = null,
         public readonly ?string $content_goal = null,
+        public readonly ?string $cta_url = null, // §4.18 (v1.15) — URL CTA thật, nhúng vào câu chuyển tiếp cuối outline + bài viết
         public readonly ?string $tone_style = null,
         public readonly ?string $competitor_urls = null,
         public readonly ?int $desired_word_count = null,

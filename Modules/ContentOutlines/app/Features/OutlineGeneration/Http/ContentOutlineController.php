@@ -8,6 +8,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Modules\ContentFoundation\Actions\ListCategoryFoundationsAction;
+use Modules\ContentOutlines\Features\ArticleDrafting\Actions\BuildArticleDraftPromptAction;
+use Modules\ContentOutlines\Features\ArticleDrafting\Actions\SaveApprovedOutlineAndBuildArticlePromptAction;
+use Modules\ContentOutlines\Features\ArticleDrafting\Http\Requests\StoreApprovedOutlineRequest;
+use Modules\ContentOutlines\Features\ArticleReview\Actions\BuildArticleReviewPromptAction;
+use Modules\ContentOutlines\Features\ArticleReview\Actions\SaveDraftedArticleAndBuildReviewPromptAction;
+use Modules\ContentOutlines\Features\ArticleReview\Http\Requests\StoreDraftedArticleRequest;
 use Modules\ContentOutlines\Features\OutlineGeneration\Actions\BuildContentOutlinePromptAction;
 use Modules\ContentOutlines\Features\OutlineGeneration\Actions\CreateContentOutlineAction;
 use Modules\ContentOutlines\Features\OutlineGeneration\Actions\LinkContentOutlineToArticleAction;
@@ -58,11 +64,25 @@ class ContentOutlineController extends Controller
 
         $promptWordCount = BuildContentOutlinePromptAction::estimateWordCount($outline->generated_prompt);
 
+        // §4.17 (v1.14) — cùng cơ chế soft-warning/Markdown-preview với prompt outline, áp cho
+        // article_draft_prompt (rỗng nếu chưa sinh "Bước 2" lần nào — Str::markdown('') → '').
+        $articlePromptWordCount = BuildArticleDraftPromptAction::estimateWordCount((string) $outline->article_draft_prompt);
+
+        // §4.20 (v1.16) — cùng cơ chế soft-warning/Markdown-preview với 2 prompt trước, áp cho
+        // review_prompt (rỗng nếu chưa sinh "Bước 3" lần nào).
+        $reviewPromptWordCount = BuildArticleReviewPromptAction::estimateWordCount((string) $outline->review_prompt);
+
         return view('contentoutlines::show', [
             'outline' => $outline,
             'promptWordCount' => $promptWordCount,
             'promptIsLong' => $promptWordCount > BuildContentOutlinePromptAction::WORD_COUNT_WARNING_THRESHOLD,
             'promptHtml' => Str::markdown($outline->generated_prompt),
+            'articlePromptWordCount' => $articlePromptWordCount,
+            'articlePromptIsLong' => $articlePromptWordCount > BuildArticleDraftPromptAction::WORD_COUNT_WARNING_THRESHOLD,
+            'articlePromptHtml' => Str::markdown((string) $outline->article_draft_prompt),
+            'reviewPromptWordCount' => $reviewPromptWordCount,
+            'reviewPromptIsLong' => $reviewPromptWordCount > BuildArticleReviewPromptAction::WORD_COUNT_WARNING_THRESHOLD,
+            'reviewPromptHtml' => Str::markdown((string) $outline->review_prompt),
         ]);
     }
 
@@ -88,6 +108,32 @@ class ContentOutlineController extends Controller
         $outline->delete();
 
         return redirect()->route('backend.contentoutlines.index')->with('success', 'Đã xoá dàn ý.');
+    }
+
+    /**
+     * §4.17 (v1.14) — "Bước 2": lưu outline đã duyệt (dán tay từ AI ngoài) + sinh prompt viết bài
+     * nhúng SẴN outline đó — vẫn KHÔNG gọi AI Provider nào (§0 mục 1), chỉ sinh thêm 1 đoạn text.
+     * Ghi đè `article_draft_prompt` cũ nếu đã có (không versioning, cùng §4.2).
+     */
+    public function generateArticlePrompt(StoreApprovedOutlineRequest $request, ContentOutline $outline, SaveApprovedOutlineAndBuildArticlePromptAction $action): RedirectResponse
+    {
+        $action->handle($outline, $request->validated('approved_outline'), $request->user()->id);
+
+        return redirect()->route('backend.contentoutlines.show', $outline)
+            ->with('success', 'Đã sinh prompt viết bài — sao chép bên dưới để dán sang 1 lượt chat AI mới.');
+    }
+
+    /**
+     * §4.20 (v1.16) — "Bước 3": lưu bài viết đã dán tay (từ AI ngoài chạy `article_draft_prompt`,
+     * hoặc viết tay) + sinh prompt soát lỗi/sửa nhúng SẴN bài đó — vẫn KHÔNG gọi AI Provider nào
+     * (§0 mục 1), chỉ sinh thêm 1 đoạn text. Ghi đè `review_prompt` cũ nếu đã có (không versioning).
+     */
+    public function generateReviewPrompt(StoreDraftedArticleRequest $request, ContentOutline $outline, SaveDraftedArticleAndBuildReviewPromptAction $action): RedirectResponse
+    {
+        $action->handle($outline, $request->validated('drafted_article'), $request->user()->id);
+
+        return redirect()->route('backend.contentoutlines.show', $outline)
+            ->with('success', 'Đã sinh prompt soát lỗi/sửa bài — sao chép bên dưới để dán sang 1 lượt chat AI mới.');
     }
 
     /**
