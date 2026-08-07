@@ -31,5 +31,6 @@
     "VideoIdeaExtractor": true,
     "PensionCalculator": true,
     "N8n": true,
-    "ContentOutlines": true
+    "ContentOutlines": true,
+    "PromptFrameworkStudio": true
 }

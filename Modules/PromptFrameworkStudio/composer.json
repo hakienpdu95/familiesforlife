@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/promptframeworkstudio",
+    "description": "",
+    "authors": [
+        {
+            "name": "KienDH",
+            "email": "bonhuyn@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\PromptFrameworkStudio\\": "app/",
+            "Modules\\PromptFrameworkStudio\\Database\\Factories\\": "database/factories/",
+            "Modules\\PromptFrameworkStudio\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\PromptFrameworkStudio\\Tests\\": "tests/"
+        }
+    }
+}

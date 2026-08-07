@@ -218,4 +218,11 @@ enum PermissionEnum: string
     // bản chất "cấu hình hệ thống" hơn "nội dung biên tập theo category" (khác Lớp B).
     case PENSION_CALCULATOR_MANAGE = 'pension_calculator.manage';
     case PENSION_CALCULATOR_VIEW   = 'pension_calculator.view';
+
+    // ══ PROMPT FRAMEWORK STUDIO (thư viện 13 framework prompt engineering + form sinh prompt có
+    // cấu trúc — không gọi AI Provider trong app, người dùng tự copy-paste sang AI ngoài) ═══
+    // spec/PromptFrameworkStudio_Technical_Specification.md §6 — gán cho platform_content_editor/
+    // platform_content_head/platform_section_editor (PromptFrameworkStudioPermissionSeeder),
+    // KHÔNG qua config/permissions.php (Lớp B) — cùng nguyên tắc CONTENT_OUTLINES_USE.
+    case PROMPT_FRAMEWORK_STUDIO_USE = 'prompt_framework_studio.use';
 }

@@ -335,6 +335,21 @@
         </div>
         @endcan
 
+        {{-- spec/PromptFrameworkStudio_Technical_Specification.md §6 — prompt_framework_studio.use
+             cấp cho platform_content_editor/platform_content_head/platform_section_editor
+             (Modules\PromptFrameworkStudio\Database\Seeders\PromptFrameworkStudioPermissionSeeder).
+             Thư viện 13 framework prompt engineering + form sinh prompt có cấu trúc — KHÔNG gọi
+             AI Provider trong app, cùng nguyên tắc ContentOutlines. --}}
+        @can(\App\Enums\PermissionEnum::PROMPT_FRAMEWORK_STUDIO_USE->value)
+        <div class="nav-group">
+            <a href="{{ route('backend.promptstudio.library') }}"
+               class="nav-link {{ request()->routeIs('backend.promptstudio.*') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                <span class="nav-label">Prompt Framework Studio</span>
+            </a>
+        </div>
+        @endcan
+
         {{-- spec/ContentCalendar_Technical_Specification.md §6/§13 — content_calendar.view cấp cho
              platform_content_creator/section_editor/content_editor/content_head/viewer
              (Modules\ContentCalendar\Database\Seeders\ContentCalendarPermissionSeeder). --}}

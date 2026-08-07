@@ -170,6 +170,8 @@ const MODULE_ENTRIES = [
   'Modules/N8n/resources/assets/js/n8n.js',
   // ContentOutlines
   'Modules/ContentOutlines/resources/assets/js/content-outlines.js',
+  // PromptFrameworkStudio
+  'Modules/PromptFrameworkStudio/resources/assets/js/prompt-framework-studio.js',
 ];
 
 // ─────────────────────────────────────────────────────────────────────
