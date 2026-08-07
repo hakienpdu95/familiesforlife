@@ -19,7 +19,15 @@
 
 {{-- §5.3 — data-confirm-regenerate: submit sẽ GHI ĐÈ rendered_prompt cũ, không versioning. --}}
 <form method="POST" action="{{ route('backend.promptstudio.prompts.update', $prompt) }}" data-confirm-regenerate
-      x-data="promptGenerator(@js(config('prompt_framework_studio.frameworks')), @js($prompt->framework_key), @js($prompt->field_values))">
+      x-data="promptGenerator(
+          @js(config('prompt_framework_studio.frameworks')),
+          @js($prompt->framework_key),
+          @js($prompt->field_values),
+          {{ Js::from([
+              'editorialContextUrlTemplate' => route('backend.api.promptstudio.editorial-context', ['category' => '__UUID__']),
+              'initialCategoryUuid' => old('post_category_uuid', $prompt->category?->uuid),
+          ]) }}
+      )">
     @csrf
     @method('PUT')
 
@@ -35,30 +43,10 @@
                 @error('label')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
             </div>
 
-            <template x-for="field in selectedFramework.fields" :key="field.key">
-                <div class="form-control">
-                    <label class="label py-0 pb-1.5">
-                        <span class="label-text font-medium">
-                            <span x-text="field.label"></span>
-                            <span x-show="field.required" class="text-error">&nbsp;*</span>
-                        </span>
-                    </label>
-                    <textarea x-show="field.type === 'textarea'" x-model="values[field.key]" rows="3"
-                              :placeholder="'VD: ' + (selectedFramework.example[field.key] || '')"
-                              class="textarea textarea-bordered textarea-sm w-full placeholder:text-base-content/30"></textarea>
-                    <input x-show="field.type === 'text'" x-model="values[field.key]" type="text"
-                           :placeholder="'VD: ' + (selectedFramework.example[field.key] || '')"
-                           class="input input-bordered input-sm w-full placeholder:text-base-content/30">
-                </div>
-            </template>
-
             {{-- framework_key KHÔNG gửi trong request — RegenerateGeneratedPromptAction luôn dùng
-                 $prompt->framework_key hiện có (§5.3), không nhận từ input. --}}
-            <template x-for="field in selectedFramework.fields" :key="field.key">
-                <input type="hidden" :name="`field_values[${field.key}]`" :value="values[field.key]">
-            </template>
-
-            @error('field_values')<p class="text-xs text-error">{{ $message }}</p>@enderror
+                 $prompt->framework_key hiện có (§5.3), không nhận từ input. Chuyên mục thì NGƯỢC
+                 LẠI: gửi bình thường vì đổi/gỡ được khi sinh lại (§5.3 v2.7). --}}
+            @include('promptframeworkstudio::prompts.partials.field-form', ['selectedCategoryUuid' => $prompt->category?->uuid])
 
             <div class="pt-2">
                 <button type="submit" class="btn btn-primary btn-sm gap-1.5">

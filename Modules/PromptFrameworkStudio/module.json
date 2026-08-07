@@ -1,7 +1,7 @@
 {
     "name": "PromptFrameworkStudio",
     "alias": "promptframeworkstudio",
-    "description": "Thư viện 13 framework prompt engineering + form sinh prompt có cấu trúc + lịch sử quản lý — không gọi AI Provider trong app, người dùng tự copy-paste sang AI ngoài. Xem spec/PromptFrameworkStudio_Technical_Specification.md.",
+    "description": "Thư viện 18 framework prompt engineering + form sinh prompt có cấu trúc (chèn ngữ cảnh biên tập theo chuyên mục từ ContentFoundation) + lịch sử quản lý — không gọi AI Provider trong app, người dùng tự copy-paste sang AI ngoài. Xem spec/PromptFrameworkStudio_Technical_Specification.md.",
     "keywords": ["prompt", "content", "productivity"],
     "priority": 0,
     "providers": [

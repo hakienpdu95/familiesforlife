@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
+use Modules\Post\Models\PostCategory;
 
 /**
  * spec/PromptFrameworkStudio_Technical_Specification.md §0/§3.2 — công cụ nội bộ đội content, KHÔNG
@@ -19,6 +20,7 @@ class GeneratedPrompt extends Model
     protected $fillable = [
         'uuid',
         'framework_key',
+        'post_category_id',
         'label',
         'field_values',
         'rendered_prompt',
@@ -56,6 +58,16 @@ class GeneratedPrompt extends Model
     public function isOrphaned(): bool
     {
         return $this->framework() === null;
+    }
+
+    /**
+     * §3.1 (v2.7) — chuyên mục dùng để tra ngữ cảnh biên tập lúc sinh prompt. Có thể null (không
+     * chọn chuyên mục) hoặc trỏ tới chuyên mục ĐÃ BỊ XOÁ sau đó (nullOnDelete) — mọi nơi đọc quan
+     * hệ này phải chịu được null, cùng cách xử lý framework orphaned (§5.4).
+     */
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(PostCategory::class, 'post_category_id');
     }
 
     public function createdBy(): BelongsTo

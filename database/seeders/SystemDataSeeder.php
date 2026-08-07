@@ -13,6 +13,7 @@ use Modules\LeadPipelineStage\Database\Seeders\LeadPipelineStageSeeder;
 use Modules\LeadSource\Database\Seeders\LeadSourceSeeder;
 use Modules\Aicem\Database\Seeders\AicemDatabaseSeeder;
 use Modules\Banner\Database\Seeders\BannerDatabaseSeeder;
+use Modules\ContentFoundation\Database\Seeders\CategoryFoundationSeeder;
 use Modules\ContentFoundation\Database\Seeders\ContentFoundationDatabaseSeeder;
 use Modules\CoreIdeaExtractor\Database\Seeders\CoreIdeaExtractorDatabaseSeeder;
 use Modules\VideoIdeaExtractor\Database\Seeders\VideoIdeaExtractorDatabaseSeeder;
@@ -172,6 +173,17 @@ class SystemDataSeeder extends Seeder
 
             // ── 29. Menu (header): mega-menu công khai — cần category_id thật (bước 28) ──
             MenuDatabaseSeeder::class,
+
+            // ── 30. Category Content Foundation: nội dung ngữ cảnh biên tập THẬT (audience/pain
+            // points/style_sample...) cho từng category — PHẢI đứng SAU MenuDatabaseSeeder (bước
+            // 29): seeder này tra category bằng `slug` (kèm `parent_slug` khi là danh mục con), và
+            // slug thật (kể cả hậu tố -2/-3 khi nhiều nhóm tuổi dùng chung tên hiển thị, VD
+            // "cham-soc-nuoi-day-2") chỉ tồn tại sau khi MenuDatabaseSeeder tạo xong toàn bộ cây
+            // category qua CreateCategoryAction::uniqueSlug(). Chạy trước bước 29 sẽ khiến MỌI
+            // định nghĩa bị bỏ qua (seeder tự warn + skip, không lỗi — nhưng dữ liệu ngữ cảnh cho
+            // CoreIdeaExtractor/VideoIdeaExtractor/PromptFrameworkStudio sẽ rỗng trên mọi DB seed
+            // mới, đúng lỗ hổng đã phát hiện khi test PromptFrameworkStudio §4.4 v2.7 trên DB sạch).
+            CategoryFoundationSeeder::class,
         ]);
 
         $this->command->newLine();

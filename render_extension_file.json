@@ -374,6 +374,11 @@
     [
         "content_outlines///add///__///",
         "outline_depth///string///10///NOT_NULL///'standard'///__///__",
-        "content_role///string///10///_NULL///NULL///__///__"
+        "content_role///string///10///_NULL///NULL///__///__",
+        "approved_outline///longText///__///_NULL///NULL///__///__",
+        "article_draft_prompt///longText///__///_NULL///NULL///__///__",
+        "cta_url///string///500///_NULL///NULL///__///__",
+        "drafted_article///longText///__///_NULL///NULL///__///__",
+        "review_prompt///longText///__///_NULL///NULL///__///__"
     ]
 ]

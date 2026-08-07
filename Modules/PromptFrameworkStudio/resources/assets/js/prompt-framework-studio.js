@@ -18,7 +18,7 @@ function esc(v) {
 // lẫn field_values đã lưu (framework không đổi được sau khi tạo — §5.3, nên trang edit KHÔNG
 // render lại bước 1 chọn framework).
 document.addEventListener('alpine:init', () => {
-    Alpine.data('promptGenerator', (frameworks, initialKey = null, initialValues = null) => ({
+    Alpine.data('promptGenerator', (frameworks, initialKey = null, initialValues = null, serverData = {}) => ({
         frameworks,
         selectedKey: initialKey,
         values: initialValues ?? {},
@@ -26,6 +26,16 @@ document.addEventListener('alpine:init', () => {
         // lưới chọn khi đã có sẵn selectedKey (đến từ nút "Dùng mẫu này") để không bắt người dùng
         // chọn lại thứ họ vừa chọn ở trang Thư viện.
         showFrameworkPicker: false,
+        // Field đang có focus — dùng để highlight đúng khối trong dải cấu trúc framework, giúp
+        // người dùng thấy field họ đang điền nằm ở đâu trong chuỗi field liên kết với nhau (thay
+        // vì cảm giác đang điền 1 danh sách rời rạc, không có thứ tự/quan hệ).
+        focusedKey: null,
+
+        // §4.4 (v2.7) — ngữ cảnh biên tập theo chuyên mục.
+        categoryUuid: serverData.initialCategoryUuid ?? '',
+        editorialBlock: '',
+        editorialHasFoundation: false,
+        loadingEditorial: false,
 
         init() {
             // Đảm bảo mọi field của framework đã chọn đều có key trong `values` (kể cả field
@@ -36,6 +46,10 @@ document.addEventListener('alpine:init', () => {
                     if (!(field.key in this.values)) this.values[field.key] = '';
                 }
             }
+
+            // Trang edit mở sẵn với 1 chuyên mục đã lưu — nạp luôn để bản xem trước khớp ngay từ
+            // lần render đầu, không phải đợi người dùng chạm vào select.
+            if (this.categoryUuid) this.loadEditorialContext();
         },
 
         select(key) {
@@ -45,6 +59,88 @@ document.addEventListener('alpine:init', () => {
 
         get selectedFramework() {
             return this.selectedKey ? this.frameworks[this.selectedKey] : null;
+        },
+
+        /**
+         * Lấy ĐÚNG đoạn text server sẽ chèn (không tự ghép lại ở client từ dữ liệu thô — sẽ thành
+         * bản logic thứ 2 và trôi lệch khỏi BuildEditorialContextBlockAction). Guard `!==` sau
+         * await: người dùng đổi chuyên mục liên tục thì chỉ response của lựa chọn HIỆN TẠI được
+         * ghi vào state, tránh response cũ về sau ghi đè kết quả mới.
+         */
+        async loadEditorialContext() {
+            const uuid = this.categoryUuid;
+
+            if (!uuid) {
+                this.editorialBlock = '';
+                this.editorialHasFoundation = false;
+
+                return;
+            }
+
+            this.loadingEditorial = true;
+
+            try {
+                const url = (serverData.editorialContextUrlTemplate ?? '').replace('__UUID__', uuid);
+                const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                const data = await res.json();
+                if (this.categoryUuid !== uuid) return;
+
+                this.editorialBlock = data.block ?? '';
+                this.editorialHasFoundation = !!data.has_foundation;
+            } catch (e) {
+                console.error('[prompt-framework-studio] load editorial context failed', e);
+                if (this.categoryUuid !== uuid) return;
+
+                this.editorialBlock = '';
+                this.editorialHasFoundation = false;
+            } finally {
+                if (this.categoryUuid === uuid) this.loadingEditorial = false;
+            }
+        },
+
+        // Cảnh báo nhẹ (không chặn submit) khi 1 field BẮT BUỘC đã điền nhưng còn quá ngắn để có
+        // khả năng đủ cụ thể — vd Audience gõ "phụ huynh" (8 ký tự) nhiều khả năng vẫn chung
+        // chung. Ngưỡng 15 ký tự là ước lượng thô, cố ý rộng rãi để tránh làm phiền field vốn
+        // ngắn gọn hợp lệ (vd Role 1 câu) — mục đích chỉ là gợi ý, không phải validate.
+        isFieldThin(field) {
+            if (!field.required) return false;
+            const val = (this.values[field.key] ?? '').toString().trim();
+
+            return val.length > 0 && val.length < 15;
+        },
+
+        /**
+         * Ghép prompt xem trước theo ĐÚNG thứ tự/quy tắc của RenderPromptFromFrameworkAction:
+         * khối bối cảnh biên tập lên đầu → các khối framework theo thứ tự canon, BỎ HẲN khối rỗng
+         * (không in nhãn cụt) → khối chuẩn nội dung ở cuối (đã nằm sẵn trong editorialBlock do
+         * server ghép). Field không có prompt_heading (freeform) in nguyên văn, không bọc `## `.
+         *
+         * Phải khớp tuyệt đối với server, nếu không bản xem trước sẽ nói dối người dùng — đó là
+         * lý do khối bối cảnh lấy nguyên văn từ API thay vì client tự dựng lại.
+         */
+        get assembledPreview() {
+            if (!this.selectedFramework) return '';
+
+            const blocks = [];
+            if (this.editorialBlock) blocks.push(this.editorialBlock);
+
+            for (const field of this.selectedFramework.fields) {
+                const val = (this.values[field.key] ?? '').toString().trim();
+                if (!val) continue;
+
+                blocks.push(field.prompt_heading ? `## ${field.prompt_heading}\n\n${val}` : val);
+            }
+
+            return blocks.join('\n\n');
+        },
+
+        /** Đếm từ theo khoảng trắng Unicode — cùng công thức RenderPromptFromFrameworkAction::estimateWordCount(). */
+        get estimatedWordCount() {
+            const t = this.assembledPreview.trim();
+
+            return t === '' ? 0 : t.split(/\s+/u).length;
         },
     }));
 });
@@ -115,6 +211,18 @@ const COLUMNS = [
     {
         title: 'Framework', field: 'framework_name', width: 140,
         formatter: (cell) => '<code class="text-xs">' + esc(cell.getValue()) + '</code>',
+    },
+    {
+        // §4.4 (v2.7) — cột này trả lời "prompt nào đã được đắp ngữ cảnh biên tập, prompt nào
+        // chưa" ngay ở danh sách, để thấy được phần chưa tận dụng Content Foundation.
+        title: 'Ngữ cảnh', field: 'category_name', width: 150, headerSort: false,
+        formatter(cell) {
+            const v = cell.getValue();
+
+            return v
+                ? '<span class="badge badge-ghost badge-sm">' + esc(v) + '</span>'
+                : '<span class="text-xs text-base-content/30" title="Chưa gắn chuyên mục — prompt không có khối bối cảnh biên tập">—</span>';
+        },
     },
     { title: 'Người tạo', field: 'created_by_name', width: 140, formatter: (cell) => esc(cell.getValue() || '—') },
     { title: 'Cập nhật lần cuối', field: 'updated_at', width: 160, sorter: 'string' },

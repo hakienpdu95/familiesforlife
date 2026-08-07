@@ -19,6 +19,8 @@ class GeneratedPromptListResource extends JsonResource
             'framework_key' => $this->framework_key,
             'framework_name' => $framework['name'] ?? $this->framework_key,
             'is_orphaned' => $framework === null,
+            // §4.4 (v2.7) — null = prompt không gắn chuyên mục (không có khối ngữ cảnh biên tập).
+            'category_name' => $this->category?->name,
             'created_by_name' => $this->createdBy?->name,
             'updated_at' => $this->updated_at?->format('d/m/Y H:i'),
             'show_url' => route('backend.promptstudio.prompts.show', $this->uuid),

@@ -22,6 +22,9 @@ class UpdateGeneratedPromptRequest extends FormRequest
         $framework = $prompt?->framework();
 
         $rules = [
+            // §5.3 (v2.7) — KHÁC framework_key: chuyên mục đổi/gỡ được khi sinh lại (chỉ là ngữ
+            // cảnh đắp thêm, không quyết định cấu trúc bản ghi).
+            'post_category_uuid' => ['nullable', 'string', 'uuid', 'exists:post_categories,uuid'],
             'label' => ['required', 'string', 'max:150'],
             'field_values' => ['required', 'array'],
         ];

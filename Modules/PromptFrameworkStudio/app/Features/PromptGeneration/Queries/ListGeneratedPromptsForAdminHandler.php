@@ -19,7 +19,7 @@ class ListGeneratedPromptsForAdminHandler implements QueryHandlerInterface
         $sortDir = $query->sortDir === 'asc' ? 'asc' : 'desc';
 
         return GeneratedPrompt::query()
-            ->with(['createdBy:id,name'])
+            ->with(['createdBy:id,name', 'category:id,name'])
             ->when($query->frameworkKey, fn ($q) => $q->where('framework_key', $query->frameworkKey))
             // tận dụng index('label') (§3.1) — tìm chuỗi con theo tên người dùng tự đặt.
             ->when($query->search, fn ($q) => $q->where('label', 'like', "%{$query->search}%"))

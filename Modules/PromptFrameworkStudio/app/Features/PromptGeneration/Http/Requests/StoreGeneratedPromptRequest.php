@@ -20,6 +20,9 @@ class StoreGeneratedPromptRequest extends FormRequest
 
         $rules = [
             'framework_key' => ['required', 'string', Rule::in(array_keys(config('prompt_framework_studio.frameworks')))],
+            // §4.4 (v2.7) — chuyên mục TUỲ CHỌN, nhận uuid (route key của PostCategory) chứ không
+            // phải id, để không lộ id tự tăng ra HTML — cùng quy ước ContentOutlines.
+            'post_category_uuid' => ['nullable', 'string', 'uuid', 'exists:post_categories,uuid'],
             'label' => ['required', 'string', 'max:150'],
             'field_values' => ['required', 'array'],
         ];

@@ -14,12 +14,20 @@
 <div class="flex items-center justify-between mb-6">
     <div>
         <h1 class="text-2xl font-bold text-base-content">{{ $prompt->label }}</h1>
-        <p class="text-sm text-base-content/50 mt-0.5">
-            Mẫu đã dùng:
+        <p class="text-sm text-base-content/50 mt-0.5 flex flex-wrap items-center gap-1.5">
+            <span>Mẫu đã dùng:</span>
             @if($framework)
                 <span class="badge badge-primary badge-outline font-mono">{{ $framework['name'] }}</span>
             @else
                 <span class="badge badge-warning font-mono">{{ $prompt->framework_key }} — đã gỡ</span>
+            @endif
+
+            {{-- §4.4 (v2.7) — nêu rõ prompt này đã được đắp ngữ cảnh biên tập của chuyên mục nào:
+                 đó là phần nội dung người dùng KHÔNG tự gõ, nên phải nhìn thấy được nó từ đâu ra. --}}
+            @if($prompt->category)
+                <span class="badge badge-ghost gap-1" title="Prompt này có chèn ngữ cảnh biên tập của chuyên mục">
+                    Ngữ cảnh: {{ $prompt->category->name }}
+                </span>
             @endif
         </p>
     </div>

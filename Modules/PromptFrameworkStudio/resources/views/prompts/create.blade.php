@@ -6,7 +6,7 @@
 <div class="flex items-center justify-between mb-2">
     <div>
         <h1 class="text-2xl font-bold text-base-content">Tạo yêu cầu mới cho AI</h1>
-        <p class="text-sm text-base-content/50 mt-0.5">Chọn 1 mẫu phù hợp, điền vào từng ô như đang mô tả công việc cho một trợ lý — hệ thống sẽ tự ghép thành 1 đoạn yêu cầu hoàn chỉnh</p>
+        <p class="text-sm text-base-content/50 mt-0.5">Chọn 1 mẫu phù hợp, điền vào từng ô như đang mô tả công việc cho một trợ lý — hệ thống tự ghép thành 1 yêu cầu hoàn chỉnh, kèm sẵn ngữ cảnh biên tập của chuyên mục bạn chọn (độc giả, nỗi đau, giọng văn) nên bạn không phải gõ lại mỗi lần</p>
     </div>
     <div class="flex items-center gap-2">
         <a href="{{ route('backend.promptstudio.library') }}" class="btn btn-ghost btn-sm">Thư viện mẫu</a>
@@ -15,17 +15,16 @@
 </div>
 
 <form method="POST" action="{{ route('backend.promptstudio.prompts.store') }}"
-      x-data="promptGenerator(@js(config('prompt_framework_studio.frameworks')), @js($preselectedKey))">
+      x-data="promptGenerator(
+          @js(config('prompt_framework_studio.frameworks')),
+          @js($preselectedKey),
+          null,
+          {{ Js::from([
+              'editorialContextUrlTemplate' => route('backend.api.promptstudio.editorial-context', ['category' => '__UUID__']),
+              'initialCategoryUuid' => old('post_category_uuid'),
+          ]) }}
+      )">
     @csrf
-
-    {{-- Thanh bước 1 → 2, cùng phong cách stepper đã dùng ở ContentOutlines --}}
-    <div class="flex items-center gap-2 mb-4 text-xs">
-        <span class="badge badge-sm gap-1" :class="selectedKey ? 'badge-success' : 'badge-primary'">
-            Bước 1: Chọn mẫu <span x-show="selectedKey">&nbsp;✓</span>
-        </span>
-        <span class="text-base-content/30">→</span>
-        <span class="badge badge-sm gap-1" :class="selectedKey ? 'badge-primary' : 'badge-ghost'">Bước 2: Điền nội dung</span>
-    </div>
 
     {{-- Bước 1: lưới chọn mẫu — thẻ lớn, hiện rõ "phù hợp khi" để không cần biết thuật ngữ kỹ thuật --}}
     <div class="card bg-base-100 shadow-sm border border-base-200 mb-4" x-show="!selectedKey || showFrameworkPicker" x-cloak>
@@ -73,33 +72,8 @@
 
                 <div class="divider my-1"></div>
 
-                <template x-for="field in selectedFramework.fields" :key="field.key">
-                    <div class="form-control">
-                        <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">
-                                <span x-text="field.label"></span>
-                                <span x-show="field.required" class="text-error">&nbsp;*</span>
-                            </span>
-                        </label>
-                        <textarea x-show="field.type === 'textarea'" x-model="values[field.key]" rows="3"
-                                  :placeholder="'VD: ' + (selectedFramework.example[field.key] || '')"
-                                  class="textarea textarea-bordered textarea-sm w-full placeholder:text-base-content/30"></textarea>
-                        <input x-show="field.type === 'text'" x-model="values[field.key]" type="text"
-                               :placeholder="'VD: ' + (selectedFramework.example[field.key] || '')"
-                               class="input input-bordered input-sm w-full placeholder:text-base-content/30">
-                    </div>
-                </template>
-
-                {{-- input ẩn để submit form thường (không AJAX) — 2 widget (textarea/input) cùng
-                     field chỉ hiện 1 theo type, tránh trùng name giữa chúng bằng cách KHÔNG đặt
-                     name trực tiếp lên input/textarea hiển thị ở trên, mà mirror sang đây theo
-                     đúng field.key hiện hành. --}}
                 <input type="hidden" name="framework_key" :value="selectedKey">
-                <template x-for="field in selectedFramework.fields" :key="field.key">
-                    <input type="hidden" :name="`field_values[${field.key}]`" :value="values[field.key]">
-                </template>
-
-                @error('field_values')<p class="text-xs text-error">{{ $message }}</p>@enderror
+                @include('promptframeworkstudio::prompts.partials.field-form', ['selectedCategoryUuid' => null])
 
                 <div class="pt-2">
                     <button type="submit" class="btn btn-primary btn-sm gap-1.5">

@@ -2437,5 +2437,19 @@
         "__index///index///__///__///__///connection_id,requested_at///__",
         "__index///index///__///__///__///requested_at///__",
         "__index///index///__///__///__///success,requested_at///__"
+    ],
+    [
+        "generated_prompts///__///__///",
+        "framework_key///string///30///NOT_NULL///__///__///__",
+        "label///string///150///NOT_NULL///__///__///__",
+        "field_values///json///__///NOT_NULL///__///__///__",
+        "rendered_prompt///longText///__///NOT_NULL///__///__///__",
+        "created_by///unsignedBigInteger///__///_NULL///NULL///->constrained('users')->onDelete('set null')///__",
+        "updated_by///unsignedBigInteger///__///_NULL///NULL///->constrained('users')->onDelete('set null')///__",
+        "__index///index///__///__///__///framework_key///__",
+        "__index///index///__///__///__///created_at///__",
+        "__index///index///__///__///__///label///__",
+        "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
+        "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật"
     ]
 ]

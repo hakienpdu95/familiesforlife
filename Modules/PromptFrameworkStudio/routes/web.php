@@ -31,4 +31,9 @@ Route::middleware(['auth', 'can:prompt_framework_studio.use'])
     ->name('backend.api.promptstudio.')
     ->group(function (): void {
         Route::get('prompts', [PromptGenerationApiController::class, 'index'])->name('prompts');
+
+        // §4.4 (v2.7) — xem trước khối "Bối cảnh biên tập" sẽ chèn cho 1 chuyên mục. Gác bằng
+        // permission CỦA MODULE NÀY (không phải content_foundation.use) — xem docblock action.
+        Route::get('editorial-context/{category}', [PromptGenerationApiController::class, 'editorialContext'])
+            ->name('editorial-context');
     });
