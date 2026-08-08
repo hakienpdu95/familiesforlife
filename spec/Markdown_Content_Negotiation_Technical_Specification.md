@@ -1,35 +1,36 @@
-# Bản Markdown cho Bài viết (Markdown Content Negotiation)
+# Content Negotiation Markdown cho Bài viết
 **Đặc tả Kỹ thuật Chi tiết — CHƯA triển khai, chờ duyệt trước khi code**
 
-**Phiên bản:** 1.1
+**Phiên bản:** 2.1
 **Ngày:** 2026-08-08
 **Framework:** Laravel 13 (PHP 8.4) + NWIDART Modules + Lorisleiva Actions
-**Module chạm tới:** `Modules/Post` (không tạo module mới — đây là 1 cách hiển thị THÊM của dữ liệu bài viết đã có, giống `toComposerPayload()`/`renderSnapshot()` đã là các "view" khác nhau của cùng `post_content_blocks`)
-**Nguồn:** `spec/giadinh.md` — Moz Whiteboard Friday "The SEO's Guide to Agentic Commerce" (Miracle Inameti-Archibong): *"Markdown... is the most efficient way of serving AI your data because it uses fewer tokens."*
+**Module chạm tới:** `Modules/Post` (không tạo module mới)
+**Nguồn:**
+- Moz Whiteboard Friday "The SEO's Guide to Agentic Commerce" (Miracle Inameti-Archibong) — lý do phục vụ Markdown cho agent (tiết kiệm token).
+- `acceptmarkdown.com/recipes/laravel` + `acceptmarkdown.com/guides/generating-markdown` — pattern parse `Accept` header đúng chuẩn, khuyến nghị cache, cảnh báo `Vary: Accept`.
+- 1 trang định nghĩa thuật ngữ "Markdown content negotiation" (David Garcia) — chỉ rõ **URL riêng KHÔNG PHẢI content negotiation thật** theo đúng nghĩa HTTP (client nêu preference qua `Accept`, server trả CÙNG 1 URL, đổi representation, kèm `Vary: Accept`) — dẫn tới quyết định LÀM LẠI TOÀN BỘ ở v2.0 (xem changelog).
+- `ekamoira.com/blog/how-to-serve-markdown-to-ai-crawlers-content-negotiation-token-economics-guide` — số liệu token economics, xác nhận Accept-header negotiation đúng chuẩn (khác cloaking mà John Mueller/Google lo ngại ở URL riêng), thực trạng crawler nào THẬT SỰ gửi `Accept: text/markdown`, khuyến nghị `Cache-Control` + `<link rel="alternate">` tự trỏ về CHÍNH nó — dẫn tới các bổ sung ở v2.1 (xem changelog).
 
-> **v1.1 (review nội bộ sau v1.0):** rà lại đưa ra 1 lỗi thật + vài điểm cần siết chặt.
-> **Đã sửa:** (1) `renderMarkdown()` thiếu nhánh `ContentBlockType::Testimonial` — bỏ sót vì
-> spec này viết TRƯỚC khi khối Testimonial ra đời (đợt 7), giờ đã bổ sung; (2) chuyển chuỗi
-> if/elseif ngầm định "không khớp gì thì coi là Product" sang `match()` liệt kê ĐỦ mọi
-> `ContentBlockType` + nhánh `default` an toàn (log cảnh báo + trả 1 dòng ghi chú thay vì chuỗi
-> rỗng im lặng) — tự bắt được ngay khi có loại block mới mà quên cập nhật file này; (3) thêm
-> bước "absolutize" URL ảnh/link tương đối trong khối Text TRƯỚC khi convert — file `.md` không
-> có `<base>` HTML để agent tự resolve; (4) thêm phòng thủ lớp 2 (pad/slice) cho
-> `comparisonBlockToMarkdown()` dù đã validate khớp số cột lúc ghi (`SyncContentBlocksAction`),
-> cùng tinh thần `Video::getWatchUrlAttribute()` tự kiểm tra lại; (5) Product Markdown thêm mô tả
-> ngắn (`display_description`, accessor đã có sẵn — dùng chung với `ArticleStructuredDataBuilder`
-> ); (6) mở rộng bộ test §7.
-> **Đã XEM XÉT nhưng KHÔNG sửa (có căn cứ, ghi lại để khỏi bị nêu lại):** "chữ ký
-> `showMarkdown(string $slug, ...)` không nhận `$id` dù route có `{id}`" — ĐÂY KHÔNG PHẢI LỖI:
-> Laravel bỏ qua route-param không khai trong signature (không lỗi binding, không throw), và đây
-> CHÍNH XÁC là pattern route `.html` hiện có đang chạy production (`PublicArticleController::
-> show(string $slug, ...)` — xem comment gốc tại `Modules/Post/routes/web.php` giải thích y hệt
-> lý do). `id` trong URL chỉ là hậu tố hiển thị, tra cứu thật LUÔN qua `slug` (đã có
-> `unique` constraint toàn hệ thống) — giữ nguyên để nhất quán 2 route `.html`/`.md`, chỉ bổ sung
-> docblock dẫn chiếu rõ (§4) để người đọc sau không hiểu nhầm lần nữa. "FAQ/Howto answer/step có
-> thể chứa HTML cần convert" — ĐÃ KIỂM CHỨNG LẠI TRỰC TIẾP: 2 field này nhập qua `<textarea>`
-> thường (`pbc-faq-answer`/`pbc-howto-step-text`), KHÔNG qua Jodit, và render bằng `{{ }}` tự
-> escape ở `faq-block`/`howto-block` — không có HTML thật để convert, giữ nguyên xử lý plain-text.
+> **v2.0 (đổi kiến trúc — thay hẳn hướng tiếp cận, không phải vá thêm):** v1.x (1.0-1.2) thiết kế
+> theo hướng **URL riêng** (`{slug}-d{id}.md` cạnh `{slug}-d{id}.html`) — bị chỉ ra ĐÚNG là **không
+> phải "content negotiation"** theo nghĩa HTTP chuẩn (RFC 9110): 1 URL riêng là "second address for
+> the same content", còn negotiation thật là CÙNG 1 URL, đổi representation theo `Accept` header,
+> kèm `Vary: Accept`. Sau khi cân nhắc, người dùng CHỌN làm lại đúng chuẩn (Hướng B, không chỉ đổi
+> tên gọi) — **XOÁ HẲN** route `.md` riêng (§2/§5/§6 của v1.x không còn áp dụng), sửa TRỰC TIẾP
+> `PublicArticleController::show()` (route `.html` hiện có) để tự chọn representation theo
+> `Accept` header — chỉ còn ĐÚNG 1 URL canonical duy nhất cho mỗi bài viết. Phần logic convert
+> từng loại `ContentBlockType` sang Markdown (`ArticleContentRenderer::renderMarkdown()`) GIỮ
+> NGUYÊN không đổi gì — đó là phần độc lập với việc chọn URL riêng hay negotiation.
+>
+> **v2.1 (bổ sung sau khi đối chiếu ekamoira.com — KHÔNG đổi kiến trúc v2.0):** (1) đảo ngược 1
+> quyết định v2.0 — `<link rel="alternate" type="text/markdown">` VẪN nên có, nhưng khác nghĩa với
+> v1.x: trỏ về CHÍNH URL hiện tại (self-reference) để khai báo "URL này có bản Markdown lấy được
+> qua Accept header", không phải trỏ sang 1 URL khác (§5); (2) thêm `Cache-Control` cho response
+> Markdown, phục vụ CDN/edge cache — trước đây chỉ có cache tầng ứng dụng (§3); (3) thêm số liệu
+> token economics cụ thể vào §1 làm căn cứ; (4) thêm ghi chú "HIỆU CHỈNH KỲ VỌNG" (§1) — hiện tại
+> CHỈ xác nhận Claude Code/OpenCode chủ động gửi `Accept: text/markdown`; GPTBot/PerplexityBot/
+> Gemini/Googlebot KHÔNG chủ động gửi header này — lợi ích thực tế trước mắt giới hạn ở nhóm agent
+> đã hỗ trợ, KHÔNG kỳ vọng ảnh hưởng ngay tới crawler traffic nói chung.
 
 ---
 
@@ -37,288 +38,324 @@
 
 | Chủ đề | Quyết định spec này | Lý do |
 |---|---|---|
-| **Phạm vi loại nội dung** | v1 CHỈ Post articles (`PublicArticleController::show()`) — không làm cho Video/Playlist/Page | Post là nội dung có giá trị AEO/GEO cao nhất (đã đầu tư JSON-LD/direct_answer/FAQ/Howto/Comparison qua nhiều đợt) và có khối lượng lớn nhất (82+ bài) — Video/Playlist là danh sách ngắn, ít prose, giá trị "phục vụ Markdown" thấp hơn nhiều. Mở rộng sau nếu có nhu cầu thật |
-| **Cơ chế: URL suffix `.md` riêng, KHÔNG dùng `Accept` header negotiation trên URL cũ** | Route mới `{slug}-d{id}.md` (đổi hẳn 1 ký tự so với `{slug}-d{id}.html` đã có) — không thêm logic parse `Accept` header trên route HTML hiện tại | (1) Đơn giản hơn: không phải áp `Illuminate\Http\Request::wantsJson()`-style content negotiation (framework không có sẵn `wantsMarkdown()`, phải tự viết + test kỹ tránh vỡ cache/CDN theo `Vary` header). (2) Discoverable hơn: gõ thẳng URL `.md` vào trình duyệt/curl là xem được ngay, không cần set custom header — khớp đúng cách cộng đồng `llmstxt.org` khuyến nghị (liên kết trực tiếp `.md`, không dựa vào content negotiation). (3) Nhiều crawler/agent đơn giản (script `curl`/`fetch` cơ bản) không chủ động gửi `Accept: text/markdown` — URL suffix hoạt động với MỌI client không cần hợp tác gì thêm |
-| **KHÔNG coi là "duplicate content" cho SEO** | Không thêm `{slug}-d{id}.md` vào sitemap.xml; giữ `<link rel="canonical">` trên trang `.md` trỏ về đúng URL `.html` gốc | `.md` là định dạng MÁY ĐỌC (như JSON/XML), không phải 1 trang cạnh tranh thứ hạng SERP với bản HTML — cùng nguyên tắc `robots.txt`/`llms.txt` hiện có không bị coi là nội dung trùng lặp |
-| **Tái dùng `ArticleContentRenderer`, thêm method `renderMarkdown()`** | Thêm 1 method mới song song `render()`/`toComposerPayload()`/`renderSnapshot()` đã có — mỗi loại `ContentBlockType` có 1 nhánh chuyển sang Markdown riêng | Đúng kiến trúc hiện có của class này: "nhiều cách hiển thị khác nhau của cùng dữ liệu `post_content_blocks`" — không tạo class mới, không lặp lại logic đọc `contentBlocks`/`faqBlock`/`howtoBlock`/`comparisonBlock` đã có sẵn ở `render()` |
-| **Thêm dependency `league/html-to-markdown`** | `composer require league/html-to-markdown` — dùng để convert `text_html` (khối Jodit) sang Markdown | Dự án đã có `league/commonmark` (chiều NGƯỢC LẠI: Markdown → HTML, dùng cho việc khác) — không có sẵn package chiều HTML → Markdown. `league/html-to-markdown` là package phổ biến, ổn định, cùng nhà phát hành `league/commonmark` nên tương thích hệ sinh thái |
-| **Khối Comparison → bảng Markdown GFM thật, không phải mô tả văn xuôi** | `\| Cột A \| Cột B \|` chuẩn GitHub-Flavored Markdown | Đây là loại content-block MAY MẮN khớp tự nhiên nhất với Markdown — bảng so sánh vốn đã là dữ liệu dạng lưới (`PostComparisonRow::values` đã có sẵn thứ tự khớp cột), không cần "dịch" gì thêm |
-| **Không cache bản Markdown** | Sinh on-the-fly mỗi request, giống `render()` (HTML) hiện tại không cache | Cùng khối lượng tính toán với `render()` (lặp qua content blocks đã eager-load, không có query nặng/gọi AI) — thêm cache là tối ưu sớm không cần thiết, đúng nguyên tắc đã áp dụng nhiều nơi trong dự án ("không thêm engineering khi chưa có bằng chứng cần") |
-| **Throttle route mới** | `throttle:60,1` — cùng mức đã dùng cho `PensionCalculator` (đọc dữ liệu công khai, không nhận input cá nhân) | Route mới, không có tiền lệ traffic thật — chặn scrape thô sơ mà không ảnh hưởng crawler/agent hợp lệ (60 req/phút đủ rộng cho use-case đọc từng bài) |
-| **Có `<link rel="alternate" type="text/markdown">` trên trang HTML** | Thêm vào `<head>` của `article.blade.php`, trỏ tới URL `.md` tương ứng | Cách chuẩn HTML để khai báo "phiên bản khác của cùng nội dung" (giống RSS `<link rel="alternate" type="application/rss+xml">`) — giúp agent/crawler tự phát hiện bản Markdown mà không cần đoán URL pattern |
-| **`llms.txt` không đổi cấu trúc, chỉ thêm 1 dòng ghi chú** | Thêm 1 dòng cuối `llms.blade.php`: "Mọi bài viết có bản Markdown tại `{url}.md`" | Xác nhận rõ khả năng này cho agent đọc `llms.txt` trước, không bắt agent tự đoán |
-| **Không áp dụng cho bài `format=redirect`** | Route `.md` trả 404 nếu `$article->isRedirect()` | Bài redirect không có nội dung riêng (redirect thẳng ra `redirect_url` ở bản HTML) — không có gì để chuyển thành Markdown |
+| **KHÔNG có URL `.md` riêng — chỉ 1 URL canonical** | Sửa trực tiếp `PublicArticleController::show()` (route `{slug}-d{id}.html` hiện có) — không thêm route nào | Đúng định nghĩa "content negotiation" (client nêu preference qua header, server trả CÙNG URL) — khác hẳn quyết định v1.x đã bị chỉ ra là sai tên gọi |
+| **Parse `Accept` header đúng chuẩn RFC 9110 §12.5.1 — KHÔNG so khớp chuỗi ngây thơ** | Trait `NegotiatesMarkdown` (`Modules/Post/app/Support/`) — xử lý q-value, specificity (`type/subtype` > `type/*` > `*/*`), loại bỏ `q=0`, tiebreak theo thứ tự khai báo trong `$produces` khi mọi thứ bằng nhau | `str_contains($accept, 'text/markdown')` SAI khi client gửi `Accept: text/html;q=0.9, text/markdown;q=0.1` (client vẫn ưu tiên HTML hơn hẳn dù CÓ nhắc tới markdown) — đây chính xác là lỗi phổ biến được cảnh báo ở nguồn `acceptmarkdown.com`. Test kỹ với Accept header thật của trình duyệt (`text/html,application/xhtml+xml,...,*/*;q=0.8`) phải LUÔN ra HTML |
+| **`Vary: Accept` bắt buộc trên CẢ 2 representation** | Thêm header này vào cả response HTML (`response()->view(...)->header('Vary', 'Accept')`) lẫn response Markdown | Không có header này, CDN/reverse-proxy/trình duyệt có thể cache SAI — trả bản Markdown cho 1 trình duyệt thường sau khi đã cache cho 1 agent trước đó (hoặc ngược lại). Đây là lỗi ĐƯỢC NÊU RÕ là phổ biến nhất khi làm content negotiation không đầy đủ |
+| **Redirect-format (`$article->isRedirect()`) — hành vi GIỐNG NHAU bất kể `Accept`** | Check redirect đặt TRƯỚC bước gọi `prefersMarkdown()` — luôn redirect thẳng ra `redirect_url`, không có "bản Markdown của 1 redirect" | Redirect là quyết định Ở TẦNG URL (mã 302, không có `Content-Type` cho body để negotiate) — không phải quyết định Ở TẦNG RENDER. Giữ nguyên hành vi đã có, không mở rộng phạm vi thay đổi |
+| **Bỏ qua `IncrementArticleViewCountAction`/`RecordArticleViewEventAction` cho request Markdown** | Chỉ gọi 2 Action này ở nhánh HTML, KHÔNG gọi ở nhánh Markdown | Request có `Accept: text/markdown` là tín hiệu TỰ KHAI BÁO rõ ràng "đây là agent/máy", đáng tin hơn hẳn việc dò User-Agent — không nên tính vào `view_count`/co-occurrence vốn dùng để đo hành vi ĐỘC GIẢ THẬT (Related Posts engine dựa vào tín hiệu này, xem `spec/Related_Posts_Engine_Technical_Specification.md`) |
+| **Cache `renderMarkdown()`, key tự-hết-hạn theo `updated_at`** | `Cache::remember("post:{$translation->id}:markdown:v1:{$translation->updated_at?->timestamp}", now()->addDay(), ...)` | Giữ nguyên quyết định đã chốt ở v1.2 (đã verify `UpdateTranslationAction`/`RestoreArticleVersionAction` luôn `update()` translation trước khi đổi content-block trong cùng transaction, nên key tự đổi đúng lúc) — không liên quan gì tới việc đổi URL riêng hay negotiation, giữ nguyên |
+| **`<link rel="alternate" type="text/markdown">` — VẪN thêm, nhưng TỰ TRỎ về chính URL đó (v2.1, đảo ngược quyết định v2.0)** | `<link rel="alternate" type="text/markdown" href="{{ $canonicalUrl }}">` trong `<head>` — `href` GIỐNG HỆT URL trang đang xem | Đây không phải "khai báo URL khác" như v1.x (lý do v2.0 xoá) — mà là khai báo NĂNG LỰC negotiation của chính URL này, giúp tool/crawler biết trước có thể xin bản Markdown qua `Accept` mà không cần thử. Nguồn `ekamoira.com` xác nhận pattern tự-trỏ này vẫn có giá trị dù dùng content negotiation thật |
+| **Không cần lo "duplicate content"/sitemap nữa** | Bỏ hẳn mối quan tâm này (đã có ở v1.x §0) | Chỉ có 1 URL, không có khái niệm trang thứ 2 cạnh tranh SERP — negotiation triệt tiêu HẲN vấn đề này thay vì phải "giải thích tại sao không tính là duplicate" như thiết kế cũ |
+| **`Cache-Control` cho response Markdown (v2.1, thêm mới)** | `Cache-Control: public, max-age=3600` trên response Markdown (song song với `Cache::remember()` tầng ứng dụng đã có) | Nguồn `ekamoira.com` nêu rõ đây là lớp cache KHÁC — cache tầng ứng dụng tránh tính lại `renderMarkdown()` mỗi request, `Cache-Control` cho phép CDN/edge/proxy tự phục vụ mà KHÔNG cần chạm tới server — 2 lớp không thay thế nhau. Không thêm cho response HTML (ngoài phạm vi sửa đổi hiện có, tránh mở rộng scope không cần thiết) |
+| **`llms.txt` — đổi hướng dẫn agent** | Thay dòng ghi chú cũ ("đổi đuôi .html→.md") bằng: "gửi `Accept: text/markdown` khi tải bất kỳ URL bài viết nào để nhận bản Markdown" | Đúng cách dùng thật của content negotiation — agent không cần biết URL pattern nào cả, chỉ cần set đúng header |
+| **Không có Accept header (client không chuẩn/cũ)** | `pickType()` trả về phần tử ĐẦU TIÊN trong `$produces` (luôn là `text/html`) làm mặc định | An toàn — không suy đoán "im lặng = muốn Markdown", giữ hành vi hiện tại cho MỌI client không khai báo rõ |
+| **Khối Comparison → bảng Markdown GFM thật; Testimonial/Citation → blockquote; Text → `league/html-to-markdown` + `absolutizeUrls()` + `demoteH1()`** | Giữ NGUYÊN logic `renderMarkdown()` đã thiết kế ở v1.1/v1.2, không đổi gì | Phần này độc lập hoàn toàn với việc chọn URL riêng hay negotiation — đã đối chiếu kỹ 2 lần trước (§3), không cần làm lại |
+| **Thêm dependency `league/html-to-markdown`** | `composer require league/html-to-markdown` | Giữ nguyên lý do đã chốt ở v1.0 — không đổi |
 
 ---
 
 ## 1. Giới thiệu & Mục tiêu
 
-Bài viết công khai hiện chỉ có 1 dạng biểu diễn: HTML đầy đủ (kèm layout/nav/footer/script). Theo Moz WBF "The SEO's Guide to Agentic Commerce": AI agent xử lý dữ liệu trong 1 "context window" giới hạn, và phục vụ HTML cho agent tốn token vô ích để agent tự "dọn" thẻ/style/script trước khi hiểu được nội dung thật — Markdown dùng ít token hơn nhiều cho cùng lượng thông tin.
+Bài viết công khai hiện chỉ có 1 dạng biểu diễn: HTML đầy đủ. AI agent xử lý HTML tốn token hơn hẳn Markdown cho cùng lượng thông tin. Số liệu cụ thể (nguồn `ekamoira.com`, đo thực tế chứ không phải ước lượng lý thuyết):
 
-Giải pháp: thêm 1 URL song song `{slug}-d{id}.md` trả về bản Markdown THUẦN của bài viết (không layout, không nav/footer/script) — dùng lại chính `post_content_blocks` đã có, không cần dữ liệu mới.
+- 1 bài blog: 16.180 token HTML → 3.150 token Markdown (**giảm ~80%**).
+- 1 trang thương mại điện tử (heading/nav/thuộc tính lặp lại nhiều): ước tính 40.000 → ~2.000 token (**giảm ~95%**).
+- 1 thẻ heading đơn lẻ: ~12-15 token dạng HTML so với ~3 token dạng Markdown.
+- RAG (retrieval-augmented generation) trích xuất thông tin từ Markdown chính xác hơn HTML ~35% trong 1 thử nghiệm được dẫn.
+
+Đòn bẩy kinh tế: context window của AI agent có hạn — nội dung càng ít token, agent càng lấy được nhiều nguồn cùng lúc trong 1 lượt truy vấn, tăng khả năng site được trích dẫn.
+
+Giải pháp ĐÚNG CHUẨN: khi request tới `{slug}-d{id}.html` có header `Accept: text/markdown` được ưu tiên hơn `text/html`, server trả về Markdown thuần (không layout/nav/script) tại **CHÍNH URL ĐÓ**, kèm `Vary: Accept`. Không có URL thứ 2 nào — 1 bài viết luôn có đúng 1 địa chỉ.
+
+> **HIỆU CHỈNH KỲ VỌNG (v2.1):** không phải mọi AI crawler đều chủ động gửi `Accept: text/markdown`
+> hiện nay. Theo `ekamoira.com`: **Claude Code và OpenCode xác nhận có gửi** header này; **ChatGPT
+> agent CHƯA gửi** (nhận diện được qua header `Signature-Agent: 'https://chatgpt.com'` thay vào đó
+> — ngoài phạm vi spec này, không xử lý); **Googlebot không xin Markdown** (đúng hành vi mong đợi —
+> Google index HTML); **Perplexity/Gemini được lợi nếu có nhưng chưa chủ động xin qua header**. Vì
+> vậy lợi ích trước mắt của tính năng này giới hạn ở nhóm agent ĐÃ hỗ trợ chuẩn Accept-header — và
+> ở chính module `Mcp` (spec riêng, `spec/MCP_Server_Technical_Specification.md`) khi tool
+> `get_article` gọi `renderMarkdown()` trực tiếp, không phụ thuộc crawler nào có hỗ trợ hay không.
+> KHÔNG kỳ vọng thay đổi ngay traffic/citation từ GPTBot/PerplexityBot nói chung.
 
 ---
 
-## 2. Route
+## 2. `NegotiatesMarkdown` — parse `Accept` header đúng chuẩn
+
+`Modules/Post/app/Support/NegotiatesMarkdown.php`
 
 ```php
-// Modules/Post/routes/web.php — thêm route mới, đặt CẠNH route .html hiện có
-Route::get('{slug}-d{id}.md', [PublicArticleController::class, 'showMarkdown'])
-    ->where(['slug' => '[a-z0-9\-]+', 'id' => '[0-9]+'])
-    ->middleware('throttle:60,1')
-    ->name('post.public.article.markdown');
-```
+namespace Modules\Post\Support;
 
----
+use Illuminate\Http\Request;
 
-## 3. `ArticleContentRenderer::renderMarkdown()`
-
-```php
 /**
- * Bản Markdown thuần — dùng cho route `.md` (§0 Markdown_Content_Negotiation_Technical_
- * Specification.md). Cùng nguồn dữ liệu với render() (HTML), khác cách chuyển đổi từng loại
- * ContentBlockType. Header (tiêu đề/direct_answer/nguồn/ngày cập nhật) do Controller ghép
- * riêng — method này CHỈ render phần BODY từ content blocks.
+ * Parse `Accept` header ĐÚNG chuẩn RFC 9110 §12.5.1 (q-value, specificity, loại bỏ q=0) — KHÔNG
+ * so khớp chuỗi ngây thơ. Dùng chung được cho bất kỳ Controller nào cần content negotiation
+ * (hiện chỉ PublicArticleController dùng, nhưng đặt ở Support cấp module để tái dùng dễ nếu
+ * Video/Playlist cần sau này — xem §8).
  */
-public function renderMarkdown(PostArticleTranslation $translation): string
+trait NegotiatesMarkdown
 {
-    $blocks = $translation->contentBlocks()
-        ->with([
-            'productBlock.items.product' => fn ($q) => $q->publicEmbed(),
-            'productBlock.items.buttons', 'faqBlock.items', 'howtoBlock.steps',
-            'comparisonBlock.columns', 'comparisonBlock.rows',
-        ])
-        ->get();
+    protected function prefersMarkdown(Request $request): bool
+    {
+        return $this->pickType($request, ['text/html', 'text/markdown']) === 'text/markdown';
+    }
 
-    $converter = new \League\HTMLToMarkdown\HtmlConverter(['strip_tags' => true]);
+    /**
+     * Trả về type PHÙ HỢP NHẤT trong $produces theo Accept header — ưu tiên q cao hơn, rồi tới
+     * độ cụ thể (type/subtype > type/* > * / *), rồi tới thứ tự khai báo trong $produces khi mọi
+     * thứ bằng nhau (VD "Accept: * / *" từ curl mặc định → luôn chọn phần tử ĐẦU TIÊN, tức HTML,
+     * KHÔNG suy đoán agent muốn Markdown chỉ vì "chấp nhận được").
+     *
+     * @param  string[]  $produces  Danh sách type hỗ trợ, THỨ TỰ = độ ưu tiên khi tie-break.
+     */
+    protected function pickType(Request $request, array $produces): ?string
+    {
+        $accept = $request->header('Accept');
 
-    // match() liệt kê ĐỦ mọi ContentBlockType (v1.1 — sửa sau review: bản v1.0 dùng chuỗi
-    // if/elseif kết thúc bằng 1 fallback ngầm định "không khớp gì thì coi là Product", khiến 1
-    // loại block mới thêm sau (quên cập nhật file này) render RỖNG hoặc SAI thành Product mà
-    // không ai biết. match() không có nhánh nào khớp sẽ rơi vào `default` — an toàn, LOGGING rõ
-    // ràng, không vỡ cả trang vì 1 loại block lạ.
-    return $blocks->map(function ($block) use ($converter) {
-        $markdown = match ($block->type) {
-            ContentBlockType::Text => trim($converter->convert($this->absolutizeUrls((string) $block->text_html))),
-            ContentBlockType::Faq => $block->faqBlock ? $this->faqBlockToMarkdown($block->faqBlock) : null,
-            ContentBlockType::Citation => $this->citationBlockToMarkdown($block),
-            ContentBlockType::Howto => $block->howtoBlock ? $this->howtoBlockToMarkdown($block->howtoBlock) : null,
-            ContentBlockType::Comparison => $block->comparisonBlock ? $this->comparisonBlockToMarkdown($block->comparisonBlock) : null,
-            ContentBlockType::Testimonial => $this->testimonialBlockToMarkdown($block),
-            ContentBlockType::Product => $block->productBlock ? $this->productBlockToMarkdown($block->productBlock) : null,
-            default => null,
-        };
-
-        if ($markdown !== null) {
-            return $markdown;
+        if (! $accept) {
+            return $produces[0] ?? null;
         }
 
-        // Quan hệ mồ côi (faqBlock/howtoBlock/comparisonBlock đã bị xoá) HOẶC loại block mới
-        // chưa được xử lý ở match() trên — trả 1 dòng ghi chú THẤY ĐƯỢC thay vì chuỗi rỗng im
-        // lặng (agent đọc .md biết rõ có phần nội dung không hiển thị được, không tưởng bài thiếu
-        // hẳn 1 đoạn do lỗi convert). Log cảnh báo để dev biết cần bổ sung nếu là loại block mới.
-        \Illuminate\Support\Facades\Log::warning('post.renderMarkdown: block không xử lý được', ['type' => $block->type->value, 'block_id' => $block->id]);
+        $ranges = $this->parseAcceptHeader($accept);
 
-        return "_({$block->type->label()} — nội dung không khả dụng)_";
-    })->filter()->implode("\n\n");
-}
+        $best = null;
+        $bestScore = null;
 
-/**
- * Agent đọc file .md KHÔNG có `<base>` HTML để tự resolve URL tương đối (v1.1 — bổ sung sau
- * review, bản v1.0 thiếu bước này). Chỉ xử lý URL bắt đầu bằng "/" (root-relative — trường hợp
- * phổ biến nhất từ Media Library) — không xử lý protocol-relative "//host/..." hay relative
- * không có "/" đầu, chấp nhận được ở v1 vì đó không phải dạng URL Jodit/Media Library sinh ra.
- */
-private function absolutizeUrls(string $html): string
-{
-    return preg_replace_callback(
-        '/(src|href)="(\/[^"]*)"/i',
-        fn ($m) => $m[1].'="'.url($m[2]).'"',
-        $html
-    );
-}
+        foreach ($produces as $index => $type) {
+            [$typePart, $subtypePart] = explode('/', $type, 2);
 
-private function faqBlockToMarkdown(PostFaqBlock $block): string
-{
-    $heading = $block->heading ? "## {$block->heading}\n\n" : '';
+            foreach ($ranges as $range) {
+                if ($range['q'] <= 0.0) {
+                    continue; // q=0 — client TỪ CHỐI loại này tường minh
+                }
 
-    return $heading.$block->items->map(
-        fn ($item) => "**{$item->question}**\n\n{$item->answer}"
-    )->implode("\n\n");
-}
+                $specificity = match (true) {
+                    $range['type'] === $typePart && $range['subtype'] === $subtypePart => 2,
+                    $range['type'] === $typePart && $range['subtype'] === '*' => 1,
+                    $range['type'] === '*' && $range['subtype'] === '*' => 0,
+                    default => null,
+                };
 
-private function howtoBlockToMarkdown(PostHowtoBlock $block): string
-{
-    $heading = $block->name ? "## {$block->name}\n\n" : '';
-    $desc = $block->description ? "{$block->description}\n\n" : '';
-    $steps = $block->steps->map(
-        fn ($step, $i) => ($i + 1).". **{$step->name}** — {$step->text}"
-    )->implode("\n");
+                if ($specificity === null) {
+                    continue;
+                }
 
-    return $heading.$desc.$steps;
-}
+                $score = [$range['q'], $specificity, -$index];
 
-/** Bảng GFM thật — khớp tự nhiên nhất với dữ liệu columns/rows đã có sẵn thứ tự (§0). */
-private function comparisonBlockToMarkdown(PostComparisonBlock $block): string
-{
-    $heading = $block->name ? "## {$block->name}\n\n" : '';
-    $desc = $block->description ? "{$block->description}\n\n" : '';
-    $columnCount = $block->columns->count();
+                if ($bestScore === null || $score > $bestScore) {
+                    $bestScore = $score;
+                    $best = $type;
+                }
+            }
+        }
 
-    $headerRow = '| | '.$block->columns->map(fn ($c) => $c->label)->implode(' | ').' |';
-    $separator = '|---'.str_repeat('|---', $columnCount).'|';
-    $bodyRows = $block->rows->map(function ($row) use ($columnCount) {
-        // Phòng thủ lớp 2 (v1.1 — bổ sung sau review) — dữ liệu ĐÃ được validate khớp số cột
-        // lúc ghi (SyncContentBlocksAction::validateComparisonBlocks()), nhưng vẫn tự vá nếu có
-        // sai lệch do sửa tay/migration lỗi (cùng tinh thần Video::getWatchUrlAttribute() tự
-        // kiểm tra lại host dù đã validate khi lưu) — tránh bảng Markdown bị lệch cột/vỡ cấu trúc.
-        $values = array_pad(array_slice($row->values, 0, $columnCount), $columnCount, '');
-
-        return "| **{$row->label}** | ".implode(' | ', $values).' |';
-    })->implode("\n");
-
-    return "{$heading}{$desc}{$headerRow}\n{$separator}\n{$bodyRows}";
-}
-
-/** Testimonial không có bảng con — field trực tiếp trên PostContentBlock (cùng Citation). */
-private function testimonialBlockToMarkdown(PostContentBlock $block): string
-{
-    $person = $block->testimonial_person_name;
-    $roleParts = array_filter([$block->testimonial_person_title, $block->testimonial_company_name]);
-    if ($roleParts) {
-        $person .= ' — '.implode(', ', $roleParts);
+        return $best;
     }
 
-    $footer = "> — {$person}";
-    if ($block->testimonial_result_metric) {
-        $footer .= " ({$block->testimonial_result_metric})";
+    /** @return array<int, array{type: string, subtype: string, q: float}> */
+    private function parseAcceptHeader(string $accept): array
+    {
+        $ranges = [];
+
+        foreach (explode(',', $accept) as $entry) {
+            $parts = explode(';', trim($entry));
+            $mediaRange = strtolower(trim(array_shift($parts)));
+
+            if (! str_contains($mediaRange, '/')) {
+                continue; // entry hỏng — Accept header do client tự gửi, không throw, bỏ qua
+            }
+
+            [$type, $subtype] = explode('/', $mediaRange, 2);
+
+            $q = 1.0;
+            foreach ($parts as $param) {
+                if (preg_match('/^\s*q\s*=\s*([\d.]+)\s*$/i', $param, $m)) {
+                    $q = (float) $m[1];
+                }
+            }
+
+            $ranges[] = ['type' => trim($type), 'subtype' => trim($subtype), 'q' => $q];
+        }
+
+        return $ranges;
     }
-
-    return "> \"{$block->testimonial_quote}\"\n{$footer}";
-}
-
-private function citationBlockToMarkdown(PostContentBlock $block): string
-{
-    $quote = "> {$block->citation_text}";
-    $source = $block->citation_source_url
-        ? "> — [{$block->citation_source_name}]({$block->citation_source_url})"
-        : "> — {$block->citation_source_name}";
-
-    return "{$quote}\n{$source}";
-}
-
-private function productBlockToMarkdown(PostProductBlock $block): string
-{
-    $heading = $block->heading ? "## {$block->heading}\n\n" : '';
-
-    return $heading.$block->items->map(function ($item) {
-        $name = $item->display_title;
-        $price = $item->display_price ? " ({$item->display_price})" : '';
-        // v1.1 — thêm mô tả ngắn (bổ sung sau review, bản v1.0 chỉ có tên+giá, quá rút gọn để
-        // agent hiểu sản phẩm là gì). Dùng chung accessor `display_description` với
-        // ArticleStructuredDataBuilder::buildProducts() — không cần thêm field/logic mới.
-        $desc = $item->display_description ? "\n  ".\Illuminate\Support\Str::limit($item->display_description, 150) : '';
-
-        return "- **{$name}**{$price}{$desc}";
-    })->implode("\n");
 }
 ```
 
-> **Chưa xử lý ở v1.1 — cần xác nhận khi code:** link CTA thật của mỗi item (`route('post.cta.redirect', $button)` — cùng URL click-tracking đang dùng ở trang HTML) CHƯA được thêm vào Markdown vì cần đối chiếu lại đúng cách `product-block/*.blade.php` đang resolve `href` cho từng `url_type` (đặc biệt `use_product_link` — không có `url` tĩnh, phải resolve động) trước khi viết — tránh đoán sai accessor. Thêm sau nếu cần, không chặn v1.1.
-
-> Các private method mới cần import thêm `PostFaqBlock`/`PostHowtoBlock`/`PostComparisonBlock`/`PostProductBlock`/`PostContentBlock` (đã import 1 phần ở class hiện tại, bổ sung nốt).
-
 ---
 
-## 4. `PublicArticleController::showMarkdown()`
+## 3. `PublicArticleController::show()` — sửa trực tiếp (route `.html` KHÔNG đổi)
 
 ```php
-/**
- * Chữ ký CHỈ nhận `$slug`, KHÔNG nhận `$id` dù route `{slug}-d{id}.md` có khai `{id}` — ĐÚNG Ý,
- * không phải thiếu sót (đã bị nêu nhầm là lỗi ở review v1.0, xem changelog đầu file): Laravel bỏ
- * qua route-param không có trong signature (không lỗi binding), và đây CHÍNH XÁC là pattern route
- * `.html` hiện có đang chạy (`PublicArticleController::show(string $slug, ...)`) — `id` trong URL
- * chỉ là hậu tố hiển thị, tra cứu thật luôn qua `slug` (đã có unique constraint toàn hệ thống).
- * Giữ nhất quán 2 route thay vì thêm `$id` không dùng tới.
- */
-public function showMarkdown(string $slug, ArticleContentRenderer $renderer): \Illuminate\Http\Response
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Modules\Post\Support\NegotiatesMarkdown;
+
+class PublicArticleController extends Controller
 {
-    $translation = PostArticleTranslation::published()
-        ->where('locale', config('post.default_locale'))
-        ->where('slug', $slug)
-        ->with(['article'])
-        ->first();
+    use NegotiatesMarkdown;
 
-    abort_unless($translation, 404);
+    public function show(
+        Request $request,
+        string $slug,
+        IncrementArticleViewCountAction $viewAction,
+        RecordArticleRedirectClickAction $clickAction,
+        RecordArticleViewEventAction $viewEventAction,
+        GetRelatedArticlesHandler $relatedHandler,
+        ArticleContentRenderer $renderer,
+        ArticleStructuredDataBuilder $structuredDataBuilder,
+    ): View|RedirectResponse|Response {
+        $translation = PostArticleTranslation::published()
+            ->where('locale', config('post.default_locale'))
+            ->where('slug', $slug)
+            ->with([
+                'article.categories', 'article.tags', 'article.createdBy.authorProfile',
+                'contentBlocks.productBlock.items.product' => fn ($q) => $q->publicEmbed(),
+                'contentBlocks.productBlock.items.buttons', 'contentBlocks.productBlock.buttons',
+                'contentBlocks.faqBlock.items', 'faqBlocks.items',
+                'contentBlocks.howtoBlock.steps', 'howtoBlocks.steps',
+                'contentBlocks.comparisonBlock.columns', 'contentBlocks.comparisonBlock.rows',
+            ])
+            ->first();
 
-    $article = $translation->article;
-    // Bài redirect không có nội dung riêng — không có gì để chuyển Markdown (§0).
-    abort_if($article?->isRedirect(), 404);
+        abort_unless($translation, 404);
 
-    $canonicalUrl = route('post.public.article', ['slug' => $translation->slug, 'id' => $translation->id]);
-    $description = $translation->seo_description ?: $translation->direct_answer ?: $translation->excerpt;
+        $article = $translation->article;
 
-    $header = "# {$translation->title}\n\n";
-    if ($description) {
-        $header .= "> {$description}\n\n";
+        // Redirect-format — GIỐNG HỆT hành vi hiện có, KHÔNG phụ thuộc Accept header (§0: redirect
+        // là quyết định tầng URL, không phải tầng render/negotiate).
+        if ($article?->isRedirect() && $article->redirect_url) {
+            $viewAction->handle($translation);
+            $clickAction->handle($article);
+
+            return redirect()->away($article->redirect_url);
+        }
+
+        // Nhánh Markdown — tách sớm TRƯỚC khi tính view_count/related (§0: request tự khai báo
+        // "đây là agent", không tính vào các số liệu đo hành vi ĐỘC GIẢ THẬT).
+        if ($this->prefersMarkdown($request)) {
+            return $this->showMarkdown($translation, $renderer);
+        }
+
+        $viewAction->handle($translation);
+        $viewEventAction->handle($article->id);
+
+        $related = $relatedHandler->handle(new GetRelatedArticlesQuery(
+            articleId: $article->id,
+            locale: $translation->locale,
+            limit: (int) config('post.related_posts.max_results', 6),
+        ));
+
+        $canonicalUrl = route('post.public.article', ['slug' => $translation->slug, 'id' => $translation->id]);
+
+        // response()->view() thay vì return view() trực tiếp — CẦN để gắn thêm header Vary (§0).
+        return response()->view('post::public.article', [
+            'translation'     => $translation,
+            'article'         => $article,
+            'locale'          => $translation->locale,
+            'content'         => $renderer->render($translation),
+            'relatedArticles' => $related,
+            'canonicalUrl'    => $canonicalUrl,
+            'structuredData'  => $structuredDataBuilder->build($article, $translation, $canonicalUrl),
+        ])->header('Vary', 'Accept');
     }
-    $header .= "Nguồn: {$canonicalUrl}\n";
-    if ($translation->updated_at) {
-        $header .= 'Cập nhật: ' . $translation->updated_at->format('d/m/Y') . "\n";
+
+    private function showMarkdown(PostArticleTranslation $translation, ArticleContentRenderer $renderer): Response
+    {
+        $canonicalUrl = route('post.public.article', ['slug' => $translation->slug, 'id' => $translation->id]);
+        $description = $translation->seo_description ?: $translation->direct_answer ?: $translation->excerpt;
+
+        $header = "# {$translation->title}\n\n";
+        if ($description) {
+            $header .= "> {$description}\n\n";
+        }
+        $header .= "Nguồn: {$canonicalUrl}\n";
+        if ($translation->updated_at) {
+            $header .= 'Cập nhật: '.$translation->updated_at->format('d/m/Y')."\n";
+        }
+        $header .= "\n---\n\n";
+
+        return response($header.$renderer->renderMarkdown($translation), 200)
+            ->header('Content-Type', 'text/markdown; charset=UTF-8')
+            ->header('Vary', 'Accept')
+            // Lớp cache KHÁC với Cache::remember() trong renderMarkdown() (§4) — đây là chỉ dẫn
+            // cho CDN/edge/reverse-proxy tự phục vụ mà KHÔNG cần chạm tới Laravel, 2 lớp không
+            // thay thế nhau (nguồn ekamoira.com). Không thêm cho response HTML — ngoài phạm vi
+            // sửa đổi hiện có của spec này.
+            ->header('Cache-Control', 'public, max-age=3600');
     }
-    $header .= "\n---\n\n";
-
-    $markdown = $header . $renderer->renderMarkdown($translation);
-
-    return response($markdown, 200)
-        ->header('Content-Type', 'text/markdown; charset=UTF-8');
 }
 ```
 
+> **Route `Modules/Post/routes/web.php` — KHÔNG đổi gì**, `Request $request` được Laravel tự inject qua service container theo type-hint, không cần khai trong route.
+
 ---
 
-## 5. `article.blade.php` — thêm `<link rel="alternate">`
+## 4. `ArticleContentRenderer::renderMarkdown()` — giữ nguyên logic v1.1/v1.2
+
+Không đổi so với bản trước — chỉ tóm tắt lại các quyết định đã chốt (chi tiết code xem lịch sử spec, không lặp lại ở đây để tránh lệch nếu sửa 1 chỗ quên chỗ kia):
+
+- `match ($block->type)` liệt kê đủ mọi `ContentBlockType`, nhánh `default` trả ghi chú thấy được + log warning, không fallback ngầm định.
+- `Text` → `league/html-to-markdown` sau khi `absolutizeUrls()` (URL root-relative → tuyệt đối) và `demoteH1()` (tránh 2 H1 trong 1 response — Controller đã tự thêm `# {title}`).
+- `Comparison` → bảng GFM thật, có `array_pad`/`array_slice` phòng thủ lớp 2 dù đã validate số cột lúc ghi.
+- `Testimonial`/`Citation` → blockquote.
+- `Product` → tên + giá + mô tả ngắn (`display_description`).
+- Bọc `Cache::remember()`, key `"post:{$translation->id}:markdown:v1:{$translation->updated_at?->timestamp}"`, TTL 1 ngày — tự hết hạn khi bài được lưu lại (đã verify `UpdateTranslationAction`/`RestoreArticleVersionAction`).
+
+---
+
+## 5. Discoverability — `<link rel="alternate">` (v2.1) & `llms.blade.php`
+
+**`article.blade.php` — thêm 1 dòng trong `<head>`, TỰ TRỎ về chính URL đang xem (khác hẳn nghĩa
+`<link rel="alternate">` ở thiết kế v1.x đã bị xoá — lúc đó trỏ sang 1 URL `.md` khác):**
 
 ```blade
-@push('meta')
-{{-- ... các meta hiện có ... --}}
-<link rel="alternate" type="text/markdown" href="{{ route('post.public.article.markdown', ['slug' => $translation->slug, 'id' => $translation->id]) }}" title="Bản Markdown">
-@endpush
+<link rel="alternate" type="text/markdown" href="{{ $canonicalUrl }}">
 ```
 
----
+`$canonicalUrl` đã có sẵn trong dữ liệu truyền cho view (§3) — không cần tính thêm gì. Mục đích:
+khai báo trước cho tool/crawler "URL này có thể lấy dạng Markdown qua `Accept` header", không cần
+thử mù. Nguồn `ekamoira.com` xác nhận pattern tự-trỏ này vẫn có giá trị dưới content negotiation
+thật (khác hẳn việc dùng thẻ này để trỏ sang 1 trang khác — đó mới là điều v2.0 đã đúng khi loại bỏ).
 
-## 6. `llms.blade.php` — thêm 1 dòng ghi chú (không đổi cấu trúc mục lục hiện có)
+**`llms.blade.php` — đổi hướng dẫn:**
 
 ```blade
 ## Bản Markdown cho AI agent
 
-Mọi bài viết có bản Markdown thuần — lấy URL bài viết, đổi đúng phần đuôi `.html` ở cuối thành
-`.md`, giữ nguyên phần còn lại (VD: `/bai-viet-d123.html` → `/bai-viet-d123.md`).
+Mọi URL bài viết hỗ trợ content negotiation — gửi header `Accept: text/markdown` khi tải trang để
+nhận bản Markdown thuần (không layout/nav/script) thay vì HTML, tại ĐÚNG cùng 1 URL.
 ```
 
----
-
-## 7. Kiểm thử bắt buộc
-
-- Route `.md` trả đúng `Content-Type: text/markdown; charset=UTF-8`, không kèm layout/nav/footer/script.
-- Bài `format=redirect` → route `.md` trả 404 (không redirect ra `redirect_url` như bản HTML).
-- Bài chưa published/slug sai → 404 (đồng nhất với route `.html`).
-- **`id` trong URL không khớp `translation->id` thật** (VD sửa tay thành số khác) → vẫn trả đúng 200 theo `slug` (khoá lại hành vi CHỦ ĐÍCH đã ghi ở §4, tránh ai đó "sửa" thành lỗi thật ở lần sau).
-- Khối Comparison → bảng Markdown parse đúng bằng 1 thư viện Markdown chuẩn (test bằng cách feed lại qua `league/commonmark` xem có sinh đúng `<table>` không — round-trip test); thử thêm 1 case cố tình lệch số `values` so với số cột (sửa thẳng DB) → xác nhận `array_pad`/`array_slice` không vỡ bảng.
-- Khối Text có HTML phức tạp (bold/italic/link/list lồng nhau, **list lồng nhau nhiều cấp, `<table>` chèn trong Text, `<img>`/`<a>` có `title`, HTML entity**) → convert Markdown không mất thông tin quan trọng — test với **5-10 mẫu `text_html` THẬT lấy từ DB** (không phải mẫu tự viết đơn giản), không chỉ "vài mẫu" chung chung.
-- **Ảnh/link tương đối (`src="/uploads/..."`) trong khối Text** → sau convert phải thành URL tuyệt đối (`absolutizeUrls()`), test cả trường hợp URL đã tuyệt đối sẵn (không bị đổi thành sai).
-- **1 bài chỉ có block loại chưa xử lý (hoặc `faqBlock`/`howtoBlock`/`comparisonBlock` bị xoá mồ côi)** → trả dòng ghi chú thấy được (`_(...)_`), có log warning, KHÔNG trả chuỗi rỗng im lặng, KHÔNG lỗi 500.
-- **Bài nhiều loại block xen kẽ đúng thứ tự `sort_order`** (Text → Comparison → Testimonial → Faq...) → Markdown giữ ĐÚNG thứ tự đó.
-- **Bài không có content block nào** (mới tạo, chưa soạn) → route `.md` vẫn trả 200, chỉ có phần header (title/mô tả/nguồn), không lỗi.
-- `<link rel="alternate">` xuất hiện đúng trên trang HTML, trỏ đúng URL `.md` của CHÍNH bài đó.
-- Throttle 60/phút hoạt động (request thứ 61 trong 1 phút → 429); sau khi hết cửa sổ 1 phút, request tiếp theo phải thành công trở lại (test recovery, không chỉ test lúc bị chặn).
+> Lưu ý (v2.1, nguồn `ekamoira.com`): 1 nghiên cứu trên 300.000 domain không tìm thấy tác động đo
+> được của `llms.txt` tới tần suất được LLM trích dẫn — file này chỉ có giá trị KHAI BÁO/tài liệu,
+> không nên kỳ vọng tự nó tăng traffic/citation. Vẫn giữ vì chi phí duy trì gần như bằng 0 và không
+> có tác dụng phụ, nhưng không đầu tư thêm công sức mở rộng nó.
 
 ---
 
-## 8. Ngoài phạm vi (v1)
+## 6. Kiểm thử bắt buộc
 
-- Video/Playlist/Page — chưa làm, mở rộng sau nếu có nhu cầu thật.
-- `Accept` header content negotiation trên URL `.html` gốc — đã cân nhắc, chọn URL suffix riêng (§0).
-- Cache bản Markdown — chưa cần (§0).
-- Markdown cho trang danh mục/trang chủ (danh sách nhiều bài) — v1 chỉ có trang chi tiết 1 bài.
+- `GET {slug}-d{id}.html` không kèm `Accept` header → HTML (mặc định, §0).
+- `Accept: text/markdown` → `Content-Type: text/markdown; charset=UTF-8`, `Vary: Accept`, `Cache-Control: public, max-age=3600` (v2.1), không kèm layout/nav/footer/script.
+- HTML response → có thẻ `<link rel="alternate" type="text/markdown" href="...">` trong `<head>`, `href` PHẢI GIỐNG HỆT `canonicalUrl` của chính trang đang xem (v2.1 — test sai nếu `href` trỏ sang URL khác, vì đó là quay lại đúng lỗi thiết kế v1.x đã bị xoá).
+- `Accept: text/html` → HTML, `Vary: Accept`.
+- `Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8` (Accept header THẬT của trình duyệt) → PHẢI ra HTML, không được nhầm thành Markdown.
+- `Accept: text/markdown;q=0.9, text/html;q=0.1` → Markdown (client ưu tiên Markdown rõ ràng).
+- `Accept: text/html;q=0.9, text/markdown;q=0.1` → HTML (client ưu tiên HTML dù CÓ nhắc markdown — case lỗi phổ biến nhất được cảnh báo, PHẢI test kỹ).
+- `Accept: */*` (curl mặc định) → HTML (tie-break theo thứ tự khai báo, §0).
+- `Accept: text/markdown;q=0` → HTML (q=0 = từ chối tường minh, không được chọn).
+- Bài `format=redirect` → LUÔN redirect ra `redirect_url`, bất kể `Accept` header gửi gì.
+- Bài chưa published/slug sai → 404, bất kể `Accept` header.
+- Request Markdown KHÔNG làm tăng `view_count`/không tạo bản ghi `post_article_view_events` (verify bằng DB assertion trước/sau).
+- Cache: sửa bài → `Accept: text/markdown` lần kế tiếp trả nội dung MỚI ngay, không dính cache cũ.
+- H1 trùng lặp, Comparison lệch cột, block mồ côi/loại lạ, ảnh/link tương đối, bài không có content block nào, không có YAML frontmatter — giữ nguyên các case đã liệt kê ở lịch sử spec v1.1/v1.2, áp dụng y hệt cho response Markdown ở kiến trúc mới.
+
+---
+
+## 7. Ngoài phạm vi (v2.0)
+
+- Video/Playlist/Page — chưa làm, nếu làm sau thì tái dùng `NegotiatesMarkdown` (đã đặt ở Support cấp module, không gắn cứng vào Post).
+- `resources/{type}` content negotiation (JSON, XML...) — trait chỉ xử lý 2 type hiện tại, mở rộng `$produces` được nhưng chưa có nhu cầu.
+- CDN/edge-level cache tuning theo `Vary: Accept` (VD Cloudflare Cache Key theo header) — nằm ngoài tầng ứng dụng, thuộc cấu hình hạ tầng khi triển khai thật, không thuộc code Laravel.
