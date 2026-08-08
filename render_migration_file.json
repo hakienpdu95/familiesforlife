@@ -2479,5 +2479,34 @@
         "__index///index///__///__///__///itemable_type,itemable_id|idx_playlist_item_itemable///__",
         "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
         "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật"
+    ],
+    [
+        "post_comparison_blocks///__///__///",
+        "translation_id///unsignedBigInteger///__///NOT_NULL///__///->constrained('post_article_translations')->onDelete('cascade')///__",
+        "name///string///255///_NULL///NULL///__///__",
+        "description///text///__///_NULL///NULL///__///__",
+        "sort_order///unsignedSmallInteger///__///NOT_NULL///0///__///__",
+        "__index///index///__///__///__///translation_id,sort_order|idx_post_comparison_block_translation_order///__",
+        "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
+        "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật"
+    ],
+    [
+        "post_comparison_columns///__///__///",
+        "comparison_block_id///unsignedBigInteger///__///NOT_NULL///__///->constrained('post_comparison_blocks')->onDelete('cascade')///__",
+        "label///string///150///NOT_NULL///__///__///__",
+        "sort_order///unsignedSmallInteger///__///NOT_NULL///0///__///__",
+        "__index///index///__///__///__///comparison_block_id,sort_order|idx_post_comparison_column_block_order///__",
+        "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
+        "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật"
+    ],
+    [
+        "post_comparison_rows///__///__///",
+        "comparison_block_id///unsignedBigInteger///__///NOT_NULL///__///->constrained('post_comparison_blocks')->onDelete('cascade')///__",
+        "label///string///150///NOT_NULL///__///__///__",
+        "values///json///__///NOT_NULL///__///__///__",
+        "sort_order///unsignedSmallInteger///__///NOT_NULL///0///__///__",
+        "__index///index///__///__///__///comparison_block_id,sort_order|idx_post_comparison_row_block_order///__",
+        "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
+        "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật"
     ]
 ]
