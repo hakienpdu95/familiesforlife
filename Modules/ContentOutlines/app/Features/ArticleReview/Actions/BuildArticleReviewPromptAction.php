@@ -23,6 +23,14 @@ use Modules\ContentOutlines\Features\OutlineGeneration\Data\ContentOutlineInputD
  *
  * Tái dùng NGUYÊN `ContentOutlineInputData` (không tạo DTO mới), cùng kỹ thuật
  * `ContentOutlineInputData::from($contentOutline)` đã dùng ở `ArticleDrafting` (§4.17).
+ *
+ * §4.25 (v1.22, đối chiếu spec/giadinh.md — Moz Whiteboard Friday, Chima Mmeje) — mở rộng mục
+ * "Rà soát cuối" chỉ rõ 3 dấu hiệu văn phong "lộ AI" cụ thể (em-dash lạm dụng/từ chuyển ý sáo
+ * mòn lặp lại/chuỗi câu ngắn cùng cấu trúc) thay vì chỉ nói chung "robotic" như trước — cùng
+ * guardrail đã thêm ở BuildArticleDraftPromptAction.
+ *
+ * §4.26 (v1.23) — mở rộng THÊM mục "2. Đánh giá độ dễ đọc": ngưỡng cụ thể ~20 từ/câu (thay vì
+ * "quá dài" mơ hồ) + rà thêm thuật ngữ chung chung thiếu ngữ cảnh cụ thể.
  */
 class BuildArticleReviewPromptAction
 {
@@ -55,9 +63,9 @@ Bạn là 1 biên tập viên/SEO editor giàu kinh nghiệm về chủ đề "{
 
 **1. Đánh giá SEO** — {$intentNote} Tiêu đề có khớp đúng ý định tìm kiếm/từ khoá mục tiêu "{$input->target_keyword}" không? Heading (H2/H3) nào chưa rõ nghĩa, cần viết lại? Có đoạn nào dùng từ khoá gượng/nhồi (keyword stuffing) không? Gợi ý 2-3 câu hỏi FAQ dựa trên câu hỏi độc giả THẬT có thể có về chủ đề này (nếu bài chưa có khối FAQ).
 
-**2. Đánh giá độ dễ đọc (readability)** — câu/đoạn nào quá dài nên chia nhỏ? Đoạn nào có từ ngữ dư thừa (filler) có thể bỏ mà KHÔNG mất nghĩa? Chuyển đoạn (transition) nào lỏng lẻo, cần câu nối tốt hơn? LƯU Ý: không đề xuất đơn giản hoá quá mức làm mất chính xác kỹ thuật của nội dung.
+**2. Đánh giá độ dễ đọc (readability)** — câu nào dài quá khoảng 20 từ nên tách thành 2 câu ngắn hơn? Đoạn nào có từ ngữ dư thừa (filler) có thể bỏ mà KHÔNG mất nghĩa? Chuyển đoạn (transition) nào lỏng lẻo, cần câu nối tốt hơn? Có cụm từ chung chung/mơ hồ nào (VD "giải pháp hiệu quả", "chiến lược phù hợp") thiếu ngữ cảnh cụ thể (áp dụng cho ai/trường hợp nào) không? LƯU Ý: không đề xuất đơn giản hoá quá mức làm mất chính xác kỹ thuật của nội dung.
 
-**3. Rà soát cuối** — đoạn nào đọc chưa rõ nghĩa; đoạn nào lặp ý với đoạn khác; câu chuyển tiếp yếu ở đâu; khẳng định/số liệu nào chưa có dẫn chứng rõ ràng; đoạn nào thiếu ví dụ cụ thể; đoạn nào đọc "robotic"/máy móc, không tự nhiên như người viết thật.
+**3. Rà soát cuối** — đoạn nào đọc chưa rõ nghĩa; đoạn nào lặp ý với đoạn khác; câu chuyển tiếp yếu ở đâu; khẳng định/số liệu nào chưa có dẫn chứng rõ ràng; đoạn nào thiếu ví dụ cụ thể; đoạn nào đọc "robotic"/máy móc, không tự nhiên như người viết thật — cụ thể tìm 3 dấu hiệu "lộ AI" phổ biến: (a) lạm dụng dấu gạch ngang em-dash "—" nối 2 vế câu ở nhiều câu liên tiếp; (b) nhiều đoạn liên tiếp mở đầu bằng cùng 1 từ chuyển ý sáo mòn ("Hơn nữa"/"Bên cạnh đó"/"Không chỉ vậy"/"Tóm lại"...); (c) chuỗi câu ngắn liên tiếp lặp lại cùng 1 cấu trúc ngữ pháp.
 
 **4. Đề xuất sửa** — với MỖI vấn đề tìm được ở Bước 1-3, đề xuất ĐOẠN VĂN THAY THẾ CỤ THỂ (không chỉ nói "nên sửa lại") để biên tập viên copy-paste trực tiếp.
 MARKDOWN;

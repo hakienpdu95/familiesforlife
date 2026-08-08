@@ -475,6 +475,207 @@
             renderSteps();
         }
 
+        // ── Block: Bảng so sánh (Comparison, GEO đợt 6 2026-08-08) ────────
+        // "Comparison fan-out" (spec/giadinh.md) — khác Faq/Howto (1 danh sách phẳng), đây là
+        // lưới 2 chiều: cột (đối tượng so sánh) × hàng (tiêu chí). Đổi số CỘT phải đồng bộ độ dài
+        // `values` của MỌI hàng (push/splice cùng lúc) — nếu không đồng bộ, submit sẽ bị
+        // SyncContentBlocksAction::validateComparisonBlocks() từ chối vì lệch số giá trị/số cột.
+
+        function addComparisonBlock(existingState) {
+            const el = document.createElement('div');
+            el.className = 'pbc-block';
+            el.dataset.kind = 'comparison';
+            el.innerHTML = blockHeaderHtml('Bảng so sánh', 'pbc-badge-comparison')
+                + '<div class="pbc-block-body"></div>';
+            wireCommonControls(el);
+            listEl.appendChild(el);
+
+            const state = existingState || {
+                blockUuid: uid('blk-'), name: '', description: '',
+                columns: [{ label: '' }, { label: '' }],
+                rows: [{ label: '', values: ['', ''] }],
+            };
+            el._comparisonState = state;
+            renderComparisonForm(el.querySelector('.pbc-block-body'), state);
+        }
+
+        function renderComparisonForm(body, state) {
+            body.innerHTML = `
+                <div style="margin-bottom:10px;">
+                    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Tiêu đề bảng (không bắt buộc)</label>
+                    <input type="text" class="input input-bordered input-sm w-full pbc-comparison-name" value="${esc(state.name)}"
+                           placeholder="VD: So sánh 3 dòng máy hút sữa phổ biến">
+                </div>
+                <div style="margin-bottom:10px;">
+                    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Mô tả ngắn (không bắt buộc)</label>
+                    <textarea class="textarea textarea-bordered textarea-sm w-full pbc-comparison-description" rows="2">${esc(state.description)}</textarea>
+                </div>
+                <div class="pbc-comparison-table-wrap" style="overflow-x:auto;"></div>
+                <div style="display:flex;gap:8px;margin-top:8px;">
+                    <button type="button" class="btn btn-sm btn-outline pbc-comparison-add-column">+ Thêm cột</button>
+                    <button type="button" class="btn btn-sm btn-outline pbc-comparison-add-row">+ Thêm tiêu chí</button>
+                </div>
+            `;
+
+            body.querySelector('.pbc-comparison-name').addEventListener('input', (e) => { state.name = e.target.value; });
+            body.querySelector('.pbc-comparison-description').addEventListener('input', (e) => { state.description = e.target.value; });
+
+            const tableWrap = body.querySelector('.pbc-comparison-table-wrap');
+
+            function renderTable() {
+                let html = '<table class="pbc-comparison-editor-table" style="border-collapse:collapse;width:100%;">';
+
+                html += '<tr><th style="width:140px;"></th>';
+                state.columns.forEach((col, colIdx) => {
+                    html += `<th style="padding:4px;">
+                        <div style="display:flex;gap:2px;align-items:center;">
+                            <input type="text" class="input input-bordered input-sm pbc-comparison-column-label" data-col-idx="${colIdx}"
+                                   value="${esc(col.label)}" placeholder="Cột ${colIdx + 1}">
+                            <button type="button" class="btn btn-ghost btn-xs text-error pbc-comparison-remove-column" data-col-idx="${colIdx}" title="Xoá cột">✕</button>
+                        </div>
+                    </th>`;
+                });
+                html += '</tr>';
+
+                state.rows.forEach((row, rowIdx) => {
+                    html += `<tr>
+                        <td style="padding:4px;">
+                            <div style="display:flex;gap:2px;align-items:center;">
+                                <input type="text" class="input input-bordered input-sm pbc-comparison-row-label" data-row-idx="${rowIdx}"
+                                       value="${esc(row.label)}" placeholder="Tiêu chí">
+                                <button type="button" class="btn btn-ghost btn-xs text-error pbc-comparison-remove-row" data-row-idx="${rowIdx}" title="Xoá tiêu chí">✕</button>
+                            </div>
+                        </td>`;
+                    row.values.forEach((value, colIdx) => {
+                        html += `<td style="padding:4px;">
+                            <input type="text" class="input input-bordered input-sm pbc-comparison-value" data-row-idx="${rowIdx}" data-col-idx="${colIdx}" value="${esc(value)}">
+                        </td>`;
+                    });
+                    html += '</tr>';
+                });
+
+                html += '</table>';
+                tableWrap.innerHTML = html;
+
+                tableWrap.querySelectorAll('.pbc-comparison-column-label').forEach((input) => {
+                    input.addEventListener('input', (e) => { state.columns[Number(e.target.dataset.colIdx)].label = e.target.value; });
+                });
+                tableWrap.querySelectorAll('.pbc-comparison-row-label').forEach((input) => {
+                    input.addEventListener('input', (e) => { state.rows[Number(e.target.dataset.rowIdx)].label = e.target.value; });
+                });
+                tableWrap.querySelectorAll('.pbc-comparison-value').forEach((input) => {
+                    input.addEventListener('input', (e) => {
+                        state.rows[Number(e.target.dataset.rowIdx)].values[Number(e.target.dataset.colIdx)] = e.target.value;
+                    });
+                });
+                tableWrap.querySelectorAll('.pbc-comparison-remove-column').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        if (state.columns.length <= 2) {
+                            alert('Bảng so sánh cần tối thiểu 2 cột.');
+                            return;
+                        }
+                        const idx = Number(btn.dataset.colIdx);
+                        state.columns.splice(idx, 1);
+                        // Đồng bộ MỌI hàng — bỏ đúng giá trị ở vị trí cột vừa xoá (§ đầu section).
+                        state.rows.forEach((row) => row.values.splice(idx, 1));
+                        renderTable();
+                    });
+                });
+                tableWrap.querySelectorAll('.pbc-comparison-remove-row').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        state.rows.splice(Number(btn.dataset.rowIdx), 1);
+                        renderTable();
+                    });
+                });
+            }
+
+            body.querySelector('.pbc-comparison-add-column').addEventListener('click', () => {
+                if (state.columns.length >= 6) {
+                    alert('Bảng so sánh tối đa 6 cột.');
+                    return;
+                }
+                state.columns.push({ label: '' });
+                state.rows.forEach((row) => row.values.push(''));
+                renderTable();
+            });
+
+            body.querySelector('.pbc-comparison-add-row').addEventListener('click', () => {
+                if (state.rows.length >= 20) {
+                    alert('Bảng so sánh tối đa 20 tiêu chí.');
+                    return;
+                }
+                state.rows.push({ label: '', values: state.columns.map(() => '') });
+                renderTable();
+            });
+
+            renderTable();
+        }
+
+        // ── Block: Lời chứng thực khách hàng (Testimonial, GEO đợt 7 2026-08-08) ──
+        // Cùng độ đơn giản Citation: KHÔNG có bảng con — 1 khối = 1 lời chứng thực + tên người
+        // (bắt buộc) + chức danh/công ty/ảnh đại diện/kết quả đạt được (đều tuỳ chọn).
+
+        function addTestimonialBlock(existingState) {
+            const el = document.createElement('div');
+            el.className = 'pbc-block';
+            el.dataset.kind = 'testimonial';
+            el.innerHTML = blockHeaderHtml('Lời chứng thực khách hàng', 'pbc-badge-testimonial')
+                + '<div class="pbc-block-body"></div>';
+            wireCommonControls(el);
+            listEl.appendChild(el);
+
+            const state = existingState || {
+                quote: '', personName: '', personTitle: '', companyName: '', avatarUrl: '', resultMetric: '',
+            };
+            el._testimonialState = state;
+            renderTestimonialForm(el.querySelector('.pbc-block-body'), state);
+        }
+
+        function renderTestimonialForm(body, state) {
+            body.innerHTML = `
+                <div style="margin-bottom:10px;">
+                    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Nội dung lời chứng thực</label>
+                    <textarea class="textarea textarea-bordered textarea-sm w-full pbc-testimonial-quote" rows="2"
+                              placeholder="VD: Nhờ sản phẩm này mà bé nhà mình ăn dặm ngoan hẳn...">${esc(state.quote)}</textarea>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+                    <div>
+                        <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Tên người chứng thực (bắt buộc)</label>
+                        <input type="text" class="input input-bordered input-sm w-full pbc-testimonial-person-name" value="${esc(state.personName)}"
+                               placeholder="VD: Chị Lan">
+                    </div>
+                    <div>
+                        <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Chức danh (không bắt buộc)</label>
+                        <input type="text" class="input input-bordered input-sm w-full pbc-testimonial-person-title" value="${esc(state.personTitle)}"
+                               placeholder="VD: Mẹ 2 con">
+                    </div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+                    <div>
+                        <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Công ty/thương hiệu (không bắt buộc)</label>
+                        <input type="text" class="input input-bordered input-sm w-full pbc-testimonial-company-name" value="${esc(state.companyName)}">
+                    </div>
+                    <div>
+                        <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Kết quả đạt được (không bắt buộc)</label>
+                        <input type="text" class="input input-bordered input-sm w-full pbc-testimonial-result-metric" value="${esc(state.resultMetric)}"
+                               placeholder="VD: Tiết kiệm 5 giờ/tuần">
+                    </div>
+                </div>
+                <div>
+                    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Link ảnh đại diện (không bắt buộc)</label>
+                    <input type="url" class="input input-bordered input-sm w-full pbc-testimonial-avatar-url" value="${esc(state.avatarUrl)}"
+                           placeholder="https://...">
+                </div>
+            `;
+
+            body.querySelector('.pbc-testimonial-quote').addEventListener('input', (e) => { state.quote = e.target.value; });
+            body.querySelector('.pbc-testimonial-person-name').addEventListener('input', (e) => { state.personName = e.target.value; });
+            body.querySelector('.pbc-testimonial-person-title').addEventListener('input', (e) => { state.personTitle = e.target.value; });
+            body.querySelector('.pbc-testimonial-company-name').addEventListener('input', (e) => { state.companyName = e.target.value; });
+            body.querySelector('.pbc-testimonial-avatar-url').addEventListener('input', (e) => { state.avatarUrl = e.target.value; });
+            body.querySelector('.pbc-testimonial-result-metric').addEventListener('input', (e) => { state.resultMetric = e.target.value; });
+        }
+
         // ── Toolbar thêm block ───────────────────────────────────────────
 
         composerEl.querySelector('.pbc-add-text').addEventListener('click', () => addTextBlock(''));
@@ -482,6 +683,8 @@
         composerEl.querySelector('.pbc-add-faq')?.addEventListener('click', () => addFaqBlock(null));
         composerEl.querySelector('.pbc-add-citation')?.addEventListener('click', () => addCitationBlock(null));
         composerEl.querySelector('.pbc-add-howto')?.addEventListener('click', () => addHowtoBlock(null));
+        composerEl.querySelector('.pbc-add-testimonial')?.addEventListener('click', () => addTestimonialBlock(null));
+        composerEl.querySelector('.pbc-add-comparison')?.addEventListener('click', () => addComparisonBlock(null));
 
         // ── Hydrate từ block đã có (trang sửa bài) ──────────────────────
 
@@ -534,6 +737,23 @@
                     name: b.name || '',
                     description: b.description || '',
                     steps: (b.steps || []).map((s) => ({ name: s.name || '', text: s.text || '' })),
+                });
+            } else if (b.type === 'comparison') {
+                addComparisonBlock({
+                    blockUuid: b.block_uuid,
+                    name: b.name || '',
+                    description: b.description || '',
+                    columns: (b.columns || []).map((c) => ({ label: c.label || '' })),
+                    rows: (b.rows || []).map((r) => ({ label: r.label || '', values: (r.values || []).map((v) => v || '') })),
+                });
+            } else if (b.type === 'testimonial') {
+                addTestimonialBlock({
+                    quote: b.quote || '',
+                    personName: b.person_name || '',
+                    personTitle: b.person_title || '',
+                    companyName: b.company_name || '',
+                    avatarUrl: b.avatar_url || '',
+                    resultMetric: b.result_metric || '',
                 });
             }
         });
@@ -599,6 +819,27 @@
                         name: st.name,
                         description: st.description,
                         steps: st.steps.map((s) => ({ name: s.name, text: s.text })),
+                    });
+                } else if (el.dataset.kind === 'comparison') {
+                    const st = el._comparisonState;
+                    out.push({
+                        type: 'comparison',
+                        block_uuid: st.blockUuid,
+                        name: st.name,
+                        description: st.description,
+                        columns: st.columns.map((c) => ({ label: c.label })),
+                        rows: st.rows.map((r) => ({ label: r.label, values: r.values })),
+                    });
+                } else if (el.dataset.kind === 'testimonial') {
+                    const st = el._testimonialState;
+                    out.push({
+                        type: 'testimonial',
+                        quote: st.quote,
+                        person_name: st.personName,
+                        person_title: st.personTitle,
+                        company_name: st.companyName,
+                        avatar_url: st.avatarUrl,
+                        result_metric: st.resultMetric,
                     });
                 }
             });

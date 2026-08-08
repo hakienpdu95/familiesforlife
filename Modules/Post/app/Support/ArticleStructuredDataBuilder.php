@@ -17,6 +17,25 @@ use Modules\Post\Models\PostProductBlockItem;
  * đây LUÔN khớp với faq-block/howto-block/default.blade.php vì cùng đọc từ
  * `$translation->faqBlocks`/`howtoBlocks`, không cần đồng bộ tay. `Article.citation` (đợt 4) lấy
  * từ khối Citation trong content-block — "citation engineering" theo nghiên cứu Princeton/KDD 2024.
+ * `Article.mentions` (đợt 5, 2026-08-08) — thực thể/chủ đề bài viết lấy từ PostTag sẵn có, phục
+ * vụ "entity fan-out" (spec/giadinh.md — Moz "A Guide to Web Guide"), xem `buildMentions()`.
+ * Đợt 6 (2026-08-08) — khối "So sánh" (ContentBlockType::Comparison) CỐ Ý KHÔNG có
+ * buildComparisons() ở đây — xem lý do ở comparison-block/default.blade.php (không có @type
+ * schema.org nào phù hợp cho bảng so sánh tuỳ ý; semantic HTML <table> là tín hiệu GEO đủ tốt).
+ *
+ * HIỆU CHỈNH KỲ VỌNG (2026-08-08, đối chiếu spec/giadinh.md — Moz "5 Takeaways from Google's GEO
+ * Guidelines", dẫn nguyên văn tài liệu chính thức của Google): "Structured data isn't required
+ * for generative AI search, and there's no special schema.org markup you need to add" —
+ * "obsessively optimizing your markup... isn't going to produce additional benefits." Class này
+ * ĐÃ Ở MỨC ĐỦ (Article/BreadcrumbList/FAQPage/HowTo/Product/mentions) — KHÔNG cần chủ động thêm
+ * loại schema mới "phòng hờ" nếu chưa có nhu cầu nội dung cụ thể phát sinh (đúng lý do đã từ chối
+ * buildComparisons() ở trên) — Google xác nhận đây không phải đòn bẩy chính cho khả năng hiện
+ * diện trong GenAI search, nội dung "phi hàng hoá" (§4.25 ContentOutlines) mới là trọng tâm.
+ *
+ * Đợt 7 (2026-08-08) — khối "Lời chứng thực khách hàng" (ContentBlockType::Testimonial) CŨNG CỐ
+ * Ý KHÔNG có buildTestimonials()/JSON-LD Review — xem lý do đầy đủ ở testimonial-block/default.
+ * blade.php (schema.org Review yêu cầu `itemReviewed` trỏ 1 entity cụ thể mà 1 testimonial nhúng
+ * trong bài viết không có; ép vào rủi ro bị Google coi là dùng sai Review/Rating markup).
  */
 class ArticleStructuredDataBuilder
 {
@@ -35,11 +54,11 @@ class ArticleStructuredDataBuilder
     private function buildArticle(PostArticle $article, PostArticleTranslation $translation, string $canonicalUrl): array
     {
         $schema = [
-            '@context'         => 'https://schema.org',
-            '@type'            => 'Article',
-            'headline'         => $translation->title,
+            '@context' => 'https://schema.org',
+            '@type' => 'Article',
+            'headline' => $translation->title,
             'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => $canonicalUrl],
-            'publisher'        => $this->buildPublisher(),
+            'publisher' => $this->buildPublisher(),
         ];
 
         if ($translation->published_at) {
@@ -76,7 +95,29 @@ class ArticleStructuredDataBuilder
             $schema['citation'] = $citations;
         }
 
+        $mentions = $this->buildMentions($article);
+        if ($mentions) {
+            $schema['mentions'] = $mentions;
+        }
+
         return $schema;
+    }
+
+    /**
+     * "Entity fan-out" (spec/giadinh.md — Moz "A Guide to Web Guide: Our Hybrid Search Future")
+     * — khai báo rõ các thực thể/chủ đề bài viết đề cập để hỗ trợ answer engine mở rộng câu hỏi
+     * theo thực thể (vd "X có tốt cho Y không?"). Tái dùng `PostTag` sẵn có làm nguồn — biên tập
+     * viên đã gắn tag = đã xác định "thực thể/chủ đề" của bài từ trước, không cần trường nhập
+     * liệu mới. `Thing` là @type tổng quát nhất hợp lý vì không biết chắc 1 tag là Place/
+     * Organization/Product cụ thể nào — tránh khai sai loại thực thể còn tệ hơn không khai.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function buildMentions(PostArticle $article): array
+    {
+        return $article->tags
+            ->map(fn ($tag) => ['@type' => 'Thing', 'name' => $tag->name])
+            ->all();
     }
 
     /** @return array<int, array<string, mixed>> */
@@ -107,7 +148,7 @@ class ArticleStructuredDataBuilder
         }
 
         $profile = $user->authorProfile;
-        $name    = $profile?->displayName() ?: $user->name;
+        $name = $profile?->displayName() ?: $user->name;
 
         if (! $name) {
             return null;
@@ -143,8 +184,8 @@ class ArticleStructuredDataBuilder
     {
         return [
             '@type' => 'Organization',
-            'name'  => config('app.site_name'),
-            'url'   => route('post.public.home'),
+            'name' => config('app.site_name'),
+            'url' => route('post.public.home'),
         ];
     }
 
@@ -158,23 +199,23 @@ class ArticleStructuredDataBuilder
         $category = $article->categories->first();
         if ($category) {
             $items[] = [
-                '@type'    => 'ListItem',
+                '@type' => 'ListItem',
                 'position' => 2,
-                'name'     => $category->name,
-                'item'     => route('post.public.category', ['category' => $category->slug]),
+                'name' => $category->name,
+                'item' => route('post.public.category', ['category' => $category->slug]),
             ];
         }
 
         $items[] = [
-            '@type'    => 'ListItem',
+            '@type' => 'ListItem',
             'position' => count($items) + 1,
-            'name'     => $translation->title,
-            'item'     => $canonicalUrl,
+            'name' => $translation->title,
+            'item' => $canonicalUrl,
         ];
 
         return [
-            '@context'        => 'https://schema.org',
-            '@type'           => 'BreadcrumbList',
+            '@context' => 'https://schema.org',
+            '@type' => 'BreadcrumbList',
             'itemListElement' => $items,
         ];
     }
@@ -192,14 +233,14 @@ class ArticleStructuredDataBuilder
         }
 
         return [
-            '@context'   => 'https://schema.org',
-            '@type'      => 'FAQPage',
+            '@context' => 'https://schema.org',
+            '@type' => 'FAQPage',
             'mainEntity' => $questions->map(fn ($item) => [
-                '@type'          => 'Question',
-                'name'           => $item->question,
+                '@type' => 'Question',
+                'name' => $item->question,
                 'acceptedAnswer' => [
                     '@type' => 'Answer',
-                    'text'  => $item->answer,
+                    'text' => $item->answer,
                 ],
             ])->all(),
         ];
@@ -217,15 +258,15 @@ class ArticleStructuredDataBuilder
         return $translation->howtoBlocks
             ->filter(fn ($block) => $block->steps->isNotEmpty())
             ->map(fn ($block) => array_filter([
-                '@context'    => 'https://schema.org',
-                '@type'       => 'HowTo',
-                'name'        => $block->name ?: $translation->title,
+                '@context' => 'https://schema.org',
+                '@type' => 'HowTo',
+                'name' => $block->name ?: $translation->title,
                 'description' => $block->description,
-                'step'        => $block->steps->map(fn ($step, $i) => [
-                    '@type'    => 'HowToStep',
+                'step' => $block->steps->map(fn ($step, $i) => [
+                    '@type' => 'HowToStep',
                     'position' => $i + 1,
-                    'name'     => $step->name,
-                    'text'     => $step->text,
+                    'name' => $step->name,
+                    'text' => $step->text,
                 ])->values()->all(),
             ]))
             ->values()
@@ -250,8 +291,8 @@ class ArticleStructuredDataBuilder
             ->map(function (PostProductBlockItem $item) {
                 $schema = [
                     '@context' => 'https://schema.org',
-                    '@type'    => 'Product',
-                    'name'     => $item->display_title,
+                    '@type' => 'Product',
+                    'name' => $item->display_title,
                 ];
 
                 if ($item->display_image_url) {
@@ -288,8 +329,8 @@ class ArticleStructuredDataBuilder
         }
 
         $offer = [
-            '@type'         => 'Offer',
-            'price'         => (string) $product->price,
+            '@type' => 'Offer',
+            'price' => (string) $product->price,
             'priceCurrency' => $product->currency ?: 'VND',
         ];
 

@@ -5,6 +5,9 @@ namespace Modules\Post\Support;
 use Illuminate\Support\Collection;
 use Modules\Post\Enums\ContentBlockType;
 use Modules\Post\Models\PostArticleTranslation;
+use Modules\Post\Models\PostComparisonBlock;
+use Modules\Post\Models\PostComparisonColumn;
+use Modules\Post\Models\PostComparisonRow;
 use Modules\Post\Models\PostContentBlock;
 use Modules\Post\Models\PostFaqBlock;
 use Modules\Post\Models\PostFaqItem;
@@ -33,6 +36,7 @@ class ArticleContentRenderer
                 // mặc định trả rỗng cho Product tenant-scoped (xem Product::scopePublicEmbed()).
                 'productBlock.items.product' => fn ($q) => $q->publicEmbed(),
                 'productBlock.items.buttons', 'productBlock.buttons', 'faqBlock.items', 'howtoBlock.steps',
+                'comparisonBlock.columns', 'comparisonBlock.rows',
             ])
             ->get();
 
@@ -55,6 +59,16 @@ class ArticleContentRenderer
                 return $block->howtoBlock
                     ? view('post::components.howto-block.default', ['block' => $block->howtoBlock])->render()
                     : '';
+            }
+
+            if ($block->type === ContentBlockType::Comparison) {
+                return $block->comparisonBlock
+                    ? view('post::components.comparison-block.default', ['block' => $block->comparisonBlock])->render()
+                    : '';
+            }
+
+            if ($block->type === ContentBlockType::Testimonial) {
+                return view('post::components.testimonial-block.default', ['block' => $block])->render();
             }
 
             if (! $block->productBlock) {
@@ -82,7 +96,7 @@ class ArticleContentRenderer
 
         $dom = new \DOMDocument('1.0', 'UTF-8');
         libxml_use_internal_errors(true);
-        $dom->loadHTML('<?xml encoding="UTF-8"><body>' . $html . '</body>', LIBXML_NOERROR | LIBXML_NOWARNING);
+        $dom->loadHTML('<?xml encoding="UTF-8"><body>'.$html.'</body>', LIBXML_NOERROR | LIBXML_NOWARNING);
         libxml_clear_errors();
 
         foreach (iterator_to_array($dom->getElementsByTagName('script')) as $script) {
@@ -96,11 +110,12 @@ class ArticleContentRenderer
             }
 
             foreach (iterator_to_array($el->attributes ?? []) as $attr) {
-                $name  = strtolower($attr->nodeName);
+                $name = strtolower($attr->nodeName);
                 $value = trim($attr->nodeValue);
 
                 if (str_starts_with($name, 'on')) {
                     $el->removeAttribute($attr->nodeName);
+
                     continue;
                 }
 
@@ -111,7 +126,7 @@ class ArticleContentRenderer
         }
 
         $body = $dom->getElementsByTagName('body')->item(0);
-        $out  = '';
+        $out = '';
         foreach ($body->childNodes as $child) {
             $out .= $dom->saveHTML($child);
         }
@@ -131,7 +146,10 @@ class ArticleContentRenderer
     public function toComposerPayload(PostArticleTranslation $translation): array
     {
         $blocks = $translation->contentBlocks()
-            ->with(['productBlock.items.product', 'productBlock.items.buttons', 'productBlock.buttons', 'faqBlock.items', 'howtoBlock.steps'])
+            ->with([
+                'productBlock.items.product', 'productBlock.items.buttons', 'productBlock.buttons',
+                'faqBlock.items', 'howtoBlock.steps', 'comparisonBlock.columns', 'comparisonBlock.rows',
+            ])
             ->get();
 
         return $blocks->map(function (PostContentBlock $block) {
@@ -146,22 +164,34 @@ class ArticleContentRenderer
                 }
 
                 return [
-                    'type'       => 'faq',
+                    'type' => 'faq',
                     'block_uuid' => $fb->uuid,
-                    'heading'    => $fb->heading,
-                    'items'      => $fb->items->map(fn ($item) => [
+                    'heading' => $fb->heading,
+                    'items' => $fb->items->map(fn ($item) => [
                         'question' => $item->question,
-                        'answer'   => $item->answer,
+                        'answer' => $item->answer,
                     ])->values(),
                 ];
             }
 
             if ($block->type === ContentBlockType::Citation) {
                 return [
-                    'type'                 => 'citation',
-                    'citation_text'        => $block->citation_text,
+                    'type' => 'citation',
+                    'citation_text' => $block->citation_text,
                     'citation_source_name' => $block->citation_source_name,
-                    'citation_source_url'  => $block->citation_source_url,
+                    'citation_source_url' => $block->citation_source_url,
+                ];
+            }
+
+            if ($block->type === ContentBlockType::Testimonial) {
+                return [
+                    'type' => 'testimonial',
+                    'quote' => $block->testimonial_quote,
+                    'person_name' => $block->testimonial_person_name,
+                    'person_title' => $block->testimonial_person_title,
+                    'company_name' => $block->testimonial_company_name,
+                    'avatar_url' => $block->testimonial_avatar_url,
+                    'result_metric' => $block->testimonial_result_metric,
                 ];
             }
 
@@ -172,13 +202,32 @@ class ArticleContentRenderer
                 }
 
                 return [
-                    'type'        => 'howto',
-                    'block_uuid'  => $hb->uuid,
-                    'name'        => $hb->name,
+                    'type' => 'howto',
+                    'block_uuid' => $hb->uuid,
+                    'name' => $hb->name,
                     'description' => $hb->description,
-                    'steps'       => $hb->steps->map(fn ($step) => [
+                    'steps' => $hb->steps->map(fn ($step) => [
                         'name' => $step->name,
                         'text' => $step->text,
+                    ])->values(),
+                ];
+            }
+
+            if ($block->type === ContentBlockType::Comparison) {
+                $cb = $block->comparisonBlock;
+                if (! $cb) {
+                    return null;
+                }
+
+                return [
+                    'type' => 'comparison',
+                    'block_uuid' => $cb->uuid,
+                    'name' => $cb->name,
+                    'description' => $cb->description,
+                    'columns' => $cb->columns->map(fn ($col) => ['label' => $col->label])->values(),
+                    'rows' => $cb->rows->map(fn ($row) => [
+                        'label' => $row->label,
+                        'values' => $row->values,
                     ])->values(),
                 ];
             }
@@ -189,42 +238,42 @@ class ArticleContentRenderer
             }
 
             return [
-                'type'          => 'product',
-                'block_uuid'    => $pb->uuid,
-                'template'      => $pb->template->value,
-                'heading'       => $pb->heading,
-                'items'         => $pb->items->map(fn ($item) => [
-                    'item_key'              => $item->item_key,
-                    'product_id'            => $item->product_id,
-                    'title_override'        => $item->title_override,
-                    'price_label_override'  => $item->price_label_override,
-                    'description_override'  => $item->description_override,
-                    'image_url_override'    => $item->image_url_override,
-                    'cached_name'           => $item->product?->name,
-                    'cached_image'          => $item->product?->cover_image_url,
-                    'cached_price'          => $item->product?->display_price,
-                    'cached_links'          => collect(ProductLinkType::cases())
+                'type' => 'product',
+                'block_uuid' => $pb->uuid,
+                'template' => $pb->template->value,
+                'heading' => $pb->heading,
+                'items' => $pb->items->map(fn ($item) => [
+                    'item_key' => $item->item_key,
+                    'product_id' => $item->product_id,
+                    'title_override' => $item->title_override,
+                    'price_label_override' => $item->price_label_override,
+                    'description_override' => $item->description_override,
+                    'image_url_override' => $item->image_url_override,
+                    'cached_name' => $item->product?->name,
+                    'cached_image' => $item->product?->cover_image_url,
+                    'cached_price' => $item->product?->display_price,
+                    'cached_links' => collect(ProductLinkType::cases())
                         ->filter(fn ($type) => filled($item->product?->{$type->urlColumn()}))
                         ->map(fn ($type) => ['type' => $type->value, 'label' => $type->label()])
                         ->values(),
-                    'buttons'               => $item->buttons->map(fn ($btn) => [
-                        'button_key'         => $btn->button_key,
-                        'label'              => $btn->label,
-                        'url_type'           => $btn->url_type->value,
-                        'url'                => $btn->url,
-                        'product_link_type'  => $btn->product_link_type,
-                        'target'             => $btn->target->value,
-                        'style'              => $btn->style->value,
+                    'buttons' => $item->buttons->map(fn ($btn) => [
+                        'button_key' => $btn->button_key,
+                        'label' => $btn->label,
+                        'url_type' => $btn->url_type->value,
+                        'url' => $btn->url,
+                        'product_link_type' => $btn->product_link_type,
+                        'target' => $btn->target->value,
+                        'style' => $btn->style->value,
                     ]),
                 ]),
                 'block_buttons' => $pb->buttons->map(fn ($btn) => [
-                    'button_key'         => $btn->button_key,
-                    'label'              => $btn->label,
-                    'url_type'           => $btn->url_type->value,
-                    'url'                => $btn->url,
-                    'product_link_type'  => $btn->product_link_type,
-                    'target'             => $btn->target->value,
-                    'style'              => $btn->style->value,
+                    'button_key' => $btn->button_key,
+                    'label' => $btn->label,
+                    'url_type' => $btn->url_type->value,
+                    'url' => $btn->url,
+                    'product_link_type' => $btn->product_link_type,
+                    'target' => $btn->target->value,
+                    'style' => $btn->style->value,
                 ]),
             ];
         })->filter()->values()->all();
@@ -238,7 +287,7 @@ class ArticleContentRenderer
      * null mà sản phẩm còn tồn tại được phép đọc `Product` hiện hành (1 lượt `whereIn` gộp,
      * không N+1) — lý do: nếu lỡ query sản phẩm đã xoá sẽ ra null/exception thay vì fallback.
      *
-     * @param array<int, array> $blocks
+     * @param  array<int, array>  $blocks
      * @return array{html: string, missing_products: array<int, array{product_id: int, referenced_in_block: ?string}>}
      */
     public function renderSnapshot(array $blocks): array
@@ -274,17 +323,17 @@ class ArticleContentRenderer
 
             if (($blockData['type'] ?? null) === 'faq') {
                 return view('post::components.faq-block.default', [
-                    'block'   => $this->hydrateFaqBlockSnapshot($blockData),
+                    'block' => $this->hydrateFaqBlockSnapshot($blockData),
                     'preview' => true,
                 ])->render();
             }
 
             if (($blockData['type'] ?? null) === 'citation') {
                 return view('post::components.citation-block.default', [
-                    'block'   => (object) [
-                        'citation_text'        => $blockData['citation_text'] ?? '',
-                        'citation_source_name'  => $blockData['citation_source_name'] ?? '',
-                        'citation_source_url'   => $blockData['citation_source_url'] ?? null,
+                    'block' => (object) [
+                        'citation_text' => $blockData['citation_text'] ?? '',
+                        'citation_source_name' => $blockData['citation_source_name'] ?? '',
+                        'citation_source_url' => $blockData['citation_source_url'] ?? null,
                     ],
                     'preview' => true,
                 ])->render();
@@ -292,7 +341,28 @@ class ArticleContentRenderer
 
             if (($blockData['type'] ?? null) === 'howto') {
                 return view('post::components.howto-block.default', [
-                    'block'   => $this->hydrateHowtoBlockSnapshot($blockData),
+                    'block' => $this->hydrateHowtoBlockSnapshot($blockData),
+                    'preview' => true,
+                ])->render();
+            }
+
+            if (($blockData['type'] ?? null) === 'comparison') {
+                return view('post::components.comparison-block.default', [
+                    'block' => $this->hydrateComparisonBlockSnapshot($blockData),
+                    'preview' => true,
+                ])->render();
+            }
+
+            if (($blockData['type'] ?? null) === 'testimonial') {
+                return view('post::components.testimonial-block.default', [
+                    'block' => (object) [
+                        'testimonial_quote' => $blockData['quote'] ?? '',
+                        'testimonial_person_name' => $blockData['person_name'] ?? '',
+                        'testimonial_person_title' => $blockData['person_title'] ?? null,
+                        'testimonial_company_name' => $blockData['company_name'] ?? null,
+                        'testimonial_avatar_url' => $blockData['avatar_url'] ?? null,
+                        'testimonial_result_metric' => $blockData['result_metric'] ?? null,
+                    ],
                     'preview' => true,
                 ])->render();
             }
@@ -311,21 +381,21 @@ class ArticleContentRenderer
     /** FAQ không tham chiếu entity ngoài (Product) — không có khái niệm "đã xoá"/fallback như product, đơn giản hơn nhiều. */
     private function hydrateFaqBlockSnapshot(array $blockData): PostFaqBlock
     {
-        $block = new PostFaqBlock();
+        $block = new PostFaqBlock;
         $block->exists = false;
         $block->forceFill([
-            'id'      => 0,
-            'uuid'    => $blockData['block_uuid'] ?? null,
+            'id' => 0,
+            'uuid' => $blockData['block_uuid'] ?? null,
             'heading' => $blockData['heading'] ?? null,
         ]);
 
         $items = collect($blockData['items'] ?? [])->map(function ($itemData) {
-            $item = new PostFaqItem();
+            $item = new PostFaqItem;
             $item->exists = false;
             $item->forceFill([
-                'id'       => 0,
+                'id' => 0,
                 'question' => $itemData['question'] ?? '',
-                'answer'   => $itemData['answer'] ?? '',
+                'answer' => $itemData['answer'] ?? '',
             ]);
 
             return $item;
@@ -339,20 +409,20 @@ class ArticleContentRenderer
     /** HowTo không tham chiếu entity ngoài — không cần fallback như product, đơn giản hơn nhiều. */
     private function hydrateHowtoBlockSnapshot(array $blockData): PostHowtoBlock
     {
-        $block = new PostHowtoBlock();
+        $block = new PostHowtoBlock;
         $block->exists = false;
         $block->forceFill([
-            'id'          => 0,
-            'uuid'        => $blockData['block_uuid'] ?? null,
-            'name'        => $blockData['name'] ?? null,
+            'id' => 0,
+            'uuid' => $blockData['block_uuid'] ?? null,
+            'name' => $blockData['name'] ?? null,
             'description' => $blockData['description'] ?? null,
         ]);
 
         $steps = collect($blockData['steps'] ?? [])->map(function ($stepData) {
-            $step = new PostHowtoStep();
+            $step = new PostHowtoStep;
             $step->exists = false;
             $step->forceFill([
-                'id'   => 0,
+                'id' => 0,
                 'name' => $stepData['name'] ?? '',
                 'text' => $stepData['text'] ?? '',
             ]);
@@ -365,15 +435,49 @@ class ArticleContentRenderer
         return $block;
     }
 
-    private function hydrateProductBlockSnapshot(array $blockData, Collection $existingProducts, Collection $missingProductIds): PostProductBlock
+    /** Comparison không tham chiếu entity ngoài — không cần fallback như product, đơn giản hơn nhiều. */
+    private function hydrateComparisonBlockSnapshot(array $blockData): PostComparisonBlock
     {
-        $block = new PostProductBlock();
+        $block = new PostComparisonBlock;
         $block->exists = false;
         $block->forceFill([
-            'id'       => 0,
-            'uuid'     => $blockData['block_uuid'] ?? null,
+            'id' => 0,
+            'uuid' => $blockData['block_uuid'] ?? null,
+            'name' => $blockData['name'] ?? null,
+            'description' => $blockData['description'] ?? null,
+        ]);
+
+        $columns = collect($blockData['columns'] ?? [])->map(function ($columnData) {
+            $column = new PostComparisonColumn;
+            $column->exists = false;
+            $column->forceFill(['id' => 0, 'label' => $columnData['label'] ?? '']);
+
+            return $column;
+        });
+
+        $rows = collect($blockData['rows'] ?? [])->map(function ($rowData) {
+            $row = new PostComparisonRow;
+            $row->exists = false;
+            $row->forceFill(['id' => 0, 'label' => $rowData['label'] ?? '', 'values' => $rowData['values'] ?? []]);
+
+            return $row;
+        });
+
+        $block->setRelation('columns', $columns);
+        $block->setRelation('rows', $rows);
+
+        return $block;
+    }
+
+    private function hydrateProductBlockSnapshot(array $blockData, Collection $existingProducts, Collection $missingProductIds): PostProductBlock
+    {
+        $block = new PostProductBlock;
+        $block->exists = false;
+        $block->forceFill([
+            'id' => 0,
+            'uuid' => $blockData['block_uuid'] ?? null,
             'template' => $blockData['template'],
-            'heading'  => $blockData['heading'] ?? null,
+            'heading' => $blockData['heading'] ?? null,
         ]);
 
         $items = collect($blockData['items'] ?? [])->map(
@@ -391,24 +495,24 @@ class ArticleContentRenderer
         $productId = $itemData['product_id'] ?? null;
         $isMissing = $productId && $missingProductIds->contains($productId);
 
-        $item = new PostProductBlockItem();
+        $item = new PostProductBlockItem;
         $item->exists = false;
         $item->forceFill([
-            'id'                    => 0,
-            'item_key'              => $itemData['item_key'] ?? null,
-            'product_id'            => $productId,
-            'title_override'        => $itemData['title_override'] ?? null,
-            'price_label_override'  => $itemData['price_label_override'] ?? null,
-            'description_override'  => $itemData['description_override'] ?? null,
-            'image_url_override'    => $itemData['image_url_override'] ?? null,
+            'id' => 0,
+            'item_key' => $itemData['item_key'] ?? null,
+            'product_id' => $productId,
+            'title_override' => $itemData['title_override'] ?? null,
+            'price_label_override' => $itemData['price_label_override'] ?? null,
+            'description_override' => $itemData['description_override'] ?? null,
+            'image_url_override' => $itemData['image_url_override'] ?? null,
         ]);
 
         if ($isMissing) {
             // Không được lazy-load Product cho id đã biết chắc không còn tồn tại (§13.3) —
             // set relation = null NGAY để accessor display_* không bao giờ kích hoạt query.
             $item->setRelation('product', null);
-            $item->title_override      = $item->title_override ?? 'Sản phẩm không còn tồn tại';
-            $item->image_url_override  = $item->image_url_override ?? self::MISSING_PRODUCT_PLACEHOLDER_IMAGE;
+            $item->title_override = $item->title_override ?? 'Sản phẩm không còn tồn tại';
+            $item->image_url_override = $item->image_url_override ?? self::MISSING_PRODUCT_PLACEHOLDER_IMAGE;
         } else {
             $item->setRelation('product', $productId ? $existingProducts->get($productId) : null);
         }
@@ -420,17 +524,17 @@ class ArticleContentRenderer
 
     private function hydrateButtonSnapshot(array $buttonData): PostProductBlockButton
     {
-        $button = new PostProductBlockButton();
+        $button = new PostProductBlockButton;
         $button->exists = false;
         $button->forceFill([
-            'id'                => 0, // route('post.cta.redirect', $button) cần 1 route-key hợp lệ để không ném UrlGenerationException (§13.3) — bấm vào là dead-link chấp nhận được cho preview lịch sử.
-            'button_key'        => $buttonData['button_key'] ?? null,
-            'label'             => $buttonData['label'] ?? null,
-            'url_type'          => $buttonData['url_type'],
-            'url'               => $buttonData['url'] ?? null,
+            'id' => 0, // route('post.cta.redirect', $button) cần 1 route-key hợp lệ để không ném UrlGenerationException (§13.3) — bấm vào là dead-link chấp nhận được cho preview lịch sử.
+            'button_key' => $buttonData['button_key'] ?? null,
+            'label' => $buttonData['label'] ?? null,
+            'url_type' => $buttonData['url_type'],
+            'url' => $buttonData['url'] ?? null,
             'product_link_type' => $buttonData['product_link_type'] ?? null,
-            'target'            => $buttonData['target'] ?? '_blank',
-            'style'             => $buttonData['style'] ?? 'primary',
+            'target' => $buttonData['target'] ?? '_blank',
+            'style' => $buttonData['style'] ?? 'primary',
         ]);
 
         return $button;

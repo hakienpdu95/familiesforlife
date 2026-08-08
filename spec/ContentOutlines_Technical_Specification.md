@@ -1,11 +1,23 @@
 # Module Dàn ý Nội dung (ContentOutlines)
 
-**Phiên bản:** 1.21
-**Ngày:** 2026-08-07
+**Phiên bản:** 1.23
+**Ngày:** 2026-08-08
 **Framework:** Laravel 13 (PHP 8.4) + NWIDART Modules + Lorisleiva Actions
 **Module mới:** `Modules/ContentOutlines` (tạo bằng `php artisan module:make ContentOutlines`)
 **Module phụ thuộc:** `Modules\ContentFoundation` (ngữ cảnh biên tập theo `PostCategory`, 1 chiều — cùng cách `CoreIdeaExtractor`/`VideoIdeaExtractor` phụ thuộc module này). Không tích hợp `app/Services/AI/` (xem §0).
-**Trạng thái:** v1.21 — đã vá 5 rủi ro sau review v1.0 (§4.1-§4.5) + áp dụng 2 điểm checklist content-marketing (§4.6) + 3 điểm phương pháp luận outline tổng quát (§4.7) + 4 điểm SEO content outline chuyên biệt (§4.8) + mô hình internal-link Pillar↔Cluster (§4.9) + CTA/độ tin cậy dữ liệu (§4.10) + answer-first/AI answer engine/chặn bịa số liệu/list lead-in/sai số ±10% (§4.11) + structure archetype/intent map 3 câu hỏi/Content-H3/differentiation note/FAQ nguồn PAA thật/anchor text (§4.12) + gợi ý Schema markup/alt text hình ảnh (§4.13) + từ khoá gần đầu/Meta 140-160/keyword trong 150 từ đầu/chặn nhồi từ khoá (§4.14) + kiểm kê SERP feature/khớp định dạng featured snippet/gom nhóm heading lặp lại đối thủ (§4.15) + H2 "Kết luận" (§4.16) + Feature `ArticleDrafting` — "Bước 2" sinh prompt viết bài từ outline đã duyệt (§4.17) + `cta_url` thật/hook mở bài/format scannable/chọn tiêu đề mạnh nhất (§4.18) + before-after example/2-3 phương án Meta/chặn case study bịa/cấm cliché mở bài (§4.19) + Feature `ArticleReview` — "Bước 3" sinh prompt soát lỗi/sửa bài đã viết (§4.20) + gợi ý ý tưởng infographic (§4.21) + gợi ý vị trí chèn câu chuyện/case study/testimonial THẬT của biên tập viên (§4.22) + nêu tên chuyên gia/tổ chức uy tín THẬT nếu biết (§4.23) + cảnh báo cascade khi regenerate + stepper/collapsible UX trang Show (§4.24) + **ghi rõ hành vi cascade vào §4.2 canonical + `<details>` mặc định đóng khi CHƯA DÙNG** (§4.24 mở rộng). Chưa qua vòng tinh chỉnh dựa trên phản hồi sử dụng thật DÀI HẠN (khác `CoreIdeaExtractor.md` đã qua 28 version).
+**Trạng thái:** v1.23 — đã vá 5 rủi ro sau review v1.0 (§4.1-§4.5) + áp dụng 2 điểm checklist content-marketing (§4.6) + 3 điểm phương pháp luận outline tổng quát (§4.7) + 4 điểm SEO content outline chuyên biệt (§4.8) + mô hình internal-link Pillar↔Cluster (§4.9) + CTA/độ tin cậy dữ liệu (§4.10) + answer-first/AI answer engine/chặn bịa số liệu/list lead-in/sai số ±10% (§4.11) + structure archetype/intent map 3 câu hỏi/Content-H3/differentiation note/FAQ nguồn PAA thật/anchor text (§4.12) + gợi ý Schema markup/alt text hình ảnh (§4.13) + từ khoá gần đầu/Meta 140-160/keyword trong 150 từ đầu/chặn nhồi từ khoá (§4.14) + kiểm kê SERP feature/khớp định dạng featured snippet/gom nhóm heading lặp lại đối thủ (§4.15) + H2 "Kết luận" (§4.16) + Feature `ArticleDrafting` — "Bước 2" sinh prompt viết bài từ outline đã duyệt (§4.17) + `cta_url` thật/hook mở bài/format scannable/chọn tiêu đề mạnh nhất (§4.18) + before-after example/2-3 phương án Meta/chặn case study bịa/cấm cliché mở bài (§4.19) + Feature `ArticleReview` — "Bước 3" sinh prompt soát lỗi/sửa bài đã viết (§4.20) + gợi ý ý tưởng infographic (§4.21) + gợi ý vị trí chèn câu chuyện/case study/testimonial THẬT của biên tập viên (§4.22) + nêu tên chuyên gia/tổ chức uy tín THẬT nếu biết (§4.23) + cảnh báo cascade khi regenerate + stepper/collapsible UX trang Show (§4.24) + **ghi rõ hành vi cascade vào §4.2 canonical + `<details>` mặc định đóng khi CHƯA DÙNG** (§4.24 mở rộng) + guardrail chống văn phong "lộ AI" (em-dash lạm dụng/từ chuyển ý sáo mòn lặp lại/chuỗi câu ngắn cùng cấu trúc) ở Bước 2 + rà lại ở Bước 3 (§4.25) + guardrail câu ≤20 từ + tránh thuật ngữ mơ hồ không có ngữ cảnh cụ thể (§4.26). Chưa qua vòng tinh chỉnh dựa trên phản hồi sử dụng thật DÀI HẠN (khác `CoreIdeaExtractor.md` đã qua 28 version).
+
+> **v1.22 (đối chiếu spec/giadinh.md — Moz Whiteboard Friday "7 Tips for Writing Great Content
+> with ChatGPT or Gemini", Chima Mmeje, 2026-08-08):** đối chiếu 7 kỹ thuật prompt engineering
+> của nguồn với toàn bộ prompt thật đang sinh ở `ContentOutlines`/`CoreIdeaExtractor`/
+> `ContentFoundation`/`PromptFrameworkStudio`. 4/7 đã có tương đương đầy đủ (context, product-led
+> qua cơ chế khác, cá nhân hoá/storytelling — §4.22, đã có 1 phần cho training-document qua
+> `style_sample`). 2/7 là quyết định ĐÃ CHỐT có chủ đích, KHÔNG áp dụng: "viết từng đoạn nhỏ
+> nhiều lượt copy-paste" (mâu thuẫn trực tiếp mô hình "1 prompt viết cả bài 1 lần" đã chốt ở
+> §4.17) và field "core offering" riêng cho `ContentFoundation` (đã thử và bỏ trước đó, xem
+> `CategoryFoundationData.php` — giữ nguyên, không mở lại). "Feedback lặp lại để AI học dần
+> (~70% chất lượng)" đòi hỏi lưu lịch sử chỉnh sửa — tính năng mới, KHÔNG làm ở v1.22 (ngoài
+> phạm vi, xem §9). 1/7 là khoảng trống THẬT, nhỏ, an toàn — đã áp dụng, xem §4.25.
 
 > **v1.21 (theo dõi đề xuất ưu tiên của người dùng sau v1.20 — 3 điểm "ưu tiên cao" đối chiếu lại,
 > xem §4.24):** người dùng hỏi "đã fix chưa" 5 đề xuất ưu tiên. Kết quả rà soát: (1) "Ghi rõ hành
@@ -935,6 +947,47 @@ Người dùng tự rà soát spec/code (không đối chiếu nguồn ngoài) v
 - **Đã sửa — stepper điều hướng:** thêm dải badge "Bước 1 ✓ → Bước 2[ ✓] → Bước 3[ ✓]" ngay dưới tiêu đề trang, mỗi badge là anchor link (`#buoc-1`/`#buoc-2`/`#buoc-3`) + đổi màu (`badge-success` khi bước đó đã có kết quả, `badge-ghost` khi chưa) — cho biên tập viên thấy NGAY tiến độ 3 bước mà không cần cuộn hết trang.
 - **Đã sửa — collapsible:** bọc nội dung card "Bước 2"/"Bước 3" (mô tả + form + khối kết quả) trong `<details>` (native HTML, không cần thư viện JS mới) — `<summary>` hiện tiêu đề bước + badge "Đã sinh" nếu đã có prompt. Bước 2 mặc định `open` TRỪ khi `review_prompt` đã có (ngụ ý biên tập viên đã tiến sang Bước 3, tự thu gọn Bước 2 để giảm chiều cao trang — vẫn mở lại được bất kỳ lúc nào, KHÔNG mất nội dung). Bước 3 LUÔN mở (bước cuối, không có bước sau để "đẩy" nó vào nền). Bước 1 (card "Prompt đã sinh") GIỮ NGUYÊN không bọc `<details>` — đây là artifact chính người dùng cần thấy ngay khi vào trang, không cần thu gọn.
 - Không đổi hành vi JS đã có (`contentOutlineCopyPrompt`/`contentOutlineDownloadPrompt`/`contentOutlineMakeCollapsible`) — `<details>` là thuần HTML/CSS, không xung đột với Alpine `x-show`/tabs bên trong.
+
+---
+
+### 4.25 Guardrail chống văn phong "lộ AI" — em-dash lạm dụng/từ chuyển ý sáo mòn/chuỗi câu ngắn cùng cấu trúc (v1.22, đối chiếu spec/giadinh.md — Moz Whiteboard Friday "7 Tips for Writing Great Content with ChatGPT or Gemini", Chima Mmeje)
+
+Nguồn liệt kê 7 kỹ thuật prompt engineering khi dùng LLM viết content. Đối chiếu từng điểm với toàn bộ prompt thật đang sinh (không chỉ tên field) — 4/7 đã có tương đương đầy đủ, 2/7 là quyết định ĐÃ CHỐT trước đó (giữ nguyên, không mở lại — xem dưới), 1/7 (feedback lặp lại) là tính năng mới ngoài phạm vi v1.22, và ĐÚNG 1/7 là khoảng trống thật đủ nhỏ để áp dụng ngay:
+
+**Đã có tương đương đầy đủ, KHÔNG cần sửa:**
+- "Provide context" — §2/§4.7 (khối "Thông tin đầu vào" đầy đủ mục tiêu/audience/tone/structure).
+- "Add core offerings/product-led" — cơ chế khác (AI tự đề xuất sản phẩm + `cta_url` thật, §4.10/§4.18) nhưng phục vụ đúng mục đích "chèn giá trị sản phẩm tự nhiên vào nội dung".
+- "Personalize the output" — §4.22 (gợi ý vị trí chèn story/case study/testimonial THẬT của biên tập viên) khớp gần như nguyên văn.
+- "Training document" (few-shot mẫu bài cũ) — có 1 phần qua `style_sample` (CategoryContentFoundation) dùng cho GIỌNG VĂN, không dùng nguyên bài — xem lý do KHÔNG mở rộng ở mục dưới.
+
+**Đã là quyết định CHỐT trước đó, KHÔNG mở lại:**
+- **"Write in small sections"** (viết từng H2 riêng, nhiều lượt copy-paste) — MÂU THUẪN trực tiếp với mô hình "1 prompt viết cả bài, 1 lần" đã chốt ở §4.17 (lý do: tránh N lượt copy-paste thủ công cho biên tập viên). Giữ nguyên quyết định §4.17.
+- **Field "core offering" riêng** cho `CategoryContentFoundation` — lịch sử đã có khái niệm này (comment ở `CategoryFoundationData.php` nhắc "Business Foundation Document") nhưng đã chủ động BỎ, chỉ giữ lại UVP/goals dạng ngữ cảnh biên tập. Không mở lại — cơ chế "AI tự đề xuất sản phẩm" (§4.10) đã phục vụ đúng nhu cầu product-led mà không cần biên tập viên tự liệt kê catalog.
+- **"Training document" đầy đủ** (nguyên 1 bài mẫu, không chỉ đoạn giọng văn) — CỐ Ý không mở rộng: `style_sample` hiện tại giới hạn rõ "chỉ dùng tham khảo văn phong, KHÔNG sao chép nội dung/chủ đề" (xem prompt CoreIdeaExtractor) — đây là guardrail chống đạo văn/lặp ý đã có chủ đích, nới rộng thành "dán nguyên 1 bài cũ" sẽ mở lại đúng rủi ro đó.
+
+**Ngoài phạm vi v1.22 (tính năng mới, không phải sửa prompt text):**
+- **"Give feedback lặp lại, mục tiêu ~70% chất lượng"** — đòi hỏi lưu lịch sử "đã sửa gì/vì sao" ở 1 lượt sinh để nạp ngược vào lượt sau — module hiện tại là "sinh 1 prompt độc lập, không trạng thái hội thoại" (đúng nguyên tắc §0), không có bảng nào lưu revision/feedback. Cần 1 quyết định phạm vi riêng nếu muốn làm (thêm bảng lưu feedback + logic nạp lại vào prompt lần sau) — không lồng vào 1 lượt sửa nhỏ như tại đây.
+
+**1 điểm THẬT áp dụng — guardrail chống văn phong "lộ AI":**
+
+Nguồn liệt kê cụ thể: lạm dụng dấu gạch ngang em-dash nối 2 vế câu, dùng đi dùng lại 1 số từ ("shape" trong ví dụ tiếng Anh của nguồn), câu ngắn cộc lốc liên tiếp — đây là các "tell" phổ biến khiến văn bản đọc rõ là do AI viết dù nội dung đúng. Module đã có 2 guardrail HẸP liên quan (cấm cliché mở bài §4.19, tự rà "robotic" ở Bước 3 §4.20) nhưng chưa liệt kê cụ thể các dấu hiệu văn phong này.
+
+- **`BuildArticleDraftPromptAction`** (Bước 2, sinh bài mới): thêm 1 bullet mới ngay sau bullet "Câu chủ động, ngắn gọn..." — cấm cụ thể: (1) lạm dụng em-dash "—" nối 2 vế câu (thỉnh thoảng 1 câu dùng được, không lặp lại liên tục nhiều câu); (2) mở nhiều đoạn liên tiếp bằng cùng 1 từ chuyển ý sáo mòn ("Hơn nữa"/"Bên cạnh đó"/"Không chỉ vậy"/"Tóm lại"...); (3) chuỗi câu ngắn liên tiếp cùng 1 cấu trúc ngữ pháp (chủ ngữ-động từ-tân ngữ lặp lại) — yêu cầu xen kẽ độ dài câu tự nhiên như người viết thật.
+- **`BuildArticleReviewPromptAction`** (Bước 3, soát bài đã viết): mở rộng mục "3. Rà soát cuối" — bên cạnh "robotic/máy móc" đã có, chỉ rõ 3 dấu hiệu cụ thể ở trên để AI review chủ động tìm VÀ đề xuất câu thay thế, không chỉ nói chung "đọc chưa tự nhiên".
+- Không đổi signature/DB, không thêm field mới — chỉ mở rộng text tĩnh trong 2 Action đã có, cùng cách §4.19/§4.23 đã làm.
+
+---
+
+### 4.26 Guardrail câu ≤20 từ + tránh thuật ngữ mơ hồ không có ngữ cảnh cụ thể (v1.23, đối chiếu spec/giadinh.md — bài phân tích xu hướng "zero-click search"/AI visibility, cùng tác giả nguồn đã đối chiếu ở §4.22)
+
+Nguồn khuyến nghị 2 điểm ở tầng CÂU (khác các guardrail đã có, vốn ở tầng ĐOẠN — "60-100 từ/đoạn" §4.6, hoặc tầng VĂN PHONG TOÀN BÀI — em-dash/từ chuyển ý sáo mòn §4.25): (1) tránh câu dài quá ~20 từ — câu dài nhiều mệnh đề khó để AI answer engine trích nguyên văn làm câu trả lời trực tiếp; (2) tránh thuật ngữ mơ hồ không kèm ngữ cảnh cụ thể (VD nói "chiến lược marketing" mà không nói rõ chiến lược nào/áp dụng cho ai) — nội dung mơ hồ vừa khó bị AI trích, vừa ít giá trị thật với người đọc.
+
+**1 điểm THẬT áp dụng — cả 2 vế trên, cùng vị trí đã sửa ở §4.25 (không tách guardrail riêng để tránh module tích luỹ quá nhiều chỉ dẫn rời rạc — rủi ro "instruction overload" đã ghi nhận ở §4.24 mục 1):**
+
+- **`BuildArticleDraftPromptAction`** (Bước 2): mở rộng NGAY bullet "Tránh dấu hiệu văn phong 'lộ AI' phổ biến" đã thêm ở §4.25 — bổ sung thêm 2 ý: (4) câu không quá ~20 từ, câu dài cần tách thành 2 câu ngắn hơn; (5) không dùng thuật ngữ/cụm từ chung chung mà không nói rõ áp dụng cho trường hợp/đối tượng nào cụ thể.
+- **`BuildArticleReviewPromptAction`** (Bước 3): mở rộng mục "2. Đánh giá độ dễ đọc (readability)" đã có sẵn câu hỏi "câu/đoạn nào quá dài nên chia nhỏ?" — chỉ rõ thêm ngưỡng cụ thể ~20 từ/câu thay vì để mơ hồ "quá dài" chung chung, và thêm câu hỏi rà thuật ngữ mơ hồ thiếu ngữ cảnh.
+- `GeoChecklist.php` — thêm 1 tiêu chí mới trong nhóm "Cấu trúc & câu trả lời" nhắc lại đúng 2 ý này cho biên tập viên tự đối chiếu khi không qua `ContentOutlines` (viết tay/dùng AI ngoài không qua module).
+- Không đổi signature/DB, không thêm field mới.
 
 ---
 

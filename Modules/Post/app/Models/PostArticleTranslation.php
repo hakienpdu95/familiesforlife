@@ -2,6 +2,7 @@
 
 namespace Modules\Post\Models;
 
+use App\Models\User;
 use App\Traits\HasTenantMedia;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -29,10 +30,10 @@ use Spatie\MediaLibrary\HasMedia;
 class PostArticleTranslation extends Model implements HasMedia
 {
     use HasFactory;
-    use SoftDeletes;
+    use HasTenantMedia;
     use LogsActivity;
     use Searchable;
-    use HasTenantMedia;
+    use SoftDeletes;
 
     protected $table = 'post_article_translations';
 
@@ -71,11 +72,11 @@ class PostArticleTranslation extends Model implements HasMedia
     ];
 
     protected $casts = [
-        'status'       => TranslationStatus::class,
+        'status' => TranslationStatus::class,
         'published_at' => 'datetime',
         'scheduled_at' => 'datetime',
-        'approved_at'  => 'datetime',
-        'view_count'   => 'integer',
+        'approved_at' => 'datetime',
+        'view_count' => 'integer',
     ];
 
     protected static function booted(): void
@@ -124,7 +125,7 @@ class PostArticleTranslation extends Model implements HasMedia
 
     public function approvedBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'approved_by');
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
     public function contentBlocks(): HasMany
@@ -145,6 +146,11 @@ class PostArticleTranslation extends Model implements HasMedia
     public function howtoBlocks(): HasMany
     {
         return $this->hasMany(PostHowtoBlock::class, 'translation_id')->orderBy('sort_order');
+    }
+
+    public function comparisonBlocks(): HasMany
+    {
+        return $this->hasMany(PostComparisonBlock::class, 'translation_id')->orderBy('sort_order');
     }
 
     public function publishingLogs(): HasMany
@@ -247,12 +253,12 @@ class PostArticleTranslation extends Model implements HasMedia
             ->with('items:id,faq_block_id,question,answer')
             ->get()
             ->flatMap(fn (PostFaqBlock $block) => $block->items)
-            ->map(fn (PostFaqItem $item) => trim(strip_tags($item->question . ' ' . $item->answer)))
+            ->map(fn (PostFaqItem $item) => trim(strip_tags($item->question.' '.$item->answer)))
             ->filter()
             ->implode(' ');
 
         if ($faqText !== '') {
-            $bodyText = trim($bodyText . ' ' . $faqText);
+            $bodyText = trim($bodyText.' '.$faqText);
         }
 
         // GEO đợt 4 — nội dung Citation (trích dẫn/thống kê + tên nguồn) cũng nên tìm được.
@@ -260,12 +266,12 @@ class PostArticleTranslation extends Model implements HasMedia
             ->where('type', ContentBlockType::Citation)
             ->orderBy('sort_order')
             ->get(['citation_text', 'citation_source_name'])
-            ->map(fn ($block) => trim($block->citation_text . ' ' . $block->citation_source_name))
+            ->map(fn ($block) => trim($block->citation_text.' '.$block->citation_source_name))
             ->filter()
             ->implode(' ');
 
         if ($citationText !== '') {
-            $bodyText = trim($bodyText . ' ' . $citationText);
+            $bodyText = trim($bodyText.' '.$citationText);
         }
 
         // GEO đợt 4 — nội dung HowTo (tên bước + chi tiết bước) cũng nên tìm được, cùng lý do trên.
@@ -273,31 +279,31 @@ class PostArticleTranslation extends Model implements HasMedia
             ->with('steps:id,howto_block_id,name,text')
             ->get()
             ->flatMap(fn (PostHowtoBlock $block) => $block->steps)
-            ->map(fn (PostHowtoStep $step) => trim(strip_tags($step->name . ' ' . $step->text)))
+            ->map(fn (PostHowtoStep $step) => trim(strip_tags($step->name.' '.$step->text)))
             ->filter()
             ->implode(' ');
 
         if ($howtoText !== '') {
-            $bodyText = trim($bodyText . ' ' . $howtoText);
+            $bodyText = trim($bodyText.' '.$howtoText);
         }
 
         return [
-            'id'               => $this->id,
-            'uuid'             => $this->uuid,
-            'locale'           => $this->locale,
-            'title'            => $this->title,
-            'excerpt'          => (string) $this->excerpt,
-            'body_text'        => Str::limit($bodyText, 5000, ''),
-            'slug'             => $this->slug,
-            'status'           => $this->status->value,
-            'published_at'     => $this->published_at?->timestamp,
-            'article_id'       => $this->article_id,
-            'format'           => $article?->format?->value,
-            'is_featured'      => (bool) $article?->is_featured,
-            'province_code'    => $article?->province_code,
-            'category_names'   => $article?->categories->pluck('name')->all() ?? [],
-            'category_slugs'   => $article?->categories->pluck('slug')->all() ?? [],
-            'tag_names'        => $article?->tags->pluck('name')->all() ?? [],
+            'id' => $this->id,
+            'uuid' => $this->uuid,
+            'locale' => $this->locale,
+            'title' => $this->title,
+            'excerpt' => (string) $this->excerpt,
+            'body_text' => Str::limit($bodyText, 5000, ''),
+            'slug' => $this->slug,
+            'status' => $this->status->value,
+            'published_at' => $this->published_at?->timestamp,
+            'article_id' => $this->article_id,
+            'format' => $article?->format?->value,
+            'is_featured' => (bool) $article?->is_featured,
+            'province_code' => $article?->province_code,
+            'category_names' => $article?->categories->pluck('name')->all() ?? [],
+            'category_slugs' => $article?->categories->pluck('slug')->all() ?? [],
+            'tag_names' => $article?->tags->pluck('name')->all() ?? [],
         ];
     }
 

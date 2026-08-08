@@ -21,6 +21,7 @@
         "laravel/socialite": "^5.27",
         "laravel/tinker": "^3.0",
         "laravelcm/laravel-subscriptions": "^1.8",
+        "league/html-to-markdown": "^5.1",
         "lorisleiva/laravel-actions": "^2.10",
         "meilisearch/meilisearch-php": "^1.16",
         "minishlink/web-push": "^10.1",

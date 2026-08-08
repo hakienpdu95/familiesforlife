@@ -371,6 +371,8 @@ function postVersionHistory(indexUrl, translationStatus, knownLatestId, canResto
                             <button type="button" class="btn btn-sm btn-outline btn-secondary pbc-add-faq">+ Thêm câu hỏi thường gặp</button>
                             <button type="button" class="btn btn-sm btn-outline btn-accent pbc-add-citation">+ Thêm trích dẫn có nguồn</button>
                             <button type="button" class="btn btn-sm btn-outline pbc-add-howto">+ Thêm hướng dẫn từng bước</button>
+                            <button type="button" class="btn btn-sm btn-outline pbc-add-comparison">+ Thêm bảng so sánh</button>
+                            <button type="button" class="btn btn-sm btn-outline pbc-add-testimonial">+ Thêm lời chứng thực</button>
                         </div>
                         {{-- BUGFIX (không thuộc phần Version History) — phải nằm TRONG .pbc-composer:
                              post-block-composer.js dùng composerEl.querySelector('input[name="blocks_json"]')

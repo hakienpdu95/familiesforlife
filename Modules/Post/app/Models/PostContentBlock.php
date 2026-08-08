@@ -26,10 +26,17 @@ class PostContentBlock extends Model
         'citation_source_name',
         'citation_source_url',
         'howto_block_id',
+        'comparison_block_id',
+        'testimonial_quote',
+        'testimonial_person_name',
+        'testimonial_person_title',
+        'testimonial_company_name',
+        'testimonial_avatar_url',
+        'testimonial_result_metric',
     ];
 
     protected $casts = [
-        'type'       => ContentBlockType::class,
+        'type' => ContentBlockType::class,
         'sort_order' => 'integer',
     ];
 
@@ -51,5 +58,10 @@ class PostContentBlock extends Model
     public function howtoBlock(): BelongsTo
     {
         return $this->belongsTo(PostHowtoBlock::class, 'howto_block_id');
+    }
+
+    public function comparisonBlock(): BelongsTo
+    {
+        return $this->belongsTo(PostComparisonBlock::class, 'comparison_block_id');
     }
 }

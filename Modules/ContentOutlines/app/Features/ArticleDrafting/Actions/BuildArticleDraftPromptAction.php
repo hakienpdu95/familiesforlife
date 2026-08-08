@@ -31,6 +31,14 @@ use Modules\ContentOutlines\Features\OutlineGeneration\Data\ContentOutlineInputD
  * KHÔNG áp dụng ở Action này: SEO Optimization/Readability Editing/Final Editing Prompt của nguồn
  * — cả 3 đều REVIEW 1 bài ĐÃ VIẾT XONG (khác Action này, sinh prompt VIẾT MỚI từ outline) — thuộc
  * 1 Feature "Bước 3" khác nếu triển khai, xem quyết định phạm vi đã hỏi người dùng ở changelog v1.16.
+ *
+ * §4.25 (v1.22, đối chiếu spec/giadinh.md — Moz Whiteboard Friday "7 Tips for Writing Great
+ * Content with ChatGPT or Gemini", Chima Mmeje) — thêm guardrail chống văn phong "lộ AI" cụ thể
+ * hơn cliché-mở-bài đã có (§4.19): cấm lạm dụng em-dash, từ chuyển ý sáo mòn lặp lại, chuỗi câu
+ * ngắn cùng cấu trúc liên tiếp. Rà lại ở BuildArticleReviewPromptAction (§4.20/§4.25).
+ *
+ * §4.26 (v1.23) — mở rộng THÊM cùng bullet §4.25: giới hạn câu ≤20 từ (tầng CÂU, khác "60-100
+ * từ/đoạn" đã có ở §4.6 là tầng ĐOẠN) + cấm thuật ngữ mơ hồ không kèm ngữ cảnh cụ thể.
  */
 class BuildArticleDraftPromptAction
 {
@@ -80,6 +88,7 @@ Bạn là 1 người viết/biên tập viên giàu kinh nghiệm về chủ đ�
 - **Ngôn ngữ:** {$languageNote}.{$toneNote}{$goalNote}
 - **Đoạn mở bài** nêu ĐÚNG vấn đề/nỗi đau chính của đối tượng đọc ngay trong 1-2 câu đầu, rồi nêu rõ đọc xong bài sẽ biết/làm được gì — KHÔNG mở đầu bằng cụm sáo rỗng kiểu "trong thế giới hiện đại ngày nay"/"trong bối cảnh phát triển như hiện nay"/"chúng ta đều biết rằng" hay tương đương, KHÔNG mở đầu vòng vo/giới thiệu chung chung.
 - Câu chủ động, ngắn gọn, tránh từ ngữ sáo rỗng/dư thừa (fluff); mỗi phần (H2) có ít nhất 1 điểm hành động cụ thể (actionable takeaway) độc giả áp dụng được ngay.
+- **Tránh dấu hiệu văn phong "lộ AI" phổ biến:** không lạm dụng dấu gạch ngang em-dash "—" nối 2 vế câu (thỉnh thoảng 1 câu dùng được, KHÔNG lặp lại liên tục ở nhiều câu); không mở nhiều đoạn liên tiếp bằng cùng 1 từ chuyển ý sáo mòn ("Hơn nữa"/"Bên cạnh đó"/"Không chỉ vậy"/"Tóm lại"...); tránh chuỗi câu ngắn liên tiếp lặp lại cùng 1 cấu trúc ngữ pháp (chủ ngữ-động từ-tân ngữ) — xen kẽ độ dài câu tự nhiên như người viết thật; mỗi câu KHÔNG quá khoảng 20 từ, câu dài nhiều mệnh đề cần tách thành 2 câu ngắn hơn; không dùng cụm từ chung chung/mơ hồ (VD "giải pháp hiệu quả", "chiến lược phù hợp") mà không nói rõ áp dụng cho trường hợp/đối tượng cụ thể nào.
 - Ưu tiên đoạn văn NGẮN (2-4 câu/đoạn), dùng bullet cho danh sách, in đậm (bold) cụm từ/khái niệm quan trọng — để bài dễ đọc lướt (scannable), không phải 1 khối văn bản dài liên tục.
 - Nếu 1 đoạn dùng danh sách/bullet, có 1 câu dẫn nhập nêu ngữ cảnh trước đó, không thả bullet trơ trọi ngay sau heading.
 - Nếu không chắc 1 số liệu/thống kê/case study cụ thể, ghi "[cần biên tập viên xác minh]" thay vì tự bịa — KHÔNG tạo số liệu/case study/dẫn chứng không kiểm chứng được.
