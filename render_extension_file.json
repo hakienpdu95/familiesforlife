@@ -380,5 +380,9 @@
         "cta_url///string///500///_NULL///NULL///__///__",
         "drafted_article///longText///__///_NULL///NULL///__///__",
         "review_prompt///longText///__///_NULL///NULL///__///__"
+    ],
+    [
+        "generated_prompts///add///__///",
+        "post_category_id///unsignedBigInteger///__///_NULL///NULL///->constrained('post_categories')->onDelete('set null')///__"
     ]
 ]
