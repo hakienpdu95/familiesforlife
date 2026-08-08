@@ -19,3 +19,4 @@ import './pages/category-index.js';
 import './pages/tag-index.js';
 import './pages/breaking-news-form.js';
 import './pages/breaking-news-index.js';
+import './pages/markdown-preview.js';

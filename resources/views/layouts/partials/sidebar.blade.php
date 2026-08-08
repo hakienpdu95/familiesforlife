@@ -191,6 +191,15 @@
                 <a href="{{ route('backend.post.tags.index') }}"
                    class="sub-link {{ request()->routeIs('backend.post.tags.*') ? 'active' : '' }}">Quản lý tag</a>
                 @endcan
+                {{-- spec/Markdown_Content_Negotiation_Technical_Specification.md — công cụ QA
+                     xem trước bản Markdown mà content negotiation trả về, gate riêng
+                     POST_ARTICLE_VIEW (không dùng chung điều kiện post_analytics.view của khối
+                     @if bên ngoài — người chỉ có quyền xem thống kê traffic không cần thấy mục
+                     này). --}}
+                @can(\App\Enums\PermissionEnum::POST_ARTICLE_VIEW->value)
+                <a href="{{ route('backend.post.markdown-preview.index') }}"
+                   class="sub-link {{ request()->routeIs('backend.post.markdown-preview.*') ? 'active' : '' }}">Xem trước Markdown (AI)</a>
+                @endcan
             </div>
         </details>
         @endif

@@ -12,6 +12,7 @@ use Modules\Post\Features\BreakingNews\Http\BreakingNewsPublicController;
 use Modules\Post\Features\CategoryManagement\Http\CategoryAdminController;
 use Modules\Post\Features\CategoryManagement\Http\CategoryApiController;
 use Modules\Post\Features\ContentAnalytics\Http\ContentAnalyticsDashboardController;
+use Modules\Post\Features\MarkdownPreview\Http\MarkdownPreviewController;
 use Modules\Post\Features\PublicReading\Http\ProductBlockClickController;
 use Modules\Post\Features\PublicReading\Http\PublicArticleController;
 use Modules\Post\Features\PublicReading\Http\PublicCategoryController;
@@ -54,6 +55,11 @@ Route::middleware(['auth'])
         // spec/ga-dashboard-statistics.md §1 — cùng lý do đặt TRƯỚC Route::resource bên dưới.
         Route::get('articles/analytics', [ContentAnalyticsDashboardController::class, 'index'])->name('articles.analytics');
 
+        // spec/Markdown_Content_Negotiation_Technical_Specification.md — công cụ QA nội bộ,
+        // KHÔNG thuộc spec (spec chỉ sửa PublicArticleController), bổ sung theo yêu cầu người
+        // dùng. Path tĩnh 'markdown-preview' không đụng 'articles/{article}' bên dưới.
+        Route::get('markdown-preview', [MarkdownPreviewController::class, 'index'])->name('markdown-preview.index');
+
         // PostArticle: chỉ "vỏ" (format/cover/is_featured/categories/tags) — không còn
         // title/status (đã chuyển sang PostArticleTranslation, xem TranslationController).
         Route::resource('articles', ArticleAdminController::class);
@@ -89,6 +95,8 @@ Route::middleware(['auth'])
 // tham chiếu Modules/Organization/routes/web.php (backend.api.organizations) ───────────────
 Route::middleware(['auth'])->prefix('backend/api/post')->name('backend.api.post.')->group(function (): void {
     Route::get('articles', [ArticleApiController::class, 'index'])->name('articles');
+    // TomSelect remote (chọn bài viết) cho trang Markdown Preview — trả {id: translation_id, text}.
+    Route::get('articles/search', [ArticleApiController::class, 'searchTranslations'])->name('articles.search');
     Route::get('categories', [CategoryApiController::class, 'index'])->name('categories');
     Route::get('tags', [TagApiController::class, 'index'])->name('tags');
 });

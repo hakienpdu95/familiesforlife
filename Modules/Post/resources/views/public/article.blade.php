@@ -18,6 +18,10 @@
 
 @push('meta')
 <link rel="canonical" href="{{ $canonicalUrl }}">
+{{-- spec/Markdown_Content_Negotiation_Technical_Specification.md §5 (v2.1) — TỰ TRỎ về chính
+     URL đang xem (KHÔNG phải 1 URL .md khác — thiết kế đó đã bị xoá ở v2.0), khai báo trước cho
+     tool/crawler "URL này có thể lấy dạng Markdown qua Accept header", không cần thử mù. --}}
+<link rel="alternate" type="text/markdown" href="{{ $canonicalUrl }}">
 
 <meta property="og:type" content="article">
 <meta property="og:title" content="{{ $ogTitle }}">

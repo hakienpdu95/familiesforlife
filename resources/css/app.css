@@ -202,6 +202,25 @@ details[open] > .nav-summary .nav-arrow { transform: rotate(90deg); }
     border-color: var(--color-error, oklch(65.5% 0.241 17.6));
 }
 
+/* ── TomSelect "loading" state — TRÙNG TÊN class với component .loading của DaisyUI ──
+   TomSelect tự gắn class "loading" lên .ts-wrapper trong lúc remote load() đang chờ phản
+   hồi (createTsRemote/preload:true) — thuần là 1 state marker, không liên quan gì tới
+   spinner. DaisyUI lại ĐỊNH NGHĨA SẴN 1 component tên đúng ".loading" (spinner riêng):
+   aspect-ratio:1 + background-color:currentColor + mask-image (SVG vòng xoay). Vì
+   .ts-wrapper có width:100% (kế thừa class w-full trên <select>), DaisyUI ép
+   aspect-ratio:1 → height = width (vd 1262px) rồi mask thành 1 vòng cung ĐEN KHỔNG LỒ
+   choán hết trang trong lúc chờ API tìm bài viết (đã tái hiện + xác nhận qua browser
+   thật — spec/Markdown_Content_Negotiation_Technical_Specification.md, trang Markdown
+   Preview). Vô hiệu hoá style DaisyUI CHỈ trên .ts-wrapper.loading — không đụng tới
+   spinner .loading dùng đúng nghĩa ở nơi khác trong app (vd <span class="loading">). */
+.ts-wrapper.loading {
+    aspect-ratio: auto !important;
+    background-color: transparent !important;
+    mask-image: none !important;
+    -webkit-mask-image: none !important;
+    pointer-events: auto !important;
+}
+
 /* ── Rich content (HTML output từ Jodit editor) ── */
 .rich-content p  { margin: 0 0 .5em; }
 .rich-content ul { list-style: disc; padding-left: 1.4em; margin: 0 0 .5em; }

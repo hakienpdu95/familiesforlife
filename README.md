@@ -129,3 +129,7 @@ Thêm — config/horizon.php: mục alerts (mail_to/slack_webhook/slack_channel)
   Việc còn lại (tự điền webhook/email thật, restart Supervisor trên production) là quyết định/thao tác hạ tầng của bạn — mình không có quyền truy cập Slack/mail/server production nên không thể tự làm thay.
 
   -------------------------------------------------
+
+  Đã tái hiện được 100% chính xác hình như ảnh gốc — đây là spinner "loading" mặc định của 
+  TomSelect, bị phóng to bất thường trong lúc chờ API articles/search trả kết quả (do preload:true
+  tự gọi ngay khi trang load). Giờ tìm đúng CSS rule gây phóng to.

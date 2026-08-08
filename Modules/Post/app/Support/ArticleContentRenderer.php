@@ -3,6 +3,9 @@
 namespace Modules\Post\Support;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use League\HTMLToMarkdown\HtmlConverter;
 use Modules\Post\Enums\ContentBlockType;
 use Modules\Post\Models\PostArticleTranslation;
 use Modules\Post\Models\PostComparisonBlock;
@@ -80,6 +83,284 @@ class ArticleContentRenderer
                 ['block' => $block->productBlock]
             )->render();
         })->implode('');
+    }
+
+    /**
+     * spec/Markdown_Content_Negotiation_Technical_Specification.md §4 — bản Markdown ĐẦY ĐỦ
+     * (kèm tiêu đề/mô tả/nguồn/ngày cập nhật) mà content negotiation (Accept: text/markdown)
+     * trả về nguyên văn cho `PublicArticleController::showMarkdown()`. Tách khỏi
+     * `renderMarkdown()` (chỉ render các content-block, không có header) để trang preview admin
+     * (Modules\Post\Features\MarkdownPreview) tái dùng được nguyên vẹn, không lặp lại logic
+     * dựng header ở 2 nơi.
+     */
+    public function renderMarkdownDocument(PostArticleTranslation $translation): string
+    {
+        $canonicalUrl = route('post.public.article', ['slug' => $translation->slug, 'id' => $translation->id]);
+        $description = $translation->seo_description ?: $translation->direct_answer ?: $translation->excerpt;
+
+        $header = "# {$translation->title}\n\n";
+        if ($description) {
+            $header .= "> {$description}\n\n";
+        }
+        $header .= "Nguồn: {$canonicalUrl}\n";
+        if ($translation->updated_at) {
+            $header .= 'Cập nhật: '.$translation->updated_at->format('d/m/Y')."\n";
+        }
+        $header .= "\n---\n\n";
+
+        return $header.$this->renderMarkdown($translation);
+    }
+
+    /**
+     * spec/Markdown_Content_Negotiation_Technical_Specification.md §4 — Markdown thuần của các
+     * content-block (KHÔNG kèm tiêu đề bài viết — Controller tự thêm `# {title}` để tránh 2 H1
+     * trong 1 response, xem `demoteH1()`). Cache theo `updated_at` — tự hết hạn khi bài được lưu
+     * lại (`UpdateTranslationAction`/`RestoreArticleVersionAction` luôn `update()` translation
+     * trước khi đổi content-block trong cùng transaction).
+     */
+    public function renderMarkdown(PostArticleTranslation $translation): string
+    {
+        return Cache::remember(
+            "post:{$translation->id}:markdown:v1:{$translation->updated_at?->timestamp}",
+            now()->addDay(),
+            function () use ($translation) {
+                $blocks = $translation->contentBlocks()
+                    ->with([
+                        'productBlock.items.product' => fn ($q) => $q->publicEmbed(),
+                        'productBlock.items.buttons', 'productBlock.buttons', 'faqBlock.items', 'howtoBlock.steps',
+                        'comparisonBlock.columns', 'comparisonBlock.rows',
+                    ])
+                    ->get();
+
+                return $blocks
+                    ->map(fn (PostContentBlock $block) => $this->blockToMarkdown($block))
+                    ->filter(fn (string $md) => trim($md) !== '')
+                    ->implode("\n\n");
+            }
+        );
+    }
+
+    /**
+     * `match` liệt kê đủ mọi `ContentBlockType` hiện có (§4) — nhánh `default` chỉ tồn tại để
+     * không fallback ngầm định nếu 1 `ContentBlockType` MỚI được thêm sau này mà quên cập nhật
+     * chỗ này (ghi log warning + trả ghi chú thấy được thay vì crash `UnhandledMatchError` giữa
+     * request công khai).
+     */
+    private function blockToMarkdown(PostContentBlock $block): string
+    {
+        return match ($block->type) {
+            ContentBlockType::Text => $this->textBlockToMarkdown($block),
+            ContentBlockType::Product => $this->productBlockToMarkdown($block),
+            ContentBlockType::Faq => $this->faqBlockToMarkdown($block),
+            ContentBlockType::Citation => $this->citationBlockToMarkdown($block),
+            ContentBlockType::Howto => $this->howtoBlockToMarkdown($block),
+            ContentBlockType::Comparison => $this->comparisonBlockToMarkdown($block),
+            ContentBlockType::Testimonial => $this->testimonialBlockToMarkdown($block),
+            default => $this->unknownBlockToMarkdown($block),
+        };
+    }
+
+    private function unknownBlockToMarkdown(PostContentBlock $block): string
+    {
+        Log::warning('ArticleContentRenderer::renderMarkdown — loại content-block chưa hỗ trợ Markdown.', [
+            'block_id' => $block->id,
+            'type' => $block->type?->value,
+        ]);
+
+        return "<!-- loại nội dung '{$block->type?->value}' chưa hỗ trợ bản Markdown -->";
+    }
+
+    /** `league/html-to-markdown` sau khi `absolutizeUrls()` + `demoteH1()` (§4). */
+    private function textBlockToMarkdown(PostContentBlock $block): string
+    {
+        $html = $this->demoteH1($this->absolutizeUrls((string) $block->text_html));
+
+        // header_style: 'atx' ('## Tiêu đề') — mặc định league/html-to-markdown dùng Setext
+        // ('Tiêu đề\n-------') cho riêng h1/h2, không nhất quán với các heading '###' mà các
+        // block khác (Comparison/Faq/Howto/Product) tự tạo ở dưới.
+        return trim((new HtmlConverter(['strip_tags' => true, 'header_style' => 'atx']))->convert($html));
+    }
+
+    /** Product → tên + giá + mô tả ngắn (`display_description`), không tên/ảnh override rỗng. */
+    private function productBlockToMarkdown(PostContentBlock $block): string
+    {
+        $pb = $block->productBlock;
+        if (! $pb) {
+            return '';
+        }
+
+        $lines = [];
+        if ($pb->heading) {
+            $lines[] = "### {$pb->heading}";
+        }
+
+        foreach ($pb->items as $item) {
+            $title = $item->display_title ?: 'Sản phẩm';
+            $line = "- **{$title}**";
+            if ($item->display_price_label) {
+                $line .= " — {$item->display_price_label}";
+            }
+            $lines[] = $line;
+            if ($item->display_description) {
+                $lines[] = "  {$item->display_description}";
+            }
+        }
+
+        return implode("\n", $lines);
+    }
+
+    /**
+     * Faq/Howto — không nêu chi tiết ở spec §4 (chỉ liệt kê Text/Comparison/Testimonial-Citation/
+     * Product), nhưng spec cũng đòi "match liệt kê đủ mọi ContentBlockType" (không fallback ngầm
+     * định) — dùng quy ước Markdown thông thường (Q/A đậm, numbered list) nhất quán với các
+     * block khác, không phải nhánh `default`.
+     */
+    private function faqBlockToMarkdown(PostContentBlock $block): string
+    {
+        $fb = $block->faqBlock;
+        if (! $fb) {
+            return '';
+        }
+
+        $lines = [];
+        if ($fb->heading) {
+            $lines[] = "### {$fb->heading}";
+        }
+
+        foreach ($fb->items as $item) {
+            $lines[] = "**{$item->question}**";
+            $lines[] = (string) $item->answer;
+            $lines[] = '';
+        }
+
+        return trim(implode("\n", $lines));
+    }
+
+    private function howtoBlockToMarkdown(PostContentBlock $block): string
+    {
+        $hb = $block->howtoBlock;
+        if (! $hb) {
+            return '';
+        }
+
+        $lines = [];
+        if ($hb->name) {
+            $lines[] = "### {$hb->name}";
+        }
+        if ($hb->description) {
+            $lines[] = (string) $hb->description;
+            $lines[] = '';
+        }
+
+        foreach ($hb->steps as $index => $step) {
+            $lines[] = ($index + 1).". **{$step->name}** — {$step->text}";
+        }
+
+        return trim(implode("\n", $lines));
+    }
+
+    /** Bảng GFM thật — `array_pad`/`array_slice` phòng thủ lớp 2 dù đã validate số cột lúc ghi (§4). */
+    private function comparisonBlockToMarkdown(PostContentBlock $block): string
+    {
+        $cb = $block->comparisonBlock;
+        if (! $cb) {
+            return '';
+        }
+
+        $columnCount = $cb->columns->count();
+        if ($columnCount === 0) {
+            return $cb->name ? "### {$cb->name}" : '';
+        }
+
+        $lines = [];
+        if ($cb->name) {
+            $lines[] = "### {$cb->name}";
+        }
+        if ($cb->description) {
+            $lines[] = (string) $cb->description;
+            $lines[] = '';
+        }
+
+        $header = array_merge([''], $cb->columns->pluck('label')->all());
+        $lines[] = '| '.implode(' | ', array_map($this->escapeTableCell(...), $header)).' |';
+        $lines[] = '| '.implode(' | ', array_fill(0, count($header), '---')).' |';
+
+        foreach ($cb->rows as $row) {
+            $values = array_slice(array_pad($row->values ?? [], $columnCount, ''), 0, $columnCount);
+            $cells = array_merge([$row->label], $values);
+            $lines[] = '| '.implode(' | ', array_map($this->escapeTableCell(...), $cells)).' |';
+        }
+
+        return implode("\n", $lines);
+    }
+
+    private function escapeTableCell(mixed $value): string
+    {
+        return str_replace(['|', "\n"], ['\\|', ' '], (string) $value);
+    }
+
+    /** Testimonial/Citation → blockquote (§4). */
+    private function testimonialBlockToMarkdown(PostContentBlock $block): string
+    {
+        $quote = trim((string) $block->testimonial_quote);
+        if ($quote === '') {
+            return '';
+        }
+
+        $lines = array_map(fn ($line) => "> {$line}", explode("\n", $quote));
+
+        $attribution = trim(implode(', ', array_filter([
+            $block->testimonial_person_name,
+            $block->testimonial_person_title,
+            $block->testimonial_company_name,
+        ])));
+
+        if ($attribution !== '') {
+            $lines[] = '>';
+            $lines[] = "> — {$attribution}";
+        }
+
+        return implode("\n", $lines);
+    }
+
+    private function citationBlockToMarkdown(PostContentBlock $block): string
+    {
+        $text = trim((string) $block->citation_text);
+        if ($text === '') {
+            return '';
+        }
+
+        $lines = array_map(fn ($line) => "> {$line}", explode("\n", $text));
+
+        if ($block->citation_source_name) {
+            $source = $block->citation_source_url
+                ? "[{$block->citation_source_name}]({$block->citation_source_url})"
+                : $block->citation_source_name;
+            $lines[] = '>';
+            $lines[] = "> — {$source}";
+        }
+
+        return implode("\n", $lines);
+    }
+
+    /** URL root-relative (href="/..."/src="/...") → tuyệt đối — text-block lưu HTML gốc tương đối theo domain hiện có (§4). */
+    private function absolutizeUrls(string $html): string
+    {
+        $base = rtrim(config('app.url'), '/');
+
+        return preg_replace_callback(
+            '/\b(href|src)="\/(?!\/)([^"]*)"/i',
+            fn ($m) => $m[1].'="'.$base.'/'.$m[2].'"',
+            $html
+        ) ?? $html;
+    }
+
+    /** Tránh 2 H1 trong 1 response Markdown — Controller đã tự thêm `# {title}` (§4). */
+    private function demoteH1(string $html): string
+    {
+        $html = preg_replace('/<\/h1>/i', '</h2>', $html) ?? $html;
+
+        return preg_replace('/<h1(\s[^>]*)?>/i', '<h2$1>', $html) ?? $html;
     }
 
     /**
