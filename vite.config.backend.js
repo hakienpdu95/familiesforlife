@@ -56,6 +56,7 @@ const JS_OUTPUT = {
   'realestate':             'assets/modules/realestate.[hash].js',
   'video':                  'assets/modules/video.[hash].js',
   'content-calendar':       'assets/modules/content-calendar.[hash].js',
+  'playlist':               'assets/modules/playlist.[hash].js',
 };
 
 /** CSS asset name → output path.
@@ -163,6 +164,8 @@ const MODULE_ENTRIES = [
   'Modules/RealEstate/resources/assets/js/realestate.js',
   // Video
   'Modules/Video/resources/assets/js/video.js',
+  // Playlist
+  'Modules/Playlist/resources/assets/js/playlist.js',
   // ContentCalendar
   'Modules/ContentCalendar/resources/assets/sass/content-calendar.scss',
   'Modules/ContentCalendar/resources/assets/js/content-calendar.js',

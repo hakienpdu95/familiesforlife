@@ -2451,5 +2451,33 @@
         "__index///index///__///__///__///label///__",
         "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
         "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật"
+    ],
+    [
+        "playlists///__///__///",
+        "name///string///255///NOT_NULL///__///__///__",
+        "slug///string///255///NOT_NULL///__///->unique()///__",
+        "description///text///__///_NULL///NULL///__///__",
+        "cover_image_url///string///2048///_NULL///NULL///__///__",
+        "meta_title///string///255///_NULL///NULL///__///__",
+        "meta_description///string///500///_NULL///NULL///__///__",
+        "sort_order///unsignedSmallInteger///__///NOT_NULL///0///__///__",
+        "is_active///boolean///__///NOT_NULL///true///__///__",
+        "created_by///unsignedBigInteger///__///NOT_NULL///__///->constrained('users')->onDelete('restrict')///__",
+        "updated_by///unsignedBigInteger///__///_NULL///NULL///->constrained('users')->onDelete('set null')///__",
+        "__index///index///__///__///__///is_active,sort_order|idx_playlist_active_sort///__",
+        "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
+        "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật",
+        "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm"
+    ],
+    [
+        "playlist_items///__///__///",
+        "playlist_id///unsignedBigInteger///__///NOT_NULL///__///->constrained('playlists')->onDelete('cascade')///__",
+        "itemable_type///string///60///NOT_NULL///__///__///__",
+        "itemable_id///unsignedBigInteger///__///NOT_NULL///__///__///__",
+        "sort_order///unsignedSmallInteger///__///NOT_NULL///0///__///__",
+        "__index///index///__///__///__///playlist_id,sort_order|idx_playlist_item_sort///__",
+        "__index///index///__///__///__///itemable_type,itemable_id|idx_playlist_item_itemable///__",
+        "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
+        "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật"
     ]
 ]

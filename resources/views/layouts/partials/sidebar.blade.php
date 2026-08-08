@@ -258,6 +258,19 @@
         </div>
         @endcan
 
+        {{-- spec/Playlist_Technical_Specification.md §0/§6.5 — playlist.manage RIÊNG (không
+             mượn video.manage) cấp cho platform_ops/platform_content_head
+             (Modules\Playlist\Database\Seeders\PlaylistPermissionSeeder). --}}
+        @can(\App\Enums\PermissionEnum::PLAYLIST_MANAGE->value)
+        <div class="nav-group">
+            <a href="{{ route('backend.playlist.items.index') }}"
+               class="nav-link {{ request()->routeIs('backend.playlist.items.*') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19V6l12-2v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-2c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-2"/></svg>
+                <span class="nav-label">Playlist</span>
+            </a>
+        </div>
+        @endcan
+
         {{-- spec/Breaking_News_Ticker_Technical_Specification.md §6.3 — breaking_news.manage
              cấp cho platform_ops/platform_content_head (Modules\Post\Database\Seeders\BreakingNewsPermissionSeeder). --}}
         @can(\App\Enums\PermissionEnum::BREAKING_NEWS_MANAGE->value)

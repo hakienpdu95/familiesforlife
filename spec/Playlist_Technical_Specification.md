@@ -1,7 +1,7 @@
 # Module Playlist (Danh sách phát đa nội dung)
 **Đặc tả Kỹ thuật Chi tiết — Sẵn sàng Triển khai**
 
-**Phiên bản:** 1.0
+**Phiên bản:** 1.1
 **Ngày:** 08/08/2026
 **Framework:** Laravel 13 (PHP 8.4) + NWIDART Modules + Lorisleiva Actions + Spatie Laravel Data
 **Module mới:** `Modules/Playlist`
@@ -9,40 +9,46 @@
 - `Modules/Video` (`spec/Video_Management_Technical_Specification.md`) — module phẳng, tài sản nền tảng, không qua duyệt (cùng tinh thần §0)
 - `Modules/Approval` (`spec/Workflow_Approval_Technical_Specification.md` §5, `ApprovalServiceProvider::boot()`) — nguồn của pattern `Relation::morphMap()` build từ config, dùng cho quan hệ polymorphic xuyên module
 
+> **Lịch sử phiên bản**
+> - **v1.0** — Bản thảo đầu: `playlists` + `playlist_items` (polymorphic qua `morphTo()`+`morphMap()`), `PlaylistableContract`, Video/Post implement, SEO đầy đủ, ô tìm kiếm hợp nhất.
+> - **v1.1** — Sau review nội bộ, siết lại 1 số điểm formal/vận hành: (1) `scopeSearchablePlaylistItems` chuyển từ "quy ước docblock" sang **bắt buộc qua interface** (PHP throws Fatal Error nếu thiếu, không còn là giới hạn ngôn ngữ như bản thảo đầu tưởng); (2) thêm accessor gộp `visible_itemable` để không còn rải `?->`/check `isPlaylistCardVisible()` thủ công ở nhiều nơi (giảm rủi ro quên → lỗi production); (3) `config('playlist.itemables')` đổi cấu trúc để mang theo cả eager-load relation (`morphWith()`) mà không phá nguyên tắc "không phụ thuộc cứng"; (4) ghi rõ `sort_order` khi attach = `max+1` tự động, không bắt người dùng nhập tay lúc thêm mới; (5) `SearchPlaylistableItemsAction` lọc thêm `isPlaylistCardVisible()` (phòng thủ lớp 2) + loại trừ item đã có trong playlist; (6) thêm badge cảnh báo item ẩn/mồ côi ở trang sửa playlist (chi phí thấp, không phải banner tổng đã để ngoài phạm vi); (7) thêm `PlaylistData` validate rules, activity log cho `PlaylistItem`, ghi chú vận hành khi `post.default_locale` đổi, và làm rõ `cascadeOnDelete` trên `playlist_items` chỉ kích hoạt khi `forceDelete()` — không mâu thuẫn với soft-delete mặc định; (8) mở rộng bộ test bắt buộc (§8) và sửa lỗi đặt tên `ToggleplaylistActiveAction` → `TogglePlaylistActiveAction`.
+
 ---
 
 ## 0. Quyết định đã chốt
 
 | Chủ đề | Quyết định spec này | Lý do |
 |---|---|---|
-| **Phạm vi loại nội dung** | v1 chỉ gom **Video** (`Modules\Video\Models\Video`) và **bài viết** (`Modules\Post\Models\PostArticle`) — không phải khung tổng quát nhận mọi loại content ngay từ đầu | Xác nhận trực tiếp với người yêu cầu. Thiết kế polymorphic (§4.2) khiến việc thêm loại thứ 3 (Product/Event/RealEstate...) sau này chỉ là 1 dòng config + 1 class implement contract — không cần migrate lại, nhưng v1 **không** làm sẵn UI/copy cho các loại chưa có nhu cầu thật (tránh over-engineering đoán trước) |
-| **Module mới hay Feature trong Post/Video?** | Module NWIDART **riêng** `Modules/Playlist`, **không** đặt trong `Modules/Post` hay `Modules/Video` | Đúng tiền lệ `Banner` (dùng chung cho ≥2 module khác, tách riêng để không module nào "sở hữu" cái kia — xem `Related_Posts_Engine_Technical_Specification.md` §0 dòng "Module mới hay Feature"). Playlist đọc dữ liệu của CẢ Video LẪN Post, không thể là feature con của 1 trong 2 |
-| **Không phụ thuộc cứng (hard dependency) vào Video/Post** | `Modules/Playlist` không `composer require` hay `use` trực tiếp class `Video`/`PostArticle` ở tầng lõi — chỉ biết đến chúng qua `config('playlist.itemables')` (map `type key → FQCN`) + 1 interface `PlaylistableContract` mà Video/Post tự implement | Cùng nguyên tắc `Modules/Approval` (`config('approval.subjects')` rỗng ở Phase 1, entity tự "đăng ký tham gia" — không phải Approval đi biết trước tất cả). Giữ được nguyên tắc module hoá: xoá `Modules/Video` không làm `Modules/Playlist` vỡ, chỉ mất 1 loại item khả dụng |
-| **Quan hệ polymorphic: `morphTo()` thật + `morphMap()` config-driven** | Bảng `playlist_items` có `itemable_type`/`itemable_id`; `PlaylistServiceProvider::boot()` gọi `Relation::morphMap(config('playlist.itemables'), merge: true)` — **không** dùng `enforceMorphMap()` (cờ toàn cục, 1 module con không có thẩm quyền bật cho cả app — xem lý do y hệt đã ghi ở `ApprovalServiceProvider::boot()`) | Khác `Modules/Aicem` (né `morphTo()`, tự tra `config('aicem_subjects')` bằng tay) — Aicem chỉ cần quan hệ 1-1 (1 run → 1 subject); Playlist cần **danh sách nhiều item xếp thứ tự thuộc nhiều loại khác nhau**, đúng bài toán `morphTo()` sinh ra để giải, và Eloquent `MorphTo::with()` (eager load) đã tự gom theo từng loại rồi truy vấn 1 lần/loại — không có vấn đề N+1 hay "1 relation không trả được nhiều loại model" như lo ngại ban đầu, đó là cách `morphTo()` hoạt động sẵn |
-| **Không dùng pivot "vô danh" (`belongsToMany`) — dùng Model `PlaylistItem` tường minh** | `playlist_items` là 1 Eloquent Model thật (`belongsTo(Playlist::class)` + `morphTo('itemable')`), không phải bảng pivot ẩn sau `belongsToMany` | Cần cột phụ `sort_order` xếp thứ tự RIÊNG trong từng playlist + cần model để gọi `->with('itemable')`. `Playlist::items(): HasMany` (không phải `morphedByMany`) — mỗi hàng `PlaylistItem` tự resolve đúng loại của chính nó qua `morphTo()`, không cần 1 relation riêng cho mỗi loại (`videos()`/`articles()`) |
-| **Hợp đồng hiển thị thống nhất: `PlaylistableContract`** | Interface `Modules\Playlist\Contracts\PlaylistableContract` với `getPlaylistCardTitle()`, `getPlaylistCardDescription()`, `getPlaylistCardThumbnailUrl()`, `getPlaylistCardUrl()`, `getPlaylistCardEmbedUrl()` (nullable — chỉ Video trả khác null), `getPlaylistCardTypeLabel()`. `Video`/`PostArticle` implement (§4.3) | Trang public/`admin` chỉ gọi qua interface, không rải `@if($type === 'video') ... @elseif(...)` khắp Blade. `getPlaylistCardEmbedUrl()` là điểm khác biệt hành vi cốt lõi: Video mở lightbox phát trực tiếp (giống trang `/videos`), bài viết điều hướng sang trang riêng — 2 loại nội dung có UX click khác nhau, không thể dùng 1 "url" chung |
-| **Bài viết đưa vào playlist PHẢI có bản dịch published ở `post.default_locale`** | `PostArticle::getPlaylistCardUrl()`/`getPlaylistCardTitle()` chỉ đọc `defaultLocaleTranslation` (bản dịch published ở đúng `config('post.default_locale')`) — nếu không có, bài đó **không được phép** thêm vào playlist (chặn ở `SearchPlaylistableItemsAction`, §6.5), và nếu 1 bài đã trong playlist bị unpublish translation đó sau này thì item bị ẩn khỏi trang công khai (§5.2), không lỗi 404 khi khách click | Phát hiện khi khảo sát `PublicArticleController` — route công khai bài viết **chỉ phục vụ đúng 1 locale mặc định** (`config('post.default_locale')`), bản dịch locale khác không có URL public nào trỏ tới. Nếu Playlist trỏ tới bài chỉ có bản dịch tiếng Anh (chưa publish bản mặc định), link sẽ 404 — phải chặn từ gốc, không phải xử lý lỗi khi khách bấm |
-| **Item bị xoá/ẩn ở nguồn (Video/Post) không tự xoá khỏi `playlist_items`** | Không có `foreign key`/cascade thật (không thể FK polymorphic trỏ 2 bảng khác nhau) — hàng `playlist_items` vẫn tồn tại, nhưng Query lấy playlist cho trang công khai **luôn** loại các item mà: `itemable` là `null` (bị xoá cứng/soft-delete), hoặc Video có `is_active=false`, hoặc bài viết mất bản dịch published mặc định (điều trên) | Cùng tinh thần "ẩn thay vì xoá vết tích" — Ops có thể tạm ẩn 1 Video (`is_active=false`) mà không lo phải nhớ gỡ nó khỏi N playlist đang chứa nó; khi bật lại `is_active=true`, item tự xuất hiện lại đúng vị trí `sort_order` cũ mà không cần thao tác gì thêm |
-| **Đơn vị nền tảng, không tenant** | Không `organization_id`, không global scope theo Organization | Nhất quán Video/Banner, và với Post (đã bỏ `organization_id` từ `2026_07_13_000001_drop_organization_id_from_post_articles_table` — Post cũng đã là tài sản nền tảng) |
-| **Không có quy trình duyệt** | Tạo xong hiển thị ngay nếu `is_active=true`, không có state `submitted → approved → published` | Cùng lý do Video/Banner §0 — Playlist do nội bộ platform biên tập, không nhận nộp từ công chúng |
-| **Sắp xếp item: nhập tay `sort_order`, không kéo-thả ở v1** | Cột `sort_order` (số nguyên) trên `playlist_items`, sắp theo `ORDER BY sort_order ASC` | Giữ đúng tiền lệ Video v1 (§0 spec Video: "kéo-thả là tiện ích UX có thể thêm sau, không đổi schema") — tránh làm phình phạm vi v1 khi bài toán cấp bách hơn là ghép được 2 nguồn dữ liệu khác nhau vào 1 danh sách trước |
-| **Ô tìm kiếm hợp nhất khi thêm item (không phải 2 tab riêng)** | 1 input search ở modal "Thêm item", `SearchPlaylistableItemsAction` (§6.5) gọi tuần tự từng nguồn đã đăng ký trong `config('playlist.itemables')`, mỗi nguồn giới hạn top-N kết quả, trả về 1 mảng đã chuẩn hoá `{type, id, title, thumbnail_url, type_label}` để render chung 1 danh sách kèm badge phân loại | Xác nhận với người yêu cầu — đánh đổi lấy UX mượt hơn (không phải chuyển tab để tìm đúng loại), đổi lại cần 1 lớp gộp kết quả từ 2 nguồn dữ liệu có cấu trúc khác nhau (không phải SQL UNION vì khác bảng/khác cột) — xử lý ở tầng PHP (Collection), không ở tầng SQL |
-| **SEO đầy đủ ngay từ v1** | `playlists` có thêm cột `meta_title`, `meta_description` (nullable, fallback về `name`/`description` nếu trống) + cover ảnh riêng (`cover_image_url`, fallback thumbnail item đầu tiên nếu trống). Trang chi tiết `/playlists/{slug}` có `<link rel="canonical">`, đầy đủ OG tags, JSON-LD `CollectionPage` lồng `ItemList` | Xác nhận với người yêu cầu — tránh phải migrate thêm cột sau nếu playlist thật sự được dùng làm landing page SEO (curated collection: "Top video phỏng vấn chuyên gia dinh dưỡng", "Chuỗi bài hướng dẫn ăn dặm"...). Theo đúng pattern AEO/GEO đã áp dụng cho Post (`ArticleStructuredDataBuilder`, xem [[project_post_aeo_geo_structured_data]]) |
-| **Quyền hạn: `playlist.manage` riêng (Lớp B)** | 1 permission `playlist.manage`, seed qua `PlaylistPermissionSeeder`, cấp cho `platform_ops` + `platform_content_head` — **không** mượn `video.manage` | Playlist là module cross-cutting mới, không phải năng lực nội tại của Video — mượn permission của Video sẽ khiến 1 tài khoản chỉ cần quản video lại vô tình quản được cả playlist chứa bài viết (vượt phạm vi công việc), và ngược lại nếu sau này thu hồi `video.manage` của 1 người thì Playlist bị ảnh hưởng ngoài ý muốn |
-| **Không dedup, không ràng buộc trùng item** | 1 video/bài viết có thể nằm trong nhiều playlist, và (ít có ý nghĩa nhưng không chặn) có thể thêm trùng 2 lần vào cùng 1 playlist | Cùng nguyên tắc Video §0 (không ép `unique` sớm khi chưa có yêu cầu nghiệp vụ rõ) — validate ở UI (input search disable item đã có trong danh sách) đủ để tránh trùng vô tình, không cần constraint DB cứng |
+| **Phạm vi loại nội dung** | v1 chỉ gom **Video** (`Modules\Video\Models\Video`) và **bài viết** (`Modules\Post\Models\PostArticle`) — không phải khung tổng quát nhận mọi loại content ngay từ đầu | Xác nhận trực tiếp với người yêu cầu. Thiết kế polymorphic (§4.2) khiến việc thêm loại thứ 3 sau này chỉ là 1 dòng config + 1 class implement contract — không cần migrate lại, nhưng v1 **không** làm sẵn UI/copy cho loại chưa có nhu cầu thật |
+| **Module mới hay Feature trong Post/Video?** | Module NWIDART **riêng** `Modules/Playlist` | Đúng tiền lệ `Banner` (dùng chung ≥2 module, tách riêng để không module nào "sở hữu" cái kia) |
+| **Không phụ thuộc cứng vào Video/Post** | `Modules/Playlist` không `use` trực tiếp class `Video`/`PostArticle` ở tầng lõi — chỉ qua `config('playlist.itemables')` + interface `PlaylistableContract` | Cùng nguyên tắc `Modules/Approval`. Giữ nguyên tắc module hoá: xoá `Modules/Video` không làm `Modules/Playlist` vỡ |
+| **Quan hệ polymorphic: `morphTo()` thật + `morphMap()` config-driven** | `PlaylistServiceProvider::boot()` gọi `Relation::morphMap(..., merge: true)` — **không** `enforceMorphMap()` (1 module con không có thẩm quyền bật cờ toàn cục cho cả app) | Khác `Modules/Aicem` (né `morphTo()`, quan hệ 1-1) — Playlist cần danh sách nhiều item xếp thứ tự thuộc nhiều loại, đúng bài toán `morphTo()` sinh ra để giải; `MorphTo::with()`/`morphWith()` tự gom theo loại rồi query 1 lần/loại, không N+1 |
+| **`PlaylistItem` là Model tường minh, không phải pivot ẩn** | `belongsTo(Playlist::class)` + `morphTo('itemable')` + cột `sort_order` riêng | Cần cột phụ xếp thứ tự trong từng playlist + cần model để `->with('itemable')`, `LogsActivity` (xem hàng activity-log riêng bên dưới) |
+| **Hợp đồng `scopeSearchablePlaylistItems` bắt buộc qua interface, không chỉ docblock** | `PlaylistableContract` khai báo thẳng `public function scopeSearchablePlaylistItems(Builder $query, string $keyword): void;` cùng các method hiển thị khác (§4.3) | **Sửa so với bản thảo đầu**: Eloquent local scope về bản chất chỉ là 1 public instance method có tiền tố `scope` — hoàn toàn khai báo được trong interface như method thường, PHP tự ném `Fatal Error: Class ... contains 1 abstract method` nếu 1 class trong `config('playlist.itemables')` quên implement. Không còn là "giới hạn ngôn ngữ chấp nhận được", mà là lỗi bắt được ngay lúc autoload thay vì runtime exception/kết quả rỗng im lặng khi thêm loại nội dung thứ 3 |
+| **`config('playlist.itemables')` mang theo cả eager-load relation, không chỉ FQCN** | Mỗi entry là `['model' => FQCN, 'with' => [...quan hệ cần eager-load khi hiển thị public...]]` — dùng để build cả `morphMap()` (§4.7) lẫn `MorphTo::morphWith()` (§7.4) | Post cần eager-load `translations` (constrained theo `default_locale`+`published`) để tránh N+1 khi hiển thị nhiều item bài viết trong 1 playlist; nếu để `Modules/Playlist` tự đoán quan hệ cần load cho từng loại thì lại phá nguyên tắc "không phụ thuộc cứng" — khai báo ở config (do chính module Video/Post tự biết mình cần load gì) giữ được cả 2 mục tiêu |
+| **`sort_order` khi ATTACH item = tự động `max+1`, không bắt nhập tay** | `AddItemToPlaylistAction` tự tính `($playlist->items()->max('sort_order') ?? 0) + 1` — người dùng chỉ "Thêm vào playlist", không phải điền số thứ tự ngay lúc thêm | Yêu cầu nhập tay `sort_order` (§0 dòng "Sắp xếp") chỉ áp dụng cho hành động **sắp xếp lại sau đó** (`ReorderPlaylistItemsAction`, form liệt kê từng dòng kèm ô số) — bắt nhập số ngay lúc thêm mới là ma sát UX không cần thiết, hành vi mặc định hợp lý nhất là "thêm vào cuối danh sách" |
+| **`SearchPlaylistableItemsAction` lọc `isPlaylistCardVisible()` + loại trừ item đã có trong playlist** | Action nhận thêm `?Playlist $playlist` — nếu truyền vào, loại khỏi kết quả những `(type,id)` đã tồn tại trong `$playlist->items`; luôn lọc `isPlaylistCardVisible()` sau khi hydrate, kể cả khi scope DB đã lọc tương tự | Phòng thủ lớp 2 (cùng tinh thần `Video::getWatchUrlAttribute()` tự kiểm tra lại host dù đã validate khi lưu) — tránh trường hợp `scopeSearchablePlaylistItems` của 1 loại nào đó lệch điều kiện với `isPlaylistCardVisible()` do sửa sau này ở 2 chỗ khác nhau. Loại trừ item đã có tránh hiển thị kết quả mà bấm vào sẽ báo lỗi "đã tồn tại" — trước đó review chỉ rejects ở tầng `Add`, nay chặn sớm hơn ở tầng hiển thị picker |
+| **Badge cảnh báo item ẩn/mồ côi ở trang SỬA playlist (không phải banner tổng)** | Mỗi dòng item trong `admin/playlists/edit.blade.php` hiển thị badge "Ẩn"/"Nguồn đã xoá" khi `$item->resolved_itemable === null \|\| ! $item->resolved_itemable->isPlaylistCardVisible()` | Chi phí thấp (chỉ 1 điều kiện Blade có sẵn dữ liệu đã load), giá trị vận hành cao — Ops phát hiện ngay playlist đang "rỗng thầm lặng" một phần thay vì phải đoán qua trang public. Banner tổng "N item đang ẩn" toàn hệ thống vẫn để ngoài phạm vi v1 (§9) |
+| **`PlaylistItem` có `LogsActivity`** | `PlaylistItem extends Model { use LogsActivity; }`, log khi attach/detach (create/delete) — khác `Playlist` (log cả sửa thông tin), `PlaylistItem` chỉ có ý nghĩa log ở 2 sự kiện tạo/xoá | Trước đó chỉ `Playlist` có activity log — 1 hành vi biên tập quan trọng ("ai đã thêm/gỡ video X khỏi playlist Y") lại không có vết tích nếu chỉ dựa vào log của `Playlist` (log đó không bắt được thay đổi trên bảng con) |
+| **`playlist_items.cascadeOnDelete()` chỉ áp dụng khi `forceDelete()`, không mâu thuẫn với soft-delete** | `Playlist` dùng `SoftDeletes` — xoá thường chỉ set `deleted_at` (UPDATE), **không** kích hoạt FK cascade của DB (cascade chỉ chạy trên `DELETE` thật). `playlist_items` của 1 playlist đã soft-delete vẫn còn nguyên trong DB nhưng không bao giờ lộ ra ngoài vì `Playlist::items()` luôn truy vấn qua playlist cha (đã bị global scope `SoftDeletes` ẩn) | Làm rõ để tránh hiểu nhầm khi review là "cascadeOnDelete mâu thuẫn với triết lý giữ-hàng-khi-xoá-mềm" — thực ra 2 cơ chế không giao nhau: cascade chỉ có tác dụng ở đường xoá cứng (`Playlist::forceDelete()`), lúc đó dọn luôn `playlist_items` là đúng (không còn playlist cha để trỏ vào) |
+| **Bài viết đưa vào playlist PHẢI có bản dịch published ở `post.default_locale`** | `PostArticle::isPlaylistCardVisible()` kiểm tra `default_locale_translation !== null` — chặn từ `AddItemToPlaylistAction` VÀ lọc khỏi kết quả tìm kiếm (§0 dòng trên) | `PublicArticleController` chỉ phục vụ đúng 1 locale mặc định — bài chỉ có bản dịch locale khác sẽ không có URL public nào, trỏ vào sẽ 404 nếu không chặn từ gốc |
+| **Thay đổi `post.default_locale` sau khi đã có dữ liệu là sự kiện vận hành hiếm, không có migration path tự động** | `isPlaylistCardVisible()`/`getPlaylistCardUrl()` đọc `config('post.default_locale')` **động mỗi lần gọi**, không cache — nếu giá trị này đổi, các bài chỉ có bản dịch ở locale cũ sẽ tự động biến mất khỏi mọi playlist công khai (đúng logic, không phải bug), nhưng **không có cảnh báo chủ động** nào báo Ops biết điều đó vừa xảy ra | Ghi rõ ràng buộc vận hành: đây là quyết định cấu hình cấp toàn site (ảnh hưởng cả `Modules/Post`, không riêng Playlist), nằm ngoài thẩm quyền xử lý của 1 module — nếu đổi `post.default_locale`, người thực hiện thao tác đó cần tự chạy rà soát thủ công (hoặc dùng lệnh audit orphan ở §9 nếu được làm sau) |
+| **Đơn vị nền tảng, không tenant / Không quy trình duyệt / Sắp xếp playlist nhập tay** | Giữ nguyên như bản thảo đầu | Nhất quán Video/Banner/Post (đã bỏ `organization_id`) |
+| **Quyền hạn: `playlist.manage` riêng (Lớp B)** | Seed qua `PlaylistPermissionSeeder`, cấp `platform_ops` + `platform_content_head` — không mượn `video.manage` | Tránh 1 tài khoản chỉ cần quản video lại vô tình quản được playlist chứa bài viết, và ngược lại |
+| **Không dedup cứng ở DB, không ràng buộc trùng item** | Validate tránh trùng ở tầng Action + UI (picker loại trừ item đã có, §0 dòng trên), không có `unique` constraint DB | Giữ đơn giản đúng tinh thần Video §0; UI đã chặn từ nguồn nên rủi ro trùng thực tế thấp, không đáng đổi lấy độ phức tạp của composite unique trên bảng polymorphic |
 
 ---
 
 ## 1. Giới thiệu & Mục tiêu
 
-Cổng thông tin hiện có 2 nguồn nội dung media/bài viết tách rời hoàn toàn: `Modules/Video` (thư viện video phẳng, 1 trang lưới duy nhất `/videos`) và `Modules/Post` (bài viết, phân theo category/tag). Không có cách nào để **biên tập 1 bộ sưu tập nội dung theo chủ đề trộn cả video lẫn bài viết** — ví dụ "Chuỗi nội dung: Ăn dặm cho bé 6 tháng" muốn gồm 2 video hướng dẫn + 3 bài viết chuyên sâu, hiển thị theo đúng 1 thứ tự biên tập, không có nơi nào làm được.
+Cổng thông tin hiện có 2 nguồn nội dung tách rời hoàn toàn: `Modules/Video` (thư viện video phẳng, 1 trang lưới `/videos`) và `Modules/Post` (bài viết, phân theo category/tag). Không có cách nào để **biên tập 1 bộ sưu tập nội dung theo chủ đề trộn cả video lẫn bài viết** — ví dụ "Chuỗi nội dung: Ăn dặm cho bé 6 tháng" muốn gồm 2 video hướng dẫn + 3 bài viết chuyên sâu, hiển thị theo đúng 1 thứ tự biên tập.
 
-Module **Playlist** giải quyết bằng 1 bảng `playlists` (thông tin danh sách) + 1 bảng quan hệ đa hình `playlist_items` (từng phần tử, trỏ tới Video hoặc PostArticle qua `morphTo()`), với:
+Module **Playlist** giải quyết bằng 1 bảng `playlists` + 1 bảng quan hệ đa hình `playlist_items` (trỏ tới Video hoặc PostArticle qua `morphTo()`), với:
 
-- Trang quản trị: tạo/sửa playlist, tìm và thêm item (video hoặc bài viết) qua 1 ô tìm kiếm hợp nhất, sắp thứ tự bằng `sort_order`.
-- Trang công khai: `/playlists` (danh sách playlist active) + `/playlists/{slug}` (chi tiết — card từng item render đúng theo loại, video mở lightbox phát ngay, bài viết dẫn sang trang bài viết), có đầy đủ SEO (OG + JSON-LD).
+- Trang quản trị: tạo/sửa playlist, tìm và thêm item qua 1 ô tìm kiếm hợp nhất, sắp thứ tự bằng `sort_order`, thấy ngay badge cảnh báo nếu 1 item đã ẩn/mồ côi.
+- Trang công khai: `/playlists` + `/playlists/{slug}` — card từng item render đúng theo loại (video mở lightbox, bài viết dẫn sang trang riêng), SEO đầy đủ (OG + JSON-LD).
 
-**Nguyên tắc thiết kế cốt lõi:** `Modules/Playlist` không biết trước Video/Post là gì ở tầng lõi — nó chỉ định nghĩa 1 hợp đồng (`PlaylistableContract`) và 1 bảng cấu hình (`config('playlist.itemables')`); Video/Post tự "đăng ký tham gia" bằng cách implement interface đó. Thêm loại nội dung thứ 3 sau này (nếu có nhu cầu thật) không đổi schema `playlist_items`, chỉ thêm 1 dòng config + 1 class.
+**Nguyên tắc thiết kế cốt lõi:** `Modules/Playlist` không biết trước Video/Post là gì ở tầng lõi — nó định nghĩa 1 hợp đồng (`PlaylistableContract`, bắt buộc qua interface PHP thật, không chỉ quy ước) + 1 bảng cấu hình; Video/Post tự "đăng ký tham gia". Thêm loại nội dung thứ 3 sau này không đổi schema, chỉ thêm config + implement contract — và nếu implement thiếu, PHP báo lỗi ngay lúc load class thay vì để lỗi trôi tới runtime.
 
 ---
 
@@ -54,9 +60,9 @@ Module **Playlist** giải quyết bằng 1 bảng `playlists` (thông tin danh 
 | Trang công khai — danh sách playlist | `GET /playlists` → `playlist.public.index` | Layout dùng chung `layouts/frontend.blade.php` |
 | Trang công khai — chi tiết 1 playlist | `GET /playlists/{slug}` → `playlist.public.show` | Card polymorphic qua `PlaylistableContract`, SEO đầy đủ (§7.3) |
 | API nội bộ cho bảng Tabulator ở trang quản trị | `GET backend/api/playlists/items` → `backend.api.playlists.items` | Cùng pattern `VideoApiController`/`BannerApiController` |
-| API tìm kiếm hợp nhất khi thêm item | `GET backend/api/playlists/{playlist}/searchable-items?q=...` → `backend.api.playlists.searchable-items` | Trả mảng chuẩn hoá trộn Video + PostArticle (§6.5) |
+| API tìm kiếm hợp nhất khi thêm item | `GET backend/api/playlists/{playlist}/searchable-items?q=...` → `backend.api.playlists.searchable-items` | Trả mảng chuẩn hoá trộn Video + PostArticle, đã loại item khả dụng nhưng không hiển thị được hoặc đã có trong playlist (§6.3) |
 
-Không có vị trí nhúng Playlist vào `Modules/Post` (làm content block) hay `Modules/Event` ở v1 — ngoài phạm vi (§9).
+Không có vị trí nhúng Playlist vào `Modules/Post` (content block) hay `Modules/Event` ở v1 — ngoài phạm vi (§9).
 
 ---
 
@@ -70,7 +76,7 @@ Playlist
   ├─ name (string, 255)
   ├─ slug (string, 255, unique)
   ├─ description (text, nullable)
-  ├─ cover_image_url (string, 2048, nullable)      — nếu trống, trang public fallback thumbnail item đầu tiên (§5.3)
+  ├─ cover_image_url (string, 2048, nullable)      — nếu trống, trang public fallback thumbnail item hợp lệ đầu tiên (§4.1)
   ├─ meta_title (string, 255, nullable)             — SEO, fallback `name` (§0/§7.3)
   ├─ meta_description (string, 500, nullable)       — SEO, fallback `description` (§0/§7.3)
   ├─ sort_order (unsigned smallint)
@@ -78,13 +84,13 @@ Playlist
   ├─ created_by, updated_by, timestamps, soft delete
   └─ items() : HasMany → PlaylistItem, orderBy sort_order
 
-PlaylistItem
-  ├─ playlist_id (FK → playlists)
+PlaylistItem   (LogsActivity — log attach/detach)
+  ├─ playlist_id (FK → playlists, cascadeOnDelete — chỉ có tác dụng khi forceDelete(), §0)
   ├─ itemable_type (string — alias qua morphMap, KHÔNG lưu FQCN thô)
   ├─ itemable_id (unsigned bigint)
-  ├─ sort_order (unsigned smallint)                 — thứ tự RIÊNG trong playlist này
+  ├─ sort_order (unsigned smallint)                 — thứ tự RIÊNG trong playlist này, mặc định max+1 khi attach (§0)
   ├─ timestamps
-  └─ itemable() : MorphTo → Video | PostArticle (mở rộng được qua config, §4.2)
+  └─ itemable() : MorphTo → Video | PostArticle (mở rộng được qua config, §4.6)
 ```
 
 Không có `organization_id` ở cả 2 bảng — tài sản nền tảng (§0).
@@ -103,14 +109,12 @@ Schema::create('playlists', function (Blueprint $table) {
     $table->text('description')->nullable();
     $table->string('cover_image_url', 2048)->nullable();
 
-    // SEO (§0/§7.3) — nullable, view fallback về name/description khi trống.
     $table->string('meta_title', 255)->nullable();
     $table->string('meta_description', 500)->nullable();
 
     $table->unsignedSmallInteger('sort_order')->default(0);
     $table->boolean('is_active')->default(true);
 
-    // Cùng quyết định created_by/updated_by như Video/Banner (restrictOnDelete/nullOnDelete).
     $table->foreignId('created_by')->constrained('users')->restrictOnDelete();
     $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
     $table->timestamps();
@@ -126,10 +130,13 @@ Schema::create('playlists', function (Blueprint $table) {
 Schema::create('playlist_items', function (Blueprint $table) {
     $table->id();
 
+    // cascadeOnDelete CHỈ kích hoạt khi Playlist::forceDelete() (xoá cứng thật) — soft-delete
+    // mặc định (set deleted_at) không chạm tới bảng này, không mâu thuẫn với "giữ hàng khi xoá
+    // mềm" (§0). Sau forceDelete(), dọn luôn playlist_items là đúng vì không còn playlist cha.
     $table->foreignId('playlist_id')->constrained('playlists')->cascadeOnDelete();
 
-    // Không có FK thật (itemable_id trỏ 1 trong nhiều bảng khác nhau tuỳ itemable_type) —
-    // xử lý item "mồ côi" (nguồn đã xoá/ẩn) ở tầng Query khi đọc, không ở tầng DB (§0/§5.2).
+    // Không có FK thật (itemable_id trỏ 1 trong nhiều bảng khác nhau tuỳ itemable_type) — item
+    // "mồ côi" (nguồn đã xoá/ẩn) được lọc ở tầng Query khi đọc, không ở tầng DB (§0/§5.2).
     $table->string('itemable_type', 60);
     $table->unsignedBigInteger('itemable_id');
 
@@ -213,7 +220,6 @@ class Playlist extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
-    /** SEO — fallback về dữ liệu hiển thị nếu chưa nhập riêng (§0/§7.3). */
     public function getEffectiveMetaTitleAttribute(): string
     {
         return $this->meta_title ?: $this->name;
@@ -225,23 +231,26 @@ class Playlist extends Model
     }
 
     /**
-     * Ảnh đại diện — dùng cover_image_url nếu có, fallback thumbnail của item ĐẦU TIÊN còn hợp
-     * lệ (bỏ qua item mồ côi/ẩn, §5.2) qua PlaylistableContract::getPlaylistCardThumbnailUrl().
-     * Gọi ở trang danh sách playlist (§7.2) — cần eager-load 'items.itemable' trước khi gọi để
-     * tránh N+1 khi liệt kê nhiều playlist cùng lúc.
+     * Danh sách item ĐÃ LỌC hợp lệ (bỏ mồ côi/ẩn) — dùng ở MỌI nơi hiển thị công khai, KHÔNG chỉ
+     * lấy $this->items thẳng ra (đó là danh sách THÔ, dùng cho trang admin để còn thấy được item
+     * cần cảnh báo, §0/§6.7). Đây là điểm hội tụ DUY NHẤT để tránh mỗi view/handler tự viết lại
+     * `?->`/`isPlaylistCardVisible()` rải rác — giảm rủi ro 1 chỗ quên gây lỗi production (đã bị
+     * flag ở review nội bộ v1.0).
+     *
+     * @return \Illuminate\Support\Collection<int, \Modules\Playlist\Contracts\PlaylistableContract>
      */
+    public function getVisibleItemablesAttribute(): \Illuminate\Support\Collection
+    {
+        return $this->items
+            ->map(fn (PlaylistItem $item) => $item->visible_itemable)
+            ->filter()
+            ->values();
+    }
+
+    /** Ảnh đại diện — cover_image_url tự nhập, fallback thumbnail item hợp lệ đầu tiên. */
     public function getEffectiveCoverImageUrlAttribute(): ?string
     {
-        if ($this->cover_image_url) {
-            return $this->cover_image_url;
-        }
-
-        $firstValidItem = $this->items
-            ->map(fn (PlaylistItem $item) => $item->itemable)
-            ->filter()
-            ->first();
-
-        return $firstValidItem?->getPlaylistCardThumbnailUrl();
+        return $this->cover_image_url ?: $this->visible_itemables->first()?->getPlaylistCardThumbnailUrl();
     }
 }
 ```
@@ -255,12 +264,26 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Modules\Playlist\Contracts\PlaylistableContract;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class PlaylistItem extends Model
 {
+    use LogsActivity;
+
     protected $fillable = ['playlist_id', 'itemable_type', 'itemable_id', 'sort_order'];
 
     protected $casts = ['sort_order' => 'integer'];
+
+    /**
+     * Chỉ log lúc TẠO/XOÁ (attach/detach) — 1 item không có "sửa thông tin" nào khác ngoài
+     * sort_order (đổi qua ReorderPlaylistItemsAction hàng loạt, không đáng ghi log từng dòng).
+     * logOnlyDirty() vẫn giữ cho nhất quán codebase dù ít khi có update thực sự trên bản ghi này.
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()->logFillable()->logOnlyDirty()->dontLogEmptyChanges();
+    }
 
     public function playlist(): BelongsTo
     {
@@ -268,23 +291,31 @@ class PlaylistItem extends Model
     }
 
     /**
-     * $itemable_type là ALIAS đã đăng ký qua Relation::morphMap() (§4.4, ví dụ "video",
+     * $itemable_type là ALIAS đã đăng ký qua Relation::morphMap() (§4.7, ví dụ "video",
      * "post_article") — KHÔNG phải FQCN thô. morphTo() eager-load ('itemable') tự gom các hàng
-     * theo từng loại rồi query 1 lần/loại (hành vi mặc định của Eloquent, không cần code thêm).
+     * theo từng loại rồi query 1 lần/loại (hành vi mặc định của Eloquent).
      */
     public function itemable(): MorphTo
     {
         return $this->morphTo();
     }
 
-    /**
-     * Truy cập itemable đã ép kiểu về contract — dùng ở view thay vì $item->itemable trực tiếp
-     * để IDE/static-analysis biết chắc có các method getPlaylistCard*(). Trả null nếu item mồ
-     * côi (nguồn đã xoá cứng) — nơi gọi PHẢI lọc null trước khi render (§5.2).
-     */
+    /** Ép kiểu về contract — null nếu item mồ côi (nguồn đã xoá cứng). */
     public function getResolvedItemableAttribute(): ?PlaylistableContract
     {
         return $this->itemable instanceof PlaylistableContract ? $this->itemable : null;
+    }
+
+    /**
+     * Điểm hội tụ null-discipline: null nếu mồ côi HOẶC còn tồn tại nhưng đang ẩn/chưa publish
+     * (`isPlaylistCardVisible() === false`). Mọi nơi hiển thị công khai PHẢI đọc qua property
+     * này thay vì tự gọi resolved_itemable + isPlaylistCardVisible() riêng lẻ (§0).
+     */
+    public function getVisibleItemableAttribute(): ?PlaylistableContract
+    {
+        $itemable = $this->resolved_itemable;
+
+        return $itemable?->isPlaylistCardVisible() ? $itemable : null;
     }
 }
 ```
@@ -294,10 +325,19 @@ class PlaylistItem extends Model
 ```php
 namespace Modules\Playlist\Contracts;
 
+use Illuminate\Database\Eloquent\Builder;
+
 /**
  * Hợp đồng mà mọi model muốn "tham gia" làm item của Playlist phải implement (§0). Video/Post
- * implement interface này ngay trên chính Model của chúng (§4.4/§4.5) — Modules/Playlist không
- * cần biết Video/Post là gì, chỉ gọi qua interface.
+ * implement trực tiếp trên Model của chúng (§4.4/§4.5) — Modules/Playlist không cần biết
+ * Video/Post là gì, chỉ gọi qua interface này.
+ *
+ * scopeSearchablePlaylistItems() CỐ Ý được khai trong interface dù về mặt Eloquent nó là 1
+ * "local scope" — bản chất chỉ là 1 public instance method thường (tiền tố `scope` chỉ có ý
+ * nghĩa với Eloquent query builder qua __call magic), nên khai báo được như method bình thường.
+ * Nhờ vậy, 1 class trong config('playlist.itemables') QUÊN implement sẽ bị PHP báo
+ * `Fatal error: Class ... contains 1 abstract method` NGAY khi autoload — bắt lỗi sớm hơn hẳn
+ * so với để runtime tự __call() báo "method không tồn tại" hoặc tệ hơn là kết quả rỗng im lặng.
  */
 interface PlaylistableContract
 {
@@ -307,7 +347,7 @@ interface PlaylistableContract
 
     public function getPlaylistCardThumbnailUrl(): ?string;
 
-    /** Link "an toàn" luôn dùng được kể cả khi không mở lightbox — trang chi tiết/watch_url. */
+    /** Link "an toàn" luôn dùng được — trang chi tiết/watch_url. */
     public function getPlaylistCardUrl(): string;
 
     /**
@@ -320,18 +360,25 @@ interface PlaylistableContract
     public function getPlaylistCardTypeLabel(): string;
 
     /**
-     * Có còn hợp lệ để hiển thị công khai không (is_active/published) — Query công khai (§5.2)
-     * lọc theo method này thay vì đoán tên cột is_active/status khác nhau giữa các loại model.
+     * Có còn hợp lệ để hiển thị công khai không (is_active/published). Query công khai VÀ
+     * SearchPlaylistableItemsAction (phòng thủ lớp 2, §0) đều lọc qua method này.
      */
     public function isPlaylistCardVisible(): bool;
+
+    /**
+     * Scope tìm kiếm dùng bởi ô tìm kiếm hợp nhất (§6.3) — mỗi model tự biết search đúng cột/
+     * quan hệ của mình (Video theo `name`, PostArticle qua `translations.title`).
+     */
+    public function scopeSearchablePlaylistItems(Builder $query, string $keyword): void;
 }
 ```
 
 ### 4.4 Implement ở `Modules\Video\Models\Video` (thay đổi cross-module)
 
-> Đây là thay đổi DUY NHẤT cần chạm vào `Modules/Video` — thêm `implements PlaylistableContract` + 5 method ngắn, tái dùng nguyên các accessor đã có (`thumbnail_url`, `embed_url`, `watch_url`, `is_active`), không đổi logic nghiệp vụ hiện tại của Video.
+> Thay đổi DUY NHẤT cần chạm vào `Modules/Video` — thêm `implements PlaylistableContract` + 6 method ngắn, tái dùng nguyên accessor đã có, không đổi logic nghiệp vụ hiện tại.
 
 ```php
+use Illuminate\Database\Eloquent\Builder;
 use Modules\Playlist\Contracts\PlaylistableContract;
 
 class Video extends Model implements PlaylistableContract
@@ -372,21 +419,30 @@ class Video extends Model implements PlaylistableContract
     {
         return $this->is_active;
     }
+
+    public function scopeSearchablePlaylistItems(Builder $query, string $keyword): void
+    {
+        $query->active()->where('name', 'like', "%{$keyword}%");
+    }
 }
 ```
 
 ### 4.5 Implement ở `Modules\Post\Models\PostArticle` (thay đổi cross-module)
 
-> Cần thêm 1 accessor `defaultLocaleTranslation` nếu Post chưa có sẵn quan hệ tương đương — tra đúng bản dịch published ở `config('post.default_locale')` (§0, lý do chống 404).
-
 ```php
+use Illuminate\Database\Eloquent\Builder;
 use Modules\Playlist\Contracts\PlaylistableContract;
 
 class PostArticle extends Model implements HasMedia, PlaylistableContract
 {
     // ... giữ nguyên toàn bộ code hiện tại ...
 
-    /** Bản dịch DUY NHẤT được phép dùng cho mọi output công khai xuyên-module (§0). */
+    /**
+     * Bản dịch DUY NHẤT được phép dùng cho mọi output công khai xuyên-module (§0 — chống 404
+     * vì PublicArticleController chỉ phục vụ đúng locale này). Đọc từ collection `translations`
+     * ĐÃ ĐƯỢC EAGER-LOAD đúng điều kiện qua config('playlist.itemables.post_article.with') —
+     * KHÔNG tự query lại ở đây (tránh N+1 khi hiển thị nhiều PostArticle trong 1 playlist, §7.4).
+     */
     public function getDefaultLocaleTranslationAttribute(): ?PostArticleTranslation
     {
         return $this->translations
@@ -432,6 +488,14 @@ class PostArticle extends Model implements HasMedia, PlaylistableContract
     {
         return $this->default_locale_translation !== null;
     }
+
+    public function scopeSearchablePlaylistItems(Builder $query, string $keyword): void
+    {
+        $query->whereHas('translations', fn ($q) => $q
+            ->where('locale', config('post.default_locale'))
+            ->where('status', TranslationStatus::Published)
+            ->where('title', 'like', "%{$keyword}%"));
+    }
 }
 ```
 
@@ -441,16 +505,24 @@ class PostArticle extends Model implements HasMedia, PlaylistableContract
 return [
     'name' => 'Playlist',
 
-    // Map "type key" ngắn (lưu trong cột itemable_type) → FQCN model thật. NGUỒN DUY NHẤT dùng
-    // để build Relation::morphMap() (§4.7) — thêm loại nội dung mới chỉ cần thêm 1 dòng ở đây +
-    // 1 class implement PlaylistableContract, KHÔNG migrate lại playlist_items.
+    // Mỗi entry: 'model' (FQCN thật, NGUỒN DUY NHẤT cho morphMap §4.7) + 'with' (quan hệ cần
+    // eager-load khi hiển thị công khai, dùng cho MorphTo::morphWith() §7.4 — TRÁNH N+1 mà
+    // KHÔNG buộc Modules/Playlist phải tự biết Post cần load 'translations'; chính Post khai báo
+    // nhu cầu của mình ở đây). Thêm loại nội dung mới chỉ cần thêm 1 entry + 1 class implement
+    // PlaylistableContract, KHÔNG migrate lại playlist_items.
     'itemables' => [
-        'video'        => \Modules\Video\Models\Video::class,
-        'post_article' => \Modules\Post\Models\PostArticle::class,
+        'video' => [
+            'model' => \Modules\Video\Models\Video::class,
+            'with'  => [],
+        ],
+        'post_article' => [
+            'model' => \Modules\Post\Models\PostArticle::class,
+            'with'  => ['translations'],
+        ],
     ],
 
-    // Số kết quả tối đa MỖI nguồn khi tìm kiếm hợp nhất ở modal "Thêm item" (§6.5) — tránh 1
-    // nguồn có nhiều bản ghi khớp từ khoá lấn át hoàn toàn nguồn còn lại trong danh sách gộp.
+    // Số kết quả tối đa MỖI nguồn khi tìm kiếm hợp nhất ở modal "Thêm item" (§6.3) — tránh 1
+    // nguồn có nhiều bản ghi khớp từ khoá lấn át hoàn toàn nguồn còn lại.
     'search_limit_per_type' => 10,
 
     'per_page' => 12,
@@ -474,9 +546,11 @@ class PlaylistServiceProvider extends ModuleServiceProvider
     {
         parent::boot();
 
-        // Cùng quyết định ApprovalServiceProvider::boot() — merge: true, KHÔNG enforceMorphMap()
-        // (xem lý do đầy đủ ở Modules/Approval/app/Providers/ApprovalServiceProvider.php).
-        Relation::morphMap(config('playlist.itemables', []), merge: true);
+        // Cùng quyết định ApprovalServiceProvider::boot() — merge: true, KHÔNG enforceMorphMap().
+        Relation::morphMap(
+            collect(config('playlist.itemables', []))->map(fn (array $cfg) => $cfg['model'])->all(),
+            merge: true,
+        );
     }
 }
 ```
@@ -485,32 +559,65 @@ class PlaylistServiceProvider extends ModuleServiceProvider
 
 ## 5. Business rules
 
-### 5.1 Thêm/xoá/sắp xếp item
-
-- **Thêm item**: `AddItemToPlaylistAction::handle(Playlist $playlist, string $itemableType, int $itemableId)` — validate `$itemableType` nằm trong `array_keys(config('playlist.itemables'))`, resolve model qua morphMap, gọi `isPlaylistCardVisible()` — từ chối thêm nếu `false` (vd bài viết chưa publish bản dịch mặc định, video đang `is_active=false`) kèm thông báo lỗi rõ ràng ("Video này đang tắt hiển thị, hãy bật lại trước khi thêm vào playlist").
-- **Xoá item**: `RemoveItemFromPlaylistAction::handle(PlaylistItem $item)` — xoá cứng hàng `playlist_items` (không soft-delete, bản thân đây chỉ là 1 liên kết, không phải nội dung gốc).
-- **Sắp xếp**: `ReorderPlaylistItemsAction::handle(Playlist $playlist, array $orderedItemIds)` — cập nhật `sort_order` hàng loạt theo thứ tự mảng truyền vào (form nhập tay từng số, §0 — không phải kéo-thả AJAX).
-
-### 5.2 Lọc item hợp lệ khi đọc (cả admin lẫn public)
-
-`Playlist::items()` trả VỀ TẤT CẢ hàng `playlist_items` kể cả mồ côi/ẩn (đúng dữ liệu thật trong DB, cần thiết để trang **admin** biết mà báo "1 item trong danh sách này đang ẩn/đã bị xoá nguồn, cân nhắc gỡ"). Trang **công khai** dùng thêm 1 lớp lọc:
+### 5.1 Thêm item
 
 ```php
-// GetPlaylistForPublicHandler — lọc item trước khi render
-$visibleItems = $playlist->items
-    ->map(fn (PlaylistItem $item) => $item->resolved_itemable)
-    ->filter(fn (?PlaylistableContract $itemable) => $itemable?->isPlaylistCardVisible());
+namespace Modules\Playlist\Features\PlaylistManagement\Actions;
+
+use Illuminate\Validation\ValidationException;
+use Lorisleiva\Actions\Concerns\AsAction;
+use Modules\Playlist\Contracts\PlaylistableContract;
+use Modules\Playlist\Models\Playlist;
+use Modules\Playlist\Models\PlaylistItem;
+
+class AddItemToPlaylistAction
+{
+    use AsAction;
+
+    public function handle(Playlist $playlist, string $itemableType, int $itemableId): PlaylistItem
+    {
+        $modelClass = config("playlist.itemables.{$itemableType}.model");
+
+        if (! $modelClass) {
+            throw ValidationException::withMessages(['itemable_type' => 'Loại nội dung không hợp lệ.']);
+        }
+
+        /** @var PlaylistableContract|null $itemable */
+        $itemable = $modelClass::find($itemableId);
+
+        if (! $itemable instanceof PlaylistableContract || ! $itemable->isPlaylistCardVisible()) {
+            throw ValidationException::withMessages([
+                'itemable_id' => 'Nội dung này hiện đang ẩn hoặc chưa xuất bản, không thể thêm vào playlist.',
+            ]);
+        }
+
+        // Mặc định "thêm vào cuối danh sách" — KHÔNG bắt nhập sort_order lúc thêm mới (§0).
+        // Sắp xếp lại vị trí là thao tác riêng, sau đó, qua ReorderPlaylistItemsAction.
+        $nextSortOrder = ($playlist->items()->max('sort_order') ?? 0) + 1;
+
+        return $playlist->items()->create([
+            'itemable_type' => $itemableType,
+            'itemable_id'   => $itemableId,
+            'sort_order'    => $nextSortOrder,
+        ]);
+    }
+}
 ```
 
-Không sửa lại `sort_order`/xoá hàng `playlist_items` tự động khi lọc — chỉ ẩn khỏi kết quả trả về, giữ nguyên dữ liệu gốc để khi nguồn được bật lại (`is_active=true`/publish lại bản dịch) thì item tự xuất hiện lại đúng vị trí cũ, không cần thao tác lại (§0).
+### 5.2 Xoá & sắp xếp lại item
 
-### 5.3 Ảnh đại diện playlist
+- **Xoá**: `RemoveItemFromPlaylistAction::handle(PlaylistItem $item)` — xoá cứng hàng `playlist_items` (đây chỉ là 1 liên kết, không phải nội dung gốc); `LogsActivity` trên `PlaylistItem` tự ghi lại sự kiện xoá.
+- **Sắp xếp lại**: `ReorderPlaylistItemsAction::handle(Playlist $playlist, array $orderedItemIds)` — cập nhật `sort_order` hàng loạt theo thứ tự mảng truyền vào; validate mọi ID trong mảng đều thuộc đúng `$playlist` (chặn 1 ID của playlist khác lọt vào request thủ công) trước khi update, nếu có ID lạ → `ValidationException`, không âm thầm bỏ qua.
 
-`Playlist::effective_cover_image_url` (§4.1) — ưu tiên `cover_image_url` tự nhập, fallback thumbnail item hợp lệ đầu tiên. Nếu playlist không có item hợp lệ nào và không nhập cover riêng → `null`, trang danh sách render placeholder tĩnh (cùng cách Video xử lý ảnh lỗi ở `public/index.blade.php`).
+### 5.3 Lọc item hợp lệ khi đọc
 
-### 5.4 Sắp xếp & bật/tắt playlist
+`Playlist::items` (thô) dùng cho **admin** — cần thấy cả item mồ côi/ẩn để hiển thị badge cảnh báo (§6.7). `Playlist::visible_itemables` (§4.1) dùng cho **mọi nơi công khai** — đã lọc sẵn qua `PlaylistItem::visible_itemable` (§4.2), không nơi nào khác được tự ý gọi `?->isPlaylistCardVisible()` rời rạc.
 
-`sort_order` (nhập tay) quyết định thứ tự hiển thị playlist tại `/playlists`. `is_active=false` ẩn khỏi trang công khai nhưng vẫn thấy ở admin (cùng nguyên tắc Video §5.4).
+Không sửa `sort_order`/xoá hàng `playlist_items` khi lọc — chỉ ẩn khỏi kết quả trả về; khi nguồn được bật lại, item tự xuất hiện lại đúng vị trí cũ.
+
+### 5.4 Ảnh đại diện & bật/tắt playlist
+
+`Playlist::effective_cover_image_url` (§4.1) ưu tiên `cover_image_url` tự nhập, fallback `visible_itemables->first()`. `sort_order`/`is_active` của chính playlist hoạt động như Video §5.4 (ẩn khỏi public, vẫn thấy ở admin).
 
 ---
 
@@ -528,7 +635,7 @@ Modules/Playlist/
 │   │   │   │   ├── CreatePlaylistAction.php
 │   │   │   │   ├── UpdatePlaylistAction.php
 │   │   │   │   ├── DeletePlaylistAction.php
-│   │   │   │   ├── ToggleplaylistActiveAction.php
+│   │   │   │   ├── TogglePlaylistActiveAction.php
 │   │   │   │   ├── AddItemToPlaylistAction.php
 │   │   │   │   ├── RemoveItemFromPlaylistAction.php
 │   │   │   │   ├── ReorderPlaylistItemsAction.php
@@ -559,7 +666,29 @@ Modules/Playlist/
 └── module.json
 ```
 
-### 6.2 Routes
+### 6.2 `PlaylistData` & validate
+
+Theo đúng pattern `VideoAdminController::validated()` — validate ở Controller, build DTO sau:
+
+```php
+private function validated(Request $request): array
+{
+    return $request->validate([
+        'name'              => ['required', 'string', 'max:255'],
+        'slug'              => ['required', 'string', 'max:255', 'alpha_dash', Rule::unique('playlists', 'slug')->ignore($this->playlist)],
+        'description'       => ['nullable', 'string', 'max:2000'],
+        'cover_image_url'   => ['nullable', 'url', 'max:2048'],
+        'meta_title'        => ['nullable', 'string', 'max:255'],
+        'meta_description'  => ['nullable', 'string', 'max:500'],
+        'sort_order'        => ['nullable', 'integer', 'min:0'],
+        'is_active'         => ['boolean'],
+    ]);
+}
+```
+
+`PlaylistData` (Spatie Laravel Data) chỉ hydrate dữ liệu đã validate, không validate lại — cùng nguyên tắc `VideoData`/`BannerData`.
+
+### 6.3 Routes
 
 ```php
 Route::middleware(['auth'])->prefix('dashboard/playlists')->name('backend.playlist.')->group(function (): void {
@@ -581,7 +710,7 @@ Route::name('playlist.public.')->group(function (): void {
 });
 ```
 
-### 6.3 `SearchPlaylistableItemsAction` — trái tim của ô tìm kiếm hợp nhất
+### 6.4 `SearchPlaylistableItemsAction` — trái tim của ô tìm kiếm hợp nhất
 
 ```php
 namespace Modules\Playlist\Features\PlaylistManagement\Actions;
@@ -589,31 +718,52 @@ namespace Modules\Playlist\Features\PlaylistManagement\Actions;
 use Illuminate\Support\Collection;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Modules\Playlist\Contracts\PlaylistableContract;
+use Modules\Playlist\Models\Playlist;
 
 class SearchPlaylistableItemsAction
 {
     use AsAction;
 
     /**
-     * Gọi lần lượt từng nguồn khai trong config('playlist.itemables'), mỗi nguồn tự biết cách
-     * search đúng bảng của mình (Video theo `name`, PostArticle theo translation.title) — Action
-     * này KHÔNG viết SQL trực tiếp lên bảng cụ thể, chỉ điều phối + chuẩn hoá kết quả trả về.
+     * Gọi lần lượt từng nguồn khai trong config('playlist.itemables') qua chính
+     * scopeSearchablePlaylistItems() mà PlaylistableContract bắt buộc (§4.3) — Action này KHÔNG
+     * viết SQL trực tiếp lên bảng cụ thể, chỉ điều phối + chuẩn hoá + lọc kết quả.
+     *
+     * $playlist (nullable): nếu truyền vào, loại khỏi kết quả các (type,id) ĐÃ có trong
+     * playlist đó — tránh hiển thị trong picker 1 item mà bấm vào sẽ không thêm được nữa.
      *
      * @return Collection<int, array{type: string, id: int, title: string, thumbnail_url: ?string, type_label: string}>
      */
-    public function handle(string $keyword): Collection
+    public function handle(string $keyword, ?Playlist $playlist = null): Collection
     {
         $limit = config('playlist.search_limit_per_type', 10);
+
+        $existingKeys = $playlist
+            ? $playlist->items->map(fn ($item) => "{$item->itemable_type}:{$item->itemable_id}")
+            : collect();
+
         $results = collect();
 
-        foreach (config('playlist.itemables', []) as $typeKey => $modelClass) {
+        foreach (config('playlist.itemables', []) as $typeKey => $cfg) {
             /** @var class-string<PlaylistableContract> $modelClass */
+            $modelClass = $cfg['model'];
+
             $matches = $modelClass::query()
-                ->searchablePlaylistItems($keyword) // scope riêng mỗi model phải tự định nghĩa (§6.4)
+                ->searchablePlaylistItems($keyword)
                 ->limit($limit)
                 ->get();
 
             foreach ($matches as $item) {
+                // Phòng thủ lớp 2 (§0) — dù scope DB thường đã lọc active/published tương tự,
+                // kiểm tra lại qua contract để không lệch nếu 1 trong 2 nơi đổi điều kiện sau này.
+                if (! $item->isPlaylistCardVisible()) {
+                    continue;
+                }
+
+                if ($existingKeys->contains("{$typeKey}:{$item->getKey()}")) {
+                    continue;
+                }
+
                 $results->push([
                     'type'          => $typeKey,
                     'id'            => $item->getKey(),
@@ -629,30 +779,7 @@ class SearchPlaylistableItemsAction
 }
 ```
 
-### 6.4 Yêu cầu bổ sung ở model tham gia: scope `searchablePlaylistItems`
-
-Mỗi model implement `PlaylistableContract` cũng phải tự định nghĩa `scopeSearchablePlaylistItems(Builder $query, string $keyword)` — Playlist không biết Video search theo cột `name` hay Post search qua `whereHas('translations', ...)`, việc đó thuộc về chính model:
-
-```php
-// Video
-public function scopeSearchablePlaylistItems(Builder $query, string $keyword): void
-{
-    $query->active()->where('name', 'like', "%{$keyword}%");
-}
-
-// PostArticle
-public function scopeSearchablePlaylistItems(Builder $query, string $keyword): void
-{
-    $query->whereHas('translations', fn ($q) => $q
-        ->where('locale', config('post.default_locale'))
-        ->where('status', TranslationStatus::Published)
-        ->where('title', 'like', "%{$keyword}%"));
-}
-```
-
-> Đây là lý do `PlaylistableContract` không thể chỉ là "marker interface" — cần ghi rõ trong docblock interface (§4.3) rằng model implement còn phải cung cấp scope này theo đúng tên, dù PHP không ép được "phải có scope X" qua interface thuần (giới hạn ngôn ngữ, chấp nhận được — kiểm bằng test tích hợp thay vì contract cứng, §8).
-
-### 6.5 `PlaylistApiController::searchableItems()`
+`PlaylistApiController::searchableItems()`:
 
 ```php
 public function searchableItems(Request $request, Playlist $playlist, SearchPlaylistableItemsAction $search): JsonResponse
@@ -661,15 +788,39 @@ public function searchableItems(Request $request, Playlist $playlist, SearchPlay
 
     $request->validate(['q' => ['required', 'string', 'min:2', 'max:255']]);
 
-    return response()->json(['data' => $search->handle($request->string('q'))]);
+    return response()->json(['data' => $search->handle($request->string('q'), $playlist)]);
 }
 ```
 
-Modal "Thêm item" ở `admin/playlists/_item-picker.blade.php` gọi endpoint này (debounce input), render 1 danh sách trộn kèm badge `type_label`, bấm 1 dòng → gọi `items.attach-item` với `type`+`id` tương ứng.
-
-### 6.6 Permission (`PlaylistPermissionSeeder`)
+### 6.5 Permission (`PlaylistPermissionSeeder`)
 
 Sao chép nguyên khuôn `VideoPermissionSeeder` (§0 — permission riêng `playlist.manage`, cấp `platform_ops` + `platform_content_head`, sync `super-admin`).
+
+### 6.6 Chính sách (`PlaylistPolicy`)
+
+`authorizeResource(Playlist::class, 'playlist')` áp policy cho toàn bộ 5 action CRUD; `toggleActive`/`attachItem`/`detachItem`/`reorderItems` không nằm trong 7 ability RESTful mặc định nên gọi `authorize('update', $playlist)` thủ công trong từng method (cùng cách `VideoAdminController::toggleActive()` làm) — **không có endpoint nào bỏ sót `authorize()`**, đây là điểm bắt buộc kiểm tra ở test (§8).
+
+### 6.7 Badge cảnh báo item ẩn/mồ côi ở trang sửa
+
+`admin/playlists/edit.blade.php` lặp qua `$playlist->items` (danh sách THÔ, không phải `visible_itemables`):
+
+```blade
+@foreach($playlist->items as $item)
+    <tr>
+        <td>{{ $item->resolved_itemable?->getPlaylistCardTitle() ?? '(Nội dung đã bị xoá)' }}</td>
+        <td>
+            @if(! $item->visible_itemable)
+                <span class="badge badge-warning">
+                    {{ $item->resolved_itemable ? 'Đang ẩn' : 'Nguồn đã xoá' }}
+                </span>
+            @endif
+        </td>
+        {{-- ... sort_order input, nút xoá ... --}}
+    </tr>
+@endforeach
+```
+
+Banner tổng "playlist X có N item đang ẩn" (quét toàn bộ playlist) để ngoài phạm vi v1 (§9) — badge từng dòng ở đây đã đủ để Ops phát hiện khi đang sửa trực tiếp playlist đó.
 
 ---
 
@@ -677,28 +828,38 @@ Sao chép nguyên khuôn `VideoPermissionSeeder` (§0 — permission riêng `pla
 
 ### 7.1 `/playlists` — danh sách
 
-Lưới card playlist (`effective_cover_image_url`, `name`, `description` rút gọn, số lượng item hợp lệ) — click vào 1 card điều hướng sang `/playlists/{slug}`. Empty state nếu chưa có playlist active nào (cùng cách Video xử lý).
+Lưới card playlist (`effective_cover_image_url`, `name`, `description` rút gọn, `visible_itemables->count()`). Empty state nếu chưa có playlist active nào.
 
 ### 7.2 `/playlists/{slug}` — chi tiết
 
 ```blade
-@foreach($visibleItems as $item)
-    @if($item->getPlaylistCardEmbedUrl())
-        {{-- Video — mở lightbox, TÁI DÙNG alpine x-data pattern từ Modules/Video/resources/views/public/index.blade.php --}}
-        <button @click="open = true; activeUrl = '{{ $item->getPlaylistCardEmbedUrl() }}'; ...">
-    @else
-        {{-- Bài viết — link điều hướng thường --}}
-        <a href="{{ $item->getPlaylistCardUrl() }}">
-    @endif
-        <img src="{{ $item->getPlaylistCardThumbnailUrl() ?? asset('images/post-cover-placeholder.svg') }}" ...>
-        <span class="badge">{{ $item->getPlaylistCardTypeLabel() }}</span>
-        <h3>{{ $item->getPlaylistCardTitle() }}</h3>
-@endforeach
+@php $visibleItems = $playlist->visible_itemables; @endphp
+
+@if($visibleItems->isEmpty())
+    {{-- Playlist còn active nhưng MỌI item đã bị ẩn/xoá nguồn — tránh trang trắng gây hiểu nhầm
+         lỗi, cùng cách Video xử lý empty state ở /videos. --}}
+    <div class="text-center py-16 text-base-content/60">
+        <p>Playlist này hiện chưa có nội dung khả dụng.</p>
+    </div>
+@else
+    @foreach($visibleItems as $item)
+        @if($item->getPlaylistCardEmbedUrl())
+            {{-- Video — mở lightbox, TÁI DÙNG alpine x-data pattern từ Modules/Video/resources/views/public/index.blade.php --}}
+            <button @click="open = true; activeUrl = '{{ $item->getPlaylistCardEmbedUrl() }}'; ...">
+        @else
+            {{-- Bài viết — link điều hướng thường --}}
+            <a href="{{ $item->getPlaylistCardUrl() }}">
+        @endif
+            <img src="{{ $item->getPlaylistCardThumbnailUrl() ?? asset('images/post-cover-placeholder.svg') }}" ...>
+            <span class="badge">{{ $item->getPlaylistCardTypeLabel() }}</span>
+            <h3>{{ $item->getPlaylistCardTitle() }}</h3>
+    @endforeach
+@endif
 ```
 
-Lightbox modal dùng chung 1 instance đặt ngoài vòng lặp — copy nguyên cấu trúc Alpine đã kiểm chứng ở `Modules/Video/resources/views/public/index.blade.php` (không viết lại từ đầu).
+Lightbox modal dùng chung 1 instance đặt ngoài vòng lặp — copy nguyên cấu trúc Alpine đã kiểm chứng ở `Modules/Video/resources/views/public/index.blade.php`.
 
-### 7.3 SEO (§0)
+### 7.3 SEO
 
 ```blade
 @section('title', $playlist->effective_meta_title)
@@ -720,14 +881,14 @@ Lightbox modal dùng chung 1 instance đặt ngoài vòng lặp — copy nguyên
 @endpush
 ```
 
-JSON-LD — `CollectionPage` lồng `ItemList` (schema.org không có type chuyên biệt cho "playlist trộn nhiều loại nội dung"; `ItemList` là type tổng quát đúng ngữ nghĩa "1 danh sách có thứ tự các nội dung khác nhau", nhất quán với cách Post đã dùng JSON-LD cho AEO/GEO — xem [[project_post_aeo_geo_structured_data]]):
+JSON-LD — `CollectionPage` lồng `ItemList` (schema.org không có type chuyên biệt cho "playlist trộn nhiều loại nội dung"; `ItemList` là type tổng quát đúng ngữ nghĩa, nhất quán với AEO/GEO đã dùng cho Post — xem [[project_post_aeo_geo_structured_data]]). Khi `$visibleItems` rỗng, vẫn phát `CollectionPage` nhưng `itemListElement: []` — không bỏ hẳn script JSON-LD (giữ nhất quán structured data có mặt trên mọi trang, tránh crawler thấy trang "biến mất" bất thường):
 
 ```php
 [
     '@context' => 'https://schema.org',
     '@type' => 'CollectionPage',
     'name' => $playlist->effective_meta_title,
-    'description' => $playlist->effective_meta_description,
+    'description' => $playlist->effective_meta_description, // có thể null — OK với schema.org
     'url' => $canonicalUrl,
     'mainEntity' => [
         '@type' => 'ItemList',
@@ -741,25 +902,62 @@ JSON-LD — `CollectionPage` lồng `ItemList` (schema.org không có type chuy�
 ]
 ```
 
+### 7.4 Eager-load bắt buộc (chống N+1)
+
+`GetPlaylistForPublicHandler`:
+
+```php
+$playlist = Playlist::active()
+    ->where('slug', $slug)
+    ->with(['items' => fn ($q) => $q->orderBy('sort_order')])
+    ->firstOrFail();
+
+$playlist->load(['items.itemable' => function (MorphTo $morphTo) {
+    // morphWith() — build TỪ CONFIG, không hard-code Video::class/PostArticle::class ở đây,
+    // giữ nguyên nguyên tắc "không phụ thuộc cứng" (§0/§4.6) dù đang tối ưu N+1 cho từng loại.
+    $morphTo->morphWith(
+        collect(config('playlist.itemables'))
+            ->mapWithKeys(fn (array $cfg) => [$cfg['model'] => $cfg['with']])
+            ->all()
+    );
+}]);
+```
+
+Nhờ đó `PostArticle::translations` được load sẵn 1 lần cho toàn bộ item bài viết trong playlist — `getDefaultLocaleTranslationAttribute()` (§4.5) chỉ lọc trong collection đã có sẵn trong bộ nhớ, không query lại.
+
+`/playlists` (trang danh sách) cần cùng cấu trúc `with()` này cho MỌI playlist trả về (không chỉ 1 playlist), vì `effective_cover_image_url` gọi `visible_itemables->first()` — thiếu eager-load ở đây là nguồn N+1 dễ bị bỏ sót nhất (nhiều playlist × nhiều item mỗi cái).
+
 ---
 
-## 8. Kiểm thử bắt buộc trước khi coi là xong (§8, phase implementation)
+## 8. Kiểm thử bắt buộc trước khi coi là xong
 
-- `PlaylistItem::itemable` resolve đúng cả 2 loại (`morphMap` hoạt động đúng, không bị fallback về FQCN thô).
-- `AddItemToPlaylistAction` từ chối thêm: video `is_active=false`, bài viết chưa có bản dịch published ở `default_locale`, `itemableType` không nằm trong `config('playlist.itemables')` (input giả mạo qua request thủ công).
-- Trang công khai KHÔNG render item mồ côi (video/bài viết đã xoá cứng khỏi DB nhưng `playlist_items` còn hàng trỏ tới id đó).
-- Trang công khai vẫn hiển thị đúng khi playlist có **cả 2 loại item trộn lẫn** theo đúng `sort_order` chung (không bị Eloquent tự nhóm video lên trước/bài viết xuống sau).
-- `SearchPlaylistableItemsAction` trả đúng giới hạn `search_limit_per_type` cho từng nguồn khi 1 nguồn có nhiều kết quả khớp hơn nguồn kia (không để 1 nguồn lấn át).
-- Xoá mềm `Video`/`PostArticle` → `PlaylistItem::itemable` trả `null`, không throw exception ở bất kỳ nơi nào gọi `->getPlaylistCard*()` (đã bọc `?->` ở mọi nơi đọc, §5.2).
+**Đã có ở bản thảo đầu:**
+- `PlaylistItem::itemable` resolve đúng cả 2 loại qua `morphMap`.
+- `AddItemToPlaylistAction` từ chối thêm: video `is_active=false`, bài viết chưa có bản dịch published ở `default_locale`, `itemableType` không nằm trong config (input giả mạo).
+- Trang công khai KHÔNG render item mồ côi (nguồn đã xoá cứng).
+- Trang công khai hiển thị đúng khi playlist có **cả 2 loại item trộn lẫn** theo đúng `sort_order` chung.
+- `SearchPlaylistableItemsAction` trả đúng giới hạn `search_limit_per_type` cho từng nguồn.
+- Xoá mềm `Video`/`PostArticle` → `PlaylistItem::itemable` trả `null`, không throw exception ở bất kỳ nơi gọi `getPlaylistCard*()`.
+
+**Bổ sung sau review v1.1:**
+- `PlaylistPolicy` áp dụng đúng trên **mọi** endpoint, kể cả 4 action ngoài RESTful mặc định (`toggleActive`/`attachItem`/`detachItem`/`reorderItems`) — test riêng cho user không có `playlist.manage` bị 403 ở từng route.
+- Thêm trùng 1 item vào cùng playlist 2 lần liên tiếp (không đi qua UI, gọi thẳng Action 2 lần) — xác nhận hành vi đúng như §0 (được phép, không constraint DB) và không gây lỗi.
+- `ReorderPlaylistItemsAction` với 1 ID không thuộc playlist (hoặc không tồn tại) trong mảng truyền vào → `ValidationException`, không âm thầm bỏ qua hay cập nhật nhầm playlist khác.
+- `effective_cover_image_url` khi item ĐẦU TIÊN theo `sort_order` là item mồ côi/ẩn — phải fallback đúng sang item hợp lệ TIẾP THEO, không trả `null` chỉ vì phần tử đầu tiên trong mảng thô không hợp lệ.
+- JSON-LD khi `meta_description`/`description` đều `null` — không được ném lỗi khi `json_encode`, và không in ra khoá `description: null` gây nhiễu (cân nhắc `array_filter` trước encode).
+- Tình huống "race" search → attach: item được search picker trả về hợp lệ, nhưng bị người khác tắt `is_active`/unpublish NGAY TRƯỚC khi request `attach-item` tới server — `AddItemToPlaylistAction` vẫn phải tự re-check `isPlaylistCardVisible()` tại thời điểm ghi (đã đúng theo code §5.1, test xác nhận không tin dữ liệu cũ từ phía client).
+- `scopeSearchablePlaylistItems` thiếu ở 1 class mới thêm vào `config('playlist.itemables')` trong lúc phát triển (không phải test hành vi, mà xác nhận **PHP tự chặn từ lúc autoload** — viết 1 test dựng 1 class giả không implement đủ contract, assert `Error` được ném ra).
 
 ---
 
 ## 9. Ngoài phạm vi (out of scope) — ghi rõ để tránh hiểu nhầm khi review
 
-- **Thêm loại nội dung thứ 3+ (Product, Event, RealEstate...)** — schema đã sẵn sàng mở rộng (§0/§4.6), nhưng v1 chỉ wiring Video + Post theo đúng yêu cầu đã xác nhận; wiring thêm loại khác là 1 thay đổi nhỏ (thêm config + implement contract) nhưng thuộc phạm vi khi có nhu cầu thật.
-- **Kéo-thả sắp xếp (drag-and-drop reorder)** cho cả playlist lẫn item trong playlist — v1 chỉ có input số `sort_order` nhập tay, cùng quyết định Video §0/§9.
-- **Playlist lồng playlist (nested)** — 1 playlist không thể chứa 1 playlist khác làm item, chỉ chứa Video/PostArticle trực tiếp.
-- **Đếm lượt xem playlist** — không có yêu cầu đo lường nào ở v1 (khác Banner có `click_count`).
-- **Danh mục/gắn thẻ cho chính Playlist** — v1 là 1 danh sách phẳng các playlist, không phân trang theo category playlist.
-- **UI cảnh báo chủ động "playlist này có N item đang ẩn/mồ côi"** ở trang admin — §5.2 chỉ đảm bảo trang public lọc đúng, chưa làm badge cảnh báo ở trang quản trị; có thể thêm sau không đổi schema.
+- **Thêm loại nội dung thứ 3+ (Product, Event, RealEstate...)** — schema đã sẵn sàng mở rộng (§0/§4.6), v1 chỉ wiring Video + Post theo yêu cầu đã xác nhận.
+- **Kéo-thả sắp xếp (drag-and-drop reorder)** cho cả playlist lẫn item — v1 chỉ có input số `sort_order` nhập tay khi sắp xếp lại (không phải lúc attach, §0), cùng quyết định Video.
+- **Nút "di chuyển lên/xuống" (move up/down) cho từng item** — tiện ích UX nhỏ có thể thêm sau mà không đổi schema, chưa cấp thiết khi đã có `ReorderPlaylistItemsAction` nhập hàng loạt.
+- **Playlist lồng playlist (nested)** — 1 playlist không thể chứa 1 playlist khác làm item.
+- **Đếm lượt xem playlist** — không có yêu cầu đo lường nào ở v1.
+- **Danh mục/gắn thẻ cho chính Playlist** — v1 là danh sách phẳng các playlist.
+- **Banner cảnh báo tổng "N playlist đang có item ẩn" trên toàn hệ thống** — v1 chỉ có badge từng dòng khi đang mở đúng trang sửa playlist đó (§6.7), chưa có dashboard tổng hợp.
+- **Lệnh audit/dọn orphan tự động (`playlist:audit-orphans` hay tương tự)** — hữu ích khi `post.default_locale` đổi (§0) hoặc dữ liệu nguồn bị xoá hàng loạt, nhưng chưa có yêu cầu vận hành thật ở v1; rà soát thủ công qua badge §6.7 là đủ cho quy mô hiện tại.
 - **Giao diện khôi phục bản ghi đã xoá mềm (soft-delete restore UI)** — cùng quyết định Video/Banner, thao tác qua DB/tinker ở v1.

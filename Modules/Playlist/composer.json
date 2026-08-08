@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/playlist",
+    "description": "",
+    "authors": [
+        {
+            "name": "KienDH",
+            "email": "bonhuyn@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Playlist\\": "app/",
+            "Modules\\Playlist\\Database\\Factories\\": "database/factories/",
+            "Modules\\Playlist\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Playlist\\Tests\\": "tests/"
+        }
+    }
+}

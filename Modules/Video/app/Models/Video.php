@@ -8,17 +8,22 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Modules\Playlist\Contracts\PlaylistableContract;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
 /**
  * spec/Video_Management_Technical_Specification.md §3/§4 — video là tài sản nền tảng
  * (platform), không organization_id, không phân cấp — cùng nguyên tắc Banner/Event/MenuItem.
+ *
+ * implements PlaylistableContract — spec/Playlist_Technical_Specification.md §4.4: Video "tham
+ * gia" làm item của Modules/Playlist qua hợp đồng này, tái dùng nguyên các accessor sẵn có
+ * (thumbnail_url/embed_url/watch_url) — không đổi logic nghiệp vụ nào của module Video.
  */
-class Video extends Model
+class Video extends Model implements PlaylistableContract
 {
-    use SoftDeletes;
     use LogsActivity;
+    use SoftDeletes;
 
     protected $fillable = [
         'uuid', 'name', 'description', 'video_url', 'embed_code', 'youtube_video_id',
@@ -26,7 +31,7 @@ class Video extends Model
     ];
 
     protected $casts = [
-        'is_active'  => 'boolean',
+        'is_active' => 'boolean',
         'sort_order' => 'integer',
     ];
 
@@ -131,5 +136,48 @@ class Video extends Model
         }
 
         return "https://www.youtube.com/watch?v={$this->youtube_video_id}";
+    }
+
+    // ── PlaylistableContract (spec/Playlist_Technical_Specification.md §4.4) ───────────────
+
+    public function getPlaylistCardTitle(): string
+    {
+        return $this->name;
+    }
+
+    public function getPlaylistCardDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function getPlaylistCardThumbnailUrl(): ?string
+    {
+        return $this->thumbnail_url;
+    }
+
+    public function getPlaylistCardUrl(): string
+    {
+        return $this->watch_url;
+    }
+
+    /** CHỈ Video trả khác null — playlist mở lightbox phát trực tiếp thay vì điều hướng. */
+    public function getPlaylistCardEmbedUrl(): ?string
+    {
+        return $this->embed_url;
+    }
+
+    public function getPlaylistCardTypeLabel(): string
+    {
+        return 'Video';
+    }
+
+    public function isPlaylistCardVisible(): bool
+    {
+        return $this->is_active;
+    }
+
+    public function scopeSearchablePlaylistItems(Builder $query, string $keyword): void
+    {
+        $query->active()->where('name', 'like', "%{$keyword}%");
     }
 }

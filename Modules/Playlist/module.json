@@ -1,0 +1,11 @@
+{
+    "name": "Playlist",
+    "alias": "playlist",
+    "description": "Danh sách phát đa nội dung (Video + Bài viết) — trang quản trị CRUD + tìm kiếm hợp nhất để thêm item, trang công khai liệt kê/chi tiết có SEO đầy đủ (spec/Playlist_Technical_Specification.md).",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Playlist\\Providers\\PlaylistServiceProvider"
+    ],
+    "files": []
+}

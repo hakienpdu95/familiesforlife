@@ -2,6 +2,7 @@
 
 namespace Modules\Post\Models;
 
+use App\Models\User;
 use App\Traits\HasTenantMedia;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -11,10 +12,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
+use Modules\Ocop\Models\OcopProduct;
+use Modules\Playlist\Contracts\PlaylistableContract;
 use Modules\Post\Database\Factories\PostArticleFactory;
 use Modules\Post\Enums\ArticleFormat;
 use Modules\Post\Enums\SponsorLabel;
-use Illuminate\Support\Str;
+use Modules\Post\Enums\TranslationStatus;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 use Spatie\MediaLibrary\HasMedia;
@@ -26,13 +30,18 @@ use Spatie\MediaLibrary\HasMedia;
  *
  * spec/Media_Library_Technical_Specification.md §8 — cover image qua Media (collection `cover`),
  * thay cho cột `cover_image_url` cũ.
+ *
+ * implements PlaylistableContract — spec/Playlist_Technical_Specification.md §4.5: bài viết
+ * "tham gia" làm item của Modules/Playlist qua hợp đồng này. CHỈ bản dịch published ở
+ * config('post.default_locale') được phép xuất hiện trong playlist công khai (§0 — chống 404 vì
+ * PublicArticleController chỉ phục vụ đúng locale mặc định).
  */
-class PostArticle extends Model implements HasMedia
+class PostArticle extends Model implements HasMedia, PlaylistableContract
 {
     use HasFactory;
-    use SoftDeletes;
-    use LogsActivity;
     use HasTenantMedia;
+    use LogsActivity;
+    use SoftDeletes;
 
     protected $table = 'post_articles';
 
@@ -71,14 +80,14 @@ class PostArticle extends Model implements HasMedia
     ];
 
     protected $casts = [
-        'format'                  => ArticleFormat::class,
-        'is_featured'             => 'boolean',
-        'sort_order'              => 'integer',
-        'is_sponsored'            => 'boolean',
-        'sponsor_label'           => SponsorLabel::class,
-        'sponsored_start_date'    => 'date',
-        'sponsored_end_date'      => 'date',
-        'sponsored_published_at'  => 'datetime',
+        'format' => ArticleFormat::class,
+        'is_featured' => 'boolean',
+        'sort_order' => 'integer',
+        'is_sponsored' => 'boolean',
+        'sponsor_label' => SponsorLabel::class,
+        'sponsored_start_date' => 'date',
+        'sponsored_end_date' => 'date',
+        'sponsored_published_at' => 'datetime',
     ];
 
     protected static function booted(): void
@@ -131,17 +140,17 @@ class PostArticle extends Model implements HasMedia
      */
     public function ocopProducts(): BelongsToMany
     {
-        return $this->belongsToMany(\Modules\Ocop\Models\OcopProduct::class, 'post_article_ocop_products', 'article_id', 'ocop_product_id');
+        return $this->belongsToMany(OcopProduct::class, 'post_article_ocop_products', 'article_id', 'ocop_product_id');
     }
 
     public function createdBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'created_by');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function updatedBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'updated_by');
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     public function translations(): HasMany
@@ -184,8 +193,8 @@ class PostArticle extends Model implements HasMedia
     public function sponsoredUtmParams(): array
     {
         return [
-            'utm_source'   => 'sponsored',
-            'utm_medium'   => 'article',
+            'utm_source' => 'sponsored',
+            'utm_medium' => 'article',
             'utm_campaign' => $this->campaign_code ?: $this->mainTranslation()?->slug,
         ];
     }
@@ -221,5 +230,69 @@ class PostArticle extends Model implements HasMedia
         }
 
         return true;
+    }
+
+    // ── PlaylistableContract (spec/Playlist_Technical_Specification.md §4.5) ───────────────
+
+    /**
+     * Bản dịch DUY NHẤT được phép dùng cho mọi output công khai xuyên-module (§0 — chống 404 vì
+     * PublicArticleController chỉ phục vụ đúng locale này). Đọc từ collection `translations` —
+     * khi gọi qua Playlist, collection này ĐÃ ĐƯỢC EAGER-LOAD đúng điều kiện qua
+     * config('playlist.itemables.post_article.with') (§7.4), không tự query lại ở đây (tránh
+     * N+1 khi hiển thị nhiều PostArticle trong 1 playlist).
+     */
+    public function getDefaultLocaleTranslationAttribute(): ?PostArticleTranslation
+    {
+        return $this->translations
+            ->where('locale', config('post.default_locale'))
+            ->firstWhere('status', TranslationStatus::Published);
+    }
+
+    public function getPlaylistCardTitle(): string
+    {
+        return $this->default_locale_translation?->title ?? '';
+    }
+
+    public function getPlaylistCardDescription(): ?string
+    {
+        return $this->default_locale_translation?->excerpt;
+    }
+
+    public function getPlaylistCardThumbnailUrl(): ?string
+    {
+        return $this->cover_image_url ?: null;
+    }
+
+    public function getPlaylistCardUrl(): string
+    {
+        $translation = $this->default_locale_translation;
+
+        return $translation
+            ? route('post.public.article', ['slug' => $translation->slug, 'id' => $this->id])
+            : '#';
+    }
+
+    /** Bài viết luôn điều hướng, không mở lightbox (§0) — khác Video. */
+    public function getPlaylistCardEmbedUrl(): ?string
+    {
+        return null;
+    }
+
+    public function getPlaylistCardTypeLabel(): string
+    {
+        return 'Bài viết';
+    }
+
+    public function isPlaylistCardVisible(): bool
+    {
+        return $this->default_locale_translation !== null;
+    }
+
+    public function scopeSearchablePlaylistItems(Builder $query, string $keyword): void
+    {
+        $query->whereHas('translations', fn ($q) => $q
+            ->where('locale', config('post.default_locale'))
+            ->where('status', TranslationStatus::Published)
+            ->where('title', 'like', "%{$keyword}%"));
     }
 }
