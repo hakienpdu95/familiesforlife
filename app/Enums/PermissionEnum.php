@@ -234,4 +234,12 @@ enum PermissionEnum: string
     // platform_content_head/platform_section_editor (PromptFrameworkStudioPermissionSeeder),
     // KHÔNG qua config/permissions.php (Lớp B) — cùng nguyên tắc CONTENT_OUTLINES_USE.
     case PROMPT_FRAMEWORK_STUDIO_USE = 'prompt_framework_studio.use';
+
+    // ══ AI VIDEO STUDIO TEMPLATE (quản lý Director Prompt Template theo Project → nhiều Shot,
+    // ghép prompt để dán sang tool ảnh/video AI ngoài — không gọi AI Provider trong app) ═══
+    // spec/AIVideoStudioTemplate_Technical_Specification.md §5 — gán cho platform_content_editor/
+    // platform_content_head/platform_section_editor (AIVideoStudioTemplatePermissionSeeder),
+    // KHÔNG qua config/permissions.php (Lớp B) — cùng nguyên tắc CONTENT_OUTLINES_USE/
+    // PROMPT_FRAMEWORK_STUDIO_USE.
+    case AI_VIDEO_STUDIO_TEMPLATE_USE = 'ai_video_studio_template.use';
 }

@@ -2508,5 +2508,39 @@
         "__index///index///__///__///__///comparison_block_id,sort_order|idx_post_comparison_row_block_order///__",
         "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
         "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật"
+    ],
+    [
+        "ai_video_studio_projects///__///__///",
+        "name///string///200///NOT_NULL///__///__///__",
+        "description///text///__///_NULL///NULL///__///__",
+        "default_subject///text///__///_NULL///NULL///__///__",
+        "default_style///text///__///_NULL///NULL///__///__",
+        "default_constraints///text///__///_NULL///NULL///__///__",
+        "status///string///10///NOT_NULL///'draft'///__///__",
+        "created_by///unsignedBigInteger///__///_NULL///NULL///->constrained('users')->onDelete('set null')///__",
+        "updated_by///unsignedBigInteger///__///_NULL///NULL///->constrained('users')->onDelete('set null')///__",
+        "__index///index///__///__///__///status///__",
+        "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
+        "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật"
+    ],
+    [
+        "ai_video_studio_shots///__///__///",
+        "project_id///unsignedBigInteger///__///NOT_NULL///__///->constrained('ai_video_studio_projects')->onDelete('cascade')///__",
+        "sort_order///unsignedInteger///__///NOT_NULL///0///__///__",
+        "label///string///200///_NULL///NULL///__///__",
+        "subject///text///__///_NULL///NULL///__///__",
+        "action///text///__///_NULL///NULL///__///__",
+        "environment///text///__///_NULL///NULL///__///__",
+        "camera///text///__///_NULL///NULL///__///__",
+        "style///text///__///_NULL///NULL///__///__",
+        "constraints///text///__///_NULL///NULL///__///__",
+        "script_line///text///__///_NULL///NULL///__///__",
+        "compiled_prompt///longText///__///_NULL///NULL///__///__",
+        "ai_result///longText///__///_NULL///NULL///__///__",
+        "created_by///unsignedBigInteger///__///_NULL///NULL///->constrained('users')->onDelete('set null')///__",
+        "updated_by///unsignedBigInteger///__///_NULL///NULL///->constrained('users')->onDelete('set null')///__",
+        "__index///index///__///__///__///project_id,sort_order///__",
+        "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
+        "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật"
     ]
 ]

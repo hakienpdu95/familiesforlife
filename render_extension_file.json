@@ -391,5 +391,25 @@
     [
         "generated_prompts///add///__///",
         "post_category_id///unsignedBigInteger///__///_NULL///NULL///->constrained('post_categories')->onDelete('set null')///__"
+    ],
+    [
+        "ai_video_studio_projects///add///__///",
+        "objective///text///__///_NULL///NULL///__///__",
+        "target_audience///text///__///_NULL///NULL///__///__",
+        "aspect_ratio///string///10///_NULL///NULL///__///__",
+        "reference_image_url///text///__///_NULL///NULL///__///__",
+        "resolution///string///10///_NULL///NULL///__///__",
+        "video_type///string///20///_NULL///NULL///__///__",
+        "core_message///text///__///_NULL///NULL///__///__"
+    ],
+    [
+        "ai_video_studio_shots///add///__///",
+        "model_tool///string///150///_NULL///NULL///__///__",
+        "qc_notes///text///__///_NULL///NULL///__///__",
+        "mood///text///__///_NULL///NULL///__///__",
+        "duration_seconds///unsignedSmallInteger///__///_NULL///NULL///__///__",
+        "audio_direction///text///__///_NULL///NULL///__///__",
+        "reference_assets///text///__///_NULL///NULL///__///__",
+        "cta_text///string///200///_NULL///NULL///__///__"
     ]
 ]

@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/aivideostudiotemplate",
+    "description": "",
+    "authors": [
+        {
+            "name": "KienDH",
+            "email": "bonhuyn@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\AIVideoStudioTemplate\\": "app/",
+            "Modules\\AIVideoStudioTemplate\\Database\\Factories\\": "database/factories/",
+            "Modules\\AIVideoStudioTemplate\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\AIVideoStudioTemplate\\Tests\\": "tests/"
+        }
+    }
+}

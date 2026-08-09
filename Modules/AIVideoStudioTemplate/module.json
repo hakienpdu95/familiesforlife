@@ -1,0 +1,12 @@
+{
+    "name": "AIVideoStudioTemplate",
+    "alias": "aivideostudiotemplate",
+    "description": "Quản lý Director Prompt Template (Subject/Action/Environment/Camera/Style/Constraints + lời thoại) theo Project → nhiều Shot, ghép prompt để dán sang tool ảnh/video AI ngoài (Midjourney/Kling/Runway/Sora...) — KHÔNG gọi AI Provider trong app. Xem spec/AIVideoStudioTemplate_Technical_Specification.md.",
+    "keywords": ["ai", "video", "prompt", "director-prompt-template"],
+    "priority": 0,
+    "providers": [
+        "Modules\\AIVideoStudioTemplate\\Providers\\AIVideoStudioTemplateServiceProvider",
+        "Modules\\AIVideoStudioTemplate\\Providers\\RouteServiceProvider"
+    ],
+    "files": []
+}

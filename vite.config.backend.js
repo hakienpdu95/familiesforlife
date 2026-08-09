@@ -175,6 +175,8 @@ const MODULE_ENTRIES = [
   'Modules/ContentOutlines/resources/assets/js/content-outlines.js',
   // PromptFrameworkStudio
   'Modules/PromptFrameworkStudio/resources/assets/js/prompt-framework-studio.js',
+  // AIVideoStudioTemplate
+  'Modules/AIVideoStudioTemplate/resources/assets/js/aivideostudiotemplate.js',
 ];
 
 // ─────────────────────────────────────────────────────────────────────
