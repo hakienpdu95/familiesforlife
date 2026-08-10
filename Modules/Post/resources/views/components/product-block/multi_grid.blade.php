@@ -10,8 +10,9 @@
         <div class="card-body p-3">
             <h5 class="text-sm font-semibold line-clamp-2">{{ $item->display_title }}</h5>
             @if($item->display_price_label)<p class="text-primary font-bold text-sm">{{ $item->display_price_label }}</p>@endif
+            {{-- rel="sponsored noopener" — xem banner.blade.php. --}}
             @foreach($item->buttons as $button)
-            <a href="{{ route('post.cta.redirect', $button) }}" target="{{ $button->target->value }}"
+            <a href="{{ route('post.cta.redirect', $button) }}" target="{{ $button->target->value }}" rel="sponsored noopener"
                class="btn btn-xs {{ $button->style->btnClass() }} w-full mt-1">{{ $button->display_label }}</a>
             @endforeach
         </div>
@@ -21,7 +22,7 @@
 @if($block->buttons->isNotEmpty())
 <div class="not-prose flex justify-center gap-2 mb-4">
     @foreach($block->buttons as $button)
-    <a href="{{ route('post.cta.redirect', $button) }}" target="{{ $button->target->value }}"
+    <a href="{{ route('post.cta.redirect', $button) }}" target="{{ $button->target->value }}" rel="sponsored noopener"
        class="btn btn-sm {{ $button->style->btnClass() }}">{{ $button->display_label }}</a>
     @endforeach
 </div>

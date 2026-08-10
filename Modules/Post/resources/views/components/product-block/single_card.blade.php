@@ -10,13 +10,14 @@
         <h3 class="card-title">{{ $item?->display_title }}</h3>
         @if($item?->display_price_label)<p class="text-lg font-bold text-primary">{{ $item->display_price_label }}</p>@endif
         @if($item?->display_description)<p class="text-sm text-base-content/70">{{ $item->display_description }}</p>@endif
+        {{-- rel="sponsored noopener" — xem banner.blade.php. --}}
         <div class="card-actions mt-2 flex-wrap gap-2">
             @foreach($item?->buttons ?? [] as $button)
-            <a href="{{ route('post.cta.redirect', $button) }}" target="{{ $button->target->value }}"
+            <a href="{{ route('post.cta.redirect', $button) }}" target="{{ $button->target->value }}" rel="sponsored noopener"
                class="btn btn-sm {{ $button->style->btnClass() }}">{{ $button->display_label }}</a>
             @endforeach
             @foreach($block->buttons as $button)
-            <a href="{{ route('post.cta.redirect', $button) }}" target="{{ $button->target->value }}"
+            <a href="{{ route('post.cta.redirect', $button) }}" target="{{ $button->target->value }}" rel="sponsored noopener"
                class="btn btn-sm {{ $button->style->btnClass() }}">{{ $button->display_label }}</a>
             @endforeach
         </div>

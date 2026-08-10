@@ -11,8 +11,10 @@
             <p class="text-sm font-medium truncate">{{ $item->display_title }}</p>
             @if($item->display_price_label)<p class="text-xs text-primary font-semibold">{{ $item->display_price_label }}</p>@endif
         </div>
+        {{-- rel="sponsored noopener" — xem banner.blade.php (đích redirect luôn là link affiliate
+             thật, không điều kiện theo isCurrentlySponsored() của bài viết). --}}
         @foreach($item->buttons->take(1) as $button)
-        <a href="{{ route('post.cta.redirect', $button) }}" target="{{ $button->target->value }}"
+        <a href="{{ route('post.cta.redirect', $button) }}" target="{{ $button->target->value }}" rel="sponsored noopener"
            class="btn btn-xs {{ $button->style->btnClass() }} shrink-0">{{ $button->display_label }}</a>
         @endforeach
     </div>
@@ -21,7 +23,7 @@
 @if($block->buttons->isNotEmpty())
 <div class="not-prose flex justify-center gap-2 mb-4">
     @foreach($block->buttons as $button)
-    <a href="{{ route('post.cta.redirect', $button) }}" target="{{ $button->target->value }}"
+    <a href="{{ route('post.cta.redirect', $button) }}" target="{{ $button->target->value }}" rel="sponsored noopener"
        class="btn btn-sm {{ $button->style->btnClass() }}">{{ $button->display_label }}</a>
     @endforeach
 </div>
