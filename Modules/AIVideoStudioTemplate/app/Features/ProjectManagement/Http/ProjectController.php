@@ -4,7 +4,6 @@ namespace Modules\AIVideoStudioTemplate\Features\ProjectManagement\Http;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -15,8 +14,6 @@ use Modules\AIVideoStudioTemplate\Features\ProjectManagement\Actions\UpdateProje
 use Modules\AIVideoStudioTemplate\Features\ProjectManagement\Data\ProjectInputData;
 use Modules\AIVideoStudioTemplate\Features\ProjectManagement\Http\Requests\StoreProjectRequest;
 use Modules\AIVideoStudioTemplate\Features\ProjectManagement\Http\Requests\UpdateProjectRequest;
-use Modules\AIVideoStudioTemplate\Features\ProjectManagement\Queries\ListProjectsForAdminHandler;
-use Modules\AIVideoStudioTemplate\Features\ProjectManagement\Queries\ListProjectsForAdminQuery;
 use Modules\AIVideoStudioTemplate\Models\AiVideoStudioProject;
 
 /**
@@ -26,21 +23,10 @@ use Modules\AIVideoStudioTemplate\Models\AiVideoStudioProject;
  */
 class ProjectController extends Controller
 {
-    public function index(Request $request, ListProjectsForAdminHandler $handler): View
+    /** Dữ liệu bảng lấy qua ProjectApiController (Tabulator, remote pagination/sort/filter). */
+    public function index(): View
     {
-        $query = new ListProjectsForAdminQuery(
-            search: $request->string('search')->toString() ?: null,
-            status: $request->string('status')->toString() ?: null,
-            page: max(1, (int) $request->input('page', 1)),
-        );
-
-        return view('aivideostudiotemplate::index', [
-            'projects' => $handler->handle($query),
-            'filters' => [
-                'search' => $query->search,
-                'status' => $query->status,
-            ],
-        ]);
+        return view('aivideostudiotemplate::index');
     }
 
     public function create(): View

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\AIVideoStudioTemplate\Features\ProjectManagement\Http\ProjectApiController;
 use Modules\AIVideoStudioTemplate\Features\ProjectManagement\Http\ProjectController;
 use Modules\AIVideoStudioTemplate\Features\ShotManagement\Http\ShotApiController;
 
@@ -25,6 +26,7 @@ Route::middleware(['auth', 'can:ai_video_studio_template.use'])
     ->prefix('backend/api/ai-video-studio')
     ->name('backend.api.aivideostudiotemplate.')
     ->group(function (): void {
+        Route::get('projects', [ProjectApiController::class, 'index'])->name('projects');
         Route::post('projects/{project}/shots', [ShotApiController::class, 'store'])->name('shots.store');
         Route::put('shots/{shot}', [ShotApiController::class, 'update'])->name('shots.update');
         Route::delete('shots/{shot}', [ShotApiController::class, 'destroy'])->name('shots.destroy');

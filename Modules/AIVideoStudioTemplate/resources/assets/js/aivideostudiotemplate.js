@@ -5,6 +5,7 @@
  *
  * spec/AIVideoStudioTemplate_Technical_Specification.md §6.1/§6.2 — contract JSON + debounce.
  */
+import './pages/project-index.js';
 
 function esc(v) {
     if (v == null) return '';
