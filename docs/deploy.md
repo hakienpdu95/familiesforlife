@@ -16,6 +16,7 @@
 8. [Quy trình cập nhật hàng ngày](#8-quy-trình-cập-nhật-hàng-ngày)
 9. [phpMyAdmin qua SSH Tunnel](#9-phpmyadmin-qua-ssh-tunnel)
 10. [Xử lý sự cố](#10-xử-lý-sự-cố)
+11. [Sự cố thực tế khi thêm site mới trên VPS (case study)](#11-sự-cố-thực-tế-khi-thêm-site-mới-trên-vps-case-study)
 
 ---
 
@@ -1121,6 +1122,177 @@ sudo crontab -e
   | gzip > /var/backups/minhan_$(date +\%Y\%m\%d).sql.gz \
   && find /var/backups/minhan_*.sql.gz -mtime +7 -delete
 ```
+
+---
+
+## 11. Sự cố thực tế khi thêm site mới trên VPS (case study)
+
+Đúc kết từ quá trình deploy thực tế 1 site mới (`familiesforlife`, domain `vigiadinh.vn`) lên cùng VPS đang chạy `thuchocvn`/`minhan`. Thư mục lấy tên theo đúng tên repo Git (`familiesforlife`) thay vì theo mẫu `devminhan`/`minhan` trong tài liệu — nên rất nhiều chỗ phải đổi tên thủ công thay vì copy nguyên xi, và phát sinh hàng loạt lỗi liên hoàn. Ghi lại đây để lần sau tra thẳng thay vì debug lại từ đầu.
+
+### 11.1 Checklist: những chỗ PHẢI đổi tên khi copy `deploy.sh`/Supervisor từ site mẫu
+
+| Chỗ cần đổi | File | Ví dụ (mẫu `minhan` → project mới `familiesforlife`) |
+|---|---|---|
+| `APP_DIR` | `deploy.sh` | `/var/www/familiesforlife` |
+| Script fix permission gọi bằng `sudo` | `deploy.sh` | `/usr/local/bin/fix-familiesforlife-build` |
+| Tên Supervisor program | `deploy.sh` + Supervisor conf + sudoers | `familiesforlife-horizon`, `familiesforlife-reverb` |
+| Comment/log message | `deploy.sh` | đổi tên project trong log cho khỏi nhầm lẫn khi đọc output Actions |
+| Reverb port | Supervisor conf + Nginx `location /app` | phải chọn port **chưa ai dùng** — xem bảng bên dưới |
+
+**Bảng port Reverb/dịch vụ nội bộ đang chiếm trên VPS này** (cập nhật ngay khi thêm site mới, tránh giẫm port):
+
+| Port | Dùng cho |
+|---|---|
+| 8080 | devminhan (thuchocvn.vn) — Reverb |
+| 8081 | minhan (quantri.thuchocvn.vn) — Reverb |
+| 8082 | phpMyAdmin (mục 9) — **không phải Reverb**, đừng gán trùng |
+| 8083 | familiesforlife (vigiadinh.vn) — Reverb |
+
+### 11.2 Supervisor báo `CANT_REREAD: Source contains parsing errors`
+
+**Triệu chứng:** `sudo supervisorctl reread` báo lỗi parse ở dòng `command=...` (ví dụ trỏ vào `'--no-interaction\n'`).
+
+**Nguyên nhân:** paste dòng `command=...` (dài) vào `nano` bị chèn xuống dòng giữa chừng — Supervisor bắt buộc mỗi directive nằm **trọn trên 1 dòng**.
+
+**Fix:** ghi file bằng `tee` heredoc thay vì gõ/paste tay vào nano — không bao giờ bị gãy dòng:
+```bash
+sudo tee /etc/supervisor/conf.d/<ten-project>.conf > /dev/null << 'EOF'
+[program:<ten-project>-horizon]
+...
+EOF
+```
+Luôn tạo **1 file `.conf` riêng cho mỗi project**, không gộp chung vào file site khác (`thuchocvn.conf`...) — dễ quản lý, tránh đụng cấu hình của nhau khi sửa/xoá sau này.
+
+### 11.3 `Please provide a valid cache path` khi `composer install` (post-autoload-dump → `package:discover`)
+
+**Triệu chứng:** lỗi từ `Illuminate\View\Compilers\Compiler.php line 75`, ngay sau `git clone` + `composer install` lần đầu trên VPS.
+
+**Nguyên nhân:** `storage/framework/views` (và các thư mục con khác trong `storage/framework`) **không tồn tại** sau khi clone code (Laravel `.gitignore` bỏ qua nội dung các thư mục này). `config/view.php` mặc định dùng `realpath(storage_path('framework/views'))` — nếu thư mục không tồn tại, `realpath()` trả về `false` → Laravel báo "cache path không hợp lệ".
+
+**Fix** — luôn chạy trước khi `composer install` lần đầu trên VPS mới (xem checklist đầy đủ ở 11.6):
+```bash
+cd /var/www/<project>
+cp .env.example .env   # nếu chưa có .env — thiếu .env cũng góp phần gây lỗi này
+mkdir -p storage/framework/{sessions,views,cache/data,testing}
+mkdir -p storage/logs storage/app/private storage/app/public
+```
+
+### 11.4 Hàng loạt lỗi `Permission denied` liên hoàn (log, `.env`, `node_modules/.vite-temp`, `storage/app/private`...)
+
+**Nguyên nhân gốc:** nhiều user Linux khác nhau (`deploy`, `www-data` do lệnh chạy qua `sudo`, user SSH thật đang gõ lệnh như `thuchoc`) từng đụng vào project ở các bước khác nhau trong lúc setup → ownership bị lẫn lộn, user đang thao tác thực tế không có quyền ghi vào đúng chỗ cần.
+
+**Chẩn đoán nhanh:** `whoami` để biết đang chạy bằng user nào, rồi `ls -la` đúng file/thư mục báo lỗi để xem ai đang sở hữu — đừng đoán, luôn kiểm tra trước khi chown.
+
+**Fix tổng thể 1 lần** (thay `<user>` bằng user SSH thật đang thao tác, ví dụ `thuchoc`):
+```bash
+sudo chown -R <user>:www-data /var/www/<project>
+sudo find /var/www/<project> -type d -exec chmod 755 {} \;
+sudo find /var/www/<project> -type f -exec chmod 644 {} \;
+sudo chmod -R 775 /var/www/<project>/storage /var/www/<project>/bootstrap/cache
+```
+
+> ⚠️ **Bẫy quan trọng:** lệnh `chmod 644` áp cho toàn bộ file sẽ xoá luôn quyền thực thi (`+x`) của các binary như `node_modules/.bin/vite`, `vendor/bin/pint`, hay chính `deploy.sh` — gây lỗi `Permission denied` (khác hẳn ý nghĩa với lỗi "Permission denied" do thiếu quyền ghi) khi chạy chúng. Sau lệnh `chmod 644` recursive, LUÔN chạy thêm:
+> ```bash
+> chmod +x /var/www/<project>/node_modules/.bin/*
+> chmod +x /var/www/<project>/vendor/bin/* 2>/dev/null || true
+> chmod +x /var/www/<project>/deploy.sh
+> ```
+
+Để đỡ phải sửa lại nhiều lần về sau, nên **thêm user SSH thật vào group `www-data`** ngay từ đầu (cần đăng nhập SSH lại mới có hiệu lực):
+```bash
+sudo usermod -aG www-data <user>
+```
+
+### 11.5 `League\Flysystem\UnableToCreateDirectory ... storage/app/private`
+
+Laravel 11+ mặc định cần thư mục `storage/app/private` (local disk mới) — nếu thiếu sau khi clone, thao tác filesystem (upload file...) sẽ lỗi này.
+
+```bash
+mkdir -p /var/www/<project>/storage/app/private /var/www/<project>/storage/app/public
+sudo chown -R <user>:www-data /var/www/<project>/storage
+sudo chmod -R 775 /var/www/<project>/storage
+php8.5 artisan storage:link   # nếu dùng public disk
+```
+
+### 11.6 Checklist đầy đủ — setup lần đầu 1 project mới trên VPS (đúc kết 11.3–11.5)
+
+```bash
+cd /var/www/<project>
+
+# 1. .env + toàn bộ thư mục storage/bootstrap cần thiết
+cp .env.example .env
+mkdir -p storage/framework/{sessions,views,cache/data,testing}
+mkdir -p storage/logs storage/app/private storage/app/public
+mkdir -p bootstrap/cache
+
+# 2. Ownership + quyền — chạy bằng user SSH thật đang deploy
+sudo chown -R $(whoami):www-data /var/www/<project>
+sudo find /var/www/<project> -type d -exec chmod 755 {} \;
+sudo find /var/www/<project> -type f -exec chmod 644 {} \;
+sudo chmod -R 775 storage bootstrap/cache
+chmod +x node_modules/.bin/* vendor/bin/* deploy.sh 2>/dev/null || true
+
+# 3. Cài đặt
+composer install --no-dev --optimize-autoloader --no-interaction
+php8.5 artisan key:generate
+npx vite build --config vite.config.backend.js
+npx vite build --config vite.config.frontend.js
+php8.5 artisan migrate --force
+php8.5 artisan storage:link
+php8.5 artisan config:cache && php8.5 artisan route:cache
+php8.5 artisan view:cache  && php8.5 artisan event:cache
+```
+
+### 11.7 Certbot: `cannot load certificate ... No such file` (chicken-and-egg)
+
+**Triệu chứng:** chạy `sudo certbot --nginx -d domain -d www.domain` báo `nginx -t` fail vì thiếu file cert — do vhost đã có sẵn dòng `ssl_certificate` trỏ vào cert **chưa từng được cấp lần nào**.
+
+**Fix** — tạm comment 4 dòng sau trong vhost trước khi chạy Certbot lần đầu cho domain đó:
+```nginx
+#listen 443 ssl;
+#http2 on;
+#ssl_certificate     /etc/letsencrypt/live/<domain>/fullchain.pem;
+#ssl_certificate_key /etc/letsencrypt/live/<domain>/privkey.pem;
+```
+```bash
+sudo nginx -t && sudo systemctl reload nginx
+sudo certbot --nginx -d <domain> -d www.<domain> --email <email> --agree-tos --no-eff-email
+```
+Certbot tự bỏ comment và điền đúng path cert sau khi cấp thành công — không cần tự sửa lại tay.
+
+### 11.8 Certbot: `conflicting server name` + redirect loop ("The page isn't redirecting properly")
+
+**Triệu chứng:** `nginx -t` cảnh báo (không phải lỗi, vẫn "test is successful") `conflicting server name "domain" on 0.0.0.0:443, ignored`; sau đó trình duyệt báo lỗi redirect loop khi vào HTTPS.
+
+**Nguyên nhân:** Certbot tự động chèn (đánh dấu `# managed by Certbot`) khối SSL vào **2 server block khác nhau** cùng khai báo `server_name` đó trên port 443 — 1 block là block HTTPS thật (có `root`, `location ~ \.php$`...), 1 block vốn chỉ định làm redirect (`return 301 https://...`) nhưng bị Certbot gắn nhầm thêm `listen 443 ssl;` vào. Vì dòng `return 301` đó nằm **trần trong `server{}`** (không bọc trong `location`) nên chạy vô điều kiện ở pha rewrite — kể cả khi request đã ở HTTPS rồi — gây tự redirect vào chính nó vô hạn.
+
+**Fix:** sau mỗi lần chạy Certbot, luôn `cat -n` lại vhost, tìm và xoá hẳn **block dư/hỏng** đó (block chỉ có `return 301` + SSL block bị gắn nhầm vào). Chỉ giữ lại đúng 1 block HTTPS thật + 1 block port 80. Kiểm tra nhanh có bị dư block không:
+```bash
+sudo grep -c "listen 443" /etc/nginx/sites-available/<file>
+```
+Nếu ra > 1, chắc chắn có block dư cần dọn.
+
+### 11.9 Certbot tự sinh bare `return 404;`/`return 301;` trong `server{}` — chặn location tự thêm sau này
+
+Đã gặp lặp lại ở nhiều nơi (mục 9 — phpMyAdmin, và mục 11.8 ở trên): Certbot tự sinh khối port 80 kiểu:
+```nginx
+server {
+    if ($host = www.domain) { return 301 https://$host$request_uri; }
+    if ($host = domain)     { return 301 https://$host$request_uri; }
+    listen 80;
+    server_name domain www.domain;
+    return 404; # managed by Certbot
+}
+```
+`return 404;` này nằm **trần**, chạy ở pha *server rewrite* — **trước khi** Nginx chọn location. Nghĩa là bất kỳ `location` nào bạn thêm sau này vào đúng block đó đều bị chặn, luôn trả 404 dù URI có khớp location hay không.
+
+**Fix:** bọc lại trong `location /`:
+```nginx
+    location / {
+        return 404;
+    }
+```
+rồi thêm các `location` khác cần dùng bên cạnh nó — lúc đó Nginx mới chọn location theo URI thay vì chặn hết ngay từ pha rewrite.
 
 ---
 

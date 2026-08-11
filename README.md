@@ -133,3 +133,92 @@ Thêm — config/horizon.php: mục alerts (mail_to/slack_webhook/slack_channel)
   Đã tái hiện được 100% chính xác hình như ảnh gốc — đây là spinner "loading" mặc định của 
   TomSelect, bị phóng to bất thường trong lúc chờ API articles/search trả kết quả (do preload:true
   tự gọi ngay khi trang load). Giờ tìm đúng CSS rule gây phóng to.
+
+
+
+CREATE USER 'vgd_kiendh'@'localhost' IDENTIFIED BY 'KienDH@2026!';
+  GRANT ALL PRIVILEGES ON *.* TO 'vgd_kiendh'@'localhost' WITH GRANT OPTION;
+  FLUSH PRIVILEGES;
+  EXIT;
+
+
+  CREATE DATABASE vgd_vigiadinhvn CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+  CREATE USER 'vgd_vigiadinhvn'@'localhost' IDENTIFIED BY 'ApbbF7lBkKzrQobRa20w';
+  GRANT ALL PRIVILEGES ON vgd_vigiadinhvn.* TO 'vgd_vigiadinhvn'@'localhost';
+  FLUSH PRIVILEGES;
+  EXIT;
+
+
+  DB_DATABASE=vgd_vigiadinhvn
+  DB_USERNAME=vgd_vigiadinhvn
+  DB_PASSWORD=ApbbF7lBkKzrQobRa20w
+
+  sudo nano /etc/nginx/sites-available/vigiadinhvn
+
+  truncate -s 0 /var/www/familiesforlife/.env
+
+
+  ------------------------------------------------
+  Dùng port 8083 cho Reverb (vì 8080 đã dùng cho devminhan, 8081 cho minhan, và 8082 đang dùng cho
+  vhost phpMyAdmin riêng — tránh trùng port).
+
+  ; ── familiesforlife ──────────────────────────────────────────
+  [program:familiesforlife-horizon]
+  process_name=%(program_name)s
+  command=/usr/bin/php8.5 /var/www/familiesforlife/artisan horizon
+  directory=/var/www/familiesforlife
+  autostart=true
+  autorestart=true
+  user=www-data
+  redirect_stderr=true
+  stdout_logfile=/var/www/familiesforlife/storage/logs/horizon.log
+  stopwaitsecs=3600
+  stopsignal=SIGTERM
+
+  [program:familiesforlife-reverb]
+  process_name=%(program_name)s
+  command=/usr/bin/php8.5 /var/www/familiesforlife/artisan reverb:start --host=127.0.0.1 --port=8083
+  --no-interaction
+  directory=/var/www/familiesforlife
+  autostart=true
+  autorestart=true
+  user=www-data
+  redirect_stderr=true
+  stdout_logfile=/var/www/familiesforlife/storage/logs/reverb.log
+
+  Thêm block này vào file supervisor config trên VPS (ví dụ
+  /etc/supervisor/conf.d/familiesforlife.conf hoặc gộp chung vào file hiện có), rồi:
+
+  sudo supervisorctl reread
+  sudo supervisorctl update
+  sudo supervisorctl start familiesforlife-horizon familiesforlife-reverb
+  sudo supervisorctl status
+
+  Đồng thời thêm sudoers cho deploy.sh (bước 7 restart worker):
+
+  sudo visudo -f /etc/sudoers.d/deploy-supervisor
+  deploy ALL=(ALL) NOPASSWD: /usr/bin/supervisorctl restart familiesforlife-horizon
+  deploy ALL=(ALL) NOPASSWD: /usr/bin/supervisorctl restart familiesforlife-reverb
+
+  Nếu Nginx vhost của familiesforlife có proxy WebSocket (location /app), nhớ trỏ proxy_pass 
+  http://127.0.0.1:8083; để khớp port Reverb mới này. Bạn có muốn tôi soạn luôn đoạn Nginx vhost đầy
+  đủ cho familiesforlife (giống mục 4.2/4.3 trong docs/deploy.md) không?
+
+✻ Cogitated for 15s
+
+❯ sudo nano /etc/supervisor/conf.d/thuchocvn.conf => setup vào chung file này ah hay tạo file mới   
+
+● Nên tạo file mới, không gộp chung vào thuchocvn.conf — vì đây là project khác (familiesforlife),
+  tách file giúp:
+  - Sửa/xoá/disable riêng từng project mà không đụng tới config của thuchocvn/minhan.
+  - Đỡ nhầm lẫn khi đọc lại sau này (tên file khớp tên project).
+
+  sudo nano /etc/supervisor/conf.d/familiesforlife.conf
+
+  Dán nguyên đoạn config familiesforlife-horizon + familiesforlife-reverb ở trên vào file mới này,
+  rồi:
+
+  sudo supervisorctl reread
+  sudo supervisorctl update
+  sudo supervisorctl start familiesforlife-horizon familiesforlife-reverb
+  sudo supervisorctl status
