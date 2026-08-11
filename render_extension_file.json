@@ -416,5 +416,13 @@
         "content_calendar_entries///add///__///",
         "funnel_stage///string///10///_NULL///NULL///__///__",
         "__index///index///__///__///__///post_category_id,funnel_stage|cc_entries_category_funnel_idx///__"
+    ],
+    [
+        "events///add///__///",
+        "heritage_site_id///unsignedBigInteger///__///_NULL///NULL///->constrained('heritage_sites')->onDelete('set null')///__"
+    ],
+    [
+        "ocop_products///add///__///",
+        "heritage_site_id///unsignedBigInteger///__///_NULL///NULL///->constrained('heritage_sites')->onDelete('set null')///__"
     ]
 ]
