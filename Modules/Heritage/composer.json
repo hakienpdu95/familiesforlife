@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/heritage",
+    "description": "",
+    "authors": [
+        {
+            "name": "KienDH",
+            "email": "bonhuyn@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Heritage\\": "app/",
+            "Modules\\Heritage\\Database\\Factories\\": "database/factories/",
+            "Modules\\Heritage\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Heritage\\Tests\\": "tests/"
+        }
+    }
+}

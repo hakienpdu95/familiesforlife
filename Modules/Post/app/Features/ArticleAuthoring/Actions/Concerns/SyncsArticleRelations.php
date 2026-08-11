@@ -12,7 +12,7 @@ trait SyncsArticleRelations
     private function syncCategories(PostArticle $article, ArticleData $data): void
     {
         $categoryIds = $data->category_ids;
-        $primaryId   = $data->is_primary_category_id ?? ($categoryIds[0] ?? null);
+        $primaryId = $data->is_primary_category_id ?? ($categoryIds[0] ?? null);
 
         $sync = [];
         foreach ($categoryIds as $categoryId) {
@@ -53,5 +53,14 @@ trait SyncsArticleRelations
     private function syncOcopProducts(PostArticle $article, ArticleData $data): void
     {
         $article->ocopProducts()->sync($data->ocop_product_ids);
+    }
+
+    /**
+     * spec/Heritage_Technical_Specification.md §8.3 — chỉ gọi từ UpdateArticleAction (form sửa
+     * bài viết), KHÔNG gọi từ CreateArticleAction — không bắt buộc, cùng nguyên tắc syncOcopProducts().
+     */
+    private function syncHeritageSites(PostArticle $article, ArticleData $data): void
+    {
+        $article->heritageSites()->sync($data->heritage_site_ids);
     }
 }

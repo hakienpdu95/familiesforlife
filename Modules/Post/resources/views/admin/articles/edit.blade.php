@@ -616,6 +616,37 @@ function postVersionHistory(indexUrl, translationStatus, knownLatestId, canResto
                     </div>
                 </div>
 
+                {{-- spec/Heritage_Technical_Specification.md §8.3 — mirror 1-1 khối OCOP ở trên,
+                     lắng nghe cùng sự kiện "address-picker:change" (instanceId=article-edit),
+                     _setupHeritageSitePicker gọi GET /api/heritage-sites/picker. --}}
+                <div class="form-control mb-3" id="heritage-site-picker" data-instance-id="article-edit">
+                    <label class="label py-0 pb-1.5"><span class="label-text text-xs font-medium">Di tích liên quan</span></label>
+                    @php
+                        $selectedHeritageIds = old('heritage_site_ids', $article->heritageSites->pluck('id')->all());
+                    @endphp
+                    <div class="max-h-40 overflow-y-auto flex flex-col gap-1 border border-base-200 rounded-lg p-2" data-heritage-picker-list>
+                        @forelse($heritageSites as $s)
+                        <label class="flex items-center gap-2 cursor-pointer text-xs py-0.5">
+                            <input type="checkbox" name="heritage_site_ids[]" value="{{ $s->id }}"
+                                   data-name="{{ $s->name }}" data-place="{{ $s->ward_name ?: $s->province_name }}"
+                                   class="checkbox checkbox-xs shrink-0" {{ in_array($s->id, $selectedHeritageIds) ? 'checked' : '' }}>
+                            <span class="flex-1">{{ $s->name }}</span>
+                            @if($s->ward_name || $s->province_name)
+                            <span class="text-base-content/40">{{ $s->ward_name ?: $s->province_name }}</span>
+                            @endif
+                        </label>
+                        @empty
+                        <p class="text-xs text-base-content/30 py-1" data-heritage-picker-empty>
+                            @if($article->ward_code || $article->province_code)
+                            Không có di tích nào khớp tỉnh/phường đã chọn.
+                            @else
+                            Chọn tỉnh/thành hoặc phường/xã ở trên để xem di tích tương ứng.
+                            @endif
+                        </p>
+                        @endforelse
+                    </div>
+                </div>
+
                 <div class="form-control mb-3">
                     <label class="label py-0 pb-1.5">
                         <span class="label-text text-xs font-medium">Danh mục</span>

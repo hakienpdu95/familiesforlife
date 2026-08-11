@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Modules\Heritage\Models\HeritageSite;
 use Modules\Ocop\Models\OcopProduct;
 use Modules\Playlist\Contracts\PlaylistableContract;
 use Modules\Post\Database\Factories\PostArticleFactory;
@@ -141,6 +142,16 @@ class PostArticle extends Model implements HasMedia, PlaylistableContract
     public function ocopProducts(): BelongsToMany
     {
         return $this->belongsToMany(OcopProduct::class, 'post_article_ocop_products', 'article_id', 'ocop_product_id');
+    }
+
+    /**
+     * spec/Heritage_Technical_Specification.md §3.7/§8.3 — di tích liên quan (many-to-many, tuỳ
+     * chọn) — bảng pivot post_article_heritage_sites thuộc Modules/Heritage (module phụ thuộc
+     * biết về Post, không ngược lại), Post chỉ định nghĩa quan hệ đọc — cùng nguyên tắc ocopProducts().
+     */
+    public function heritageSites(): BelongsToMany
+    {
+        return $this->belongsToMany(HeritageSite::class, 'post_article_heritage_sites', 'article_id', 'heritage_site_id');
     }
 
     public function createdBy(): BelongsTo

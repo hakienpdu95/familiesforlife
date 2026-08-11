@@ -12,6 +12,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Modules\Banner\Models\Banner;
+use Modules\Heritage\Models\HeritageSite;
+use Modules\Ocop\Models\OcopProduct;
+use Modules\Organization\Models\Organization;
+use Modules\Post\Models\PostArticle;
+use Modules\Post\Models\PostAuthorProfile;
+use Modules\RealEstate\Models\RealEstateListing;
 use Spatie\MediaLibrary\HasMedia;
 
 /**
@@ -52,17 +59,18 @@ class MediaUploadController extends Controller
      * Add new models as they adopt HasTenantMedia.
      */
     private const ENTITY_MAP = [
-        'organization'            => \Modules\Organization\Models\Organization::class,
-        'post_article'            => \Modules\Post\Models\PostArticle::class,
-        'post_author_profile'     => \Modules\Post\Models\PostAuthorProfile::class,
-        'ocop_product'            => \Modules\Ocop\Models\OcopProduct::class,
-        'banner'                  => \Modules\Banner\Models\Banner::class,
-        'real_estate_listing'     => \Modules\RealEstate\Models\RealEstateListing::class,
+        'organization' => Organization::class,
+        'post_article' => PostArticle::class,
+        'post_author_profile' => PostAuthorProfile::class,
+        'ocop_product' => OcopProduct::class,
+        'heritage_site' => HeritageSite::class,
+        'banner' => Banner::class,
+        'real_estate_listing' => RealEstateListing::class,
     ];
 
     public function __construct(
         private readonly MediaUploadService $uploadService,
-        private readonly MediaUrlService    $urlService,
+        private readonly MediaUrlService $urlService,
     ) {}
 
     /**
@@ -85,10 +93,10 @@ class MediaUploadController extends Controller
         $collectionConfig = config("media.collections.{$collection}", []);
 
         $request->validate([
-            'file' => ['required', 'file', 'max:' . ($collectionConfig['max_size_kb'] ?? 10240)],
+            'file' => ['required', 'file', 'max:'.($collectionConfig['max_size_kb'] ?? 10240)],
         ]);
 
-        $file        = $request->file('file');
+        $file = $request->file('file');
         $allowedMime = $collectionConfig['allowed_mime'] ?? ['*'];
 
         if ($allowedMime !== ['*'] && ! in_array($file->getMimeType(), $allowedMime, true)) {
@@ -107,18 +115,18 @@ class MediaUploadController extends Controller
             }
 
             return response()->json([
-                'uuid'      => $media->uuid,
-                'url'       => $this->urlService->url($media, 'medium') ?: $this->urlService->url($media),
-                'thumb_url' => $this->urlService->url($media, 'thumb')  ?: $this->urlService->url($media),
-                'original'  => $this->urlService->url($media),
+                'uuid' => $media->uuid,
+                'url' => $this->urlService->url($media, 'medium') ?: $this->urlService->url($media),
+                'thumb_url' => $this->urlService->url($media, 'thumb') ?: $this->urlService->url($media),
+                'original' => $this->urlService->url($media),
             ]);
         } catch (\Throwable $e) {
             Log::error('FilePond upload failed', [
                 'collection' => $collection,
-                'error'      => $e->getMessage(),
+                'error' => $e->getMessage(),
             ]);
 
-            return response()->json(['message' => 'Upload thất bại: ' . $e->getMessage()], 422);
+            return response()->json(['message' => 'Upload thất bại: '.$e->getMessage()], 422);
         }
     }
 
@@ -144,7 +152,7 @@ class MediaUploadController extends Controller
             return response()->json(['message' => 'File không tồn tại.'], 404);
         }
 
-        $isDraft    = $media->model_type === FilePondDraft::class;
+        $isDraft = $media->model_type === FilePondDraft::class;
         $uploadedBy = $media->getCustomProperty('uploaded_by');
 
         // Non-draft files: only the uploader may revert, and only for managed collections
@@ -171,7 +179,7 @@ class MediaUploadController extends Controller
     private function resolveModel(Request $request): Model&HasMedia
     {
         $contextType = $request->header('X-Context-Type') ?: null;
-        $contextId   = $request->header('X-Context-Id')   ?: null;
+        $contextId = $request->header('X-Context-Id') ?: null;
 
         if ($contextType && $contextId && isset(self::ENTITY_MAP[$contextType])) {
             $class = self::ENTITY_MAP[$contextType];
@@ -201,9 +209,9 @@ class MediaUploadController extends Controller
 
         return FilePondDraft::create([
             'organization_id' => TenantContext::getOrganizationId(),
-            'user_id'         => auth()->id(),
-            'context_type'    => $contextType,
-            'context_id'      => $contextId,
+            'user_id' => auth()->id(),
+            'context_type' => $contextType,
+            'context_id' => $contextId,
         ]);
     }
 

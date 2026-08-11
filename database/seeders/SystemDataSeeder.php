@@ -5,34 +5,36 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
 use Modules\ActivityLog\Database\Seeders\ActivityLogPermissionsSeeder;
+use Modules\Aicem\Database\Seeders\AicemDatabaseSeeder;
 use Modules\Approval\Database\Seeders\ApprovalDatabaseSeeder;
 use Modules\Assessment\Database\Seeders\AssessmentDatabaseSeeder;
 use Modules\Auth\Database\Seeders\AuthDatabaseSeeder;
-use Modules\Lead\Database\Seeders\LeadDatabaseSeeder;
-use Modules\LeadPipelineStage\Database\Seeders\LeadPipelineStageSeeder;
-use Modules\LeadSource\Database\Seeders\LeadSourceSeeder;
-use Modules\Aicem\Database\Seeders\AicemDatabaseSeeder;
 use Modules\Banner\Database\Seeders\BannerDatabaseSeeder;
 use Modules\ContentFoundation\Database\Seeders\CategoryFoundationSeeder;
 use Modules\ContentFoundation\Database\Seeders\ContentFoundationDatabaseSeeder;
 use Modules\CoreIdeaExtractor\Database\Seeders\CoreIdeaExtractorDatabaseSeeder;
-use Modules\VideoIdeaExtractor\Database\Seeders\VideoIdeaExtractorDatabaseSeeder;
 use Modules\Event\Database\Seeders\EventDatabaseSeeder;
 use Modules\Event\Database\Seeders\EventDemoSeeder;
+use Modules\Heritage\Database\Seeders\HeritageDatabaseSeeder;
+use Modules\Heritage\Database\Seeders\HeritageDemoSeeder;
+use Modules\Lead\Database\Seeders\LeadDatabaseSeeder;
+use Modules\LeadPipelineStage\Database\Seeders\LeadPipelineStageSeeder;
+use Modules\LeadSource\Database\Seeders\LeadSourceSeeder;
 use Modules\Menu\Database\Seeders\MenuDatabaseSeeder;
+use Modules\Ocop\Database\Seeders\OcopDatabaseSeeder;
+use Modules\Organization\Database\Seeders\OrganizationRolePermissionSeeder;
 use Modules\Page\Database\Seeders\PageDatabaseSeeder;
-use Modules\Product\Database\Seeders\ProductDatabaseSeeder;
 use Modules\Post\Database\Seeders\PostDatabaseSeeder;
 use Modules\Post\Database\Seeders\PostDemoSeeder;
 use Modules\Post\Database\Seeders\ProvinceShowcaseCategorySeeder;
-use Modules\Ocop\Database\Seeders\OcopDatabaseSeeder;
-use Modules\RealEstate\Database\Seeders\RealEstateListingDemoSeeder;
+use Modules\Product\Database\Seeders\ProductDatabaseSeeder;
 use Modules\ProvinceShowcase\Database\Seeders\ProvinceShowcaseDemoSeeder;
 use Modules\ProvinceShowcase\Database\Seeders\ProvinceSlugBackfillSeeder;
-use Modules\Organization\Database\Seeders\OrganizationRolePermissionSeeder;
+use Modules\RealEstate\Database\Seeders\RealEstateListingDemoSeeder;
 use Modules\Subscription\Database\Seeders\SubscriptionDatabaseSeeder;
 use Modules\Survey\Database\Seeders\SurveyDatabaseSeeder;
 use Modules\Video\Database\Seeders\VideoDatabaseSeeder;
+use Modules\VideoIdeaExtractor\Database\Seeders\VideoIdeaExtractorDatabaseSeeder;
 
 /**
  * Master Seeder — điểm khởi chạy duy nhất cho toàn bộ dữ liệu mặc định hệ thống.
@@ -63,7 +65,7 @@ class SystemDataSeeder extends Seeder
         // lặng (không lỗi) — xem spec/Province_Showcase_Technical_Specification.md §8 Phase 1.
         // Idempotent (Model::upsert theo khoá tự nhiên), an toàn chạy lại trên DB đã có dữ liệu.
         Artisan::call('import:provinces-wards');
-        $this->command->info('  ✓ ' . trim(Artisan::output()));
+        $this->command->info('  ✓ '.trim(Artisan::output()));
 
         $this->call([
             // ── 0b. spec/Province_Showcase_Technical_Specification.md §3.1 — backfill
@@ -155,6 +157,11 @@ class SystemDataSeeder extends Seeder
             // PHẢI đứng sau bước đó (spec/Video_Management_Technical_Specification.md §6.7) ──
             VideoDatabaseSeeder::class,
 
+            // ── 27f. Heritage: permission heritage.manage — gán cho platform_ops/
+            // platform_content_head (role do ApprovalDatabaseSeeder tạo ở bước 27), cùng nguyên
+            // tắc Banner/Ocop/Page/Video (spec/Heritage_Technical_Specification.md §4) ──
+            HeritageDatabaseSeeder::class,
+
             // ── 28. Demo content: bài viết + sự kiện mẫu đã xuất bản (đọc cho trang public) ──
             PostDemoSeeder::class,
             EventDemoSeeder::class,
@@ -170,6 +177,11 @@ class SystemDataSeeder extends Seeder
             ProvinceShowcaseCategorySeeder::class,
             OcopDatabaseSeeder::class,
             ProvinceShowcaseDemoSeeder::class,
+
+            // ── 28c. Heritage demo: 5 di tích (Huế/Cà Mau) + cross-link tay tới Post/Event/Ocop
+            // demo đã seed ở bước 28/28b — PHẢI đứng sau ProvinceShowcaseDemoSeeder (spec/
+            // Heritage_Technical_Specification.md §9) ──
+            HeritageDemoSeeder::class,
 
             // ── 29. Menu (header): mega-menu công khai — cần category_id thật (bước 28) ──
             MenuDatabaseSeeder::class,

@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Modules\Heritage\Models\HeritageSite;
 use Modules\Ocop\Enums\OcopProductStatus;
 use Modules\Ocop\Features\OcopProductManagement\Actions\CreateOcopProductAction;
 use Modules\Ocop\Features\OcopProductManagement\Actions\DeleteOcopProductAction;
@@ -37,14 +39,15 @@ class OcopProductAdminController extends Controller
         // Cây danh mục OCOP chính thức (spec/danhmuc.html) dạng phẳng kèm depth — <select> hiển
         // thị thụt lề đúng cấp bậc I → Nhóm → Phân nhóm, thay vì liệt kê phẳng theo tên.
         $categoryTree = OcopCategory::flatTree();
-        $statuses     = OcopProductStatus::cases();
+        $statuses = OcopProductStatus::cases();
+        $heritageSites = $this->heritageSitesForPicker();
 
-        return view('ocop::admin.products.create', compact('categoryTree', 'statuses'));
+        return view('ocop::admin.products.create', compact('categoryTree', 'statuses', 'heritageSites'));
     }
 
     public function store(Request $request, CreateOcopProductAction $action): RedirectResponse
     {
-        $data    = OcopProductData::from($this->validated($request));
+        $data = OcopProductData::from($this->validated($request));
         $product = $action->handle($data);
 
         return redirect()->route('backend.ocop.products.index')
@@ -55,9 +58,10 @@ class OcopProductAdminController extends Controller
     {
         // Cùng lý do create() ở trên.
         $categoryTree = OcopCategory::flatTree();
-        $statuses     = OcopProductStatus::cases();
+        $statuses = OcopProductStatus::cases();
+        $heritageSites = $this->heritageSitesForPicker();
 
-        return view('ocop::admin.products.edit', compact('product', 'categoryTree', 'statuses'));
+        return view('ocop::admin.products.edit', compact('product', 'categoryTree', 'statuses', 'heritageSites'));
     }
 
     public function update(Request $request, OcopProduct $product, UpdateOcopProductAction $action): RedirectResponse
@@ -81,41 +85,57 @@ class OcopProductAdminController extends Controller
             ->with('success', 'Đã xoá sản phẩm.');
     }
 
+    /**
+     * spec/Heritage_Technical_Specification.md §8.2 — CHỈ hiện HeritageSite heritage_type ∈
+     * {intangible, historical_monument} làm GỢI Ý MẶC ĐỊNH (ưu tiên đầu danh sách), KHÔNG ép
+     * cứng — editor vẫn chọn được loại khác nếu hợp lý (VD sản phẩm ẩm thực gắn 1 danh lam
+     * thắng cảnh có truyền thống ẩm thực riêng), nên danh sách vẫn gồm mọi di tích published.
+     */
+    private function heritageSitesForPicker(): Collection
+    {
+        return HeritageSite::published()
+            ->orderByRaw("CASE WHEN heritage_type IN ('intangible', 'historical_monument') THEN 0 ELSE 1 END")
+            ->orderBy('name')
+            ->get(['id', 'name', 'heritage_type', 'province_name']);
+    }
+
     private function validated(Request $request): array
     {
         return $request->validate([
-            'category_id'       => ['required', 'integer', 'exists:ocop_categories,id'],
-            'name'               => ['required', 'string', 'max:150'],
+            'category_id' => ['required', 'integer', 'exists:ocop_categories,id'],
+            'name' => ['required', 'string', 'max:150'],
             // §4.2 — chương trình OCOP quốc gia chỉ chấm từ 3 sao trở lên mới được công nhận.
-            'star_rating'        => ['required', 'in:3,4,5'],
-            'description'        => ['nullable', 'string'],
-            'province_code'      => ['nullable', 'string', 'size:2', 'exists:provinces,province_code'],
-            'ward_code'          => ['nullable', 'string', 'exists:wards,ward_code'],
-            'producer_name'      => ['nullable', 'string', 'max:150'],
-            'producer_address'   => ['nullable', 'string', 'max:255'],
+            'star_rating' => ['required', 'in:3,4,5'],
+            'description' => ['nullable', 'string'],
+            'province_code' => ['nullable', 'string', 'size:2', 'exists:provinces,province_code'],
+            'ward_code' => ['nullable', 'string', 'exists:wards,ward_code'],
+            'producer_name' => ['nullable', 'string', 'max:150'],
+            'producer_address' => ['nullable', 'string', 'max:255'],
+            // spec/Heritage_Technical_Specification.md §8.2 — tuỳ chọn.
+            'heritage_site_id' => ['nullable', 'integer', 'exists:heritage_sites,id'],
             // spec/Media_Library_Technical_Specification.md §8 — chỉ dùng ở create form.
-            'cover_media_uuid'   => ['nullable', 'string'],
-            'purchase_url'       => ['nullable', 'url', 'max:500'],
-            'status'             => ['required', Rule::in(array_column(OcopProductStatus::cases(), 'value'))],
-            'is_featured'        => ['boolean'],
-            'sort_order'         => ['integer', 'min:0'],
+            'cover_media_uuid' => ['nullable', 'string'],
+            'purchase_url' => ['nullable', 'url', 'max:500'],
+            'status' => ['required', Rule::in(array_column(OcopProductStatus::cases(), 'value'))],
+            'is_featured' => ['boolean'],
+            'sort_order' => ['integer', 'min:0'],
         ], [
-            'category_id.required'     => 'Vui lòng chọn danh mục.',
-            'category_id.exists'       => 'Danh mục được chọn không hợp lệ.',
-            'name.required'            => 'Vui lòng nhập tên sản phẩm.',
-            'name.max'                 => 'Tên sản phẩm không được vượt quá :max ký tự.',
-            'star_rating.required'     => 'Vui lòng chọn hạng sao.',
-            'star_rating.in'           => 'Hạng sao không hợp lệ — chỉ chấp nhận 3, 4 hoặc 5 sao.',
-            'province_code.exists'     => 'Tỉnh/thành được chọn không hợp lệ.',
-            'ward_code.exists'         => 'Phường/xã được chọn không hợp lệ.',
-            'producer_name.max'       => 'Tên nhà sản xuất không được vượt quá :max ký tự.',
-            'producer_address.max'    => 'Địa chỉ nhà sản xuất không được vượt quá :max ký tự.',
-            'purchase_url.url'         => 'URL không hợp lệ — phải bắt đầu bằng https://',
-            'purchase_url.max'        => 'URL không được vượt quá :max ký tự.',
-            'status.required'          => 'Vui lòng chọn trạng thái.',
-            'status.in'                => 'Trạng thái không hợp lệ.',
-            'sort_order.integer'      => 'Thứ tự hiển thị phải là số nguyên.',
-            'sort_order.min'          => 'Thứ tự hiển thị không được âm.',
+            'category_id.required' => 'Vui lòng chọn danh mục.',
+            'category_id.exists' => 'Danh mục được chọn không hợp lệ.',
+            'name.required' => 'Vui lòng nhập tên sản phẩm.',
+            'name.max' => 'Tên sản phẩm không được vượt quá :max ký tự.',
+            'star_rating.required' => 'Vui lòng chọn hạng sao.',
+            'star_rating.in' => 'Hạng sao không hợp lệ — chỉ chấp nhận 3, 4 hoặc 5 sao.',
+            'province_code.exists' => 'Tỉnh/thành được chọn không hợp lệ.',
+            'ward_code.exists' => 'Phường/xã được chọn không hợp lệ.',
+            'producer_name.max' => 'Tên nhà sản xuất không được vượt quá :max ký tự.',
+            'producer_address.max' => 'Địa chỉ nhà sản xuất không được vượt quá :max ký tự.',
+            'purchase_url.url' => 'URL không hợp lệ — phải bắt đầu bằng https://',
+            'purchase_url.max' => 'URL không được vượt quá :max ký tự.',
+            'status.required' => 'Vui lòng chọn trạng thái.',
+            'status.in' => 'Trạng thái không hợp lệ.',
+            'sort_order.integer' => 'Thứ tự hiển thị phải là số nguyên.',
+            'sort_order.min' => 'Thứ tự hiển thị không được âm.',
         ]);
     }
 }

@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     _setupTagsInput(form);
     _setupCategoryPicker();
     _setupOcopProductPicker();
+    _setupHeritageSitePicker();
 });
 
 // ── Tab-aware submit guard ─────────────────────────────────────────────────
@@ -266,6 +267,100 @@ function _setupOcopProductPicker() {
     function _row(id, name, place, isChecked) {
         return `<label class="flex items-center gap-2 cursor-pointer text-xs py-0.5">
             <input type="checkbox" name="ocop_product_ids[]" value="${id}"
+                   data-name="${_esc(name)}" data-place="${_esc(place)}"
+                   class="checkbox checkbox-xs shrink-0" ${isChecked ? 'checked' : ''}>
+            <span class="flex-1">${_esc(name)}</span>
+            ${place ? `<span class="text-base-content/40">${_esc(place)}</span>` : ''}
+        </label>`;
+    }
+
+    function _esc(str) {
+        return String(str ?? '').replace(/[&<>"']/g, (c) => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+        }[c]));
+    }
+}
+
+// ── Di tích liên quan — load động theo province_code/ward_code ─────────────
+
+/**
+ * spec/Heritage_Technical_Specification.md §8.3 — mirror 1-1 _setupOcopProductPicker() ở trên,
+ * chỉ khác endpoint (GET /api/heritage-sites/picker) và tên field (heritage_site_ids[]).
+ */
+function _setupHeritageSitePicker() {
+    const container = document.getElementById('heritage-site-picker');
+    if (!container) return;
+
+    const instanceId = container.dataset.instanceId;
+    const list = container.querySelector('[data-heritage-picker-list]');
+    if (!list) return;
+
+    /** @type {Map<string, {name: string, place: string}>} id (string) → nhãn hiển thị */
+    const checked = new Map();
+    _syncCheckedState();
+
+    document.addEventListener('address-picker:change', (e) => {
+        if (e.detail.instanceId !== instanceId) return;
+        _loadSites(e.detail.provinceCode, e.detail.wardCode);
+    });
+
+    function _syncCheckedState() {
+        list.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+            if (cb.checked) {
+                checked.set(cb.value, { name: cb.dataset.name ?? '', place: cb.dataset.place ?? '' });
+            } else {
+                checked.delete(cb.value);
+            }
+        });
+    }
+
+    async function _loadSites(provinceCode, wardCode) {
+        _syncCheckedState();
+
+        if (!provinceCode && !wardCode) {
+            _render([]);
+            return;
+        }
+
+        list.innerHTML = '<p class="text-xs text-base-content/30 py-1">Đang tải...</p>';
+
+        const params = new URLSearchParams();
+        if (wardCode) params.set('ward_code', wardCode);
+        else params.set('province_code', provinceCode);
+
+        try {
+            const res = await fetch('/api/heritage-sites/picker?' + params.toString());
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            _render(await res.json());
+        } catch (err) {
+            console.error('[heritagePicker] Lỗi tải di tích:', err);
+            list.innerHTML = '<p class="text-xs text-error py-1">Lỗi tải danh sách di tích.</p>';
+        }
+    }
+
+    function _render(sites) {
+        const seen = new Set();
+        const rows = [];
+
+        for (const s of sites) {
+            const id = String(s.id);
+            seen.add(id);
+            rows.push(_row(id, s.name, s.ward_name || s.province_name || '', checked.has(id)));
+        }
+
+        for (const [id, info] of checked) {
+            if (seen.has(id)) continue;
+            rows.push(_row(id, info.name, info.place, true));
+        }
+
+        list.innerHTML = rows.length
+            ? rows.join('')
+            : '<p class="text-xs text-base-content/30 py-1">Không có di tích nào khớp tỉnh/phường đã chọn.</p>';
+    }
+
+    function _row(id, name, place, isChecked) {
+        return `<label class="flex items-center gap-2 cursor-pointer text-xs py-0.5">
+            <input type="checkbox" name="heritage_site_ids[]" value="${id}"
                    data-name="${_esc(name)}" data-place="${_esc(place)}"
                    class="checkbox checkbox-xs shrink-0" ${isChecked ? 'checked' : ''}>
             <span class="flex-1">${_esc(name)}</span>

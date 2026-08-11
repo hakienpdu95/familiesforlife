@@ -55,6 +55,14 @@ class ArticleData extends Data
          */
         public readonly array $ocop_product_ids = [],
 
+        /**
+         * spec/Heritage_Technical_Specification.md §8.3 — di tích liên quan, chỉ có ở form sửa
+         * bài viết (create form không có multi-select này) — cùng nguyên tắc ocop_product_ids.
+         *
+         * @var int[]
+         */
+        public readonly array $heritage_site_ids = [],
+
         public readonly bool $is_sponsored = false,
         public readonly ?string $sponsor_name = null,
         public readonly ?string $sponsor_logo_url = null,

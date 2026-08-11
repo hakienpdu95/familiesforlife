@@ -31,22 +31,23 @@ class CreateOcopProductAction
             : null;
 
         $product = OcopProduct::create([
-            'category_id'       => $data->category_id,
-            'name'              => $data->name,
-            'slug'              => $this->uniqueSlug($data->name),
-            'star_rating'       => $data->star_rating,
-            'description'       => $data->description,
-            'province_code'     => $data->province_code,
-            'province_name'     => $provinceName,
-            'ward_code'         => $data->ward_code,
-            'ward_name'         => $wardName,
-            'producer_name'     => $data->producer_name,
-            'producer_address'  => $data->producer_address,
-            'purchase_url'      => $data->purchase_url,
-            'status'            => $data->status,
-            'is_featured'       => $data->is_featured,
-            'sort_order'        => $data->sort_order,
-            'created_by'        => auth()->id(),
+            'category_id' => $data->category_id,
+            'name' => $data->name,
+            'slug' => $this->uniqueSlug($data->name),
+            'star_rating' => $data->star_rating,
+            'description' => $data->description,
+            'province_code' => $data->province_code,
+            'province_name' => $provinceName,
+            'ward_code' => $data->ward_code,
+            'ward_name' => $wardName,
+            'producer_name' => $data->producer_name,
+            'producer_address' => $data->producer_address,
+            'heritage_site_id' => $data->heritage_site_id,
+            'purchase_url' => $data->purchase_url,
+            'status' => $data->status,
+            'is_featured' => $data->is_featured,
+            'sort_order' => $data->sort_order,
+            'created_by' => auth()->id(),
         ]);
 
         // spec/Media_Library_Technical_Specification.md §8 — form tạo mới chưa có product.id
@@ -62,7 +63,7 @@ class CreateOcopProductAction
     {
         $base = Str::slug($name);
         $slug = $base;
-        $i    = 2;
+        $i = 2;
 
         while (OcopProduct::where('slug', $slug)->exists()) {
             $slug = "{$base}-{$i}";

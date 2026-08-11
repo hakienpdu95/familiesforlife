@@ -183,6 +183,25 @@
                         @error('online_url')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                     </div>
 
+                    {{-- spec/Heritage_Technical_Specification.md §8.1 — tuỳ chọn, không bắt buộc. --}}
+                    <div class="form-control">
+                        <label class="label py-0 pb-1.5">
+                            <span class="label-text font-medium">Di tích liên quan</span>
+                            <span class="label-text-alt text-xs text-base-content/40">Không bắt buộc</span>
+                        </label>
+                        <select id="ts-heritage-site" name="heritage_site_id"
+                                class="select select-bordered select-sm w-full ts-init @error('heritage_site_id') select-error @enderror"
+                                data-ts-placeholder="— Không gắn di tích —">
+                            <option value=""></option>
+                            @foreach($heritageSites as $s)
+                            <option value="{{ $s->id }}" {{ (string) old('heritage_site_id', $event->heritage_site_id) === (string) $s->id ? 'selected' : '' }}>
+                                {{ $s->name }}{{ $s->province_name ? " ({$s->province_name})" : '' }}
+                            </option>
+                            @endforeach
+                        </select>
+                        @error('heritage_site_id')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                    </div>
+
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
                             <span class="label-text font-medium">Website / Vé <span class="text-error">*</span></span>

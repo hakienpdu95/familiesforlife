@@ -420,6 +420,19 @@
         </div>
         @endcan
 
+        {{-- spec/Heritage_Technical_Specification.md §4 — heritage.manage cấp cho
+             platform_ops/platform_content_head (Modules\Heritage\Database\Seeders\
+             HeritagePermissionSeeder). Single nav-link (không dropdown), cùng nguyên tắc OCOP. --}}
+        @can(\App\Enums\PermissionEnum::HERITAGE_MANAGE->value)
+        <div class="nav-group">
+            <a href="{{ route('backend.heritage.sites.index') }}"
+               class="nav-link {{ request()->routeIs('backend.heritage.*') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 21h18M5 21V7l8-4v18M13 21V11l6 3v7M9 9v.01M9 12v.01M9 15v.01"/></svg>
+                <span class="nav-label">Di tích/Di sản</span>
+            </a>
+        </div>
+        @endcan
+
         {{-- spec/bhxh/PensionCalculator_Technical_Specification.md §5/§9.3 — Lớp A, qua
              config/permissions.php + RoleEnum: pension_calculator.manage (System_Admin, sửa
              được) / pension_calculator.view (CEO, chỉ xem) — cùng nguyên tắc PRODUCT_VIEW/

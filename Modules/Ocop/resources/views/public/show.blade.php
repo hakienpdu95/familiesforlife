@@ -49,6 +49,13 @@
                     @if(! $product->producer_name && ! $product->producer_address && ! $product->province_name)
                     <p class="text-sm text-base-content/40">Chưa cập nhật thông tin.</p>
                     @endif
+                    @if($heritageSite)
+                    <p class="text-sm mt-1">
+                        <a href="{{ route('heritage.public.show', ['slug' => $heritageSite->slug, 'id' => $heritageSite->id]) }}" class="link link-primary">
+                            Làng nghề/di tích: {{ $heritageSite->name }}
+                        </a>
+                    </p>
+                    @endif
                 </div>
             </div>
 

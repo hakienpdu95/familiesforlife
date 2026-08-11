@@ -185,6 +185,26 @@
                     @error('producer_address')<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
                 </div>
 
+                {{-- spec/Heritage_Technical_Specification.md §8.2 — tuỳ chọn, ưu tiên hiện di
+                     tích/làng nghề (intangible/historical_monument) đầu danh sách. --}}
+                <div class="form-control">
+                    <label class="label py-0 pb-1.5">
+                        <span class="label-text font-medium">Làng nghề/di tích liên quan</span>
+                        <span class="label-text-alt text-xs text-base-content/40">Không bắt buộc</span>
+                    </label>
+                    <select id="ts-heritage_site_id" name="heritage_site_id"
+                            class="select select-bordered select-sm w-full ts-init @error('heritage_site_id') select-error @enderror"
+                            data-ts-placeholder="— Không gắn di tích —">
+                        <option value=""></option>
+                        @foreach($heritageSites as $s)
+                        <option value="{{ $s->id }}" {{ (string) old('heritage_site_id', $product?->heritage_site_id) === (string) $s->id ? 'selected' : '' }}>
+                            {{ $s->name }}{{ $s->province_name ? " ({$s->province_name})" : '' }}
+                        </option>
+                        @endforeach
+                    </select>
+                    @error('heritage_site_id')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                </div>
+
                 <div class="divider my-1"></div>
 
                 <div class="form-control">

@@ -146,6 +146,13 @@ enum PermissionEnum: string
     // — cùng nguyên tắc BANNER_MANAGE.
     case OCOP_MANAGE = 'ocop.manage';
 
+    // ══ HERITAGE (Di tích/di sản có cấu trúc — loại hình, xếp hạng, toạ độ; trục liên kết
+    // Post/Event/Ocop) ═══
+    // spec/Heritage_Technical_Specification.md §4 — gán cho platform_ops + platform_content_head
+    // (HeritagePermissionSeeder), KHÔNG qua config/permissions.php (Lớp B) — cùng nguyên tắc
+    // BANNER_MANAGE/OCOP_MANAGE.
+    case HERITAGE_MANAGE = 'heritage.manage';
+
     // ══ PAGE (Trang tĩnh — Giới thiệu/Liên hệ/Điều khoản..., tài sản nền tảng) ═══
     // spec/Page_Static_Pages_Technical_Specification.md §7 — gán cho platform_ops +
     // platform_content_head (PagePermissionSeeder), KHÔNG qua config/permissions.php (Lớp B)

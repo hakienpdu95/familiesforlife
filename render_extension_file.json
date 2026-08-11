@@ -411,5 +411,10 @@
         "audio_direction///text///__///_NULL///NULL///__///__",
         "reference_assets///text///__///_NULL///NULL///__///__",
         "cta_text///string///200///_NULL///NULL///__///__"
+    ],
+    [
+        "content_calendar_entries///add///__///",
+        "funnel_stage///string///10///_NULL///NULL///__///__",
+        "__index///index///__///__///__///post_category_id,funnel_stage|cc_entries_category_funnel_idx///__"
     ]
 ]

@@ -5,6 +5,7 @@ namespace Modules\Ocop\Features\PublicReading\Http;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Modules\Heritage\Models\HeritageSite;
 use Modules\Ocop\Enums\OcopProductStatus;
 use Modules\Ocop\Features\PublicReading\Queries\ListPublishedOcopProductsHandler;
 use Modules\Ocop\Features\PublicReading\Queries\ListPublishedOcopProductsQuery;
@@ -42,6 +43,12 @@ class PublicOcopController extends Controller
 
         abort_unless($product, 404);
 
-        return view('ocop::public.show', compact('product'));
+        // spec/Heritage_Technical_Specification.md §5.2 "Quy tắc bắt buộc" — luôn qua
+        // HeritageSite::published(), KHÔNG find() thẳng (cùng lý do PublicEventController::show()).
+        $heritageSite = $product->heritage_site_id
+            ? HeritageSite::published()->find($product->heritage_site_id)
+            : null;
+
+        return view('ocop::public.show', compact('product', 'heritageSite'));
     }
 }

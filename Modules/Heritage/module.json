@@ -1,0 +1,11 @@
+{
+    "name": "Heritage",
+    "alias": "heritage",
+    "description": "Di tích/di sản có cấu trúc (loại hình, xếp hạng, toạ độ) — trục liên kết Post/Event/Ocop lại với nhau (spec/Heritage_Technical_Specification.md).",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Heritage\\Providers\\HeritageServiceProvider"
+    ],
+    "files": []
+}

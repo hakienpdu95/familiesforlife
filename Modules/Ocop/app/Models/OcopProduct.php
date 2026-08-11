@@ -2,6 +2,7 @@
 
 namespace Modules\Ocop\Models;
 
+use App\Models\User;
 use App\Traits\HasTenantMedia;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -28,26 +29,26 @@ use Spatie\MediaLibrary\HasMedia;
  */
 class OcopProduct extends Model implements HasMedia
 {
-    use SoftDeletes;
+    use HasTenantMedia;
     use LogsActivity;
     use Searchable;
-    use HasTenantMedia;
+    use SoftDeletes;
 
     protected $table = 'ocop_products';
 
     protected $fillable = [
         'uuid', 'category_id', 'name', 'slug', 'star_rating', 'description',
         'province_code', 'province_name', 'ward_code', 'ward_name',
-        'producer_name', 'producer_address',
+        'producer_name', 'producer_address', 'heritage_site_id',
         'purchase_url', 'status', 'is_featured', 'sort_order',
         'created_by', 'updated_by',
     ];
 
     protected $casts = [
-        'star_rating'       => 'integer',
-        'status'            => OcopProductStatus::class,
-        'is_featured'       => 'boolean',
-        'sort_order'        => 'integer',
+        'star_rating' => 'integer',
+        'status' => OcopProductStatus::class,
+        'is_featured' => 'boolean',
+        'sort_order' => 'integer',
     ];
 
     public function getActivitylogOptions(): LogOptions
@@ -87,12 +88,12 @@ class OcopProduct extends Model implements HasMedia
 
     public function createdBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'created_by');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function updatedBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'updated_by');
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     // ── Scopes ───────────────────────────────────────────────────────
@@ -146,19 +147,19 @@ class OcopProduct extends Model implements HasMedia
         $this->loadMissing('category');
 
         return [
-            'id'              => $this->id,
-            'uuid'            => $this->uuid,
-            'name'            => $this->name,
-            'description'     => (string) $this->description,
-            'producer_name'   => (string) $this->producer_name,
-            'slug'            => $this->slug,
-            'status'          => $this->status->value,
-            'star_rating'     => $this->star_rating,
-            'is_featured'     => (bool) $this->is_featured,
-            'province_code'   => $this->province_code,
-            'category_id'     => $this->category_id,
-            'category_name'   => $this->category?->name,
-            'category_slug'   => $this->category?->slug,
+            'id' => $this->id,
+            'uuid' => $this->uuid,
+            'name' => $this->name,
+            'description' => (string) $this->description,
+            'producer_name' => (string) $this->producer_name,
+            'slug' => $this->slug,
+            'status' => $this->status->value,
+            'star_rating' => $this->star_rating,
+            'is_featured' => (bool) $this->is_featured,
+            'province_code' => $this->province_code,
+            'category_id' => $this->category_id,
+            'category_name' => $this->category?->name,
+            'category_slug' => $this->category?->slug,
         ];
     }
 

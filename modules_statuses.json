@@ -34,5 +34,6 @@
     "ContentOutlines": true,
     "PromptFrameworkStudio": true,
     "Playlist": true,
-    "AIVideoStudioTemplate": true
+    "AIVideoStudioTemplate": true,
+    "Heritage": true
 }

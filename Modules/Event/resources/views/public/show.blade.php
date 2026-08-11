@@ -65,6 +65,13 @@
                 <span class="text-base-content/60">{{ $event->full_address ?: trim($event->venue_address.', '.$event->ward?->name.', '.$event->province?->name, ', ') }}</span>
             </p>
             @endif
+            @if($heritageSite)
+            <p class="text-sm mt-2">
+                <a href="{{ route('heritage.public.show', ['slug' => $heritageSite->slug, 'id' => $heritageSite->id]) }}" class="link link-primary">
+                    Diễn ra tại di tích: {{ $heritageSite->name }}
+                </a>
+            </p>
+            @endif
         </div>
         <div class="card bg-base-100 border border-base-300 p-4">
             <span class="text-xs font-black uppercase tracking-wide text-secondary">Giá vé</span>

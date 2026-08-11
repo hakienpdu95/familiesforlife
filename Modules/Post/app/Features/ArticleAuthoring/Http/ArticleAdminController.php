@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Modules\Heritage\Models\HeritageSite;
+use Modules\Ocop\Models\OcopProduct;
 use Modules\Post\Enums\ArticleFormat;
 use Modules\Post\Enums\SponsorLabel;
 use Modules\Post\Features\ArticleAuthoring\Actions\CreateArticleAction;
@@ -32,7 +34,6 @@ use Modules\Post\Features\CategoryManagement\Queries\ListCategoriesForAdminHandl
 use Modules\Post\Features\CategoryManagement\Queries\ListCategoriesForAdminQuery;
 use Modules\Post\Models\PostArticle;
 use Modules\Post\Support\ArticleContentRenderer;
-use Modules\Ocop\Models\OcopProduct;
 
 /**
  * PostArticle (§9) chỉ còn là "vỏ" dùng chung mọi ngôn ngữ (format/cover/categories/tags) —
@@ -47,7 +48,7 @@ class ArticleAdminController extends Controller
     {
         $this->authorize('viewAny', PostArticle::class);
 
-        $categories = $categoryHandler->handle(new ListCategoriesForAdminQuery());
+        $categories = $categoryHandler->handle(new ListCategoriesForAdminQuery);
 
         return view('post::admin.articles.index', compact('categories'));
     }
@@ -76,7 +77,7 @@ class ArticleAdminController extends Controller
     {
         $this->authorize('viewAny', PostArticle::class);
 
-        $translations = $handler->handle(new ListFreshnessReviewTranslationsQuery());
+        $translations = $handler->handle(new ListFreshnessReviewTranslationsQuery);
 
         return view('post::admin.articles.needs-freshness-review', compact('translations'));
     }
@@ -87,7 +88,7 @@ class ArticleAdminController extends Controller
 
         // Cây danh mục thật (cha/con/cháu...) thay vì danh sách phẳng — picker "Danh mục" cần
         // hiển thị đúng cấp bậc phân cấp thay vì chỉ 1 dòng "cha › con".
-        $categoryTree = $categoryTreeHandler->handle(new GetCategoryTreeQuery());
+        $categoryTree = $categoryTreeHandler->handle(new GetCategoryTreeQuery);
 
         return view('post::admin.articles.create', compact('categoryTree'));
     }
@@ -114,7 +115,7 @@ class ArticleAdminController extends Controller
         $title = $request->validate(['title' => ['required', 'string', 'max:300']])['title'];
 
         [$article, $translation] = DB::transaction(function () use ($data, $title, $articleAction, $translationAction) {
-            $article     = $articleAction->handle($data);
+            $article = $articleAction->handle($data);
             $translation = $translationAction->handle($article, $article->main_locale, TranslationData::from(['title' => $title]));
 
             return [$article, $translation];
@@ -138,10 +139,10 @@ class ArticleAdminController extends Controller
     {
         $this->authorizeArticle($article, 'post_article.edit');
 
-        $article->load(['categories', 'tags', 'ocopProducts', 'translations.contentBlocks.productBlock.items.product', 'translations.contentBlocks.productBlock.items.buttons', 'translations.contentBlocks.productBlock.buttons', 'translations.contentBlocks.faqBlock.items', 'translations.contentBlocks.howtoBlock.steps']);
+        $article->load(['categories', 'tags', 'ocopProducts', 'heritageSites', 'translations.contentBlocks.productBlock.items.product', 'translations.contentBlocks.productBlock.items.buttons', 'translations.contentBlocks.productBlock.buttons', 'translations.contentBlocks.faqBlock.items', 'translations.contentBlocks.howtoBlock.steps']);
 
         // Cây danh mục thật (cha/con/cháu...) — cùng lý do create() ở trên.
-        $categoryTree = $categoryTreeHandler->handle(new GetCategoryTreeQuery());
+        $categoryTree = $categoryTreeHandler->handle(new GetCategoryTreeQuery);
 
         // spec/Province_Showcase_Technical_Specification.md §3.4.1 — lọc theo ward_code của bài
         // nếu có (chuyên sâu hơn), fallback province_code; bài chưa gắn tỉnh/phường nào → không
@@ -164,6 +165,22 @@ class ArticleAdminController extends Controller
             ->sortBy('name')
             ->values();
 
+        // spec/Heritage_Technical_Specification.md §8.3 — mirror 1-1 cơ chế picker OCOP ở trên
+        // (cùng lý do lọc theo ward_code/province_code, cùng lý do giữ lại di tích đã gắn dù
+        // không khớp bộ lọc mới).
+        $heritageSites = $article->ward_code || $article->province_code
+            ? HeritageSite::published()
+                ->when($article->ward_code, fn ($q) => $q->where('ward_code', $article->ward_code))
+                ->when(! $article->ward_code && $article->province_code, fn ($q) => $q->forProvince($article->province_code))
+                ->orderBy('name')
+                ->get(['id', 'name', 'province_name', 'ward_name'])
+            : collect();
+
+        $heritageSites = $heritageSites
+            ->concat($article->heritageSites->whereNotIn('id', $heritageSites->pluck('id')))
+            ->sortBy('name')
+            ->values();
+
         // Tab locale server-side (không SPA) — mỗi lần đổi tab load lại trang, tránh phải
         // làm cho post-block-composer.js/article-form.js (vốn giả định 1 form/1 composer duy
         // nhất mỗi trang) hỗ trợ nhiều instance cùng lúc.
@@ -177,7 +194,7 @@ class ArticleAdminController extends Controller
         // GEO Checklist (spec/blog.md) — danh sách tham khảo tĩnh, không phụ thuộc dữ liệu bài viết.
         $geoChecklistGroups = GeoChecklist::groups();
 
-        return view('post::admin.articles.edit', compact('article', 'categoryTree', 'activeLocale', 'translation', 'existingBlocks', 'ocopProducts', 'geoChecklistGroups'));
+        return view('post::admin.articles.edit', compact('article', 'categoryTree', 'activeLocale', 'translation', 'existingBlocks', 'ocopProducts', 'heritageSites', 'geoChecklistGroups'));
     }
 
     public function update(Request $request, PostArticle $article, UpdateArticleAction $action): RedirectResponse
@@ -208,9 +225,9 @@ class ArticleAdminController extends Controller
         $stats = $handler->handle(new GetArticleRedirectClickStatsQuery(articleId: $article->id));
 
         return view('post::admin.articles.clicks', [
-            'article'  => $article,
-            'stats'    => $stats,
-            'title'    => $article->mainTranslation()?->title ?? "Bài viết #{$article->id}",
+            'article' => $article,
+            'stats' => $stats,
+            'title' => $article->mainTranslation()?->title ?? "Bài viết #{$article->id}",
         ]);
     }
 
@@ -225,7 +242,7 @@ class ArticleAdminController extends Controller
         // dashboard/posts/articles xoá qua AJAX (Tabulator, xem article-index.js) — cùng
         // pattern OrganizationController::destroy (Modules/Organization).
         if ($request->expectsJson()) {
-            return response()->json(['message' => 'Đã xoá bài viết "' . $title . '".']);
+            return response()->json(['message' => 'Đã xoá bài viết "'.$title.'".']);
         }
 
         return redirect()->route('backend.post.articles.index')
@@ -282,36 +299,40 @@ class ArticleAdminController extends Controller
     private function validated(Request $request): array
     {
         return $request->validate([
-            'format'                  => ['required', 'in:' . implode(',', array_column(ArticleFormat::cases(), 'value'))],
+            'format' => ['required', 'in:'.implode(',', array_column(ArticleFormat::cases(), 'value'))],
             // format=redirect — bài không có nội dung riêng, chỉ dẫn link ra nguồn khác.
-            'redirect_url'            => ['required_if:format,redirect', 'nullable', 'url', 'max:500'],
+            'redirect_url' => ['required_if:format,redirect', 'nullable', 'url', 'max:500'],
             // spec/Media_Library_Technical_Specification.md §8 — chỉ dùng ở create form (form
             // sửa gắn ảnh trực tiếp qua FilePond context header, không qua field này).
-            'cover_media_uuid'        => ['nullable', 'string'],
-            'is_featured'             => ['boolean'],
-            'main_locale'             => ['nullable', 'string', 'in:' . implode(',', array_keys(config('post.locales')))],
-            'category_ids'            => ['array'],
-            'category_ids.*'          => ['integer', 'exists:post_categories,id'],
-            'is_primary_category_id'  => ['nullable', 'integer'],
-            'tags'                    => ['nullable', 'string', 'max:500'],
+            'cover_media_uuid' => ['nullable', 'string'],
+            'is_featured' => ['boolean'],
+            'main_locale' => ['nullable', 'string', 'in:'.implode(',', array_keys(config('post.locales')))],
+            'category_ids' => ['array'],
+            'category_ids.*' => ['integer', 'exists:post_categories,id'],
+            'is_primary_category_id' => ['nullable', 'integer'],
+            'tags' => ['nullable', 'string', 'max:500'],
 
             // spec/Province_Showcase_Technical_Specification.md §3.2/§6.3 — tuỳ chọn, không bắt
             // buộc (§0 mục 4) — không phá luồng viết bài hiện tại khi tác giả chưa chọn tỉnh.
-            'province_code'           => ['nullable', 'string', 'size:2', 'exists:provinces,province_code'],
-            'ward_code'               => ['nullable', 'string', 'size:5', 'exists:wards,ward_code'],
+            'province_code' => ['nullable', 'string', 'size:2', 'exists:provinces,province_code'],
+            'ward_code' => ['nullable', 'string', 'size:5', 'exists:wards,ward_code'],
             // §3.4.1 — chỉ có ở form sửa bài viết, create form không gửi field này (mảng rỗng mặc định).
-            'ocop_product_ids'        => ['array'],
-            'ocop_product_ids.*'      => ['integer', 'exists:ocop_products,id'],
+            'ocop_product_ids' => ['array'],
+            'ocop_product_ids.*' => ['integer', 'exists:ocop_products,id'],
+
+            // spec/Heritage_Technical_Specification.md §8.3 — cùng nguyên tắc ocop_product_ids.
+            'heritage_site_ids' => ['array'],
+            'heritage_site_ids.*' => ['integer', 'exists:heritage_sites,id'],
 
             // spec/dac-ta-ky-thuat-bai-viet-tai-tro.md §6.1/§10 — rule string thuần, KHÔNG dựa
             // vào attribute Spatie Data trên ArticleData (không có tác dụng validate thật ở đây).
-            'is_sponsored'            => ['boolean'],
-            'sponsor_name'            => ['required_if:is_sponsored,1', 'nullable', 'string', 'max:255'],
-            'sponsor_logo_url'        => ['nullable', 'string', 'max:500'],
-            'sponsor_label'           => ['required_if:is_sponsored,1', 'nullable', Rule::enum(SponsorLabel::class)],
-            'campaign_code'           => ['nullable', 'string', 'max:50'],
-            'sponsored_start_date'    => ['nullable', 'date'],
-            'sponsored_end_date'      => ['nullable', 'date', 'after_or_equal:sponsored_start_date'],
+            'is_sponsored' => ['boolean'],
+            'sponsor_name' => ['required_if:is_sponsored,1', 'nullable', 'string', 'max:255'],
+            'sponsor_logo_url' => ['nullable', 'string', 'max:500'],
+            'sponsor_label' => ['required_if:is_sponsored,1', 'nullable', Rule::enum(SponsorLabel::class)],
+            'campaign_code' => ['nullable', 'string', 'max:50'],
+            'sponsored_start_date' => ['nullable', 'date'],
+            'sponsored_end_date' => ['nullable', 'date', 'after_or_equal:sponsored_start_date'],
         ]);
     }
 }

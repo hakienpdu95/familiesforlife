@@ -2,6 +2,9 @@
 
 namespace Modules\Event\Models;
 
+use App\Models\Province;
+use App\Models\User;
+use App\Models\Ward;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,8 +26,8 @@ use Spatie\Activitylog\Support\LogOptions;
 class Event extends Model
 {
     use HasFactory;
-    use SoftDeletes;
     use LogsActivity;
+    use SoftDeletes;
 
     protected $table = 'events';
 
@@ -39,6 +42,7 @@ class Event extends Model
     protected $fillable = [
         'uuid',
         'category_id',
+        'heritage_site_id',
         'title',
         'short_title',
         'slug',
@@ -79,23 +83,23 @@ class Event extends Model
     ];
 
     protected $casts = [
-        'start_date'        => 'date',
-        'end_date'          => 'date',
-        'location_type'     => EventLocationType::class,
-        'price_type'        => EventPriceType::class,
-        'status'            => EventStatus::class,
-        'is_featured'       => 'boolean',
-        'price_amount'      => 'decimal:2',
-        'price_min'         => 'decimal:2',
-        'price_max'         => 'decimal:2',
-        'latitude'          => 'decimal:7',
-        'longitude'         => 'decimal:7',
-        'poster_width'      => 'integer',
-        'poster_height'     => 'integer',
+        'start_date' => 'date',
+        'end_date' => 'date',
+        'location_type' => EventLocationType::class,
+        'price_type' => EventPriceType::class,
+        'status' => EventStatus::class,
+        'is_featured' => 'boolean',
+        'price_amount' => 'decimal:2',
+        'price_min' => 'decimal:2',
+        'price_max' => 'decimal:2',
+        'latitude' => 'decimal:7',
+        'longitude' => 'decimal:7',
+        'poster_width' => 'integer',
+        'poster_height' => 'integer',
         'poster_size_bytes' => 'integer',
-        'approved_at'       => 'datetime',
-        'rejected_at'       => 'datetime',
-        'published_at'      => 'datetime',
+        'approved_at' => 'datetime',
+        'rejected_at' => 'datetime',
+        'published_at' => 'datetime',
     ];
 
     protected static function booted(): void
@@ -124,12 +128,12 @@ class Event extends Model
 
     public function province(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\Province::class, 'province_code', 'province_code');
+        return $this->belongsTo(Province::class, 'province_code', 'province_code');
     }
 
     public function ward(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\Ward::class, 'ward_code', 'ward_code');
+        return $this->belongsTo(Ward::class, 'ward_code', 'ward_code');
     }
 
     /** PII người nộp — KHÔNG bao giờ load ở query/route công khai (spec §5.3/§10.5). */
@@ -140,22 +144,22 @@ class Event extends Model
 
     public function approvedBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'approved_by');
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
     public function rejectedBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'rejected_by');
+        return $this->belongsTo(User::class, 'rejected_by');
     }
 
     public function createdBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'created_by');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function updatedBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'updated_by');
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     // ── Scopes ───────────────────────────────────────────────────────
@@ -177,15 +181,15 @@ class Event extends Model
     public function priceLabel(): string
     {
         return match ($this->price_type) {
-            \Modules\Event\Enums\EventPriceType::Free   => 'Miễn phí',
-            \Modules\Event\Enums\EventPriceType::Single => number_format((float) $this->price_amount, 0, ',', '.').'đ',
-            \Modules\Event\Enums\EventPriceType::Range  => number_format((float) $this->price_min, 0, ',', '.').'đ – '.number_format((float) $this->price_max, 0, ',', '.').'đ',
+            EventPriceType::Free => 'Miễn phí',
+            EventPriceType::Single => number_format((float) $this->price_amount, 0, ',', '.').'đ',
+            EventPriceType::Range => number_format((float) $this->price_min, 0, ',', '.').'đ – '.number_format((float) $this->price_max, 0, ',', '.').'đ',
         };
     }
 
     public function locationLabel(): string
     {
-        return $this->location_type === \Modules\Event\Enums\EventLocationType::Online
+        return $this->location_type === EventLocationType::Online
             ? 'Trực tuyến'
             : trim(($this->venue_name ?? '').($this->ward?->name ? ", {$this->ward->name}" : '').($this->province?->name ? ", {$this->province->name}" : ''), ', ');
     }

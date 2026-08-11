@@ -21,6 +21,9 @@ class OcopProductData extends Data
         public readonly ?string $producer_name = null,
         public readonly ?string $producer_address = null,
 
+        // spec/Heritage_Technical_Specification.md §8.2 — làng nghề/di tích liên quan, tuỳ chọn.
+        public readonly ?int $heritage_site_id = null,
+
         /**
          * spec/Media_Library_Technical_Specification.md §8 — UUID media FilePond (collection
          * `cover`) chờ gắn vào sản phẩm vừa tạo — CHỈ dùng ở luồng tạo mới (create form, chưa có

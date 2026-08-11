@@ -50,6 +50,9 @@ class EventData extends Data
         public readonly ?string $ward_code,
         public readonly ?string $online_url,
 
+        // spec/Heritage_Technical_Specification.md §8.1 — di tích liên quan, tuỳ chọn.
+        public readonly ?int $heritage_site_id,
+
         #[Required, Max(500)]
         public readonly string $website_url,
 
