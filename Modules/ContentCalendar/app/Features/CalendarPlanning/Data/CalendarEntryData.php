@@ -30,5 +30,9 @@ class CalendarEntryData extends Data
         public readonly ?string $target_publish_date = null,
         #[Nullable]
         public readonly ?int $assigned_to = null,
+        // (2026-08-11) — xem Modules\ContentCalendar\Enums\FunnelStage. Tuỳ chọn, cùng lý do
+        // assigned_to/target_publish_date: không ép biên tập viên phân loại ngay lúc tạo.
+        #[Nullable]
+        public readonly ?string $funnel_stage = null,
     ) {}
 }

@@ -16,8 +16,14 @@
     <span>Không cần biết "prompt" hay "framework" là gì — mỗi mẫu dưới đây chỉ là 1 bộ câu hỏi có sẵn (giống tờ khai in sẵn). Bạn chỉ cần đọc mô tả <b>"Phù hợp khi..."</b> để chọn đúng mẫu, rồi điền vào từng ô theo ví dụ gợi ý.</span>
 </div>
 
+@foreach($groupedFrameworks as $groupName => $frameworks)
+<div class="{{ $loop->first ? '' : 'mt-8' }} mb-3 flex items-center gap-2">
+    <h2 class="text-base font-bold text-base-content">{{ $groupName }}</h2>
+    <span class="badge badge-ghost badge-sm">{{ count($frameworks) }} mẫu</span>
+</div>
+
 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-    @foreach($frameworks as $key => $framework)
+    @foreach($frameworks as $framework)
     <div class="card bg-base-100 shadow-sm border border-base-200 hover:border-primary/40 hover:shadow-md transition-all">
         <div class="card-body p-5">
             <div class="flex items-start justify-between gap-2 mb-1">
@@ -38,7 +44,7 @@
                 <textarea readonly rows="6" class="textarea textarea-bordered textarea-xs w-full mt-2 font-mono bg-base-200/40">{{ $framework['rendered_example'] }}</textarea>
             </details>
 
-            <a href="{{ route('backend.promptstudio.prompts.create', ['framework' => $key]) }}"
+            <a href="{{ route('backend.promptstudio.prompts.create', ['framework' => $framework['key']]) }}"
                class="btn btn-primary btn-sm btn-block mt-4 gap-1.5">
                 Dùng mẫu này
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
@@ -47,5 +53,6 @@
     </div>
     @endforeach
 </div>
+@endforeach
 
 @endsection

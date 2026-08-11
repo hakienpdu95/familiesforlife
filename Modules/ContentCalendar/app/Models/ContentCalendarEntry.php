@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use Modules\ContentCalendar\Enums\CalendarEntryOrigin;
 use Modules\ContentCalendar\Enums\CalendarEntryStatus;
+use Modules\ContentCalendar\Enums\FunnelStage;
 use Modules\Post\Models\PostArticle;
 use Modules\Post\Models\PostCategory;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
@@ -20,21 +21,22 @@ use Spatie\Activitylog\Support\LogOptions;
  */
 class ContentCalendarEntry extends Model
 {
-    use SoftDeletes;
     use LogsActivity;
+    use SoftDeletes;
 
     protected $table = 'content_calendar_entries';
 
     protected $fillable = [
         'post_category_id', 'title', 'brief', 'origin', 'origin_note',
-        'status', 'target_publish_date', 'assigned_to', 'post_article_id',
+        'status', 'funnel_stage', 'target_publish_date', 'assigned_to', 'post_article_id',
         'created_by', 'updated_by',
     ];
 
     protected $casts = [
-        'origin'               => CalendarEntryOrigin::class,
-        'status'               => CalendarEntryStatus::class,
-        'target_publish_date'  => 'date',
+        'origin' => CalendarEntryOrigin::class,
+        'status' => CalendarEntryStatus::class,
+        'funnel_stage' => FunnelStage::class,
+        'target_publish_date' => 'date',
     ];
 
     public function getActivitylogOptions(): LogOptions

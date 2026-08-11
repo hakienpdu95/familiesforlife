@@ -10,10 +10,12 @@
     'linkArticleUrlTemplate' => route('backend.api.contentcalendar.entries.link-article', ['entry' => '__UUID__']),
     'destroyUrlTemplate'     => route('backend.api.contentcalendar.entries.destroy', ['entry' => '__UUID__']),
     'calendarUrl'      => route('backend.contentcalendar.calendar'),
+    'funnelGapAnalysisUrlTemplate' => route('backend.api.contentcalendar.categories.funnel-gap-analysis', ['category' => '__CATEGORY_UUID__']),
     'categories'       => $categories,
     'assignableUsers'  => $assignableUsers,
     'statuses'         => $statuses,
     'origins'          => $origins,
+    'funnelStages'     => $funnelStages,
     'canManage'        => $canManage,
 ]) }})" x-init="init()">
 
@@ -55,6 +57,11 @@
                 <input type="checkbox" x-model="filters.includeDone" @change="loadEntries()" class="checkbox checkbox-sm">
                 <span class="label-text text-xs">Hiện cả Đã xong/Đã huỷ</span>
             </label>
+            {{-- (2026-08-11) — chỉ bật khi đã lọc theo 1 category cụ thể, vì kiểm kê Lạnh/Ấm/Nóng
+                 chỉ có ý nghĩa trong phạm vi 1 chuyên mục (mỗi chuyên mục có ContentFoundation/
+                 pain point riêng — xem BuildFunnelGapAnalysisPromptAction). --}}
+            <button type="button" class="btn btn-outline btn-sm" x-show="filters.categoryId" x-cloak
+                    @click="openFunnelGapModal()">Phân tích khoảng trống Lạnh/Ấm/Nóng</button>
             <p x-show="loading" class="text-xs text-base-content/40">Đang tải...</p>
         </div>
     </div>
@@ -76,6 +83,9 @@
                                     <span class="badge badge-ghost badge-xs" x-text="entry.category?.name"></span>
                                     <span class="badge badge-xs" :class="entry.status_badge_class" x-text="entry.status_label"
                                           :title="entry.is_linked ? 'Đọc từ trạng thái bài viết thật — không sửa trực tiếp được' : ''"></span>
+                                    <span class="badge badge-xs" x-show="entry.funnel_stage" x-cloak
+                                          :class="entry.funnel_stage_badge_class" x-text="entry.funnel_stage_label"
+                                          title="Giai đoạn hành trình độc giả"></span>
                                 </div>
                                 <p class="text-xs text-base-content/50" x-show="entry.assigned_to">
                                     Người viết: <span x-text="entry.assigned_to?.name"></span>
@@ -161,6 +171,22 @@
 
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
+                            <span class="label-text font-medium">Giai đoạn hành trình</span>
+                            <span class="label-text-alt text-base-content/40 text-xs">Không bắt buộc</span>
+                        </label>
+                        <select id="ts-entry-funnel-stage" x-model="form.funnel_stage"
+                                class="select select-bordered select-sm w-full"
+                                data-ts-placeholder="— Chưa phân loại —">
+                            <option value="">— Chưa phân loại —</option>
+                            <template x-for="s in funnelStages" :key="s.value">
+                                <option :value="s.value" :title="s.hint" x-text="s.label"></option>
+                            </template>
+                        </select>
+                        <p x-show="fieldErrors.funnel_stage" x-cloak class="mt-1 text-xs text-error" x-text="fieldErrors.funnel_stage?.[0]"></p>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label py-0 pb-1.5">
                             <span class="label-text font-medium">Ngày dự kiến đăng</span>
                             <span class="label-text-alt text-base-content/40 text-xs">Không bắt buộc</span>
                         </label>
@@ -229,6 +255,46 @@
                     </div>
                 </div>
             </form>
+        </div>
+        <form method="dialog" class="modal-backdrop"><button>close</button></form>
+    </dialog>
+
+    {{-- ── Modal phân tích khoảng trống Lạnh/Ấm/Nóng (2026-08-11) ─────────
+         Đọc-only: chỉ hiển thị số liệu + prompt sinh sẵn để copy sang ChatGPT/Claude — KHÔNG gọi
+         AI Provider, cùng nguyên tắc ContentOutlines/PromptFrameworkStudio. --}}
+    <dialog x-ref="funnelGapDialog" class="modal">
+        <div class="modal-box max-w-2xl">
+            <h3 class="font-bold text-lg">Phân tích khoảng trống theo giai đoạn hành trình</h3>
+            <p class="text-xs text-base-content/50 mt-0.5" x-text="funnelGap.categoryName"></p>
+
+            <div x-show="funnelGap.loading" class="py-6 text-center text-sm text-base-content/40">Đang tính...</div>
+
+            <template x-if="!funnelGap.loading && funnelGap.counts">
+                <div class="mt-4 space-y-4">
+                    {{-- Thanh tỷ lệ trực quan — tô theo đúng badge màu của FunnelStage (info/warning/error). --}}
+                    <div>
+                        <div class="flex h-3 w-full overflow-hidden rounded-full bg-base-200">
+                            <div class="bg-info" :style="`width: ${funnelGapPercent('cold')}%`" title="Lạnh"></div>
+                            <div class="bg-warning" :style="`width: ${funnelGapPercent('warm')}%`" title="Ấm"></div>
+                            <div class="bg-error" :style="`width: ${funnelGapPercent('hot')}%`" title="Nóng"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-base-content/50 mt-1">
+                            <span>Lạnh: <span x-text="funnelGap.counts.cold"></span></span>
+                            <span>Ấm: <span x-text="funnelGap.counts.warm"></span></span>
+                            <span>Nóng: <span x-text="funnelGap.counts.hot"></span></span>
+                            <span x-show="funnelGap.counts.unclassified > 0">Chưa phân loại: <span x-text="funnelGap.counts.unclassified"></span></span>
+                        </div>
+                    </div>
+
+                    <div class="form-control">
+                        <div class="flex items-center justify-between">
+                            <label class="label py-0 pb-1.5"><span class="label-text font-medium">Prompt gợi ý bù giai đoạn thiếu</span></label>
+                            <button type="button" class="btn btn-ghost btn-2xs" @click="copyFunnelGapPrompt()">Sao chép</button>
+                        </div>
+                        <textarea readonly rows="12" class="textarea textarea-bordered textarea-sm w-full font-mono text-xs" x-text="funnelGap.prompt"></textarea>
+                    </div>
+                </div>
+            </template>
         </div>
         <form method="dialog" class="modal-backdrop"><button>close</button></form>
     </dialog>

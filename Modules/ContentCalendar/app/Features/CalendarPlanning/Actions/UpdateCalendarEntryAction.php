@@ -29,14 +29,15 @@ class UpdateCalendarEntryAction
         }
 
         $entry->update([
-            'post_category_id'    => $data->post_category_id,
-            'title'               => $data->title,
-            'brief'               => $data->brief,
-            'origin'              => $data->origin,
-            'origin_note'         => $data->origin_note,
+            'post_category_id' => $data->post_category_id,
+            'title' => $data->title,
+            'brief' => $data->brief,
+            'origin' => $data->origin,
+            'origin_note' => $data->origin_note,
+            'funnel_stage' => $data->funnel_stage,
             'target_publish_date' => $data->target_publish_date,
-            'assigned_to'         => $data->assigned_to,
-            'updated_by'          => $actor->id,
+            'assigned_to' => $data->assigned_to,
+            'updated_by' => $actor->id,
         ]);
 
         return $entry->refresh();

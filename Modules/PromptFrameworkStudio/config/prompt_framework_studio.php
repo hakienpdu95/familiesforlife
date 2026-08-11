@@ -23,6 +23,19 @@
 // suy ra từ chính chuỗi `template` cũ nên giữ nguyên ngữ nghĩa gốc, vd 'Narrowing/constraints'
 // thay vì nhãn UI rút gọn 'Narrowing'. Vắng mặt = in nguyên văn không bọc `## `, hiện chỉ
 // `freeform.text`), type, required. Ví dụ mẫu cụ thể nằm ở `example[field.key]`, dùng làm placeholder.
+//
+// (2026-08-11, nguồn spec/giadinh.md — "ChatGPT Prompts for Content Marketing", thư viện 30
+// prompt content-marketing dạng <context>/<task>) — 2 key MỚI, chỉ dùng cho nhóm "Chiến lược nội
+// dung" bên dưới, KHÔNG áp cho 18 framework prompt-engineering tổng quát ở trên (khác biệt có chủ
+// đích, xem §0 mục "Kết luận" của giadinh.md gap-analysis): framework tổng quát không có nhiệm vụ
+// cố định — model tự suy luận việc cần làm từ chính nội dung field; 5 mục "Chiến lược nội dung"
+// dưới đây LÀ nhiệm vụ cố định có sẵn (dịch/biên tập lại từ nguồn, KHÔNG sao chép nguyên văn — cùng
+// nguyên tắc "Ví dụ mẫu" ở trên), người dùng chỉ cung cấp tham số tình huống qua `fields`.
+//   - group: nhãn nhóm hiển thị ở trang Thư viện (mặc định coi là 'Framework prompt engineering
+//     tổng quát' khi vắng mặt — xem FrameworkLibraryController).
+//   - task_instructions: mảng các nhiệm vụ đánh số cố định, in ở khối `## Nhiệm vụ` SAU field
+//     blocks — xem RenderPromptFromFrameworkAction. Câu cuối cùng trong mảng luôn là chỉ dẫn định
+//     dạng đầu ra (tương đương "Return as..." của nguồn).
 return [
     'frameworks' => [
 
@@ -371,6 +384,242 @@ return [
                 'task' => 'Viết email nhắc phụ huynh hoàn tất hồ sơ đăng ký khoá học đang bỏ dở.',
                 'criteria' => 'Dưới 120 từ; có đúng 1 lời kêu gọi hành động (CTA) duy nhất; nhắc đúng tên khoá học đã đăng ký dở; giọng văn nhắc nhở nhẹ nhàng, không tạo áp lực; không dùng từ "vui lòng" quá 1 lần.',
                 'rules' => 'Hiện đủ 3 phần: Bản nháp → Tự phê bình theo từng tiêu chí trên → Bản hoàn chỉnh đã sửa hết các điểm bị chê.',
+            ],
+        ],
+
+        // (2026-08-11, đối chiếu "A Guide to Prompting with LLMs: 2026 Edition" — IAB Australia)
+        // — 3 kỹ thuật suy luận CÒN THIẾU sau khi rà soát: Chain-of-Thought, Step-Back Prompting,
+        // Few-Shot (nhiều ví dụ). Cả 3 dùng `task_instructions` (cùng cơ chế nhóm "Chiến lược nội
+        // dung" bên dưới) vì bản chất kỹ thuật của chúng LÀ 1 chỉ dẫn suy luận cố định ("suy nghĩ
+        // từng bước", "trả lời tổng quát trước"), không phải cấu trúc field người dùng tự định
+        // nghĩa như 18 framework viết-nội-dung ở trên — nhưng KHÔNG gắn `group` (mặc định vào
+        // "Framework prompt engineering tổng quát" cùng skeleton/tot/plansolve/selfrefine/react ở
+        // trên, đúng bản chất: đây là kỹ thuật suy luận đa dụng, không riêng cho content marketing).
+        //
+        // ĐÃ CÂN NHẮC nhưng KHÔNG thêm — Self-Consistency Sampling: trùng chức năng đáng kể với
+        // `tot` đã có (nhiều phương án + tiêu chí + chọn) cho mục đích thực tế của toà soạn nội
+        // dung này; Structured Prompting (nhãn ROLE/CONTEXT/DATA...): chính là cơ chế nền của TOÀN
+        // BỘ module (`RenderPromptFromFrameworkAction`), không phải khoảng trống; Multimodal: kiến
+        // trúc module chỉ ghép chuỗi text (`field_values` string, không upload file) — người dùng
+        // tự đính kèm file khi dán prompt sang ChatGPT/Claude, không phải việc của module này.
+
+        'cot' => [
+            'name' => 'Chain-of-Thought',
+            'description' => 'Problem · Known Info · Reasoning Examples (tuỳ chọn) · Output Format — buộc AI suy luận tuần tự qua từng bước trước khi trả lời, thay vì trả lời ngay theo trực giác.',
+            'best_for' => 'Câu hỏi cần cân nhắc nhiều yếu tố mới ra kết luận đúng (so sánh lựa chọn, tính toán nhiều bước, phân tích nguyên nhân). Chỉ cần 1 câu trả lời trực tiếp không cần lý luận thì dùng RTF; cần NHIỀU phương án song song có chấm điểm thì dùng Tree-of-Thought — CoT chỉ đi theo 1 mạch suy luận duy nhất, không rẽ nhánh.',
+            'fields' => [
+                ['key' => 'problem', 'label' => 'Problem', 'hint' => 'Vấn đề/câu hỏi cần AI suy luận qua nhiều bước trước khi trả lời.', 'prompt_heading' => 'Problem', 'type' => 'textarea', 'required' => true],
+                ['key' => 'known_info', 'label' => 'Known Info', 'hint' => 'Thông tin/ràng buộc đã biết cần tuân theo khi suy luận.', 'prompt_heading' => 'Known information / constraints', 'type' => 'textarea', 'required' => false],
+                ['key' => 'reasoning_examples', 'label' => 'Reasoning Examples', 'hint' => '1-2 ví dụ suy luận mẫu cho câu hỏi TƯƠNG TỰ (nêu cả các bước, không chỉ đáp án) — để trống thì dùng Zero-Shot (chỉ yêu cầu suy nghĩ từng bước), điền vào thì dùng Few-Shot CoT (AI học theo CÁCH suy luận trong ví dụ).', 'tip' => 'Zero-Shot (để trống) đủ dùng cho hầu hết câu hỏi thông thường. Chỉ điền Few-Shot khi Zero-Shot đã thử mà AI suy luận sai hướng hoặc bỏ sót bước quan trọng — ví dụ mẫu lúc đó chỉ rõ ĐÚNG bước hay bị bỏ sót là bước nào, không cần thiết cho câu hỏi đơn giản.', 'prompt_heading' => 'Reasoning example (Few-Shot)', 'type' => 'textarea', 'required' => false],
+                ['key' => 'output_format', 'label' => 'Output Format', 'hint' => 'Câu trả lời cuối cần trình bày thế nào — chỉ đáp án, hay cả tóm tắt lý do.', 'prompt_heading' => 'Output format', 'type' => 'text', 'required' => true],
+            ],
+            'task_instructions' => [
+                'Suy nghĩ tuần tự qua từng bước trước khi đưa ra câu trả lời cuối cùng — không nhảy thẳng tới kết luận.',
+                'Với mỗi bước, nêu rõ đang xét yếu tố nào và kết quả xét yếu tố đó.',
+                'Nếu có ví dụ suy luận mẫu ở trên, áp dụng đúng CÁCH suy luận trong ví dụ đó cho vấn đề mới, không chỉ chép lại đáp án.',
+                'Tách riêng phần "Câu trả lời cuối cùng" rõ ràng, dễ tìm, KHÔNG lẫn vào các bước suy luận phía trên.',
+                'Trả về theo đúng định dạng đầu ra đã nêu.',
+            ],
+            'example' => [
+                'problem' => 'Gia đình chị H có thu nhập 20 triệu/tháng, con chuẩn bị vào lớp 1, đang phân vân giữa 1 trường công gần nhà (miễn học phí, sĩ số 45 học sinh/lớp) và 1 trường tư cách nhà 8km (học phí 6 triệu/tháng, sĩ số 25 học sinh/lớp). Nên chọn trường nào?',
+                'known_info' => 'Ưu tiên: học phí không vượt quá 25% thu nhập; sĩ số lớp ảnh hưởng mức độ được giáo viên quan tâm; thời gian di chuyển không quá 30 phút/lượt.',
+                'reasoning_examples' => 'Câu hỏi tương tự: 1 gia đình khác chọn giữa trường công cách 15 phút và trường tư gần nhà nhưng học phí 8 triệu (32% thu nhập) → bước đầu tiên đã loại trường tư vì vượt ngưỡng 25%, dù gần hơn; kết luận chọn trường công dù xa hơn.',
+                'output_format' => 'Nêu rõ từng bước cân nhắc theo 3 tiêu chí đã nêu, sau đó 1 câu kết luận chọn trường nào và vì sao.',
+            ],
+        ],
+
+        'stepback' => [
+            'name' => 'Step-Back Prompting',
+            'description' => 'Specific Question · Step-Back Question · Context · Output Format — trả lời câu hỏi TỔNG QUÁT hơn trước để rút ra nguyên tắc, rồi mới áp dụng nguyên tắc đó vào tình huống cụ thể.',
+            'best_for' => 'Tình huống cụ thể dễ khiến AI trả lời theo cảm tính/thiếu nhất quán nếu hỏi thẳng — cần neo vào 1 nguyên tắc chung trước khi áp dụng. Câu hỏi đã đơn giản, rõ ràng, không cần nguyên tắc nền thì dùng RTF hoặc RACE.',
+            'fields' => [
+                ['key' => 'specific_question', 'label' => 'Specific Question', 'hint' => 'Câu hỏi/tình huống cụ thể thực sự cần trả lời.', 'prompt_heading' => 'Specific question', 'type' => 'textarea', 'required' => true],
+                ['key' => 'step_back_question', 'label' => 'Step-Back Question', 'hint' => 'Câu hỏi TỔNG QUÁT hơn đứng sau tình huống này — nguyên tắc/quy luật chung là gì?', 'tip' => 'Phép thử: nếu câu hỏi tổng quát này đổi được sang 1 tình huống hoàn toàn khác mà vẫn hỏi đúng, nghĩa là đủ tổng quát. Nếu vẫn còn nhắc chi tiết riêng của tình huống cụ thể (tên người, con số riêng), nó chưa lùi đủ xa — hãy trừu tượng hoá thêm 1 bậc nữa.', 'prompt_heading' => 'Step-back question (trả lời TRƯỚC)', 'type' => 'textarea', 'required' => true],
+                ['key' => 'context', 'label' => 'Context', 'hint' => 'Bối cảnh thêm cho tình huống cụ thể — tuỳ chọn.', 'prompt_heading' => 'Context', 'type' => 'textarea', 'required' => false],
+                ['key' => 'output_format', 'label' => 'Output Format', 'hint' => 'Câu trả lời cuối cần trình bày thế nào.', 'prompt_heading' => 'Output format', 'type' => 'text', 'required' => true],
+            ],
+            'task_instructions' => [
+                'Trả lời câu hỏi tổng quát (step-back question) trước — nêu rõ nguyên tắc/quy luật chung, CHƯA áp dụng vào tình huống cụ thể.',
+                'Sau đó mới áp dụng nguyên tắc vừa nêu vào tình huống cụ thể để trả lời.',
+                'Dùng 1 câu chuyển ý rõ ràng khi chuyển từ "nguyên tắc chung" sang "áp dụng cụ thể" — không gộp lẫn 2 phần.',
+                'Nếu nguyên tắc chung và tình huống cụ thể mâu thuẫn nhau ở điểm nào, nêu rõ ngoại lệ đó thay vì bỏ qua.',
+                'Trả về theo đúng định dạng đầu ra đã nêu.',
+            ],
+            'example' => [
+                'specific_question' => 'Con 5 tuổi nhà em cứ đòi mua đồ chơi mới mỗi lần đi siêu thị, không mua là ăn vạ giữa siêu thị. Em nên làm gì?',
+                'step_back_question' => 'Nguyên tắc chung khi xử lý hành vi ăn vạ ở trẻ mầm non để đòi được thứ mình muốn là gì?',
+                'context' => 'Con đã ăn vạ kiểu này khoảng 2 tháng nay, tần suất tăng dần.',
+                'output_format' => 'Đoạn văn 2 phần rõ ràng: (1) nguyên tắc chung, (2) áp dụng cụ thể cho tình huống ở siêu thị.',
+            ],
+        ],
+
+        'fewshot' => [
+            'name' => 'Few-Shot Prompting',
+            'description' => 'Task · Examples (2-5 cặp mẫu) · Đầu vào mới · Rules — dạy AI 1 khuôn/định dạng qua NHIỀU ví dụ input→output, để áp dụng nhất quán cho dữ liệu mới.',
+            'best_for' => 'Việc cần lặp lại đúng 1 khuôn nhiều lần (chuẩn hoá mô tả sự kiện/sản phẩm, viết caption theo mẫu cố định, phân loại bình luận độc giả). Chỉ có ĐÚNG 1 ví dụ để học theo thì dùng TRACE/CARE — Few-Shot cần ít nhất 2 ví dụ mới lộ ra khuôn chung (cái gì cố định, cái gì thay đổi theo dữ liệu).',
+            'fields' => [
+                ['key' => 'task', 'label' => 'Task', 'hint' => 'Việc cần làm — mô tả ngắn gọn.', 'prompt_heading' => 'Task', 'type' => 'text', 'required' => true],
+                ['key' => 'examples', 'label' => 'Examples', 'hint' => '2-5 ví dụ mẫu, mỗi ví dụ gồm "Đầu vào: ..." rồi "Đầu ra: ...", cách nhau 1 dòng trống.', 'tip' => 'Lỗi thường gặp: cho 2 ví dụ gần giống hệt nhau khiến AI không phân biệt được đâu là khuôn cố định, đâu là nội dung thay đổi theo dữ liệu. Ví dụ nên KHÁC NHAU về nội dung nhưng GIỐNG NHAU về cấu trúc/định dạng — sự khác biệt đó chính là thứ dạy AI nhận ra đâu là khuôn thật.', 'prompt_heading' => 'Examples', 'type' => 'textarea', 'required' => true],
+                ['key' => 'new_input', 'label' => 'Đầu vào mới', 'hint' => 'Dữ liệu MỚI cần AI áp dụng đúng khuôn đã học từ các ví dụ.', 'prompt_heading' => 'Đầu vào mới cần xử lý', 'type' => 'textarea', 'required' => true],
+                ['key' => 'rules', 'label' => 'Rules', 'hint' => 'Ràng buộc thêm (độ dài, từ cấm...) — tuỳ chọn.', 'prompt_heading' => 'Rules', 'type' => 'textarea', 'required' => false],
+            ],
+            'task_instructions' => [
+                'Học đúng KHUÔN/ĐỊNH DẠNG chung từ các ví dụ đã cho — không chỉ học nội dung riêng của từng ví dụ.',
+                'Áp dụng đúng khuôn đó cho đầu vào mới, giữ nguyên cấu trúc/độ dài/giọng văn như các ví dụ mẫu.',
+                'Không thêm phần giải thích hay lời dẫn ngoài khuôn đã học, trừ khi chính ví dụ mẫu có phần đó.',
+                'Nếu đầu vào mới có chi tiết KHÔNG khớp khuôn nào trong ví dụ, nêu rõ đang linh hoạt điều chỉnh ở đâu.',
+                'Trả về đúng khuôn đã học, áp dụng cho đầu vào mới.',
+            ],
+            'example' => [
+                'task' => 'Viết mô tả ngắn 1 câu cho sự kiện gia đình, dùng hiển thị trên thẻ (card) danh sách sự kiện.',
+                'examples' => "Đầu vào: Hội thảo nuôi dạy con không nước mắt, diễn ra 20/8/2026 tại Hà Nội, miễn phí.\nĐầu ra: Hội thảo miễn phí giúp cha mẹ nuôi dạy con không cần quát mắng — 20/8 tại Hà Nội.\n\nĐầu vào: Trại hè kỹ năng sinh tồn cho trẻ 8-12 tuổi, 3 ngày 2 đêm, giá 2.500.000đ, khởi hành từ TP.HCM.\nĐầu ra: Trại hè 3 ngày 2 đêm rèn kỹ năng sinh tồn cho trẻ 8-12 tuổi, khởi hành từ TP.HCM.",
+                'new_input' => 'Khoá học online Kỷ luật tích cực trong 30 ngày, học phí 890.000đ, có video bài giảng và bài tập hằng ngày.',
+                'rules' => 'Luôn dưới 20 từ; luôn có 1 chi tiết cụ thể (giá/địa điểm/thời lượng); không dùng dấu chấm than.',
+            ],
+        ],
+
+        // ── Nhóm "Chiến lược nội dung" (2026-08-11, nguồn spec/giadinh.md) — 5 mẫu CÓ NHIỆM VỤ CỐ
+        // ĐỊNH (`task_instructions`), khác 18 framework tổng quát ở trên (KHÔNG có nhiệm vụ cố định
+        // — xem docblock đầu file). Ví dụ mẫu dùng chung bối cảnh "Vì Gia Đình" (`config('app.
+        // site_name')` — xem ArticleStructuredDataBuilder::buildPublisher()) để nhất quán với phần
+        // còn lại của hệ thống, KHÔNG dùng ví dụ agency/khách hàng như nguồn gốc (nguồn viết cho
+        // marketing agency, không khớp mô hình toà soạn nội dung của dự án này).
+
+        'contentstrategy' => [
+            'name' => 'Chiến lược nội dung theo quý',
+            'group' => 'Chiến lược nội dung',
+            'description' => 'Thương hiệu · Đối tượng · Mục tiêu · Kênh · Mức độ trưởng thành → bản kế hoạch nội dung 1 quý (mục tiêu, trụ cột, kênh, tần suất, rủi ro).',
+            'best_for' => 'Đầu quý, khi cần 1 bản định hướng nội dung tổng thể trước khi lên lịch bài chi tiết ở Content Calendar. Đã có sẵn danh sách ý tưởng, chỉ cần sắp lịch thì dùng thẳng module Lịch nội dung, không cần mẫu này.',
+            'fields' => [
+                ['key' => 'brand', 'label' => 'Thương hiệu', 'hint' => 'Tên trang/mảng nội dung — càng cụ thể AI càng bám sát đúng định vị hiện có.', 'prompt_heading' => 'Thương hiệu', 'type' => 'text', 'required' => true],
+                ['key' => 'audience', 'label' => 'Đối tượng độc giả', 'hint' => 'Càng cụ thể càng tốt — độ tuổi con, khu vực, mối quan tâm chính.', 'prompt_heading' => 'Đối tượng độc giả', 'type' => 'textarea', 'required' => true],
+                ['key' => 'goal', 'label' => 'Mục tiêu quý này', 'hint' => 'Mục tiêu biên tập/kinh doanh cụ thể — VD tăng lượt đọc, tăng đăng ký bản tin, tăng chuyển đổi khoá học.', 'prompt_heading' => 'Mục tiêu quý này', 'type' => 'text', 'required' => true],
+                ['key' => 'channels', 'label' => 'Kênh chính', 'hint' => 'VD: bài viết trên site, Facebook, Zalo OA, TikTok.', 'prompt_heading' => 'Kênh chính', 'type' => 'text', 'required' => true],
+                ['key' => 'maturity', 'label' => 'Mức độ hiện tại', 'hint' => 'Nội dung hiện đang: chưa có / thất thường / đã đều đặn.', 'tip' => 'Mức độ trưởng thành quyết định tần suất AI đề xuất ở nhiệm vụ 5 — điền sai (VD ghi "đều đặn" khi thực ra hay đứt quãng) sẽ ra tần suất phi thực tế, không theo nổi.', 'prompt_heading' => 'Mức độ trưởng thành hiện tại', 'type' => 'text', 'required' => false],
+            ],
+            'task_instructions' => [
+                'Xác định 1 mục tiêu nội dung đo lường được, gắn với mục tiêu quý này, kèm chỉ số cụ thể và mốc thời gian.',
+                'Xác định 3 nhóm độc giả trong đối tượng đã nêu và nhu cầu chính (việc họ cần được giải quyết) của từng nhóm.',
+                'Đề xuất 4 trụ cột nội dung bám sát mục tiêu; giải thích lý do chọn mỗi trụ cột trong 1 câu.',
+                'Gắn mỗi trụ cột với 1 kênh chính và 1 giai đoạn: mới biết đến / đang tìm hiểu / sẵn sàng hành động.',
+                'Đề xuất tần suất đăng bài hằng tuần hợp lý với mức độ trưởng thành hiện tại.',
+                'Liệt kê 3 rủi ro lớn nhất khi triển khai và 1 cách giảm thiểu cho mỗi rủi ro.',
+                'Trả về dưới dạng bản kế hoạch có tiêu đề rõ ràng cho từng phần (mục tiêu, trụ cột, kênh & tần suất, rủi ro).',
+            ],
+            'example' => [
+                'brand' => 'Vì Gia Đình — cẩm nang nuôi dạy con, trường học và hoạt động gia đình',
+                'audience' => 'Cha mẹ có con 0-12 tuổi ở thành phố, quan tâm nuôi dạy con tích cực và tìm hoạt động cuối tuần cho cả nhà',
+                'goal' => 'Tăng 30% lượt đăng ký nhận bản tin trong quý, ưu tiên nội dung nuôi dạy con và sự kiện gia đình',
+                'channels' => 'Bài viết trên site, Facebook, Zalo OA, TikTok',
+                'maturity' => 'Đã đăng đều 3 bài/tuần nhưng chưa có chủ đề xuyên suốt',
+            ],
+        ],
+
+        'contentpillars' => [
+            'name' => 'Trụ cột nội dung từ nỗi đau độc giả',
+            'group' => 'Chiến lược nội dung',
+            'description' => 'Thương hiệu · Đối tượng · Nỗi đau/băn khoăn · Chuyên mục hiện có → 3-5 trụ cột nội dung kèm chủ đề bài con.',
+            'best_for' => 'Khi đã có sẵn nỗi đau/câu hỏi thật của độc giả (từ bình luận, khảo sát, câu hỏi gửi về) và cần biến chúng thành cấu trúc chuyên mục/trụ cột, thay vì đoán chủ đề từ đầu.',
+            'fields' => [
+                ['key' => 'brand', 'label' => 'Thương hiệu', 'hint' => 'Tên trang/mảng nội dung.', 'prompt_heading' => 'Thương hiệu', 'type' => 'text', 'required' => true],
+                ['key' => 'audience', 'label' => 'Đối tượng độc giả', 'hint' => 'Độc giả chính của mảng nội dung này.', 'prompt_heading' => 'Đối tượng độc giả', 'type' => 'textarea', 'required' => true],
+                ['key' => 'pain_points', 'label' => 'Nỗi đau/băn khoăn', 'hint' => 'Dán nguyên văn câu hỏi/bình luận/băn khoăn thật của độc giả — càng nguyên văn càng tốt.', 'tip' => 'Dán CÂU CHỮ THẬT của độc giả (bình luận, câu hỏi gửi về), không tự diễn giải lại thành câu văn trang trọng — trụ cột dựng từ ngôn ngữ thật của độc giả luôn sát nhu cầu hơn trụ cột dựng từ suy đoán của người viết.', 'prompt_heading' => 'Nỗi đau/băn khoăn của độc giả', 'type' => 'textarea', 'required' => true],
+                ['key' => 'categories', 'label' => 'Chuyên mục hiện có', 'hint' => 'Các chuyên mục đang có trên site (nếu có) — giúp AI biết trụ cột nào đã phủ, trụ cột nào còn thiếu.', 'prompt_heading' => 'Chuyên mục nội dung hiện có', 'type' => 'text', 'required' => false],
+            ],
+            'task_instructions' => [
+                'Gom nhóm các nỗi đau/băn khoăn thành 3-5 chủ đề; đặt tên mỗi chủ đề thành 1 trụ cột nội dung.',
+                'Viết 1 câu định vị cho mỗi trụ cột, kết nối thương hiệu với đúng nỗi đau đó.',
+                'Liệt kê 6 chủ đề bài viết con cho mỗi trụ cột, phù hợp viết bài dài.',
+                'Đánh dấu trụ cột nào khác biệt, trụ cột nào chuyên mục nào cũng có (me-too).',
+                'Đề xuất 1 trụ cột nên đầu tư mạnh nhất trong quý này và lý do.',
+                'Trả về dưới dạng bảng trụ cột (tên trụ cột, câu định vị, 6 chủ đề con, mức độ khác biệt).',
+            ],
+            'example' => [
+                'brand' => 'Vì Gia Đình',
+                'audience' => 'Cha mẹ có con chuẩn bị vào lớp 1',
+                'pain_points' => '"Con em nhút nhát quá, sợ không theo kịp lớp 1"; "Không biết chọn trường công hay tư"; "Con hay ăn vạ, la mắng mãi không hết"; "Không có thời gian chơi cùng con vì đi làm cả ngày"; "Sợ con nghiện điện thoại/iPad"',
+                'categories' => 'Nuôi dạy con, Chọn trường cho con, Sản phẩm & dịch vụ',
+            ],
+        ],
+
+        'readerjourney' => [
+            'name' => 'Hành trình người đọc',
+            'group' => 'Chiến lược nội dung',
+            'description' => 'Thương hiệu · Đối tượng · Sản phẩm/Dịch vụ chính · Thời gian ra quyết định → bản đồ nội dung theo từng giai đoạn hành trình đọc.',
+            'best_for' => 'Khi thư viện nội dung đang lệch hẳn về 1 giai đoạn (VD toàn bài giới thiệu chung, thiếu bài giúp người đọc "chốt" hành động) và cần nhìn ra khoảng trống đó.',
+            'fields' => [
+                ['key' => 'brand', 'label' => 'Thương hiệu', 'hint' => 'Tên trang/mảng nội dung.', 'prompt_heading' => 'Thương hiệu', 'type' => 'text', 'required' => true],
+                ['key' => 'audience', 'label' => 'Đối tượng độc giả', 'hint' => 'Độc giả chính.', 'prompt_heading' => 'Đối tượng độc giả', 'type' => 'textarea', 'required' => true],
+                ['key' => 'offering', 'label' => 'Sản phẩm/Dịch vụ chính', 'hint' => 'Khoá học, sản phẩm gắn trong bài, sự kiện, tư vấn... Nếu chỉ có nội dung miễn phí, ghi rõ "chỉ có nội dung, không bán gì".', 'prompt_heading' => 'Sản phẩm/dịch vụ chính', 'type' => 'text', 'required' => true],
+                ['key' => 'decision_time', 'label' => 'Thời gian ra quyết định', 'hint' => 'Đọc xong quyết định ngay / cân nhắc vài ngày / cân nhắc vài tuần.', 'prompt_heading' => 'Thời gian ra quyết định', 'type' => 'text', 'required' => false],
+            ],
+            'task_instructions' => [
+                'Xác định các giai đoạn hành trình của đối tượng độc giả: mới biết đến, đang tìm hiểu, sẵn sàng hành động, tiếp tục theo dõi.',
+                'Với mỗi giai đoạn, mô tả câu hỏi chính đang nằm trong đầu người đọc.',
+                'Đề xuất 2 định dạng nội dung phù hợp nhất cho mỗi giai đoạn để trả lời đúng câu hỏi đó.',
+                'Cho 1 ví dụ tiêu đề bài cụ thể cho mỗi định dạng.',
+                'Chỉ ra giai đoạn đang bị bỏ ngỏ nhiều nhất trong thư viện nội dung hiện có và giải thích cơ hội ở đó.',
+                'Trả về dưới dạng bảng hành trình (giai đoạn, câu hỏi, định dạng, ví dụ tiêu đề).',
+            ],
+            'example' => [
+                'brand' => 'Vì Gia Đình',
+                'audience' => 'Cha mẹ lần đầu tìm khoá học kỷ luật tích cực cho con',
+                'offering' => 'Khoá học online "Kỷ luật tích cực trong 30 ngày"',
+                'decision_time' => 'Cân nhắc vài ngày, thường đọc 2-3 bài trước khi đăng ký',
+            ],
+        ],
+
+        'competitivegap' => [
+            'name' => 'Phân tích khoảng trống so với đối thủ',
+            'group' => 'Chiến lược nội dung',
+            'description' => 'Thương hiệu · Đối thủ · Chủ đề · Đối tượng → danh sách khoảng trống nội dung đối thủ đang bỏ ngỏ, xếp theo độ khó/đáng làm.',
+            'best_for' => 'Trước khi lên kế hoạch cho 1 chuyên mục mới hoặc khi cảm giác nội dung đang trùng lặp với các trang cùng mảng, cần biết nên viết khác đi ở đâu.',
+            'fields' => [
+                ['key' => 'brand', 'label' => 'Thương hiệu', 'hint' => 'Tên trang/mảng nội dung.', 'prompt_heading' => 'Thương hiệu', 'type' => 'text', 'required' => true],
+                ['key' => 'competitors', 'label' => 'Đối thủ', 'hint' => 'Tên 2-3 trang/kênh cùng mảng nội dung.', 'prompt_heading' => 'Đối thủ chính', 'type' => 'text', 'required' => true],
+                ['key' => 'topic', 'label' => 'Chủ đề cần phân tích', 'hint' => 'Mảng nội dung/chuyên mục cụ thể muốn soi khoảng trống.', 'prompt_heading' => 'Chủ đề', 'type' => 'text', 'required' => true],
+                ['key' => 'audience', 'label' => 'Đối tượng độc giả', 'hint' => 'Độc giả chính của chủ đề này.', 'tip' => 'Khoảng trống chỉ có ý nghĩa khi gắn với 1 đối tượng cụ thể — cùng 1 chủ đề nhưng đối tượng khác nhau sẽ ra khoảng trống khác nhau hoàn toàn. Mô tả càng chung chung, danh sách khoảng trống AI đưa ra càng generic và khó dùng.', 'prompt_heading' => 'Đối tượng độc giả', 'type' => 'textarea', 'required' => true],
+            ],
+            'task_instructions' => [
+                'Liệt kê các góc nội dung nhiều khả năng đối thủ đang làm tốt quanh chủ đề đã nêu.',
+                'Xác định 5 góc nội dung đối thủ đang bỏ ngỏ hoặc làm hời hợt với đối tượng độc giả đã nêu.',
+                'Với mỗi khoảng trống, đánh giá độ khó để làm tốt hơn (thấp/vừa/cao) và mức độ đáng làm.',
+                'Đề xuất 3 khoảng trống nên khai thác trước.',
+                'Gợi ý 1 góc nhìn riêng khiến nội dung của thương hiệu khó bị sao chép.',
+                'Trả về dưới dạng bảng khoảng trống kèm 2 câu khuyến nghị về góc nhìn riêng.',
+            ],
+            'example' => [
+                'brand' => 'Vì Gia Đình',
+                'competitors' => 'Marrybaby, WebTreTho, Eva.vn (mục Gia đình)',
+                'topic' => 'Nuôi dạy con tuổi dậy thì',
+                'audience' => 'Cha mẹ có con 11-15 tuổi, lo lắng con thay đổi tính cách, ngại chia sẻ với bố mẹ',
+            ],
+        ],
+
+        'contentkpi' => [
+            'name' => 'Bộ chỉ số & mục tiêu nội dung',
+            'group' => 'Chiến lược nội dung',
+            'description' => 'Thương hiệu · Mục tiêu · Kênh · Số liệu nền → cây chỉ số (KPI tree) tách bạch chỉ số dẫn dắt/kết quả, kèm mục tiêu 90 ngày.',
+            'best_for' => 'Khi cần chốt "đo bằng gì" trước khi bắt đầu 1 giai đoạn nội dung mới, tránh báo cáo hằng tuần chỉ toàn số liệu không nói lên điều gì (lượt xem, follow) mà bỏ qua chỉ số thật sự phản ánh hiệu quả.',
+            'fields' => [
+                ['key' => 'brand', 'label' => 'Thương hiệu', 'hint' => 'Tên trang/mảng nội dung.', 'prompt_heading' => 'Thương hiệu', 'type' => 'text', 'required' => true],
+                ['key' => 'objective', 'label' => 'Mục tiêu nội dung', 'hint' => 'Mục tiêu đang theo đuổi — VD tăng đăng ký bản tin, tăng chuyển đổi khoá học, tăng người đọc quay lại.', 'prompt_heading' => 'Mục tiêu nội dung', 'type' => 'text', 'required' => true],
+                ['key' => 'channels', 'label' => 'Kênh', 'hint' => 'VD: bài viết trên site, Facebook, Zalo OA, TikTok.', 'prompt_heading' => 'Kênh', 'type' => 'text', 'required' => true],
+                ['key' => 'baseline', 'label' => 'Số liệu nền', 'hint' => 'Số liệu hiện có (nếu có) — để trống nếu chưa từng đo.', 'prompt_heading' => 'Số liệu nền hiện có', 'type' => 'textarea', 'required' => false],
+            ],
+            'task_instructions' => [
+                'Đề xuất 1 chỉ số "ngôi sao dẫn đường" (north-star) gắn trực tiếp với mục tiêu nội dung đã nêu.',
+                'Liệt kê 3 chỉ số dẫn dắt (leading indicator) có thể dự báo chỉ số ngôi sao đó.',
+                'Liệt kê 3 chỉ số kết quả (lagging indicator) chứng minh tác động thật tới mục tiêu kinh doanh.',
+                'Đề xuất mục tiêu cụ thể cho 90 ngày tới dựa trên số liệu nền (hoặc theo mặt bằng chung ngành nếu chưa có số liệu).',
+                'Thiết kế 1 mẫu báo cáo hằng tuần gọn gàng bao quát tất cả chỉ số trên.',
+                'Trả về dưới dạng cây chỉ số (KPI tree) kèm mục tiêu 90 ngày.',
+            ],
+            'example' => [
+                'brand' => 'Vì Gia Đình',
+                'objective' => 'Tăng số người đăng ký nhận bản tin hằng tuần',
+                'channels' => 'Bài viết trên site, Facebook, Zalo OA',
+                'baseline' => 'Hiện ~1.200 lượt đọc/bài, tỷ lệ đăng ký bản tin từ bài viết khoảng 1,5%',
             ],
         ],
 

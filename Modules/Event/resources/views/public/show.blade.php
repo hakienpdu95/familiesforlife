@@ -4,12 +4,17 @@
 @section('meta_description', \Illuminate\Support\Str::limit(strip_tags($event->description), 160))
 
 @push('meta')
-<link rel="canonical" href="{{ route('event.public.show', ['slug' => $event->slug, 'id' => $event->id]) }}">
+<link rel="canonical" href="{{ $canonicalUrl }}">
 <meta property="og:type" content="event">
 <meta property="og:title" content="{{ $event->title }}">
 <meta property="og:description" content="{{ \Illuminate\Support\Str::limit(strip_tags($event->description), 160) }}">
 @if($event->poster_path)
 <meta property="og:image" content="{{ url(\Illuminate\Support\Facades\Storage::url($event->poster_path)) }}">
+@endif
+
+@if(!empty($structuredData))
+{{-- GEO/AEO (2026-08-11) — Event JSON-LD, xem Modules\Event\Support\EventStructuredDataBuilder. --}}
+<script type="application/ld+json">{!! json_encode($structuredData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
 @endif
 @endpush
 

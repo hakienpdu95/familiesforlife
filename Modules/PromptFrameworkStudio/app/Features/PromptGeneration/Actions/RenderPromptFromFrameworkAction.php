@@ -23,6 +23,10 @@ use Modules\ContentFoundation\Models\CategoryContentFoundation;
  *   TOP    — Bối cảnh biên tập (chuyên mục) → model hiểu ĐỘC GIẢ trước khi nhận yêu cầu.
  *   MIDDLE — các khối của framework, ĐÚNG THỨ TỰ CANON của framework đó (thứ tự chính là bản chất
  *            framework — KHÔNG sắp xếp lại), khối rỗng bị bỏ HẲN thay vì in nhãn cụt.
+ *   MIDDLE+ — (2026-08-11, nguồn spec/giadinh.md) `task_instructions` — nhiệm vụ CỐ ĐỊNH, có ở 5
+ *            mẫu "Chiến lược nội dung" (config), KHÔNG có ở 18 framework tổng quát. Đặt SAU field
+ *            blocks, đúng thứ tự `<context>` rồi `<task>` của nguồn — field cung cấp tình huống,
+ *            task nói AI phải LÀM gì với tình huống đó.
  *   BOTTOM — chuẩn nội dung nền tảng, đặt cuối vì đây là ràng buộc phải còn trong "tầm chú ý" của
  *            model ngay trước lúc nó bắt đầu sinh.
  *
@@ -75,6 +79,17 @@ class RenderPromptFromFrameworkAction
             $blocks[] = $heading === null
                 ? $value
                 : "## {$heading}\n\n{$value}";
+        }
+
+        // task_instructions — xem docblock class. Đánh số cố định 1..N bất kể $fieldValues, KHÔNG
+        // bỏ qua dù rỗng vì đây là nhiệm vụ CỦA FRAMEWORK, không phải giá trị người dùng nhập.
+        if (! empty($framework['task_instructions'])) {
+            $numbered = collect($framework['task_instructions'])
+                ->values()
+                ->map(fn (string $item, int $i) => ($i + 1).'. '.$item)
+                ->implode("\n");
+
+            $blocks[] = "## Nhiệm vụ\n\n{$numbered}";
         }
 
         // BOTTOM — gắn với việc CÓ chuyên mục, không phải mặc định luôn chèn: đây là công cụ soạn

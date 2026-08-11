@@ -28,16 +28,17 @@ class CreateCalendarEntryAction
         // sẽ có `status = null` nếu bỏ dòng này (cùng convention Modules\Post — luôn set status
         // tường minh khi ghi, không bao giờ dựa vào DB default để suy ra state trong PHP).
         return ContentCalendarEntry::create([
-            'post_category_id'    => $data->post_category_id,
-            'title'               => $data->title,
-            'brief'               => $data->brief,
-            'origin'              => $data->origin,
-            'origin_note'         => $data->origin_note,
-            'status'              => CalendarEntryStatus::Idea,
+            'post_category_id' => $data->post_category_id,
+            'title' => $data->title,
+            'brief' => $data->brief,
+            'origin' => $data->origin,
+            'origin_note' => $data->origin_note,
+            'status' => CalendarEntryStatus::Idea,
+            'funnel_stage' => $data->funnel_stage,
             'target_publish_date' => $data->target_publish_date,
-            'assigned_to'         => $data->assigned_to,
-            'created_by'          => $actor->id,
-            'updated_by'          => $actor->id,
+            'assigned_to' => $data->assigned_to,
+            'created_by' => $actor->id,
+            'updated_by' => $actor->id,
         ]);
     }
 }

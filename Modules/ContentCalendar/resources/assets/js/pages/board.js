@@ -17,7 +17,8 @@ document.addEventListener('alpine:init', () => {
         fieldErrors: {},
         editingEntry: null,
         filters: { categoryId: '', assignedTo: '', includeDone: false },
-        form: { post_category_id: '', title: '', brief: '', origin: 'manual', origin_note: '', target_publish_date: '', assigned_to: '' },
+        form: { post_category_id: '', title: '', brief: '', origin: 'manual', origin_note: '', target_publish_date: '', assigned_to: '', funnel_stage: '' },
+        funnelGap: { loading: false, counts: null, prompt: '', categoryName: '' },
 
         init() {
             this.loadEntries();
@@ -140,7 +141,7 @@ document.addEventListener('alpine:init', () => {
             this.editingEntry = null;
             this.errorMessage = '';
             this.fieldErrors = {};
-            this.form = { post_category_id: '', title: '', brief: '', origin: 'manual', origin_note: '', target_publish_date: '', assigned_to: '' };
+            this.form = { post_category_id: '', title: '', brief: '', origin: 'manual', origin_note: '', target_publish_date: '', assigned_to: '', funnel_stage: '' };
             this.$refs.entryDialog.showModal();
             this.$nextTick(() => syncEntryDialogWidgets(this.$refs.entryDialog));
         },
@@ -157,6 +158,7 @@ document.addEventListener('alpine:init', () => {
                 origin_note: entry.origin_note ?? '',
                 target_publish_date: entry.target_publish_date ?? '',
                 assigned_to: entry.assigned_to?.id ?? '',
+                funnel_stage: entry.funnel_stage ?? '',
             };
             this.$refs.entryDialog.showModal();
             this.$nextTick(() => syncEntryDialogWidgets(this.$refs.entryDialog));
@@ -201,6 +203,47 @@ document.addEventListener('alpine:init', () => {
             } finally {
                 this.saving = false;
             }
+        },
+
+        /** (2026-08-11) — % làm tròn để vẽ thanh tỷ lệ; total=0 thì mọi giai đoạn 0%, tránh chia cho 0. */
+        funnelGapPercent(stage) {
+            const total = this.funnelGap.counts?.total ?? 0;
+            if (!total) return 0;
+
+            return Math.round(((this.funnelGap.counts[stage] ?? 0) / total) * 100);
+        },
+
+        async openFunnelGapModal() {
+            const category = this.categories.find((c) => String(c.id) === String(this.filters.categoryId));
+            if (!category) return;
+
+            this.funnelGap = { loading: true, counts: null, prompt: '', categoryName: category.name };
+            this.$refs.funnelGapDialog.showModal();
+
+            try {
+                const res = await fetch(this.funnelGapAnalysisUrlTemplate.replace('__CATEGORY_UUID__', category.uuid), {
+                    headers: { Accept: 'application/json' },
+                });
+                const json = await res.json().catch(() => ({}));
+
+                if (!res.ok) {
+                    window.Toast?.error('Không phân tích được — thử lại sau.');
+                    this.$refs.funnelGapDialog.close();
+                    return;
+                }
+
+                this.funnelGap = { loading: false, counts: json.counts, prompt: json.prompt, categoryName: category.name };
+            } catch {
+                window.Toast?.error('Không phân tích được — thử lại sau.');
+                this.$refs.funnelGapDialog.close();
+            }
+        },
+
+        async copyFunnelGapPrompt() {
+            if (!this.funnelGap.prompt) return;
+
+            await navigator.clipboard.writeText(this.funnelGap.prompt);
+            window.Toast?.success('Đã sao chép prompt.');
         },
     }));
 });

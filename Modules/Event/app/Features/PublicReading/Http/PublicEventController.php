@@ -13,6 +13,7 @@ use Modules\Event\Features\PublicReading\Queries\LoadMoreEventsHandler;
 use Modules\Event\Features\PublicReading\Queries\LoadMoreEventsQuery;
 use Modules\Event\Models\Event;
 use Modules\Event\Models\EventCategory;
+use Modules\Event\Support\EventStructuredDataBuilder;
 
 /**
  * spec/Event_Management_Technical_Specification.md §8/§13 Phase 3 — không {locale}, cùng quyết
@@ -142,15 +143,18 @@ class PublicEventController extends Controller
 
     /** Slug không phải route key (getRouteKeyName()='uuid', cùng lý do PostArticleTranslation
      *  — xem §3.4) — resolve thủ công, không implicit binding. */
-    public function show(string $slug): View
+    public function show(string $slug, EventStructuredDataBuilder $structuredDataBuilder): View
     {
         $event = Event::where('status', EventStatus::Published)
             ->where('slug', $slug)
-            ->with('category')
+            ->with(['category', 'province', 'ward'])
             ->first();
 
         abort_unless($event, 404);
 
-        return view('event::public.show', compact('event'));
+        $canonicalUrl = route('event.public.show', ['slug' => $event->slug, 'id' => $event->id]);
+        $structuredData = $structuredDataBuilder->build($event, $canonicalUrl);
+
+        return view('event::public.show', compact('event', 'canonicalUrl', 'structuredData'));
     }
 }

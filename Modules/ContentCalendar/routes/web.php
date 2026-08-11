@@ -25,4 +25,5 @@ Route::middleware(['auth', 'can:content_calendar.view'])
         Route::post('entries/{entry:uuid}/link-article', [CalendarEntryController::class, 'linkArticle'])->name('entries.link-article');
         Route::delete('entries/{entry:uuid}', [CalendarEntryController::class, 'destroy'])->name('entries.destroy');
         Route::get('categories/{category}/planned-titles', [CalendarEntryController::class, 'plannedTitles'])->name('categories.planned-titles');
+        Route::get('categories/{category}/funnel-gap-analysis', [CalendarEntryController::class, 'funnelGapAnalysis'])->name('categories.funnel-gap-analysis');
     });
