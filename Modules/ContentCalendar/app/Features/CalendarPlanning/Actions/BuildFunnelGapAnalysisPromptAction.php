@@ -36,11 +36,13 @@ class BuildFunnelGapAnalysisPromptAction
 
         $counts = $this->countByStage->handle($category);
 
+        $weakest = $this->countByStage->describeImbalance($counts);
+
         $blocks = [];
 
         $blocks[] = $this->buildEditorialContext($category, $foundation);
-        $blocks[] = $this->buildDistribution($counts);
-        $blocks[] = $this->buildTask($counts);
+        $blocks[] = $this->buildDistribution($counts, $weakest);
+        $blocks[] = $this->buildTask($weakest);
 
         return implode("\n\n", array_filter($blocks, fn ($b) => $b !== ''));
     }
@@ -77,7 +79,7 @@ class BuildFunnelGapAnalysisPromptAction
     }
 
     /** @param array{cold: int, warm: int, hot: int, unclassified: int, total: int} $counts */
-    private function buildDistribution(array $counts): string
+    private function buildDistribution(array $counts, ?FunnelStage $weakest): string
     {
         $lines = [];
         $lines[] = '## Phân bổ nội dung hiện tại theo giai đoạn hành trình';
@@ -92,21 +94,32 @@ class BuildFunnelGapAnalysisPromptAction
 
         if ($counts['total'] === 0) {
             $lines[] = 'Chuyên mục này hiện chưa có kế hoạch nào đang hoạt động.';
+        } elseif ($weakest) {
+            $lines[] = "**Giai đoạn đang bị bỏ ngỏ nhất: {$weakest->label()}** (đã tính sẵn từ số liệu trên — không cần tính lại).";
+        } else {
+            $lines[] = 'Phân bổ hiện tại tương đối cân bằng giữa 3 giai đoạn (hoặc chưa đủ dữ liệu đã phân loại để kết luận).';
         }
 
         return implode("\n", $lines);
     }
 
-    /** @param array{cold: int, warm: int, hot: int, unclassified: int, total: int} $counts */
-    private function buildTask(array $counts): string
+    private function buildTask(?FunnelStage $weakest): string
     {
         $lines = [];
         $lines[] = '## Nhiệm vụ';
-        $lines[] = '1. Dựa trên số liệu phân bổ ở trên, xác định giai đoạn (Lạnh/Ấm/Nóng) đang bị bỏ ngỏ nhiều nhất so với 2 giai đoạn còn lại.';
-        $lines[] = '2. Giải thích ngắn gọn vì sao mất cân bằng này có thể gây hại — ví dụ dồn hết vào Lạnh thì thu hút được người đọc nhưng không dẫn được ai tới quyết định; dồn hết vào Nóng thì bỏ lỡ phần lớn độc giả còn đang tìm hiểu.';
-        $lines[] = '3. Đề xuất 5 ý tưởng bài viết CỤ THỂ cho ĐÚNG giai đoạn đang thiếu, bám sát pain point (nếu là Lạnh) hoặc lăn tăn/tiêu chí so sánh (nếu là Nóng) đã nêu ở bối cảnh biên tập — không đề xuất ý tưởng chung chung không gắn với dữ liệu đã cho.';
-        $lines[] = '4. Với mỗi ý tưởng, gợi ý 1 bài ở giai đoạn liền kề (Lạnh→Ấm hoặc Ấm→Nóng) nên liên kết nội bộ tới/từ bài đó, để dẫn dắt người đọc đi tiếp trong hành trình thay vì dừng lại.';
-        $lines[] = '5. Trả về dưới dạng bảng: Tiêu đề ý tưởng | Giai đoạn | Pain point/tiêu chí bám theo | Gợi ý liên kết.';
+
+        if (! $weakest) {
+            $lines[] = '1. Phân bổ hiện tại đã tương đối cân bằng — đề xuất 2 ý tưởng bài viết mới cho MỖI giai đoạn (Lạnh/Ấm/Nóng) để duy trì, bám sát bối cảnh biên tập ở trên.';
+            $lines[] = '2. Với mỗi ý tưởng, gợi ý 1 bài ở giai đoạn liền kề nên liên kết nội bộ tới/từ bài đó.';
+            $lines[] = '3. Trả về dưới dạng bảng: Tiêu đề ý tưởng | Giai đoạn | Gợi ý liên kết.';
+
+            return implode("\n", $lines);
+        }
+
+        $lines[] = "1. Giải thích ngắn gọn vì sao bỏ ngỏ giai đoạn {$weakest->label()} có thể gây hại cho hành trình đọc — {$weakest->hint()}";
+        $lines[] = "2. Đề xuất 5 ý tưởng bài viết CỤ THỂ cho ĐÚNG giai đoạn {$weakest->label()}, bám sát pain point (nếu là Lạnh) hoặc lăn tăn/tiêu chí so sánh (nếu là Nóng) đã nêu ở bối cảnh biên tập — không đề xuất ý tưởng chung chung không gắn với dữ liệu đã cho.";
+        $lines[] = '3. Với mỗi ý tưởng, gợi ý 1 bài ở giai đoạn liền kề (Lạnh→Ấm hoặc Ấm→Nóng) nên liên kết nội bộ tới/từ bài đó, để dẫn dắt người đọc đi tiếp trong hành trình thay vì dừng lại.';
+        $lines[] = '4. Trả về dưới dạng bảng: Tiêu đề ý tưởng | Pain point/tiêu chí bám theo | Gợi ý liên kết.';
 
         return implode("\n", $lines);
     }

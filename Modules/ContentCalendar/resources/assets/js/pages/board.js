@@ -18,7 +18,10 @@ document.addEventListener('alpine:init', () => {
         editingEntry: null,
         filters: { categoryId: '', assignedTo: '', includeDone: false },
         form: { post_category_id: '', title: '', brief: '', origin: 'manual', origin_note: '', target_publish_date: '', assigned_to: '', funnel_stage: '' },
-        funnelGap: { loading: false, counts: null, prompt: '', categoryName: '' },
+        // (2026-08-11) — `loaded` tách khỏi `loading` vì 2 nơi cần phân biệt 3 trạng thái: chưa
+        // từng tải (ẩn hẳn khối phân bổ), đang tải (skeleton), đã tải xong (hiện số liệu) — 2 field
+        // không đủ diễn tả "chưa tải VÀ không loading" (trạng thái ban đầu khi chưa chọn category).
+        funnelGap: { loading: false, loaded: false, categoryName: '', counts: null, weakestStage: null, weakestStageLabel: null, prompt: '' },
 
         init() {
             this.loadEntries();
@@ -98,7 +101,9 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
 
-            await this.loadEntries();
+            // Đổi trạng thái có thể đưa entry ra khỏi tập "đang hoạt động" (VD chuyển Done/Dropped)
+            // — refresh phân bổ để không hiện số liệu cũ.
+            await Promise.all([this.loadEntries(), this.loadFunnelGap()]);
         },
 
         async promptLinkArticle(entry) {
@@ -134,7 +139,7 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
 
-            await this.loadEntries();
+            await Promise.all([this.loadEntries(), this.loadFunnelGap()]);
         },
 
         openCreateModal() {
@@ -199,7 +204,7 @@ document.addEventListener('alpine:init', () => {
                 }
 
                 this.closeModal();
-                await this.loadEntries();
+                await Promise.all([this.loadEntries(), this.loadFunnelGap()]);
             } finally {
                 this.saving = false;
             }
@@ -213,12 +218,22 @@ document.addEventListener('alpine:init', () => {
             return Math.round(((this.funnelGap.counts[stage] ?? 0) / total) * 100);
         },
 
-        async openFunnelGapModal() {
+        /**
+         * (2026-08-11) — TỰ động gọi mỗi khi đổi category lọc (không chờ người dùng bấm nút) để
+         * "dễ theo dõi" — thấy ngay phân bổ Lạnh/Ấm/Nóng của category vừa chọn mà không cần thêm
+         * 1 thao tác. Bỏ chọn category → về trạng thái ẩn hẳn (`loaded: false`), tránh hiện số liệu
+         * của category cũ gây hiểu nhầm đang xem "tất cả".
+         */
+        async loadFunnelGap() {
+            if (!this.filters.categoryId) {
+                this.funnelGap = { loading: false, loaded: false, categoryName: '', counts: null, weakestStage: null, weakestStageLabel: null, prompt: '' };
+                return;
+            }
+
             const category = this.categories.find((c) => String(c.id) === String(this.filters.categoryId));
             if (!category) return;
 
-            this.funnelGap = { loading: true, counts: null, prompt: '', categoryName: category.name };
-            this.$refs.funnelGapDialog.showModal();
+            this.funnelGap = { loading: true, loaded: false, categoryName: category.name, counts: null, weakestStage: null, weakestStageLabel: null, prompt: '' };
 
             try {
                 const res = await fetch(this.funnelGapAnalysisUrlTemplate.replace('__CATEGORY_UUID__', category.uuid), {
@@ -226,17 +241,25 @@ document.addEventListener('alpine:init', () => {
                 });
                 const json = await res.json().catch(() => ({}));
 
-                if (!res.ok) {
-                    window.Toast?.error('Không phân tích được — thử lại sau.');
-                    this.$refs.funnelGapDialog.close();
-                    return;
-                }
-
-                this.funnelGap = { loading: false, counts: json.counts, prompt: json.prompt, categoryName: category.name };
+                this.funnelGap = res.ok
+                    ? {
+                        loading: false,
+                        loaded: true,
+                        categoryName: category.name,
+                        counts: json.counts,
+                        weakestStage: json.weakest_stage,
+                        weakestStageLabel: json.weakest_stage_label,
+                        prompt: json.prompt,
+                    }
+                    : { loading: false, loaded: false, categoryName: category.name, counts: null, weakestStage: null, weakestStageLabel: null, prompt: '' };
             } catch {
-                window.Toast?.error('Không phân tích được — thử lại sau.');
-                this.$refs.funnelGapDialog.close();
+                this.funnelGap = { loading: false, loaded: false, categoryName: category.name, counts: null, weakestStage: null, weakestStageLabel: null, prompt: '' };
             }
+        },
+
+        /** Modal chỉ MỞ, không tự fetch — dữ liệu đã có sẵn từ loadFunnelGap() chạy lúc đổi filter. */
+        openFunnelGapModal() {
+            this.$refs.funnelGapDialog.showModal();
         },
 
         async copyFunnelGapPrompt() {
@@ -244,6 +267,11 @@ document.addEventListener('alpine:init', () => {
 
             await navigator.clipboard.writeText(this.funnelGap.prompt);
             window.Toast?.success('Đã sao chép prompt.');
+        },
+
+        /** Hint hiện dưới select "Giai đoạn hành trình" — tra theo value đang chọn trong form. */
+        funnelStageHint(value) {
+            return this.funnelStages.find((s) => s.value === value)?.hint ?? '';
         },
     }));
 });

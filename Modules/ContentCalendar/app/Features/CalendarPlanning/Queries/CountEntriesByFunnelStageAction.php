@@ -48,4 +48,35 @@ class CountEntriesByFunnelStageAction
             'total' => $cold + $warm + $hot + $unclassified,
         ];
     }
+
+    /**
+     * (2026-08-11) — tính SẴN giai đoạn yếu nhất ở server thay vì để prompt bắt AI tự đoán từ số
+     * liệu (AI có thể cộng/so sánh sai) — "thà tính đúng 1 lần ở đây còn hơn để model đoán lại mỗi
+     * lần sinh prompt", cùng triết lý `ArticleStructuredDataBuilder::buildOffer()` (thà thiếu còn
+     * hơn sai). Dùng cả cho badge cảnh báo trên UI (`funnelGapAnalysis()`) lẫn task #1 của
+     * `BuildFunnelGapAnalysisPromptAction`.
+     *
+     * Chỉ tính trên 3 giai đoạn ĐÃ PHÂN LOẠI (bỏ qua `unclassified` — chưa gán giai đoạn không có
+     * nghĩa là "thiếu nội dung giai đoạn đó", chỉ là chưa được gắn nhãn). `< 3` bài đã phân loại
+     * thì mẫu quá nhỏ để kết luận gì (null). Ngưỡng 15%: 1 giai đoạn dưới 15% tổng 3 giai đoạn coi
+     * là "bị bỏ ngỏ" — đủ chặt để không báo động giả trên phân bổ gần đều (VD 30/35/35%).
+     */
+    public function describeImbalance(array $counts): ?FunnelStage
+    {
+        $classified = $counts['cold'] + $counts['warm'] + $counts['hot'];
+
+        if ($classified < 3) {
+            return null;
+        }
+
+        $byStage = ['cold' => $counts['cold'], 'warm' => $counts['warm'], 'hot' => $counts['hot']];
+        $weakestKey = array_search(min($byStage), $byStage, true);
+        $weakestShare = $byStage[$weakestKey] / $classified;
+
+        if ($weakestShare >= 0.15) {
+            return null;
+        }
+
+        return FunnelStage::from($weakestKey);
+    }
 }

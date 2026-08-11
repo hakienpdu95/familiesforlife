@@ -155,8 +155,15 @@ class CalendarEntryController extends Controller
     ): JsonResponse {
         $this->authorize('viewAny', ContentCalendarEntry::class);
 
+        $counts = $countByStage->handle($category);
+        $weakest = $countByStage->describeImbalance($counts);
+
         return response()->json([
-            'counts' => $countByStage->handle($category),
+            'counts' => $counts,
+            // null khi đã cân bằng/chưa đủ dữ liệu — UI dùng để quyết định có hiện badge cảnh báo
+            // hay không, KHÔNG tự suy luận lại ở JS (§ describeImbalance — 1 nguồn tính duy nhất).
+            'weakest_stage' => $weakest?->value,
+            'weakest_stage_label' => $weakest?->label(),
             'prompt' => $buildPrompt->handle($category),
         ]);
     }

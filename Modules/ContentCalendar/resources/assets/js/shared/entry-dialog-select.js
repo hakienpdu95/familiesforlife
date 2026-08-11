@@ -57,6 +57,7 @@ function _positionWithinDialog(popupEl, anchorEl, dialogEl, { offsetTop = 0, mat
 const SELECT_FIELDS = [
     { id: 'ts-entry-category', placeholder: '— Chọn category —' },
     { id: 'ts-entry-origin', placeholder: '— Chọn nguồn gốc —' },
+    { id: 'ts-entry-funnel-stage', placeholder: '— Chưa phân loại —' },
     { id: 'ts-entry-assignee', placeholder: '— Chưa gán —' },
 ];
 

@@ -37,7 +37,7 @@
         <div class="card-body py-3 px-3 flex flex-row flex-wrap gap-3 items-end">
             <div class="form-control">
                 <label class="label py-0.5"><span class="label-text text-xs font-medium">Category</span></label>
-                <select x-model="filters.categoryId" @change="loadEntries()" class="select select-sm select-bordered w-64">
+                <select x-model="filters.categoryId" @change="loadEntries(); loadFunnelGap()" class="select select-sm select-bordered w-64">
                     <option value="">Tất cả</option>
                     <template x-for="cat in categories" :key="cat.id">
                         <option :value="cat.id" x-text="categoryOptionLabel(cat)"></option>
@@ -57,13 +57,44 @@
                 <input type="checkbox" x-model="filters.includeDone" @change="loadEntries()" class="checkbox checkbox-sm">
                 <span class="label-text text-xs">Hiện cả Đã xong/Đã huỷ</span>
             </label>
-            {{-- (2026-08-11) — chỉ bật khi đã lọc theo 1 category cụ thể, vì kiểm kê Lạnh/Ấm/Nóng
-                 chỉ có ý nghĩa trong phạm vi 1 chuyên mục (mỗi chuyên mục có ContentFoundation/
-                 pain point riêng — xem BuildFunnelGapAnalysisPromptAction). --}}
-            <button type="button" class="btn btn-outline btn-sm" x-show="filters.categoryId" x-cloak
-                    @click="openFunnelGapModal()">Phân tích khoảng trống Lạnh/Ấm/Nóng</button>
             <p x-show="loading" class="text-xs text-base-content/40">Đang tải...</p>
         </div>
+
+        {{-- (2026-08-11) — tự hiện ngay khi chọn 1 category (loadFunnelGap() gọi kèm @change ở
+             trên), KHÔNG cần thêm thao tác bấm mới thấy — "dễ theo dõi": số liệu Lạnh/Ấm/Nóng nằm
+             ngay trong tầm mắt cùng lúc với danh sách kế hoạch, không phải tính năng ẩn phải nhớ
+             ra để bấm. Chỉ có ý nghĩa trong phạm vi 1 category cụ thể (mỗi category có
+             ContentFoundation/pain point riêng — xem BuildFunnelGapAnalysisPromptAction), nên ẩn
+             hẳn khi lọc "Tất cả". --}}
+        <template x-if="filters.categoryId">
+            <div class="border-t border-base-200 px-3 py-2.5">
+                <div x-show="funnelGap.loading" class="flex items-center gap-2 text-xs text-base-content/40">
+                    <span class="loading loading-spinner loading-xs"></span> Đang tính phân bổ Lạnh/Ấm/Nóng...
+                </div>
+                <template x-if="!funnelGap.loading && funnelGap.loaded">
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <span class="text-xs font-medium text-base-content/60 shrink-0">Lạnh/Ấm/Nóng:</span>
+                        <div class="flex h-2.5 w-40 overflow-hidden rounded-full bg-base-200 shrink-0">
+                            <div class="bg-info" :style="`width: ${funnelGapPercent('cold')}%`" title="Lạnh"></div>
+                            <div class="bg-warning" :style="`width: ${funnelGapPercent('warm')}%`" title="Ấm"></div>
+                            <div class="bg-error" :style="`width: ${funnelGapPercent('hot')}%`" title="Nóng"></div>
+                        </div>
+                        <span class="text-xs text-base-content/50">
+                            <span x-text="funnelGap.counts?.cold ?? 0"></span>L ·
+                            <span x-text="funnelGap.counts?.warm ?? 0"></span>Ấ ·
+                            <span x-text="funnelGap.counts?.hot ?? 0"></span>N
+                            <template x-if="(funnelGap.counts?.unclassified ?? 0) > 0">
+                                <span>· <span x-text="funnelGap.counts.unclassified"></span> chưa phân loại</span>
+                            </template>
+                        </span>
+                        <span class="badge badge-warning badge-sm gap-1" x-show="funnelGap.weakestStageLabel" x-cloak>
+                            ⚠ Đang bỏ ngỏ giai đoạn <span x-text="funnelGap.weakestStageLabel"></span>
+                        </span>
+                        <button type="button" class="btn btn-outline btn-2xs ml-auto" @click="openFunnelGapModal()">Xem gợi ý prompt</button>
+                    </div>
+                </template>
+            </div>
+        </template>
     </div>
 
     {{-- ── Board Kanban ────────────────────────────────────────────────── --}}
@@ -179,9 +210,12 @@
                                 data-ts-placeholder="— Chưa phân loại —">
                             <option value="">— Chưa phân loại —</option>
                             <template x-for="s in funnelStages" :key="s.value">
-                                <option :value="s.value" :title="s.hint" x-text="s.label"></option>
+                                <option :value="s.value" x-text="s.label"></option>
                             </template>
                         </select>
+                        {{-- `title` trên <option> KHÔNG hiện được vì TomSelect render dropdown riêng
+                             (option gốc bị ẩn) — hint hiện ở đây, đổi theo lựa chọn hiện tại. --}}
+                        <p x-show="form.funnel_stage" x-cloak class="mt-1 text-xs text-base-content/40" x-text="funnelStageHint(form.funnel_stage)"></p>
                         <p x-show="fieldErrors.funnel_stage" x-cloak class="mt-1 text-xs text-error" x-text="fieldErrors.funnel_stage?.[0]"></p>
                     </div>
 
@@ -264,28 +298,20 @@
          AI Provider, cùng nguyên tắc ContentOutlines/PromptFrameworkStudio. --}}
     <dialog x-ref="funnelGapDialog" class="modal">
         <div class="modal-box max-w-2xl">
-            <h3 class="font-bold text-lg">Phân tích khoảng trống theo giai đoạn hành trình</h3>
-            <p class="text-xs text-base-content/50 mt-0.5" x-text="funnelGap.categoryName"></p>
+            <h3 class="font-bold text-lg">Gợi ý bù giai đoạn thiếu</h3>
+            <div class="flex items-center gap-2 mt-0.5">
+                <p class="text-xs text-base-content/50" x-text="funnelGap.categoryName"></p>
+                <span class="badge badge-warning badge-xs gap-1" x-show="funnelGap.weakestStageLabel" x-cloak>
+                    ⚠ Bỏ ngỏ giai đoạn <span x-text="funnelGap.weakestStageLabel"></span>
+                </span>
+            </div>
 
             <div x-show="funnelGap.loading" class="py-6 text-center text-sm text-base-content/40">Đang tính...</div>
 
+            {{-- Phân bổ đầy đủ đã hiện sẵn ở thanh lọc (không lặp lại ở đây) — modal chỉ tập trung
+                 vào việc dùng prompt: đọc + copy. --}}
             <template x-if="!funnelGap.loading && funnelGap.counts">
                 <div class="mt-4 space-y-4">
-                    {{-- Thanh tỷ lệ trực quan — tô theo đúng badge màu của FunnelStage (info/warning/error). --}}
-                    <div>
-                        <div class="flex h-3 w-full overflow-hidden rounded-full bg-base-200">
-                            <div class="bg-info" :style="`width: ${funnelGapPercent('cold')}%`" title="Lạnh"></div>
-                            <div class="bg-warning" :style="`width: ${funnelGapPercent('warm')}%`" title="Ấm"></div>
-                            <div class="bg-error" :style="`width: ${funnelGapPercent('hot')}%`" title="Nóng"></div>
-                        </div>
-                        <div class="flex justify-between text-xs text-base-content/50 mt-1">
-                            <span>Lạnh: <span x-text="funnelGap.counts.cold"></span></span>
-                            <span>Ấm: <span x-text="funnelGap.counts.warm"></span></span>
-                            <span>Nóng: <span x-text="funnelGap.counts.hot"></span></span>
-                            <span x-show="funnelGap.counts.unclassified > 0">Chưa phân loại: <span x-text="funnelGap.counts.unclassified"></span></span>
-                        </div>
-                    </div>
-
                     <div class="form-control">
                         <div class="flex items-center justify-between">
                             <label class="label py-0 pb-1.5"><span class="label-text font-medium">Prompt gợi ý bù giai đoạn thiếu</span></label>

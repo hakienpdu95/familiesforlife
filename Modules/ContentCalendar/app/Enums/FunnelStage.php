@@ -28,13 +28,18 @@ enum FunnelStage: string
         };
     }
 
-    /** Mô tả ngắn cho tooltip/hint trên form — nhắc biên tập viên đúng mindset độc giả ở giai đoạn này. */
+    /**
+     * (2026-08-11, đối chiếu thêm aioseo.com/tofu-mofu-bofu) — mô tả hiện NGAY dưới field chọn
+     * giai đoạn (không dùng `title` attribute — TomSelect render dropdown riêng, tooltip gắn trên
+     * `<option>` gốc không hiện ra được), nêu mindset độc giả + loại nội dung nên viết để biên
+     * tập viên chọn xong hiểu ngay "vậy giai đoạn này viết kiểu bài gì".
+     */
     public function hint(): string
     {
         return match ($this) {
-            self::Cold => 'Mới biết vấn đề, chưa sẵn sàng nghe về sản phẩm/dịch vụ — nội dung thuần giáo dục.',
-            self::Warm => 'Đã hiểu vấn đề, đang so sánh giải pháp — có thể nhắc tới sản phẩm/dịch vụ nhưng vẫn ở dạng hướng dẫn.',
-            self::Hot => 'Đã nghiên cứu xong, cần bằng chứng cụ thể (case study, so sánh, đánh giá thật) để quyết định.',
+            self::Cold => 'Mới biết vấn đề, CHƯA sẵn sàng nghe về sản phẩm/dịch vụ. Hợp: bài định nghĩa, giải đáp "là gì/vì sao", hướng dẫn tổng quan — không nhắc thương hiệu.',
+            self::Warm => 'Đã hiểu vấn đề, đang so sánh giải pháp. Hợp: bài so sánh, đánh giá, hướng dẫn từng bước có thể nhắc tới sản phẩm/dịch vụ như 1 lựa chọn.',
+            self::Hot => 'Đã nghiên cứu xong, cần bằng chứng cụ thể để quyết định. Hợp: case study, so sánh chi tiết, đánh giá thật, FAQ gỡ lăn tăn cuối cùng.',
         };
     }
 
