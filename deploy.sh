@@ -1,10 +1,10 @@
 #!/bin/bash
-# deploy.sh — thuchocvn.vn production deploy
+# deploy.sh — familiesforlife production deploy
 # Chạy thủ công: bash deploy.sh
 # Chạy migrate (chỉ khi quản trị chủ động muốn): bash deploy.sh --with-migrations
 set -euo pipefail
 
-APP_DIR="/var/www/minhan"
+APP_DIR="/var/www/familiesforlife"
 PHP="/usr/bin/php8.5"
 BRANCH="main"
 
@@ -50,7 +50,7 @@ ok()  { echo "[$(date '+%H:%M:%S')] ✓ $*"; }
 err() { echo "[$(date '+%H:%M:%S')] ✗ $*" >&2; }
 
 log "═══════════════════════════════════════"
-log "  Deploy thuchocvn.vn — $(date '+%Y-%m-%d %H:%M:%S')"
+log "  Deploy familiesforlife — $(date '+%Y-%m-%d %H:%M:%S')"
 log "  Branch: $BRANCH | Commit: $(git log --oneline -1) | Skip migrations: $SKIP_MIGRATIONS"
 log "═══════════════════════════════════════"
 
@@ -71,7 +71,7 @@ log "[2/7] Skipping frontend build (quản trị tự chạy: npx vite build --c
 # ── 3. Maintenance mode ────────────────────────────────────────
 log "[3/7] Enabling maintenance mode..."
 # Fix storage permissions trước khi artisan chạy
-sudo /usr/local/bin/fix-minhan-build 2>/dev/null || true
+sudo /usr/local/bin/fix-familiesforlife-build 2>/dev/null || true
 # Xóa config cache cũ — bắt buộc trước migrate để artisan đọc đúng .env
 $PHP artisan config:clear
 $PHP artisan down --retry=10
@@ -110,8 +110,8 @@ trap - ERR   # bỏ trap sau khi up thành công
 
 # ── 7. Khởi động lại workers ──────────────────────────────────────
 log "[7/7] Restarting workers..."
-sudo supervisorctl restart minhan-horizon  > /dev/null
-sudo supervisorctl restart minhan-reverb   > /dev/null
+sudo supervisorctl restart familiesforlife-horizon > /dev/null
+sudo supervisorctl restart familiesforlife-reverb  > /dev/null
 ok "Horizon + Reverb restarted"
 
 log ""

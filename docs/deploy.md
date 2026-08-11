@@ -889,7 +889,13 @@ git checkout v1.1.0
 
 ## 9. phpMyAdmin qua SSH Tunnel
 
-Không expose phpMyAdmin ra internet — chỉ truy cập qua SSH tunnel từ máy local.
+Không expose phpMyAdmin ra internet — chỉ truy cập qua SSH tunnel từ máy local, dùng **vhost Nginx riêng biệt, độc lập hoàn toàn** với `thuchocvn`/`quantri-thuchocvn`.
+
+> ⚠️ **Bài học từ thực tế** — ĐỪNG thêm `location /phpmyadmin` vào vhost `thuchocvn`/`quantri-thuchocvn`, rất dễ gãy vì 2 lý do:
+> 1. `location ~ \.php$` (regex, dùng cho Laravel) có độ ưu tiên cao hơn `location /phpmyadmin` (prefix match thường), trừ khi thêm modifier `^~` — nếu không, mọi request `.php` trong `/phpmyadmin` bị regex của Laravel "cướp" trước, PHP-FPM tìm sai đường dẫn (theo root Laravel) → 404.
+> 2. Certbot tự sinh `return 404;` nằm **trần trong `server{}`** (không bọc trong `location`) ở block `listen 80` — directive này chạy ở pha *server rewrite*, **trước khi** Nginx chọn location, nên chặn *mọi* request tới port 80 (kể cả `/phpmyadmin`) bất kể bạn thêm location gì.
+>
+> → Cách bền hơn nhiều: tạo **1 vhost hoàn toàn tách biệt**, chỉ lắng nghe ở `127.0.0.1`, không đụng tới Certbot/Laravel.
 
 ### 9.1 Cài phpMyAdmin trên VPS
 
@@ -899,56 +905,70 @@ sudo apt install -y phpmyadmin
 # Khi hỏi dbconfig-common: Yes
 ```
 
-Cấu hình Nginx — thêm vào trong `server` block của `/etc/nginx/sites-available/thuchocvn`:
+### 9.2 Tạo vhost Nginx riêng cho phpMyAdmin
+
+```bash
+sudo nano /etc/nginx/sites-available/phpmyadmin-local
+```
 
 ```nginx
-# phpMyAdmin — chỉ cho phép localhost (SSH tunnel), chặn internet
-location /phpmyadmin {
-    allow 127.0.0.1;
-    deny all;
-
-    root /usr/share/;
+server {
+    listen 127.0.0.1:8082;
+    server_name localhost;
+    root /usr/share/phpmyadmin;
     index index.php;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
 
     location ~ \.php$ {
         fastcgi_pass unix:/var/run/php/php8.5-fpm.sock;
-        fastcgi_param SCRIPT_FILENAME $request_filename;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         include fastcgi_params;
     }
 }
 ```
 
+`listen 127.0.0.1:8082` đảm bảo port này **không** nghe trên IP public — chỉ truy cập được từ chính VPS (qua SSH tunnel), dù UFW có lỡ mở port cũng không expose ra ngoài.
+
 ```bash
+sudo ln -s /etc/nginx/sites-available/phpmyadmin-local /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
+
+# Test ngay trên VPS trước khi mở tunnel — phải ra 200 OK
+curl -sI http://127.0.0.1:8082/index.php
 ```
 
-### 9.2 Mở SSH Tunnel từ máy local
+### 9.3 Mở SSH Tunnel từ máy local
 
 **Mac / Linux / Windows Terminal:**
 
 ```bash
-ssh -L 8888:localhost:80 thuchoc@124.158.6.69 -p 2223
+ssh -N -L 8888:127.0.0.1:8082 thuchoc@124.158.6.69 -p 2223
 ```
 
-Terminal sẽ đứng yên — đó là bình thường, tunnel đang chạy.  
-Mở trình duyệt: **`http://localhost:8888/phpmyadmin`**  
+`-N` giữ tunnel chạy nền mà không mở shell tương tác — terminal đứng yên đúng nghĩa. Không dùng `-N` cũng không sao (SSH vẫn đăng nhập vào shell VPS, tunnel vẫn chạy song song) — chỉ cần **không đóng cửa sổ terminal**.
+
+Mở trình duyệt: **`http://localhost:8888/`** — chú ý truy cập vào **gốc `/`**, không phải `/phpmyadmin`, vì vhost riêng này có `root` trỏ thẳng vào thư mục phpMyAdmin.
+
 Khi xong: `Ctrl+C` để đóng tunnel.
 
 **Windows — PuTTY:**
 
 ```
 Session     → Host: 124.158.6.69 | Port: 2223
-SSH → Tunnels → Source port: 8888 | Destination: localhost:80 → Add
+SSH → Tunnels → Source port: 8888 | Destination: 127.0.0.1:8082 → Add
 → Open → nhập password
-→ Mở trình duyệt: http://localhost:8888/phpmyadmin
+→ Mở trình duyệt: http://localhost:8888/
 ```
 
-### 9.3 Alias tiện dụng (đặt 1 lần, dùng mãi)
+### 9.4 Alias tiện dụng (đặt 1 lần, dùng mãi — trên từng máy: công ty, laptop cá nhân...)
 
 Thêm vào `~/.bashrc` hoặc `~/.zshrc` trên máy **local**:
 
 ```bash
-alias tunnel-vps="ssh -L 8888:localhost:80 thuchoc@124.158.6.69 -p 2223"
+alias pma-tunnel="ssh -N -L 8888:127.0.0.1:8082 thuchoc@124.158.6.69 -p 2223"
 ```
 
 ```bash
@@ -958,28 +978,60 @@ source ~/.bashrc   # hoặc source ~/.zshrc
 Từ sau chỉ cần:
 
 ```bash
-tunnel-vps
-# → mở http://localhost:8888/phpmyadmin
+pma-tunnel
+# → mở http://localhost:8888/
 ```
 
-### 9.4 Tunnel chạy nền (không cần giữ terminal)
+SSH vốn không giới hạn theo IP nguồn (chỉ cần đúng key/password), nên cách này dùng được linh hoạt từ bất kỳ máy nào — không cần cấu hình lại firewall mỗi khi đổi mạng/IP.
+
+### 9.5 Tài khoản MySQL đăng nhập phpMyAdmin
+
+**Không dùng user production của app** (`thuchocvn`, `minhan`...) để đăng nhập phpMyAdmin quản trị chung — nếu dùng chung, lỡ app bị lỗi bảo mật (SQL injection...) thì kẻ tấn công có thể lợi dụng đúng quyền hạn đó. Giữ nguyên tắc: user app chỉ có quyền trong đúng DB của app.
+
+Tạo riêng 1 user admin (toàn quyền server) chỉ dùng để quản trị qua phpMyAdmin:
 
 ```bash
-# Mở tunnel nền
-ssh -f -N -L 8888:localhost:80 thuchoc@124.158.6.69 -p 2223
+sudo mysql -u root
+```
 
-# Đóng tunnel khi xong
+```sql
+CREATE USER 'pma_admin'@'localhost' IDENTIFIED BY 'MatKhauManhRieng';
+GRANT ALL PRIVILEGES ON *.* TO 'pma_admin'@'localhost' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+EXIT;
+```
+
+Khi cần tạo database/user mới cho 1 project cụ thể (theo đúng pattern mục 3.3 — 1 DB + 1 user cùng tên, giới hạn trong đúng DB đó):
+
+```sql
+CREATE DATABASE ten_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'ten_db'@'localhost' IDENTIFIED BY 'MatKhauRieng';
+GRANT ALL PRIVILEGES ON ten_db.* TO 'ten_db'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+### 9.6 Xử lý sự cố thường gặp
+
+**`bind [127.0.0.1]:8888: Address already in use`**
+
+Port ở máy local đang bị 1 tunnel cũ (chưa đóng hẳn) chiếm:
+
+```bash
+lsof -i :8888          # Mac/Linux — xem tiến trình đang giữ port
 kill $(lsof -t -i:8888)
 ```
 
-### 9.5 Luồng sử dụng hàng ngày
+Hoặc đơn giản đổi sang port local khác: `ssh -N -L 8889:127.0.0.1:8082 ...` rồi vào `http://localhost:8889/`.
 
-```
-1. Terminal → gõ: tunnel-vps
-2. Nhập password VPS
-3. Chrome → http://localhost:8888/phpmyadmin
-4. Làm việc xong → Ctrl+C
-```
+**Truy cập `http://localhost:8888/` ra 404**
+
+1. Kiểm tra vhost đã enable: `ls -la /etc/nginx/sites-enabled/ | grep phpmyadmin`
+2. Test trực tiếp trên VPS trước khi nghi ngờ tunnel: `curl -sI http://127.0.0.1:8082/index.php` (phải ra `200 OK`)
+3. Nếu VPS đã 200 OK nhưng trình duyệt vẫn 404 — thử cửa sổ ẩn danh (loại trừ cache từ lần thử URL/port khác trước đó), và kiểm tra đúng port trong lệnh tunnel khớp với port bạn gõ trên trình duyệt.
+
+**phpMyAdmin đăng nhập được nhưng không có nút tạo database ("No privileges to create databases")**
+
+User đang dùng bị giới hạn quyền theo từng DB (như `thuchocvn` chỉ có quyền trên `thuchocvn.*`) — đây là thiết kế đúng, không phải lỗi. Cần đăng nhập bằng `pma_admin` (mục 9.5) để có toàn quyền tạo database mới trên server.
 
 ---
 
