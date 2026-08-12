@@ -400,7 +400,8 @@
         "reference_image_url///text///__///_NULL///NULL///__///__",
         "resolution///string///10///_NULL///NULL///__///__",
         "video_type///string///20///_NULL///NULL///__///__",
-        "core_message///text///__///_NULL///NULL///__///__"
+        "core_message///text///__///_NULL///NULL///__///__",
+        "reference_context_prompt///text///__///_NULL///NULL///__///__"
     ],
     [
         "ai_video_studio_shots///add///__///",
@@ -410,7 +411,10 @@
         "duration_seconds///unsignedSmallInteger///__///_NULL///NULL///__///__",
         "audio_direction///text///__///_NULL///NULL///__///__",
         "reference_assets///text///__///_NULL///NULL///__///__",
-        "cta_text///string///200///_NULL///NULL///__///__"
+        "cta_text///string///200///_NULL///NULL///__///__",
+        "timeline_breakdown///text///__///_NULL///NULL///__///__",
+        "image_prompt///text///__///_NULL///NULL///__///__",
+        "motion_prompt///text///__///_NULL///NULL///__///__"
     ],
     [
         "content_calendar_entries///add///__///",

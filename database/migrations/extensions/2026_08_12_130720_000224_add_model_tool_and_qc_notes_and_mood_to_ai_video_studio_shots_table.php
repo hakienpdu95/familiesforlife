@@ -32,13 +32,22 @@ return new class extends Migration {
             if (!Schema::hasColumn('ai_video_studio_shots', 'cta_text')) {
                 $table->string('cta_text', 200)->nullable()->after('reference_assets');
             }
+            if (!Schema::hasColumn('ai_video_studio_shots', 'timeline_breakdown')) {
+                $table->text('timeline_breakdown')->nullable()->after('cta_text');
+            }
+            if (!Schema::hasColumn('ai_video_studio_shots', 'image_prompt')) {
+                $table->text('image_prompt')->nullable()->after('timeline_breakdown');
+            }
+            if (!Schema::hasColumn('ai_video_studio_shots', 'motion_prompt')) {
+                $table->text('motion_prompt')->nullable()->after('image_prompt');
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('ai_video_studio_shots', function (Blueprint $table) {
-            $cols = array_filter(['model_tool', 'qc_notes', 'mood', 'duration_seconds', 'audio_direction', 'reference_assets', 'cta_text'], fn($c) => Schema::hasColumn('ai_video_studio_shots', $c));
+            $cols = array_filter(['model_tool', 'qc_notes', 'mood', 'duration_seconds', 'audio_direction', 'reference_assets', 'cta_text', 'timeline_breakdown', 'image_prompt', 'motion_prompt'], fn($c) => Schema::hasColumn('ai_video_studio_shots', $c));
             if (!empty($cols)) $table->dropColumn(array_values($cols));
         });
     }

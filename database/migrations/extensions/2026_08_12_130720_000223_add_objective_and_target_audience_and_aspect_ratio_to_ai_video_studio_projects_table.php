@@ -32,13 +32,16 @@ return new class extends Migration {
             if (!Schema::hasColumn('ai_video_studio_projects', 'core_message')) {
                 $table->text('core_message')->nullable()->after('video_type');
             }
+            if (!Schema::hasColumn('ai_video_studio_projects', 'reference_context_prompt')) {
+                $table->text('reference_context_prompt')->nullable()->after('core_message');
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('ai_video_studio_projects', function (Blueprint $table) {
-            $cols = array_filter(['objective', 'target_audience', 'aspect_ratio', 'reference_image_url', 'resolution', 'video_type', 'core_message'], fn($c) => Schema::hasColumn('ai_video_studio_projects', $c));
+            $cols = array_filter(['objective', 'target_audience', 'aspect_ratio', 'reference_image_url', 'resolution', 'video_type', 'core_message', 'reference_context_prompt'], fn($c) => Schema::hasColumn('ai_video_studio_projects', $c));
             if (!empty($cols)) $table->dropColumn(array_values($cols));
         });
     }

@@ -1,0 +1,28 @@
+name: Deploy on Tag
+on:
+  push:
+    tags:
+      - 'v*'
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    name: "→ vigiadinh.vn (${{ github.ref_name }})"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: production
+      url: https://vigiadinh.vn
+    steps:
+      - name: "Deploy ${{ github.ref_name }} via SSH"
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script_stop: true
+          script: |
+            cd /var/www/familiesforlife
+            bash deploy.sh --ref=${{ github.ref_name }}

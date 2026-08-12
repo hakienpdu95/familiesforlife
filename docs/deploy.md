@@ -1272,7 +1272,22 @@ sudo grep -c "listen 443" /etc/nginx/sites-available/<file>
 ```
 Nếu ra > 1, chắc chắn có block dư cần dọn.
 
-### 11.9 Certbot tự sinh bare `return 404;`/`return 301;` trong `server{}` — chặn location tự thêm sau này
+### 11.9 GitHub Actions — Auto Deploy cho familiesforlife (tag push)
+
+Áp dụng đúng pattern tag-push ở mục 7 (đã chứng minh ổn định trên `devminhan`/`minhan`) cho repo `familiesforlife`, không dùng `workflow_dispatch` — chỉ deploy khi có ai chủ động gắn tag `v*`, giữ nguyên tắc "push `main` bao nhiêu cũng không đụng production".
+
+**Khác biệt so với mục 7:**
+
+- `deploy.sh` được thêm flag `--ref=<git-ref>` (mặc định `main`) thay vì hardcode branch. Workflow gọi `bash deploy.sh --ref=${{ github.ref_name }}` — tự động deploy đúng tag vừa push, không phải luôn kéo `main`.
+- Vì `--ref` có thể là tag (không tồn tại dưới dạng `origin/<tag>` sau khi fetch), script tự kiểm tra: nếu `origin/$REF` tồn tại (trường hợp branch như `main`) thì dùng nó, không thì dùng `$REF` trực tiếp (trường hợp tag/commit) — `git fetch origin --tags --force` đảm bảo tag mới luôn có sẵn cục bộ trước khi reset.
+- Nhờ vậy, **rollback thủ công cũng dùng đúng 1 lệnh nhất quán** thay vì checkout tay + chạy lại từng bước artisan như mục 8 mô tả:
+  ```bash
+  ssh deploy@vigiadinh.vn "cd /var/www/familiesforlife && bash deploy.sh --ref=v1.1.0"
+  ```
+
+**Setup secrets/deploy key:** làm đúng các bước 7.0–7.5 (PAT cho git push từ local, SSH key riêng cho GitHub Actions, thêm public key vào `authorized_keys` của user `deploy`, 3 secrets `VPS_HOST`/`VPS_USER`/`VPS_SSH_KEY`, tạo GitHub Environment `production`) — chỉ đổi tên repo/domain thành `familiesforlife`/`vigiadinh.vn`. Workflow file: `.github/workflows/deploy.yml` trong repo này.
+
+### 11.10 Certbot tự sinh bare `return 404;`/`return 301;` trong `server{}` — chặn location tự thêm sau này
 
 Đã gặp lặp lại ở nhiều nơi (mục 9 — phpMyAdmin, và mục 11.8 ở trên): Certbot tự sinh khối port 80 kiểu:
 ```nginx

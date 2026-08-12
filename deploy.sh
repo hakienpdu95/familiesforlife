@@ -1,12 +1,21 @@
 #!/bin/bash
 # deploy.sh — familiesforlife production deploy
-# Chạy thủ công: bash deploy.sh
+# Chạy thủ công (deploy nhánh main mới nhất): bash deploy.sh
+# Deploy đúng 1 tag/branch/commit cụ thể (rollback, hotfix cũ): bash deploy.sh --ref=v1.1.0
 # Chạy migrate (chỉ khi quản trị chủ động muốn): bash deploy.sh --with-migrations
 set -euo pipefail
 
 APP_DIR="/var/www/familiesforlife"
 PHP="/usr/bin/php8.5"
-BRANCH="main"
+
+# --ref phải được đọc TRƯỚC bước re-exec ở dưới vì nó quyết định target của
+# git reset ngay trong lần chạy đầu (trước khi DEPLOY_REEXEC=1).
+REF="main"
+for arg in "$@"; do
+    case "$arg" in
+        --ref=*) REF="${arg#--ref=}" ;;
+    esac
+done
 
 cd "$APP_DIR"
 
@@ -18,10 +27,16 @@ cd "$APP_DIR"
 # bước reload PHP-FPM không chạy dù đã commit). Re-exec đảm bảo toàn bộ phần
 # sau bước này luôn đọc từ file mới nhất trên đĩa.
 if [ -z "${DEPLOY_REEXEC:-}" ]; then
-    echo "[$(date '+%H:%M:%S')] [0/7] Pulling latest code..."
+    echo "[$(date '+%H:%M:%S')] [0/7] Pulling latest code (ref: $REF)..."
     [ -f "$APP_DIR/.env" ] && cp "$APP_DIR/.env" /tmp/.env.deploy.bak
-    git fetch origin
-    git reset --hard "origin/$BRANCH"
+    git fetch origin --tags --force
+    # $REF có thể là branch (→ origin/$REF) hoặc tag/commit (không có origin/ prefix)
+    if git rev-parse -q --verify "origin/$REF" >/dev/null; then
+        TARGET="origin/$REF"
+    else
+        TARGET="$REF"
+    fi
+    git reset --hard "$TARGET"
     [ -f /tmp/.env.deploy.bak ] && mv /tmp/.env.deploy.bak "$APP_DIR/.env"
     echo "[$(date '+%H:%M:%S')] ✓ Code updated → $(git log --oneline -1)"
 
@@ -51,7 +66,7 @@ err() { echo "[$(date '+%H:%M:%S')] ✗ $*" >&2; }
 
 log "═══════════════════════════════════════"
 log "  Deploy familiesforlife — $(date '+%Y-%m-%d %H:%M:%S')"
-log "  Branch: $BRANCH | Commit: $(git log --oneline -1) | Skip migrations: $SKIP_MIGRATIONS"
+log "  Ref: $REF | Commit: $(git log --oneline -1) | Skip migrations: $SKIP_MIGRATIONS"
 log "═══════════════════════════════════════"
 
 # ── 1. PHP dependencies ────────────────────────────────────────
