@@ -17,6 +17,7 @@
 9. [phpMyAdmin qua SSH Tunnel](#9-phpmyadmin-qua-ssh-tunnel)
 10. [Xử lý sự cố](#10-xử-lý-sự-cố)
 11. [Sự cố thực tế khi thêm site mới trên VPS (case study)](#11-sự-cố-thực-tế-khi-thêm-site-mới-trên-vps-case-study)
+12. [Checklist tổng hợp — Thêm domain/project mới ổn định ngay từ đầu](#12-checklist-tổng-hợp--thêm-1-domainproject-mới-ổn-định-ngay-từ-đầu)
 
 ---
 
@@ -1203,6 +1204,30 @@ sudo chmod -R 775 /var/www/<project>/storage /var/www/<project>/bootstrap/cache
 sudo usermod -aG www-data <user>
 ```
 
+> ⚠️ **Đừng giả định đã làm rồi — luôn kiểm tra lại bằng `id`/`groups`.** Case thực tế: gợi ý chạy `usermod -aG www-data thuchoc` được đưa ra nhưng không được thực thi ngay; nhiều bước sau đó (kể cả sau khi `chown`/`setfacl` đã đúng) `php artisan ...` chạy tay bởi `thuchoc` vẫn báo `Permission denied` — vì ACL/permission đã đúng cho group `www-data`, nhưng `id` cho thấy `thuchoc` chưa từng ở trong group đó. Sau khi `usermod`, group mới **chỉ áp dụng cho session SSH mới** — session đang mở vẫn chạy với danh sách group cũ; dùng `newgrp www-data` để có ngay group mới trong session hiện tại mà không cần đăng xuất, hoặc mở 1 cửa sổ SSH mới.
+
+**Fix bền hơn — default ACL (khuyên dùng thay vì chown lặp lại):** `chown -R` ở trên chỉ sửa được ownership của file *đang có* — vài ngày sau, `www-data` (Horizon/PHP-FPM) hoặc `deploy` (CI) tạo file mới trong `storage`/`bootstrap/cache` lại mang owner/group khác, lỗi lặp lại y như cũ vì owner mặc định của file mới do **primary group của process tạo ra nó** quyết định, không tự kế thừa. `setfacl` với default ACL giải quyết dứt điểm: mọi file/thư mục **mới tạo sau này**, bất kể user nào tạo, đều tự động có quyền `rwx` cho group `www-data`:
+
+```bash
+sudo apt install -y acl   # nếu server chưa có lệnh setfacl
+
+# Áp ngay cho file/thư mục đang có
+sudo setfacl -R -m g:www-data:rwx \
+  /var/www/<project>/storage /var/www/<project>/bootstrap/cache
+
+# Default ACL — file/thư mục MỚI tạo trong này về sau tự kế thừa quyền trên,
+# không phân biệt tạo bởi deploy (CI), www-data (Horizon/PHP-FPM), hay user SSH thật
+sudo setfacl -R -d -m g:www-data:rwx \
+  /var/www/<project>/storage /var/www/<project>/bootstrap/cache
+```
+
+Kiểm tra đã áp đúng — phải thấy dòng `default:group:www-data:rwx`:
+```bash
+getfacl /var/www/<project>/storage/logs
+```
+
+Làm 1 lần cho mỗi project mới là đủ, không cần lặp lại `chown -R` mỗi khi gặp lỗi permission trong `storage`/`bootstrap/cache` nữa.
+
 ### 11.5 `League\Flysystem\UnableToCreateDirectory ... storage/app/private`
 
 Laravel 11+ mặc định cần thư mục `storage/app/private` (local disk mới) — nếu thiếu sau khi clone, thao tác filesystem (upload file...) sẽ lỗi này.
@@ -1287,6 +1312,50 @@ Nếu ra > 1, chắc chắn có block dư cần dọn.
 
 **Setup secrets/deploy key:** làm đúng các bước 7.0–7.5 (PAT cho git push từ local, SSH key riêng cho GitHub Actions, thêm public key vào `authorized_keys` của user `deploy`, 3 secrets `VPS_HOST`/`VPS_USER`/`VPS_SSH_KEY`, tạo GitHub Environment `production`) — chỉ đổi tên repo/domain thành `familiesforlife`/`vigiadinh.vn`. Workflow file: `.github/workflows/deploy.yml` trong repo này.
 
+### 11.9b Checklist thực tế — kích hoạt lần đầu CI/CD tag-push (đúc kết từ lần bật cho familiesforlife)
+
+Lần đầu bật workflow ở 11.9 cho 1 site đã tồn tại (project không được setup CI/CD từ đầu, từng deploy tay bằng user khác) phát sinh 5 lỗi liên hoàn, đúng thứ tự gặp phải — tra thẳng theo đây thay vì debug lại:
+
+1. **PAT thiếu scope `workflow`** — `git push` báo `refusing to allow a Personal Access Token to create or update workflow ... without workflow scope`. Fix: vào GitHub → token (classic) → tick thêm `workflow`, hoặc nếu dùng fine-grained token thì cấp quyền **Workflows: Read and write**. Xem lại mục 7.0.
+
+2. **SSH port không phải 22 mặc định** — VPS có thể đã đổi sang port khác (ví dụ `2223`, xem mục 9.3). `Connection refused` ở port 22 → thử đúng port thật. **Workflow phải khai báo port này** — không hardcode `port: 22` trong `.github/workflows/deploy.yml`, dùng thêm secret `VPS_PORT` và `port: ${{ secrets.VPS_PORT }}`, nếu không GitHub Actions sẽ refused dù SSH tay đã chạy được.
+
+3. **SSH hỏi password dù key đã thêm đúng vào `authorized_keys`** — nguyên nhân thường KHÔNG phải sai key/permission, mà do **test nhầm chiều**: chạy lệnh `ssh ... deploy@VPS` từ chính 1 session đang SSH sẵn vào VPS (loopback, user khác, private key không tồn tại ở đó) thay vì từ máy laptop thật — nơi giữ private key. Luôn `ssh -v` để đọc dòng `Offering public key` — nếu không thấy dòng này xuất hiện, khả năng cao đang chạy sai máy/sai user, không phải sai cấu hình key.
+
+4. **`fatal: detected dubious ownership in repository`** khi `deploy.sh` chạy `git fetch/reset` bằng user `deploy` qua GitHub Actions (git ≥2.35 chặn user khác owner thao tác git). Fix 1 lần:
+   ```bash
+   sudo -u deploy git config --global --add safe.directory /var/www/<project>
+   ```
+   Nếu sau đó vẫn `error: cannot open '.git/FETCH_HEAD': Permission denied` — nghĩa là ownership thật của thư mục không phải `deploy` (do trước đó deploy tay bằng user khác), `safe.directory` chỉ tắt cảnh báo, không cấp quyền ghi. Phải chown thật:
+   ```bash
+   sudo chown -R deploy:www-data /var/www/<project>
+   sudo chmod -R u+rwX,g+rwX /var/www/<project>
+   ```
+   Dùng `u+rwX,g+rwX` (thêm quyền) thay vì set cứng `644`/`755` để không xoá mất `+x` của `vendor/bin/*`, `node_modules/.bin/*`, `deploy.sh` (bẫy đã ghi ở mục 11.4).
+
+5. **`sudo: a terminal is required to authenticate`** ở bước restart Horizon/Reverb hoặc reload PHP-FPM — SSH của GitHub Actions không có tty, nên bất kỳ lệnh `sudo` nào chưa được cấp `NOPASSWD` sẽ tự fail (không hiện prompt, script chết ngang do `set -e`). Fix — thêm đủ **mọi** lệnh sudo mà `deploy.sh` gọi vào sudoers (không chỉ 2 lệnh mẫu ở mục 6.2):
+   ```bash
+   sudo visudo -f /etc/sudoers.d/deploy-<project>
+   ```
+   ```
+   deploy ALL=(ALL) NOPASSWD: /usr/bin/supervisorctl restart <project>-horizon
+   deploy ALL=(ALL) NOPASSWD: /usr/bin/supervisorctl restart <project>-reverb
+   deploy ALL=(ALL) NOPASSWD: /usr/bin/systemctl reload php8.5-fpm
+   deploy ALL=(ALL) NOPASSWD: /usr/local/bin/fix-<project>-build
+   ```
+
+6. **`familiesforlife-horizon: ERROR (no such process)`** khi restart — Supervisor chưa từng có file `.conf` cho project (dễ quên nếu project được thêm CI/CD sau, không phải từ lúc setup ban đầu ở mục 6.1). Kiểm tra nhanh trước khi nghi ngờ gì khác:
+   ```bash
+   sudo supervisorctl status | grep <project>
+   ```
+   Nếu trống — tạo file theo mẫu mục 6.1 (đổi tên program + port Reverb theo bảng ở mục 11.1), rồi:
+   ```bash
+   sudo supervisorctl reread && sudo supervisorctl update
+   ```
+   Trạng thái `STARTING` ngay sau `update` là bình thường — đợi vài giây rồi `status` lại để xác nhận `RUNNING`.
+
+> **Bài học chung:** khi 1 project được bật CI/CD *sau* khi đã tồn tại và từng deploy tay, luôn giả định 3 thứ chưa đồng bộ với `deploy` user: (a) ownership của source code, (b) sudoers cho các lệnh không tương tác, (c) Supervisor conf. Kiểm tra cả 3 trước khi push tag đầu tiên, đỡ phải debug từng lỗi một qua Actions log.
+
 ### 11.10 Certbot tự sinh bare `return 404;`/`return 301;` trong `server{}` — chặn location tự thêm sau này
 
 Đã gặp lặp lại ở nhiều nơi (mục 9 — phpMyAdmin, và mục 11.8 ở trên): Certbot tự sinh khối port 80 kiểu:
@@ -1308,6 +1377,193 @@ server {
     }
 ```
 rồi thêm các `location` khác cần dùng bên cạnh nó — lúc đó Nginx mới chọn location theo URI thay vì chặn hết ngay từ pha rewrite.
+
+---
+
+## 12. Checklist tổng hợp — Thêm 1 domain/project MỚI ổn định ngay từ đầu
+
+Toàn bộ mục 11 là **case study xử lý phản ứng** (gặp lỗi → tra → fix) khi thêm `familiesforlife` — hầu hết lỗi đó đều lặp lại vì làm các bước không đúng thứ tự hoặc bỏ sót 1 bước. Checklist này gộp lại theo đúng thứ tự nên làm, để lần sau thêm domain/project mới lên **cùng VPS này** không phải debug lại từng lỗi một.
+
+> Thay `<project>`/`<domain>`/`<port>` bằng tên thật. Trước khi bắt đầu, cập nhật bảng port ở mục 11.1 với port Reverb sẽ dùng — kiểm tra chưa ai chiếm.
+
+### 12.1 Clone code — làm đúng ngay từ bước đầu, tránh cả saga ownership ở mục 11.4/11.9b#4
+
+**Luôn clone bằng chính user `deploy`, không dùng user admin thật (`thuchoc`...) rồi chown lại sau:**
+```bash
+sudo mkdir -p /var/www/<project>
+sudo chown deploy:www-data /var/www/<project>
+sudo -u deploy git clone git@github.com:<org>/<project>.git /var/www/<project>
+```
+Nếu vì lý do gì đó đã clone bằng user khác — chown lại **ngay lập tức**, đừng để tới khi CI báo lỗi mới phát hiện:
+```bash
+sudo chown -R deploy:www-data /var/www/<project>
+```
+
+### 12.2 `.env` + storage/bootstrap dirs (mục 11.3) — làm trước `composer install`
+
+```bash
+cd /var/www/<project>
+cp .env.example .env
+mkdir -p storage/framework/{sessions,views,cache/data,testing}
+mkdir -p storage/logs storage/app/private storage/app/public bootstrap/cache
+```
+
+### 12.3 Ownership + ACL bền vững — làm 1 lần, xong hẳn (mục 11.4)
+
+```bash
+sudo chown -R deploy:www-data /var/www/<project>
+sudo find /var/www/<project> -type d -exec chmod 755 {} \;
+sudo find /var/www/<project> -type f -exec chmod 644 {} \;
+chmod +x /var/www/<project>/vendor/bin/* /var/www/<project>/node_modules/.bin/* /var/www/<project>/deploy.sh 2>/dev/null || true
+
+sudo apt install -y acl   # nếu chưa có
+sudo setfacl -R    -m g:www-data:rwx /var/www/<project>/storage /var/www/<project>/bootstrap/cache
+sudo setfacl -R -d -m g:www-data:rwx /var/www/<project>/storage /var/www/<project>/bootstrap/cache
+```
+
+Thêm mọi user SSH thật sẽ chạy `artisan` tay vào group `www-data`, rồi **xác minh lại bằng `id`, không giả định**:
+```bash
+sudo usermod -aG www-data <user-ssh-thật>
+```
+Test ngay trong session hiện tại (không cần logout): `newgrp www-data` rồi `id` — phải thấy `www-data` trong danh sách group.
+
+### 12.4 Cài đặt lần đầu
+
+```bash
+sudo -u deploy composer install --no-dev --optimize-autoloader --no-interaction
+sudo -u deploy npm ci
+npx vite build --config vite.config.backend.js    # + frontend.js nếu có
+php8.5 artisan key:generate
+php8.5 artisan migrate --force
+php8.5 artisan storage:link
+php8.5 artisan config:cache && php8.5 artisan route:cache
+php8.5 artisan view:cache  && php8.5 artisan event:cache
+```
+
+### 12.5 Nginx + SSL (mục 4) — cẩn thận các bẫy Certbot đã ghi ở 11.7–11.10
+
+Trỏ DNS trước, tạo vhost theo mẫu mục 4.2, comment tạm 4 dòng SSL trước lần cấp cert đầu (11.7), chạy Certbot, rồi **luôn `cat -n` lại vhost sau khi Certbot chạy** để phát hiện block dư/`return 404` trần chưa bọc `location` (11.8, 11.9/cũ→11.10 hiện tại).
+
+### 12.6 Supervisor — tạo và xác nhận `RUNNING` TRƯỚC khi đụng tới CI/CD (mục 6.1, 11.2, 11.9b#6)
+
+```bash
+sudo tee /etc/supervisor/conf.d/<project>.conf > /dev/null << 'EOF'
+[program:<project>-horizon]
+process_name=%(program_name)s
+command=/usr/bin/php8.5 /var/www/<project>/artisan horizon
+directory=/var/www/<project>
+autostart=true
+autorestart=true
+user=www-data
+redirect_stderr=true
+stdout_logfile=/var/www/<project>/storage/logs/horizon.log
+stopwaitsecs=3600
+stopsignal=SIGTERM
+
+[program:<project>-reverb]
+process_name=%(program_name)s
+command=/usr/bin/php8.5 /var/www/<project>/artisan reverb:start --host=127.0.0.1 --port=<port> --no-interaction
+directory=/var/www/<project>
+autostart=true
+autorestart=true
+user=www-data
+redirect_stderr=true
+stdout_logfile=/var/www/<project>/storage/logs/reverb.log
+EOF
+
+sudo supervisorctl reread && sudo supervisorctl update
+sleep 5 && sudo supervisorctl status | grep <project>   # phải RUNNING, không FATAL
+```
+Dùng `tee` heredoc — không gõ/paste tay vào `nano` (bẫy gãy dòng ở 11.2).
+
+### 12.7 Sudoers NOPASSWD — cấp đủ TRƯỚC khi test deploy tự động (mục 6.2, 11.9b#5)
+
+Liệt kê **đúng từng lệnh sudo mà `deploy.sh` thực sự gọi** (đọc lại script, không đoán):
+```bash
+sudo visudo -f /etc/sudoers.d/deploy-<project>
+```
+```
+deploy ALL=(ALL) NOPASSWD: /usr/bin/supervisorctl restart <project>-horizon
+deploy ALL=(ALL) NOPASSWD: /usr/bin/supervisorctl restart <project>-reverb
+deploy ALL=(ALL) NOPASSWD: /usr/bin/systemctl reload php8.5-fpm
+deploy ALL=(ALL) NOPASSWD: /usr/local/bin/fix-<project>-build
+```
+Lý do bắt buộc làm bước này: SSH của GitHub Actions không có tty, `sudo` thiếu `NOPASSWD` sẽ tự fail bằng `a terminal is required to authenticate` — không hiện prompt để nhập tay được.
+
+### 12.8 `deploy.sh` — copy từ project mẫu (`familiesforlife` là bản mới nhất, có `--ref=`)
+
+Checklist đổi tên khi copy (mục 11.1): `APP_DIR`, tên script fix-permission, tên Supervisor program, comment/log message, port Reverb trong `reverb:start`. Giữ nguyên pattern `--ref=<git-ref>` (branch/tag/commit, mặc định `main`) — cho phép cùng 1 script dùng cho cả deploy tự động (tag push) và deploy/rollback tay.
+
+### 12.9 GitHub Actions — setup secrets & key TRƯỚC khi viết workflow (mục 7.0–7.3)
+
+1. PAT (máy local) phải có scope **`workflow`**, không chỉ `repo` — thiếu là push `.github/workflows/*.yml` bị GitHub từ chối ngay (11.9b#1).
+2. Tạo SSH key riêng cho Actions (không dùng chung với deploy key git pull):
+   ```bash
+   ssh-keygen -t ed25519 -C "github-actions@<domain>" -f ~/.ssh/gh_actions_<project> -N ""
+   ```
+3. Thêm public key vào `/home/deploy/.ssh/authorized_keys` trên VPS.
+4. **Test SSH thủ công TỪ MÁY LOCAL (không phải từ 1 session đang SSH sẵn vào VPS)** trước khi động vào GitHub — nhầm chiều test là lỗi hay gặp nhất, dễ tưởng nhầm là sai key (11.9b#3):
+   ```bash
+   ssh -v -i ~/.ssh/gh_actions_<project> -p <ssh-port-thật> deploy@<VPS_IP> "echo ok"
+   ```
+   Xác nhận log có dòng `Offering public key` và `Authenticated ... using "publickey"`.
+5. **Xác định đúng SSH port thật của VPS** — không phải lúc nào cũng là `22` (VPS này đang dùng port khác, xem mục 9.3). Nếu khác 22, phải có secret riêng cho port này (bước 6).
+6. Thêm 4 secrets vào repo (Settings → Secrets and variables → Actions):
+
+   | Secret | Giá trị |
+   |---|---|
+   | `VPS_HOST` | IP VPS |
+   | `VPS_USER` | `deploy` |
+   | `VPS_PORT` | port SSH thật (không hardcode `22` trong workflow) |
+   | `VPS_SSH_KEY` | toàn bộ private key vừa tạo ở bước 2 |
+
+7. Tạo GitHub Environment `production`.
+
+### 12.10 Workflow file — trigger tag push, port lấy từ secret
+
+```yaml
+name: Deploy on Tag
+on:
+  push:
+    tags: ['v*']
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    name: "→ <domain> (${{ github.ref_name }})"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: production
+      url: https://<domain>
+    steps:
+      - uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script_stop: true
+          script: |
+            cd /var/www/<project>
+            bash deploy.sh --ref=${{ github.ref_name }}
+```
+
+### 12.11 `safe.directory` cho git (mục 11.9b#4) — chỉ cần nếu bước 12.1 không làm đúng từ đầu
+
+Nếu đã clone bằng đúng user `deploy` ngay từ 12.1 và không có sudo/user khác đụng vào `.git` sau đó, bước này thường không cần. Nếu vẫn gặp `dubious ownership`:
+```bash
+sudo -u deploy git config --global --add safe.directory /var/www/<project>
+```
+
+### 12.12 Test lần đầu
+
+```bash
+git tag v1.0.0 -m "Kích hoạt CI/CD"
+git push origin v1.0.0
+```
+Theo dõi tab **Actions**. Nếu fail, tra theo đúng thứ tự lỗi đã liệt kê ở 11.9b — thứ tự đó chính là thứ tự các bước 12.1–12.11 ở trên đã bỏ sót, làm đủ từ đầu thì thường qua thẳng không lỗi.
 
 ---
 
