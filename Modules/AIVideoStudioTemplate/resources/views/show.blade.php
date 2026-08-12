@@ -155,11 +155,37 @@
                     </tbody>
                 </table>
             </div>
+            {{-- v1.14 (imagine.art "make-ai-marketing-videos") — khung 20s ngắn hơn cho video UGC/quảng
+                 cáo nhanh (khác khung 60s ở trên dành cho video có "Vấn đề" rõ ràng cần build-up dài hơi). --}}
             <p class="text-base-content/60 mt-2">
-                <b>Lỗi thường gặp làm giảm engagement:</b> mở đầu bằng logo thay vì hook, nhồi 3 thông điệp vào 1 clip 20 giây, bỏ qua phụ đề (80% video mạng xã hội được xem không tiếng).
+                <b>Video ngắn (UGC/quảng cáo nhanh, ~20s):</b> Hook 0–3s → Sản phẩm 3–8s → Lợi ích 8–12s → Bằng chứng 12–18s → CTA 18–20s.
             </p>
+            <p class="text-base-content/60 mt-2">
+                <b>Lỗi thường gặp làm giảm engagement:</b> mở đầu bằng logo thay vì hook, ẩn sản phẩm quá lâu (nên xuất hiện rõ trong 5 giây đầu), nhồi 3 thông điệp vào 1 clip 20 giây, bỏ qua phụ đề (80% video mạng xã hội được xem không tiếng).
+            </p>
+            {{-- v1.14 (mindstudio.ai "multi-agent-workflow") — bảng định dạng/thời lượng tối đa theo
+                 nền tảng, giúp chọn Tỷ lệ khung hình + ước lượng Tổng thời lượng phù hợp TRƯỚC khi soạn
+                 shot hàng loạt. Thuần tham khảo — KHÔNG chặn lưu nếu vượt quá. --}}
+            <div class="overflow-x-auto mt-3">
+                <table class="table table-xs">
+                    <thead>
+                        <tr class="text-xs">
+                            <th>Nền tảng</th>
+                            <th>Tỷ lệ khung hình</th>
+                            <th>Thời lượng tối đa thường dùng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>TikTok/Reels</td><td>9:16</td><td>~3 phút</td></tr>
+                        <tr><td>YouTube Shorts</td><td>9:16</td><td>60 giây</td></tr>
+                        <tr><td>YouTube (thường)</td><td>16:9</td><td>Không giới hạn</td></tr>
+                        <tr><td>LinkedIn</td><td>16:9</td><td>~10 phút</td></tr>
+                        <tr><td>Instagram Feed</td><td>1:1</td><td>60 giây</td></tr>
+                    </tbody>
+                </table>
+            </div>
             @if($project->shots->isEmpty())
-            <p class="text-base-content/60 mt-1">Muốn dùng luôn khung này? Bấm <b>"Chèn 5 cảnh mẫu"</b> ở khối bên dưới — hệ thống tự tạo 5 Shot theo đúng 5 phần trên.</p>
+            <p class="text-base-content/60 mt-2">Muốn dùng luôn khung 60s? Bấm <b>"Chèn 5 cảnh mẫu"</b> ở khối bên dưới — hệ thống tự tạo 5 Shot theo đúng 5 phần trên.</p>
             @endif
         </div>
     </details>
@@ -187,6 +213,12 @@
                 {{-- v1.8 (sentx.ai "Take approach") — nhịp lấy cảnh (pacing) là 1 lựa chọn riêng, khác Duration (độ dài). --}}
                 1 cú máy chậm, liên tục tạo cảm giác khác hẳn chuyển động nhanh, dồn dập — chọn nhịp (pacing) phù hợp tâm trạng của shot, không chỉ chọn số giây ·
                 đừng kỳ vọng ra kết quả hoàn hảo ngay lần đầu — nên bắt đầu đơn giản (Subject+Action) rồi thêm dần Style/Camera/Audio, tạo vài biến thể song song thay vì cầu toàn 1 bản, lặp lại 3-4 lần/shot, mỗi lần chỉ sửa 1 vấn đề cụ thể (ghi vào QC bên dưới) ·
+                {{-- v1.14 (mindstudio.ai "multi-agent-workflow" — Agent 1 "Script + Shot List") — công
+                     thức tốc độ đọc chuẩn, dùng để ước lượng độ dài Lời thoại khớp với Thời lượng đã điền. --}}
+                Lời thoại (script_line): ước lượng ~125-150 từ cho mỗi 1 phút video khi viết — giúp khớp độ dài lời đọc với Thời lượng (giây) đã điền, tránh lời thoại quá dài so với shot ngắn ·
+                {{-- v1.14 (mindstudio.ai — Agent 2 "Voiceover") — bước tạo giọng đọc TRƯỚC khi tạo
+                     video, dùng timestamp cấp từ để canh khớp lời thoại với từng shot khi dựng/ghép. --}}
+                có lời thoại dài/nhiều shot? cân nhắc tạo giọng đọc (voiceover) bằng TTS chất lượng cao (ElevenLabs/PlayHT/OpenAI TTS/Kokoro) TRƯỚC khi tạo video từng shot — dùng timestamp cấp từ do TTS trả về để canh đúng lời thoại với từng shot lúc dựng/ghép, thay vì đoán thời lượng ·
                 {{-- v1.8 (sentx.ai "Troubleshooting by Slot") — trỏ tới khối mới trong tài liệu xuất. --}}
                 output ra sai ý? xem khối "Xử lý sự cố theo triệu chứng" trong tài liệu xuất (nút "Xuất Director Prompt Template" bên dưới) để biết đúng field cần sửa.
             </span>

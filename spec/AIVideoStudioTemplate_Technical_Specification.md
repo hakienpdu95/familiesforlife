@@ -1,12 +1,45 @@
 # AI Video Studio Template — Quản lý Director Prompt Template cho video AI
 
-**Đặc tả Kỹ thuật Chi tiết — ĐÃ triển khai (v1.0/v1.1); v1.2-v1.6 bổ sung techniques từ Hedra/DeepReel/BytePlus/Pyxeljam/LinkedIn; v1.7 rà soát nội bộ; v1.8 bổ sung từ sentx.ai; v1.9 bổ sung từ veed.io, xem changelog dưới**
+**Đặc tả Kỹ thuật Chi tiết — ĐÃ triển khai (v1.0/v1.1); v1.2-v1.6 bổ sung techniques từ Hedra/DeepReel/BytePlus/Pyxeljam/LinkedIn; v1.7 rà soát nội bộ; v1.8 bổ sung từ sentx.ai; v1.9 bổ sung từ veed.io; v1.10-v1.13 xem tóm tắt bên dưới; v1.14-v1.15 bổ sung từ mindstudio.ai + imagine.art, xem changelog dưới**
 
-**Phiên bản:** 1.9
-**Ngày:** 2026-08-09
+**Phiên bản:** 1.15
+**Ngày:** 2026-08-12
 **Framework:** Laravel 13 (PHP 8.4) + NWIDART Modules + Lorisleiva Actions
 **Module:** `Modules/AIVideoStudioTemplate`
 
+> **v1.15 (2026-08-12, cùng phiên — phản hồi người dùng "không áp dụng kỹ thuật nào mới ah?" sau
+> v1.14):** đúng — v1.14 chỉ thêm tip/text + 2 lựa chọn `video_type`, chưa có khối TÍNH TOÁN mới nào
+> từ 2 nguồn `mindstudio.ai`/`imagine.art`. Rà soát lại: `mindstudio.ai` Agent 2 "Voiceover" có khái
+> niệm **EDL (Edit Decision List)** — bảng đối chiếu narration/thời gian với từng shot, dùng ở Agent 4
+> "Assembly" để canh clip khớp voiceover/phụ đề — module có đủ dữ liệu (`duration_seconds`,
+> `script_line`, `sort_order`) nhưng chưa từng tổng hợp thành bảng này, kể cả trong tài liệu XUẤT
+> (.md tải về đưa cho editor). Thêm `CompileProjectDirectorPromptAction::buildEdlBlock()` — xem §3.5.
+>
+> **v1.14 (2026-08-12 — đọc `mindstudio.ai/blog/ai-video-generation-content-marketing-multi-agent-workflow`
+> + `imagine.art/blogs/make-ai-marketing-videos`, rà soát kỹ thuật còn thiếu so với v1.13):** 2 nguồn
+> phần lớn lặp lại nguyên tắc đã có (hook đầu video, 1 CTA duy nhất, checklist trước/sau khi tạo, thử
+> biến thể — đã phủ từ v1.0-v1.9); phần rõ ràng KHÔNG áp dụng (gọi API TTS/video model thật, retry/
+> backoff, tích hợp content-calendar, đo hiệu suất phân phối sau khi đăng) trùng quyết định "chỉ tổ
+> chức prompt, không gọi AI Provider" (§0) và mục đã loại khỏi phạm vi ở §10 — không mở lại. 4 kỹ
+> thuật thật sự còn thiếu, đã áp dụng vào `CompileProjectDirectorPromptAction`/`AiVideoStudioProject`/
+> `show.blade.php` (chi tiết ở docblock class + §2.1/§4.1/§7/§8): (1) 2 `video_type` mới
+> `spokesperson`/`offer_promo` (imagine.art, 7 định dạng cụ thể hơn) + tip tương ứng; (2) công thức
+> tốc độ đọc 125-150 từ/phút (mindstudio.ai Agent 1) cho `script_line`; (3) ghi chú quy trình
+> Voiceover/TTS TRƯỚC khi tạo video, dùng timestamp cấp từ canh khớp shot (mindstudio.ai Agent 2 —
+> chỉ là hướng dẫn, module không gọi TTS thật); (4) bảng định dạng/thời lượng tối đa theo nền tảng +
+> "ẩn sản phẩm quá lâu"/phụ đề mờ thêm vào `QC_CHECKLIST`. Nhân tiện sửa 1 lỗi phát hiện khi rà soát:
+> `buildCreativeBriefBlock()` in slug thô `video_type` thay vì `videoTypeLabel()` dù §11 (v1.7) đã ghi
+> nhận hành vi ĐÚNG này từ trước — code lệch spec, không phải do thay đổi vừa rồi.
+>
+> **v1.10-v1.13 (2026-08-12, cùng phiên làm việc, tóm tắt — xem chi tiết ở docblock từng file):**
+> v1.10 (LinkedIn, đọc lại) thêm `image_prompt`/`motion_prompt` tự sinh (quy trình 2 bước Image-to-
+> Video) + `timeline_breakdown` + 2 field ảnh nguồn ghép KOL/sản phẩm; v1.11 (phản hồi người dùng) bỏ
+> 2 field ảnh nguồn đó, thay bằng `reference_context_prompt` (text ngắn tự gõ); v1.12 (phản hồi người
+> dùng) bỏ tự sinh `image_prompt`/`motion_prompt`, đổi thành nhập tay tự do; v1.13 (phản hồi người
+> dùng) làm lại UX trang `show.blade.php` — bỏ thanh quy trình 4 bước (logic "active" không nhất
+> quán), bỏ input `reference_image_url` khỏi UI, bỏ khối "Nâng cao"/"Kết quả AI", đổi autosave debounce
+> mỗi field thành nút "Lưu"/shot bấm tay (giảm request AJAX) + cảnh báo `beforeunload` nếu chưa lưu.
+>
 > **v1.9 (2026-08-09 — đọc `veed.io/learn/video-prompts`, rà soát kỹ thuật còn thiếu so với v1.8):**
 > nguồn dùng công thức "3 thành phần" (Subject & Action/Visual Style/Technical Direction) + "power
 > words" (temporal/spatial/emotional cues) + tổ chức prompt theo thứ tự + sai lầm phổ biến — ĐÃ phủ
@@ -244,7 +277,8 @@ Schema::create('ai_video_studio_projects', function (Blueprint $table) {
     // này sẽ build lại prompt toàn bộ Shot (§3.6, v1.7). Tập giá trị: hằng số ở Model (§4.1).
     $table->text('target_audience')->nullable();      // đối tượng khán giả mục tiêu
     // v1.6 (LinkedIn marketing guide) — Step 1 "Define Objectives" tách 2 khái niệm này riêng.
-    $table->string('video_type', 20)->nullable();     // explainer|testimonial|product_demo|storytelling|other
+    // v1.14 (imagine.art) — thêm spokesperson|offer_promo, `string(20)` vẫn đủ chỗ (dài nhất 12 ký tự).
+    $table->string('video_type', 20)->nullable();     // explainer|testimonial|product_demo|storytelling|spokesperson|offer_promo|other
     $table->text('core_message')->nullable();         // thông điệp/lời hứa cụ thể, VD "Tăng năng suất 40%"
     $table->string('aspect_ratio', 10)->nullable();   // 16:9|9:16|1:1|4:5
     $table->string('resolution', 10)->nullable();     // v1.5 (pyxeljam.com) — 720p|1080p|2K|4K
@@ -492,6 +526,18 @@ public function handle(AiVideoStudioProject $project, array $shotIdsInOrder): vo
 > `compiled_prompt` chính: **Prompt Ảnh (keyframe)** (nếu có `image_prompt`) và **Prompt Motion (hoạt
 > hình hoá ảnh)** (nếu có `motion_prompt`). v1.12 — 2 field này đổi từ tự sinh sang nhập tay (§3.1),
 > nhưng logic hiển thị ở đây KHÔNG đổi (vẫn chỉ in nếu có giá trị, bất kể nguồn gốc giá trị là gì).
+>
+> **v1.15 (mindstudio.ai — Agent 2/4 "Voiceover → Assembly", phản hồi người dùng sau v1.14 rằng
+> chưa có gì "kỹ thuật mới" thật sự)** — thêm `buildEdlBlock()`: khối `## EDL — Bảng đối chiếu Lời
+> thoại & Thời gian` (bảng Markdown Cảnh|Thời gian|Lời thoại|Mô tả hình ảnh), đặt CUỐI phần header
+> (sau khối troubleshooting, TRƯỚC danh sách Shot). Thời gian cộng dồn từ `duration_seconds` theo thứ
+> tự `sort_order` — shot KHÔNG điền `duration_seconds` hiện `"{cursor}s+ (?)"` (không cộng dồn tiếp,
+> báo hiệu mốc sau đó chỉ là ước lượng) thay vì giả định 1 con số. Cột "Mô tả hình ảnh" ưu tiên
+> `label`, rơi xuống `Str::limit(subject + action, 60)` nếu label rỗng. CHỈ xuất hiện nếu project có
+> **ít nhất 1 shot** và **ít nhất 1 trong 2** `duration_seconds`/`script_line` có điền ở bất kỳ shot
+> nào — bảng toàn placeholder không có giá trị tham khảo. Đây là bảng DUY NHẤT trong tài liệu xuất
+> tổng hợp timing + lời thoại cùng lúc — timeline trực quan (`#aivsTimeline`, §8) chỉ có trên trang
+> `show`, KHÔNG có trong file `.md` tải về đưa cho editor.
 
 ```php
 namespace Modules\AIVideoStudioTemplate\Features\ProjectManagement\Actions;
@@ -783,7 +829,7 @@ Route::middleware(['auth', 'can:ai_video_studio_template.use'])
 
 ## 7. Validation
 
-- `StoreProjectRequest`/`UpdateProjectRequest`: `name` required|string|max:200; `description`/`objective`/`target_audience`/`core_message`/`default_subject`/`reference_image_url`(max:2048)/`default_style`/`default_constraints` nullable|string; `aspect_ratio` nullable|string|in:16:9,9:16,1:1,4:5 (v1.2); `resolution` nullable|string|in:720p,1080p,2K,4K (v1.5); `video_type` nullable|string|in:explainer,testimonial,product_demo,storytelling,other (v1.6); `reference_context_prompt` nullable|string|max:300 (v1.11 — cố ý giới hạn ngắn, đây là ghi chú không phải kịch bản).
+- `StoreProjectRequest`/`UpdateProjectRequest`: `name` required|string|max:200; `description`/`objective`/`target_audience`/`core_message`/`default_subject`/`reference_image_url`(max:2048)/`default_style`/`default_constraints` nullable|string; `aspect_ratio` nullable|string|in:16:9,9:16,1:1,4:5 (v1.2); `resolution` nullable|string|in:720p,1080p,2K,4K (v1.5); `video_type` nullable|string|in:explainer,testimonial,product_demo,storytelling,spokesperson,offer_promo,other (v1.6; 2 giá trị cuối trước `other` thêm ở v1.14); `reference_context_prompt` nullable|string|max:300 (v1.11 — cố ý giới hạn ngắn, đây là ghi chú không phải kịch bản).
 - `StoreShotRequest`/`UpdateShotRequest`: tất cả field director + `label` + `model_tool`(max:150, v1.2) + `qc_notes`(v1.2) đều `nullable|string`; `mood` nullable|string (v1.3); `duration_seconds` nullable|integer|min:1|max:36000 (v1.3); `audio_direction`/`reference_assets` nullable|string (v1.4); `cta_text` nullable|string|max:200 (v1.6); `timeline_breakdown` nullable|string (v1.10); `image_prompt`/`motion_prompt` nullable|string (v1.12 — field nhập tay, không giới hạn độ dài vì là nội dung prompt thật) — không bắt buộc field nào (cho phép điền dần).
 - `SaveShotAiResultRequest`: `ai_result` nullable|string.
 - `ReorderShotsRequest`: `shot_ids` required|array, `shot_ids.*` required|integer — ownership thật (thuộc đúng project) kiểm tra ở Action (§3.4), KHÔNG kiểm tra được ở FormRequest thuần (cần query DB theo `{project}` route param).
@@ -806,7 +852,7 @@ Trang `show.blade.php` (`@extends('layouts.backend')`):
 - Cuối trang: nút "Xuất Director Prompt Template" → gọi `GET {project}/export`, trả về file `.md` tải xuống (nội dung từ `CompileProjectDirectorPromptAction`, v1.2 gồm cả khối Creative Brief + checklist đánh giá — xem §3.5), + nút "Copy toàn bộ" hiển thị trong `<textarea readonly>` lớn.
 
 `_form.blade.php` (create/edit project, v1.2-v1.6):
-- Khối "Creative Brief" mới (trước khối Anchoring) — `objective`/`target_audience` (textarea) + `video_type` (`<select>` 5 lựa chọn: explainer/testimonial/product_demo/storytelling/other, v1.6) + `core_message` (textarea, v1.6) + `aspect_ratio` (`<select>` 4 lựa chọn cố định: 16:9/9:16/1:1/4:5) + `resolution` (`<select>` 4 lựa chọn: 720p/1080p/2K/4K, v1.5) — tất cả không bắt buộc.
+- Khối "Creative Brief" mới (trước khối Anchoring) — `objective`/`target_audience` (textarea) + `video_type` (`<select>` 7 lựa chọn: explainer/testimonial/product_demo/storytelling/spokesperson/offer_promo/other, v1.6; 2 lựa chọn giữa thêm ở v1.14) + `core_message` (textarea, v1.6) + `aspect_ratio` (`<select>` 4 lựa chọn cố định: 16:9/9:16/1:1/4:5) + `resolution` (`<select>` 4 lựa chọn: 720p/1080p/2K/4K, v1.5) — tất cả không bắt buộc.
 - Khối Anchoring thêm 1 textarea `reference_context_prompt` (v1.11, `maxlength="300"` — mô tả ngắn tự gõ, không tự sinh gì, xem §3.7). v1.13 (phản hồi người dùng) — input `reference_image_url` (URL ảnh tham chiếu) ĐÃ BỎ khỏi form, chỉ giữ lại cột/dữ liệu backend.
 - Placeholder các field mô tả (`default_subject`/`default_style`/`default_constraints`) viết lại theo Key Prompting Principles — ví dụ cụ thể thay vì mô tả chung chung, nhắc kèm bảng màu/tone thương hiệu ở `default_style`, kỹ thuật negative prompt ở `default_constraints`.
 
@@ -851,7 +897,9 @@ Thêm 1 mục top-level (không nằm trong nhóm "Bài viết") trong `resource
 - Optimistic locking / cảnh báo xung đột khi 2 tab cùng sửa 1 shot — chấp nhận last-write-wins ở v1 (§6.1).
 - Disclosure/compliance labeling (EU AI Act...) — không thuộc phạm vi công cụ nội bộ.
 - Đa ngôn ngữ cho nội dung Project/Shot, và cho chính LABEL các field prompt (`CHỦ THỂ (Subject)`...) — hard-code tiếng Việt trong `BuildShotPromptAction` (§3.1), chấp nhận được cho v1 nhưng là điểm cần sửa nếu sau này module phục vụ đa ngôn ngữ.
-- **Theo dõi hiệu suất thực tế sau khi đăng** (views/engagement/conversion — thực hành #10 pyxeljam.com "Test and Improve") — v1.5 chỉ dừng ở đánh giá CHẤT LƯỢNG video tạo ra (`qc_notes`, checklist §3.5), KHÔNG theo dõi hiệu suất phân phối/kinh doanh sau khi video được đăng lên nền tảng — thuộc phạm vi công cụ phân tích riêng, ngoài phạm vi "Director Prompt Template" của module này.
+- **Theo dõi hiệu suất thực tế sau khi đăng** (views/engagement/conversion — thực hành #10 pyxeljam.com "Test and Improve") — v1.5 chỉ dừng ở đánh giá CHẤT LƯỢNG video tạo ra (`qc_notes`, checklist §3.5), KHÔNG theo dõi hiệu suất phân phối/kinh doanh sau khi video được đăng lên nền tảng — thuộc phạm vi công cụ phân tích riêng, ngoài phạm vi "Director Prompt Template" của module này. v1.14 (imagine.art liệt kê Hook rate/Hold rate/CTR/CPC/CPA/add-to-cart) — cùng quyết định, không mở lại.
+- **Gọi API TTS thật để tạo giọng đọc** (ElevenLabs/PlayHT/OpenAI TTS/Kokoro — mindstudio.ai Agent 2 "Voiceover") — v1.14 chỉ THÊM GHI CHÚ hướng dẫn quy trình vào callout "Mẹo viết prompt" (§8), không tích hợp API — trùng quyết định cốt lõi "không gọi AI Provider" (§0).
+- **Retry logic/exponential backoff, tích hợp content calendar (Notion/Airtable/Google Sheets), Brand Style Library dùng lại xuyên PROJECT** (mindstudio.ai "Optimizing at Scale") — đều là hạ tầng tự động hoá/pipeline thật, ngoài phạm vi 1 tool tổ chức prompt thủ công của module (§0). "Brand Style Library" gần nhất với `default_style`/`default_constraints` đã có (anchoring CẤP PROJECT, §0) — chưa có nhu cầu dùng lại xuyên nhiều Project, để dành bản sau nếu phát sinh.
 
 ## 11. Testing (bắt buộc trước khi coi là hoàn thành)
 
@@ -891,6 +939,13 @@ Thêm 1 mục top-level (không nằm trong nhóm "Bài viết") trong `resource
 - **v1.10 — API resource shape**: `POST/PUT shots` trả về JSON có đủ `timeline_breakdown`/`image_prompt`/`motion_prompt` (§6.1).
 - **v1.11 — `reference_context_prompt`**: field text tự do, KHÔNG xuất hiện trong `compiled_prompt`/`image_prompt`/`motion_prompt` của bất kỳ shot nào (cùng nhóm `objective` — chỉ dành cho người đọc); project có điền → hiển thị dạng text (không phải link) ở card Anchoring trên `show.blade.php`; không điền → dòng đó không xuất hiện.
 - **v1.11 — `BuildReferenceCompositionPromptAction`/`kol_reference_image_url`/`product_reference_image_url` đã bị xoá**: gọi `BuildReferenceCompositionPromptAction` (namespace cũ) → `class not found`; `ShotApiController`/`ProjectController` không còn phụ thuộc class này (§3.7).
+- **v1.14 — `video_type` mới**: `Rule::in()` chấp nhận `spokesperson`/`offer_promo` (không còn báo lỗi 422); `videoTypeLabel()` trả đúng nhãn tiếng Việt cho 2 giá trị này; `CompileProjectDirectorPromptAction` in đúng dòng "Gợi ý theo loại video" tương ứng khi project chọn 1 trong 2.
+- **v1.14 — `video_type` label trong tài liệu xuất (sửa lỗi)**: project có `video_type` → dòng "Loại video" trong `## Creative Brief` in **nhãn** (VD "Product demo (trình diễn sản phẩm)"), KHÔNG in slug thô (VD "product_demo") — trước v1.14 code in nhầm slug thô dù §11 (v1.7) đã ghi nhận hành vi đúng từ trước.
+- **v1.14 — `QC_CHECKLIST` phụ đề**: mục "Phụ đề (nếu có) đủ lớn, tương phản cao..." luôn xuất hiện trong khối `## Checklist đánh giá output`, kể cả project 0 shot (cùng hành vi các mục QC tĩnh khác).
+- **v1.15 — `buildEdlBlock()` ẩn khi không có dữ liệu**: project 0 shot → khối `## EDL` KHÔNG xuất hiện; project có shot nhưng KHÔNG shot nào điền `duration_seconds` lẫn `script_line` → khối `## EDL` KHÔNG xuất hiện; chỉ cần ĐÚNG 1 shot có 1 trong 2 field đó → khối xuất hiện với ĐỦ mọi shot (kể cả shot rỗng hoàn toàn, hiện placeholder).
+- **v1.15 — Thời gian cộng dồn đúng thứ tự `sort_order`**: 3 shot lần lượt 3s/không điền/5s → cột Thời gian lần lượt `0–3s`, `3s+ (?)`, `3–8s` (shot không điền KHÔNG cộng dồn tiếp, shot sau tính tiếp từ mốc cursor cũ).
+- **v1.15 — Cột "Mô tả hình ảnh"**: shot có `label` → ưu tiên hiện `label`; shot KHÔNG có `label` nhưng có `subject`/`action` → hiện `Str::limit(subject+action, 60)`; shot rỗng cả 3 → hiện `_(chưa có mô tả)_`.
+- **v1.15 — Escape ký tự `|` trong bảng Markdown**: `script_line`/`label`/`subject` chứa ký tự `|` → thay bằng `/` trong ô tương ứng, không làm vỡ cấu trúc bảng.
 
 **v1.7 — rà soát logic build prompt (xem changelog đầu tài liệu):**
 

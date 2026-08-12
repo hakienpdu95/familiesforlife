@@ -28,6 +28,11 @@ class AiVideoStudioProject extends Model
         'testimonial' => 'Testimonial (đánh giá/trải nghiệm thật)',
         'product_demo' => 'Product demo (trình diễn sản phẩm)',
         'storytelling' => 'Storytelling (kể chuyện thương hiệu)',
+        // v1.14 (imagine.art) — 2 định dạng nguồn liệt kê riêng mà 5 loại cũ không phủ tốt:
+        // "Spokesperson" (người nói trực diện camera, khác talking-head chung chung của explainer)
+        // và "Offer/Promo" (nhấn giá/tính khẩn cấp/khuyến mãi có hạn — khác demo/explain thông thường).
+        'spokesperson' => 'Spokesperson (người phát ngôn nói trực tiếp với camera)',
+        'offer_promo' => 'Offer/Promo (ưu đãi, khuyến mãi có thời hạn)',
         'other' => 'Khác',
     ];
 

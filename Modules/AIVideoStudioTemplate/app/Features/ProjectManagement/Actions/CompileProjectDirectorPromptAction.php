@@ -3,6 +3,7 @@
 namespace Modules\AIVideoStudioTemplate\Features\ProjectManagement\Actions;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Modules\AIVideoStudioTemplate\Models\AiVideoStudioProject;
 use Modules\AIVideoStudioTemplate\Models\AiVideoStudioShot;
@@ -78,6 +79,37 @@ use Modules\AIVideoStudioTemplate\Models\AiVideoStudioShot;
  * `BuildShotPromptAction::buildImagePrompt()`/`buildMotionPrompt()`), đặt NGAY SAU `compiled_prompt`
  * chính — phục vụ quy trình 2 bước (text-to-image rồi image-to-video) khác với quy trình 1 bước
  * (text-to-video) mà `compiled_prompt` phục vụ từ trước.
+ *
+ * v1.14 (mindstudio.ai "ai-video-generation-content-marketing-multi-agent-workflow" +
+ * imagine.art "make-ai-marketing-videos" — đọc theo yêu cầu tổng hợp kỹ thuật mới): 2 nguồn phần lớn
+ * lặp lại nguyên tắc đã có (hook đầu video, 1 CTA duy nhất, kiểm tra trước khi đăng, thử biến thể —
+ * đã phủ từ v1.0-v1.9); các phần rõ ràng KHÔNG áp dụng (gọi API TTS/video model thật, retry/backoff,
+ * content-calendar integration, đo hiệu suất sau khi đăng) trùng quyết định "chỉ tổ chức prompt,
+ * không gọi AI Provider" (§0) và mục "Theo dõi hiệu suất thực tế" đã loại khỏi phạm vi ở §10 — không
+ * mở lại. 4 kỹ thuật thật sự còn thiếu, đã áp dụng: (1) **2 `video_type` mới** `spokesperson`/
+ * `offer_promo` (imagine.art liệt kê 7 định dạng cụ thể hơn 5 loại cũ, §4.1) — kèm tip tương ứng ở
+ * `CONTENT_TIPS_BY_VIDEO_TYPE`; (2) **công thức tốc độ đọc 125-150 từ/phút** (mindstudio.ai Agent 1)
+ * cho `script_line`, thêm vào callout "Mẹo viết prompt" (`show.blade.php`); (3) **bước Voiceover/TTS**
+ * (mindstudio.ai Agent 2 — tạo giọng đọc TRƯỚC khi tạo video, dùng timestamp cấp từ canh khớp shot),
+ * thêm vào cùng callout — chỉ là GHI CHÚ quy trình, module không gọi TTS thật; (4) **bảng định dạng/
+ * thời lượng theo nền tảng** (mindstudio.ai) + **"ẩn sản phẩm quá lâu"/phụ đề mờ** (imagine.art) —
+ * thêm vào khung thời gian mẫu + `QC_CHECKLIST` (`show.blade.php`). Nhân tiện sửa 1 lỗi phát hiện khi
+ * rà soát: `buildCreativeBriefBlock()` in slug thô `$project->video_type` thay vì `videoTypeLabel()`
+ * dù spec §11 (v1.7) đã ghi nhận hành vi ĐÚNG này từ trước — code trước đó lệch với spec, không phải
+ * do thay đổi vừa rồi.
+ *
+ * v1.15 (cùng nguồn mindstudio.ai — phản hồi người dùng "không áp dụng kỹ thuật nào mới ah?" sau
+ * v1.14, đúng: v1.14 chỉ thêm tip/text, chưa có khối TÍNH TOÁN mới nào): nguồn có khái niệm **EDL
+ * (Edit Decision List)** ở Agent 2 "Voiceover" — bảng đối chiếu narration/thời gian với từng shot,
+ * dùng ở Agent 4 "Assembly" để canh clip khớp voiceover/phụ đề. Module CHƯA có bảng này dù đã đủ dữ
+ * liệu (`duration_seconds`, `script_line`, `sort_order`) — trước đây chỉ có ("Tổng thời lượng ước
+ * tính", 1 số) và timeline trực quan trên `show.blade.php` (chỉ hiện TRÊN TRANG, không có trong tài
+ * liệu xuất — bản .md tải về để đưa cho editor lại thiếu). Bổ sung `buildEdlBlock()`: bảng Markdown
+ * (Cảnh | Thời gian | Lời thoại | Mô tả hình ảnh), thời gian tính cộng dồn TỪ `duration_seconds` (như
+ * `renderTimeline()`/timeline strip đã làm ở `show.blade.php`, KHÔNG tách logic dùng chung vì 1 bên
+ * PHP 1 bên JS — chấp nhận trùng lặp nhỏ, đã có tiền lệ tương tự giữa `handle()` và JS timeline). CHỈ
+ * xuất hiện nếu ít nhất 1 shot có `duration_seconds` HOẶC `script_line` — dự án chưa viết gì thì bảng
+ * rỗng không có ý nghĩa. Đặt SAU khối troubleshooting (cuối phần header, ngay trước danh sách Shot).
  */
 class CompileProjectDirectorPromptAction
 {
@@ -96,6 +128,9 @@ class CompileProjectDirectorPromptAction
         'Thời lượng khớp tỷ lệ khung hình của nền tảng phát hành (v1.6)',
         'Nhất quán thương hiệu — vị trí logo, đúng bảng màu đã khai (v1.6)',
         'Âm thanh rõ ràng, không tạp âm nền (v1.6)',
+        // v1.14 (imagine.art) — phụ đề mờ/nhỏ là 1 trong 7 lỗi phổ biến nguồn liệt kê; 80% video xem
+        // không tiếng (đã ghi ở khung thời gian mẫu) nên phụ đề PHẢI đọc được, không chỉ "có mặt".
+        'Phụ đề (nếu có) đủ lớn, tương phản cao, đọc được trên nền video (v1.14)',
     ];
 
     /** Checklist rà lại prompt TRƯỚC khi chạy trên tool AI ngoài — deepreel.com (v1.3). */
@@ -144,6 +179,10 @@ class CompileProjectDirectorPromptAction
      * (đã có sẵn từ v1.6, `AiVideoStudioProject::VIDEO_TYPES`) sang gợi ý viết prompt riêng cho loại
      * nội dung đó. Bỏ qua `other` vì nguồn không có gợi ý chung nào phù hợp để gán vào.
      *
+     * v1.14 (imagine.art "make-ai-marketing-videos") — thêm tip cho 2 loại mới `spokesperson`/
+     * `offer_promo` (§4.1) ngay khi thêm option, tránh lặp lại tình trạng field có mà chưa có tip
+     * khớp (đã xảy ra với `other` từ v1.6 tới giờ, chấp nhận vì nguồn không có gợi ý chung phù hợp).
+     *
      * @var array<string, string>
      */
     private const CONTENT_TIPS_BY_VIDEO_TYPE = [
@@ -151,6 +190,8 @@ class CompileProjectDirectorPromptAction
         'testimonial' => 'Mô tả rõ bối cảnh người chia sẻ (ở đâu, đang làm gì) + vị trí đặt call-to-action trong cảnh.',
         'product_demo' => 'Nêu rõ lợi ích chính của sản phẩm cần lên hình + kiểu ánh sáng, góc máy, tâm trạng nhạc nền phù hợp.',
         'storytelling' => 'Mô tả mạch cảm xúc xuyên suốt, tiến triển cảnh theo trình tự, phong cách lời dẫn, kiểu chuyển cảnh điện ảnh.',
+        'spokesperson' => 'Mô tả rõ người nói nhìn thẳng vào camera (không phải góc nghiêng/quay lưng), giọng điệu tự tin/gần gũi tuỳ thương hiệu; sản phẩm nên xuất hiện trong khung hình cùng người nói, không chỉ nhắc bằng lời.',
+        'offer_promo' => 'Nhấn mạnh RÕ con số/thời hạn cụ thể trong Constraints hoặc CTA (VD "giảm 25%, chỉ tuần này") — nhịp cắt nhanh, phụ đề in đậm; đây là loại video ưu tiên tốc độ truyền tải hơn cảm xúc/câu chuyện.',
     ];
 
     public function handle(AiVideoStudioProject $project): string
@@ -191,7 +232,9 @@ class CompileProjectDirectorPromptAction
             $brief[] = "- **Đối tượng khán giả:** {$project->target_audience}";
         }
         if (filled($project->video_type)) {
-            $brief[] = "- **Loại video:** {$project->video_type}";
+            // v1.14 — sửa lỗi in slug thô (vd "product_demo") thay vì nhãn đẹp; spec §11 (v1.7) đã
+            // ghi nhận hành vi ĐÚNG này từ trước nhưng code trước đó lệch, phát hiện khi rà soát lại.
+            $brief[] = "- **Loại video:** {$project->videoTypeLabel()}";
             // v1.9 (veed.io) — chỉ in nếu CÓ tip khớp; bỏ qua `other` (nguồn không có gợi ý phù hợp).
             if ($tip = self::CONTENT_TIPS_BY_VIDEO_TYPE[$project->video_type] ?? null) {
                 $brief[] = "- **Gợi ý theo loại video:** {$tip}";
@@ -231,7 +274,47 @@ class CompileProjectDirectorPromptAction
         $sections[] = "## Checklist đánh giá output (mỗi shot, sau khi có kết quả AI, trước khi chấp nhận)\n\n{$qcChecklist}";
         $sections[] = $this->buildTroubleshootingBlock();
 
+        if ($edl = $this->buildEdlBlock($shots)) {
+            $sections[] = $edl;
+        }
+
         return implode("\n\n", $sections)."\n\n---\n\n";
+    }
+
+    /**
+     * v1.15 (mindstudio.ai — Agent 2/4 "Voiceover → Assembly") — bảng EDL cộng dồn thời gian từ
+     * `duration_seconds` (giống `renderTimeline()`/timeline strip ở `show.blade.php`), đối chiếu với
+     * `script_line`, dùng lúc dựng/ghép video hoặc thu voiceover khớp từng shot.
+     */
+    private function buildEdlBlock(Collection $shots): ?string
+    {
+        if ($shots->isEmpty() || $shots->every(fn (AiVideoStudioShot $shot) => blank($shot->duration_seconds) && blank($shot->script_line))) {
+            return null;
+        }
+
+        $rows = ['| Cảnh | Thời gian | Lời thoại | Mô tả hình ảnh |', '|---|---|---|---|'];
+        $cursor = 0;
+
+        foreach ($shots as $index => $shot) {
+            $shotLabel = 'Cảnh '.($index + 1).($shot->label ? ' — '.str_replace('|', '/', $shot->label) : '');
+
+            if (filled($shot->duration_seconds)) {
+                $time = "{$cursor}–".($cursor + $shot->duration_seconds).'s';
+                $cursor += $shot->duration_seconds;
+            } else {
+                $time = "{$cursor}s+ (?)";
+            }
+
+            $scriptLine = filled($shot->script_line) ? '"'.str_replace(["\r\n", "\n", '|'], [' ', ' ', '/'], trim($shot->script_line)).'"' : '_(chưa có lời thoại)_';
+            $visual = $shot->label ?: (Str::limit(trim("{$shot->subject} {$shot->action}"), 60) ?: '_(chưa có mô tả)_');
+            $visual = str_replace('|', '/', $visual);
+
+            $rows[] = "| {$shotLabel} | {$time} | {$scriptLine} | {$visual} |";
+        }
+
+        return "## EDL — Bảng đối chiếu Lời thoại & Thời gian (Edit Decision List)\n\n"
+            ."Dùng khi thu giọng đọc (voiceover) hoặc dựng/ghép video — canh từng shot khớp đúng mốc thời gian và lời thoại. \"(?)\" nghĩa là shot chưa điền Thời lượng, mốc thời gian sau đó chỉ là ước lượng.\n\n"
+            .implode("\n", $rows);
     }
 
     /**
