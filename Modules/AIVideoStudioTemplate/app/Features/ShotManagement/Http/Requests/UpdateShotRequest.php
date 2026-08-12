@@ -34,6 +34,7 @@ class UpdateShotRequest extends FormRequest
             'style' => ['nullable', 'string'],
             'mood' => ['nullable', 'string'],
             'duration_seconds' => ['nullable', 'integer', 'min:1', 'max:36000'],
+            'timeline_breakdown' => ['nullable', 'string'],
             'audio_direction' => ['nullable', 'string'],
             'constraints' => ['nullable', 'string'],
             'script_line' => ['nullable', 'string'],
@@ -41,6 +42,8 @@ class UpdateShotRequest extends FormRequest
             'model_tool' => ['nullable', 'string', 'max:150'],
             'reference_assets' => ['nullable', 'string'],
             'qc_notes' => ['nullable', 'string'],
+            'image_prompt' => ['nullable', 'string'],
+            'motion_prompt' => ['nullable', 'string'],
         ];
     }
 
@@ -58,6 +61,7 @@ class UpdateShotRequest extends FormRequest
             'style' => $this->valueOrExisting('style', $shot),
             'mood' => $this->valueOrExisting('mood', $shot),
             'durationSeconds' => $this->valueOrExisting('duration_seconds', $shot),
+            'timelineBreakdown' => $this->valueOrExisting('timeline_breakdown', $shot),
             'audioDirection' => $this->valueOrExisting('audio_direction', $shot),
             'constraints' => $this->valueOrExisting('constraints', $shot),
             'scriptLine' => $this->valueOrExisting('script_line', $shot),
@@ -65,6 +69,8 @@ class UpdateShotRequest extends FormRequest
             'modelTool' => $this->valueOrExisting('model_tool', $shot),
             'referenceAssets' => $this->valueOrExisting('reference_assets', $shot),
             'qcNotes' => $this->valueOrExisting('qc_notes', $shot),
+            'imagePrompt' => $this->valueOrExisting('image_prompt', $shot),
+            'motionPrompt' => $this->valueOrExisting('motion_prompt', $shot),
         ];
     }
 

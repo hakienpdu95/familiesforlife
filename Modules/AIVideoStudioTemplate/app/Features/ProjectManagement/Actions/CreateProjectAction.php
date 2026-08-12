@@ -23,6 +23,7 @@ class CreateProjectAction
             'resolution' => $data->resolution,
             'default_subject' => $data->defaultSubject,
             'reference_image_url' => $data->referenceImageUrl,
+            'reference_context_prompt' => $data->referenceContextPrompt,
             'default_style' => $data->defaultStyle,
             'default_constraints' => $data->defaultConstraints,
             'created_by' => $userId,

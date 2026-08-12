@@ -23,6 +23,7 @@ class StoreShotRequest extends FormRequest
             'style' => ['nullable', 'string'],
             'mood' => ['nullable', 'string'],
             'duration_seconds' => ['nullable', 'integer', 'min:1', 'max:36000'],
+            'timeline_breakdown' => ['nullable', 'string'],
             'audio_direction' => ['nullable', 'string'],
             'constraints' => ['nullable', 'string'],
             'script_line' => ['nullable', 'string'],
@@ -30,6 +31,8 @@ class StoreShotRequest extends FormRequest
             'model_tool' => ['nullable', 'string', 'max:150'],
             'reference_assets' => ['nullable', 'string'],
             'qc_notes' => ['nullable', 'string'],
+            'image_prompt' => ['nullable', 'string'],
+            'motion_prompt' => ['nullable', 'string'],
         ];
     }
 
@@ -44,6 +47,7 @@ class StoreShotRequest extends FormRequest
             'style' => $this->input('style') ?: null,
             'mood' => $this->input('mood') ?: null,
             'durationSeconds' => $this->input('duration_seconds') ?: null,
+            'timelineBreakdown' => $this->input('timeline_breakdown') ?: null,
             'audioDirection' => $this->input('audio_direction') ?: null,
             'constraints' => $this->input('constraints') ?: null,
             'scriptLine' => $this->input('script_line') ?: null,
@@ -51,6 +55,8 @@ class StoreShotRequest extends FormRequest
             'modelTool' => $this->input('model_tool') ?: null,
             'referenceAssets' => $this->input('reference_assets') ?: null,
             'qcNotes' => $this->input('qc_notes') ?: null,
+            'imagePrompt' => $this->input('image_prompt') ?: null,
+            'motionPrompt' => $this->input('motion_prompt') ?: null,
         ];
     }
 }

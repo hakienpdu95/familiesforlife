@@ -71,9 +71,10 @@ class ShotApiController extends Controller
     {
         return $shot->only([
             'id', 'uuid', 'sort_order', 'label',
-            'subject', 'action', 'environment', 'camera', 'style', 'mood', 'duration_seconds',
+            'subject', 'action', 'environment', 'camera', 'style', 'mood', 'duration_seconds', 'timeline_breakdown',
             'audio_direction', 'script_line', 'cta_text', 'constraints',
-            'model_tool', 'reference_assets', 'compiled_prompt', 'ai_result', 'qc_notes',
+            'model_tool', 'reference_assets', 'compiled_prompt', 'image_prompt', 'motion_prompt',
+            'ai_result', 'qc_notes',
         ]);
     }
 }

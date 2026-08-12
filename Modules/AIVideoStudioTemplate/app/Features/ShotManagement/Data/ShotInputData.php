@@ -21,6 +21,7 @@ class ShotInputData extends Data
         public readonly ?string $style = null,
         public readonly ?string $mood = null,
         public readonly ?int $durationSeconds = null,
+        public readonly ?string $timelineBreakdown = null,
         public readonly ?string $audioDirection = null,
         public readonly ?string $constraints = null,
         public readonly ?string $scriptLine = null,
@@ -28,5 +29,7 @@ class ShotInputData extends Data
         public readonly ?string $modelTool = null,
         public readonly ?string $referenceAssets = null,
         public readonly ?string $qcNotes = null,
+        public readonly ?string $imagePrompt = null,
+        public readonly ?string $motionPrompt = null,
     ) {}
 }

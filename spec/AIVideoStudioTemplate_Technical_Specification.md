@@ -221,7 +221,8 @@ Sản xuất 1 TVC/video quảng cáo bằng AI hiện đòi hỏi lặp lại n
 > 95 trước khi có các yêu cầu này) — mỗi bản nằm trong 1 migration `Schema::table` (ALTER) riêng:
 > `..._190001_add_hedra_technique_fields...` (v1.2), `..._200001_add_deepreel_mood_duration_fields...`
 > (v1.3), `..._210001_add_byteplus_audio_and_reference_fields...` (v1.4),
-> `..._220001_add_resolution_field...` (v1.5), `..._230001_add_marketing_video_fields...` (v1.6) —
+> `..._220001_add_resolution_field...` (v1.5), `..._230001_add_marketing_video_fields...` (v1.6),
+> `2026_08_12_100001_add_two_step_prompt_and_reference_composition_fields...` (v1.10) —
 > cùng pattern `Modules/ContentOutlines/database/migrations/2026_08_07_170001_add_article_drafting_fields_to_content_outlines_table.php`
 > (KHÔNG sửa migration đã chạy — luôn thêm migration ALTER mới).
 
@@ -251,6 +252,13 @@ Schema::create('ai_video_studio_projects', function (Blueprint $table) {
     // Anchoring — prefill vào Shot mới, KHÔNG bắt buộc (§0).
     $table->text('default_subject')->nullable();     // mô tả nhân vật/sản phẩm cố định
     $table->text('reference_image_url')->nullable(); // v1.2 — anchor bằng ẢNH tham chiếu (Hedra Step 2 + magichour.ai)
+    // v1.11 (phản hồi người dùng, cùng ngày với v1.10) — v1.10 ban đầu thêm 2 field ảnh nguồn
+    // (kol_reference_image_url/product_reference_image_url) + BuildReferenceCompositionPromptAction để
+    // TỰ SINH prompt "ghép 2 ảnh thành 1 ảnh mới". Sai bài toán: người dùng đã tự chuẩn bị SẴN ảnh KOL +
+    // sản phẩm ở NGOÀI tool trước khi tới bước này — không cần tool sinh prompt ghép hộ. Thay bằng 1 ô
+    // text NGẮN tự gõ để nhớ lại ngữ cảnh của ảnh tham chiếu đã có sẵn — KHÔNG tự sinh, KHÔNG vào
+    // compiled_prompt của Shot nào (cùng nhóm "chỉ dành cho người đọc" với `objective`, §3.1).
+    $table->text('reference_context_prompt')->nullable(); // mô tả ngắn tự gõ, VD "KOL mặc áo trắng, cầm sản phẩm..."
     $table->text('default_style')->nullable();        // phong cách hình ảnh cố định
     $table->text('default_constraints')->nullable();  // ràng buộc cố định (giọng đọc, "không text"...)
 
@@ -285,6 +293,9 @@ Schema::create('ai_video_studio_shots', function (Blueprint $table) {
     // CẢ HAI đưa vào compiled_prompt (nội dung prompt thật, khác model_tool/qc_notes bên dưới).
     $table->text('mood')->nullable();                          // tâm trạng/tông cảm xúc
     $table->unsignedSmallInteger('duration_seconds')->nullable(); // thời lượng ước tính (giây)
+    // v1.10 (LinkedIn, ví dụ Synthesia "kịch bản theo timeline 0-5s/5-15s/kết") — breakdown tự do của
+    // duration_seconds theo mốc thời gian, cho shot dài/nhiều nhịp. Nội dung prompt thật → compiled_prompt.
+    $table->text('timeline_breakdown')->nullable();
     // v1.4 (byteplus.com) — âm thanh môi trường + nhạc nền, KHÁC lời thoại script_line bên dưới.
     // Nội dung prompt thật → đưa vào compiled_prompt.
     $table->text('audio_direction')->nullable();
@@ -301,7 +312,13 @@ Schema::create('ai_video_studio_shots', function (Blueprint $table) {
     // multi-reference của nguồn), ngoài ảnh anchor chung của Project. Metadata — KHÔNG đưa vào compiled_prompt.
     $table->text('reference_assets')->nullable();
 
-    $table->longText('compiled_prompt')->nullable(); // BuildShotPromptAction — ghi đè khi sửa
+    $table->longText('compiled_prompt')->nullable(); // BuildShotPromptAction::handle() — TỰ SINH, quy trình 1 bước (text-to-video), ghi đè khi sửa field khác
+    // v1.10 (LinkedIn mục 3.2 "Image-to-Video") — quy trình 2 bước thay thế: prompt ảnh tĩnh (keyframe)
+    // + prompt hoạt hình hoá ảnh đó, tách riêng khỏi compiled_prompt. v1.12 (phản hồi người dùng —
+    // 2 field TỰ SINH này gây hiểu nhầm "không gõ được = lỗi") — hết tự sinh, giờ NHẬP TAY tự do như
+    // model_tool/qc_notes, KHÔNG còn method BuildShotPromptAction::buildImagePrompt()/buildMotionPrompt().
+    $table->longText('image_prompt')->nullable();  // nhập tay, KHÔNG vào compiled_prompt
+    $table->longText('motion_prompt')->nullable(); // nhập tay, KHÔNG vào compiled_prompt
     $table->longText('ai_result')->nullable();       // dán link/text kết quả từ AI ngoài
     $table->text('qc_notes')->nullable();            // v1.2 — Hedra Step 3 evaluation checklist, ghi chú tự do
 
@@ -344,6 +361,7 @@ GÓC MÁY (Camera): ...
 PHONG CÁCH (Style): ...
 TÂM TRẠNG (Mood): ...                                        ← v1.3
 THỜI LƯỢNG (Duration): 15 giây                               ← v1.3
+TIMELINE NỘI DUNG (Content Timeline): 0-5s: ...; 5-15s: ...  ← v1.10
 ÂM THANH (Audio/Soundscape): ...                             ← v1.4
 LỜI THOẠI: "..."
 CALL-TO-ACTION (CTA): ...                                    ← v1.6
@@ -363,9 +381,15 @@ RÀNG BUỘC (Constraints): ...
 | `label` KHÔNG tính là nội dung | Nhãn quản lý nội bộ, không phải mô tả cảnh |
 | `ĐỊNH DẠNG` đứng TRƯỚC nội dung shot, giữ thật ngắn | "20-30 từ đầu có trọng số cao nhất" (deepreel.com) — dành chỗ đó cho Subject/Action; byteplus cũng dẫn ví dụ mở đầu bằng "UGC-style 9:16 video" |
 | `BỐI CẢNH CHIẾN DỊCH` đứng CUỐI + ghi rõ "KHÔNG cần thể hiện toàn bộ" | Chặn lỗi "overloading" — AI cố nhồi cả chiến dịch vào 1 clip 4-15 giây |
-| `objective` / `reference_image_url` / `model_tool` / `reference_assets` / `qc_notes` / `ai_result` / `label` **KHÔNG BAO GIỜ** vào prompt | `objective` là mục tiêu kinh doanh (không đổi thứ gì trên khung hình); ảnh/asset tham chiếu là file đính kèm, cú pháp khác nhau tuỳ tool (§0/v1.4); còn lại là metadata nội bộ |
+| `objective` / `reference_image_url` / `model_tool` / `reference_assets` / `qc_notes` / `ai_result` / `label` / `image_prompt` / `motion_prompt` (v1.12) **KHÔNG BAO GIỜ** vào prompt | `objective` là mục tiêu kinh doanh (không đổi thứ gì trên khung hình); ảnh/asset tham chiếu là file đính kèm, cú pháp khác nhau tuỳ tool (§0/v1.4); còn lại là metadata nội bộ — `image_prompt`/`motion_prompt` nhập tay từ v1.12, cùng nhóm |
 | Giá trị nhiều dòng: thụt lề 4 space cho dòng nối, chuẩn hoá `\r\n`→`\n` | Giữ ranh giới `NHÃN: giá trị` khi người dùng dán text xuống dòng; KHÔNG gộp về 1 dòng để không phá lời thoại nhiều câu |
 | **KHÔNG** đưa vị trí "Shot N/M" vào prompt | Sẽ lỗi thời sau mỗi lần thêm/xoá/đổi thứ tự shot; đổi lại phải build lại toàn bộ sau mỗi cú bấm "↑/↓" — không đáng. Thứ tự đã có ở heading `## Shot N` của tài liệu xuất (§3.5) |
+
+**v1.10 — `buildImagePrompt()`/`buildMotionPrompt()` — ĐÃ GỠ BỎ (v1.12):** 2 method này từng tự sinh
+`image_prompt`/`motion_prompt` từ field khác (Subject/Camera/Style/Action/...), theo quy trình 2 bước
+của bài LinkedIn mục 3.2 "Image-to-Video". Phản hồi người dùng: 2 ô hiển thị kết quả bị khoá readonly
+(đúng thiết kế "tự sinh") nhưng gây hiểu nhầm là lỗi "không gõ được text". Đã xoá 2 method — xem
+docblock class + `image_prompt`/`motion_prompt` ở §2.2 (giờ nhập tay tự do, cùng nhóm `model_tool`).
 
 ### 3.2 `CreateShotAction` — prefill anchoring từ Project
 
@@ -463,6 +487,11 @@ public function handle(AiVideoStudioProject $project, array $shotIdsInOrder): vo
 > `PLATFORM_TIPS_BY_ASPECT_RATIO`) và **Gợi ý theo loại video** (ngay sau dòng Loại video, chỉ in
 > nếu `video_type` khác `other` — có tip khớp trong `CONTENT_TIPS_BY_VIDEO_TYPE`). Dùng lại đúng 2
 > field đã tồn tại (`aspect_ratio` v1.2, `video_type` v1.6) — không thêm field/schema mới.
+>
+> **v1.10 (LinkedIn, mục 3.2 "Image-to-Video")** — mỗi shot section thêm 2 dòng CÓ ĐIỀU KIỆN NGAY SAU
+> `compiled_prompt` chính: **Prompt Ảnh (keyframe)** (nếu có `image_prompt`) và **Prompt Motion (hoạt
+> hình hoá ảnh)** (nếu có `motion_prompt`). v1.12 — 2 field này đổi từ tự sinh sang nhập tay (§3.1),
+> nhưng logic hiển thị ở đây KHÔNG đổi (vẫn chỉ in nếu có giá trị, bất kể nguồn gốc giá trị là gì).
 
 ```php
 namespace Modules\AIVideoStudioTemplate\Features\ProjectManagement\Actions;
@@ -500,12 +529,29 @@ ngược nhau:
 | Sửa ở Project | **KHÔNG** lan xuống Shot đã tạo | **CÓ** — build lại `compiled_prompt` toàn bộ Shot |
 | Vì sao | Giá trị đã nằm trong field của Shot và người dùng có thể đã cố ý sửa khác default — ghi đè sẽ mất công sức của họ (§0) | Không nằm ở field nào của Shot nên **không có gì để mất**; không build lại thì mọi prompt đã lưu nói sai định dạng/tông |
 
-Thực thi ở `UpdateProjectAction::rebuildShotPrompts()` — chỉ đụng đúng cột `compiled_prompt`, không
-chạm field nội dung nào của Shot. Chỉ chạy khi 1 trong 5 field bối cảnh thực sự đổi (so sánh trước/sau
-`update()`), nên sửa `name`/`description`/`objective`/anchoring KHÔNG gây ghi thừa.
+Thực thi ở `UpdateProjectAction::rebuildShotPrompts()` — chỉ đụng đúng cột tự sinh `compiled_prompt`,
+không chạm field nội dung nào của Shot. Chỉ chạy khi 1 trong 5 field bối cảnh thực sự đổi (so sánh
+trước/sau `update()`), nên sửa `name`/`description`/`objective`/anchoring KHÔNG gây ghi thừa.
+
+> **v1.10 → v1.12**: từ v1.10, method này CŨNG rebuild `image_prompt`/`motion_prompt` (đọc
+> `aspect_ratio`/`resolution` qua `buildFormatLine()` như `compiled_prompt`). v1.12 bỏ lại — 2 field
+> này giờ nhập tay tự do (§3.1/§2.2), rebuild ở đây sẽ GHI ĐÈ mất nội dung người dùng vừa gõ, đúng lỗi
+> mà cơ chế "không đụng field nội dung Shot" ở bảng trên tồn tại để tránh.
 
 Cả 2 khác biệt này **bắt buộc hiển thị trên UI** (§8): callout ở khối Creative Brief ("sửa sẽ tự động
 build lại prompt") và callout ở khối Anchoring ("KHÔNG tự động cập nhật Shot đã tạo").
+
+### 3.7 `BuildReferenceCompositionPromptAction` — ĐÃ GỠ BỎ (v1.11, cùng ngày với v1.10)
+
+v1.10 từng thêm Action này (prep-prompt tự sinh để ghép `kol_reference_image_url` +
+`product_reference_image_url` thành 1 ảnh mới, lấy cảm hứng từ ví dụ Kling AI của bài LinkedIn) + 2
+field ảnh nguồn tương ứng ở §2.1. Phản hồi người dùng ngay sau đó: sai bài toán — người dùng đã tự
+chuẩn bị SẴN ảnh KOL + sản phẩm ở NGOÀI tool trước khi tới bước này, không cần tool tự sinh prompt
+"ghép ảnh" hộ. Đã xoá file Action + 2 field ảnh nguồn, thay bằng 1 field `reference_context_prompt`
+(text ngắn, tự gõ, xem §2.1) — không có Action/logic tự sinh nào thay thế, đây thuần là 1 ô ghi chú.
+Vì migration ALTER `2026_08_12_100001...` của v1.10 chưa release ở môi trường nào khác lúc sửa (cùng
+ngày, cùng phiên làm việc, chưa commit), thay đổi này SỬA TRỰC TIẾP vào chính file migration đó thay
+vì thêm 1 migration mới chỉ để đảo ngược — xem ghi chú đầu file migration đó.
 
 ---
 
@@ -699,14 +745,17 @@ Route::middleware(['auth', 'can:ai_video_studio_template.use'])
   {
     "id": 12, "uuid": "...", "sort_order": 0, "label": "Shot 1 — Hook",
     "subject": "...", "action": "...", "environment": "...", "camera": "...",
-    "style": "...", "mood": "...", "duration_seconds": 15, "audio_direction": "...",
+    "style": "...", "mood": "...", "duration_seconds": 15, "timeline_breakdown": "...", "audio_direction": "...",
     "constraints": "...", "script_line": "...",
-    "model_tool": "...", "reference_assets": "...", "compiled_prompt": "...", "ai_result": null, "qc_notes": "..."
+    "model_tool": "...", "reference_assets": "...",
+    "compiled_prompt": "...", "image_prompt": "...", "motion_prompt": "...",
+    "ai_result": null, "qc_notes": "..."
   }
   ```
   (`model_tool`/`qc_notes` thêm ở v1.2 — Hedra Model Selection Criteria + Step 3 evaluation checklist.
   `mood`/`duration_seconds` thêm ở v1.3 — deepreel.com, 2 field này nằm trong `compiled_prompt`.
-  `audio_direction` (trong `compiled_prompt`) + `reference_assets` (metadata) thêm ở v1.4 — byteplus.com.)
+  `audio_direction` (trong `compiled_prompt`) + `reference_assets` (metadata) thêm ở v1.4 — byteplus.com.
+  `timeline_breakdown`/`image_prompt`/`motion_prompt` thêm ở v1.10 — LinkedIn, xem §3.1/§3.6.)
 - **`PUT shots/{shot}` là MERGE, KHÔNG phải replace (v1.7)** — field **vắng mặt** trong request giữ nguyên giá trị đang lưu; gửi **chuỗi rỗng** vẫn xoá field như cũ. Trước v1.7 field vắng mặt bị ghi `null`, nên `PUT {"subject":"x"}` xoá sạch 14 field còn lại; UI luôn gửi đủ nên chưa lộ, nhưng chỉ cần thêm 1 field mà quên gắn `.aivs-field` trong JS là field đó bị xoá ở MỌI shot sau mỗi lần gõ. Payload đầy đủ (như UI đang gửi) hành xử y hệt trước, nên đổi này KHÔNG phá contract hiện có.
 - **Lỗi validate (422)** — dùng đúng shape mặc định của Laravel FormRequest (`{"message": "...", "errors": {"field": ["..."]}}`) — KHÔNG tự chế shape lỗi riêng, để JS xử lý bằng 1 hàm dùng chung cho mọi form trong module.
 - **Lỗi ownership ở `reorder` (§3.4)** — trả 422 (không phải 403) với `{"message": "1 hoặc nhiều shot không thuộc project này."}` — đây là lỗi dữ liệu gửi lên sai, không phải thiếu quyền truy cập chức năng.
@@ -716,14 +765,26 @@ Route::middleware(['auth', 'can:ai_video_studio_template.use'])
 
 ### 6.2 UX ghi/lưu field (chống spam request)
 
-- Mỗi ô input/textarea trong Shot card: **debounce 600-800ms** sau khi ngừng gõ rồi mới gọi `PUT shots/{shot}` — KHÔNG gọi API mỗi keystroke.
-- `<textarea>` hiển thị `compiled_prompt`: **luôn `readonly`** (chỉ đọc, sinh tự động) — không cho sửa tay trực tiếp, tránh lệch với 7 field nguồn khi user quên bấm sinh lại.
-- Có trạng thái hiển thị nhỏ cạnh mỗi field đang debounce/đang lưu ("Đang lưu..."/"Đã lưu") để người dùng biết chắc đã ghi nhận trước khi rời trang — tránh mất dữ liệu do rời trang giữa lúc debounce chưa bắn request.
+> **v1.13 — ĐỔI CƠ CHẾ (phản hồi người dùng "hạn chế lưu ajax, mỗi shot bấm lưu khi làm xong")**: bản
+> gốc dưới đây (debounce 600-800ms, tự PUT sau mỗi lần ngừng gõ) đã bị THAY THẾ bằng nút **"Lưu"** bấm
+> tay/shot (`.aivs-save-shot`) — gõ bao nhiêu field cũng chỉ 1 request `PUT` khi bấm, thay vì 1 request
+> mỗi 600-800ms/field. Lý do đổi: giảm số lượng request AJAX (đúng yêu cầu), đổi lại người dùng phải
+> tự nhớ bấm Lưu — bù bằng 2 cơ chế an toàn: (1) trạng thái "Chưa lưu — bấm 'Lưu'" hiện ngay khi gõ
+> (không cần chờ mạng, đọc/ghi thẳng `card.dataset.dirty`), (2) `beforeunload` cảnh báo nếu còn shot
+> `data-dirty="true"` lúc rời trang. Timeline trực quan (§8) vẫn cập nhật LIVE theo từng keystroke —
+> khác PUT, việc này đọc thẳng DOM, không gọi mạng, nên không mâu thuẫn với mục tiêu giảm AJAX.
+>
+> Nội dung cũ (không còn đúng, giữ lại để biết đã đổi từ đâu): Mỗi ô input/textarea trong Shot card
+> debounce 600-800ms sau khi ngừng gõ rồi mới gọi `PUT shots/{shot}` — KHÔNG gọi API mỗi keystroke; có
+> trạng thái hiển thị nhỏ cạnh mỗi field đang debounce/đang lưu ("Đang lưu..."/"Đã lưu").
+
+- `<textarea>` hiển thị `compiled_prompt`: **luôn `readonly`** (chỉ đọc, sinh tự động) — không cho sửa tay trực tiếp, tránh lệch với field nguồn khi user quên bấm Lưu lại. (`image_prompt`/`motion_prompt` KHÔNG readonly từ v1.12 — nhập tay tự do, xem §3.1.)
+- Nút "Lưu"/shot gửi `PUT shots/{shot}` với **toàn bộ** giá trị hiện tại của mọi `.aivs-field` trong card (`collectShotPayload()`), không chỉ field vừa đổi — khớp hành vi PUT merge đã có (§6.1), chỉ khác thời điểm gọi (bấm tay thay vì debounce).
 
 ## 7. Validation
 
-- `StoreProjectRequest`/`UpdateProjectRequest`: `name` required|string|max:200; `description`/`objective`/`target_audience`/`core_message`/`default_subject`/`reference_image_url`(max:2048)/`default_style`/`default_constraints` nullable|string; `aspect_ratio` nullable|string|in:16:9,9:16,1:1,4:5 (v1.2); `resolution` nullable|string|in:720p,1080p,2K,4K (v1.5); `video_type` nullable|string|in:explainer,testimonial,product_demo,storytelling,other (v1.6).
-- `StoreShotRequest`/`UpdateShotRequest`: tất cả field director + `label` + `model_tool`(max:150, v1.2) + `qc_notes`(v1.2) đều `nullable|string`; `mood` nullable|string (v1.3); `duration_seconds` nullable|integer|min:1|max:36000 (v1.3); `audio_direction`/`reference_assets` nullable|string (v1.4); `cta_text` nullable|string|max:200 (v1.6) — không bắt buộc field nào (cho phép điền dần).
+- `StoreProjectRequest`/`UpdateProjectRequest`: `name` required|string|max:200; `description`/`objective`/`target_audience`/`core_message`/`default_subject`/`reference_image_url`(max:2048)/`default_style`/`default_constraints` nullable|string; `aspect_ratio` nullable|string|in:16:9,9:16,1:1,4:5 (v1.2); `resolution` nullable|string|in:720p,1080p,2K,4K (v1.5); `video_type` nullable|string|in:explainer,testimonial,product_demo,storytelling,other (v1.6); `reference_context_prompt` nullable|string|max:300 (v1.11 — cố ý giới hạn ngắn, đây là ghi chú không phải kịch bản).
+- `StoreShotRequest`/`UpdateShotRequest`: tất cả field director + `label` + `model_tool`(max:150, v1.2) + `qc_notes`(v1.2) đều `nullable|string`; `mood` nullable|string (v1.3); `duration_seconds` nullable|integer|min:1|max:36000 (v1.3); `audio_direction`/`reference_assets` nullable|string (v1.4); `cta_text` nullable|string|max:200 (v1.6); `timeline_breakdown` nullable|string (v1.10); `image_prompt`/`motion_prompt` nullable|string (v1.12 — field nhập tay, không giới hạn độ dài vì là nội dung prompt thật) — không bắt buộc field nào (cho phép điền dần).
 - `SaveShotAiResultRequest`: `ai_result` nullable|string.
 - `ReorderShotsRequest`: `shot_ids` required|array, `shot_ids.*` required|integer — ownership thật (thuộc đúng project) kiểm tra ở Action (§3.4), KHÔNG kiểm tra được ở FormRequest thuần (cần query DB theo `{project}` route param).
 
@@ -731,23 +792,22 @@ Route::middleware(['auth', 'can:ai_video_studio_template.use'])
 
 Trang `show.blade.php` (`@extends('layouts.backend')`):
 - **Creative Brief card** (v1.2, chỉ hiện nếu có ít nhất 1 field điền) — hiển thị `objective`/`target_audience`/`video_type`/`core_message`(v1.6)/`aspect_ratio`/`resolution`(v1.5) dạng chỉ đọc, sửa qua "Sửa project".
-- Header: tên project + field default (anchoring) hiển thị dạng card, có nút "Sửa" mở modal/inline edit. **Bắt buộc có 1 dòng ghi chú nhỏ, rõ ràng ngay dưới tiêu đề card**: *"Áp dụng khi tạo Shot MỚI — sửa ở đây KHÔNG tự động cập nhật các Shot đã tạo trước đó."* — đây là điểm dễ hiểu nhầm nhất của cơ chế anchoring (§0), phải hiển thị luôn trên UI, không chỉ nằm trong spec. Card này cũng hiện link `reference_image_url` (v1.2) nếu có điền.
+- Header: tên project + field default (anchoring) hiển thị dạng card, có nút "Sửa" mở modal/inline edit. **Bắt buộc có 1 dòng ghi chú nhỏ, rõ ràng ngay dưới tiêu đề card**: *"Áp dụng khi tạo Shot MỚI — sửa ở đây KHÔNG tự động cập nhật các Shot đã tạo trước đó."* — đây là điểm dễ hiểu nhầm nhất của cơ chế anchoring (§0), phải hiển thị luôn trên UI, không chỉ nằm trong spec. Card này cũng hiện `reference_context_prompt` (v1.11, nếu có điền — hiển thị dạng text thường). v1.13 (phản hồi người dùng) — KHÔNG còn hiện link `reference_image_url` ở UI (input lẫn display đã bỏ cả 2, chỉ giữ lại cột/dữ liệu backend).
 - **Callout "Mẹo viết prompt"** (v1.2-v1.6, tĩnh, ngay trên danh sách Shot) — tóm tắt Key Prompting Principles của Hedra (mỗi shot 1 cảnh/khoảnh khắc, thay tính từ chung chung bằng mô tả cụ thể, luôn điền Camera, gọi tên phong cách rõ ràng) + deepreel.com (50-150 từ/prompt, ưu tiên 20-30 từ đầu, tránh yêu cầu đối lập, negative prompt cụ thể, kỳ vọng lặp 3-4 lần) + byteplus.com (không dồn nhiều hành động vào 1 shot ngắn, đừng bỏ qua Audio Direction) + pyxeljam.com/LinkedIn (v1.6 — phân biệt diễn đạt khẳng định ở Subject/Action/Style với loại trừ cụ thể dồn vào Constraints; điều chỉnh giọng văn theo nền tảng/đối tượng đã khai ở Creative Brief) + sentx.ai (v1.8 — "single hero focus" giới hạn số chủ thể trong khung hình, khác nguyên tắc "1 hành động/shot" đã có; "pacing" — nhịp lấy cảnh tách khỏi Duration; trỏ tới khối troubleshooting mới trong tài liệu xuất). Placeholder field Camera/Style (§8) cũng bổ sung vốn từ vựng cỡ cảnh/góc máy/chuyển động máy và cách gọi tên nguồn sáng + thời điểm trong ngày (v1.8) — 2 field callout nhắc là quan trọng nhưng trước đó không có ví dụ nào. v1.9 (veed.io) — câu chung "điều chỉnh giọng văn theo nền tảng" giờ trỏ rõ tới 2 dòng "Gợi ý theo nền tảng"/"Gợi ý theo loại video" tự hiện trong Creative Brief; placeholder Environment bổ sung spatial+temporal descriptors (field cuối cùng trong nhóm 5 field cốt lõi còn thiếu ví dụ), Style bổ sung ví dụ phong cách hoạt hình/nghệ thuật.
 - Danh sách Shot: mỗi Shot là 1 card có:
-  - **Input "Thời lượng (giây)"** (v1.3, `duration_seconds`, số) — đặt cạnh Label ở đầu card.
-  - 10 input (textarea nhỏ) cho Subject/Action/Environment/Camera/Style/Mood/Audio/Lời thoại/CTA/Constraints — debounce theo §6.2, gọi `PUT shots/{shot}` → nhận về **toàn bộ shot resource mới** (§6.1), cập nhật lại `<textarea readonly>` hiển thị `compiled_prompt`. Field `mood` (v1.3), `audio_direction` (v1.4), `cta_text` (v1.6) và `constraints` có placeholder ví dụ cụ thể (Mood: liệt kê vài tông cảm xúc mẫu; Audio: ví dụ âm thanh môi trường + nhạc nền, phân biệt rõ với lời thoại; CTA: ví dụ text nút/đếm ngược; Constraints: minh hoạ kỹ thuật negative prompt — loại trừ rõ ràng thay vì mơ hồ).
+  - Badge số thứ tự "Cảnh N" (`.aivs-shot-number`, tính lại phía client sau add/xoá/sắp xếp — xem `renumberShots()`) + **Input "Thời lượng (giây)"** (v1.3, `duration_seconds`, số) — đặt cạnh Label ở đầu card.
+  - **Nút "Lưu"/shot** (`.aivs-save-shot`, v1.13) — xem §6.2 (đã đổi từ debounce tự động sang bấm tay).
+  - 11 input (textarea nhỏ, nhóm theo 3 khối UI/UX v2: "Nội dung cảnh", "Hình ảnh & Âm thanh", "Timeline & Lời thoại") cho Subject/Action/Environment/Camera/Style/Mood/Timeline(v1.10)/Audio/Lời thoại/CTA/Constraints — KHÔNG tự gọi mạng khi gõ (v1.13), chỉ đánh dấu "chưa lưu"; bấm nút "Lưu" mới gọi `PUT shots/{shot}` → nhận về **toàn bộ shot resource mới** (§6.1), cập nhật lại `<textarea readonly>` hiển thị `compiled_prompt`. Field `mood` (v1.3), `audio_direction` (v1.4), `cta_text` (v1.6), `timeline_breakdown` (v1.10) và `constraints` có placeholder ví dụ cụ thể (Mood: liệt kê vài tông cảm xúc mẫu; Audio: ví dụ âm thanh môi trường + nhạc nền, phân biệt rõ với lời thoại; CTA: ví dụ text nút/đếm ngược; Timeline: ví dụ mốc thời gian kiểu Synthesia "0-5s/5-15s/kết"; Constraints: minh hoạ kỹ thuật negative prompt — loại trừ rõ ràng thay vì mơ hồ).
   - `<textarea readonly>` (bắt buộc `readonly`, §6.2) hiển thị `compiled_prompt` + nút "Copy" (tái dùng pattern JS đã có ở `content-outlines.js`/breaking-news picker) + **bộ đếm từ** (v1.3, `.aivs-word-count`, JS tính client-side) cảnh báo nhẹ (đổi màu) nếu ngoài khoảng 50-150 từ — không chặn lưu.
-  - **Input "Model/Tool đã dùng"** (v1.2, `model_tool`) — cùng cơ chế debounce/`.aivs-field` như các field trên, KHÔNG đưa vào `compiled_prompt`.
-  - **Input "Tài liệu tham chiếu bổ sung"** (v1.4, `reference_assets`) — link ảnh/video/audio tham chiếu riêng cho shot này (khái niệm multi-reference của byteplus.com), KHÔNG đưa vào `compiled_prompt`.
-  - `<textarea>` "Kết quả AI" (dán link/text) + nút "Lưu kết quả" → `PUT shots/{shot}/result`.
-  - **Textarea "Ghi chú đánh giá (QC)"** (v1.2, `qc_notes`) — gợi ý 5 tiêu chí Hedra Step 3 (chủ thể/chuyển động/góc máy/phong cách/artifact) qua `label-text-alt`; placeholder (v1.3) minh hoạ cấu trúc ghi chú "3 điểm được + 1 điểm cần sửa" theo quy trình tinh chỉnh lặp của deepreel.com.
+  - **Khối `<details>` "Prompt 2 bước — Ảnh + Motion (Image-to-Video)"** (v1.10, đóng mặc định — dùng `<details class="collapse collapse-arrow">` của DaisyUI, KHÔNG thêm JS dependency mới) — 2 `<textarea>` NHẬP TAY (v1.12, `.aivs-field`, KHÔNG `readonly` — xem §3.1) hiển thị/lưu `image_prompt`/`motion_prompt`, mỗi ô có nút Copy riêng cùng pattern `.aivs-copy-compiled`.
+  - **v1.13 (phản hồi người dùng) — ĐÃ BỎ khỏi UI**: input "Model/Tool đã dùng" (`model_tool`), "Tài liệu tham chiếu bổ sung" (`reference_assets`), textarea "Ghi chú đánh giá QC" (`qc_notes`) — từng gộp trong khối `<details>` "Nâng cao"; và textarea + nút "Lưu kết quả" cho `ai_result` (`PUT shots/{shot}/result`). Cả 4 field/route/Action backend liên quan (`SaveShotAiResultAction`, `shots.save-result`) KHÔNG bị xoá — chỉ không còn UI, dữ liệu cũ (nếu có) vẫn hiện trong tài liệu xuất (§3.5).
   - Nút xoá shot (**có `confirm()`/modal xác nhận** — xoá shot không cascade gì thêm nhưng vẫn là hành động mất dữ liệu không hoàn tác được); sắp xếp lại bằng 2 nút "↑"/"↓" đổi `sort_order` với shot liền kề (đã xác nhận: `PostCategory::reorder()` — tiền lệ reorder duy nhất tìm thấy trong repo — nhận thẳng mảng `order[]` từ client, KHÔNG dùng thư viện JS drag-drop nào (không có `Sortable`/`sortablejs` trong `resources/js/`) — v1 dùng nút mũi tên cho đơn giản, tránh thêm dependency JS mới; có thể nâng cấp lên drag-drop ở bản sau nếu cần).
-  - Nút "+ Thêm shot".
+  - Nút "+ Thêm cảnh" + (v1.13) nút "⚡ Chèn 5 cảnh mẫu" trong empty-state khi project 0 shot.
 - Cuối trang: nút "Xuất Director Prompt Template" → gọi `GET {project}/export`, trả về file `.md` tải xuống (nội dung từ `CompileProjectDirectorPromptAction`, v1.2 gồm cả khối Creative Brief + checklist đánh giá — xem §3.5), + nút "Copy toàn bộ" hiển thị trong `<textarea readonly>` lớn.
 
 `_form.blade.php` (create/edit project, v1.2-v1.6):
 - Khối "Creative Brief" mới (trước khối Anchoring) — `objective`/`target_audience` (textarea) + `video_type` (`<select>` 5 lựa chọn: explainer/testimonial/product_demo/storytelling/other, v1.6) + `core_message` (textarea, v1.6) + `aspect_ratio` (`<select>` 4 lựa chọn cố định: 16:9/9:16/1:1/4:5) + `resolution` (`<select>` 4 lựa chọn: 720p/1080p/2K/4K, v1.5) — tất cả không bắt buộc.
-- Khối Anchoring thêm input `reference_image_url` (URL ảnh tham chiếu, cạnh `default_subject`).
+- Khối Anchoring thêm 1 textarea `reference_context_prompt` (v1.11, `maxlength="300"` — mô tả ngắn tự gõ, không tự sinh gì, xem §3.7). v1.13 (phản hồi người dùng) — input `reference_image_url` (URL ảnh tham chiếu) ĐÃ BỎ khỏi form, chỉ giữ lại cột/dữ liệu backend.
 - Placeholder các field mô tả (`default_subject`/`default_style`/`default_constraints`) viết lại theo Key Prompting Principles — ví dụ cụ thể thay vì mô tả chung chung, nhắc kèm bảng màu/tone thương hiệu ở `default_style`, kỹ thuật negative prompt ở `default_constraints`.
 
 **Xoá Project (từ trang `index`/`edit`)** — bắt buộc modal/`confirm()` xác nhận nêu rõ hậu quả: *"Xoá project sẽ xoá VĨNH VIỄN toàn bộ N shot bên trong (cascade). Không thể hoàn tác."* — đúng vì `cascadeOnDelete()` (§2.2) xoá sạch shot con ngay lập tức, không soft-delete để khôi phục.
@@ -824,6 +884,13 @@ Thêm 1 mục top-level (không nằm trong nhóm "Bài viết") trong `resource
 - **v1.8 — `PRE_GENERATION_CHECKLIST` "single hero focus"**: mục mới xuất hiện trong khối `## Checklist trước khi generate`, khác nội dung mục "1 hành động/shot" đã có ở callout `show.blade.php`.
 - **v1.9 — Gợi ý theo nền tảng**: project có `aspect_ratio` = `9:16` hoặc `16:9` → dòng "Gợi ý theo nền tảng" xuất hiện ngay sau dòng "Tỷ lệ khung hình"; `aspect_ratio` = `1:1`/`4:5` → dòng "Tỷ lệ khung hình" vẫn xuất hiện nhưng KHÔNG có dòng gợi ý (không có tip khớp).
 - **v1.9 — Gợi ý theo loại video**: project có `video_type` khác `other` (VD `testimonial`) → dòng "Gợi ý theo loại video" xuất hiện ngay sau dòng "Loại video"; `video_type` = `other` → dòng "Loại video" vẫn xuất hiện nhưng KHÔNG có dòng gợi ý.
+- **v1.10 — `timeline_breakdown` trong `compiled_prompt`**: shot có điền → dòng "TIMELINE NỘI DUNG (Content Timeline)" xuất hiện, đặt SAU Duration, TRƯỚC Audio; KHÔNG điền → không xuất hiện.
+- **v1.10 — `buildImagePrompt()`/`buildMotionPrompt()` — ĐÃ GỠ BỎ (v1.12)**: gọi 2 method này (namespace cũ) → `method not found`; `BuildShotPromptAction` chỉ còn `handle()`.
+- **v1.12 — `image_prompt`/`motion_prompt` là field nhập tay**: `PUT shots/{shot} {"image_prompt": "x"}` → lưu đúng `"x"` (không qua build/biến đổi gì); vắng mặt trong request → giữ nguyên giá trị đang lưu (cùng `valueOrExisting()` như `qc_notes`); KHÔNG xuất hiện trong `compiled_prompt` dù có điền.
+- **v1.12 — KHÔNG rebuild khi đổi bối cảnh Project**: đổi `aspect_ratio`/`resolution`/`video_type`/`target_audience`/`core_message` → `image_prompt`/`motion_prompt` của mọi shot giữ NGUYÊN (chỉ `compiled_prompt` rebuild, §3.6) — khác hành vi v1.10 đã gỡ.
+- **v1.10 — API resource shape**: `POST/PUT shots` trả về JSON có đủ `timeline_breakdown`/`image_prompt`/`motion_prompt` (§6.1).
+- **v1.11 — `reference_context_prompt`**: field text tự do, KHÔNG xuất hiện trong `compiled_prompt`/`image_prompt`/`motion_prompt` của bất kỳ shot nào (cùng nhóm `objective` — chỉ dành cho người đọc); project có điền → hiển thị dạng text (không phải link) ở card Anchoring trên `show.blade.php`; không điền → dòng đó không xuất hiện.
+- **v1.11 — `BuildReferenceCompositionPromptAction`/`kol_reference_image_url`/`product_reference_image_url` đã bị xoá**: gọi `BuildReferenceCompositionPromptAction` (namespace cũ) → `class not found`; `ShotApiController`/`ProjectController` không còn phụ thuộc class này (§3.7).
 
 **v1.7 — rà soát logic build prompt (xem changelog đầu tài liệu):**
 

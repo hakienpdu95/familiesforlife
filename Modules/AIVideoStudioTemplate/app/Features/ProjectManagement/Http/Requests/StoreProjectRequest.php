@@ -27,6 +27,7 @@ class StoreProjectRequest extends FormRequest
             'resolution' => ['nullable', 'string', Rule::in(array_keys(AiVideoStudioProject::RESOLUTIONS))],
             'default_subject' => ['nullable', 'string'],
             'reference_image_url' => ['nullable', 'string', 'max:2048'],
+            'reference_context_prompt' => ['nullable', 'string', 'max:300'],
             'default_style' => ['nullable', 'string'],
             'default_constraints' => ['nullable', 'string'],
         ];
@@ -45,6 +46,7 @@ class StoreProjectRequest extends FormRequest
             'resolution' => $this->input('resolution') ?: null,
             'defaultSubject' => $this->input('default_subject') ?: null,
             'referenceImageUrl' => $this->input('reference_image_url') ?: null,
+            'referenceContextPrompt' => $this->input('reference_context_prompt') ?: null,
             'defaultStyle' => $this->input('default_style') ?: null,
             'defaultConstraints' => $this->input('default_constraints') ?: null,
         ];

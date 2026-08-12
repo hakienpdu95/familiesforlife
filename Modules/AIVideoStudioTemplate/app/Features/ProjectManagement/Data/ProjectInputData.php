@@ -22,6 +22,7 @@ class ProjectInputData extends Data
         public readonly ?string $resolution = null,
         public readonly ?string $defaultSubject = null,
         public readonly ?string $referenceImageUrl = null,
+        public readonly ?string $referenceContextPrompt = null,
         public readonly ?string $defaultStyle = null,
         public readonly ?string $defaultConstraints = null,
         public readonly ?string $status = null,

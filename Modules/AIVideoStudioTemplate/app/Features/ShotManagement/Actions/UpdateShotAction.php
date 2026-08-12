@@ -29,6 +29,7 @@ class UpdateShotAction
             'style' => $data->style,
             'mood' => $data->mood,
             'duration_seconds' => $data->durationSeconds,
+            'timeline_breakdown' => $data->timelineBreakdown,
             'audio_direction' => $data->audioDirection,
             'constraints' => $data->constraints,
             'script_line' => $data->scriptLine,
@@ -36,6 +37,9 @@ class UpdateShotAction
             'model_tool' => $data->modelTool,
             'reference_assets' => $data->referenceAssets,
             'qc_notes' => $data->qcNotes,
+            // v1.12 — nhập tay tự do, KHÔNG tự sinh (xem BuildShotPromptAction).
+            'image_prompt' => $data->imagePrompt,
+            'motion_prompt' => $data->motionPrompt,
             'updated_by' => $userId,
         ]);
 

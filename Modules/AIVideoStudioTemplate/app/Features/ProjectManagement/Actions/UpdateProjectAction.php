@@ -46,6 +46,7 @@ class UpdateProjectAction
             'resolution' => $data->resolution,
             'default_subject' => $data->defaultSubject,
             'reference_image_url' => $data->referenceImageUrl,
+            'reference_context_prompt' => $data->referenceContextPrompt,
             'default_style' => $data->defaultStyle,
             'default_constraints' => $data->defaultConstraints,
             'status' => $data->status ?: $project->status,
@@ -62,6 +63,10 @@ class UpdateProjectAction
     /**
      * Build lại `compiled_prompt` cho MỌI shot của project. Chỉ đụng đúng cột `compiled_prompt` —
      * không chạm field nội dung nào của Shot, nên an toàn với shot người dùng đã sửa tay.
+     *
+     * v1.12 — KHÔNG còn động tới `image_prompt`/`motion_prompt`: 2 field này giờ nhập tay tự do
+     * (BuildShotPromptAction không còn tự sinh chúng), nên tự rebuild ở đây sẽ GHI ĐÈ mất nội dung
+     * người dùng vừa gõ — đúng lỗi mà cơ chế rebuild này tồn tại để TRÁNH cho field nội dung khác.
      */
     private function rebuildShotPrompts(AiVideoStudioProject $project): void
     {

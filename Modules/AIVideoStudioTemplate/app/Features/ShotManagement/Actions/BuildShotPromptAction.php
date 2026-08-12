@@ -17,7 +17,8 @@ use Modules\AIVideoStudioTemplate\Models\AiVideoStudioShot;
  *   →  4. BỐI CẢNH CHIẾN DỊCH (đặt CUỐI, đánh dấu rõ "chỉ tham khảo" để AI không cố nhồi cả chiến
  *      dịch vào 1 shot — đúng sai lầm "overloading" mà hedra/deepreel/byteplus đều cảnh báo).
  *
- * Lịch sử bổ sung field: v1.3 Mood + Duration (deepreel), v1.4 Audio (byteplus), v1.6 CTA (LinkedIn).
+ * Lịch sử bổ sung field: v1.3 Mood + Duration (deepreel), v1.4 Audio (byteplus), v1.6 CTA (LinkedIn),
+ * v1.10 Timeline (bài LinkedIn, ví dụ Synthesia "kịch bản theo timeline 0-5s/5-15s/kết").
  * `model_tool`/`reference_assets`/`qc_notes` là metadata nội bộ — KHÔNG BAO GIỜ vào prompt.
  *
  * **Ghi chú prompt-injection (CLAUDE.md)**: quy ước bọc `<<<DELIMITER>>>` áp dụng cho text không tin
@@ -25,6 +26,16 @@ use Modules\AIVideoStudioTemplate\Models\AiVideoStudioShot;
  * được người dùng copy tay sang tool ngoài, và mọi giá trị đều do biên tập viên nội bộ tự gõ. Rủi ro
  * thực tế là **vỡ cấu trúc do giá trị nhiều dòng**, xử lý bằng `indentContinuationLines()` bên dưới.
  * Nếu sau này module tự gọi AI Provider thì PHẢI bọc delimiter theo đúng convention của CLAUDE.md.
+ *
+ * **v1.10 → v1.12 — `image_prompt`/`motion_prompt` (bài LinkedIn "step-by-step guide creating AI
+ * marketing videos prompts", mục 3.2 "Image-to-Video")**: v1.10 từng có `buildImagePrompt()`/
+ * `buildMotionPrompt()` TỰ SINH 2 prompt này từ field khác (Subject/Camera/Style/Action/...). PHẢN HỒI
+ * NGƯỜI DÙNG (v1.12): không gõ được trực tiếp vào 2 ô này — đúng như thiết kế (readonly, tự sinh),
+ * nhưng người dùng muốn ngược lại: **2 field NHẬP TAY tự do, KHÔNG tự sinh từ đâu cả** (khác hẳn
+ * `compiled_prompt` ở `handle()` — field đó vẫn tự sinh, không đổi). Đã xoá `buildImagePrompt()`/
+ * `buildMotionPrompt()`; `image_prompt`/`motion_prompt` giờ là field metadata nhập tay như
+ * `model_tool`/`qc_notes` (xem `CreateShotAction`/`UpdateShotAction`), vẫn xuất hiện trong tài liệu
+ * export nếu có điền (`CompileProjectDirectorPromptAction`), nhưng KHÔNG BAO GIỜ vào `compiled_prompt`.
  */
 class BuildShotPromptAction
 {
@@ -87,6 +98,10 @@ class BuildShotPromptAction
         if (filled($shot->duration_seconds)) {
             $lines[] = "THỜI LƯỢNG (Duration): {$shot->duration_seconds} giây";
         }
+
+        // v1.10 (bài LinkedIn, ví dụ Synthesia "kịch bản theo timeline") — đặt ngay sau Duration vì
+        // đây là breakdown của chính con số đó, trước khi tới Audio/Script.
+        $this->appendField($lines, 'TIMELINE NỘI DUNG (Content Timeline)', $shot->timeline_breakdown);
 
         $this->appendField($lines, 'ÂM THANH (Audio/Soundscape)', $shot->audio_direction);
 

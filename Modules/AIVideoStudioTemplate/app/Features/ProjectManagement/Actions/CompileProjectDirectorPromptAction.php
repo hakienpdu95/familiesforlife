@@ -72,6 +72,12 @@ use Modules\AIVideoStudioTemplate\Models\AiVideoStudioShot;
  * màu nước, VHS cũ) — nguồn liệt kê riêng như 1 kỹ thuật anchor bản sắc hình ảnh. "Leveraging ChatGPT
  * để soạn thảo" và danh sách model cụ thể (MiniMax/PixVerse/Kling...) CỐ Ý không áp dụng — trùng
  * quyết định "không phụ thuộc 1 tool cụ thể" đã chốt ở §0 spec (module chỉ ghi `model_tool` tự do).
+ *
+ * v1.10 (đọc lại bài LinkedIn — mục 3.2 "Image-to-Video"): mỗi Shot section giờ có thêm khối
+ * **Prompt Ảnh (keyframe)** / **Prompt Motion** (nếu `image_prompt`/`motion_prompt` có giá trị — xem
+ * `BuildShotPromptAction::buildImagePrompt()`/`buildMotionPrompt()`), đặt NGAY SAU `compiled_prompt`
+ * chính — phục vụ quy trình 2 bước (text-to-image rồi image-to-video) khác với quy trình 1 bước
+ * (text-to-video) mà `compiled_prompt` phục vụ từ trước.
  */
 class CompileProjectDirectorPromptAction
 {
@@ -156,12 +162,16 @@ class CompileProjectDirectorPromptAction
         $sections = $shots->map(function (AiVideoStudioShot $shot, int $index) {
             $heading = '## Shot '.($index + 1).($shot->label ? " — {$shot->label}" : '');
             $body = $shot->compiled_prompt ?: '_(chưa có prompt — điền field còn thiếu)_';
+            // v1.10 — quy trình 2 bước Image-to-Video (BuildShotPromptAction::buildImagePrompt/
+            // buildMotionPrompt), chỉ xuất hiện nếu shot có đủ field liên quan để build 2 prompt này.
+            $imagePrompt = filled($shot->image_prompt) ? "\n\n**Prompt Ảnh (keyframe):**\n{$shot->image_prompt}" : '';
+            $motionPrompt = filled($shot->motion_prompt) ? "\n\n**Prompt Motion (hoạt hình hoá ảnh):**\n{$shot->motion_prompt}" : '';
             $modelTool = filled($shot->model_tool) ? "\n\n**Model/Tool đã dùng:** {$shot->model_tool}" : '';
             $referenceAssets = filled($shot->reference_assets) ? "\n\n**Tài liệu tham chiếu bổ sung:** {$shot->reference_assets}" : '';
             $result = filled($shot->ai_result) ? "\n\n**Kết quả AI:**\n{$shot->ai_result}" : '';
             $qcNotes = filled($shot->qc_notes) ? "\n\n**Ghi chú đánh giá (QC):** {$shot->qc_notes}" : '';
 
-            return "{$heading}\n\n{$body}{$modelTool}{$referenceAssets}{$result}{$qcNotes}";
+            return "{$heading}\n\n{$body}{$imagePrompt}{$motionPrompt}{$modelTool}{$referenceAssets}{$result}{$qcNotes}";
         });
 
         return "# Director Prompt Template — {$project->name}\n\n{$header}".$sections->implode("\n\n---\n\n");

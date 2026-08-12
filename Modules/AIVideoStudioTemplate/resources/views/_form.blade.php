@@ -31,7 +31,9 @@
         </div>
         @endif
 
-        <div class="divider text-xs text-base-content/40">Creative Brief — chốt trước khi soạn prompt</div>
+        {{-- UI/UX v2 — cùng ngôn ngữ hình ảnh (badge số bước) với show.blade.php, để người dùng quen
+             mắt xuyên suốt từ lúc tạo/sửa project tới lúc soạn kịch bản. --}}
+        <h3 class="text-sm font-semibold flex items-center gap-2 pt-1"><span class="badge badge-primary badge-sm">1</span> Mục tiêu &amp; Định dạng <span class="font-normal text-xs text-base-content/40">— chốt trước khi soạn prompt</span></h3>
 
         {{-- Hedra "how-to-make-ai-video" Step 1: chốt mục tiêu/đối tượng/định dạng TRƯỚC khi generate
              — bỏ qua bước này là sai lầm phổ biến nhất bài viết liệt kê. Không bắt buộc ở v1. --}}
@@ -94,7 +96,7 @@
             <span>Loại video · Thông điệp cốt lõi · Khán giả · Tỷ lệ khung hình · Độ phân giải được ghi vào prompt của MỌI Shot — sửa ở đây sẽ tự động cập nhật lại prompt đã sinh.</span>
         </div>
 
-        <div class="divider text-xs text-base-content/40">Anchoring — mô tả cố định (§0)</div>
+        <h3 class="text-sm font-semibold flex items-center gap-2 pt-2"><span class="badge badge-primary badge-sm">2</span> Ảnh tham chiếu <span class="badge badge-ghost badge-sm font-normal">Không bắt buộc</span></h3>
 
         {{-- spec §8 — ghi chú bắt buộc hiển thị ngay dưới tiêu đề anchoring, tránh hiểu nhầm rằng
              sửa ở đây sẽ cập nhật lại các Shot đã tạo trước đó. --}}
@@ -108,14 +110,16 @@
                       placeholder="VD: Người mẹ trẻ khoảng 28 tuổi, tóc buộc gọn, áo thun trắng — không dùng mô tả chung chung như 'một người phụ nữ'">{{ old('default_subject', $project?->default_subject) }}</textarea>
         </div>
 
-        {{-- Hedra Step 2 "chuẩn bị nguồn tham chiếu" + magichour.ai character consistency — anchor
-             bằng ẢNH tham chiếu, bổ sung cho anchor bằng TEXT ở trên (subject mặc định). --}}
+        {{-- v1.13 (phản hồi người dùng) — bỏ hẳn input `reference_image_url` (link ảnh) khỏi UI, chỉ
+             còn 1 ô text ngắn tự gõ. KHÔNG xoá cột/dữ liệu backend — cùng nguyên tắc "bỏ UI, giữ data"
+             đã áp dụng cho model_tool/qc_notes/ai_result trước đó. v1.11 (phản hồi người dùng — đã tự
+             chuẩn bị sẵn ảnh KOL + sản phẩm ở NGOÀI tool) — chỉ cần 1 ô text NGẮN tự gõ để nhớ lại
+             ngữ cảnh của ảnh đã chuẩn bị sẵn — KHÔNG tự sinh, KHÔNG vào compiled_prompt của Shot nào. --}}
         <div class="form-control">
-            <label class="label py-0 pb-1.5"><span class="label-text font-medium">Ảnh tham chiếu (reference image)</span></label>
-            <input type="text" name="reference_image_url" value="{{ old('reference_image_url', $project?->reference_image_url) }}"
-                   class="input input-bordered input-sm w-full"
-                   placeholder="Dán link ảnh nhân vật/sản phẩm dùng làm tham chiếu xuyên suốt các shot">
-            <p class="text-xs text-base-content/40 mt-1">Nền sạch, độ phân giải cao — dùng để giữ nhất quán nhân vật/sản phẩm giữa các shot (tránh "identity drift").</p>
+            <label class="label py-0 pb-1.5"><span class="label-text font-medium">Mô tả ngữ cảnh ảnh tham chiếu</span></label>
+            <textarea name="reference_context_prompt" rows="2" maxlength="300" class="textarea textarea-bordered textarea-sm w-full"
+                      placeholder="VD: KOL mặc áo trắng, cầm sản phẩm trước ngực, ánh sáng studio, nền trắng">{{ old('reference_context_prompt', $project?->reference_context_prompt) }}</textarea>
+            <p class="text-xs text-base-content/40 mt-1">Ghi ngắn gọn bối cảnh của ảnh tham chiếu bạn đã chuẩn bị sẵn (KOL + sản phẩm) — để bạn tự nhớ lại khi viết prompt cho từng shot.</p>
         </div>
 
         <div class="form-control">
@@ -131,7 +135,7 @@
         </div>
 
         <div class="card-actions justify-end pt-2">
-            <button type="submit" class="btn btn-primary btn-sm">{{ $project ? 'Lưu thay đổi' : 'Tạo project' }}</button>
+            <button type="submit" class="btn btn-primary btn-sm">{{ $project ? 'Lưu' : 'Tạo project' }}</button>
         </div>
 
     </div>

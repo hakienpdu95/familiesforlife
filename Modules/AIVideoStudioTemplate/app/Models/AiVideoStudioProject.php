@@ -56,7 +56,8 @@ class AiVideoStudioProject extends Model
     protected $fillable = [
         'uuid', 'name', 'description',
         'objective', 'target_audience', 'video_type', 'core_message', 'aspect_ratio', 'resolution',
-        'default_subject', 'reference_image_url', 'default_style', 'default_constraints',
+        'default_subject', 'reference_image_url', 'reference_context_prompt',
+        'default_style', 'default_constraints',
         'status', 'created_by', 'updated_by',
     ];
 
