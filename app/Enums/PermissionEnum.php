@@ -249,4 +249,12 @@ enum PermissionEnum: string
     // KHÔNG qua config/permissions.php (Lớp B) — cùng nguyên tắc CONTENT_OUTLINES_USE/
     // PROMPT_FRAMEWORK_STUDIO_USE.
     case AI_VIDEO_STUDIO_TEMPLATE_USE = 'ai_video_studio_template.use';
+
+    // ══ ENTITY COMPARISON (So sánh động các đối tượng theo tiêu chí — trường học, bệnh viện,
+    // khóa học... tài sản nền tảng, catalog dùng lại được nhiều nơi) ═══
+    // spec/Entity_Comparison_Module_Technical_Spec.md §0 mục 9/§10 — gán cho platform_ops +
+    // platform_content_head + platform_content_editor (EntityComparisonPermissionSeeder), KHÔNG
+    // qua config/permissions.php (Lớp B) — cùng nguyên tắc BANNER_MANAGE/OCOP_MANAGE/
+    // HERITAGE_MANAGE/PAGE_MANAGE.
+    case ENTITY_COMPARISON_MANAGE = 'entity_comparison.manage';
 }

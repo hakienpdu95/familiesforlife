@@ -103,7 +103,7 @@ Reverb isn't started. Run it:
 
 Notification Thông báo in-app  + push — (thông báo trên chuông) tất cả module đều cần
 
-Đọc file spec/Heritage_Technical_Specification.md và implement theo đúng spec đó, tuân thủ đúng cấu trúc và nguyên tắc chuẩn khi thiết kế và triển khai module theo cấu trúc Advanced Vertical Slice (AVSA) + CQRS-lite + Laravel Modules + Laravel Actions, bổ sung ra mdenu sidebar để dùng, phần views hãy kế thừa và làm chuẩn @extends('layouts.backend')
+Đọc file spec/Entity_Comparison_Module_Technical_Spec.md và implement theo đúng spec đó, tuân thủ đúng cấu trúc và nguyên tắc chuẩn khi thiết kế và triển khai module theo cấu trúc Advanced Vertical Slice (AVSA) + CQRS-lite + Laravel Modules + Laravel Actions, bổ sung ra mdenu sidebar để dùng, phần views hãy kế thừa và làm chuẩn @extends('layouts.backend')
 
 # > Thêm org selector theo pattern _resolveOrganizations() vào form create/edit của  module X
 

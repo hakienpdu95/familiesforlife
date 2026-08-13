@@ -433,6 +433,29 @@
         </div>
         @endcan
 
+        {{-- spec/Entity_Comparison_Module_Technical_Spec.md §0 mục 9/§10 — entity_comparison.manage
+             cấp cho platform_ops/platform_content_head/platform_content_editor
+             (Modules\EntityComparison\Database\Seeders\EntityComparisonPermissionSeeder), KHÔNG qua
+             config/permissions.php (Lớp B). Dropdown (3 màn quản trị riêng: Loại đối tượng/Tiêu
+             chí/Đối tượng) — cùng nguyên tắc dropdown Lịch biên tập, khác single-link OCOP/Heritage. --}}
+        @can(\App\Enums\PermissionEnum::ENTITY_COMPARISON_MANAGE->value)
+        <details class="nav-group" {{ request()->routeIs('backend.entity_comparison.*') ? 'open' : '' }}>
+            <summary class="nav-summary {{ request()->routeIs('backend.entity_comparison.*') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0H5a2 2 0 01-2-2v-4m6 6h10a2 2 0 002-2v-4m0-6h-6m6 0v6m-6-6v6"/></svg>
+                <span class="nav-label">So sánh đối tượng</span>
+                <svg class="nav-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m9 18 6-6-6-6"/></svg>
+            </summary>
+            <div class="sub-menu">
+                <a href="{{ route('backend.entity_comparison.entity_types.index') }}"
+                   class="sub-link {{ request()->routeIs('backend.entity_comparison.entity_types.*') ? 'active' : '' }}">Loại đối tượng</a>
+                <a href="{{ route('backend.entity_comparison.criteria.index') }}"
+                   class="sub-link {{ request()->routeIs('backend.entity_comparison.criteria.*') ? 'active' : '' }}">Tiêu chí</a>
+                <a href="{{ route('backend.entity_comparison.entities.index') }}"
+                   class="sub-link {{ request()->routeIs('backend.entity_comparison.entities.*') ? 'active' : '' }}">Đối tượng</a>
+            </div>
+        </details>
+        @endcan
+
         {{-- spec/bhxh/PensionCalculator_Technical_Specification.md §5/§9.3 — Lớp A, qua
              config/permissions.php + RoleEnum: pension_calculator.manage (System_Admin, sửa
              được) / pension_calculator.view (CEO, chỉ xem) — cùng nguyên tắc PRODUCT_VIEW/

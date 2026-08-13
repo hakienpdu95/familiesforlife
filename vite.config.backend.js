@@ -57,6 +57,7 @@ const JS_OUTPUT = {
   'video':                  'assets/modules/video.[hash].js',
   'content-calendar':       'assets/modules/content-calendar.[hash].js',
   'playlist':               'assets/modules/playlist.[hash].js',
+  'entitycomparison':       'assets/modules/entitycomparison.[hash].js',
 };
 
 /** CSS asset name → output path.
@@ -180,6 +181,8 @@ const MODULE_ENTRIES = [
   'Modules/PromptFrameworkStudio/resources/assets/js/prompt-framework-studio.js',
   // AIVideoStudioTemplate
   'Modules/AIVideoStudioTemplate/resources/assets/js/aivideostudiotemplate.js',
+  // EntityComparison
+  'Modules/EntityComparison/resources/assets/js/entitycomparison.js',
 ];
 
 // ─────────────────────────────────────────────────────────────────────

@@ -35,5 +35,6 @@
     "PromptFrameworkStudio": true,
     "Playlist": true,
     "AIVideoStudioTemplate": true,
-    "Heritage": true
+    "Heritage": true,
+    "EntityComparison": true
 }

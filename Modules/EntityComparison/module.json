@@ -1,0 +1,11 @@
+{
+    "name": "EntityComparison",
+    "alias": "entitycomparison",
+    "description": "So sánh động các đối tượng (Entity) theo tiêu chí (Criteria) linh hoạt, tái sử dụng cho nhiều domain (trường học, bệnh viện, khóa học...) — spec/Entity_Comparison_Module_Technical_Spec.md.",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\EntityComparison\\Providers\\EntityComparisonServiceProvider"
+    ],
+    "files": []
+}

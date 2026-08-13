@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/entitycomparison",
+    "description": "",
+    "authors": [
+        {
+            "name": "KienDH",
+            "email": "bonhuyn@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\EntityComparison\\": "app/",
+            "Modules\\EntityComparison\\Database\\Factories\\": "database/factories/",
+            "Modules\\EntityComparison\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\EntityComparison\\Tests\\": "tests/"
+        }
+    }
+}
