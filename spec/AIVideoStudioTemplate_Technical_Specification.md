@@ -1,12 +1,105 @@
 # AI Video Studio Template — Quản lý Director Prompt Template cho video AI
 
-**Đặc tả Kỹ thuật Chi tiết — ĐÃ triển khai (v1.0/v1.1); v1.2-v1.6 bổ sung techniques từ Hedra/DeepReel/BytePlus/Pyxeljam/LinkedIn; v1.7 rà soát nội bộ; v1.8 bổ sung từ sentx.ai; v1.9 bổ sung từ veed.io; v1.10-v1.13 xem tóm tắt bên dưới; v1.14-v1.15 bổ sung từ mindstudio.ai + imagine.art, xem changelog dưới**
+**Đặc tả Kỹ thuật Chi tiết — ĐÃ triển khai (v1.0/v1.1); v1.2-v1.6 bổ sung techniques từ Hedra/DeepReel/BytePlus/Pyxeljam/LinkedIn; v1.7 rà soát nội bộ; v1.8 bổ sung từ sentx.ai; v1.9 bổ sung từ veed.io; v1.10-v1.13 xem tóm tắt bên dưới; v1.14-v1.15 bổ sung từ mindstudio.ai + imagine.art; v1.16 bổ sung từ tulsainternetmarketingservice.com + swarmify.com; v1.17 UI theo phản hồi người dùng; v1.18 bổ sung từ ngram.com (2 bài); v1.19 UI theo phản hồi người dùng, xem changelog dưới**
 
-**Phiên bản:** 1.15
-**Ngày:** 2026-08-12
+**Phiên bản:** 1.19
+**Ngày:** 2026-08-13
 **Framework:** Laravel 13 (PHP 8.4) + NWIDART Modules + Lorisleiva Actions
 **Module:** `Modules/AIVideoStudioTemplate`
 
+> **v1.19 (2026-08-13, cùng ngày với v1.18 — phản hồi người dùng: "Chỗ khối nội dung 'Mẹo viết prompt'
+> nên trình bày dễ đọc, chuyên nghiệp. Hiện tại trải dài như một text nội dung, khó nắm bắt thông
+> tin"):** callout "💡 Mẹo viết prompt" từ v1.2 tới v1.18 là 1 `<span>` duy nhất nối 14 mẹo bằng dấu
+> "·", đọc như 1 đoạn văn dài — càng về sau càng khó quét mắt khi số mẹo tăng dần qua mỗi nguồn đọc
+> thêm. Đổi sang 4 nhóm có tiêu đề nhỏ (cùng kiểu chữ với nhóm field "Nội dung cảnh"/"Hình ảnh & Âm
+> thanh" đã có ở mỗi Shot card) + danh sách gạch đầu dòng `<ul class="list-disc list-inside">` (cùng
+> pattern hiển thị lỗi validate ở `create.blade.php`/`edit.blade.php`) — mỗi mẹo là 1 dòng riêng biệt:
+> (1) **Phạm vi 1 Shot** — quyết định TRƯỚC khi viết field nào; (2) **Cách mô tả từng field** — lúc
+> đang gõ Subject/Action/Style/Audio/CTA; (3) **Nhịp độ & thời lượng** — lúc chọn Duration/pacing;
+> (4) **Lặp lại & xử lý sự cố** — lúc đã có `compiled_prompt`/kết quả AI, cần tinh chỉnh. Nội dung
+> từng mẹo GIỮ NGUYÊN so với v1.18 — chỉ đổi cách trình bày, không đổi/bớt kỹ thuật nào, không có
+> field/schema mới.
+>
+> **v1.18 (2026-08-13 — đọc `ngram.com/blog/demo-video-script-template` +
+> `ngram.com/blog/how-to-make-demo-video`, rà soát kỹ thuật còn thiếu so với v1.17):** 2 bài đều nói
+> về video demo phần mềm QUAY MÀN HÌNH THẬT (screen recording) — khác domain với module (AI-generated
+> video qua tool ngoài, §0). Phần lớn nội dung KHÔNG áp dụng vì thuộc về quay/dựng thật, không phải
+> viết prompt: thiết lập ghi hình (độ phân giải màn hình, đóng tab, mic vật lý, rehearse, ghi liên
+> tục — công cụ Camtasia/OBS/Loom), kỹ thuật dựng hậu kỳ (cắt lỗi, callout/annotation mũi tên/khoanh
+> tròn, transition — trùng quyết định "không animatic/edit trong app" §10), vị trí đặt video đã xuất
+> bản (landing page/email/help center + số liệu conversion theo nơi đặt — trùng "không theo dõi hiệu
+> suất phân phối" §10), quy trình AI Script Generation 6 bước của chính ngram (mô tả tính năng sản
+> phẩm CẠNH TRANH, không phải kỹ thuật — trùng quyết định "không gọi AI Provider" §0).
+>
+> 2 gap thật sự áp dụng được (chỉ phần VIẾT KỊCH BẢN, tách khỏi phần quay/dựng thật của nguồn):
+> (1) **5-Part Demo Video Script Framework** (Hook → Problem Deep-dive → Solution Introduction → Key
+> Features in Action → CTA & Outcome, 90-120s) — trục giống `video_formula` đã có (v1.16/v1.17) nhưng
+> khác PSA ở 2 điểm: tách riêng nhịp Hook khỏi Problem, và có nhịp "Key Features in Action" trình diễn
+> NHIỀU tính năng (2-5) mà PSA gộp chung vào 1 nhịp Solution — không trùng lặp. Thêm khoá `demo_5part`
+> vào `AiVideoStudioProject::VIDEO_FORMULAS` + `CompileProjectDirectorPromptAction::FORMULA_TIPS_BY_
+> VIDEO_FORMULA`/`FORMULA_BEATS` (dùng lại đúng cơ chế đã có, KHÔNG field/UI/migration mới — cột
+> `video_formula` đã là `string(20)`, `demo_5part` 10 ký tự vẫn đủ chỗ); `FORMULA_BEATS['demo_5part']`
+> giữ NGUYÊN số giây cụ thể nguồn cho (5-10s, 10-30s...) thay vì quy đổi % như 3 công thức cũ, đúng
+> tinh thần "Include Specific Numbers" của chính nguồn này. (2) Enrich tip `product_demo` trong
+> `CONTENT_TIPS_BY_VIDEO_TYPE` — nguồn "show one feature, one workflow, one result" bổ sung giới hạn
+> SỐ tính năng nên trình diễn (2-5 tính năng, mỗi tính năng gắn 1 lợi ích) mà tip cũ chỉ có gợi ý hình
+> ảnh (ánh sáng/góc máy/nhạc nền), chưa nói tới số lượng.
+>
+> Nhân tiện bổ sung 3 điểm nhỏ vào callout "Mẹo viết prompt" (`show.blade.php`, §8) — đều là nguyên
+> tắc VIẾT, không phụ thuộc domain quay màn hình của nguồn: "Lead with Outcomes, Not Features" (Action/
+> CTA nên mô tả KẾT QUẢ khán giả nhận được, không liệt kê tính năng/thông số), "Include Specific
+> Numbers" (số liệu cụ thể trong Script/CTA dễ nhớ và đáng tin hơn số liệu chung chung), và "Slow down"
+> (nghiêng về Duration/pacing CHẬM hơn cảm giác của người viết prompt — thiên kiến quen thuộc ý tưởng,
+> khác góc độ pacing-theo-tâm-trạng đã có ở v1.8).
+>
+> **v1.17 (2026-08-13, cùng ngày với v1.16 — phản hồi người dùng: "Khi chọn Loại video ... và Công
+> thức kịch bản ... thì ở bên dưới nội dung khối Kịch bản & Timeline, sẽ load những gợi ý về cách
+> trình bày mô tả tương đương cho loại content đó"):** v1.16 chỉ hiển thị gợi ý `video_type`/
+> `video_formula` trong Creative Brief của TÀI LIỆU XUẤT (`CompileProjectDirectorPromptAction`,
+> §3.5) — người dùng phải bấm "Xuất Director Prompt Template" mới thấy, không có gì ngay trên trang
+> `show` lúc đang gõ từng shot. Bổ sung `CompileProjectDirectorPromptAction::FORMULA_BEATS` — breakdown
+> mỗi công thức (`psa`/`bab`/`hook_value_cta`) thành 3 nhịp (tên/tỉ lệ % thời lượng gợi ý trong khoảng
+> tổng thời lượng đã có ở `FORMULA_TIPS_BY_VIDEO_FORMULA`/cách viết Subject-Action-Script cho nhịp đó)
+> — chi tiết hơn 1 câu tóm tắt hiện có. Đổi `CONTENT_TIPS_BY_VIDEO_TYPE` từ `private` sang `public` để
+> tái dùng, không chép lại nội dung. Thêm 1 khối `<details>` mới **"🎯 Gợi ý mô tả theo Loại video &
+> Công thức kịch bản đã chọn"** ở `show.blade.php`, đặt NGAY DƯỚI phần mở đầu section "3. Kịch bản &
+> Timeline" — TRƯỚC khối "Khung thời gian mẫu" tĩnh đã có (khối mới đặc thù theo lựa chọn Project, khối
+> cũ là fallback chung chung không đổi theo lựa chọn). Nội dung: câu tip theo `video_type` (nếu có) +
+> bảng 3 nhịp theo `video_formula` (nếu có) — chỉ 1 trong 2 vẫn hiện được (thiếu formula thì chỉ có
+> câu tip + gợi ý bấm "Sửa project" để chọn thêm). CHỈ hiện khối nếu có ít nhất 1 trong 2 field — dự
+> án chưa chọn gì thì không có gì để gợi ý (§8, §11). Thuần hiển thị — KHÔNG có field/schema mới, KHÔNG
+> vào `compiled_prompt`/tài liệu xuất (đó vẫn là vai trò của `FORMULA_TIPS_BY_VIDEO_FORMULA` cũ).
+>
+> **v1.16 (2026-08-13 — đọc `tulsainternetmarketingservice.com/blog/video-marketing-formulas` +
+> `swarmify.com/blog/video-marketing-strategy`, rà soát kỹ thuật còn thiếu so với v1.15):**
+> `swarmify.com` là bài chiến lược marketing tổng quát, phần lớn NGOÀI phạm vi module hoặc trùng field
+> đã có: mục tiêu kinh doanh + KPI 90 ngày (~`objective`), nghiên cứu thói quen xem video của khán giả
+> (~`target_audience`), video SEO (schema markup/transcript/từ khoá — module không host/index video),
+> tối ưu hiệu suất trang web nhúng video (CDN/lazy-load/facade pattern — module không xuất bản video
+> lên web), tối ưu ngân sách sản xuất bằng AI tool + đo lường/lặp lại theo tuần/tháng/quý sau khi đăng
+> (trùng quyết định "không gọi AI Provider" §0 và "không theo dõi hiệu suất phân phối" §10 đã chốt từ
+> v1.5/v1.14, không mở lại). Phân loại theo giai đoạn funnel (awareness/consideration/conversion, tỷ
+> lệ 60/25/15) CỐ Ý không áp dụng: trùng lấn `video_type` đã có (`product_demo`/`testimonial`/
+> `offer_promo` đã ngầm gắn với từng giai đoạn) mà không thêm hướng dẫn viết prompt nào khác biệt —
+> thêm field này sẽ tạo 2 trục phân loại nội dung chồng chéo nhau, đi ngược kỷ luật "không field trùng
+> lặp" module đã giữ xuyên suốt (VD quyết định không thêm `funnel_stage` hệt lý do không lặp lại phân
+> loại `video_type`).
+>
+> `tulsainternetmarketingservice.com` có 1 gap thật sự: 3 **công thức kịch bản** (narrative arc) —
+> Problem-Solution-CTA (30-60s), Before-After-Bridge (60-90s), Hook-Value-CTA (15-45s), mỗi công thức
+> là 1 TRÌNH TỰ 3 nhịp cho toàn bộ video + khoảng thời lượng khuyến nghị. Đây là TRỤC KHÁC với
+> `video_type`: video_type nói video thuộc LOẠI NỘI DUNG gì, công thức nói video KỂ CHUYỆN THEO TRÌNH
+> TỰ nào — 1 video `product_demo` vẫn dùng được cấu trúc PSA hoặc Hook-Value-CTA tuỳ ý đồ, không trùng
+> lặp như `funnel_stage` bị loại ở trên. Thêm `video_formula` (nullable, cấp Project, migration ALTER
+> riêng sau `video_type` — §2.1) + hằng số `AiVideoStudioProject::VIDEO_FORMULAS` + helper
+> `videoFormulaLabel()` (§4.1); hiển thị 2 dòng **Công thức kịch bản**/**Cấu trúc gợi ý** trong Creative
+> Brief của tài liệu xuất (`CompileProjectDirectorPromptAction::FORMULA_TIPS_BY_VIDEO_FORMULA`, §3.5) —
+> cùng pattern `CONTENT_TIPS_BY_VIDEO_TYPE` (v1.9); RENDER vào `compiled_prompt` của mọi Shot qua
+> `BuildShotPromptAction::buildCampaignContextLines()` (dòng "Công thức kịch bản", §3.1) — cùng nhóm
+> với `video_type`, nên thêm vào `PROMPT_CONTEXT_FIELDS` của `UpdateProjectAction` (sửa sẽ build lại
+> `compiled_prompt` toàn bộ Shot, §3.6). Form (`_form.blade.php`) thêm `<select>` 3 lựa chọn cạnh Loại
+> video; trang `show.blade.php` thêm dòng hiển thị cùng khối Creative Brief (§8).
+>
 > **v1.15 (2026-08-12, cùng phiên — phản hồi người dùng "không áp dụng kỹ thuật nào mới ah?" sau
 > v1.14):** đúng — v1.14 chỉ thêm tip/text + 2 lựa chọn `video_type`, chưa có khối TÍNH TOÁN mới nào
 > từ 2 nguồn `mindstudio.ai`/`imagine.art`. Rà soát lại: `mindstudio.ai` Agent 2 "Voiceover" có khái
@@ -216,6 +309,12 @@
 - Bài LinkedIn "step-by-step guide creating AI marketing videos with prompts" (v1.6) — quy trình 3 bước (Define Objectives → Tool Selection → Prepare Input Materials), cấu trúc prompt text-to-video/image-to-video/website-to-video, CTA specifications, quy tắc cụ thể hoá (brand color constraints, emotional triggers), Quality Optimization Checklist (tỷ lệ nền tảng, nhất quán thương hiệu, âm thanh rõ).
 - `sentx.ai/blog/how-to-write-ai-video-prompts` (v1.8) — công thức 7-lớp (Subject/Action/Setting/Camera/Lighting & Mood/Style/Duration & Pacing), "single hero focus" (giới hạn số chủ thể trong khung hình), troubleshooting theo triệu chứng (map lỗi output → field cần sửa), token weighting/front-load, show-vs-tell, "swipe file" prompt tái dùng.
 - `veed.io/learn/video-prompts` (v1.9) — công thức 3 thành phần (Subject & Action/Visual Style/Technical Direction), power words (temporal/spatial/emotional cues), Platform-Specific Strategies (TikTok/Reels, YouTube theo loại nội dung, Business/Commercial), artistic style references (anime/claymation/watercolor/VHS), model-specific recommendations (MiniMax/PixVerse/Seedance/Veo/Kling).
+- `mindstudio.ai/blog/ai-video-generation-content-marketing-multi-agent-workflow` (v1.14/v1.15) — quy trình multi-agent (Script → Voiceover → Visual → Assembly), công thức tốc độ đọc 125-150 từ/phút, EDL (Edit Decision List) đối chiếu narration/thời gian với từng shot, bảng định dạng/thời lượng theo nền tảng.
+- `imagine.art/blogs/make-ai-marketing-videos` (v1.14) — 7 định dạng video marketing cụ thể (bao gồm Spokesperson/Offer-Promo), 7 lỗi phổ biến (ẩn sản phẩm quá lâu, phụ đề mờ...), chỉ số hiệu suất phân phối (Hook rate/Hold rate/CTR/CPC/CPA).
+- `tulsainternetmarketingservice.com/blog/video-marketing-formulas` (v1.16) — 3 công thức kịch bản (narrative arc) kèm khoảng thời lượng khuyến nghị: Problem-Solution-CTA (30-60s), Before-After-Bridge (60-90s), Hook-Value-CTA (15-45s).
+- `swarmify.com/blog/video-marketing-strategy` (v1.16 — phần lớn ngoài phạm vi, xem changelog) — chiến lược marketing tổng quát: mục tiêu kinh doanh, nghiên cứu khán giả, phân loại funnel (awareness/consideration/conversion), tối ưu ngân sách sản xuất, video SEO, tối ưu hiệu suất trang web nhúng video, đo lường/lặp lại.
+- `ngram.com/blog/demo-video-script-template` (v1.18) — 5-Part Demo Video Script Framework (Hook/Problem Deep-dive/Solution Introduction/Key Features in Action/CTA & Outcome), 6 kỹ thuật viết script (lead with outcomes, show-don't-tell, conversational, one problem one solution, specific numbers, clear next step), số liệu conversion theo loại script.
+- `ngram.com/blog/how-to-make-demo-video` (v1.18 — phần lớn ngoài phạm vi vì nói về quay màn hình thật, xem changelog) — quy trình 8 bước làm video demo phần mềm (screen recording): mục tiêu/đối tượng, script, độ dài/format, ghi hình, chỉnh sửa, chọn nơi đặt, CTA, theo dõi hiệu suất; genuine gap áp dụng được: "slow down" (thiên kiến pacing của người quay/viết).
 
 ---
 
@@ -255,7 +354,8 @@ Sản xuất 1 TVC/video quảng cáo bằng AI hiện đòi hỏi lặp lại n
 > `..._190001_add_hedra_technique_fields...` (v1.2), `..._200001_add_deepreel_mood_duration_fields...`
 > (v1.3), `..._210001_add_byteplus_audio_and_reference_fields...` (v1.4),
 > `..._220001_add_resolution_field...` (v1.5), `..._230001_add_marketing_video_fields...` (v1.6),
-> `2026_08_12_100001_add_two_step_prompt_and_reference_composition_fields...` (v1.10) —
+> `2026_08_12_100001_add_two_step_prompt_and_reference_composition_fields...` (v1.10),
+> `2026_08_13_100001_add_video_formula_field...` (v1.16) —
 > cùng pattern `Modules/ContentOutlines/database/migrations/2026_08_07_170001_add_article_drafting_fields_to_content_outlines_table.php`
 > (KHÔNG sửa migration đã chạy — luôn thêm migration ALTER mới).
 
@@ -273,12 +373,15 @@ Schema::create('ai_video_studio_projects', function (Blueprint $table) {
     // CHỈ dành cho người đọc (khối Creative Brief ở tài liệu xuất) — KHÔNG vào prompt (§3.1, v1.7).
     $table->text('objective')->nullable();            // mục tiêu kinh doanh, không đổi thứ gì trên khung hình
 
-    // 5 field BỐI CẢNH PROJECT — được RENDER vào compiled_prompt của mọi Shot; sửa 1 trong 5 field
+    // 6 field BỐI CẢNH PROJECT — được RENDER vào compiled_prompt của mọi Shot; sửa 1 trong 6 field
     // này sẽ build lại prompt toàn bộ Shot (§3.6, v1.7). Tập giá trị: hằng số ở Model (§4.1).
     $table->text('target_audience')->nullable();      // đối tượng khán giả mục tiêu
     // v1.6 (LinkedIn marketing guide) — Step 1 "Define Objectives" tách 2 khái niệm này riêng.
     // v1.14 (imagine.art) — thêm spokesperson|offer_promo, `string(20)` vẫn đủ chỗ (dài nhất 12 ký tự).
     $table->string('video_type', 20)->nullable();     // explainer|testimonial|product_demo|storytelling|spokesperson|offer_promo|other
+    // v1.16 (tulsainternetmarketingservice.com) — TRỤC KHÁC video_type: công thức KỂ CHUYỆN (trình
+    // tự), không phải loại nội dung. Migration ALTER riêng (`2026_08_13_100001...`), đặt sau video_type.
+    $table->string('video_formula', 20)->nullable();  // psa|bab|hook_value_cta
     $table->text('core_message')->nullable();         // thông điệp/lời hứa cụ thể, VD "Tăng năng suất 40%"
     $table->string('aspect_ratio', 10)->nullable();   // 16:9|9:16|1:1|4:5
     $table->string('resolution', 10)->nullable();     // v1.5 (pyxeljam.com) — 720p|1080p|2K|4K
@@ -403,6 +506,7 @@ RÀNG BUỘC (Constraints): ...
 
 --- BỐI CẢNH CHIẾN DỊCH (tham khảo để giữ đúng tông — KHÔNG cần thể hiện toàn bộ trong shot này) ---
 - Loại video: Testimonial (đánh giá/trải nghiệm thật)        ← Project (v1.7)
+- Công thức kịch bản: Before–After–Bridge (60-90s)           ← Project (v1.16)
 - Khán giả mục tiêu: ...
 - Thông điệp xuyên suốt: ...
 ```
@@ -642,6 +746,15 @@ Cả 2 model: KHÔNG `TenantAwareModel`, KHÔNG soft-delete, KHÔNG `LogsActivit
 > cho `<select>` và để hiển thị. Trước v1.7 mỗi tập được viết lại ở 3 nơi (`_form.blade.php` + 2
 > FormRequest) — thêm 1 lựa chọn ở form mà quên sửa validate sẽ ra 422 khó hiểu, và trang `show`/tài
 > liệu xuất in slug thô (`testimonial`) trong khi form hiện nhãn đẹp. Thêm giá trị mới: sửa đúng 1 chỗ.
+>
+> **v1.16** — thêm `VIDEO_FORMULAS` (`psa`/`bab`/`hook_value_cta` => nhãn kèm khoảng thời lượng, VD
+> `"Problem–Solution–CTA (30-60s)"`) + helper `videoFormulaLabel()`, cùng pattern trên. Không có khoá
+> `other` (khác `VIDEO_TYPES`) — để trống nghĩa là "không áp dụng công thức nào cố định".
+>
+> **v1.18 (ngram.com/blog/demo-video-script-template)** — thêm khoá thứ 4 `demo_5part` =>
+> `"Demo Script 5 phần (90-120s)"` vào `VIDEO_FORMULAS`. Validate/`<select>`/`FORMULA_TIPS_BY_VIDEO_
+> FORMULA`/`FORMULA_BEATS` (§3.5) tự động nhận khoá mới qua `array_keys()`/`@foreach` đã có sẵn —
+> KHÔNG cần sửa `StoreProjectRequest`/`UpdateProjectRequest`/`_form.blade.php`.
 
 ```php
 namespace Modules\AIVideoStudioTemplate\Models;
@@ -829,7 +942,7 @@ Route::middleware(['auth', 'can:ai_video_studio_template.use'])
 
 ## 7. Validation
 
-- `StoreProjectRequest`/`UpdateProjectRequest`: `name` required|string|max:200; `description`/`objective`/`target_audience`/`core_message`/`default_subject`/`reference_image_url`(max:2048)/`default_style`/`default_constraints` nullable|string; `aspect_ratio` nullable|string|in:16:9,9:16,1:1,4:5 (v1.2); `resolution` nullable|string|in:720p,1080p,2K,4K (v1.5); `video_type` nullable|string|in:explainer,testimonial,product_demo,storytelling,spokesperson,offer_promo,other (v1.6; 2 giá trị cuối trước `other` thêm ở v1.14); `reference_context_prompt` nullable|string|max:300 (v1.11 — cố ý giới hạn ngắn, đây là ghi chú không phải kịch bản).
+- `StoreProjectRequest`/`UpdateProjectRequest`: `name` required|string|max:200; `description`/`objective`/`target_audience`/`core_message`/`default_subject`/`reference_image_url`(max:2048)/`default_style`/`default_constraints` nullable|string; `aspect_ratio` nullable|string|in:16:9,9:16,1:1,4:5 (v1.2); `resolution` nullable|string|in:720p,1080p,2K,4K (v1.5); `video_type` nullable|string|in:explainer,testimonial,product_demo,storytelling,spokesperson,offer_promo,other (v1.6; 2 giá trị cuối trước `other` thêm ở v1.14); `video_formula` nullable|string|in:psa,bab,hook_value_cta (v1.16); `reference_context_prompt` nullable|string|max:300 (v1.11 — cố ý giới hạn ngắn, đây là ghi chú không phải kịch bản).
 - `StoreShotRequest`/`UpdateShotRequest`: tất cả field director + `label` + `model_tool`(max:150, v1.2) + `qc_notes`(v1.2) đều `nullable|string`; `mood` nullable|string (v1.3); `duration_seconds` nullable|integer|min:1|max:36000 (v1.3); `audio_direction`/`reference_assets` nullable|string (v1.4); `cta_text` nullable|string|max:200 (v1.6); `timeline_breakdown` nullable|string (v1.10); `image_prompt`/`motion_prompt` nullable|string (v1.12 — field nhập tay, không giới hạn độ dài vì là nội dung prompt thật) — không bắt buộc field nào (cho phép điền dần).
 - `SaveShotAiResultRequest`: `ai_result` nullable|string.
 - `ReorderShotsRequest`: `shot_ids` required|array, `shot_ids.*` required|integer — ownership thật (thuộc đúng project) kiểm tra ở Action (§3.4), KHÔNG kiểm tra được ở FormRequest thuần (cần query DB theo `{project}` route param).
@@ -837,7 +950,8 @@ Route::middleware(['auth', 'can:ai_video_studio_template.use'])
 ## 8. Views — pattern UI
 
 Trang `show.blade.php` (`@extends('layouts.backend')`):
-- **Creative Brief card** (v1.2, chỉ hiện nếu có ít nhất 1 field điền) — hiển thị `objective`/`target_audience`/`video_type`/`core_message`(v1.6)/`aspect_ratio`/`resolution`(v1.5) dạng chỉ đọc, sửa qua "Sửa project".
+- **Creative Brief card** (v1.2, chỉ hiện nếu có ít nhất 1 field điền) — hiển thị `objective`/`target_audience`/`video_type`/`video_formula`(v1.16)/`core_message`(v1.6)/`aspect_ratio`/`resolution`(v1.5) dạng chỉ đọc, sửa qua "Sửa project".
+- **Khối "🎯 Gợi ý mô tả theo Loại video & Công thức kịch bản đã chọn"** (v1.17, `<details>`, mở sẵn nếu project chưa có shot) — đặt đầu section "3. Kịch bản & Timeline", TRƯỚC khối "Khung thời gian mẫu". Chỉ hiện nếu project có `video_type` HOẶC `video_formula`; nội dung đọc lại `CompileProjectDirectorPromptAction::CONTENT_TIPS_BY_VIDEO_TYPE`/`FORMULA_BEATS` (§3.5) — câu tip theo loại nội dung + bảng 3 nhịp (tên/tỉ lệ thời lượng/cách viết mô tả) theo công thức kịch bản.
 - Header: tên project + field default (anchoring) hiển thị dạng card, có nút "Sửa" mở modal/inline edit. **Bắt buộc có 1 dòng ghi chú nhỏ, rõ ràng ngay dưới tiêu đề card**: *"Áp dụng khi tạo Shot MỚI — sửa ở đây KHÔNG tự động cập nhật các Shot đã tạo trước đó."* — đây là điểm dễ hiểu nhầm nhất của cơ chế anchoring (§0), phải hiển thị luôn trên UI, không chỉ nằm trong spec. Card này cũng hiện `reference_context_prompt` (v1.11, nếu có điền — hiển thị dạng text thường). v1.13 (phản hồi người dùng) — KHÔNG còn hiện link `reference_image_url` ở UI (input lẫn display đã bỏ cả 2, chỉ giữ lại cột/dữ liệu backend).
 - **Callout "Mẹo viết prompt"** (v1.2-v1.6, tĩnh, ngay trên danh sách Shot) — tóm tắt Key Prompting Principles của Hedra (mỗi shot 1 cảnh/khoảnh khắc, thay tính từ chung chung bằng mô tả cụ thể, luôn điền Camera, gọi tên phong cách rõ ràng) + deepreel.com (50-150 từ/prompt, ưu tiên 20-30 từ đầu, tránh yêu cầu đối lập, negative prompt cụ thể, kỳ vọng lặp 3-4 lần) + byteplus.com (không dồn nhiều hành động vào 1 shot ngắn, đừng bỏ qua Audio Direction) + pyxeljam.com/LinkedIn (v1.6 — phân biệt diễn đạt khẳng định ở Subject/Action/Style với loại trừ cụ thể dồn vào Constraints; điều chỉnh giọng văn theo nền tảng/đối tượng đã khai ở Creative Brief) + sentx.ai (v1.8 — "single hero focus" giới hạn số chủ thể trong khung hình, khác nguyên tắc "1 hành động/shot" đã có; "pacing" — nhịp lấy cảnh tách khỏi Duration; trỏ tới khối troubleshooting mới trong tài liệu xuất). Placeholder field Camera/Style (§8) cũng bổ sung vốn từ vựng cỡ cảnh/góc máy/chuyển động máy và cách gọi tên nguồn sáng + thời điểm trong ngày (v1.8) — 2 field callout nhắc là quan trọng nhưng trước đó không có ví dụ nào. v1.9 (veed.io) — câu chung "điều chỉnh giọng văn theo nền tảng" giờ trỏ rõ tới 2 dòng "Gợi ý theo nền tảng"/"Gợi ý theo loại video" tự hiện trong Creative Brief; placeholder Environment bổ sung spatial+temporal descriptors (field cuối cùng trong nhóm 5 field cốt lõi còn thiếu ví dụ), Style bổ sung ví dụ phong cách hoạt hình/nghệ thuật.
 - Danh sách Shot: mỗi Shot là 1 card có:
@@ -852,7 +966,7 @@ Trang `show.blade.php` (`@extends('layouts.backend')`):
 - Cuối trang: nút "Xuất Director Prompt Template" → gọi `GET {project}/export`, trả về file `.md` tải xuống (nội dung từ `CompileProjectDirectorPromptAction`, v1.2 gồm cả khối Creative Brief + checklist đánh giá — xem §3.5), + nút "Copy toàn bộ" hiển thị trong `<textarea readonly>` lớn.
 
 `_form.blade.php` (create/edit project, v1.2-v1.6):
-- Khối "Creative Brief" mới (trước khối Anchoring) — `objective`/`target_audience` (textarea) + `video_type` (`<select>` 7 lựa chọn: explainer/testimonial/product_demo/storytelling/spokesperson/offer_promo/other, v1.6; 2 lựa chọn giữa thêm ở v1.14) + `core_message` (textarea, v1.6) + `aspect_ratio` (`<select>` 4 lựa chọn cố định: 16:9/9:16/1:1/4:5) + `resolution` (`<select>` 4 lựa chọn: 720p/1080p/2K/4K, v1.5) — tất cả không bắt buộc.
+- Khối "Creative Brief" mới (trước khối Anchoring) — `objective`/`target_audience` (textarea) + `video_type` (`<select>` 7 lựa chọn: explainer/testimonial/product_demo/storytelling/spokesperson/offer_promo/other, v1.6; 2 lựa chọn giữa thêm ở v1.14) + `video_formula` (`<select>` 3 lựa chọn: psa/bab/hook_value_cta, v1.16 — không có "Khác", ngay sau Loại video) + `core_message` (textarea, v1.6) + `aspect_ratio` (`<select>` 4 lựa chọn cố định: 16:9/9:16/1:1/4:5) + `resolution` (`<select>` 4 lựa chọn: 720p/1080p/2K/4K, v1.5) — tất cả không bắt buộc.
 - Khối Anchoring thêm 1 textarea `reference_context_prompt` (v1.11, `maxlength="300"` — mô tả ngắn tự gõ, không tự sinh gì, xem §3.7). v1.13 (phản hồi người dùng) — input `reference_image_url` (URL ảnh tham chiếu) ĐÃ BỎ khỏi form, chỉ giữ lại cột/dữ liệu backend.
 - Placeholder các field mô tả (`default_subject`/`default_style`/`default_constraints`) viết lại theo Key Prompting Principles — ví dụ cụ thể thay vì mô tả chung chung, nhắc kèm bảng màu/tone thương hiệu ở `default_style`, kỹ thuật negative prompt ở `default_constraints`.
 
@@ -946,6 +1060,15 @@ Thêm 1 mục top-level (không nằm trong nhóm "Bài viết") trong `resource
 - **v1.15 — Thời gian cộng dồn đúng thứ tự `sort_order`**: 3 shot lần lượt 3s/không điền/5s → cột Thời gian lần lượt `0–3s`, `3s+ (?)`, `3–8s` (shot không điền KHÔNG cộng dồn tiếp, shot sau tính tiếp từ mốc cursor cũ).
 - **v1.15 — Cột "Mô tả hình ảnh"**: shot có `label` → ưu tiên hiện `label`; shot KHÔNG có `label` nhưng có `subject`/`action` → hiện `Str::limit(subject+action, 60)`; shot rỗng cả 3 → hiện `_(chưa có mô tả)_`.
 - **v1.15 — Escape ký tự `|` trong bảng Markdown**: `script_line`/`label`/`subject` chứa ký tự `|` → thay bằng `/` trong ô tương ứng, không làm vỡ cấu trúc bảng.
+- **v1.16 — `video_formula` trong Creative Brief**: project có điền → dòng "Công thức kịch bản" (nhãn qua `videoFormulaLabel()`, không phải slug thô) và dòng "Cấu trúc gợi ý" (từ `FORMULA_TIPS_BY_VIDEO_FORMULA`) xuất hiện ngay sau khối Loại video; KHÔNG điền → cả 2 dòng không xuất hiện.
+- **v1.16 — `video_formula` trong `compiled_prompt`**: project có điền → dòng "Công thức kịch bản" xuất hiện trong khối `BỐI CẢNH CHIẾN DỊCH` của mọi Shot, ngay sau dòng "Loại video"; KHÔNG điền → không xuất hiện.
+- **v1.16 — Rebuild khi đổi `video_formula`**: đổi `video_formula` của Project (kể cả khi `aspect_ratio`/`resolution`/`video_type`/`target_audience`/`core_message` giữ nguyên) → `compiled_prompt` của MỌI shot được build lại (`video_formula` nằm trong `PROMPT_CONTEXT_FIELDS` của `UpdateProjectAction`, §3.6).
+- **v1.16 — `Rule::in()` cho `video_formula`**: giá trị ngoài `psa`/`bab`/`hook_value_cta` → 422; để trống → hợp lệ (nullable).
+- **v1.17 — khối gợi ý trên trang `show`**: project có cả `video_type` và `video_formula` → khối "🎯 Gợi ý mô tả..." hiện cả câu tip loại nội dung LẪN bảng 3 nhịp; project chỉ có `video_type` (không có `video_formula`) → chỉ hiện câu tip + dòng gợi ý "chọn Công thức kịch bản ở Sửa project", KHÔNG hiện bảng nhịp; project không có field nào trong 2 field này → khối KHÔNG xuất hiện (khối "Khung thời gian mẫu" cũ vẫn hiện bình thường, không phụ thuộc 2 field này).
+- **v1.17 — không có deprecation warning khi cả 2 field đều trống**: `video_type`/`video_formula` đều `null` → không truy cập `array[null]` trực tiếp (đã guard bằng `filled()` trước khi lấy index).
+- **v1.18 — `demo_5part` hợp lệ như 3 khoá cũ**: `Rule::in()` chấp nhận `demo_5part` (không còn báo lỗi 422); `videoFormulaLabel()` trả `"Demo Script 5 phần (90-120s)"`; `<select>` ở `_form.blade.php` có đủ 4 lựa chọn (tự động qua `@foreach`, không cần sửa view).
+- **v1.18 — `FORMULA_BEATS['demo_5part']` có 5 dòng**: khối "🎯 Gợi ý mô tả..." ở `show.blade.php` (§8) hiện bảng 5 nhịp (Hook/Problem Deep-dive/Solution Introduction/Key Features in Action/CTA & Outcome) khi project chọn `video_formula = demo_5part` — khác 3 khoá cũ chỉ có 3 nhịp; `compiled_prompt` của mọi Shot có dòng "Công thức kịch bản: Demo Script 5 phần (90-120s)" trong khối Bối cảnh chiến dịch.
+- **v1.18 — tip `product_demo` cập nhật**: project có `video_type = product_demo` → dòng "Gợi ý theo loại video" trong Creative Brief (tài liệu xuất) và khối "🎯 Gợi ý mô tả..." (trang `show`) đều chứa cụm "giới hạn 2-5 tính năng chính".
 
 **v1.7 — rà soát logic build prompt (xem changelog đầu tài liệu):**
 

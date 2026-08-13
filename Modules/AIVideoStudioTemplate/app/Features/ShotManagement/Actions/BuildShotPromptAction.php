@@ -18,7 +18,9 @@ use Modules\AIVideoStudioTemplate\Models\AiVideoStudioShot;
  *      dịch vào 1 shot — đúng sai lầm "overloading" mà hedra/deepreel/byteplus đều cảnh báo).
  *
  * Lịch sử bổ sung field: v1.3 Mood + Duration (deepreel), v1.4 Audio (byteplus), v1.6 CTA (LinkedIn),
- * v1.10 Timeline (bài LinkedIn, ví dụ Synthesia "kịch bản theo timeline 0-5s/5-15s/kết").
+ * v1.10 Timeline (bài LinkedIn, ví dụ Synthesia "kịch bản theo timeline 0-5s/5-15s/kết"), v1.16
+ * `video_formula` (tulsainternetmarketingservice.com — công thức kịch bản PSA/BAB/Hook-Value-CTA,
+ * vào BỐI CẢNH CHIẾN DỊCH giống `video_type`, không phải field riêng của Shot).
  * `model_tool`/`reference_assets`/`qc_notes` là metadata nội bộ — KHÔNG BAO GIỜ vào prompt.
  *
  * **Ghi chú prompt-injection (CLAUDE.md)**: quy ước bọc `<<<DELIMITER>>>` áp dụng cho text không tin
@@ -154,6 +156,12 @@ class BuildShotPromptAction
         $items = [];
         if (filled($project->video_type)) {
             $items[] = '- Loại video: '.$project->videoTypeLabel();
+        }
+        // v1.16 (tulsainternetmarketingservice.com) — công thức kịch bản là trục KHÁC video_type
+        // (cấu trúc kể chuyện, không phải loại nội dung); AI cần biết cả 2 để dàn cảnh đúng vai trò
+        // shot đang tạo (VD shot này là "Problem" hay "Solution" trong công thức PSA).
+        if (filled($project->video_formula)) {
+            $items[] = '- Công thức kịch bản: '.$project->videoFormulaLabel();
         }
         if (filled($project->target_audience)) {
             $items[] = '- Khán giả mục tiêu: '.$this->indentContinuationLines($project->target_audience);

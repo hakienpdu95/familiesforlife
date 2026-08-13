@@ -401,7 +401,8 @@
         "resolution///string///10///_NULL///NULL///__///__",
         "video_type///string///20///_NULL///NULL///__///__",
         "core_message///text///__///_NULL///NULL///__///__",
-        "reference_context_prompt///text///__///_NULL///NULL///__///__"
+        "reference_context_prompt///text///__///_NULL///NULL///__///__",
+        "video_formula///string///20///_NULL///NULL///__///__"
     ],
     [
         "ai_video_studio_shots///add///__///",

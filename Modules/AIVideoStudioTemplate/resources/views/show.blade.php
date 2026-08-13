@@ -46,14 +46,14 @@
 
     {{-- v1.2 (Hedra "how-to-make-ai-video" Step 1) — Creative Brief: mục tiêu/đối tượng/định dạng
          đã chốt trước khi soạn prompt, hiển thị dạng chỉ đọc (sửa qua "Sửa project"). --}}
-    @if($project->objective || $project->target_audience || $project->video_type || $project->core_message || $project->aspect_ratio || $project->resolution)
+    @if($project->objective || $project->target_audience || $project->video_type || $project->video_formula || $project->core_message || $project->aspect_ratio || $project->resolution)
     <div id="step-1" class="card bg-base-100 shadow-sm border border-base-200 mb-5 scroll-mt-4">
         <div class="card-body">
             <h2 class="card-title text-base"><span class="badge badge-primary badge-sm">1</span> Mục tiêu &amp; Định dạng</h2>
             {{-- v1.7 — phân biệt rõ với Anchoring bên dưới: nhóm này được ghi vào prompt và LAN
                  xuống mọi Shot khi sửa; anchoring thì chỉ prefill lúc tạo Shot mới. --}}
             <p class="text-xs text-base-content/50 -mt-1 mb-2">
-                Tỷ lệ khung hình · Độ phân giải · Loại video · Khán giả · Thông điệp cốt lõi được ghi vào prompt của mọi Shot; sửa sẽ tự động build lại prompt.
+                Tỷ lệ khung hình · Độ phân giải · Loại video · Công thức kịch bản · Khán giả · Thông điệp cốt lõi được ghi vào prompt của mọi Shot; sửa sẽ tự động build lại prompt.
             </p>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                 <div>
@@ -69,6 +69,12 @@
                 <div>
                     <p class="text-xs font-medium text-base-content/50 mb-1">Loại video</p>
                     <p>{{ $project->videoTypeLabel() ?: '—' }}</p>
+                </div>
+                {{-- v1.16 (tulsainternetmarketingservice.com) — công thức kịch bản, trục khác với
+                     Loại video ở trên (cấu trúc kể chuyện, không phải loại nội dung). --}}
+                <div>
+                    <p class="text-xs font-medium text-base-content/50 mb-1">Công thức kịch bản</p>
+                    <p>{{ $project->videoFormulaLabel() ?: '—' }}</p>
                 </div>
                 <div>
                     <p class="text-xs font-medium text-base-content/50 mb-1">Thông điệp cốt lõi</p>
@@ -129,6 +135,58 @@
         <h2 class="text-lg font-semibold flex items-center gap-2"><span class="badge badge-primary badge-sm">3</span> Kịch bản &amp; Timeline</h2>
         <p class="text-xs text-base-content/50 mt-0.5">Mỗi Shot là 1 cảnh (scene) trong video — điền theo thứ tự xuất hiện, Timeline bên dưới sẽ tự cập nhật.</p>
     </div>
+
+    {{-- v1.17 (phản hồi người dùng — "chọn Loại video + Công thức kịch bản thì bên dưới khối Kịch
+         bản & Timeline nên load gợi ý cách trình bày mô tả tương đương cho loại content đó"): gợi ý
+         ĐẶC THÙ theo lựa chọn `video_type`/`video_formula` của project (khác khối "Khung thời gian
+         mẫu" tĩnh bên dưới — luôn 1 cấu trúc chung bất kể đã chọn gì). Dùng lại 2 nguồn dữ liệu có sẵn
+         từ CompileProjectDirectorPromptAction (KHÔNG chép lại nội dung trong view) — xem docblock class
+         đó. CHỈ hiện nếu có ít nhất 1 trong 2 field, mở sẵn khi project chưa có shot (lúc cần nhất). --}}
+    @php
+        // filled() trước khi lấy index — video_type/video_formula null thì PHP 8.1+ báo deprecation
+        // "null as array offset" nếu đưa thẳng vào [$project->video_type].
+        $aivsFormulaBeats = filled($project->video_formula)
+            ? (\Modules\AIVideoStudioTemplate\Features\ProjectManagement\Actions\CompileProjectDirectorPromptAction::FORMULA_BEATS[$project->video_formula] ?? null)
+            : null;
+        $aivsTypeTip = filled($project->video_type)
+            ? (\Modules\AIVideoStudioTemplate\Features\ProjectManagement\Actions\CompileProjectDirectorPromptAction::CONTENT_TIPS_BY_VIDEO_TYPE[$project->video_type] ?? null)
+            : null;
+    @endphp
+    @if($aivsFormulaBeats || $aivsTypeTip)
+    <details {{ $project->shots->isEmpty() ? 'open' : '' }} class="collapse collapse-arrow bg-base-100 border border-primary/30 mb-4">
+        <summary class="collapse-title text-sm font-medium py-3">🎯 Gợi ý mô tả theo Loại video &amp; Công thức kịch bản đã chọn</summary>
+        <div class="collapse-content text-xs">
+            @if($aivsTypeTip)
+            <p class="text-base-content/70 mb-3"><b>{{ $project->videoTypeLabel() }}:</b> {{ $aivsTypeTip }}</p>
+            @endif
+            @if($aivsFormulaBeats)
+            <div class="overflow-x-auto">
+                <table class="table table-xs">
+                    <thead>
+                        <tr class="text-xs">
+                            <th>Nhịp</th>
+                            <th>Thời lượng gợi ý</th>
+                            <th>Cách viết mô tả (Subject/Action/Script...)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($aivsFormulaBeats as $beat)
+                        <tr>
+                            <td class="font-medium whitespace-nowrap">{{ $beat['name'] }}</td>
+                            <td class="whitespace-nowrap">{{ $beat['duration'] }}</td>
+                            <td>{{ $beat['guide'] }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-base-content/50 mt-2">Chia N cảnh của bạn thành 3 cụm tương ứng 3 nhịp trên theo đúng thứ tự — không cần 1 shot = 1 nhịp, 1 nhịp có thể gồm nhiều shot liên tiếp.</p>
+            @else
+            <p class="text-base-content/50 mt-2">Chưa chọn Công thức kịch bản — chọn ở "Sửa project" để xem thêm gợi ý chia nhịp theo cấu trúc PSA/BAB/Hook-Value-CTA.</p>
+            @endif
+        </div>
+    </details>
+    @endif
 
     {{-- UI/UX v2 (content24.ai — Bước 2 "Write a 30-60s script" của nguồn) — khung thời gian mẫu dịch
          từ bảng gốc (Hook/Problem/Solution/Proof/CTA), giúp người không chuyên có sẵn 1 khuôn để bắt
@@ -192,36 +250,77 @@
 
     {{-- v1.2 (Hedra "how-to-make-ai-video" — Key Prompting Techniques) + v1.3
          (deepreel.com/blog/ai-video-prompts) + v1.4 (byteplus.com) + v1.5 (pyxeljam.com) + v1.8
-         (sentx.ai/blog/how-to-write-ai-video-prompts) + v1.9 (veed.io/learn/video-prompts) — nhắc
-         nhanh nguyên tắc viết prompt tốt. UI/UX v2 — thu gọn mặc định (trước đây là 1 alert luôn mở,
-         chiếm ~10 dòng trước khi vào danh sách Shot). --}}
+         (sentx.ai/blog/how-to-write-ai-video-prompts) + v1.9 (veed.io/learn/video-prompts) + v1.18
+         (ngram.com, 2 bài) — nhắc nhanh nguyên tắc viết prompt tốt. UI/UX v2 — thu gọn mặc định
+         (trước đây là 1 alert luôn mở, chiếm ~10 dòng trước khi vào danh sách Shot).
+         v1.19 (phản hồi người dùng — "trải dài như 1 đoạn text, khó nắm bắt thông tin"): đổi từ 1
+         `<span>` nối 14 mẹo bằng dấu "·" (đọc như 1 đoạn văn dài) sang 4 nhóm có tiêu đề nhỏ + danh
+         sách gạch đầu dòng (`<ul class="list-disc list-inside">`, cùng pattern lỗi validate ở
+         create/edit.blade.php) — mỗi mẹo giờ là 1 dòng riêng biệt, dễ quét mắt. Nhóm theo lúc nào cần
+         dùng tới mẹo đó: (1) Phạm vi 1 Shot — quyết định TRƯỚC khi viết field nào; (2) Cách mô tả từng
+         field — lúc đang gõ Subject/Action/Style/Audio/CTA; (3) Nhịp độ & thời lượng — lúc chọn
+         Duration/pacing; (4) Lặp lại & xử lý sự cố — lúc đã có compiled_prompt/kết quả AI, cần tinh
+         chỉnh. Nội dung từng mẹo GIỮ NGUYÊN — chỉ đổi cách trình bày, không đổi/bớt kỹ thuật nào. --}}
     <details class="collapse collapse-arrow bg-base-100 border border-base-200 mb-4">
         <summary class="collapse-title text-sm font-medium py-3">💡 Mẹo viết prompt (bấm để xem)</summary>
         <div class="collapse-content text-xs text-base-content/70">
-            <span>
-                mỗi Shot chỉ nên tả 1 cảnh/khoảnh khắc duy nhất, KHÔNG dồn nhiều hành động khác nhau (VD chạy + nhảy + mở cửa + nói) vào 1 shot ngắn ·
-                {{-- v1.8 (sentx.ai "Single hero focus") — khác nguyên tắc "1 hành động" ở trên: đây là giới hạn SỐ chủ thể trong khung hình. --}}
-                chỉ nên có 1 chủ thể chính + tối đa 1 yếu tố phụ trong khung hình, đừng dồn nhiều người/vật cùng lúc ·
-                thay tính từ chung chung ("đẹp", "tốt") bằng mô tả cụ thể ("ánh sáng khuếch tán mềm") ·
-                luôn điền Camera (loại cảnh + chuyển động máy) — ảnh hưởng lớn tới chất lượng điện ảnh · Style nên gọi tên phong cách rõ ràng ("phong cách phim tài liệu", "ánh sáng chụp sản phẩm") ·
-                đừng bỏ qua Audio (âm thanh môi trường + nhạc nền) — thiếu phần này dễ ra video tĩnh, thiếu sức sống dù hình đẹp ·
-                mỗi prompt nên trong khoảng 50-150 từ, đặt thông tin quan trọng nhất ở 20-30 từ đầu (AI đọc trái→phải, ưu tiên phần đầu) ·
-                tránh yêu cầu đối lập trong cùng 1 shot (VD "vừa dữ dội vừa yên bình") ·
-                Subject/Action/Style nên NÊU RÕ ĐIỀU MUỐN THẤY (khẳng định), còn loại trừ CỤ THỂ ("không motion blur, nét mặt nhân vật") thay vì mô tả mơ hồ ("không mờ") thì dồn hết vào Constraints — tránh trộn 2 kiểu diễn đạt trong cùng 1 field ·
-                {{-- v1.9 (veed.io "Platform-Specific Strategies") — câu chung trước đây giờ trỏ tới 2 dòng gợi ý CỤ THỂ mới trong Creative Brief (tự hiện theo Tỷ lệ khung hình/Loại video đã chọn). --}}
-                điều chỉnh giọng văn/độ chi tiết theo nền tảng và đối tượng khán giả đã khai ở Creative Brief — xem 2 dòng "Gợi ý theo nền tảng"/"Gợi ý theo loại video" tự hiện ở đó theo Tỷ lệ khung hình/Loại video đã chọn ·
-                {{-- v1.8 (sentx.ai "Take approach") — nhịp lấy cảnh (pacing) là 1 lựa chọn riêng, khác Duration (độ dài). --}}
-                1 cú máy chậm, liên tục tạo cảm giác khác hẳn chuyển động nhanh, dồn dập — chọn nhịp (pacing) phù hợp tâm trạng của shot, không chỉ chọn số giây ·
-                đừng kỳ vọng ra kết quả hoàn hảo ngay lần đầu — nên bắt đầu đơn giản (Subject+Action) rồi thêm dần Style/Camera/Audio, tạo vài biến thể song song thay vì cầu toàn 1 bản, lặp lại 3-4 lần/shot, mỗi lần chỉ sửa 1 vấn đề cụ thể (ghi vào QC bên dưới) ·
-                {{-- v1.14 (mindstudio.ai "multi-agent-workflow" — Agent 1 "Script + Shot List") — công
-                     thức tốc độ đọc chuẩn, dùng để ước lượng độ dài Lời thoại khớp với Thời lượng đã điền. --}}
-                Lời thoại (script_line): ước lượng ~125-150 từ cho mỗi 1 phút video khi viết — giúp khớp độ dài lời đọc với Thời lượng (giây) đã điền, tránh lời thoại quá dài so với shot ngắn ·
-                {{-- v1.14 (mindstudio.ai — Agent 2 "Voiceover") — bước tạo giọng đọc TRƯỚC khi tạo
-                     video, dùng timestamp cấp từ để canh khớp lời thoại với từng shot khi dựng/ghép. --}}
-                có lời thoại dài/nhiều shot? cân nhắc tạo giọng đọc (voiceover) bằng TTS chất lượng cao (ElevenLabs/PlayHT/OpenAI TTS/Kokoro) TRƯỚC khi tạo video từng shot — dùng timestamp cấp từ do TTS trả về để canh đúng lời thoại với từng shot lúc dựng/ghép, thay vì đoán thời lượng ·
-                {{-- v1.8 (sentx.ai "Troubleshooting by Slot") — trỏ tới khối mới trong tài liệu xuất. --}}
-                output ra sai ý? xem khối "Xử lý sự cố theo triệu chứng" trong tài liệu xuất (nút "Xuất Director Prompt Template" bên dưới) để biết đúng field cần sửa.
-            </span>
+            <div class="space-y-3">
+                <div>
+                    <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/40 mb-1.5">Phạm vi 1 Shot</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>Mỗi Shot chỉ nên tả 1 cảnh/khoảnh khắc duy nhất — KHÔNG dồn nhiều hành động khác nhau (VD chạy + nhảy + mở cửa + nói) vào 1 shot ngắn.</li>
+                        {{-- v1.8 (sentx.ai "Single hero focus") — khác nguyên tắc "1 hành động" ở trên: đây là giới hạn SỐ chủ thể trong khung hình. --}}
+                        <li>Chỉ nên có 1 chủ thể chính + tối đa 1 yếu tố phụ trong khung hình — đừng dồn nhiều người/vật cùng lúc.</li>
+                        <li>Tránh yêu cầu đối lập trong cùng 1 shot (VD "vừa dữ dội vừa yên bình").</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/40 mb-1.5">Cách mô tả từng field</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>Thay tính từ chung chung ("đẹp", "tốt") bằng mô tả cụ thể ("ánh sáng khuếch tán mềm").</li>
+                        <li>Luôn điền Camera (loại cảnh + chuyển động máy) — ảnh hưởng lớn tới chất lượng điện ảnh; Style nên gọi tên phong cách rõ ràng ("phong cách phim tài liệu", "ánh sáng chụp sản phẩm").</li>
+                        <li>Đừng bỏ qua Audio (âm thanh môi trường + nhạc nền) — thiếu phần này dễ ra video tĩnh, thiếu sức sống dù hình đẹp.</li>
+                        <li>Subject/Action/Style nên NÊU RÕ ĐIỀU MUỐN THẤY (khẳng định); loại trừ CỤ THỂ ("không motion blur, nét mặt nhân vật") thay vì mơ hồ ("không mờ") thì dồn hết vào Constraints — tránh trộn 2 kiểu diễn đạt trong cùng 1 field.</li>
+                        {{-- v1.18 (ngram.com/blog/demo-video-script-template "Lead with Outcomes, Not
+                             Features") — VD nguồn: yếu "platform có tích hợp 50+ tool" · mạnh "gộp mọi
+                             công cụ vào 1 nơi, hết cảnh gạt qua lại giữa các cửa sổ". --}}
+                        <li>Action/CTA nên mô tả KẾT QUẢ khán giả nhận được ("gộp mọi công cụ vào 1 nơi"), không liệt kê tính năng/thông số ("tích hợp 50+ công cụ") — kết quả dễ hình dung và thuyết phục hơn danh sách tính năng.</li>
+                        {{-- v1.18 (ngram.com "Include Specific Numbers") — cùng tinh thần VD "Tăng
+                             năng suất 40%" đã có ở core_message. --}}
+                        <li>Script/CTA có số liệu thật thì nêu CỤ THỂ ("giảm 47% thời gian", "nhanh gấp 5 lần") thay vì chung chung ("nhanh hơn", "hiệu quả hơn") — số cụ thể dễ nhớ và đáng tin hơn.</li>
+                        <li>Mỗi prompt nên trong khoảng 50-150 từ, đặt thông tin quan trọng nhất ở 20-30 từ đầu (AI đọc trái→phải, ưu tiên phần đầu).</li>
+                        {{-- v1.9 (veed.io "Platform-Specific Strategies") — câu chung trước đây giờ trỏ tới 2 dòng gợi ý CỤ THỂ trong Creative Brief. --}}
+                        <li>Điều chỉnh giọng văn/độ chi tiết theo nền tảng và đối tượng khán giả đã khai ở Creative Brief — xem 2 dòng "Gợi ý theo nền tảng"/"Gợi ý theo loại video" tự hiện ở đó.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/40 mb-1.5">Nhịp độ &amp; thời lượng</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        {{-- v1.8 (sentx.ai "Take approach") — nhịp lấy cảnh (pacing) là 1 lựa chọn riêng, khác Duration (độ dài). --}}
+                        <li>1 cú máy chậm, liên tục tạo cảm giác khác hẳn chuyển động nhanh, dồn dập — chọn nhịp (pacing) phù hợp tâm trạng của shot, không chỉ chọn số giây.</li>
+                        {{-- v1.18 (ngram.com/blog/how-to-make-demo-video "Slow down — what feels slow
+                             to you probably feels normal to them") — thiên kiến người viết prompt đã
+                             quen ý tưởng, khác góc độ pacing-theo-tâm-trạng ở trên. --}}
+                        <li>Khi phân vân giữa 2 mức Duration/pacing, nên nghiêng về phía CHẬM hơn cảm giác của chính bạn — bạn đã quen thuộc ý tưởng nên thấy nhanh là bình thường, khán giả lần đầu xem cần nhiều thời gian xử lý hơn bạn nghĩ.</li>
+                        {{-- v1.14 (mindstudio.ai "multi-agent-workflow" — Agent 1 "Script + Shot List"). --}}
+                        <li>Lời thoại (script_line): ước lượng ~125-150 từ cho mỗi 1 phút video khi viết — giúp khớp độ dài lời đọc với Thời lượng (giây) đã điền, tránh lời thoại quá dài so với shot ngắn.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/40 mb-1.5">Lặp lại &amp; xử lý sự cố</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>Đừng kỳ vọng ra kết quả hoàn hảo ngay lần đầu — nên bắt đầu đơn giản (Subject+Action) rồi thêm dần Style/Camera/Audio, tạo vài biến thể song song thay vì cầu toàn 1 bản, lặp lại 3-4 lần/shot, mỗi lần chỉ sửa 1 vấn đề cụ thể (ghi vào QC bên dưới).</li>
+                        {{-- v1.14 (mindstudio.ai — Agent 2 "Voiceover") — bước tạo giọng đọc TRƯỚC khi
+                             tạo video, dùng timestamp cấp từ để canh khớp lời thoại với từng shot. --}}
+                        <li>Có lời thoại dài/nhiều shot? Cân nhắc tạo giọng đọc (voiceover) bằng TTS chất lượng cao (ElevenLabs/PlayHT/OpenAI TTS/Kokoro) TRƯỚC khi tạo video từng shot — dùng timestamp cấp từ do TTS trả về để canh đúng lời thoại lúc dựng/ghép, thay vì đoán thời lượng.</li>
+                        {{-- v1.8 (sentx.ai "Troubleshooting by Slot") — trỏ tới khối mới trong tài liệu xuất. --}}
+                        <li>Output ra sai ý? Xem khối "Xử lý sự cố theo triệu chứng" trong tài liệu xuất (nút "Xuất Director Prompt Template" bên dưới) để biết đúng field cần sửa.</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </details>
 

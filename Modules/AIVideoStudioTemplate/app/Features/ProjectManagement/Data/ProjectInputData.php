@@ -17,6 +17,7 @@ class ProjectInputData extends Data
         public readonly ?string $objective = null,
         public readonly ?string $targetAudience = null,
         public readonly ?string $videoType = null,
+        public readonly ?string $videoFormula = null,
         public readonly ?string $coreMessage = null,
         public readonly ?string $aspectRatio = null,
         public readonly ?string $resolution = null,

@@ -36,6 +36,21 @@ class AiVideoStudioProject extends Model
         'other' => 'Khác',
     ];
 
+    /**
+     * v1.16 (tulsainternetmarketingservice.com/blog/video-marketing-formulas) — công thức KỂ CHUYỆN
+     * (narrative arc), khác trục với `VIDEO_TYPES` (loại nội dung). Không có `other`: để trống nghĩa
+     * là "không áp dụng công thức nào cố định" — đã đủ vai trò của 1 lựa chọn "khác".
+     */
+    public const VIDEO_FORMULAS = [
+        'psa' => 'Problem–Solution–CTA (30-60s)',
+        'bab' => 'Before–After–Bridge (60-90s)',
+        'hook_value_cta' => 'Hook–Value–CTA (15-45s)',
+        // v1.18 (ngram.com/blog/demo-video-script-template) — 5 nhịp, dài hơn PSA (90-120s) và có
+        // nhịp "Key Features in Action" riêng (trình diễn 2-5 tính năng) mà PSA gộp chung vào 1 nhịp
+        // "Solution" — phù hợp video demo sản phẩm nhiều tính năng cần trình diễn lần lượt.
+        'demo_5part' => 'Demo Script 5 phần (90-120s)',
+    ];
+
     public const ASPECT_RATIOS = [
         '16:9' => '16:9 — Ngang (YouTube)',
         '9:16' => '9:16 — Dọc (TikTok/Reels/Shorts)',
@@ -60,7 +75,7 @@ class AiVideoStudioProject extends Model
 
     protected $fillable = [
         'uuid', 'name', 'description',
-        'objective', 'target_audience', 'video_type', 'core_message', 'aspect_ratio', 'resolution',
+        'objective', 'target_audience', 'video_type', 'video_formula', 'core_message', 'aspect_ratio', 'resolution',
         'default_subject', 'reference_image_url', 'reference_context_prompt',
         'default_style', 'default_constraints',
         'status', 'created_by', 'updated_by',
@@ -85,6 +100,14 @@ class AiVideoStudioProject extends Model
         return $this->video_type === null
             ? null
             : (self::VIDEO_TYPES[$this->video_type] ?? $this->video_type);
+    }
+
+    /** v1.16 — nhãn hiển thị của `video_formula`, cùng pattern `videoTypeLabel()`. */
+    public function videoFormulaLabel(): ?string
+    {
+        return $this->video_formula === null
+            ? null
+            : (self::VIDEO_FORMULAS[$this->video_formula] ?? $this->video_formula);
     }
 
     public function shots(): HasMany

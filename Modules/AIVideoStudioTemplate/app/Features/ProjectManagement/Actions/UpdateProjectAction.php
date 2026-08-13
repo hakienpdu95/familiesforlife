@@ -16,7 +16,7 @@ use Modules\AIVideoStudioTemplate\Models\AiVideoStudioShot;
  * 1. `default_subject`/`default_style`/`default_constraints` (anchoring) — SAO CHÉP giá trị vào
  *    field của Shot lúc TẠO MỚI. Sửa ở đây KHÔNG lan sang Shot đã tạo, vì người dùng có thể đã cố ý
  *    sửa field đó khác default; ghi đè sẽ mất công sức của họ (§0).
- * 2. `aspect_ratio`/`resolution`/`video_type`/`target_audience`/`core_message` (bối cảnh project) —
+ * 2. `aspect_ratio`/`resolution`/`video_type`/`video_formula`(v1.16)/`target_audience`/`core_message` (bối cảnh project) —
  *    được RENDER vào `compiled_prompt`, không nằm ở field nào của Shot nên không có gì để mất. Đổi
  *    mà không build lại thì mọi prompt đã lưu nói sai định dạng/tông → PHẢI lan xuống toàn bộ Shot.
  */
@@ -26,7 +26,7 @@ class UpdateProjectAction
 
     /** Các field của Project được render vào `compiled_prompt` (BuildShotPromptAction). */
     private const PROMPT_CONTEXT_FIELDS = [
-        'aspect_ratio', 'resolution', 'video_type', 'target_audience', 'core_message',
+        'aspect_ratio', 'resolution', 'video_type', 'video_formula', 'target_audience', 'core_message',
     ];
 
     public function __construct(private readonly BuildShotPromptAction $buildShotPrompt) {}
@@ -41,6 +41,7 @@ class UpdateProjectAction
             'objective' => $data->objective,
             'target_audience' => $data->targetAudience,
             'video_type' => $data->videoType,
+            'video_formula' => $data->videoFormula,
             'core_message' => $data->coreMessage,
             'aspect_ratio' => $data->aspectRatio,
             'resolution' => $data->resolution,

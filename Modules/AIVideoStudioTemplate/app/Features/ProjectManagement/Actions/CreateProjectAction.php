@@ -18,6 +18,7 @@ class CreateProjectAction
             'objective' => $data->objective,
             'target_audience' => $data->targetAudience,
             'video_type' => $data->videoType,
+            'video_formula' => $data->videoFormula,
             'core_message' => $data->coreMessage,
             'aspect_ratio' => $data->aspectRatio,
             'resolution' => $data->resolution,

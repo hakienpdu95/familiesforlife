@@ -61,6 +61,20 @@
             </select>
         </div>
 
+        {{-- v1.16 (tulsainternetmarketingservice.com/blog/video-marketing-formulas) — công thức KỂ
+             CHUYỆN (narrative arc), trục khác với Loại video (nội dung) ở trên: 1 video product_demo
+             vẫn có thể dùng cấu trúc PSA hoặc Hook-Value-CTA tuỳ ý đồ. --}}
+        <div class="form-control">
+            <label class="label py-0 pb-1.5"><span class="label-text font-medium">Công thức kịch bản</span></label>
+            <select name="video_formula" class="select select-bordered select-sm w-full max-w-xs">
+                <option value="">— Chưa chọn —</option>
+                @foreach(\Modules\AIVideoStudioTemplate\Models\AiVideoStudioProject::VIDEO_FORMULAS as $key => $label)
+                <option value="{{ $key }}" @selected(old('video_formula', $project?->video_formula) === $key)>{{ $label }}</option>
+                @endforeach
+            </select>
+            <p class="text-xs text-base-content/40 mt-1">Cấu trúc trình tự kể chuyện cho toàn bộ shot của project — VD PSA: shot đầu nêu vấn đề, shot giữa cho thấy giải pháp, shot cuối là CTA.</p>
+        </div>
+
         <div class="form-control">
             <label class="label py-0 pb-1.5"><span class="label-text font-medium">Thông điệp cốt lõi</span></label>
             <textarea name="core_message" rows="2" class="textarea textarea-bordered textarea-sm w-full"
@@ -93,7 +107,7 @@
         {{-- v1.7 — 5 field bối cảnh dưới đây được RENDER vào compiled_prompt của mọi Shot, nên sửa
              chúng sẽ build lại prompt toàn bộ Shot (khác anchoring bên dưới — xem UpdateProjectAction). --}}
         <div class="alert alert-warning py-2 px-3 text-xs">
-            <span>Loại video · Thông điệp cốt lõi · Khán giả · Tỷ lệ khung hình · Độ phân giải được ghi vào prompt của MỌI Shot — sửa ở đây sẽ tự động cập nhật lại prompt đã sinh.</span>
+            <span>Loại video · Công thức kịch bản · Thông điệp cốt lõi · Khán giả · Tỷ lệ khung hình · Độ phân giải được ghi vào prompt của MỌI Shot — sửa ở đây sẽ tự động cập nhật lại prompt đã sinh.</span>
         </div>
 
         <h3 class="text-sm font-semibold flex items-center gap-2 pt-2"><span class="badge badge-primary badge-sm">2</span> Ảnh tham chiếu <span class="badge badge-ghost badge-sm font-normal">Không bắt buộc</span></h3>
