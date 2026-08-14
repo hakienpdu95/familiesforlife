@@ -1,12 +1,25 @@
 # AI Video Studio Template — Quản lý Director Prompt Template cho video AI
 
-**Đặc tả Kỹ thuật Chi tiết — ĐÃ triển khai (v1.0/v1.1); v1.2-v1.6 bổ sung techniques từ Hedra/DeepReel/BytePlus/Pyxeljam/LinkedIn; v1.7 rà soát nội bộ; v1.8 bổ sung từ sentx.ai; v1.9 bổ sung từ veed.io; v1.10-v1.13 xem tóm tắt bên dưới; v1.14-v1.15 bổ sung từ mindstudio.ai + imagine.art; v1.16 bổ sung từ tulsainternetmarketingservice.com + swarmify.com; v1.17 UI theo phản hồi người dùng; v1.18 bổ sung từ ngram.com (2 bài); v1.19 UI theo phản hồi người dùng; v1.20 bổ sung từ leadde.ai; v1.21 bổ sung từ buffer.com, xem changelog dưới**
+**Đặc tả Kỹ thuật Chi tiết — ĐÃ triển khai (v1.0/v1.1); v1.2-v1.6 bổ sung techniques từ Hedra/DeepReel/BytePlus/Pyxeljam/LinkedIn; v1.7 rà soát nội bộ; v1.8 bổ sung từ sentx.ai; v1.9 bổ sung từ veed.io; v1.10-v1.13 xem tóm tắt bên dưới; v1.14-v1.15 bổ sung từ mindstudio.ai + imagine.art; v1.16 bổ sung từ tulsainternetmarketingservice.com + swarmify.com; v1.17 UI theo phản hồi người dùng; v1.18 bổ sung từ ngram.com (2 bài); v1.19 UI theo phản hồi người dùng; v1.20 bổ sung từ leadde.ai; v1.21 bổ sung từ buffer.com; v1.22 đối chiếu goepps.com — KHÔNG áp dụng gì, xem changelog dưới**
 
-**Phiên bản:** 1.21
+**Phiên bản:** 1.22
 **Ngày:** 2026-08-14
 **Framework:** Laravel 13 (PHP 8.4) + NWIDART Modules + Lorisleiva Actions
 **Module:** `Modules/AIVideoStudioTemplate`
 
+> **v1.22 (2026-08-14 — đọc `goepps.com/blog/which-content-formats-do-ai-engines-actually-cite-most`,
+> rà soát kỹ thuật còn thiếu so với v1.21 — KHÔNG áp dụng gì):** nguồn (bài blog quảng bá 1 tool trả
+> phí "AEO by GoEpps") nói về định dạng NỘI DUNG VĂN BẢN (Q&A ngắn/bảng-danh sách/review bên thứ ba)
+> mà AI answer engine (ChatGPT/Perplexity/Google AI Overview) hay trích dẫn khi trả lời câu hỏi người
+> dùng — toàn bộ tiền đề là nội dung đã XUẤT BẢN, index được, có thể crawl. Module này chỉ sinh
+> Director Prompt Template cho tool tạo VIDEO (§1) — không xuất bản/host/index video, không có
+> caption/mô tả/metadata nào để "được trích dẫn" bởi answer engine. Cùng nhóm lý do đã loại "video
+> SEO" (v1.16 — swarmify.com) và "SEO caption/searchable phrases" (v1.21 — buffer.com) — không mở
+> lại. Đã áp dụng phần genuine gap của nguồn này (ngưỡng ~125 ký tự cho câu trả lời FAQ trích dẫn
+> trực tiếp) vào `ContentOutlines` thay vì module này — xem
+> `ContentOutlines_Technical_Specification.md` §4.27 (module đó SINH NỘI DUNG VĂN BẢN xuất bản thật,
+> đúng tiền đề của nguồn).
+>
 > **v1.21 (2026-08-14 — đọc `buffer.com/resources/social-media-marketing-strategy`, rà soát kỹ thuật
 > còn thiếu so với v1.20, theo yêu cầu áp dụng cho module + rà soát cả hệ thống):** nguồn là hướng
 > dẫn 7 bước xây dựng CHIẾN LƯỢC social media tổng thể (kiểm toán tài khoản → định nghĩa khán giả

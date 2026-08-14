@@ -1,11 +1,35 @@
 # Module Dàn ý Nội dung (ContentOutlines)
 
-**Phiên bản:** 1.23
-**Ngày:** 2026-08-08
+**Phiên bản:** 1.24
+**Ngày:** 2026-08-14
 **Framework:** Laravel 13 (PHP 8.4) + NWIDART Modules + Lorisleiva Actions
 **Module mới:** `Modules/ContentOutlines` (tạo bằng `php artisan module:make ContentOutlines`)
 **Module phụ thuộc:** `Modules\ContentFoundation` (ngữ cảnh biên tập theo `PostCategory`, 1 chiều — cùng cách `CoreIdeaExtractor`/`VideoIdeaExtractor` phụ thuộc module này). Không tích hợp `app/Services/AI/` (xem §0).
-**Trạng thái:** v1.23 — đã vá 5 rủi ro sau review v1.0 (§4.1-§4.5) + áp dụng 2 điểm checklist content-marketing (§4.6) + 3 điểm phương pháp luận outline tổng quát (§4.7) + 4 điểm SEO content outline chuyên biệt (§4.8) + mô hình internal-link Pillar↔Cluster (§4.9) + CTA/độ tin cậy dữ liệu (§4.10) + answer-first/AI answer engine/chặn bịa số liệu/list lead-in/sai số ±10% (§4.11) + structure archetype/intent map 3 câu hỏi/Content-H3/differentiation note/FAQ nguồn PAA thật/anchor text (§4.12) + gợi ý Schema markup/alt text hình ảnh (§4.13) + từ khoá gần đầu/Meta 140-160/keyword trong 150 từ đầu/chặn nhồi từ khoá (§4.14) + kiểm kê SERP feature/khớp định dạng featured snippet/gom nhóm heading lặp lại đối thủ (§4.15) + H2 "Kết luận" (§4.16) + Feature `ArticleDrafting` — "Bước 2" sinh prompt viết bài từ outline đã duyệt (§4.17) + `cta_url` thật/hook mở bài/format scannable/chọn tiêu đề mạnh nhất (§4.18) + before-after example/2-3 phương án Meta/chặn case study bịa/cấm cliché mở bài (§4.19) + Feature `ArticleReview` — "Bước 3" sinh prompt soát lỗi/sửa bài đã viết (§4.20) + gợi ý ý tưởng infographic (§4.21) + gợi ý vị trí chèn câu chuyện/case study/testimonial THẬT của biên tập viên (§4.22) + nêu tên chuyên gia/tổ chức uy tín THẬT nếu biết (§4.23) + cảnh báo cascade khi regenerate + stepper/collapsible UX trang Show (§4.24) + **ghi rõ hành vi cascade vào §4.2 canonical + `<details>` mặc định đóng khi CHƯA DÙNG** (§4.24 mở rộng) + guardrail chống văn phong "lộ AI" (em-dash lạm dụng/từ chuyển ý sáo mòn lặp lại/chuỗi câu ngắn cùng cấu trúc) ở Bước 2 + rà lại ở Bước 3 (§4.25) + guardrail câu ≤20 từ + tránh thuật ngữ mơ hồ không có ngữ cảnh cụ thể (§4.26). Chưa qua vòng tinh chỉnh dựa trên phản hồi sử dụng thật DÀI HẠN (khác `CoreIdeaExtractor.md` đã qua 28 version).
+**Trạng thái:** v1.24 — đã vá 5 rủi ro sau review v1.0 (§4.1-§4.5) + áp dụng 2 điểm checklist content-marketing (§4.6) + 3 điểm phương pháp luận outline tổng quát (§4.7) + 4 điểm SEO content outline chuyên biệt (§4.8) + mô hình internal-link Pillar↔Cluster (§4.9) + CTA/độ tin cậy dữ liệu (§4.10) + answer-first/AI answer engine/chặn bịa số liệu/list lead-in/sai số ±10% (§4.11) + structure archetype/intent map 3 câu hỏi/Content-H3/differentiation note/FAQ nguồn PAA thật/anchor text (§4.12) + gợi ý Schema markup/alt text hình ảnh (§4.13) + từ khoá gần đầu/Meta 140-160/keyword trong 150 từ đầu/chặn nhồi từ khoá (§4.14) + kiểm kê SERP feature/khớp định dạng featured snippet/gom nhóm heading lặp lại đối thủ (§4.15) + H2 "Kết luận" (§4.16) + Feature `ArticleDrafting` — "Bước 2" sinh prompt viết bài từ outline đã duyệt (§4.17) + `cta_url` thật/hook mở bài/format scannable/chọn tiêu đề mạnh nhất (§4.18) + before-after example/2-3 phương án Meta/chặn case study bịa/cấm cliché mở bài (§4.19) + Feature `ArticleReview` — "Bước 3" sinh prompt soát lỗi/sửa bài đã viết (§4.20) + gợi ý ý tưởng infographic (§4.21) + gợi ý vị trí chèn câu chuyện/case study/testimonial THẬT của biên tập viên (§4.22) + nêu tên chuyên gia/tổ chức uy tín THẬT nếu biết (§4.23) + cảnh báo cascade khi regenerate + stepper/collapsible UX trang Show (§4.24) + **ghi rõ hành vi cascade vào §4.2 canonical + `<details>` mặc định đóng khi CHƯA DÙNG** (§4.24 mở rộng) + guardrail chống văn phong "lộ AI" (em-dash lạm dụng/từ chuyển ý sáo mòn lặp lại/chuỗi câu ngắn cùng cấu trúc) ở Bước 2 + rà lại ở Bước 3 (§4.25) + guardrail câu ≤20 từ + tránh thuật ngữ mơ hồ không có ngữ cảnh cụ thể (§4.26) + FAQ answer ~125 ký tự cho AI answer engine trích dẫn trực tiếp (§4.27). Chưa qua vòng tinh chỉnh dựa trên phản hồi sử dụng thật DÀI HẠN (khác `CoreIdeaExtractor.md` đã qua 28 version).
+
+> **v1.24 (2026-08-14, tham khảo goepps.com/blog/which-content-formats-do-ai-engines-actually-cite-most
+> — đọc theo yêu cầu tổng hợp kỹ thuật mới, rà soát cả hệ thống + module AIVideoStudioTemplate):**
+> nguồn (bài blog quảng bá 1 tool trả phí "AEO by GoEpps") liệt kê 3 nhóm định dạng AI answer engine
+> hay trích dẫn: Q&A ngắn gọn/trực tiếp (câu trả lời ≤~125 ký tự), so sánh/danh sách/bảng có cấu
+> trúc (facts rời rạc, ưu tiên dữ liệu gốc/insight độc quyền), và đánh giá/đề cập từ bên thứ ba
+> (external validation). 2/3 nhóm ĐÃ có cơ chế tương đương từ §4.11/§4.15 (answer-first, khớp định
+> dạng featured snippet, USP/differentiation note/"information gain") — không lặp lại. Nhóm thứ 3
+> (review/mention bên thứ ba) khác bản chất — nguồn nói về thu thập review TRÊN NỀN TẢNG KHÁC
+> (off-page, quy trình xin khách hàng đánh giá/PR), không phải cấu trúc nội dung 1 bài outline; phần
+> gần nhất áp được TRONG bài viết (trích dẫn testimonial/chuyên gia thật) đã có ở §4.22/§4.23.
+>
+> **1 điểm THẬT còn thiếu, đã áp dụng** — ngưỡng CỤ THỂ mà "answer-first" (§4.11) chưa có: câu trả
+> lời FAQ nên đủ NGẮN (~125 ký tự) để AI answer engine trích dẫn nguyên văn làm câu trả lời trực
+> tiếp — khác answer-first của H2/H3 (bao quát chủ đề rộng hơn, có thể dài 1-2 câu). Thêm vào bước
+> FAQ ở CẢ 3 `outline_depth` (`BuildContentOutlinePromptAction::buildBottomBrief/Standard/Detailed()`,
+> §4.27 trong docblock class — nguồn thật, tránh trôi khỏi spec) — không đổi số câu hỏi/nguồn PAA đã
+> chốt ở §4.12(5), không đổi signature/DB.
+>
+> **Rà soát module `AIVideoStudioTemplate` (theo yêu cầu) — KHÔNG áp dụng gì:** nguồn nói về cách AI
+> answer engine trích dẫn nội dung VĂN BẢN đã xuất bản/index được, trong khi module đó chỉ sinh
+> Director Prompt Template cho tool tạo VIDEO — không có caption/mô tả/metadata xuất bản nào để
+> "được trích dẫn". Cùng nhóm lý do đã loại "video SEO" (spec đó v1.16) và "SEO caption/searchable
+> phrases" (v1.21) — không mở lại, xem changelog `AIVideoStudioTemplate_Technical_Specification.md`.
 
 > **v1.22 (đối chiếu spec/giadinh.md — Moz Whiteboard Friday "7 Tips for Writing Great Content
 > with ChatGPT or Gemini", Chima Mmeje, 2026-08-08):** đối chiếu 7 kỹ thuật prompt engineering
