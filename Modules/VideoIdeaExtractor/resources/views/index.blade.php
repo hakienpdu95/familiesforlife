@@ -705,6 +705,13 @@ document.addEventListener('alpine:init', () => {
                     // ở tiêu chí 4.
                     top.push('Chưa có mô tả đối tượng khán giả nào — TRƯỚC khi brainstorm ở BƯỚC 1, tự dựng chân dung khán giả cụ thể nhất có thể từ transcript + tên chuyên mục: giai đoạn gia đình họ đang ở, vị trí của họ trong gia đình (cha/mẹ, con đã trưởng thành, ông/bà, vợ/chồng...), điều kiện sinh hoạt và quỹ thời gian. Rồi brainstorm CHO chính chân dung đó — KHÔNG brainstorm cho "gia đình Việt Nam nói chung" rồi mới nghĩ tới khán giả lúc đánh giá, cũng KHÔNG nới lại chân dung cho vừa với những ý đã nghĩ ra. Chân dung này được ghi lại ở BƯỚC 3 (xem tiêu chí 4 của BƯỚC 2 để biết cách ghi).');
                 }
+                // v1.29 (lindapophal.substack.com/p/the-2026-content-marketing-imperative, đồng bộ
+                // CoreIdeaExtractor) — "3 cấp độ hiểu đối tượng": audienceText ở trên chỉ là Level 1
+                // (nhân khẩu học). audience_behavior là Level 3 (hành vi THẬT — họ xem/tìm nội dung
+                // ở đâu, khi nào) — khác objections/decision_criteria bên dưới (Level 2, tâm lý).
+                if (foundation?.audience_behavior) {
+                    top.push(`Hành vi THẬT của nhóm khán giả này (khác mô tả nhân khẩu học ở trên — đây là quan sát thực tế, không phải suy đoán): ${foundation.audience_behavior} — dùng để chọn VÍ DỤ/TÌNH HUỐNG gần với đời sống thật của họ (không phải tình huống lý thuyết), và ưu tiên góc khai thác khớp với CÁCH họ thực sự xem/tìm nội dung (thời điểm rảnh, kênh hay dùng, kiểu câu hỏi họ hay gõ tìm kiếm) thay vì chỉ khớp chủ đề chung chung.`);
+                }
 
                 // writer_insights đứng TRƯỚC core_focus/unique_angle theo đúng vai trò thiết kế của
                 // field (5-7 gạch đầu dòng tóm tắt nhanh, "đọc trước khi đọc hết core_focus/

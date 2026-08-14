@@ -13,7 +13,10 @@ use Spatie\LaravelData\Data;
  * khó khăn thường gặp của độc giả rút ra từ NGHIÊN CỨU THỰC TẾ; rejected_ideas là "Decision Log"
  * — ý tưởng đã cân nhắc và QUYẾT ĐỊNH KHÔNG viết kèm lý do; objections là LÝ DO CÒN NGHI NGỜ/CHƯA
  * TIN khiến độc giả chưa hành động; decision_criteria là TIÊU CHÍ họ dùng để so sánh/chọn giữa các
- * lựa chọn; family_values_focus là TẬP KEY (con của danh sách CỐ ĐỊNH
+ * lựa chọn; audience_behavior (§12.12) là tầng HÀNH VI THẬT (Level 3 của "3 cấp độ hiểu đối tượng" —
+ * lindapophal.substack.com: demographic/psychographic/behavioral) — ngày của họ trông thế nào, họ
+ * đang tìm kiếm/tiêu thụ nội dung gì, KHÁC `audience` vốn chỉ là mô tả nhân khẩu học (Level 1);
+ * family_values_focus là TẬP KEY (con của danh sách CỐ ĐỊNH
  * config('content_foundation.family_values.items')) cho biết chuyên mục ưu tiên phục vụ giá trị
  * nào trong Hệ giá trị gia đình Việt Nam; family_conduct_focus (spec §12.11) cùng cơ chế cho 4 cặp
  * quan hệ của Bộ tiêu chí ứng xử trong gia đình (config('content_foundation.family_conduct_
@@ -45,6 +48,8 @@ class CategoryFoundationData extends Data
         public readonly ?string $rejected_ideas = null,
         #[Nullable, Max(500)]
         public readonly ?string $audience = null,
+        #[Nullable, Max(2000)]
+        public readonly ?string $audience_behavior = null,
         #[Nullable, Max(500)]
         public readonly ?string $constraints = null,
         #[Nullable, Max(3000)]

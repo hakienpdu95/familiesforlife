@@ -40,6 +40,7 @@ class UpsertCategoryFoundationAction
                 'family_conduct_focus' => $data->family_conduct_focus,
                 'rejected_ideas' => $data->rejected_ideas,
                 'audience' => $data->audience,
+                'audience_behavior' => $data->audience_behavior,
                 'constraints' => $data->constraints,
                 'style_sample' => $data->style_sample,
                 'updated_by' => $userId,

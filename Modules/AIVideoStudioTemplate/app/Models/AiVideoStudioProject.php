@@ -33,6 +33,14 @@ class AiVideoStudioProject extends Model
         // và "Offer/Promo" (nhấn giá/tính khẩn cấp/khuyến mãi có hạn — khác demo/explain thông thường).
         'spokesperson' => 'Spokesperson (người phát ngôn nói trực tiếp với camera)',
         'offer_promo' => 'Offer/Promo (ưu đãi, khuyến mãi có thời hạn)',
+        // v1.20 (leadde.ai/blog/marketing-script-template) — nguồn xếp 15 template thành 3 nhóm theo
+        // funnel; 2 nhóm đầu (Video/Ads, Product-Sales-Funnel) đã phủ bởi 6 loại trên, nhưng nhóm thứ 3
+        // "Trust, Education & Retention" — cụ thể "Customer Onboarding Script" (welcome khách hàng mới,
+        // hướng dẫn SOP/tính năng, retention) — KHÔNG có loại nào phủ tốt: `explainer` là giải thích sản
+        // phẩm cho khách TIỀM NĂNG (trước khi mua), khác hẳn onboarding là hướng dẫn khách ĐÃ MUA dùng
+        // sản phẩm. Đây là use-case retention hoàn toàn vắng mặt trong 6 loại cũ (đều thiên về
+        // awareness/consideration/conversion).
+        'onboarding' => 'Onboarding khách hàng (SOP/đào tạo/hướng dẫn sử dụng)',
         'other' => 'Khác',
     ];
 
@@ -49,6 +57,13 @@ class AiVideoStudioProject extends Model
         // nhịp "Key Features in Action" riêng (trình diễn 2-5 tính năng) mà PSA gộp chung vào 1 nhịp
         // "Solution" — phù hợp video demo sản phẩm nhiều tính năng cần trình diễn lần lượt.
         'demo_5part' => 'Demo Script 5 phần (90-120s)',
+        // v1.20 (leadde.ai/blog/marketing-script-template) — 3 công thức thật sự còn thiếu sau khi rà
+        // soát 15 template của nguồn so với 4 công thức đã có (xem docblock class
+        // CompileProjectDirectorPromptAction để biết lý do từng công thức KHÔNG trùng lặp với PSA/BAB/
+        // Hook-Value-CTA/Demo 5 phần):
+        'abcd' => 'ABCD — Attention-Branding-Connection-Direction (YouTube Ads)',
+        'testimonial_5part' => 'Testimonial Script 5 phần (Before-Challenge-Solution-Result-Recommendation)',
+        'onboarding_5part' => 'Onboarding Script 5 phần (Welcome-First value-Steps-Mistakes-Support CTA)',
     ];
 
     public const ASPECT_RATIOS = [

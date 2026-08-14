@@ -162,6 +162,82 @@ use Modules\AIVideoStudioTemplate\Models\AiVideoStudioShot;
  * prompt" (`show.blade.php`, §8): "Lead with Outcomes, Not Features" (mở đầu bằng kết quả khách hàng
  * muốn, không phải liệt kê tính năng) và số liệu cụ thể ghi nhớ lâu hơn số liệu chung chung — cả 2
  * đều là nguyên tắc VIẾT, không phụ thuộc domain quay màn hình của nguồn.
+ *
+ * v1.20 (đọc `leadde.ai/blog/marketing-script-template` — đọc theo yêu cầu tổng hợp kỹ thuật mới):
+ * nguồn liệt kê 15 template xếp thành 3 nhóm theo funnel (Video/Ads, Product-Sales-Funnel, Trust-
+ * Education-Retention) + 8 thành phần script + Google ABCD Framework cho YouTube Ads + 1 "AI Prompt
+ * Template" (cấu trúc "Act as [role]...") để soạn kịch bản qua chatbot. Phần lớn 15 template chỉ là
+ * biến thể phối lại các nhịp Hook/Problem/Solution/Proof/CTA đã phủ từ v1.0-v1.18 dưới tên khác nhau
+ * (VD "Basic Marketing Script" = Hook→Problem→Solution→Proof→CTA trùng gần hệt PSA đã có, chỉ thêm 1
+ * nhịp Proof lồng vào Solution/CTA — không đủ khác biệt để tách công thức riêng); "AI Prompt Template"
+ * CỐ Ý không áp dụng — đây là prompt cho chatbot SOẠN kịch bản, khác domain module (Director Prompt
+ * Template cho tool AI tạo VIDEO, §0 "không gọi AI Provider"); bảng Metrics theo từng giai đoạn funnel
+ * và phân loại 15 template theo awareness/consideration/conversion/retention CỐ Ý không áp dụng — trùng
+ * quyết định "không theo dõi hiệu suất phân phối" + "không thêm field funnel_stage" đã chốt ở v1.5/
+ * v1.14/v1.16 (không mở lại, xem docblock v1.16 phía trên). 3 gap thật sự còn thiếu, cả 3 đều là
+ * TRỤC `video_formula` (không phải field mới — dùng đúng cơ chế `VIDEO_FORMULAS`/`FORMULA_TIPS_BY_
+ * VIDEO_FORMULA`/`FORMULA_BEATS` đã có từ v1.16/v1.17/v1.18):
+ * (1) **`abcd`** (Google ABCD Framework: Attention-Branding-Connection-Direction) — nguồn ghi rõ đây
+ *     là framework CHÍNH THỨC của Google cho YouTube Ads (pre-roll/in-stream, có thể bị bấm "Bỏ qua"
+ *     sau 5s). Khác biệt THẬT với 4 công thức đã có: cả PSA/BAB/Hook-Value-CTA/Demo-5-phần đều đặt
+ *     thương hiệu/sản phẩm ở nhịp GIỮA hoặc CUỐI (sau khi đã nêu vấn đề/giá trị) — ABCD đặt "Branding"
+ *     ngay nhịp thứ 2 (giới thiệu thương hiệu SỚM), vì quảng cáo có thể bị bỏ qua bất cứ lúc nào nên
+ *     không đợi được tới cuối mới lộ diện thương hiệu. Đây là 1 nguyên tắc dàn nhịp khác hẳn, không
+ *     trùng lặp.
+ * (2) **`testimonial_5part`** (Before→Challenge→Solution→Result→Recommendation) — nguồn tách riêng
+ *     khỏi BAB đã có: BAB chỉ có 3 nhịp (Before/After/Bridge, Bridge = SẢN PHẨM giải thích vì sao nó là
+ *     cầu nối), còn công thức này có 5 nhịp, thêm "Challenge" (khó khăn CỤ THỂ đã gặp, tách khỏi
+ *     "Before" chung chung) và đổi "Bridge" (góc nhìn sản phẩm) thành "Recommendation" (góc nhìn NGƯỜI
+ *     ĐƯỢC PHỎNG VẤN khuyên trực tiếp người xem, giọng điệu cá nhân hơn hẳn) — cùng logic đã dùng để
+ *     chấp nhận `demo_5part` tách khỏi `psa` ở v1.18 (thêm nhịp + đổi góc nhìn = không trùng lặp), áp
+ *     dụng cho `video_type = testimonial` đã có sẵn từ v1.6.
+ * (3) **`onboarding_5part`** (Welcome→First value→Steps→Mistakes→Support CTA) — gắn với `video_type`
+ *     MỚI `onboarding` (Model §4.1); đây là formula RETENTION đầu tiên của module — 4 công thức cũ đều
+ *     hướng tới thuyết phục khán giả CHƯA MUA (problem→solution/before→after→CTA mua hàng), còn công
+ *     thức này hướng dẫn khách hàng ĐÃ MUA dùng sản phẩm hiệu quả (CTA cuối là "tìm hỗ trợ", không phải
+ *     CTA bán hàng) — trục hoàn toàn khác, không thể ép vào 4 công thức cũ.
+ *
+ * Nhân tiện: `Brand Story Script` (Origin→Mission→Customer problem→Belief→Vision) của nguồn CỐ Ý
+ * không thêm công thức riêng dù cũng là 1 trục khác biệt (không xoay quanh pain-point/giải pháp) — nội
+ * dung phần lớn trùng hướng dẫn "mô tả mạch cảm xúc xuyên suốt, tiến triển cảnh theo trình tự" đã có ở
+ * `CONTENT_TIPS_BY_VIDEO_TYPE['storytelling']` (v1.6), và use-case hẹp (trang About/tuyển dụng) không
+ * đủ giá trị biên để đánh đổi việc phình danh sách `video_formula` lên 8 lựa chọn — có thể mở lại nếu
+ * có nhu cầu thực tế sau này.
+ *
+ * v1.21 (đọc `buffer.com/resources/social-media-marketing-strategy` — đọc theo yêu cầu tổng hợp kỹ
+ * thuật mới, áp dụng cho module + rà soát cả hệ thống): nguồn là hướng dẫn 7 BƯỚC xây dựng CHIẾN LƯỢC
+ * social media tổng thể — kiểm toán tài khoản, định nghĩa khán giả (tổng quát), đặt mục tiêu SMART,
+ * chọn nền tảng, định nghĩa "content pillar" (3-5 chủ đề lặp lại cho CẢ 1 kênh), xây lịch đăng + tần
+ * suất theo nền tảng, đo lường/xoay trục hàng tháng-quý. Đây là công cụ QUẢN LÝ TÀI KHOẢN MẠNG XÃ HỘI
+ * (Buffer chính là 1 tool lịch đăng/phân tích) — RÀ SOÁT CẢ HỆ THỐNG không tìm thấy module nào tương
+ * ứng: `ContentCalendar` (spec §16 "Ngoài phạm vi") đã tường minh loại "đa kênh (repurpose sang
+ * social/newsletter)" khỏi Phase 1 — module đó chỉ quản lý pipeline biên tập bài viết CỦA NỀN TẢNG
+ * (`Post`), không đăng/lên lịch lên tài khoản mạng xã hội ngoài; `AIVideoStudioTemplate` (module này)
+ * chỉ là công cụ dựng PROMPT cho 1 video/TVC đơn lẻ, không quản lý tài khoản/lịch đăng/KPI của cả kênh
+ * — đã CỐ Ý không theo dõi hiệu suất phân phối từ v1.5/v1.10/v1.14/v1.16 (§10, không mở lại). Vì vậy
+ * phần lớn 7 bước (Bước 1 kiểm toán, Bước 2 audience tổng quát, Bước 3 SMART goal, Bước 5 content
+ * pillar, Bước 6 lịch đăng/tần suất, Bước 7 đo lường) KHÔNG áp dụng — không có nơi nào trong hệ thống
+ * hợp lý để đặt các khái niệm này, không phải khoảng trống của riêng module này.
+ *
+ * **1 gap thật sự áp dụng được cho `AIVideoStudioTemplate`** — nửa đầu Bước 4 "Chọn nền tảng": bảng
+ * MỤC TIÊU THUẬT TOÁN theo nền tảng (TikTok/Reels = thời gian xem + tỷ lệ HOÀN THÀNH; YouTube = thời
+ * gian xem + tỷ lệ NHẤP) — khác hẳn `PLATFORM_TIPS_BY_ASPECT_RATIO` (v1.9) vốn chỉ nói cách MỞ ĐẦU
+ * (hook), không nói gì về việc GIỮ nhịp xuyên suốt để thuật toán không cắt giảm phân phối giữa chừng.
+ * Enrich 2 tip `9:16`/`16:9` đã có — không thêm field/schema mới (xem docblock hằng số
+ * `PLATFORM_TIPS_BY_ASPECT_RATIO` bên dưới). Nửa sau Bước 4 (bảng hiệu suất ĐỊNH DẠNG theo nền tảng —
+ * VD LinkedIn Carousel/PDF vượt trội Video, Instagram Carousel vượt ảnh đơn) CỐ Ý không áp dụng: module
+ * này CHỈ tạo prompt cho VIDEO (§1 "Mục tiêu"), không có carousel/ảnh đơn/text post để so sánh — dữ
+ * liệu "định dạng nào tốt hơn video" không có hành động tương ứng nào trong 1 tool CHỈ làm video.
+ *
+ * **Từ chối áp dụng, có lý do (còn lại của nguồn):** "1-2 nền tảng làm kỹ hơn 4-5 nền tảng làm mỏng"/
+ * kiểm toán đối thủ/content pillar — chiến lược cấp KÊNH, không phải cấp 1 Project/video đơn lẻ; SMART
+ * goal — đã có `objective` (Creative Brief, v1.2) đúng vai trò mục tiêu kinh doanh, không cần khung
+ * SMART chi tiết hơn cho 1 video đơn; lịch đăng/tần suất/đo lường hiệu suất — trùng quyết định "không
+ * theo dõi hiệu suất phân phối" đã chốt nhiều lần (§10); "3 lựa chọn dùng AI" (soạn thảo VỚI AI, không
+ * xuất bản THẲNG TỪ AI) — đúng triết lý module đã có sẵn từ v1.0 (copy tay sang tool ngoài + 2 checklist
+ * trước/sau generate, §0/§3.5), không phải khoảng trống; SEO caption/searchable phrases — thuộc siêu dữ
+ * liệu XUẤT BẢN (tiêu đề/mô tả video khi đăng), khác phạm vi "Director Prompt Template" (nội dung HÌNH
+ * ẢNH của shot, §1), cùng nhóm đã loại ở v1.16 ("module không host/index video" — video SEO).
  */
 class CompileProjectDirectorPromptAction
 {
@@ -219,11 +295,19 @@ class CompileProjectDirectorPromptAction
      * `AiVideoStudioProject::ASPECT_RATIOS`) sang gợi ý viết prompt riêng cho định dạng đó. CHỈ 2
      * khoá vì nguồn chỉ nói rõ 2 định dạng này — không đoán thêm tip cho `1:1`/`4:5`.
      *
+     * v1.21 (buffer.com/resources/social-media-marketing-strategy) — enrich CẢ 2 tip với mục tiêu
+     * TỐI ƯU HOÁ CỦA THUẬT TOÁN nền tảng (bảng "thuật toán ưu tiên gì" của nguồn: TikTok = thời gian
+     * xem + tỷ lệ hoàn thành; YouTube = thời gian xem + tỷ lệ nhấp) — góc HOÀN TOÀN KHÁC tip gốc v1.9
+     * (chỉ nói cách mở đầu/hook, không nói gì về việc GIỮ nhịp xuyên suốt để xem hết). Không trùng
+     * "Slow down" (v1.18, thiên kiến pacing chủ quan của người viết prompt) hay "single hero focus"
+     * (v1.8, giới hạn SỐ chủ thể) — đây là 1 trục khác: nhịp độ PHÂN BỔ theo THỜI LƯỢNG, không phải
+     * tốc độ tuyệt đối hay số lượng chủ thể.
+     *
      * @var array<string, string>
      */
     private const PLATFORM_TIPS_BY_ASPECT_RATIO = [
-        '9:16' => 'TikTok/Reels/Shorts: 1-2 giây đầu PHẢI có hành động/phản ứng gây chú ý ngay (hook) — đừng mở đầu chậm; ưu tiên mô tả cắt nhanh, zoom-in, nhấn cá tính/chuyển động nhân vật.',
-        '16:9' => 'YouTube: nội dung giáo dục — nêu rõ kiểu người dẫn/kể (narrator) + hình thức hiển thị + chỉ dẫn text overlay; nội dung hướng dẫn từng bước (tutorial) — mô tả khung có tay/vật thể đang thực hiện (hands-in-frame); kể chuyện thương hiệu — mô tả rõ mạch cảm xúc, tiến triển cảnh, kiểu chuyển cảnh điện ảnh.',
+        '9:16' => 'TikTok/Reels/Shorts: 1-2 giây đầu PHẢI có hành động/phản ứng gây chú ý ngay (hook) — đừng mở đầu chậm; ưu tiên mô tả cắt nhanh, zoom-in, nhấn cá tính/chuyển động nhân vật. Thuật toán các nền tảng này ưu tiên THỜI GIAN XEM + TỶ LỆ XEM HẾT (completion rate) — hook mạnh chỉ giữ được người xem 1-2 giây đầu, còn lại phụ thuộc nhịp độ CÓ ĐỀU xuyên suốt hay không: nếu nhiều shot nối tiếp nhau, đừng để phần giữa/cuối đuối nhịp so với đầu — Action/Camera của MỌI shot nên giữ mức năng lượng gần bằng nhau, không chỉ dồn lực vào shot mở đầu.',
+        '16:9' => 'YouTube: nội dung giáo dục — nêu rõ kiểu người dẫn/kể (narrator) + hình thức hiển thị + chỉ dẫn text overlay; nội dung hướng dẫn từng bước (tutorial) — mô tả khung có tay/vật thể đang thực hiện (hands-in-frame); kể chuyện thương hiệu — mô tả rõ mạch cảm xúc, tiến triển cảnh, kiểu chuyển cảnh điện ảnh. Thuật toán ưu tiên THỜI GIAN XEM + TỶ LỆ NHẤP (click-through rate) — với video nhiều shot, tránh đặt các shot ít thông tin/lặp lại liên tiếp gây rớt người xem giữa chừng; mỗi shot nên có LÝ DO tồn tại rõ ràng (tiến triển nội dung, không chỉ đẹp mắt) để giữ thời gian xem cộng dồn.',
     ];
 
     /**
@@ -250,6 +334,9 @@ class CompileProjectDirectorPromptAction
         'storytelling' => 'Mô tả mạch cảm xúc xuyên suốt, tiến triển cảnh theo trình tự, phong cách lời dẫn, kiểu chuyển cảnh điện ảnh.',
         'spokesperson' => 'Mô tả rõ người nói nhìn thẳng vào camera (không phải góc nghiêng/quay lưng), giọng điệu tự tin/gần gũi tuỳ thương hiệu; sản phẩm nên xuất hiện trong khung hình cùng người nói, không chỉ nhắc bằng lời.',
         'offer_promo' => 'Nhấn mạnh RÕ con số/thời hạn cụ thể trong Constraints hoặc CTA (VD "giảm 25%, chỉ tuần này") — nhịp cắt nhanh, phụ đề in đậm; đây là loại video ưu tiên tốc độ truyền tải hơn cảm xúc/câu chuyện.',
+        // v1.20 (leadde.ai/blog/marketing-script-template) — video_type MỚI, không có nguồn tip nào
+        // trước đó phủ được use-case retention này.
+        'onboarding' => 'Mở đầu chào mừng khách hàng MỚI (không phải khách tiềm năng) + cho thấy NGAY 1 "quick win" để giữ động lực; phần chính hướng dẫn từng bước cụ thể (numbered steps, show-don\'t-tell) + cảnh báo lỗi/hiểu lầm thường gặp; CTA cuối là nơi tìm hỗ trợ thêm, KHÔNG phải CTA bán hàng.',
     ];
 
     /**
@@ -269,6 +356,11 @@ class CompileProjectDirectorPromptAction
         // in Action" trình diễn NHIỀU tính năng (PSA chỉ có 1 nhịp Solution chung). Dài hơn PSA
         // (90-120s so với 30-60s) — phù hợp demo có nhiều thứ cần trình diễn hơn 1 quảng cáo ngắn.
         'demo_5part' => 'Demo Script 5 phần (90-120s): Hook (pain point cụ thể, 5-10s) → Problem Deep-dive (hậu quả/chi phí nếu không giải quyết, 10-30s) → Solution Introduction (nối RÕ với vấn đề vừa nêu, 30-50s) → Key Features in Action (trình diễn 2-5 tính năng, show-don\'t-tell, 50-90s+) → CTA & Outcome (1 CTA + 1 kết quả cụ thể, 90-120s). Phù hợp video demo sản phẩm nhiều tính năng, dài hơi hơn PSA.',
+        // v1.20 (leadde.ai/blog/marketing-script-template) — 3 công thức mới, xem docblock class để
+        // biết lý do không trùng lặp với 4 công thức trên.
+        'abcd' => 'ABCD — Attention-Branding-Connection-Direction: framework của Google cho YouTube Ads (pre-roll/in-stream, người xem có thể bấm "Bỏ qua quảng cáo" sau 5s). Attention (gây chú ý NGAY vài giây đầu) → Branding (giới thiệu thương hiệu/sản phẩm SỚM — khác 4 công thức kia thường để cuối) → Connection (kết nối trực tiếp với vấn đề/mong muốn của khán giả mục tiêu) → Direction (1 CTA rõ ràng). Phù hợp quảng cáo YouTube có thể bị bỏ qua giữa chừng.',
+        'testimonial_5part' => 'Testimonial Script 5 phần: Before (cuộc sống/tình huống TRƯỚC khi biết sản phẩm) → Challenge (khó khăn CỤ THỂ đã gặp phải, tách riêng khỏi Before) → Solution (cách họ tìm ra/áp dụng sản phẩm) → Result (kết quả cụ thể đạt được, càng nhiều số liệu càng thuyết phục) → Recommendation (lời khuyên trực tiếp tới người xem, giọng điệu cá nhân — khác "Bridge" của BAB vốn là góc nhìn sản phẩm). Phù hợp video chứng thực/case study chi tiết hơn BAB.',
+        'onboarding_5part' => 'Onboarding Script 5 phần: Welcome (chào mừng khách hàng MỚI, xác nhận họ chọn đúng) → First value (cho thấy NGAY 1 kết quả/quick win để duy trì động lực) → Steps (hướng dẫn từng bước cụ thể, numbered, show-don\'t-tell — phần nặng nhất) → Mistakes (cảnh báo lỗi/hiểu lầm thường gặp cần tránh) → Support CTA (hướng dẫn nơi tìm hỗ trợ thêm, KHÔNG phải CTA bán hàng). Phù hợp video đào tạo/SOP/hướng dẫn sử dụng — công thức RETENTION đầu tiên của module, khác 4 công thức trên đều hướng tới khách CHƯA MUA.',
     ];
 
     /**
@@ -313,6 +405,27 @@ class CompileProjectDirectorPromptAction
             ['name' => 'Giới thiệu giải pháp (Solution Introduction)', 'duration' => '30-50s', 'guide' => 'Subject chuyển sang sản phẩm; nối RÕ ràng với vấn đề vừa nêu — không nhảy cóc sang tính năng ngay.'],
             ['name' => 'Trình diễn tính năng (Key Features in Action)', 'duration' => '50-90s+', 'guide' => 'Trình diễn 2-5 tính năng chính, MỖI tính năng gắn với 1 lợi ích cụ thể — show, don\'t tell (hình ảnh thay vì chỉ mô tả bằng lời).'],
             ['name' => 'CTA & Kết quả (Outcome)', 'duration' => '90-120s (cuối)', 'guide' => 'Điền field CTA với 1 hành động tiếp theo RÕ RÀNG + 1 kết quả cụ thể — tránh mơ hồ (VD không chỉ "Cảm ơn đã xem").'],
+        ],
+        // v1.20 (leadde.ai/blog/marketing-script-template) — 3 breakdown mới, cùng cơ chế v1.17/v1.18.
+        'abcd' => [
+            ['name' => 'Attention', 'duration' => '~15-20% đầu (vài giây)', 'guide' => 'Subject/Action mở bằng hình ảnh/tình huống gây chú ý NGAY (pattern-interrupt) — quảng cáo YouTube có thể bị bấm "Bỏ qua" sau 5s, không có thời gian khởi động chậm.'],
+            ['name' => 'Branding', 'duration' => '~10-20%, ngay sau Attention', 'guide' => 'Cho logo/sản phẩm/thương hiệu xuất hiện SỚM trong Subject/Environment — đừng đợi tới CTA cuối mới lộ diện thương hiệu, khác thói quen ở PSA/BAB/Hook-Value-CTA.'],
+            ['name' => 'Connection', 'duration' => '~30-40% giữa', 'guide' => 'Action/Lời thoại kết nối trực tiếp với vấn đề/mong muốn của khán giả mục tiêu (`target_audience`) — cho họ thấy video đang "nói về họ".'],
+            ['name' => 'Direction', 'duration' => '~20-30% cuối', 'guide' => 'Điền field CTA với 1 hành động cụ thể, rõ ràng.'],
+        ],
+        'testimonial_5part' => [
+            ['name' => 'Trước (Before)', 'duration' => '~15-20% đầu', 'guide' => 'Subject/Action mô tả tình huống/cuộc sống của khách hàng TRƯỚC khi biết tới sản phẩm — giọng điệu chân thực.'],
+            ['name' => 'Khó khăn (Challenge)', 'duration' => '~15-20%', 'guide' => 'Nêu rõ khó khăn/rào cản CỤ THỂ họ từng gặp phải — tách riêng khỏi nhịp Before, không gộp chung như BAB.'],
+            ['name' => 'Giải pháp (Solution)', 'duration' => '~20-25%', 'guide' => 'Mô tả họ tìm ra/bắt đầu dùng sản phẩm như thế nào.'],
+            ['name' => 'Kết quả (Result)', 'duration' => '~20-25%', 'guide' => 'Kết quả cụ thể đạt được — càng nhiều số liệu/chi tiết càng thuyết phục.'],
+            ['name' => 'Giới thiệu (Recommendation)', 'duration' => '~15-20% cuối', 'guide' => 'Lời khuyên/giới thiệu trực tiếp tới người xem từ góc nhìn NGƯỜI ĐƯỢC PHỎNG VẤN — giọng điệu cá nhân, khác Bridge của BAB (góc nhìn sản phẩm).'],
+        ],
+        'onboarding_5part' => [
+            ['name' => 'Chào mừng (Welcome)', 'duration' => '~10-15% đầu', 'guide' => 'Chào mừng khách hàng MỚI, xác nhận họ đã đưa ra lựa chọn đúng — giọng điệu thân thiện, không phải bán hàng.'],
+            ['name' => 'Giá trị đầu tiên (First value)', 'duration' => '~15-20%', 'guide' => 'Cho thấy NGAY 1 kết quả/quick win họ có thể đạt được sớm, để duy trì động lực học tiếp.'],
+            ['name' => 'Các bước (Steps)', 'duration' => '~35-45% giữa', 'guide' => 'Hướng dẫn từng bước cụ thể (numbered), show-don\'t-tell — mỗi bước 1 hành động rõ ràng; đây là phần nặng nhất của công thức.'],
+            ['name' => 'Lỗi thường gặp (Mistakes)', 'duration' => '~10-15%', 'guide' => 'Cảnh báo lỗi/hiểu lầm phổ biến cần tránh khi thực hiện các bước trên.'],
+            ['name' => 'CTA hỗ trợ (Support CTA)', 'duration' => '~10-15% cuối', 'guide' => 'Điền field CTA với nơi tìm hỗ trợ thêm (kênh hỗ trợ, tài liệu, liên hệ) — KHÔNG phải CTA bán hàng.'],
         ],
     ];
 

@@ -105,6 +105,7 @@ class CategoryFoundationController extends Controller
             'family_conduct_focus.*' => ['string', 'in:'.implode(',', $validFamilyConductKeys)],
             'rejected_ideas' => ['nullable', 'string', 'max:2000'],
             'audience' => ['nullable', 'string', 'max:500'],
+            'audience_behavior' => ['nullable', 'string', 'max:2000'],
             'constraints' => ['nullable', 'string', 'max:500'],
             'style_sample' => ['nullable', 'string', 'max:3000'],
             'category_uuids' => ['sometimes', 'array'],

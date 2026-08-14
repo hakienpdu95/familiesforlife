@@ -1,12 +1,97 @@
 # AI Video Studio Template — Quản lý Director Prompt Template cho video AI
 
-**Đặc tả Kỹ thuật Chi tiết — ĐÃ triển khai (v1.0/v1.1); v1.2-v1.6 bổ sung techniques từ Hedra/DeepReel/BytePlus/Pyxeljam/LinkedIn; v1.7 rà soát nội bộ; v1.8 bổ sung từ sentx.ai; v1.9 bổ sung từ veed.io; v1.10-v1.13 xem tóm tắt bên dưới; v1.14-v1.15 bổ sung từ mindstudio.ai + imagine.art; v1.16 bổ sung từ tulsainternetmarketingservice.com + swarmify.com; v1.17 UI theo phản hồi người dùng; v1.18 bổ sung từ ngram.com (2 bài); v1.19 UI theo phản hồi người dùng, xem changelog dưới**
+**Đặc tả Kỹ thuật Chi tiết — ĐÃ triển khai (v1.0/v1.1); v1.2-v1.6 bổ sung techniques từ Hedra/DeepReel/BytePlus/Pyxeljam/LinkedIn; v1.7 rà soát nội bộ; v1.8 bổ sung từ sentx.ai; v1.9 bổ sung từ veed.io; v1.10-v1.13 xem tóm tắt bên dưới; v1.14-v1.15 bổ sung từ mindstudio.ai + imagine.art; v1.16 bổ sung từ tulsainternetmarketingservice.com + swarmify.com; v1.17 UI theo phản hồi người dùng; v1.18 bổ sung từ ngram.com (2 bài); v1.19 UI theo phản hồi người dùng; v1.20 bổ sung từ leadde.ai; v1.21 bổ sung từ buffer.com, xem changelog dưới**
 
-**Phiên bản:** 1.19
-**Ngày:** 2026-08-13
+**Phiên bản:** 1.21
+**Ngày:** 2026-08-14
 **Framework:** Laravel 13 (PHP 8.4) + NWIDART Modules + Lorisleiva Actions
 **Module:** `Modules/AIVideoStudioTemplate`
 
+> **v1.21 (2026-08-14 — đọc `buffer.com/resources/social-media-marketing-strategy`, rà soát kỹ thuật
+> còn thiếu so với v1.20, theo yêu cầu áp dụng cho module + rà soát cả hệ thống):** nguồn là hướng
+> dẫn 7 bước xây dựng CHIẾN LƯỢC social media tổng thể (kiểm toán tài khoản → định nghĩa khán giả
+> tổng quát → mục tiêu SMART → chọn nền tảng → content pillar → lịch đăng/tần suất → đo lường/xoay
+> trục hàng tháng-quý) — bản chất là 1 công cụ QUẢN LÝ TÀI KHOẢN MẠNG XÃ HỘI (Buffer chính là tool
+> lịch đăng/phân tích). Rà soát cả hệ thống (không chỉ module này) không tìm thấy nơi nào tương ứng:
+> `ContentCalendar` (spec riêng, §16 "Ngoài phạm vi Phase 1") đã tường minh loại "đa kênh (repurpose
+> sang social/newsletter)" khỏi phạm vi — module đó chỉ quản lý pipeline biên tập bài viết CỦA NỀN
+> TẢNG (`Post`), không đăng/lên lịch lên tài khoản mạng xã hội ngoài; module này (`AIVideoStudioTemplate`)
+> chỉ dựng PROMPT cho 1 video/TVC đơn lẻ, không quản lý tài khoản/lịch đăng/KPI của cả kênh — đã CỐ Ý
+> không theo dõi hiệu suất phân phối từ v1.5/v1.10/v1.14/v1.16 (§10, không mở lại). Vì vậy phần lớn 7
+> bước (kiểm toán, audience tổng quát, SMART goal, content pillar, lịch đăng/tần suất, đo lường) KHÔNG
+> áp dụng — không có chỗ hợp lý nào trong hệ thống hiện tại để đặt, không phải khoảng trống của riêng
+> module này.
+>
+> **1 gap thật sự áp dụng được** — nửa đầu Bước 4 "Chọn nền tảng" của nguồn: bảng MỤC TIÊU THUẬT
+> TOÁN theo nền tảng (TikTok/Reels = thời gian xem + tỷ lệ HOÀN THÀNH; YouTube = thời gian xem + tỷ
+> lệ NHẤP) — khác hẳn `PLATFORM_TIPS_BY_ASPECT_RATIO` (v1.9) vốn chỉ nói cách MỞ ĐẦU (hook 1-2 giây
+> đầu), không nói gì về việc GIỮ nhịp xuyên suốt để thuật toán không cắt giảm phân phối giữa chừng.
+> Enrich 2 tip `9:16`/`16:9` đã có (`CompileProjectDirectorPromptAction::PLATFORM_TIPS_BY_ASPECT_
+> RATIO`) — không thêm field/schema mới, dùng đúng cơ chế v1.9. Nửa sau Bước 4 (bảng hiệu suất ĐỊNH
+> DẠNG theo nền tảng — VD LinkedIn Carousel/PDF vượt trội Video, Instagram Carousel vượt ảnh đơn) CỐ
+> Ý không áp dụng: module này CHỈ tạo prompt cho VIDEO (§1), không có carousel/ảnh đơn/text post để
+> so sánh — dữ liệu "định dạng nào tốt hơn video" không có hành động tương ứng trong 1 tool CHỈ làm
+> video.
+>
+> **Từ chối áp dụng, có lý do (còn lại của nguồn):** "1-2 nền tảng làm kỹ hơn 4-5 nền tảng làm mỏng"/
+> kiểm toán đối thủ/content pillar — chiến lược cấp KÊNH, không phải cấp 1 Project/video đơn lẻ mà
+> module quản lý; SMART goal — đã có `objective` (Creative Brief, v1.2) đúng vai trò mục tiêu kinh
+> doanh cho 1 video, không cần khung SMART chi tiết hơn; lịch đăng/tần suất/đo lường hiệu suất — trùng
+> quyết định "không theo dõi hiệu suất phân phối" đã chốt nhiều lần (§10); "3 lựa chọn dùng AI" (soạn
+> thảo VỚI AI, không xuất bản THẲNG TỪ AI) — đúng triết lý module đã có sẵn từ v1.0 (copy tay sang tool
+> ngoài + 2 checklist trước/sau generate, §0/§3.5), không phải khoảng trống; SEO caption/searchable
+> phrases — thuộc siêu dữ liệu XUẤT BẢN (tiêu đề/mô tả khi đăng), khác phạm vi "Director Prompt
+> Template" (nội dung HÌNH ẢNH của shot, §1), cùng nhóm đã loại ở v1.16 (video SEO — "module không
+> host/index video").
+>
+> Chi tiết đầy đủ 2 tip enrich xem docblock hằng số `PLATFORM_TIPS_BY_ASPECT_RATIO` trong
+> `CompileProjectDirectorPromptAction` (nguồn thật, tránh trôi khỏi code như đã cảnh báo ở §3.1).
+>
+> **v1.20 (2026-08-14 — đọc `leadde.ai/blog/marketing-script-template`, rà soát kỹ thuật còn thiếu so
+> với v1.19):** nguồn liệt kê 15 marketing script template xếp thành 3 nhóm theo funnel (Video/Ads,
+> Product-Sales-Funnel, Trust-Education-Retention), 8 thành phần script, Google ABCD Framework cho
+> YouTube Ads, và 1 "AI Prompt Template" (cấu trúc "Act as [role]...create a script...") để soạn kịch
+> bản qua chatbot. Phần lớn 15 template chỉ là biến thể phối lại nhịp Hook/Problem/Solution/Proof/CTA
+> đã phủ từ v1.0-v1.18 dưới tên khác (VD "Basic Marketing Script" ≈ PSA đã có). "AI Prompt Template"
+> CỐ Ý không áp dụng — đây là prompt cho chatbot SOẠN kịch bản văn bản, khác domain module (Director
+> Prompt Template cho tool AI tạo VIDEO, §0 "không gọi AI Provider"; cùng lý do đã loại "leverage
+> ChatGPT để soạn prompt" ở v1.9, không mở lại). Bảng Metrics theo giai đoạn funnel + phân loại 15
+> template theo awareness/consideration/conversion/retention CỐ Ý không áp dụng — trùng quyết định
+> "không theo dõi hiệu suất phân phối" (§10) + "không thêm field `funnel_stage`" đã chốt ở v1.5/v1.14/
+> v1.16 (không mở lại).
+>
+> 3 gap thật sự còn thiếu, cả 3 đều nằm trên trục `video_formula` đã có (VIDEO_FORMULAS/FORMULA_TIPS_
+> BY_VIDEO_FORMULA/FORMULA_BEATS, cơ chế từ v1.16-v1.18 — không field/migration mới, cột `string(20)`
+> đã đủ chỗ cho cả 3 khoá mới dài nhất `testimonial_5part` 18 ký tự): (1) **`abcd`** (Google ABCD
+> Framework: Attention-Branding-Connection-Direction) — framework chính thức của Google cho YouTube
+> Ads (có thể bị bấm "Bỏ qua" sau 5s); khác biệt thật với PSA/BAB/Hook-Value-CTA/Demo-5-phần: 4 công
+> thức đó đều đặt thương hiệu/sản phẩm ở nhịp GIỮA/CUỐI, ABCD đặt "Branding" NGAY nhịp thứ 2 (giới
+> thiệu thương hiệu sớm vì quảng cáo có thể bị bỏ qua bất cứ lúc nào) — nguyên tắc dàn nhịp khác hẳn.
+> (2) **`testimonial_5part`** (Before→Challenge→Solution→Result→Recommendation) — tách khỏi BAB (3
+> nhịp) bằng cách thêm nhịp "Challenge" (khó khăn cụ thể, tách khỏi Before chung chung) và đổi "Bridge"
+> (góc nhìn sản phẩm) thành "Recommendation" (góc nhìn người được phỏng vấn khuyên trực tiếp người
+> xem) — cùng logic đã dùng để chấp nhận `demo_5part` tách khỏi `psa` ở v1.18, áp dụng cho
+> `video_type = testimonial` đã có từ v1.6. (3) **`onboarding_5part`** (Welcome→First value→Steps→
+> Mistakes→Support CTA) — gắn với `video_type` MỚI `onboarding` (§2.1/§4.1); formula RETENTION đầu
+> tiên của module (4 công thức cũ đều hướng tới khán giả CHƯA MUA, công thức này hướng dẫn khách ĐÃ
+> MUA — CTA cuối là "tìm hỗ trợ", không phải CTA bán hàng).
+>
+> Thêm `video_type` MỚI **`onboarding`** (Onboarding khách hàng — SOP/đào tạo/hướng dẫn sử dụng) vào
+> `VIDEO_TYPES` — nguồn xếp "Customer Onboarding Script" vào nhóm Trust-Education-Retention mà 6 loại
+> cũ (explainer/testimonial/product_demo/storytelling/spokesperson/offer_promo) hoàn toàn không phủ:
+> `explainer` là giải thích sản phẩm cho khách TIỀM NĂNG (trước khi mua), khác hẳn onboarding là hướng
+> dẫn khách ĐÃ MUA dùng sản phẩm — use-case retention vắng mặt hoàn toàn trước v1.20. Kèm tip tương ứng
+> trong `CONTENT_TIPS_BY_VIDEO_TYPE`, cùng cơ chế v1.9/v1.14 (không field/UI/migration mới —
+> `array_keys()`/`@foreach` ở FormRequest và `_form.blade.php` tự nhận khoá mới).
+>
+> Nhân tiện: `Brand Story Script` (Origin→Mission→Customer problem→Belief→Vision) của nguồn CỐ Ý không
+> thêm formula riêng dù cũng là 1 trục khác biệt (không xoay quanh pain-point/giải pháp) — nội dung
+> phần lớn trùng hướng dẫn "mô tả mạch cảm xúc xuyên suốt, tiến triển cảnh theo trình tự" đã có ở
+> `CONTENT_TIPS_BY_VIDEO_TYPE['storytelling']` (v1.6), và use-case hẹp (trang About/tuyển dụng) không
+> đủ giá trị biên để đánh đổi việc phình `video_formula` lên 8 lựa chọn — có thể mở lại nếu có nhu cầu
+> thực tế sau này. Chi tiết đầy đủ 3 công thức + tip `onboarding` xem docblock class
+> `CompileProjectDirectorPromptAction` (nguồn thật, tránh trôi khỏi code như đã cảnh báo ở §3.1).
+>
 > **v1.19 (2026-08-13, cùng ngày với v1.18 — phản hồi người dùng: "Chỗ khối nội dung 'Mẹo viết prompt'
 > nên trình bày dễ đọc, chuyên nghiệp. Hiện tại trải dài như một text nội dung, khó nắm bắt thông
 > tin"):** callout "💡 Mẹo viết prompt" từ v1.2 tới v1.18 là 1 `<span>` duy nhất nối 14 mẹo bằng dấu
@@ -315,6 +400,8 @@
 - `swarmify.com/blog/video-marketing-strategy` (v1.16 — phần lớn ngoài phạm vi, xem changelog) — chiến lược marketing tổng quát: mục tiêu kinh doanh, nghiên cứu khán giả, phân loại funnel (awareness/consideration/conversion), tối ưu ngân sách sản xuất, video SEO, tối ưu hiệu suất trang web nhúng video, đo lường/lặp lại.
 - `ngram.com/blog/demo-video-script-template` (v1.18) — 5-Part Demo Video Script Framework (Hook/Problem Deep-dive/Solution Introduction/Key Features in Action/CTA & Outcome), 6 kỹ thuật viết script (lead with outcomes, show-don't-tell, conversational, one problem one solution, specific numbers, clear next step), số liệu conversion theo loại script.
 - `ngram.com/blog/how-to-make-demo-video` (v1.18 — phần lớn ngoài phạm vi vì nói về quay màn hình thật, xem changelog) — quy trình 8 bước làm video demo phần mềm (screen recording): mục tiêu/đối tượng, script, độ dài/format, ghi hình, chỉnh sửa, chọn nơi đặt, CTA, theo dõi hiệu suất; genuine gap áp dụng được: "slow down" (thiên kiến pacing của người quay/viết).
+- `leadde.ai/blog/marketing-script-template` (v1.20) — 15 marketing script template xếp theo 3 nhóm funnel (Video/Ads, Product-Sales-Funnel, Trust-Education-Retention), 8 thành phần script, Google ABCD Framework (YouTube Ads), AI Prompt Template ("Act as [role]..."), sai lầm phổ biến + tips chuyển đổi, metrics theo giai đoạn funnel. Genuine gap áp dụng được: ABCD Framework, Testimonial 5-part (Before-Challenge-Solution-Result-Recommendation), Customer Onboarding Script (Welcome-First value-Steps-Mistakes-Support CTA) — cả 3 xem changelog v1.20.
+- `buffer.com/resources/social-media-marketing-strategy` (v1.21) — hướng dẫn 7 bước xây dựng chiến lược social media (kiểm toán, audience, SMART goal, chọn nền tảng, content pillar, lịch đăng/tần suất, đo lường) — phần lớn NGOÀI phạm vi (công cụ quản lý tài khoản mạng xã hội, không có module tương ứng trong hệ thống, xem changelog v1.21). Genuine gap áp dụng được: bảng mục tiêu thuật toán theo nền tảng (TikTok = thời gian xem + tỷ lệ hoàn thành; YouTube = thời gian xem + tỷ lệ nhấp) — enrich `PLATFORM_TIPS_BY_ASPECT_RATIO` (9:16/16:9).
 
 ---
 
@@ -378,10 +465,13 @@ Schema::create('ai_video_studio_projects', function (Blueprint $table) {
     $table->text('target_audience')->nullable();      // đối tượng khán giả mục tiêu
     // v1.6 (LinkedIn marketing guide) — Step 1 "Define Objectives" tách 2 khái niệm này riêng.
     // v1.14 (imagine.art) — thêm spokesperson|offer_promo, `string(20)` vẫn đủ chỗ (dài nhất 12 ký tự).
-    $table->string('video_type', 20)->nullable();     // explainer|testimonial|product_demo|storytelling|spokesperson|offer_promo|other
+    // v1.20 (leadde.ai) — thêm onboarding (retention, `string(20)` vẫn đủ chỗ, 10 ký tự).
+    $table->string('video_type', 20)->nullable();     // explainer|testimonial|product_demo|storytelling|spokesperson|offer_promo|onboarding|other
     // v1.16 (tulsainternetmarketingservice.com) — TRỤC KHÁC video_type: công thức KỂ CHUYỆN (trình
     // tự), không phải loại nội dung. Migration ALTER riêng (`2026_08_13_100001...`), đặt sau video_type.
-    $table->string('video_formula', 20)->nullable();  // psa|bab|hook_value_cta
+    // v1.18 (ngram.com) thêm demo_5part; v1.20 (leadde.ai) thêm abcd|testimonial_5part|onboarding_5part
+    // — dài nhất `testimonial_5part` 18 ký tự, `string(20)` vẫn đủ chỗ, không cần migration mới.
+    $table->string('video_formula', 20)->nullable();  // psa|bab|hook_value_cta|demo_5part|abcd|testimonial_5part|onboarding_5part
     $table->text('core_message')->nullable();         // thông điệp/lời hứa cụ thể, VD "Tăng năng suất 40%"
     $table->string('aspect_ratio', 10)->nullable();   // 16:9|9:16|1:1|4:5
     $table->string('resolution', 10)->nullable();     // v1.5 (pyxeljam.com) — 720p|1080p|2K|4K
@@ -755,6 +845,12 @@ Cả 2 model: KHÔNG `TenantAwareModel`, KHÔNG soft-delete, KHÔNG `LogsActivit
 > `"Demo Script 5 phần (90-120s)"` vào `VIDEO_FORMULAS`. Validate/`<select>`/`FORMULA_TIPS_BY_VIDEO_
 > FORMULA`/`FORMULA_BEATS` (§3.5) tự động nhận khoá mới qua `array_keys()`/`@foreach` đã có sẵn —
 > KHÔNG cần sửa `StoreProjectRequest`/`UpdateProjectRequest`/`_form.blade.php`.
+>
+> **v1.20 (leadde.ai/blog/marketing-script-template)** — thêm 1 khoá `VIDEO_TYPES` (`onboarding` =>
+> `"Onboarding khách hàng (SOP/đào tạo/hướng dẫn sử dụng)"`) + 3 khoá `VIDEO_FORMULAS` (`abcd`,
+> `testimonial_5part`, `onboarding_5part` — xem lý do không trùng lặp với 4 công thức cũ ở docblock
+> class `CompileProjectDirectorPromptAction`, §3.5). Cùng cơ chế v1.16/v1.18 — thêm giá trị vào 2 hằng
+> số này là ĐỦ, không đổi `StoreProjectRequest`/`UpdateProjectRequest`/`_form.blade.php`/migration.
 
 ```php
 namespace Modules\AIVideoStudioTemplate\Models;

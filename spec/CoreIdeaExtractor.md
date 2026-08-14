@@ -1,9 +1,58 @@
 # CoreIdeaExtractor
 
-**Version:** 1.28  
-**Last Updated:** 2026-08-06  
+**Version:** 1.29  
+**Last Updated:** 2026-08-14  
 **Status:** Design Specification (Ready for Implementation)
 
+> **v1.29 (Đối chiếu lindapophal.substack.com/p/the-2026-content-marketing-imperative — "3 cấp độ
+> hiểu đối tượng", 1 khoảng trống thật ÁP DỤNG, phần còn lại đã có sẵn hoặc từ chối có lý do):**
+> nguồn (bài blog ngắn, không trích số liệu/nghiên cứu — ghi rõ để không nhầm là nguồn học thuật) nêu
+> khung 3 tầng: **Demographic** (tuổi/ngành/chức danh/địa lý — điểm khởi đầu, chưa đủ), **Psychographic**
+> (họ quan tâm gì/lo lắng gì/khao khát gì), **Behavioral** (ngày của họ trông thế nào, họ thực sự đang
+> làm gì, tiêu thụ/chia sẻ/bỏ qua nội dung nào, gõ câu hỏi gì vào công cụ tìm kiếm — nguồn gọi đây là
+> tầng tạo lợi thế cạnh tranh khi AI sinh nội dung chung chung tràn lan). Đối chiếu với chuỗi ngữ cảnh
+> đối tượng đã có (§12.2/§12.6/§12.6-v1.16): `audience` (freetext, Max 500) chỉ phủ Level 1; `pain_
+> points`/`objections`/`decision_criteria` đã phủ Level 2 khá đầy đủ (khó khăn thật/nghi ngờ chưa tin/
+> tiêu chí so sánh — đúng tinh thần "quan tâm gì, lo gì"). **Level 3 hoàn toàn vắng mặt** — khối chỉ
+> dẫn `audienceText` ở BƯỚC 0 (`buildLayer2PromptText()`, thêm ở vá 2026-08-06) có NHẮC tới "bối cảnh
+> sinh hoạt, điều kiện kinh tế và quỹ thời gian thực tế" khi diễn giải cách DÙNG `audienceText`, nhưng
+> đó là suy luận model tự làm TỪ 1 mô tả nhân khẩu học ngắn — không phải dữ liệu hành vi THẬT do editor
+> quan sát/ghi lại, đúng khoảng trống nguồn chỉ ra ("a lot of brands stop short of doing the real
+> work").
+>
+> Thêm field mới **`audience_behavior`** (text, nullable, cùng nhóm §12.2 — xem §12.12 chi tiết đầy
+> đủ) trên `content_foundations` (migration ALTER riêng, KHÔNG sửa migration gốc đã chạy) — tách khỏi
+> `audience` đúng logic đã dùng để tách `objections`/`decision_criteria` khỏi `pain_points` ở v1.16
+> (gộp chung khiến editor bỏ sót 1 trong 2 hoặc viết lẫn lộn 2 khái niệm khác bản chất). Render vào
+> TOP của "Copy prompt cho AI" ở CẢ `CoreIdeaExtractor` lẫn `VideoIdeaExtractor` (module song sinh,
+> cùng đọc `CategoryContentFoundation`) ngay sau khối `audienceText`, đúng nhóm "độc giả là ai/sống thế
+> nào" trước khi tới nhóm "họ nghĩ gì" (`writer_insights`/`pain_points`/...).
+>
+> **Không áp dụng (có lý do):**
+> - **"Shadow buyers"** (độc giả âm thầm nghiên cứu/ảnh hưởng quyết định nhưng cố tình tránh tương tác
+>   công khai qua form/webinar) — khái niệm gốc thuộc bối cảnh B2B lead-gen (form điền thông tin liên
+>   hệ, đăng ký webinar để "lộ diện"). Platform familiesforlife xuất bản nội dung biên tập công khai
+>   cho gia đình Việt Nam, không thu lead qua form/webinar — không có khái niệm "buyer ẩn danh cố tránh
+>   liên hệ" tương ứng. Phần tinh thần CÓ thể chuyển hoá được ("đừng chỉ đo đối tượng qua ai bình luận
+>   công khai — nhiều độc giả đọc/bị ảnh hưởng nhưng im lặng") đã gộp vào hướng dẫn nguồn dữ liệu của
+>   `audience_behavior` ở §12.12 (không cần khái niệm/field riêng).
+> - **"Viết cho 1 người cụ thể, không phải đám đông"** — ĐÃ có sẵn từ vá 2026-08-06 (không phải khoảng
+>   trống): câu "KHÔNG mở rộng sang nhóm độc giả khác cho 'an toàn' — ý tưởng nhắm đúng 1 nhóm cụ thể
+>   luôn tốt hơn ý tưởng chung chung ai đọc cũng được" (`index.blade.php`, khối `audienceText`) đã diễn
+>   đạt đúng tinh thần này; nhánh "chưa có mô tả đối tượng" còn ép model tự dựng 1 chân dung cụ thể
+>   TRƯỚC khi brainstorm thay vì brainstorm chung chung rồi mới nghĩ tới đối tượng.
+> - **Phương pháp nghiên cứu thực tiễn** (đọc bình luận, theo dõi engagement, ghi câu hỏi lặp lại, xem
+>   nội dung nào kém hiệu quả, phỏng vấn trực tiếp) — đã đúng tinh thần tài liệu hoá ở `pain_points`
+>   (§12.6, v1.10: "khảo sát, feedback, câu hỏi lặp lại từ độc giả/khách hàng"); tích hợp TỰ ĐỘNG các
+>   nguồn này (phân tích bình luận/search analytics thật) đã bị loại khỏi phạm vi từ v1.10 ("KHÔNG tự
+>   động hoá việc thu thập pain points... không tích hợp khảo sát/phân tích sales call") — không mở
+>   lại, cùng lý do; `audience_behavior` mới thêm CŨNG là field editor tự điền tay, không tích hợp gì.
+> - **"Lợi thế cạnh tranh so với nội dung AI chung chung"** — khung diễn giải Ý NGHĨA của việc hiểu đối
+>   tượng, không phải 1 kỹ thuật/field cụ thể để áp — không có gì để implement.
+>
+> Không đổi Layer 1/Layer 2 JSON schema (§5, §7) — thuần field UI/prompt-template như mọi field khác
+> trong §12.2.
+>
 > **v1.28 (Rà lại toàn bộ chuỗi ngữ cảnh biên tập sau khi thêm khung ứng xử — vá 12 lỗ hổng):** khung
 > §12.11 ở v1.27 chạy được nhưng rà lại cả chuỗi (đối tượng độc giả → khung giá trị → khung ứng xử →
 > BƯỚC 1 sinh ý → BƯỚC 2 lọc) lộ ra 12 lỗ hổng, đáng chú ý nhất là 2 lỗi LOGIC chứ không phải câu chữ:
@@ -1217,6 +1266,60 @@ không diễn giải lại văn bản, đúng thứ §12.10.3 đã từ chối. 
 ("Lớp 1 luôn liệt kê đủ 4 cặp, focus chỉ là ưu tiên bổ sung chứ không phải giới hạn") nên là quyết
 định thiết kế, không tự đổi. Với nguồn thật (5-7 URL) tỷ lệ này tụt xuống thấp hơn nhiều vì JSON
 nguồn lớn hơn hẳn.
+
+### 12.12 Tầng hành vi độc giả — `audience_behavior` (v1.29)
+
+Tham khảo lindapophal.substack.com/p/the-2026-content-marketing-imperative — "3 cấp độ hiểu đối
+tượng": Demographic (họ LÀ ai — tuổi, ngành, chức danh, địa lý) → Psychographic (họ QUAN TÂM gì —
+lo lắng, khao khát) → Behavioral (họ THỰC SỰ LÀM gì — ngày của họ trông thế nào, tiêu thụ/tìm kiếm
+nội dung ở đâu, khi nào). Nguồn nhấn mạnh tầng Behavioral là **lợi thế cạnh tranh** khi AI có thể
+sinh nội dung chung chung ở tầng Demographic/Psychographic dễ dàng, còn tầng Behavioral đòi hỏi
+quan sát thật mà phần lớn thương hiệu "dừng lại trước khi làm" ("stop short of doing the real
+work").
+
+Đối chiếu chuỗi ngữ cảnh đối tượng đã có: `audience` (§12.2, freetext ngắn) là Level 1;
+`pain_points`/`objections`/`decision_criteria` (§12.6, v1.16) đã phủ Level 2. **Level 3 chưa có
+field nào** — khối chỉ dẫn `audienceText` ở BƯỚC 0 (`buildLayer2PromptText()`) có nhắc "bối cảnh
+sinh hoạt, điều kiện kinh tế và quỹ thời gian thực tế" khi diễn giải cách DÙNG mô tả đối tượng,
+nhưng đó là model tự SUY LUẬN từ 1 câu nhân khẩu học ngắn (VD "mẹ mới sinh con đầu lòng"), không
+phải dữ liệu hành vi THẬT do editor quan sát/ghi lại.
+
+- Field mới `audience_behavior` (text, nullable) trên `content_foundations`, đặt SAU `audience` —
+  migration `2026_08_14_000001_add_audience_behavior_to_content_foundations_table.php` (ALTER
+  riêng, không sửa migration gốc `2026_08_02_000001_create_content_foundations_table.php`).
+- Khác `audience` (mô tả TĨNH họ là ai) — `audience_behavior` là quan sát THẬT về hành vi: giờ họ
+  rảnh để đọc/xem, kênh họ hay dùng (Google/TikTok/Facebook group...), kiểu câu hỏi họ hay gõ tìm
+  kiếm, họ có xu hướng bình luận công khai hay chỉ đọc/lưu bài trong im lặng — lý tưởng nhất rút ra
+  từ quan sát thực tế (bình luận, search analytics, trò chuyện trực tiếp với độc giả/khách hàng),
+  cùng tinh thần nguồn gốc của `pain_points` (§12.6: "khảo sát/feedback/câu hỏi lặp lại" thay vì
+  editor tự đoán) — không phải suy luận từ `audience`.
+- Cùng nhóm validate/quyền/UI với `pain_points`/`objections`/`decision_criteria` — không Gate/rule
+  riêng (`CategoryFoundationController::upsert()`, `max:2000` — dài hơn `audience` Max 500 vì mô tả
+  hành vi thường cần liệt kê nhiều điểm quan sát hơn 1 câu nhân khẩu học).
+- Render vào TOP của "Copy prompt cho AI" ở **CẢ 2 module song sinh** (`CoreIdeaExtractor` VÀ
+  `VideoIdeaExtractor` — cùng đọc `CategoryContentFoundation`, đúng tiền lệ "2 lỗ hổng ngữ cảnh
+  khác trong 2 blade" đã ghi ở v1.14), đặt NGAY SAU khối `audienceText` (cùng nhóm "độc giả là
+  ai/sống thế nào", trước nhóm "họ nghĩ gì" của `writer_insights`/`pain_points`/...). Chỉ dẫn dùng
+  để chọn VÍ DỤ/TÌNH HUỐNG gần đời sống thật + ưu tiên góc khai thác khớp CÁCH họ thực sự tiếp cận
+  nội dung, khác vai trò của `pain_points` (chọn VẤN ĐỀ) hay `objections` (chọn BẰNG CHỨNG).
+- **Không** nối vào `formatHints` (§12.4, v1.19 — `pain_points`/`objections`/`decision_criteria`
+  ánh xạ sang gợi ý ĐỊNH DẠNG cụ thể vì mỗi field có 1 Ý NGHĨA rời rạc rõ ràng ánh xạ 1-1 sang 1
+  dạng bài). `audience_behavior` là văn bản tự do đa dạng (giờ rảnh, kênh dùng, kiểu tìm kiếm...)
+  không có ánh xạ 1-1 sang 1 dạng bài cụ thể — gán cứng sẽ là suy diễn quá tay, đúng loại rủi ro
+  "framework flourish" module đã từ chối nhiều lần (v1.6, v1.8, v1.18, v1.22, v1.23, v1.24).
+- **Không đổi Layer 1/Layer 2 JSON schema (§5, §7)** — thuần field UI/prompt-template.
+
+**Ngoài phạm vi (v1.29, đã cân nhắc nhưng KHÔNG làm):**
+- "Shadow buyers" (độc giả nghiên cứu/ảnh hưởng quyết định nhưng tránh tương tác công khai) — khái
+  niệm gốc thuộc B2B lead-gen (form/webinar), không có tương đương ở platform xuất bản nội dung
+  biên tập công khai này. Phần tinh thần chuyển hoá được (đừng chỉ đo đối tượng qua ai bình luận
+  công khai) đã gộp vào mô tả nguồn dữ liệu của `audience_behavior` ở trên, không cần khái niệm/
+  field riêng.
+- Tích hợp TỰ ĐỘNG thu thập hành vi (phân tích bình luận thật/Google Search Console/GA...) — cùng
+  quyết định đã chốt cho `pain_points` từ v1.10 ("không tích hợp khảo sát/phân tích... vẫn là field
+  editor tự điền tay"), không mở lại riêng cho field này.
+- "Viết cho 1 người cụ thể, không phải đám đông" — không phải khoảng trống, đã có sẵn từ vá
+  2026-08-06 (xem đối chiếu ở changelog v1.29 đầu file).
 
 ---
 

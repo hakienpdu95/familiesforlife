@@ -189,6 +189,13 @@
                         </div>
                     </div>
                     <div class="form-control">
+                        <label class="label py-0.5">
+                            <span class="label-text text-xs font-medium">Hành vi thực tế của độc giả (khác "Đối tượng độc giả" ở trên — đây là ngày của họ trông thế nào, họ tìm kiếm/đọc nội dung ở đâu, khi nào; dựa trên QUAN SÁT THẬT — bình luận, từ khoá tìm kiếm, giờ truy cập — không phải suy đoán)</span>
+                        </label>
+                        <textarea x-model="cat._form.audience_behavior" rows="2" placeholder="VD: Lướt điện thoại lúc con ngủ trưa/tối muộn, hay tìm trên Google/TikTok bằng câu hỏi cụ thể (VD 'trẻ mấy tháng ăn dặm được'), ít khi bình luận công khai nhưng đọc kỹ và lưu bài"
+                                  class="textarea textarea-bordered textarea-sm w-full"></textarea>
+                    </div>
+                    <div class="form-control">
                         <label class="label py-0.5"><span class="label-text text-xs font-medium">Đoạn văn mẫu (giọng văn)</span></label>
                         <textarea x-model="cat._form.style_sample" rows="3"
                                   class="textarea textarea-bordered textarea-sm w-full text-xs"></textarea>
@@ -259,7 +266,7 @@ document.addEventListener('alpine:init', () => {
             familyConductStandards = [], familyConductStandardsRef = '',
         } = serverData;
 
-        const emptyForm = () => ({ core_focus: '', writer_insights: '', unique_angle: '', content_goals: '', pain_points: '', objections: '', decision_criteria: '', family_values_focus: [], family_conduct_focus: [], rejected_ideas: '', audience: '', constraints: '', style_sample: '' });
+        const emptyForm = () => ({ core_focus: '', writer_insights: '', unique_angle: '', content_goals: '', pain_points: '', objections: '', decision_criteria: '', family_values_focus: [], family_conduct_focus: [], rejected_ideas: '', audience: '', audience_behavior: '', constraints: '', style_sample: '' });
 
         return {
             categories: [],
