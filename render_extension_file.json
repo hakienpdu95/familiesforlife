@@ -429,5 +429,9 @@
     [
         "ocop_products///add///__///",
         "heritage_site_id///unsignedBigInteger///__///_NULL///NULL///->constrained('heritage_sites')->onDelete('set null')///__"
+    ],
+    [
+        "content_foundations///add///__///",
+        "audience_behavior///text///__///_NULL///NULL///__///__"
     ]
 ]
