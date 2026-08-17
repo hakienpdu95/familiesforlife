@@ -1,12 +1,26 @@
 # AI Video Studio Template — Quản lý Director Prompt Template cho video AI
 
-**Đặc tả Kỹ thuật Chi tiết — ĐÃ triển khai (v1.0/v1.1); v1.2-v1.6 bổ sung techniques từ Hedra/DeepReel/BytePlus/Pyxeljam/LinkedIn; v1.7 rà soát nội bộ; v1.8 bổ sung từ sentx.ai; v1.9 bổ sung từ veed.io; v1.10-v1.13 xem tóm tắt bên dưới; v1.14-v1.15 bổ sung từ mindstudio.ai + imagine.art; v1.16 bổ sung từ tulsainternetmarketingservice.com + swarmify.com; v1.17 UI theo phản hồi người dùng; v1.18 bổ sung từ ngram.com (2 bài); v1.19 UI theo phản hồi người dùng; v1.20 bổ sung từ leadde.ai; v1.21 bổ sung từ buffer.com; v1.22 đối chiếu goepps.com — KHÔNG áp dụng gì; v1.23 thêm tính năng "Cố vấn Công thức Kịch bản" (spec/ma-tran-cong-thuc-kich-ban.md, ngách Mẹ & Bé) — xem §13; v1.24 sửa 2 lỗi tự phát hiện khi rà soát lại v1.23; v1.25 ĐẢO NGƯỢC kiến trúc §13 theo yêu cầu người dùng — AI ngoài tự chọn công thức + viết kịch bản qua Master Prompt, phạm vi mở rộng ra mọi sản phẩm; v1.26 sửa lỗi "Xem chi tiết" luôn ra rỗng (groupBy() mất khoá slug); v1.27 thêm PersonaCatalog (spec/chan-dung-nguoi-review.md) diễn giải đầy đủ 13 mã chân dung**
+**Đặc tả Kỹ thuật Chi tiết — ĐÃ triển khai (v1.0/v1.1); v1.2-v1.6 bổ sung techniques từ Hedra/DeepReel/BytePlus/Pyxeljam/LinkedIn; v1.7 rà soát nội bộ; v1.8 bổ sung từ sentx.ai; v1.9 bổ sung từ veed.io; v1.10-v1.13 xem tóm tắt bên dưới; v1.14-v1.15 bổ sung từ mindstudio.ai + imagine.art; v1.16 bổ sung từ tulsainternetmarketingservice.com + swarmify.com; v1.17 UI theo phản hồi người dùng; v1.18 bổ sung từ ngram.com (2 bài); v1.19 UI theo phản hồi người dùng; v1.20 bổ sung từ leadde.ai; v1.21 bổ sung từ buffer.com; v1.22 đối chiếu goepps.com — KHÔNG áp dụng gì; v1.23 thêm tính năng "Cố vấn Công thức Kịch bản" (spec/ma-tran-cong-thuc-kich-ban.md, ngách Mẹ & Bé) — xem §13; v1.24 sửa 2 lỗi tự phát hiện khi rà soát lại v1.23; v1.25 ĐẢO NGƯỢC kiến trúc §13 theo yêu cầu người dùng — AI ngoài tự chọn công thức + viết kịch bản qua Master Prompt, phạm vi mở rộng ra mọi sản phẩm; v1.26 sửa lỗi "Xem chi tiết" luôn ra rỗng (groupBy() mất khoá slug); v1.27 thêm PersonaCatalog (spec/chan-dung-nguoi-review.md) diễn giải đầy đủ 13 mã chân dung; v1.28 thêm 4 chỉ dẫn chất lượng viết vào Master Prompt (Takeaway/câu chuyện thực tế/framework/cảm xúc cá nhân), loại 3 phần ngoài phạm vi cùng nguồn**
 
-**Phiên bản:** 1.27
+**Phiên bản:** 1.28
 **Ngày:** 2026-08-17
 **Framework:** Laravel 13 (PHP 8.4) + NWIDART Modules + Lorisleiva Actions
 **Module:** `Modules/AIVideoStudioTemplate`
 
+> **v1.28 (2026-08-17, cùng ngày — người dùng đưa tài liệu "Bản chất Nội dung Giá trị + Quy trình 5
+> bước sản xuất video", hỏi có nên chèn vào Master Prompt của trang `formula-advisor` không):** rà
+> theo đúng kỷ luật đã áp dụng xuyên suốt module (chỉ áp dụng phần THẬT SỰ khác biệt và khớp phạm vi,
+> từ chối có lý do). Nguồn gồm 4 phần: (1) định nghĩa "Nội dung giá trị = tạo sự chuyển hoá" — ÁP
+> DỤNG, thành chỉ dẫn "Takeaway lớn nhất" ở đầu BƯỚC 2; (2) phần "Thêm vào" của "Biên tập kịch bản
+> chữ" (câu chuyện thực tế thay vì số liệu, framework áp dụng ngay, cảm xúc cá nhân thật) — ÁP DỤNG,
+> thêm 3 bullet vào BƯỚC 2; (3) nguyên tắc chọn chủ đề 80/20 (Competence, Leila Hormozi) — KHÔNG áp
+> dụng, đây là content strategy (chọn `$topic`), không phải cách viết cho topic đã chọn — `$topic` là
+> input đã cố định trước khi vào Action; (4) "Dump Talking" (Bước 3 nguồn, nói nháp bằng giọng nói) +
+> "Quay dựng đăng tải, theo dõi số liệu" (Bước 5 nguồn) — KHÔNG áp dụng, lần lượt là hoạt động con
+> người trước khi có nội dung (khác vai trò "AI tự sáng tác từ đầu") và trùng quyết định "không theo
+> dõi hiệu suất phân phối" đã chốt nhiều lần (§10, v1.5/v1.10/v1.14/v1.16 — không mở lại). Thêm 2
+> Unit test mới khoá lại cả phần áp dụng lẫn phần loại. Chi tiết đầy đủ: §13.2.
+>
 > **v1.27 (2026-08-17, cùng ngày — người dùng cung cấp `spec/chan-dung-nguoi-review.md`, lấp khoảng
 > trống đã ghi nhận từ v1.23 "cần tài liệu 'Bộ Chân dung Người Review' để diễn giải đầy đủ"):** thêm
 > `PersonaCatalog` (13 chân dung P1-P13: tên, "điểm tin cậy", ranh giới bắt buộc nếu có) — panel chi
@@ -1267,6 +1281,7 @@ Thêm 1 mục top-level (không nằm trong nhóm "Bài viết") trong `resource
 - **v1.24 — badge `forbid_formulas` trên UI**: catalog entry có `forbid_formulas` không rỗng (VD `kem_duong_am`) → panel chi tiết (`?product=kem_duong_am`) render thêm badge `badge-error` có tiền tố "🚫" cho MỖI formula bị cấm, cạnh badge tham khảo `primary`/`secondary`; entry không có `forbid_formulas` (đa số) → không có badge nào thêm. Vẫn đúng ở v1.25 (badge chuyển sang `badge-outline` cho `primary`/`secondary` vì không còn là "đề xuất chính thức", nhưng `forbid_formulas` giữ nguyên `badge-error`).
 - **v1.25 — `FormulaDecisionTree`/`RecommendVideoFormulaAction`/`FormulaDecisionTreeTest` ĐÃ XOÁ**: gọi các class này (namespace cũ) → `class not found`; wizard 9 câu hỏi không còn tồn tại trên UI; nút "Tạo project với công thức này" (cả 2 vị trí ở v1.23/v1.24) không còn tồn tại — `ProjectController::create()`/`_form.blade.php`/`create.blade.php` đã REVERT nguyên trạng trước v1.23 (không còn nhận/xử lý `$prefill`).
 - **v1.25 — `BuildMasterScriptPromptAction::handle()` (11 Unit test, `tests/Unit/Modules/AIVideoStudioTemplate/BuildMasterScriptPromptActionTest.php`, không chạm DB/AI)**: chuỗi trả về LUÔN chứa `topic`; `description` rỗng/`null` → chèn "Không có mô tả chi tiết"; `description` có giá trị → chèn nguyên văn, KHÔNG chèn placeholder; `isMotherBaby=true` → chứa "Nghị định 100/2014/NĐ-CP" + "before/after trên cơ thể trẻ em"; `isMotherBaby=false` → KHÔNG chứa 2 cụm đó, thay bằng nhắc nhở chung ("chính sách quảng cáo của nền tảng"); LUÔN chứa đúng cụm "Attention-Branding-Connection-Direction" (định nghĩa ABCD gốc Google, v1.20) và KHÔNG BAO GIỜ chứa "Attention-Benefit-Credibility-Decision" (định nghĩa sai ở bản nháp người dùng cung cấp, §13.0); LUÔN liệt kê đủ 7 công thức (`FORMULA_TIPS_BY_VIDEO_FORMULA`, tái dùng từ `CompileProjectDirectorPromptAction`, đổi `private` → `public` ở v1.25); KHÔNG chứa cụm "dành cho sản phẩm nhạy cảm (Mẹ & Bé)" (định nghĩa Onboarding bị thu hẹp sai ở bản nháp — giữ định nghĩa gốc không giới hạn ngành hàng); `topic`/`description` nhiều dòng → dòng nối được thụt lề 4 space (`indentContinuationLines()`, cùng kỹ thuật `BuildShotPromptAction` §3.1); luôn kết thúc bằng câu yêu cầu trả về "Công thức đã chọn, Lý do chọn".
+- **v1.28 — 2 test mới (13 Unit test tổng, cùng file trên)**: chuỗi trả về LUÔN chứa "TAKEAWAY LỚN NHẤT", "người xem nhớ câu chuyện hơn số liệu", "mẹo/framework nhỏ người xem áp dụng được NGAY", "cảm xúc cá nhân thật" — bất kể `isMotherBaby`; chuỗi trả về KHÔNG BAO GIỜ chứa "Dump Talking"/"80/20"/"theo dõi số liệu" (3 cụm khoá của phần nguồn CỐ Ý không áp dụng, §13.2) — test fail nếu sau này ai copy nhầm nguyên văn phần bị loại vào Action.
 - **v1.26 — sửa lỗi "Xem chi tiết" luôn ra rỗng (`ProductFormulaCatalogTest::test_grouping_by_tier_with_preserve_keys_keeps_slugs_as_keys`, thêm vào file test đã có ở v1.24)**: `collect($catalog)->groupBy('tier', true)` — MỌI khoá trong từng nhóm PHẢI là slug string (VD `bim_ta`), KHÔNG được là chỉ số nguyên tự đánh lại; MỌI slug đó PHẢI khớp 1 entry thật qua `ProductFormulaCatalog::find()`. Test FAIL nếu ai đó lỡ bỏ tham số `true` (`preserveKeys`) khi sửa `formula-advisor.blade.php` sau này — đúng bug thật đã xảy ra ở v1.25/v1.26 (§13.3).
 - **v1.26 — link "Xem chi tiết" từ trang catalog thật (không phải slug tự gõ tay)**: trích xuất href thật từ HTML đã render ở trang `formula-advisor` (không query) → parse query string → gọi lại `FormulaAdvisorController::index()` với đúng query đó → `$selected` PHẢI khác `null` và panel (`id="aivsSelectedProduct"`) PHẢI xuất hiện trong HTML. Cách test THIẾU đúng bước "trích xuất href thật" (tự gõ tay 1 slug hợp lệ để test) sẽ KHÔNG phát hiện được bug này — xem bài học ghi lại ở §13.3.
 - **v1.27 — `PersonaCatalog` (8 Unit test, `tests/Unit/Modules/AIVideoStudioTemplate/PersonaCatalogTest.php`, không chạm DB)**: `count(PERSONAS)` = 13; `find('P99')` → `null`; `find('P2')` → chứa "Mẹ bỉm 0–3 tháng"; `parseCodes()` tách đúng thứ tự cho cả 3 kiểu phân cách đã dùng trong catalog (`"P2 → P5 → P6"` → `['P2','P5','P6']`; `"P2 + P9"` → `['P2','P9']`; `"P5 / P6 / P7"` → `['P5','P6','P7']`; `"P5"` → `['P5']`); **mọi mã chân dung xuất hiện trong `ProductFormulaCatalog::PRODUCTS` PHẢI resolve được qua `PersonaCatalog::find()`** (`test_every_persona_code_referenced_in_product_catalog_exists`) — test FAIL nếu catalog tham chiếu 1 mã không tồn tại (VD gõ nhầm "P14").
@@ -1483,7 +1498,32 @@ Không bọc `<<<DELIMITER>>>` cho `topic`/`description` (khác convention CLAUD
 Provider) — đúng ghi chú prompt-injection đã có ở `BuildShotPromptAction` (v1.7): module này không
 gọi AI, rủi ro thực tế là VỠ CẤU TRÚC (xử lý bằng `indentContinuationLines()`), không phải injection.
 
-**Test:** 11 Unit test không chạm DB, `tests/Unit/Modules/AIVideoStudioTemplate/
+**v1.28 (người dùng đưa tài liệu "Bản chất Nội dung Giá trị + Quy trình 5 bước sản xuất video", hỏi
+có nên chèn vào Master Prompt không) — thêm 4 bullet chất lượng viết vào BƯỚC 2:**
+
+1. **Takeaway lớn nhất** — trước khi viết, AI phải xác định 1 bài học/thay đổi cụ thể trong suy nghĩ
+   hoặc hành vi mà người xem ghi nhớ và áp dụng NGAY được (chuyển thể định nghĩa "Nội dung giá trị =
+   tạo sự chuyển hoá" của nguồn).
+2. **Ưu tiên câu chuyện thực tế hơn số liệu** — chuyển thể mục "Thêm vào" của Bước 4 nguồn ("lồng
+   ghép câu chuyện thực tế vì người xem nhớ câu chuyện hơn số liệu").
+3. **Lồng 1 mẹo/framework áp dụng ngay** — cùng mục "Thêm vào" của nguồn.
+4. **Giọng văn cảm xúc cá nhân thật** — chuyển thể "Thêm cảm xúc cá nhân" của nguồn.
+
+Cả 4 đều là chỉ dẫn CHẤT LƯỢNG VIẾT áp dụng cho MỌI công thức đã chọn ở Bước 1 (không riêng 1 công
+thức) — đúng vai trò sẵn có của BƯỚC 2 (hướng dẫn cách viết, khác Bước 1 chọn công thức).
+
+**CỐ Ý KHÔNG áp dụng 3 phần còn lại của cùng nguồn** (không mở lại):
+
+- **"Chia sẻ điều bạn giỏi nhất" (Competence, quy tắc 80/20 Leila Hormozi)** — tiêu chí CHỌN CHỦ ĐỀ
+  (content strategy), không phải cách viết cho 1 chủ đề đã chọn. `$topic` là INPUT đã quyết định sẵn
+  trước khi vào form, Action này không có vai trò tư vấn nên làm chủ đề gì.
+- **Bước 3 nguồn "Dump Talking"** (nói nháp tự do bằng giọng nói) — hoạt động CON NGƯỜI làm TRƯỚC
+  khi có nội dung, không áp dụng vào 1 prompt yêu cầu AI TỰ SÁNG TÁC kịch bản từ đầu.
+- **Bước 5 nguồn "Quay, dựng, đăng tải... theo dõi số liệu thực tế"** — trùng quyết định "không theo
+  dõi hiệu suất phân phối" đã chốt nhiều lần trong lịch sử module (§10, từ v1.5/v1.10/v1.14/v1.16).
+
+**Test:** 13 Unit test không chạm DB (11 cũ + 2 mới — gồm 1 test khoá lại đủ 4 bullet mới, 1 test xác
+nhận KHÔNG lọt 3 cụm từ khoá của phần bị loại), `tests/Unit/Modules/AIVideoStudioTemplate/
 BuildMasterScriptPromptActionTest.php` — chi tiết hành vi từng nhánh xem §11.
 
 ### 13.3 UI — `formula-advisor.blade.php` (viết lại ở v1.25)

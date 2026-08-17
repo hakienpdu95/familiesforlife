@@ -27,6 +27,30 @@ use Modules\AIVideoStudioTemplate\Features\ProjectManagement\Actions\CompileProj
  * `BuildShotPromptAction`: module này không gọi AI, chuỗi chỉ copy tay sang tool ngoài, rủi ro thực
  * tế là VỠ CẤU TRÚC (giá trị nhiều dòng phá dòng `NHÃN: giá trị`) chứ không phải injection — xử lý
  * bằng `indentContinuationLines()` (đúng kỹ thuật `BuildShotPromptAction` §3.1 đã dùng).
+ *
+ * spec/AIVideoStudioTemplate_Technical_Specification.md §13.6 (v1.28 — người dùng đưa nguyên văn 1
+ * đoạn tài liệu "Bản chất Nội dung Giá trị + Quy trình 5 bước sản xuất video", hỏi có nên chèn vào
+ * Master Prompt không). Rà theo đúng kỷ luật đã áp dụng xuyên suốt module (chỉ áp dụng phần THẬT SỰ
+ * khác biệt, từ chối có lý do — không mở lại): tài liệu gồm 4 phần, chỉ 1 phần khớp phạm vi.
+ *
+ * ÁP DỤNG — 4 bullet mới ở BƯỚC 2 (định nghĩa "Nội dung giá trị" + phần "Thêm vào" của "Biên tập
+ * kịch bản chữ", Bước 4 nguồn): "Takeaway lớn nhất" (định nghĩa "nội dung giá trị = tạo sự chuyển
+ * hoá", nguồn), "câu chuyện thực tế thay vì số liệu"/"framework thực hành ngay"/"cảm xúc cá nhân
+ * thật" (3 gạch đầu dòng con của "Thêm vào", Bước 4 nguồn) — cả 4 đều là chỉ dẫn CHẤT LƯỢNG VIẾT áp
+ * dụng được cho MỌI công thức đã chọn ở Bước 1, không riêng 1 công thức nào, đúng vai trò BƯỚC 2 sẵn
+ * có (hướng dẫn cách viết, không phải chọn công thức).
+ *
+ * CỐ Ý KHÔNG áp dụng (3 phần còn lại của nguồn, có lý do, không mở lại):
+ * 1. **"Chia sẻ điều bạn giỏi nhất" (Competence, quy tắc 80/20 Leila Hormozi)** — đây là tiêu chí
+ *    CHỌN CHỦ ĐỀ (content strategy), không phải cách viết kịch bản cho 1 chủ đề đã chọn. Action này
+ *    nhận `$topic` làm INPUT đã quyết định sẵn trước khi vào form — không có vai trò tư vấn nên làm
+ *    chủ đề gì, cùng nhóm lý do đã loại các nội dung content-strategy cấp kênh trước đây.
+ * 2. **Bước 3 nguồn "Dump Talking"** (nói nháp tự do bằng giọng nói, chuyển thành văn bản) — hoạt
+ *    động CON NGƯỜI làm TRƯỚC khi có nội dung, không áp dụng được vào 1 prompt yêu cầu AI TỰ SÁNG
+ *    TÁC kịch bản từ đầu (khác vai trò "biên tập lại 1 bản nháp có sẵn").
+ * 3. **Bước 5 nguồn "Quay, dựng, đăng tải và tối ưu... theo dõi số liệu thực tế"** — trùng quyết
+ *    định "không theo dõi hiệu suất phân phối" đã chốt nhiều lần trong lịch sử module (§10, từ
+ *    v1.5/v1.10/v1.14/v1.16 — không mở lại).
  */
 class BuildMasterScriptPromptAction
 {
@@ -60,8 +84,12 @@ class BuildMasterScriptPromptAction
         $lines[] = '';
         $lines[] = 'BƯỚC 2: VIẾT KỊCH BẢN';
         $lines[] = 'Dựa vào công thức đã chọn ở Bước 1, hãy viết kịch bản chi tiết:';
+        $lines[] = '- Trước khi viết: xác định rõ TAKEAWAY LỚN NHẤT — 1 bài học/thay đổi cụ thể trong suy nghĩ hoặc hành vi mà người xem có thể ghi nhớ và áp dụng NGAY sau khi xem xong. Nội dung không tạo ra sự thay đổi này chỉ là quảng cáo suông, dù đúng công thức tới đâu.';
         $lines[] = '- Độ dài: theo đúng khoảng thời lượng khuyến nghị của công thức đã chọn (xem mô tả ở Bước 1).';
         $lines[] = '- Hình thức: bảng 3 cột (Thời lượng/Nhịp | Hình ảnh/Video Shot | Lời thoại/Audio).';
+        $lines[] = '- Ưu tiên kể 1 trải nghiệm/câu chuyện thực tế cụ thể (KHÔNG bịa) thay vì liệt kê số liệu/tính năng khô khan — người xem nhớ câu chuyện hơn số liệu.';
+        $lines[] = '- Nếu phù hợp với công thức đã chọn, lồng 1 mẹo/framework nhỏ người xem áp dụng được NGAY, không chỉ dừng ở lời khen sản phẩm.';
+        $lines[] = '- Giọng văn cần cảm xúc cá nhân thật (tiếc nuối, mừng rỡ, bất ngờ...), tránh văn phong quảng cáo vô cảm, sáo rỗng.';
         $lines[] = '';
         $lines[] = 'RANH GIỚI BẮT BUỘC:';
 
