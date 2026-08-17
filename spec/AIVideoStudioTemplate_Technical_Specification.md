@@ -1,12 +1,52 @@
 # AI Video Studio Template — Quản lý Director Prompt Template cho video AI
 
-**Đặc tả Kỹ thuật Chi tiết — ĐÃ triển khai (v1.0/v1.1); v1.2-v1.6 bổ sung techniques từ Hedra/DeepReel/BytePlus/Pyxeljam/LinkedIn; v1.7 rà soát nội bộ; v1.8 bổ sung từ sentx.ai; v1.9 bổ sung từ veed.io; v1.10-v1.13 xem tóm tắt bên dưới; v1.14-v1.15 bổ sung từ mindstudio.ai + imagine.art; v1.16 bổ sung từ tulsainternetmarketingservice.com + swarmify.com; v1.17 UI theo phản hồi người dùng; v1.18 bổ sung từ ngram.com (2 bài); v1.19 UI theo phản hồi người dùng; v1.20 bổ sung từ leadde.ai; v1.21 bổ sung từ buffer.com; v1.22 đối chiếu goepps.com — KHÔNG áp dụng gì; v1.23 thêm tính năng "Cố vấn Công thức Kịch bản" (spec/ma-tran-cong-thuc-kich-ban.md, ngách Mẹ & Bé) — xem §13; v1.24 sửa 2 lỗi tự phát hiện khi rà soát lại v1.23; v1.25 ĐẢO NGƯỢC kiến trúc §13 theo yêu cầu người dùng — AI ngoài tự chọn công thức + viết kịch bản qua Master Prompt, phạm vi mở rộng ra mọi sản phẩm; v1.26 sửa lỗi "Xem chi tiết" luôn ra rỗng (groupBy() mất khoá slug); v1.27 thêm PersonaCatalog (spec/chan-dung-nguoi-review.md) diễn giải đầy đủ 13 mã chân dung; v1.28 thêm 4 chỉ dẫn chất lượng viết vào Master Prompt (Takeaway/câu chuyện thực tế/framework/cảm xúc cá nhân), loại 3 phần ngoài phạm vi cùng nguồn**
+**Đặc tả Kỹ thuật Chi tiết — ĐÃ triển khai (v1.0/v1.1); v1.2-v1.6 bổ sung techniques từ Hedra/DeepReel/BytePlus/Pyxeljam/LinkedIn; v1.7 rà soát nội bộ; v1.8 bổ sung từ sentx.ai; v1.9 bổ sung từ veed.io; v1.10-v1.13 xem tóm tắt bên dưới; v1.14-v1.15 bổ sung từ mindstudio.ai + imagine.art; v1.16 bổ sung từ tulsainternetmarketingservice.com + swarmify.com; v1.17 UI theo phản hồi người dùng; v1.18 bổ sung từ ngram.com (2 bài); v1.19 UI theo phản hồi người dùng; v1.20 bổ sung từ leadde.ai; v1.21 bổ sung từ buffer.com; v1.22 đối chiếu goepps.com — KHÔNG áp dụng gì; v1.23 thêm tính năng "Cố vấn Công thức Kịch bản" (spec/ma-tran-cong-thuc-kich-ban.md, ngách Mẹ & Bé) — xem §13; v1.24 sửa 2 lỗi tự phát hiện khi rà soát lại v1.23; v1.25 ĐẢO NGƯỢC kiến trúc §13 theo yêu cầu người dùng — AI ngoài tự chọn công thức + viết kịch bản qua Master Prompt, phạm vi mở rộng ra mọi sản phẩm; v1.26 sửa lỗi "Xem chi tiết" luôn ra rỗng (groupBy() mất khoá slug); v1.27 thêm PersonaCatalog (spec/chan-dung-nguoi-review.md) diễn giải đầy đủ 13 mã chân dung; v1.28 thêm 4 chỉ dẫn chất lượng viết vào Master Prompt (Takeaway/câu chuyện thực tế/framework/cảm xúc cá nhân), loại 3 phần ngoài phạm vi cùng nguồn; v1.29 sửa lại cách rà soát nguồn thứ 2 theo phản hồi người dùng (tách nguyên lý kỹ thuật độc lập-công cụ khỏi cách Claude Projects triển khai nó), thêm khung sườn Hook-Build-up-Core-Rehook-CTA + tự đánh giá cuối kịch bản vào Master Prompt; v1.30 thêm Hook 3-6s/Curiosity Gap + cấu trúc Core Content + sửa Re-hook→Sub-hook số nhiều vào Master Prompt, loại Packaging/Research/Loop Trap ngoài phạm vi cùng nguồn**
 
-**Phiên bản:** 1.28
+**Phiên bản:** 1.30
 **Ngày:** 2026-08-17
 **Framework:** Laravel 13 (PHP 8.4) + NWIDART Modules + Lorisleiva Actions
 **Module:** `Modules/AIVideoStudioTemplate`
 
+> **v1.30 (2026-08-17, cùng ngày — người dùng đưa tiếp 1 tài liệu khác "Khung 4 Bước Viết Kịch Bản
+> Viral" — Packaging trước khi viết + Intro/Click Confirmation/Curiosity Gap + Research/Shock Value +
+> Body/Retention Dance/Sub-hook + Outro/Loop Trap, không kèm câu hỏi):** áp dụng cùng kỷ luật rà soát
+> đã dùng cho mọi nguồn trước — chỉ áp dụng phần khớp đúng vai trò BƯỚC 2 "viết kịch bản cho 1 công
+> thức/topic đã chọn sẵn". ÁP DỤNG 3 điểm neo: (1) Hook 3-6 giây đầu = xác nhận đúng nội dung với
+> `$topic`/`$description` (thay cho cặp Tiêu đề/Thumbnail nguồn dùng, module không có Packaging) + mở
+> khoảng trống tò mò bằng 1 trong 5 kỹ thuật FOMO/đồng cảm/nỗi sợ/câu hỏi/ngắt mô thức; (2) Core
+> Content dẫn dắt theo mạch Bối cảnh→Chi tiết→Mâu thuẫn→Cao trào-kết luận, xen kẽ nhịp độ hay/quen
+> thuộc, chèn ví dụ bất ngờ tránh đều đều (gộp Storytelling Method + Retention Dance + Pattern
+> Interruption của nguồn); (3) sửa "Re-hook" (v1.29) thành "Sub-hook" số nhiều — nguồn chỉ rõ nên chèn
+> NHIỀU điểm móc giữa các luận điểm (do độ tập trung chỉ ~8s, tối đa 3 phút/mạch chuyện), không phải 1
+> lần cố định ở giữa như v1.29 diễn giải. CỐ Ý KHÔNG áp dụng: Packaging (Idea/Title/Thumbnail — xảy ra
+> TRƯỚC khi có `$topic`, cùng lý do loại "chọn chủ đề 80/20" ở v1.28), Research & Shock Value (hoạt
+> động nghiên cứu CON NGƯỜI trước khi có nội dung, cùng lý do loại "Dump Talking" ở v1.28), Outro/
+> "Loop Trap" (điều hướng sang video KHÁC trong 1 series — sai mục tiêu CTA affiliate của module, và
+> "tóm tắt" trùng bullet "TAKEAWAY LỚN NHẤT" đã có từ v1.28). Thêm 2 Unit test mới (17 test tổng), sửa
+> 1 test cũ (đổi assertion "Re-hook" → "Sub-hook" cho khớp v1.30). Chi tiết đầy đủ: §13.2, docblock
+> class.
+>
+> **v1.29 (2026-08-17, cùng ngày — người dùng đưa tiếp 1 tài liệu khác "Chuẩn hoá dataset đào tạo +
+> Custom Instructions + Quy trình 3 bước viết kịch bản + Meta-Prompting", cùng câu hỏi):** đánh giá
+> LẦN 1 chỉ trích ra bullet "khán giả mục tiêu cụ thể" rồi loại 4 phần còn lại vì lý do chúng "cần
+> Project Knowledge/Custom Instructions/hội thoại nhiều lượt" — người dùng phản hồi trực tiếp: "kiến
+> thức kỹ thuật và quy trình trên nhất định phải có điểm neo để bổ sung vào hoàn thiện, chứ không
+> liên quan gì đến các công cụ AI cả" — chỉ ra lỗi lấy CÁCH Claude Projects triển khai kỹ thuật làm lý
+> do loại, thay vì tách xem NGUYÊN LÝ đằng sau (độc lập công cụ) có áp dụng được vào 1 prompt đơn hay
+> không. Đánh giá LẦN 2 theo đúng hướng đó, tìm thêm 3 điểm neo thật: (1) khung sườn Hook → Build-up →
+> Core Content → (Re-hook nếu kịch bản dài hơn ~60s) → CTA — gộp nguyên lý "gắn nhãn 5 nhịp" (dataset
+> hoá) với nguyên lý "lập outline trước khi viết full draft" (quy trình 3 bước), bỏ phần cơ chế riêng
+> của Claude Projects (lưu dataset nhiều dự án, 3 lượt hội thoại tách biệt); (2) cân nhắc ≥2 cách mở
+> Hook rồi chọn cách mạnh nhất — bản rút gọn tương xứng video ngắn của "đề xuất nhiều lựa chọn trước
+> khi chốt 1", bỏ quy mô "10-25 ý tưởng" của nguồn (tương xứng video dài); (3) tự đánh giá & đề xuất
+> cải thiện ngay trong CÙNG phản hồi — nguyên lý Meta-Prompting ("bản nháp đầu hiếm khi hoàn hảo, cần
+> tự phê bình") không bắt buộc phải đưa sang AI/phiên khác, chỉ cần thêm 1 mục cuối kịch bản. CỐ Ý
+> KHÔNG áp dụng: chỉ còn phần THỰC SỰ đòi hỏi trạng thái bền vững qua nhiều lần gọi (lưu Training
+> Dataset tái sử dụng nhiều dự án, tải tài liệu vào Project Knowledge, Custom Instructions áp dụng
+> cho MỌI lần tạo sau) — tool này không lưu lịch sử giữa các lần gọi (§0), không còn cách diễn giải
+> tool-độc-lập nào khác cho riêng 3 mục này. Thêm 2 Unit test mới khoá lại cả phần áp dụng lẫn phần
+> loại (15 test tổng). Chi tiết đầy đủ: §13.2, docblock class ("Đánh giá LẦN 1"/"LẦN 2").
+>
 > **v1.28 (2026-08-17, cùng ngày — người dùng đưa tài liệu "Bản chất Nội dung Giá trị + Quy trình 5
 > bước sản xuất video", hỏi có nên chèn vào Master Prompt của trang `formula-advisor` không):** rà
 > theo đúng kỷ luật đã áp dụng xuyên suốt module (chỉ áp dụng phần THẬT SỰ khác biệt và khớp phạm vi,
@@ -1282,6 +1322,8 @@ Thêm 1 mục top-level (không nằm trong nhóm "Bài viết") trong `resource
 - **v1.25 — `FormulaDecisionTree`/`RecommendVideoFormulaAction`/`FormulaDecisionTreeTest` ĐÃ XOÁ**: gọi các class này (namespace cũ) → `class not found`; wizard 9 câu hỏi không còn tồn tại trên UI; nút "Tạo project với công thức này" (cả 2 vị trí ở v1.23/v1.24) không còn tồn tại — `ProjectController::create()`/`_form.blade.php`/`create.blade.php` đã REVERT nguyên trạng trước v1.23 (không còn nhận/xử lý `$prefill`).
 - **v1.25 — `BuildMasterScriptPromptAction::handle()` (11 Unit test, `tests/Unit/Modules/AIVideoStudioTemplate/BuildMasterScriptPromptActionTest.php`, không chạm DB/AI)**: chuỗi trả về LUÔN chứa `topic`; `description` rỗng/`null` → chèn "Không có mô tả chi tiết"; `description` có giá trị → chèn nguyên văn, KHÔNG chèn placeholder; `isMotherBaby=true` → chứa "Nghị định 100/2014/NĐ-CP" + "before/after trên cơ thể trẻ em"; `isMotherBaby=false` → KHÔNG chứa 2 cụm đó, thay bằng nhắc nhở chung ("chính sách quảng cáo của nền tảng"); LUÔN chứa đúng cụm "Attention-Branding-Connection-Direction" (định nghĩa ABCD gốc Google, v1.20) và KHÔNG BAO GIỜ chứa "Attention-Benefit-Credibility-Decision" (định nghĩa sai ở bản nháp người dùng cung cấp, §13.0); LUÔN liệt kê đủ 7 công thức (`FORMULA_TIPS_BY_VIDEO_FORMULA`, tái dùng từ `CompileProjectDirectorPromptAction`, đổi `private` → `public` ở v1.25); KHÔNG chứa cụm "dành cho sản phẩm nhạy cảm (Mẹ & Bé)" (định nghĩa Onboarding bị thu hẹp sai ở bản nháp — giữ định nghĩa gốc không giới hạn ngành hàng); `topic`/`description` nhiều dòng → dòng nối được thụt lề 4 space (`indentContinuationLines()`, cùng kỹ thuật `BuildShotPromptAction` §3.1); luôn kết thúc bằng câu yêu cầu trả về "Công thức đã chọn, Lý do chọn".
 - **v1.28 — 2 test mới (13 Unit test tổng, cùng file trên)**: chuỗi trả về LUÔN chứa "TAKEAWAY LỚN NHẤT", "người xem nhớ câu chuyện hơn số liệu", "mẹo/framework nhỏ người xem áp dụng được NGAY", "cảm xúc cá nhân thật" — bất kể `isMotherBaby`; chuỗi trả về KHÔNG BAO GIỜ chứa "Dump Talking"/"80/20"/"theo dõi số liệu" (3 cụm khoá của phần nguồn CỐ Ý không áp dụng, §13.2) — test fail nếu sau này ai copy nhầm nguyên văn phần bị loại vào Action.
+- **v1.29 — 2 test mới (15 Unit test tổng, cùng file trên)**: chuỗi trả về LUÔN chứa "Hook (mở đầu giữ chân)", "Build-up (dẫn dắt)", "Sub-hook" (nhãn đổi từ "Re-hook" ở v1.30), "cân nhắc ít nhất 2 cách mở đầu khác nhau", "Tự đánh giá & đề xuất cải thiện" (kể cả trong câu yêu cầu trả về kết quả ở cuối prompt) — bất kể `isMotherBaby`; chuỗi trả về KHÔNG BAO GIỜ chứa "Training Dataset"/"Project Knowledge"/"Custom Instructions" (3 cụm khoá của phần thực sự đòi hỏi trạng thái bền vững, đánh giá LẦN 2 §13.2 — CỐ Ý không áp dụng) — test fail nếu sau này ai copy nhầm nguyên văn phần bị loại vào Action.
+- **v1.30 — 2 test mới (17 Unit test tổng, cùng file trên)**: chuỗi trả về LUÔN chứa "3-6 giây đầu", "FOMO", "Bối cảnh → Chi tiết cụ thể", "Sub-hook" — bất kể `isMotherBaby`; chuỗi trả về KHÔNG BAO GIỜ chứa "Re-hook" (đổi tên số ít → "Sub-hook" số nhiều), "Thumbnail"/"Shock Value"/"Loop Trap" (3 cụm khoá của phần nguồn CỐ Ý không áp dụng, §13.2) — test fail nếu sau này ai copy nhầm nguyên văn phần bị loại vào Action.
 - **v1.26 — sửa lỗi "Xem chi tiết" luôn ra rỗng (`ProductFormulaCatalogTest::test_grouping_by_tier_with_preserve_keys_keeps_slugs_as_keys`, thêm vào file test đã có ở v1.24)**: `collect($catalog)->groupBy('tier', true)` — MỌI khoá trong từng nhóm PHẢI là slug string (VD `bim_ta`), KHÔNG được là chỉ số nguyên tự đánh lại; MỌI slug đó PHẢI khớp 1 entry thật qua `ProductFormulaCatalog::find()`. Test FAIL nếu ai đó lỡ bỏ tham số `true` (`preserveKeys`) khi sửa `formula-advisor.blade.php` sau này — đúng bug thật đã xảy ra ở v1.25/v1.26 (§13.3).
 - **v1.26 — link "Xem chi tiết" từ trang catalog thật (không phải slug tự gõ tay)**: trích xuất href thật từ HTML đã render ở trang `formula-advisor` (không query) → parse query string → gọi lại `FormulaAdvisorController::index()` với đúng query đó → `$selected` PHẢI khác `null` và panel (`id="aivsSelectedProduct"`) PHẢI xuất hiện trong HTML. Cách test THIẾU đúng bước "trích xuất href thật" (tự gõ tay 1 slug hợp lệ để test) sẽ KHÔNG phát hiện được bug này — xem bài học ghi lại ở §13.3.
 - **v1.27 — `PersonaCatalog` (8 Unit test, `tests/Unit/Modules/AIVideoStudioTemplate/PersonaCatalogTest.php`, không chạm DB)**: `count(PERSONAS)` = 13; `find('P99')` → `null`; `find('P2')` → chứa "Mẹ bỉm 0–3 tháng"; `parseCodes()` tách đúng thứ tự cho cả 3 kiểu phân cách đã dùng trong catalog (`"P2 → P5 → P6"` → `['P2','P5','P6']`; `"P2 + P9"` → `['P2','P9']`; `"P5 / P6 / P7"` → `['P5','P6','P7']`; `"P5"` → `['P5']`); **mọi mã chân dung xuất hiện trong `ProductFormulaCatalog::PRODUCTS` PHẢI resolve được qua `PersonaCatalog::find()`** (`test_every_persona_code_referenced_in_product_catalog_exists`) — test FAIL nếu catalog tham chiếu 1 mã không tồn tại (VD gõ nhầm "P14").
@@ -1337,7 +1379,7 @@ Thêm 1 mục top-level (không nằm trong nhóm "Bài viết") trong `resource
 20. Route `formula-advisor` trong `routes/web.php` (đặt TRƯỚC `{project}` trong cùng group) — không đổi từ v1.23.
 21. Sidebar: `nav-group` đơn → `details`/`summary` dropdown 2 `sub-link` ("Danh sách project" + "Sinh Master Prompt", đổi tên từ "Cố vấn công thức" ở v1.25) — không đổi cấu trúc từ v1.23.
 22. `CompileProjectDirectorPromptAction::FORMULA_TIPS_BY_VIDEO_FORMULA` đổi `private` → `public` (v1.25) để `BuildMasterScriptPromptAction` tái dùng, tránh chép tay gây lệch định nghĩa (bài học từ lỗi ABCD ở bản nháp người dùng cung cấp, §13.0).
-23. `tests/Unit/Modules/AIVideoStudioTemplate/BuildMasterScriptPromptActionTest.php` (11 test, thuần logic) — thay `FormulaDecisionTreeTest.php` (12 test, ĐÃ XOÁ ở v1.25).
+23. `tests/Unit/Modules/AIVideoStudioTemplate/BuildMasterScriptPromptActionTest.php` (15 test, thuần logic) — thay `FormulaDecisionTreeTest.php` (12 test, ĐÃ XOÁ ở v1.25).
 24. `tests/Unit/Modules/AIVideoStudioTemplate/ProductFormulaCatalogTest.php` (6 test, từ v1.24) — còn nguyên, không đổi ở v1.25.
 25. `ProjectController::create()`/`_form.blade.php`/`create.blade.php` — cơ chế `$prefill` (thêm ở v1.23, sửa ở v1.24) đã REVERT nguyên trạng ở v1.25 vì không còn nơi gọi (2 nút "Tạo project với công thức này" đã bỏ khỏi UI, §13.0/§13.5).
 26. `vendor/bin/pint` + `vendor/bin/phpunit tests/Unit/Modules/AIVideoStudioTemplate/` (17 test, không chạm DB) + xác nhận `php artisan route:list --name=aivideostudiotemplate`.
@@ -1491,8 +1533,9 @@ hẳn `FormulaDecisionTree` đã xoá). Nội dung prompt gồm:
      NĐ-CP) không CTA bán hàng trực tiếp.
    - `false` — nhắc nhở chung: không cam kết hiệu quả chưa kiểm chứng, không thổi phồng nỗi sợ, tuân
      thủ chính sách quảng cáo nền tảng đăng video.
-6. **Yêu cầu kết quả trả về** — "Công thức đã chọn, Lý do chọn, và Kịch bản chi tiết" (bảng 3 cột:
-   Thời lượng/Nhịp | Hình ảnh/Video Shot | Lời thoại/Audio).
+6. **Yêu cầu kết quả trả về** — "Công thức đã chọn, Lý do chọn, Kịch bản chi tiết, và mục Tự đánh giá
+   & đề xuất cải thiện" (bảng 3 cột: Thời lượng/Nhịp | Hình ảnh/Video Shot | Lời thoại/Audio) — cụm
+   cuối thêm ở v1.29.
 
 Không bọc `<<<DELIMITER>>>` cho `topic`/`description` (khác convention CLAUDE.md cho module GỌI AI
 Provider) — đúng ghi chú prompt-injection đã có ở `BuildShotPromptAction` (v1.7): module này không
@@ -1525,6 +1568,87 @@ thức) — đúng vai trò sẵn có của BƯỚC 2 (hướng dẫn cách vi�
 **Test:** 13 Unit test không chạm DB (11 cũ + 2 mới — gồm 1 test khoá lại đủ 4 bullet mới, 1 test xác
 nhận KHÔNG lọt 3 cụm từ khoá của phần bị loại), `tests/Unit/Modules/AIVideoStudioTemplate/
 BuildMasterScriptPromptActionTest.php` — chi tiết hành vi từng nhánh xem §11.
+
+**v1.29 (người dùng đưa tiếp 1 tài liệu khác "Chuẩn hoá dataset đào tạo + Custom Instructions + Quy
+trình 3 bước viết kịch bản + Meta-Prompting", cùng câu hỏi) — sửa lại cách rà soát theo phản hồi
+người dùng, thêm 3 điểm neo mới vào BƯỚC 2:**
+
+Đánh giá LẦN 1 chỉ trích ra bullet "khán giả mục tiêu cụ thể" (đã ghi ở v1.29 bản đầu) rồi loại 4
+phần còn lại với lý do chúng "cần Project Knowledge/Custom Instructions/hội thoại nhiều lượt" — sai ở
+chỗ lấy CÁCH Claude Projects triển khai kỹ thuật làm lý do loại, thay vì tách NGUYÊN LÝ kỹ thuật đằng
+sau (độc lập công cụ) ra trước. Người dùng phản hồi trực tiếp: "kiến thức kỹ thuật và quy trình trên
+nhất định phải có điểm neo để bổ sung vào hoàn thiện, chứ không liên quan gì đến các công cụ AI cả".
+
+Đánh giá LẦN 2 (đúng hướng người dùng chỉ ra), tìm thêm 3 điểm neo:
+
+1. **Khung sườn Hook → Build-up → Core Content → (Re-hook nếu dài hơn ~60s) → CTA** — gộp 2 nguyên lý
+   của cùng nguồn: "gắn nhãn 5 nhịp cho transcript" (§4 nguồn, phần dataset hoá) và "lập outline trước
+   khi viết full draft" (§6 nguồn, quy trình 3 bước) BẢN CHẤT cùng nói 1 việc — đừng viết thẳng lời
+   thoại đầy đủ, phác khung nhịp trước. Phần "lưu dataset qua nhiều dự án" và "3 lượt hội thoại tách
+   biệt" mới là cơ chế RIÊNG của Claude Projects (cần bộ nhớ bền vững) — còn khung 5 nhịp áp dụng được
+   trong CÙNG 1 prompt. "Re-hook" đặc biệt lấp khoảng trống thật: 3/7 công thức hiện có (Demo/
+   Testimonial/Onboarding, 50-240s) chưa có bước giữ chân giữa video.
+2. **Cân nhắc ≥2 cách mở Hook rồi chọn cách mạnh nhất** — gộp vào bullet 1, bản rút gọn tương xứng
+   video ngắn của nguyên lý "đề xuất nhiều lựa chọn trước khi chốt 1" (§6 nguồn); bỏ quy mô "10-25 ý
+   tưởng" của nguồn vì tương xứng video dài cần lên kế hoạch kỹ, không tương xứng 15s-4 phút module
+   phục vụ.
+3. **Tự đánh giá & đề xuất cải thiện ngay trong CÙNG phản hồi** (thêm 1 bullet cuối BƯỚC 2 + gộp vào
+   "Yêu cầu kết quả trả về") — nguyên lý cốt lõi của Meta-Prompting (§7 nguồn) là "bản nháp đầu hiếm
+   khi hoàn hảo, cần tự phê bình tìm điểm yếu" — nguyên lý này KHÔNG bắt buộc phải đưa sang AI/phiên
+   khác mới làm được; yêu cầu chính AI đang viết tự rà lại NGAY trong cùng câu trả lời vẫn giữ đúng
+   tinh thần, chỉ bỏ phần "2 tool tách biệt" (cơ chế riêng của multi-turn, không phải nguyên lý).
+
+**CỐ Ý KHÔNG áp dụng** (chỉ còn phần THỰC SỰ đòi hỏi trạng thái bền vững qua nhiều lần gọi — không còn
+cách diễn giải tool-độc-lập nào khác cho riêng 2 mục này):
+
+- **Lưu transcript đã gắn nhãn thành Training Dataset tái sử dụng nhiều dự án sau** — hành vi LƯU TRỮ
+  lâu dài, không phải chỉ dẫn cho 1 lần sinh kịch bản; tool này không lưu lịch sử giữa các lần gọi
+  (§0). Bản thân khung 5 nhịp đã lấy ở điểm neo 1 phía trên.
+- **Tải tài liệu mẫu vào Project Knowledge + Custom Instructions áp dụng cho MỌI lần tạo sau** — cùng
+  lý do trên: cấu hình BỀN VỮNG giữa các lần gọi, đúng nghĩa đen cần 1 nền tảng có bộ nhớ dài hạn. 2
+  yếu tố nội dung của Custom Instructions ("Bạn là ai?"/"loại nội dung gì?") vẫn đã có sẵn ở dòng Vai
+  trò (đánh giá LẦN 1, không đổi).
+
+**Test:** 15 Unit test không chạm DB (13 cũ + 2 mới — 1 test khoá lại khung sườn Hook/Build-up/Re-hook
++ cân nhắc 2 cách mở + tự đánh giá, 1 test xác nhận KHÔNG lọt 3 cụm từ khoá của phần bị loại ở v1.29),
+cùng file `BuildMasterScriptPromptActionTest.php` — chi tiết hành vi từng nhánh xem §11.
+
+**v1.30 (người dùng đưa tiếp 1 tài liệu khác "Khung 4 Bước Viết Kịch Bản Viral" — Packaging + Intro/
+Curiosity Gap + Research/Shock Value + Body/Retention Dance/Sub-hook + Outro/Loop Trap, không kèm câu
+hỏi rõ ràng) — áp dụng cùng kỷ luật rà soát đã dùng cho mọi nguồn trước, thêm 3 điểm neo mới:**
+
+1. **Hook 3-6 giây đầu = xác nhận đúng kỳ vọng + mở khoảng trống tò mò** — chuyển thể "Click
+   Confirmation" (nguồn dùng cặp Tiêu đề/Thumbnail làm chuẩn xác nhận; module không có bước Packaging
+   nên đổi chuẩn xác nhận sang `$topic`/`$description` đã nêu ở đầu prompt) và "Curiosity Gap" (giữ
+   nguyên 5 kỹ thuật FOMO/đồng cảm/nỗi sợ/câu hỏi/ngắt mô thức — đều là kỹ thuật viết Hook thuần túy,
+   không phụ thuộc nền tảng hay công cụ AI nào).
+2. **Core Content theo mạch Bối cảnh → Chi tiết → Mâu thuẫn → Cao trào-kết luận + xen kẽ nhịp độ +
+   ngắt mô thức bằng ví dụ/hình ảnh bất ngờ** — gộp "Storytelling Method" + "Retention Dance" +
+   "Pattern Interruption" của Bước 3 nguồn, cả 3 đều là chỉ dẫn CÁCH VIẾT thân bài, đúng vai trò sẵn
+   có của BƯỚC 2.
+3. **Sửa "Re-hook" (v1.29) thành "Sub-hook" số nhiều** — nguồn (Bước 3, "Chuyển đoạn qua Sub-hook")
+   chỉ rõ hơn: nên chèn NHIỀU điểm móc giữa các luận điểm chính (độ tập trung chỉ ~8 giây, tối đa 3
+   phút/1 mạch chuyện), không phải chỉ 1 lần cố định ở giữa video như v1.29 diễn giải — sửa khung sườn
+   cho đúng hơn, không phải điểm neo hoàn toàn mới.
+
+**CỐ Ý KHÔNG áp dụng** (3 phần, có lý do, không mở lại):
+
+- **Packaging (Ý tưởng/Tiêu đề/Thumbnail phải hoàn thiện trước khi viết kịch bản)** — xảy ra TRƯỚC khi
+  có `$topic`; Action nhận `$topic`/`$description` làm INPUT đã quyết định sẵn (cùng lý do đã loại
+  "chọn chủ đề 80/20" ở v1.28) — không có vai trò tư vấn Tiêu đề/Thumbnail.
+- **Research & Shock Value (Consuming/Doing/Analyzing)** — hoạt động nghiên cứu CON NGƯỜI làm TRƯỚC
+  khi có nội dung để viết, cùng bản chất "Dump Talking" đã loại ở v1.28; `$description` đã là nơi
+  người dùng gói ghém kết quả nghiên cứu của họ trước khi vào Action.
+- **Outro/"The Loop Trap" (tóm tắt → tạo nhu cầu mới → điều hướng sang video tiếp theo trong 1
+  series)** — sai mục tiêu CTA: nguồn nhắm giữ chân xem tiếp 1 video KHÁC cùng kênh (channel growth),
+  còn CTA của module là hành động AFFILIATE (mua/dùng thử sản phẩm) cho ĐÚNG video đang xem — không có
+  khái niệm "video tiếp theo". Phần "tóm tắt lại" cũng trùng vai trò bullet "TAKEAWAY LỚN NHẤT" đã có
+  từ v1.28.
+
+**Test:** 17 Unit test không chạm DB (15 cũ + 2 mới — 1 test khoá lại Hook 3-6s/Curiosity Gap/cấu trúc
+Core Content/nhãn Sub-hook, 1 test xác nhận KHÔNG lọt 3 cụm từ khoá của phần bị loại ở v1.30), sửa 1
+test cũ (đổi assertion "Re-hook" → "Sub-hook"), cùng file `BuildMasterScriptPromptActionTest.php` —
+chi tiết hành vi từng nhánh xem §11.
 
 ### 13.3 UI — `formula-advisor.blade.php` (viết lại ở v1.25)
 
