@@ -29,9 +29,31 @@ class StoreGeneratedPromptRequest extends FormRequest
 
         if ($framework) {
             foreach ($framework['fields'] as $field) {
-                $rules["field_values.{$field['key']}"] = $field['required']
-                    ? ['required', 'string', 'max:5000']
-                    : ['nullable', 'string', 'max:5000'];
+                $isCustomSelect = ($field['type'] ?? null) === 'select' && ! empty($field['allow_custom']);
+
+                // spec/AIIdeaMatrixGenerator.md §2.6 (v2.2) — field select có `allow_custom` PHẢI
+                // dùng `custom_max_length` (giới hạn NGẮN, mặc định 150 nếu field không tự khai)
+                // thay vì `max:5000` mặc định của mọi field text/textarea — bản chất là 1 CỤM TỪ
+                // NGẮN neo cảm xúc/văn hoá, không phải nội dung tự do dài. Không giới hạn này, người
+                // dùng dán nguyên khối quảng cáo/thông cáo báo chí vào field vốn chỉ cần 1 câu ngắn
+                // (xem ví dụ thật ở docblock RenderPromptFromFrameworkAction) — phá đúng mục đích
+                // "Hằng số + Biến số" của cả mô hình.
+                $maxLength = $isCustomSelect ? ($field['custom_max_length'] ?? 150) : 5000;
+
+                $rule = $field['required']
+                    ? ['required', 'string', "max:{$maxLength}"]
+                    : ['nullable', 'string', "max:{$maxLength}"];
+
+                // spec/AIIdeaMatrixGenerator.md §2.1 — field 'select' chỉ được nhận khoá có trong
+                // chính options của nó, chặn ở đây TRƯỚC khi lưu vào field_values (lớp chính; lớp
+                // phòng thủ thứ 2 là fallback `?? $value` ở RenderPromptFromFrameworkAction).
+                // §2.5 (v2.1) — TRỪ field có `allow_custom`: tập giá trị của nó MỞ theo thiết kế
+                // (biến số biên tập, options chỉ là gợi ý).
+                if (($field['type'] ?? null) === 'select' && ! $isCustomSelect) {
+                    $rule[] = Rule::in(array_keys($field['options']));
+                }
+
+                $rules["field_values.{$field['key']}"] = $rule;
             }
         }
 

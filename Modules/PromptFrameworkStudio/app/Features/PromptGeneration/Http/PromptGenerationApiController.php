@@ -9,6 +9,7 @@ use Modules\Post\Models\PostCategory;
 use Modules\PromptFrameworkStudio\Features\Concerns\ResolvesCategoryFoundation;
 use Modules\PromptFrameworkStudio\Features\PromptGeneration\Actions\BuildEditorialContextBlockAction;
 use Modules\PromptFrameworkStudio\Features\PromptGeneration\Actions\BuildFamilyValuesBlockAction;
+use Modules\PromptFrameworkStudio\Features\PromptGeneration\Actions\FindLatestPromptForFrameworkAction;
 use Modules\PromptFrameworkStudio\Features\PromptGeneration\Http\Resources\GeneratedPromptListResource;
 use Modules\PromptFrameworkStudio\Features\PromptGeneration\Queries\ListGeneratedPromptsForAdminHandler;
 use Modules\PromptFrameworkStudio\Features\PromptGeneration\Queries\ListGeneratedPromptsForAdminQuery;
@@ -75,6 +76,25 @@ class PromptGenerationApiController extends Controller
             'has_foundation' => $foundation !== null,
             'category_name' => $category->name,
             'block' => implode("\n\n", $blocks),
+        ]);
+    }
+
+    /**
+     * spec/AIIdeaMatrixGenerator.md §3 — "Dùng lại giá trị từ prompt trước". `frameworkKey` là
+     * chuỗi thô (không phải route-model-binding — không có model nào cho khoá framework), validate
+     * bằng chính danh sách config thay vì để lọt query DB với khoá bất kỳ.
+     */
+    public function lastPromptForFramework(string $frameworkKey, FindLatestPromptForFrameworkAction $findLatest): JsonResponse
+    {
+        if (! array_key_exists($frameworkKey, config('prompt_framework_studio.frameworks', []))) {
+            return response()->json(['found' => false]);
+        }
+
+        $prompt = $findLatest->handle($frameworkKey);
+
+        return response()->json([
+            'found' => $prompt !== null,
+            'field_values' => $prompt?->field_values ?? [],
         ]);
     }
 }

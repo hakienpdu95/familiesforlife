@@ -57,14 +57,44 @@
 {{-- Dải cấu trúc framework — thể hiện các field LIÊN KẾT THEO THỨ TỰ với nhau (đúng bản chất
      framework), không phải danh sách rời rạc. Field đang gõ được highlight để người dùng luôn
      biết mình đang ở khối nào trong chuỗi. --}}
-<div class="flex flex-wrap items-center gap-1">
-    <template x-for="(field, idx) in selectedFramework.fields" :key="'chip-' + field.key">
-        <div class="flex items-center gap-1">
-            <span class="text-base-content/20 text-xs" x-show="idx > 0">→</span>
-            <span class="badge badge-xs font-mono transition-colors"
-                  :class="focusedKey === field.key ? 'badge-primary' : 'badge-ghost text-base-content/40'"
-                  x-text="field.label"></span>
-        </div>
+<div class="flex flex-wrap items-center justify-between gap-2">
+    <div class="flex flex-wrap items-center gap-1">
+        <template x-for="(field, idx) in selectedFramework.fields" :key="'chip-' + field.key">
+            <div class="flex items-center gap-1">
+                <span class="text-base-content/20 text-xs" x-show="idx > 0">→</span>
+                <span class="badge badge-xs font-mono transition-colors"
+                      :class="focusedKey === field.key ? 'badge-primary' : 'badge-ghost text-base-content/40'"
+                      x-text="field.label"></span>
+            </div>
+        </template>
+    </div>
+
+    {{-- spec/AIIdeaMatrixGenerator.md §2.2 — nút "Ngẫu nhiên" GENERIC cho mọi framework có ≥1 field
+         `select` (không riêng `heritage_idea_matrix`), chọn ngẫu nhiên 1 khoá hợp lệ cho MỖI field
+         select cùng lúc, thuần JS phía client, không endpoint mới. --}}
+    <button type="button" x-show="hasSelectFields" @click="randomizeSelectFields()"
+            class="btn btn-outline btn-xs gap-1 shrink-0">
+        🎲 Ngẫu nhiên
+    </button>
+</div>
+
+{{-- spec/AIIdeaMatrixGenerator.md §2.9 (v2.4) — khối "Ví dụ tham khảo", đặt NGAY TRÊN field đầu
+     tiên (Thông điệp cốt lõi ở heritage_idea_matrix) theo đúng yêu cầu: người dùng thấy được TOÀN
+     CẢNH 1 ví dụ hoàn chỉnh trước khi điền, thay vì tự ghép lại từ placeholder rải rác từng ô. Mở
+     sẵn (không phải `<details>` đóng) — đây là thứ CẦN thấy TRƯỚC khi điền, không phải tra cứu thêm
+     khi cần (khác khối "Xem trước prompt" ở cuối, vốn chỉ hữu ích SAU khi đã có ít nhất vài field).
+     Generic cho MỌI framework — `exampleRows` rỗng thì khối này tự ẩn (framework nào không có
+     `example` đầy đủ, hiếm khi xảy ra vì đã có test bao phủ). --}}
+<div x-show="exampleRows.length > 0" x-cloak
+     class="rounded-lg border border-info/30 bg-info/5 p-3 space-y-1.5">
+    <p class="text-xs font-semibold text-info-content/90 flex items-center gap-1.5">
+        📋 Ví dụ tham khảo — điền thử nội dung nào để hình dung trước khi bạn tự điền:
+    </p>
+    <template x-for="row in exampleRows" :key="row.label">
+        <p class="text-xs leading-snug">
+            <span class="font-medium text-base-content/70" x-text="row.label + ':'"></span>
+            <span class="text-base-content/60" x-text="row.value"></span>
+        </p>
     </template>
 </div>
 
@@ -102,6 +132,42 @@
                    @focus="focusedKey = field.key" @blur="focusedKey = null"
                    :placeholder="'VD: ' + (selectedFramework.example[field.key] || '')"
                    class="input input-bordered input-sm w-full placeholder:text-base-content/30">
+            {{-- spec/AIIdeaMatrixGenerator.md §2.1 — field type MỚI `select`, dùng chung cho mọi
+                 framework (không riêng `heritage_idea_matrix`) khi cần giới hạn lựa chọn thay vì
+                 text tự do. Giá trị lưu/gửi là KHOÁ (`field.options` khoá => nhãn) — dịch sang nhãn
+                 khi render ở server (RenderPromptFromFrameworkAction), không phải ở đây.
+
+                 §2.5 (v2.1) — KHÔNG x-model trực tiếp: field có `allow_custom` thêm lựa chọn
+                 sentinel `__custom__` mở ô text tự nhập bên dưới, nên giá trị hiển thị của <select>
+                 (selectValueFor) tách khỏi giá trị thật (values[field.key] — khoá HOẶC text tự do);
+                 mọi ghi đều đi qua onSelectChange để 2 trạng thái không giẫm nhau. --}}
+            <select x-show="field.type === 'select'"
+                    :value="selectValueFor(field)" @change="onSelectChange(field, $event.target.value)"
+                    @focus="focusedKey = field.key" @blur="focusedKey = null"
+                    class="select select-bordered select-sm w-full">
+                <option value="">— Chưa chọn —</option>
+                <template x-for="[optKey, optLabel] in Object.entries(field.options || {})" :key="optKey">
+                    <option :value="optKey" x-text="optLabel"></option>
+                </template>
+                <template x-if="field.allow_custom">
+                    <option value="__custom__">✏️ Khác (tự nhập)…</option>
+                </template>
+            </select>
+            <input x-show="field.type === 'select' && isCustomSelect(field)" x-model="values[field.key]" type="text"
+                   @focus="focusedKey = field.key" @blur="focusedKey = null"
+                   :maxlength="field.custom_max_length || 150"
+                   {{-- spec/AIIdeaMatrixGenerator.md §2.8 (v2.3) — `custom_placeholder` RIÊNG từng
+                        field (nếu config có khai) thay vì 1 chuỗi generic dùng chung cho mọi field
+                        allow_custom — ví dụ "Trẻ sợ đi khám răng" hợp với Tình huống Gia đình nhưng
+                        SAI ngữ cảnh nếu hiện y hệt cho Yếu tố Di sản/Sản phẩm. --}}
+                   :placeholder="field.custom_placeholder || '1 cụm từ ngắn — không phải cả đoạn quảng cáo/thông cáo báo chí'"
+                   class="input input-bordered input-sm w-full mt-1.5 placeholder:text-base-content/30">
+            {{-- spec/AIIdeaMatrixGenerator.md §2.6 (v2.2) — cảnh báo mềm, cùng tinh thần isFieldThin
+                 (không chặn submit, `maxlength` HTML ở trên mới là chặn cứng): nhắc lại field này là
+                 CỤM TỪ, không phải đoạn văn, ngay khi người dùng gõ gần chạm giới hạn. --}}
+            <p class="text-xs text-warning mt-1" x-show="isCustomFieldNearLimit(field)">
+                Gần chạm giới hạn <span x-text="field.custom_max_length || 150"></span> ký tự — ô này nên là 1 cụm từ ngắn, không phải đoạn văn/nội dung quảng cáo đầy đủ. Nội dung dài hơn nên đưa vào field textarea khác của mẫu này (nếu có).
+            </p>
 
             {{-- Gợi ý chất lượng, KHÔNG chặn submit — chỉ nhắc field bắt buộc đã điền nhưng còn
                  ngắn/có khả năng chung chung (xem isFieldThin trong prompt-framework-studio.js). --}}

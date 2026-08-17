@@ -36,4 +36,9 @@ Route::middleware(['auth', 'can:prompt_framework_studio.use'])
         // permission CỦA MODULE NÀY (không phải content_foundation.use) — xem docblock action.
         Route::get('editorial-context/{category}', [PromptGenerationApiController::class, 'editorialContext'])
             ->name('editorial-context');
+
+        // spec/AIIdeaMatrixGenerator.md §3 — "Dùng lại giá trị từ prompt trước", gọi từ trang tạo
+        // prompt mới. {frameworkKey} là chuỗi thô (không phải model), validate trong Controller.
+        Route::get('last-prompt/{frameworkKey}', [PromptGenerationApiController::class, 'lastPromptForFramework'])
+            ->name('last-prompt');
     });

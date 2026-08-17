@@ -38,6 +38,22 @@ use Modules\ContentFoundation\Models\CategoryContentFoundation;
  * `abort_if` bên dưới là nơi kiểm tra DUY NHẤT cho việc framework có tồn tại trong config hay
  * không (§4.1/§5.4) — CreateGeneratedPromptAction và RegenerateGeneratedPromptAction đều gọi
  * xuyên qua Action này để lấy rendered_prompt, nên cả 2 tự động thừa hưởng guard này.
+ *
+ * spec/AIIdeaMatrixGenerator.md §2.1 — field `type === 'select'` (thêm cùng preset
+ * `heritage_idea_matrix`) dịch KHOÁ đã lưu sang NHÃN qua `field['options']` trước khi chèn vào
+ * block, fallback về chính khoá thô nếu không khớp `options` (không throw — xem inline comment).
+ *
+ * spec/AIIdeaMatrixGenerator.md §2.6 (v2.2, ví dụ THẬT phát hiện khi dùng sản phẩm) — field
+ * `heritage_variable`/`situation_variable` (allow_custom, §2.5) dùng để dán NGUYÊN VĂN 1 đoạn thông
+ * cáo báo chí quảng bá dài (~150 từ, đủ chi tiết địa điểm/thương hiệu/emoji) vào ô "Tình huống Gia
+ * đình" — trong khi nội dung đó gần như trùng lặp hoàn toàn với ô "Yếu tố Di sản/Sản phẩm" và
+ * "Thông điệp cốt lõi" đã điền. Hệ quả: prompt mất hẳn cấu trúc "Tình huống → giải quyết bằng Di
+ * sản" mà `task_instructions[0]` yêu cầu (2 khối giờ chứa cùng 1 nội dung), và field vốn chỉ cần 1
+ * CỤM TỪ NGẮN neo cảm xúc (VD "Trẻ ăn vạ chốn đông người") lại chứa nguyên khối quảng cáo. Nguyên
+ * nhân: field `allow_custom` (v2.1) mở text tự do nhưng KHÔNG có giới hạn độ dài riêng — dùng chung
+ * `max:5000` của field textarea tự do (VD `audience`), không có gì cản việc dán cả bài PR vào đây.
+ * Sửa ở lớp VALIDATE (`custom_max_length`, §2.6), KHÔNG sửa ở đây — Action này chỉ ghép chuỗi, việc
+ * chặn nội dung dài quá mức thuộc về `Store/UpdateGeneratedPromptRequest`.
  */
 class RenderPromptFromFrameworkAction
 {
@@ -73,6 +89,17 @@ class RenderPromptFromFrameworkAction
             $value = trim((string) ($fieldValues[$field['key']] ?? ''));
             if ($value === '') {
                 continue;
+            }
+
+            // spec/AIIdeaMatrixGenerator.md §2.1 — field `type === 'select'` lưu KHOÁ
+            // (VD `pov_parent`), không phải NHÃN — dịch sang nhãn qua `options` trước khi chèn vào
+            // prompt, khoá thô vô nghĩa với AI đọc prompt. Fallback `?? $value` (KHÔNG throw) phục
+            // vụ 2 vai: (1) phòng thủ với dữ liệu tới từ đường khác ngoài StoreGeneratedPromptRequest
+            // (seeder/Tinker/khoá cũ hết hạn khi 1 preset đổi `options`); (2) §2.5 (v2.1) — là ĐƯỜNG
+            // CHÍNH cho field có `allow_custom`: giá trị tự nhập không nằm trong `options` được chèn
+            // NGUYÊN VĂN, đúng thiết kế "biến số biên tập, options chỉ là gợi ý".
+            if (($field['type'] ?? null) === 'select') {
+                $value = $field['options'][$value] ?? $value;
             }
 
             $heading = $field['prompt_heading'] ?? null;

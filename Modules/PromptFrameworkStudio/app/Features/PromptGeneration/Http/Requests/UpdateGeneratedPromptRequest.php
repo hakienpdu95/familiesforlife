@@ -3,6 +3,7 @@
 namespace Modules\PromptFrameworkStudio\Features\PromptGeneration\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 /**
  * spec/PromptFrameworkStudio_Technical_Specification.md §5.3/§5.4 — KHÔNG có rule cho
@@ -31,9 +32,22 @@ class UpdateGeneratedPromptRequest extends FormRequest
 
         if ($framework) {
             foreach ($framework['fields'] as $field) {
-                $rules["field_values.{$field['key']}"] = $field['required']
-                    ? ['required', 'string', 'max:5000']
-                    : ['nullable', 'string', 'max:5000'];
+                $isCustomSelect = ($field['type'] ?? null) === 'select' && ! empty($field['allow_custom']);
+
+                // spec/AIIdeaMatrixGenerator.md §2.6 (v2.2) — cùng lý do StoreGeneratedPromptRequest.
+                $maxLength = $isCustomSelect ? ($field['custom_max_length'] ?? 150) : 5000;
+
+                $rule = $field['required']
+                    ? ['required', 'string', "max:{$maxLength}"]
+                    : ['nullable', 'string', "max:{$maxLength}"];
+
+                // spec/AIIdeaMatrixGenerator.md §2.1/§2.5 — cùng lý do StoreGeneratedPromptRequest
+                // (Rule::in chỉ cho tập đóng; field `allow_custom` là tập mở, nhận text tự do).
+                if (($field['type'] ?? null) === 'select' && ! $isCustomSelect) {
+                    $rule[] = Rule::in(array_keys($field['options']));
+                }
+
+                $rules["field_values.{$field['key']}"] = $rule;
             }
         } else {
             // §5.4 — orphaned: không còn field definition để validate chi tiết theo từng khoá.

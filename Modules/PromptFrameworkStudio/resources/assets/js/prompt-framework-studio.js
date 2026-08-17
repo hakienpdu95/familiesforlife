@@ -55,10 +55,145 @@ document.addEventListener('alpine:init', () => {
         select(key) {
             this.selectedKey = key;
             this.values = Object.fromEntries(this.frameworks[key].fields.map((f) => [f.key, '']));
+            this.customSelect = {};
         },
 
         get selectedFramework() {
             return this.selectedKey ? this.frameworks[this.selectedKey] : null;
+        },
+
+        /**
+         * spec/AIIdeaMatrixGenerator.md §2.9 (v2.4) — khối "Ví dụ tham khảo" hiển thị NGAY TRÊN field
+         * đầu tiên: gộp `example` (đã có sẵn trong config, trước đó CHỈ dùng làm placeholder rời rạc
+         * từng field + hiển thị đầy đủ ở trang Thư viện) thành 1 danh sách label => giá trị mẫu, theo
+         * ĐÚNG thứ tự canon field — để người dùng thấy được TOÀN CẢNH 1 ví dụ hoàn chỉnh trước khi
+         * điền, thay vì phải tự ghép lại từ các placeholder rải rác từng ô. Field `select` map khoá
+         * mẫu sang NHÃN (cùng logic RenderPromptFromFrameworkAction phía server — không hiện khoá
+         * thô); field không có giá trị mẫu bị bỏ qua (không phải mọi field optional đều có `example`).
+         * Generic cho MỌI framework, không riêng heritage_idea_matrix.
+         */
+        get exampleRows() {
+            if (!this.selectedFramework) return [];
+
+            const example = this.selectedFramework.example || {};
+
+            return this.selectedFramework.fields
+                .filter((field) => !!example[field.key])
+                .map((field) => ({
+                    label: field.label,
+                    value: field.type === 'select' ? (field.options?.[example[field.key]] ?? example[field.key]) : example[field.key],
+                }));
+        },
+
+        // spec/AIIdeaMatrixGenerator.md §2.5 (v2.1) — field.key => true khi người dùng CHỦ ĐỘNG chọn
+        // "✏️ Khác (tự nhập)…". Cần cờ riêng vì lúc ô text còn rỗng, không thể phân biệt "đang gõ
+        // custom" với "— Chưa chọn —" chỉ bằng giá trị.
+        customSelect: {},
+
+        /**
+         * Field select đang ở chế độ tự nhập? — hoặc do cờ (vừa bấm "Khác"), hoặc suy ra từ dữ liệu
+         * (giá trị đã lưu không phải khoá nào trong options — VD mở trang edit của bản ghi có giá
+         * trị tự nhập từ trước).
+         */
+        isCustomSelect(field) {
+            if (!field.allow_custom) return false;
+            if (this.customSelect[field.key]) return true;
+
+            const val = (this.values[field.key] ?? '').toString();
+
+            return val !== '' && !(val in (field.options || {}));
+        },
+
+        /** Giá trị hiển thị của <select> — sentinel '__custom__' khi đang ở chế độ tự nhập. */
+        selectValueFor(field) {
+            return this.isCustomSelect(field) ? '__custom__' : (this.values[field.key] ?? '');
+        },
+
+        onSelectChange(field, newVal) {
+            if (newVal === '__custom__') {
+                this.customSelect[field.key] = true;
+                this.values[field.key] = '';
+            } else {
+                this.customSelect[field.key] = false;
+                this.values[field.key] = newVal;
+            }
+        },
+
+        /**
+         * spec/AIIdeaMatrixGenerator.md §2.6 (v2.2) — cảnh báo mềm khi ô tự nhập của field
+         * `allow_custom` gần chạm `custom_max_length` (mặc định 150, khớp `Store/UpdateGenerated
+         * PromptRequest`) — field này bản chất là 1 cụm từ ngắn, gần giới hạn thường là dấu hiệu
+         * người dùng đang dán cả đoạn quảng cáo/thông cáo báo chí vào đây (xem ví dụ thật ở docblock
+         * RenderPromptFromFrameworkAction). Ngưỡng 70% — đủ sớm để người dùng sửa trước khi chạm
+         * `maxlength` HTML (chặn cứng), không phải lúc gõ xong mới báo.
+         */
+        isCustomFieldNearLimit(field) {
+            if (!this.isCustomSelect(field)) return false;
+
+            const max = field.custom_max_length || 150;
+            const len = (this.values[field.key] ?? '').toString().length;
+
+            return len >= max * 0.7;
+        },
+
+        // spec/AIIdeaMatrixGenerator.md §2.2 — hiện nút "Ngẫu nhiên" khi framework đang chọn có
+        // ÍT NHẤT 1 field type 'select' (generic, không riêng heritage_idea_matrix).
+        get hasSelectFields() {
+            return !!this.selectedFramework?.fields?.some((f) => f.type === 'select');
+        },
+
+        /**
+         * Chọn ngẫu nhiên 1 khoá hợp lệ (nằm trong field.options) cho MỖI field select cùng lúc.
+         * Reset cờ custom trước — random luôn trả về khoá đã biết, giữ cờ cũ sẽ khiến ô tự nhập
+         * hiện khoá thô thay vì <select> hiện nhãn.
+         */
+        randomizeSelectFields() {
+            if (!this.selectedFramework) return;
+
+            this.customSelect = {};
+
+            for (const field of this.selectedFramework.fields) {
+                if (field.type !== 'select' || !field.options) continue;
+
+                const keys = Object.keys(field.options);
+                this.values[field.key] = keys[Math.floor(Math.random() * keys.length)];
+            }
+        },
+
+        /**
+         * spec/AIIdeaMatrixGenerator.md §3 — "Dùng lại giá trị từ prompt trước": prefill toàn bộ
+         * field_values từ GeneratedPrompt gần nhất CÙNG framework_key, để biên tập viên không phải
+         * gõ lại field campaign-level (VD red_thread/audience) mỗi lần tạo prompt mới — chỉ cần đổi
+         * field select. KHÔNG phải khái niệm Campaign riêng (§0/§3 — đã ghi nhận là giới hạn chấp
+         * nhận được, không giả vờ giải quyết triệt để bằng bảng DB mới).
+         */
+        async reuseLastPromptValues() {
+            if (!this.selectedKey) return;
+
+            const url = (serverData.lastPromptUrlTemplate ?? '').replace('__FRAMEWORK__', this.selectedKey);
+            if (!url) return;
+
+            try {
+                const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                const data = await res.json();
+                if (!data.found) {
+                    window.Toast?.info?.('Chưa có prompt nào trước đó dùng mẫu này.');
+
+                    return;
+                }
+
+                // Reset cờ custom — giá trị nạp về tự quyết định chế độ hiển thị qua isCustomSelect
+                // (khoá đã biết → <select>; text tự do → ô tự nhập), cờ cũ không được ghi đè nó.
+                this.customSelect = {};
+
+                for (const field of this.selectedFramework.fields) {
+                    if (field.key in data.field_values) this.values[field.key] = data.field_values[field.key];
+                }
+            } catch (e) {
+                console.error('[prompt-framework-studio] reuse last prompt failed', e);
+            }
         },
 
         /**
@@ -105,7 +240,9 @@ document.addEventListener('alpine:init', () => {
         // chung. Ngưỡng 15 ký tự là ước lượng thô, cố ý rộng rãi để tránh làm phiền field vốn
         // ngắn gọn hợp lệ (vd Role 1 câu) — mục đích chỉ là gợi ý, không phải validate.
         isFieldThin(field) {
-            if (!field.required) return false;
+            // spec/AIIdeaMatrixGenerator.md §2.1 — field 'select' chọn từ danh sách cố định, không
+            // phải text tự do — cảnh báo "còn ngắn, thử cụ thể hơn" vô nghĩa với khoá kiểu 'lam_ban'.
+            if (!field.required || field.type === 'select') return false;
             const val = (this.values[field.key] ?? '').toString().trim();
 
             return val.length > 0 && val.length < 15;
@@ -127,8 +264,12 @@ document.addEventListener('alpine:init', () => {
             if (this.editorialBlock) blocks.push(this.editorialBlock);
 
             for (const field of this.selectedFramework.fields) {
-                const val = (this.values[field.key] ?? '').toString().trim();
+                let val = (this.values[field.key] ?? '').toString().trim();
                 if (!val) continue;
+
+                // spec/AIIdeaMatrixGenerator.md §2.1 — PHẢI khớp tuyệt đối RenderPromptFromFrameworkAction
+                // phía server: field 'select' hiện NHÃN, không phải khoá thô, kể cả ở bản xem trước.
+                if (field.type === 'select') val = field.options?.[val] ?? val;
 
                 blocks.push(field.prompt_heading ? `## ${field.prompt_heading}\n\n${val}` : val);
             }

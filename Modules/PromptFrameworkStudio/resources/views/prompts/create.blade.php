@@ -22,6 +22,7 @@
           {{ Js::from([
               'editorialContextUrlTemplate' => route('backend.api.promptstudio.editorial-context', ['category' => '__UUID__']),
               'initialCategoryUuid' => old('post_category_uuid'),
+              'lastPromptUrlTemplate' => route('backend.api.promptstudio.last-prompt', ['frameworkKey' => '__FRAMEWORK__']),
           ]) }}
       )">
     @csrf
@@ -55,7 +56,14 @@
                         2. Điền nội dung —
                         <span class="badge badge-primary badge-outline font-mono" x-text="selectedFramework.name"></span>
                     </h2>
-                    <button type="button" class="btn btn-ghost btn-xs" @click="showFrameworkPicker = true">Đổi mẫu khác</button>
+                    <div class="flex items-center gap-1">
+                        {{-- spec/AIIdeaMatrixGenerator.md §3 — chỉ có ý nghĩa ở trang TẠO MỚI (edit
+                             đã có sẵn giá trị thật của chính bản ghi đang sửa). --}}
+                        <button type="button" class="btn btn-ghost btn-xs" @click="reuseLastPromptValues()">
+                            🔁 Dùng lại giá trị từ prompt trước
+                        </button>
+                        <button type="button" class="btn btn-ghost btn-xs" @click="showFrameworkPicker = true">Đổi mẫu khác</button>
+                    </div>
                 </div>
                 <p class="text-xs text-base-content/40 -mt-2" x-text="selectedFramework.description"></p>
 
