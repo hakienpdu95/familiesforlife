@@ -1,15 +1,15 @@
 # Ma trận Ý tưởng Di sản — bổ sung vào `Modules/PromptFrameworkStudio`
 
-**Đặc tả Kỹ thuật — v2.5 (v2.0 viết lại toàn bộ sau đánh giá đối chiếu codebase; v2.1 sửa lỗi thiết kế "biến số bị đóng cứng thành hằng số" — thêm `allow_custom`, §2.5; v2.2 sửa lỗi phát sinh từ chính v2.1 — mở tự do không giới hạn độ dài, thêm `custom_max_length`, §2.6; v2.3 đưa hướng dẫn dùng đúng field (§2.7) vào trong form qua `tip`/`custom_placeholder`, §2.8; v2.4 thêm khối "Ví dụ tham khảo" toàn cảnh trên field đầu tiên, §2.9; v2.5 đổi `example` chuẩn sang thông cáo hội chợ OCOP thật theo yêu cầu người dùng, §2.10)**
+**Đặc tả Kỹ thuật — v2.6 (v2.0 viết lại toàn bộ sau đánh giá đối chiếu codebase; v2.1 sửa lỗi thiết kế "biến số bị đóng cứng thành hằng số" — thêm `allow_custom`, §2.5; v2.2 sửa lỗi phát sinh từ chính v2.1 — mở tự do không giới hạn độ dài, thêm `custom_max_length`, §2.6; v2.3 đưa hướng dẫn dùng đúng field (§2.7) vào trong form qua `tip`/`custom_placeholder`, §2.8; v2.4 thêm khối "Ví dụ tham khảo" toàn cảnh trên field đầu tiên, §2.9; v2.5 đổi `example` chuẩn sang thông cáo hội chợ OCOP thật theo yêu cầu người dùng, §2.10; v2.6 thêm "Trợ lý tách nội dung thô" — sinh prompt cho AI ngoài tự đề xuất giá trị field, §2.11)**
 
 **Ngày:** 2026-08-17
 **Framework:** Laravel 13 (PHP 8.4) + NWIDART Modules + Lorisleiva Actions
 **Module đích:** `Modules/PromptFrameworkStudio` (KHÔNG còn là module riêng `AIIdeaMatrixGenerator`)
 
-> **Trạng thái: ĐÃ TRIỂN KHAI (2026-08-17, gồm cả v2.1-v2.5).** Toàn bộ §2 (field `select` + nút
+> **Trạng thái: ĐÃ TRIỂN KHAI (2026-08-17, gồm cả v2.1-v2.6).** Toàn bộ §2 (field `select` + nút
 > Randomize + preset `heritage_idea_matrix` + validate + §3 "Dùng lại giá trị từ prompt trước" +
 > §2.5 `allow_custom` + §2.6 `custom_max_length` + §2.8 `tip`/`custom_placeholder` + §2.9 khối "Ví
-> dụ tham khảo" + §2.10 ví dụ chuẩn OCOP) đã code đúng theo đặc tả.
+> dụ tham khảo" + §2.10 ví dụ chuẩn OCOP + §2.11 "Trợ lý tách nội dung thô") đã code đúng theo đặc tả.
 > Đã kiểm chứng bằng: (1) `RenderPromptFromFrameworkActionTest` — 6 test pure-logic (không chạm DB)
 > chạy PASS thật, gồm 3 test mới khoá lại hành vi `select`; (2) tinker end-to-end — config 27
 > framework, `RenderPromptFromFrameworkAction::handle('heritage_idea_matrix', ...)` render đúng NHÃN
@@ -373,6 +373,35 @@ vụ (406 từ, dưới xa ngưỡng cảnh báo 6.000 từ); trang `create?fram
 Thư viện đều phản ánh ví dụ mới, không còn dấu vết "Gốm sứ Bát Tràng" ở đâu; `test_all_13_frameworks_
 render_with_full_example_values` (test CHUNG cho mọi framework, không sửa gì) vẫn pass — xác nhận ví
 dụ mới tự nhất quán, không cần sửa test riêng.
+
+### 2.11 "Trợ lý tách nội dung thô" — sinh prompt cho AI ngoài tự đề xuất giá trị field (v2.6)
+
+**Yêu cầu:** người dùng cần 1 prompt copy-paste để dán vào Claude/ChatGPT CÙNG với 1 đoạn nội dung
+thô (thông cáo/quảng cáo) — AI ngoài đọc xong tự đề xuất giá trị cho từng field, thay vì người dùng
+phải tự tay áp 7 bước của §2.7 mỗi lần.
+
+**Cơ chế — reuse hoàn toàn metadata field đã có, KHÔNG thêm config mới:** `fieldSplittingPrompt`
+(getter Alpine mới, thuần client-side JS — không endpoint, không gọi AI Provider, đúng nguyên tắc
+§0) đọc `selectedFramework.fields` rồi với mỗi field ghép `label` + `hint` + (nếu `type === 'select'`)
+liệt kê nguyên văn `options` + ghi chú `custom_max_length` khi có `allow_custom` + (nếu field có
+`tip`) nhúng NGUYÊN VĂN `tip` vào chỉ dẫn. Đây là điểm quan trọng nhất: hướng dẫn "Tình huống Gia
+đình PHẢI ĐỘC LẬP với Yếu tố Di sản/Sản phẩm" (viết ở `tip`, §2.8) tự động lọt vào prompt tách field
+mà KHÔNG cần viết lại — nếu không có cơ chế tái dùng `tip` này, AI tách field rất dễ mắc lại đúng lỗi
+gốc (§2.6): sao chép nguyên nội dung quảng cáo vào field "Tình huống Gia đình".
+
+**Generic cho MỌI framework** — đã kiểm chứng bằng tinker: prompt sinh đúng cho cả `heritage_idea_
+matrix` lẫn `costar`, không phải cơ chế riêng cho preset di sản.
+
+**UI:** `<details>` ĐÓNG mặc định (khác khối "Ví dụ tham khảo" §2.9 luôn mở) — đặt NGAY TRÊN khối đó,
+vì đây là bước làm TRƯỚC nếu có sẵn nội dung thô. Gồm: 1 textarea dán nội dung thô
+(`rawContentToSplit`, reactive) + nút Copy (đọc trực tiếp giá trị Alpine, KHÔNG qua DOM `.value` của
+`<textarea readonly x-text>` — tránh đúng vấn đề kỹ thuật đã biết: gán `textContent` bằng `x-text`
+không đồng bộ ngược lại thuộc tính `.value` của `<textarea>` sau lần render đầu) + 1 textarea readonly
+hiển thị prompt đã ghép.
+
+**CỐ Ý KHÔNG tự parse kết quả AI trả về để tự điền form** — người dùng đọc câu trả lời AI rồi tự gõ
+vào từng field, đúng nguyên tắc "gợi ý không quyết định thay" xuyên suốt cả module (rủi ro parse sai
+lặng lẽ điền nhầm field không đáng đánh đổi lấy tiện lợi tự động điền).
 
 ---
 

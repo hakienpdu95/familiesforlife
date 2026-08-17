@@ -78,6 +78,31 @@
     </button>
 </div>
 
+{{-- spec/AIIdeaMatrixGenerator.md §2.11 (v2.6) — "Trợ lý tách nội dung thô": sinh 1 prompt copy-paste
+     cho AI ngoài (Claude/ChatGPT) đề xuất giá trị cho TỪNG field, dựa vào nội dung thô người dùng
+     dán vào. Đóng (`<details>`, không `open`) — khác khối "Ví dụ tham khảo" ngay dưới đây (LUÔN cần
+     thấy), khối này chỉ cần khi có sẵn 1 đoạn nội dung thô muốn tách, không phải ai cũng dùng mỗi
+     lần. Generic cho MỌI framework (`fieldSplittingPrompt` đọc thẳng field.label/hint/tip/options
+     của framework đang chọn — không riêng heritage_idea_matrix). KHÔNG tự parse kết quả AI trả về
+     để tự điền form — người dùng đọc rồi tự gõ vào từng ô (§2.11, "gợi ý không quyết định thay"). --}}
+<details class="rounded-lg border border-secondary/30 bg-secondary/5">
+    <summary class="cursor-pointer p-3 text-xs font-semibold text-secondary-content/90 flex items-center gap-1.5 select-none">
+        🪄 Có sẵn nội dung thô (thông cáo/quảng cáo)? Dán vào đây để nhờ AI ngoài gợi ý điền field
+    </summary>
+    <div class="px-3 pb-3 space-y-2">
+        <textarea x-model="rawContentToSplit" rows="4"
+                  placeholder="Dán nguyên văn thông cáo/quảng cáo/mô tả sản phẩm vào đây..."
+                  class="textarea textarea-bordered textarea-sm w-full placeholder:text-base-content/30"></textarea>
+        <div class="flex items-center justify-between gap-2">
+            <p class="text-xs text-base-content/50">Copy prompt bên dưới, dán sang ChatGPT/Claude, đọc kết quả rồi tự gõ vào từng field — công cụ không tự điền hộ.</p>
+            <button type="button" @click="copyFieldSplittingPrompt($event.target.closest('button'))"
+                    class="btn btn-secondary btn-outline btn-xs shrink-0">📋 Copy prompt</button>
+        </div>
+        <textarea readonly rows="6" x-text="fieldSplittingPrompt"
+                  class="textarea textarea-bordered w-full font-mono text-xs leading-relaxed bg-base-200/40"></textarea>
+    </div>
+</details>
+
 {{-- spec/AIIdeaMatrixGenerator.md §2.9 (v2.4) — khối "Ví dụ tham khảo", đặt NGAY TRÊN field đầu
      tiên (Thông điệp cốt lõi ở heritage_idea_matrix) theo đúng yêu cầu: người dùng thấy được TOÀN
      CẢNH 1 ví dụ hoàn chỉnh trước khi điền, thay vì tự ghép lại từ placeholder rải rác từng ô. Mở

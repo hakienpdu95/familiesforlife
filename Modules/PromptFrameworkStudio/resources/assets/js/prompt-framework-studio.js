@@ -37,6 +37,10 @@ document.addEventListener('alpine:init', () => {
         editorialHasFoundation: false,
         loadingEditorial: false,
 
+        // spec/AIIdeaMatrixGenerator.md §2.11 (v2.6) — nội dung thô người dùng dán vào (thông cáo/
+        // quảng cáo/mô tả sản phẩm) để sinh "prompt tách field" — xem fieldSplittingPrompt bên dưới.
+        rawContentToSplit: '',
+
         init() {
             // Đảm bảo mọi field của framework đã chọn đều có key trong `values` (kể cả field
             // optional chưa từng điền trước đây, hoặc field mới được thêm vào framework sau khi
@@ -83,6 +87,71 @@ document.addEventListener('alpine:init', () => {
                     label: field.label,
                     value: field.type === 'select' ? (field.options?.[example[field.key]] ?? example[field.key]) : example[field.key],
                 }));
+        },
+
+        /**
+         * spec/AIIdeaMatrixGenerator.md §2.11 (v2.6) — "prompt tách field": sinh 1 prompt copy-paste
+         * cho AI ngoài (Claude/ChatGPT) đọc `rawContentToSplit` rồi đề xuất giá trị cho TỪNG field
+         * của framework đang chọn. Generic cho MỌI framework — đọc thẳng `field.label`/`hint`/`tip`/
+         * `type`/`options`/`allow_custom`/`custom_max_length` đã có sẵn trong config, KHÔNG thêm dữ
+         * liệu preset-specific nào mới. `tip` (nếu field có) được nhúng NGUYÊN VĂN vào chỉ dẫn cho
+         * field đó — đây chính là cách hướng dẫn "Tình huống Gia đình PHẢI ĐỘC LẬP với sản phẩm"
+         * (§2.8) tới được AI tách field, không cần viết lại lần 2.
+         *
+         * KHÔNG gọi AI Provider — đúng nguyên tắc §0 của cả module, chỉ tổ chức prompt để copy tay.
+         * KHÔNG tự parse kết quả AI trả về để tự điền form (rủi ro parse sai lặng lẽ điền nhầm field)
+         * — người dùng đọc kết quả rồi tự gõ vào từng ô, đúng tinh thần "gợi ý không quyết định thay"
+         * xuyên suốt cả module.
+         */
+        get fieldSplittingPrompt() {
+            if (!this.selectedFramework) return '';
+
+            const lines = [
+                'Bạn là trợ lý phân tích nội dung marketing. Tôi sẽ dán 1 đoạn nội dung thô (thông cáo báo chí/quảng cáo/mô tả sản phẩm) ở cuối prompt này. Nhiệm vụ của bạn: đề xuất giá trị cho các trường bên dưới, dựa vào nội dung thô đó.',
+                '',
+                'CÁC TRƯỜNG CẦN ĐIỀN (theo đúng thứ tự):',
+            ];
+
+            this.selectedFramework.fields.forEach((field, idx) => {
+                let line = `${idx + 1}. ${field.label} — ${field.hint || ''}`;
+
+                if (field.type === 'select') {
+                    const optionLabels = Object.values(field.options || {}).join(' · ');
+                    line += ` Chọn ĐÚNG 1 trong các lựa chọn sau, ghi lại NGUYÊN VĂN nhãn đã chọn: ${optionLabels}.`;
+                    if (field.allow_custom) {
+                        line += ` Nếu KHÔNG lựa chọn nào phù hợp, tự đề xuất 1 cụm từ ngắn khác (tối đa ${field.custom_max_length || 150} ký tự, không phải đoạn văn dài).`;
+                    }
+                }
+                if (field.tip) line += ` LƯU Ý QUAN TRỌNG: ${field.tip}`;
+
+                lines.push(line);
+            });
+
+            lines.push('');
+            lines.push('QUY TẮC TRẢ LỜI: chỉ trả về đúng các dòng theo định dạng "Tên trường: giá trị", không giải thích thêm, không đánh số lại, không markdown. Field nào KHÔNG có sẵn thông tin trong nội dung thô thì bạn TỰ ĐỀ XUẤT hợp lý theo đúng hướng dẫn của field đó (không bỏ trống, không bịa số liệu/sự kiện cụ thể).');
+            lines.push('');
+            lines.push('NỘI DUNG THÔ CẦN TÁCH:');
+            lines.push('"""');
+            lines.push(this.rawContentToSplit || '(dán nội dung của bạn vào đây trước khi copy prompt)');
+            lines.push('"""');
+
+            return lines.join('\n');
+        },
+
+        async copyFieldSplittingPrompt(btnEl) {
+            const idleHtml = btnEl ? btnEl.innerHTML : null;
+
+            try {
+                await navigator.clipboard.writeText(this.fieldSplittingPrompt);
+                window.Toast?.success?.('Đã copy prompt tách field vào clipboard.');
+
+                if (btnEl) {
+                    btnEl.innerHTML = '✓ Đã copy!';
+                    setTimeout(() => { btnEl.innerHTML = idleHtml; }, 1500);
+                }
+            } catch (e) {
+                console.error('[prompt-framework-studio] copy field splitting prompt failed', e);
+            }
         },
 
         // spec/AIIdeaMatrixGenerator.md §2.5 (v2.1) — field.key => true khi người dùng CHỦ ĐỘNG chọn
