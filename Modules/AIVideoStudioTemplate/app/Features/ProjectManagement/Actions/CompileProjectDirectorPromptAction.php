@@ -345,9 +345,15 @@ class CompileProjectDirectorPromptAction
      * (Model không định nghĩa) — mọi giá trị trong `VIDEO_FORMULAS` đều có tip khớp, khác
      * `CONTENT_TIPS_BY_VIDEO_TYPE` (bỏ qua `other`).
      *
+     * v1.25 (§13, "Cố vấn & Sinh Master Prompt Kịch bản") — đổi `private` → `public` để
+     * `BuildMasterScriptPromptAction` tái dùng đúng 1 nguồn định nghĩa 7 công thức khi liệt kê trong
+     * Master Prompt, cùng lý do/pattern đã áp dụng cho `CONTENT_TIPS_BY_VIDEO_TYPE` ở v1.17 (tránh
+     * chép lại nội dung — chép tay từng gây lệch định nghĩa ABCD ở bản nháp người dùng cung cấp,
+     * xem §13.0).
+     *
      * @var array<string, string>
      */
-    private const FORMULA_TIPS_BY_VIDEO_FORMULA = [
+    public const FORMULA_TIPS_BY_VIDEO_FORMULA = [
         'psa' => 'Problem–Solution–CTA (30-60s): mở đầu nêu RÕ nỗi đau/vấn đề khán giả đang gặp → phần giữa cho thấy sản phẩm/dịch vụ giải quyết vấn đề đó thế nào → kết thúc mời hành động cụ thể. Phù hợp video quảng cáo sản phẩm, bản demo.',
         'bab' => 'Before–After–Bridge (60-90s): mở đầu mô tả tình trạng TRƯỚC khi có sản phẩm → phần giữa cho thấy kết quả/thành công SAU khi dùng → kết thúc giải thích sản phẩm là "cầu nối" tạo ra chuyển đổi đó. Phù hợp lời chứng thực (testimonial), câu chuyện chuyển đổi.',
         'hook_value_cta' => 'Hook–Value–CTA (15-45s): 1-2 giây đầu gây chú ý bằng phát biểu/hình ảnh mạnh (hook) → phần giữa truyền đạt 1 mẹo/insight hữu ích (value) → kết thúc mời hành động cụ thể. Phù hợp nội dung giáo dục, chia sẻ chuyên môn, mẹo/chiến lược.',

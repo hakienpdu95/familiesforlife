@@ -372,19 +372,27 @@
         </div>
         @endcan
 
-        {{-- spec/AIVideoStudioTemplate_Technical_Specification.md §9 — ai_video_studio_template.use
+        {{-- spec/AIVideoStudioTemplate_Technical_Specification.md §9/§13 — ai_video_studio_template.use
              cấp cho platform_content_editor/platform_content_head/platform_section_editor
              (Modules\AIVideoStudioTemplate\Database\Seeders\AIVideoStudioTemplatePermissionSeeder).
              Quản lý Director Prompt Template (Project → nhiều Shot) — KHÔNG gọi AI Provider trong
-             app, cùng nguyên tắc ContentOutlines/PromptFrameworkStudio. --}}
+             app, cùng nguyên tắc ContentOutlines/PromptFrameworkStudio. v1.23 — đổi sang dropdown
+             (cùng pattern ContentCalendar bên dưới) để thêm trang "Sinh Master Prompt kịch bản" mà không tách
+             route/permission riêng — vẫn gate phẳng bằng 1 permission như trước. --}}
         @can(\App\Enums\PermissionEnum::AI_VIDEO_STUDIO_TEMPLATE_USE->value)
-        <div class="nav-group">
-            <a href="{{ route('backend.aivideostudiotemplate.index') }}"
-               class="nav-link {{ request()->routeIs('backend.aivideostudiotemplate.*') ? 'active' : '' }}">
+        <details {{ request()->routeIs('backend.aivideostudiotemplate.*') ? 'open' : '' }}>
+            <summary class="nav-summary {{ request()->routeIs('backend.aivideostudiotemplate.*') ? 'active' : '' }}">
                 <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                 <span class="nav-label">AI Video Studio</span>
-            </a>
-        </div>
+                <svg class="nav-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m9 18 6-6-6-6"/></svg>
+            </summary>
+            <div class="sub-menu">
+                <a href="{{ route('backend.aivideostudiotemplate.index') }}"
+                   class="sub-link {{ request()->routeIs('backend.aivideostudiotemplate.index') || request()->routeIs('backend.aivideostudiotemplate.create') || request()->routeIs('backend.aivideostudiotemplate.show') || request()->routeIs('backend.aivideostudiotemplate.edit') ? 'active' : '' }}">Danh sách project</a>
+                <a href="{{ route('backend.aivideostudiotemplate.formula-advisor') }}"
+                   class="sub-link {{ request()->routeIs('backend.aivideostudiotemplate.formula-advisor') ? 'active' : '' }}">Sinh Master Prompt</a>
+            </div>
+        </details>
         @endcan
 
         {{-- spec/ContentCalendar_Technical_Specification.md §6/§13 — content_calendar.view cấp cho

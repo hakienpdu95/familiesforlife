@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\AIVideoStudioTemplate\Features\FormulaAdvisor\Http\FormulaAdvisorController;
 use Modules\AIVideoStudioTemplate\Features\ProjectManagement\Http\ProjectApiController;
 use Modules\AIVideoStudioTemplate\Features\ProjectManagement\Http\ProjectController;
 use Modules\AIVideoStudioTemplate\Features\ShotManagement\Http\ShotApiController;
@@ -12,6 +13,9 @@ Route::middleware(['auth', 'can:ai_video_studio_template.use'])
     ->name('backend.aivideostudiotemplate.')
     ->group(function (): void {
         Route::get('/', [ProjectController::class, 'index'])->name('index');
+        // spec §13 (v1.23) — đặt TRƯỚC 'create' trong route list nhưng KHÔNG đụng tới path 'create'/
+        // '{project}' đã có; GET thuần, không ghi DB (§13 docblock FormulaAdvisorController).
+        Route::get('formula-advisor', [FormulaAdvisorController::class, 'index'])->name('formula-advisor');
         Route::get('create', [ProjectController::class, 'create'])->name('create');
         Route::post('/', [ProjectController::class, 'store'])->name('store');
         Route::get('{project}', [ProjectController::class, 'show'])->name('show');

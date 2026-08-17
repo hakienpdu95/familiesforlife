@@ -1,12 +1,55 @@
 # AI Video Studio Template — Quản lý Director Prompt Template cho video AI
 
-**Đặc tả Kỹ thuật Chi tiết — ĐÃ triển khai (v1.0/v1.1); v1.2-v1.6 bổ sung techniques từ Hedra/DeepReel/BytePlus/Pyxeljam/LinkedIn; v1.7 rà soát nội bộ; v1.8 bổ sung từ sentx.ai; v1.9 bổ sung từ veed.io; v1.10-v1.13 xem tóm tắt bên dưới; v1.14-v1.15 bổ sung từ mindstudio.ai + imagine.art; v1.16 bổ sung từ tulsainternetmarketingservice.com + swarmify.com; v1.17 UI theo phản hồi người dùng; v1.18 bổ sung từ ngram.com (2 bài); v1.19 UI theo phản hồi người dùng; v1.20 bổ sung từ leadde.ai; v1.21 bổ sung từ buffer.com; v1.22 đối chiếu goepps.com — KHÔNG áp dụng gì, xem changelog dưới**
+**Đặc tả Kỹ thuật Chi tiết — ĐÃ triển khai (v1.0/v1.1); v1.2-v1.6 bổ sung techniques từ Hedra/DeepReel/BytePlus/Pyxeljam/LinkedIn; v1.7 rà soát nội bộ; v1.8 bổ sung từ sentx.ai; v1.9 bổ sung từ veed.io; v1.10-v1.13 xem tóm tắt bên dưới; v1.14-v1.15 bổ sung từ mindstudio.ai + imagine.art; v1.16 bổ sung từ tulsainternetmarketingservice.com + swarmify.com; v1.17 UI theo phản hồi người dùng; v1.18 bổ sung từ ngram.com (2 bài); v1.19 UI theo phản hồi người dùng; v1.20 bổ sung từ leadde.ai; v1.21 bổ sung từ buffer.com; v1.22 đối chiếu goepps.com — KHÔNG áp dụng gì; v1.23 thêm tính năng "Cố vấn Công thức Kịch bản" (spec/ma-tran-cong-thuc-kich-ban.md, ngách Mẹ & Bé) — xem §13; v1.24 sửa 2 lỗi tự phát hiện khi rà soát lại v1.23; v1.25 ĐẢO NGƯỢC kiến trúc §13 theo yêu cầu người dùng — AI ngoài tự chọn công thức + viết kịch bản qua Master Prompt, phạm vi mở rộng ra mọi sản phẩm**
 
-**Phiên bản:** 1.22
-**Ngày:** 2026-08-14
+**Phiên bản:** 1.25
+**Ngày:** 2026-08-17
 **Framework:** Laravel 13 (PHP 8.4) + NWIDART Modules + Lorisleiva Actions
 **Module:** `Modules/AIVideoStudioTemplate`
 
+> **v1.25 (2026-08-17, cùng ngày với v1.23/v1.24 — người dùng cung cấp trực tiếp 1 bản đặc tả cập nhật
+> "AI AFFILIATE SCRIPT GENERATOR (UPDATED)", đề xuất kiến trúc khác hẳn v1.23):** ĐẢO NGƯỢC quyết định
+> kiến trúc cốt lõi của §13 — sau khi hỏi rõ và được người dùng xác nhận trực tiếp 2 điểm (xem §13
+> đầu mục, bảng lịch sử phiên bản): (1) thay `FormulaDecisionTree` (PHP thuần) bằng để **AI ngoài**
+> (ChatGPT/Claude, copy-paste) tự chạy cây quyết định 5 câu hỏi VÀ viết kịch bản trong 1 lượt, qua 1
+> "Master Prompt" render bởi `BuildMasterScriptPromptAction` mới; (2) bỏ giới hạn 36 sản phẩm Mẹ & Bé
+> — `topic`/`description` tự do cho MỌI ngành hàng. Đã XOÁ `FormulaDecisionTree`/`RecommendVideo
+> FormulaAction`/`FormulaDecisionTreeTest` (v1.23/v1.24) + wizard 9 câu hỏi + 2 nút "Tạo project với
+> công thức này" + cơ chế `$prefill` ở `ProjectController::create()` (không còn nơi gọi). GIỮ LẠI
+> `ProductFormulaCatalog` (đổi vai trò: từ "ra quyết định" sang "ngữ cảnh tham khảo tuỳ chọn"). Phát
+> hiện + sửa 2 lỗi trong bản đặc tả người dùng cung cấp trước khi đưa vào Master Prompt: định nghĩa
+> ABCD sai acronym (bản nháp ghi "Attention-Benefit-Credibility-Decision", đúng phải là "Attention-
+> Branding-Connection-Direction" theo Google/YouTube Ads, đã dẫn nguồn từ v1.20) và Onboarding bị giới
+> hạn nhầm chỉ cho Mẹ & Bé (mâu thuẫn với chính quyết định mở rộng phạm vi). Chi tiết đầy đủ + toàn bộ
+> lý do: §13 (viết lại hoàn toàn, không còn §13.6/§13.7 cũ — gộp vào bảng lịch sử + §13.0).
+>
+> **v1.24 (2026-08-17, cùng ngày với v1.23 — tự rà soát lại tính năng "Cố vấn Công thức Kịch bản" theo
+> yêu cầu người dùng "đánh giá xem độ khớp và phù hợp ra sao"):** phát hiện 2 điểm code v1.23 không
+> khớp ý định thiết kế ban đầu (không phải lỗi ở dữ liệu nguồn `ma-tran-cong-thuc-kich-ban.md`, mà ở
+> lớp UI/tích hợp ngược vào Project): (1) `forbid_formulas` được thêm vào catalog nhưng KHÔNG nơi nào
+> đọc — dữ liệu chết, trông như đã enforce nhưng thực ra không; (2) nút "Tạo project với công thức
+> này" gán sai nội dung vào `target_audience`/`core_message` (2 field này tự định nghĩa khác ở
+> `_form.blade.php`) thay vì `description`. Cả 2 đã sửa lúc đó — **LƯU Ý: cả cơ chế `$prefill` lẫn 2
+> nút "Tạo project với công thức này" mà v1.24 sửa đều đã bị XOÁ ở v1.25** (không còn `primary` để
+> prefill sau khi bỏ `FormulaDecisionTree`) — nội dung v1.24 dưới đây giữ nguyên vì lịch sử, KHÔNG còn
+> mô tả code hiện tại, xem §13 để biết trạng thái mới nhất. `ProductFormulaCatalog` (phần dữ liệu ma
+> trận) KHÔNG đổi ở v1.24, và vẫn còn nguyên ở v1.25 (chỉ đổi vai trò, không đổi cấu trúc).
+>
+> **v1.23 (2026-08-17 — theo yêu cầu người dùng, đọc `spec/ma-tran-cong-thuc-kich-ban.md` +
+> `spec/technical_spec_laravel_module.md`, đối chiếu với `AiVideoStudioProject::VIDEO_FORMULAS` đã có
+> từ v1.16/v1.20):** thêm tính năng **"Cố vấn Công thức Kịch bản"** — 1 trang mới trong chính module
+> này (route `formula-advisor`, menu con mới trong sidebar), tra cứu 36 nhóm sản phẩm ngách Mẹ & Bé đã
+> ghép sẵn công thức/chân dung/ranh giới pháp lý (`ProductFormulaCatalog`) + cây quyết định 5 câu hỏi
+> cho sản phẩm chưa có trong ma trận (`FormulaDecisionTree`, thuần PHP, KHÔNG gọi AI). Phát hiện quan
+> trọng khi đối chiếu: 6 "công thức" của nguồn (PSC/BAB/HVC/ABCD/Testimonial/Onboarding) đã tồn tại
+> 1-1 trong `VIDEO_FORMULAS` — module KHÔNG cần định nghĩa formula mới, chỉ cần lớp GỢI Ý chọn formula
+> nào cho catalog/cây quyết định có sẵn. Bản nháp `technical_spec_laravel_module.md` (do người dùng
+> cung cấp) đề xuất 1 module Laravel riêng + bảng DB + AI làm rule engine — CỐ Ý KHÔNG theo, xem bảng
+> so sánh + lý do đầy đủ ở §13.0 (rủi ro pháp lý nếu để LLM tự chọn nhánh "nhóm cấm/hạn chế quảng
+> cáo", trùng lặp khái niệm "công thức" nếu tách module, vi phạm nguyên tắc "không gọi AI Provider" đã
+> chốt từ v1.0 §0 và convention CLAUDE.md "mọi lệnh gọi LLM qua `app/Services/AI/`"). Chi tiết đầy đủ:
+> §13.
+>
 > **v1.22 (2026-08-14 — đọc `goepps.com/blog/which-content-formats-do-ai-engines-actually-cite-most`,
 > rà soát kỹ thuật còn thiếu so với v1.21 — KHÔNG áp dụng gì):** nguồn (bài blog quảng bá 1 tool trả
 > phí "AEO by GoEpps") nói về định dạng NỘI DUNG VĂN BẢN (Q&A ngắn/bảng-danh sách/review bên thứ ba)
@@ -415,6 +458,9 @@
 - `ngram.com/blog/how-to-make-demo-video` (v1.18 — phần lớn ngoài phạm vi vì nói về quay màn hình thật, xem changelog) — quy trình 8 bước làm video demo phần mềm (screen recording): mục tiêu/đối tượng, script, độ dài/format, ghi hình, chỉnh sửa, chọn nơi đặt, CTA, theo dõi hiệu suất; genuine gap áp dụng được: "slow down" (thiên kiến pacing của người quay/viết).
 - `leadde.ai/blog/marketing-script-template` (v1.20) — 15 marketing script template xếp theo 3 nhóm funnel (Video/Ads, Product-Sales-Funnel, Trust-Education-Retention), 8 thành phần script, Google ABCD Framework (YouTube Ads), AI Prompt Template ("Act as [role]..."), sai lầm phổ biến + tips chuyển đổi, metrics theo giai đoạn funnel. Genuine gap áp dụng được: ABCD Framework, Testimonial 5-part (Before-Challenge-Solution-Result-Recommendation), Customer Onboarding Script (Welcome-First value-Steps-Mistakes-Support CTA) — cả 3 xem changelog v1.20.
 - `buffer.com/resources/social-media-marketing-strategy` (v1.21) — hướng dẫn 7 bước xây dựng chiến lược social media (kiểm toán, audience, SMART goal, chọn nền tảng, content pillar, lịch đăng/tần suất, đo lường) — phần lớn NGOÀI phạm vi (công cụ quản lý tài khoản mạng xã hội, không có module tương ứng trong hệ thống, xem changelog v1.21). Genuine gap áp dụng được: bảng mục tiêu thuật toán theo nền tảng (TikTok = thời gian xem + tỷ lệ hoàn thành; YouTube = thời gian xem + tỷ lệ nhấp) — enrich `PLATFORM_TIPS_BY_ASPECT_RATIO` (9:16/16:9).
+- `spec/ma-tran-cong-thuc-kich-ban.md` (v1.23, do người dùng cung cấp) — "Ma trận Công thức Kịch bản Video Affiliate", ngách Mẹ & Bé: giải phẫu 6 công thức (PSC/BAB/HVC/ABCD/Testimonial 5 phần/Onboarding 5 phần — cả 6 đã có sẵn trong `VIDEO_FORMULAS`), cây quyết định 5 câu hỏi, ma trận 36 nhóm sản phẩm × công thức × chân dung (Tier S/A/B/C/D), nhóm sản phẩm bị cấm/hạn chế quảng cáo (Nghị định 100/2014/NĐ-CP), bảng cấm ghép công thức × sản phẩm, 4 kịch bản mẫu hoàn chỉnh, phân bổ ngân sách sản xuất. Xem §13.
+- `spec/technical_spec_laravel_module.md` (v1.23, do người dùng cung cấp) — bản nháp gốc "AI Affiliate Video Script Generator", đề xuất module Laravel riêng + bảng DB + AI làm rule engine chọn công thức + tự sinh kịch bản. v1.23 dùng làm ĐIỂM KHỞI ĐẦU nhưng KHÔNG theo kiến trúc đề xuất (module riêng/bảng DB) — xem lịch sử ở §13.
+- Bản đặc tả "AI AFFILIATE SCRIPT GENERATOR (UPDATED)" (v1.25, do người dùng cung cấp trực tiếp trong hội thoại, không phải file riêng trong `spec/`) — đề xuất input tự do (`topic`/`description`, không giới hạn danh mục) + "Master Prompt" nhúng cây quyết định 5 câu hỏi để AI ngoài (ChatGPT/Claude) tự chọn công thức VÀ viết kịch bản. Người dùng xác nhận trực tiếp áp dụng kiến trúc này, ĐẢO NGƯỢC quyết định gốc của v1.23 — xem bảng lịch sử phiên bản + lý do đầy đủ ở đầu §13/§13.0. 2 lỗi phát hiện trong bản đặc tả này (định nghĩa ABCD sai, Onboarding bị giới hạn nhầm chỉ Mẹ & Bé) đã sửa trước khi đưa vào `BuildMasterScriptPromptAction`, KHÔNG copy nguyên văn.
 
 ---
 
@@ -982,6 +1028,8 @@ Route::middleware(['auth', 'can:ai_video_studio_template.use'])
     ->name('backend.aivideostudiotemplate.')
     ->group(function (): void {
         Route::get('/', [ProjectController::class, 'index'])->name('index');
+        // v1.23 (§13) — trang Sinh Master Prompt kịch bản (đổi tên ở v1.25), thuần GET (không ghi DB, không CSRF).
+        Route::get('formula-advisor', [FormulaAdvisorController::class, 'index'])->name('formula-advisor');
         Route::get('create', [ProjectController::class, 'create'])->name('create');
         Route::post('/', [ProjectController::class, 'store'])->name('store');
         Route::get('{project}', [ProjectController::class, 'show'])->name('show');
@@ -1106,6 +1154,15 @@ Thêm 1 mục top-level (không nằm trong nhóm "Bài viết") trong `resource
 @endcan
 ```
 
+> **v1.23 (§13) — đổi sang dropdown.** Bản trên là thiết kế GỐC (1 `nav-link` đơn) — sau khi thêm
+> trang mới (route `formula-advisor`, cùng permission, không route/permission riêng), mục menu đổi
+> thành `<details>`/`<summary>` (cùng pattern `ContentCalendar` — xem §13.4) với 2 `sub-link`: "Danh
+> sách project" (route cũ `index`/`create`/`show`/`edit`) và trang mới (route `formula-advisor`).
+> KHÔNG có permission/route mới nào phát sinh từ việc đổi UI này — vẫn gate phẳng bằng
+> `ai_video_studio_template.use`. Nhãn sub-link đổi từ "Cố vấn công thức" (v1.23) sang "Sinh Master
+> Prompt" (v1.25) — cùng lúc đổi kiến trúc trang từ tự chọn công thức sang render Master Prompt
+> copy-paste (§13.0).
+
 ---
 
 ## 10. Ngoài phạm vi (v1)
@@ -1178,6 +1235,12 @@ Thêm 1 mục top-level (không nằm trong nhóm "Bài viết") trong `resource
 - **v1.18 — `demo_5part` hợp lệ như 3 khoá cũ**: `Rule::in()` chấp nhận `demo_5part` (không còn báo lỗi 422); `videoFormulaLabel()` trả `"Demo Script 5 phần (90-120s)"`; `<select>` ở `_form.blade.php` có đủ 4 lựa chọn (tự động qua `@foreach`, không cần sửa view).
 - **v1.18 — `FORMULA_BEATS['demo_5part']` có 5 dòng**: khối "🎯 Gợi ý mô tả..." ở `show.blade.php` (§8) hiện bảng 5 nhịp (Hook/Problem Deep-dive/Solution Introduction/Key Features in Action/CTA & Outcome) khi project chọn `video_formula = demo_5part` — khác 3 khoá cũ chỉ có 3 nhịp; `compiled_prompt` của mọi Shot có dòng "Công thức kịch bản: Demo Script 5 phần (90-120s)" trong khối Bối cảnh chiến dịch.
 - **v1.18 — tip `product_demo` cập nhật**: project có `video_type = product_demo` → dòng "Gợi ý theo loại video" trong Creative Brief (tài liệu xuất) và khối "🎯 Gợi ý mô tả..." (trang `show`) đều chứa cụm "giới hạn 2-5 tính năng chính".
+- **v1.23 — `ProductFormulaCatalog`**: `count(ProductFormulaCatalog::all())` = 36 (6 Tier S + 11 Tier A + 19 nhóm Tier B/C/D theo spec/ma-tran-cong-thuc-kich-ban.md Phần 3-5); `search('bim')` (không dấu, không phân biệt hoa/thường) khớp entry `bim_ta` ("Bỉm / tã"); `find('khong_ton_tai')` → `null`. **Vẫn đúng ở v1.25** — catalog KHÔNG bị xoá/đổi khi kiến trúc chọn công thức đảo ngược (§13.0), chỉ đổi VAI TRÒ (không còn ra quyết định, chỉ còn là ngữ cảnh tham khảo).
+- **v1.23 — route `formula-advisor` đứng trước `{project}`**: `GET dashboard/ai-video-studio/formula-advisor` KHÔNG bị route `{project}` (model binding theo `uuid`) nuốt mất — do đăng ký TRƯỚC trong cùng group (`routes/web.php`), không phải do path pattern khác biệt.
+- **v1.24 — `ProductFormulaCatalogTest` (6 Unit test, `tests/Unit/Modules/AIVideoStudioTemplate/ProductFormulaCatalogTest.php`)**: `count(all())` = 36; `find('khong_ton_tai')` → `null`; `find('bim_ta')` → đúng `name`/`primary`; `search('BIM')` (không dấu, không hoa/thường) khớp `bim_ta`; `search('')` trả về đủ 36; **KHÔNG entry nào có `primary`/`secondary` trùng `forbid_formulas` của chính nó** (`test_no_entry_recommends_a_formula_it_also_forbids`) — test này FAIL nếu 1 lần sửa catalog sau này vô tình đưa `bab` vào `secondary` của `kem_duong_am` (đã bị `forbid_formulas` cấm). Vẫn đúng ở v1.25.
+- **v1.24 — badge `forbid_formulas` trên UI**: catalog entry có `forbid_formulas` không rỗng (VD `kem_duong_am`) → panel chi tiết (`?product=kem_duong_am`) render thêm badge `badge-error` có tiền tố "🚫" cho MỖI formula bị cấm, cạnh badge tham khảo `primary`/`secondary`; entry không có `forbid_formulas` (đa số) → không có badge nào thêm. Vẫn đúng ở v1.25 (badge chuyển sang `badge-outline` cho `primary`/`secondary` vì không còn là "đề xuất chính thức", nhưng `forbid_formulas` giữ nguyên `badge-error`).
+- **v1.25 — `FormulaDecisionTree`/`RecommendVideoFormulaAction`/`FormulaDecisionTreeTest` ĐÃ XOÁ**: gọi các class này (namespace cũ) → `class not found`; wizard 9 câu hỏi không còn tồn tại trên UI; nút "Tạo project với công thức này" (cả 2 vị trí ở v1.23/v1.24) không còn tồn tại — `ProjectController::create()`/`_form.blade.php`/`create.blade.php` đã REVERT nguyên trạng trước v1.23 (không còn nhận/xử lý `$prefill`).
+- **v1.25 — `BuildMasterScriptPromptAction::handle()` (11 Unit test, `tests/Unit/Modules/AIVideoStudioTemplate/BuildMasterScriptPromptActionTest.php`, không chạm DB/AI)**: chuỗi trả về LUÔN chứa `topic`; `description` rỗng/`null` → chèn "Không có mô tả chi tiết"; `description` có giá trị → chèn nguyên văn, KHÔNG chèn placeholder; `isMotherBaby=true` → chứa "Nghị định 100/2014/NĐ-CP" + "before/after trên cơ thể trẻ em"; `isMotherBaby=false` → KHÔNG chứa 2 cụm đó, thay bằng nhắc nhở chung ("chính sách quảng cáo của nền tảng"); LUÔN chứa đúng cụm "Attention-Branding-Connection-Direction" (định nghĩa ABCD gốc Google, v1.20) và KHÔNG BAO GIỜ chứa "Attention-Benefit-Credibility-Decision" (định nghĩa sai ở bản nháp người dùng cung cấp, §13.0); LUÔN liệt kê đủ 7 công thức (`FORMULA_TIPS_BY_VIDEO_FORMULA`, tái dùng từ `CompileProjectDirectorPromptAction`, đổi `private` → `public` ở v1.25); KHÔNG chứa cụm "dành cho sản phẩm nhạy cảm (Mẹ & Bé)" (định nghĩa Onboarding bị thu hẹp sai ở bản nháp — giữ định nghĩa gốc không giới hạn ngành hàng); `topic`/`description` nhiều dòng → dòng nối được thụt lề 4 space (`indentContinuationLines()`, cùng kỹ thuật `BuildShotPromptAction` §3.1); luôn kết thúc bằng câu yêu cầu trả về "Công thức đã chọn, Lý do chọn".
 
 **v1.7 — rà soát logic build prompt (xem changelog đầu tài liệu):**
 
@@ -1217,3 +1280,177 @@ Thêm 1 mục top-level (không nằm trong nhóm "Bài viết") trong `resource
 14. Sidebar entry (§9).
 15. Feature test theo §11.
 16. `vendor/bin/pint` + `php artisan test`.
+
+**v1.23 → v1.25 — lịch sử triển khai tính năng bổ sung §13 (chỉ liệt kê trạng thái HIỆN TẠI, xem
+đầu tài liệu để biết chi tiết từng bước đã đảo ngược/xoá — không lặp lại lịch sử ở đây):**
+
+17. `ProductFormulaCatalog` (`Features/FormulaAdvisor/Support/`) — chuyển thể matrix từ spec/ma-tran-cong-thuc-kich-ban.md, KHÔNG thêm bảng DB (§13.1). Còn nguyên từ v1.23, chỉ đổi VAI TRÒ ở v1.25 (§13.0).
+18. `BuildMasterScriptPromptAction` (`Features/FormulaAdvisor/Actions/`) — thay `RecommendVideoFormulaAction`/`FormulaDecisionTree` (v1.23/v1.24, ĐÃ XOÁ ở v1.25). Render Master Prompt copy-paste, KHÔNG có logic quyết định (§13.2).
+19. `FormulaAdvisorController` (`Features/FormulaAdvisor/Http/`) + view `formula-advisor.blade.php` — 1 trang GET duy nhất (§13.3), viết lại toàn bộ ở v1.25 (bỏ wizard 9 câu hỏi, thêm form topic/description + checkbox `is_mother_baby`).
+20. Route `formula-advisor` trong `routes/web.php` (đặt TRƯỚC `{project}` trong cùng group) — không đổi từ v1.23.
+21. Sidebar: `nav-group` đơn → `details`/`summary` dropdown 2 `sub-link` ("Danh sách project" + "Sinh Master Prompt", đổi tên từ "Cố vấn công thức" ở v1.25) — không đổi cấu trúc từ v1.23.
+22. `CompileProjectDirectorPromptAction::FORMULA_TIPS_BY_VIDEO_FORMULA` đổi `private` → `public` (v1.25) để `BuildMasterScriptPromptAction` tái dùng, tránh chép tay gây lệch định nghĩa (bài học từ lỗi ABCD ở bản nháp người dùng cung cấp, §13.0).
+23. `tests/Unit/Modules/AIVideoStudioTemplate/BuildMasterScriptPromptActionTest.php` (11 test, thuần logic) — thay `FormulaDecisionTreeTest.php` (12 test, ĐÃ XOÁ ở v1.25).
+24. `tests/Unit/Modules/AIVideoStudioTemplate/ProductFormulaCatalogTest.php` (6 test, từ v1.24) — còn nguyên, không đổi ở v1.25.
+25. `ProjectController::create()`/`_form.blade.php`/`create.blade.php` — cơ chế `$prefill` (thêm ở v1.23, sửa ở v1.24) đã REVERT nguyên trạng ở v1.25 vì không còn nơi gọi (2 nút "Tạo project với công thức này" đã bỏ khỏi UI, §13.0/§13.5).
+26. `vendor/bin/pint` + `vendor/bin/phpunit tests/Unit/Modules/AIVideoStudioTemplate/` (17 test, không chạm DB) + xác nhận `php artisan route:list --name=aivideostudiotemplate`.
+
+---
+
+
+## 13. Sinh Master Prompt Kịch bản (đổi tên từ "Formula Advisor") — v1.25
+
+**Lịch sử phiên bản của §13 (đọc trước khi dùng — kiến trúc đã ĐẢO NGƯỢC 1 lần, không phải chỉ vá lỗi):**
+
+| Version | Cơ chế chọn công thức | Phạm vi sản phẩm | Trạng thái |
+|---|---|---|---|
+| v1.23 | `FormulaDecisionTree` — PHP thuần, 5 câu hỏi | 36 sản phẩm Mẹ & Bé (catalog) | Đã xoá ở v1.25 |
+| v1.24 | (giữ nguyên v1.23) — chỉ sửa 2 lỗi UI (dead data `forbid_formulas`, prefill sai field) | (giữ nguyên v1.23) | Đã xoá ở v1.25 |
+| **v1.25 (hiện tại)** | **AI ngoài** (ChatGPT/Claude, copy-paste) tự chạy cây quyết định + viết kịch bản | **Mọi sản phẩm** (topic/description tự do) | Đang dùng |
+
+**Nguồn v1.25:** người dùng cung cấp trực tiếp bản đặc tả "ĐẶC TẢ KỸ THUẬT: AI AFFILIATE SCRIPT
+GENERATOR (UPDATED)" trong hội thoại — đề xuất input tự do (`topic`/`description`, không giới hạn
+danh mục) + 1 "Master Prompt" nhúng cây quyết định 5 câu hỏi để AI ngoài tự chọn công thức VÀ viết
+kịch bản, thay cho cách tiếp cận catalog + cây quyết định PHP của v1.23/v1.24. Người dùng xác nhận
+trực tiếp 2 câu hỏi quyết định kiến trúc (không suy đoán): (1) **thay hẳn** cách chọn công thức bằng
+AI thay vì giữ PHP + chỉ thêm bước AI viết kịch bản (phương án tôi đề xuất ban đầu, KHÔNG được chọn);
+(2) **mở rộng phạm vi ra mọi sản phẩm**, không giữ riêng Mẹ & Bé.
+
+### 13.0 Quyết định kiến trúc
+
+**Vì sao chấp nhận đảo ngược quyết định "AI không được chọn công thức" đã lập luận ở v1.23:**
+lý do gốc (v1.23) là lo ngại rủi ro pháp lý nếu AI tự chọn sai nhánh "nhóm cấm/hạn chế quảng cáo".
+Điểm giảm nhẹ quan trọng: cách gọi AI ở v1.25 vẫn là **copy-paste thủ công** — người dùng tự đọc kết
+quả AI trả về trước khi dùng, đúng workflow "KHÔNG gọi AI Provider trong app" mà cả module đã theo từ
+v1.0 (§0) cho ảnh/video. Rủi ro thực tế thấp hơn kịch bản app tự động gọi API rồi tin thẳng kết quả
+(đó mới là rủi ro §13.0 bản v1.23 nhắm tới). Người dùng đã cân nhắc điều này và xác nhận chọn phương
+án đảo ngược — quyết định giữ nguyên, không tranh luận lại.
+
+**2 lỗi trong bản nháp v1.25 người dùng cung cấp — KHÔNG copy nguyên văn vào Master Prompt:**
+
+1. **Định nghĩa ABCD sai.** Bản nháp ghi "Attention-**Benefit-Credibility-Decision**". Code hiện tại
+   (`CompileProjectDirectorPromptAction::FORMULA_TIPS_BY_VIDEO_FORMULA['abcd']`, nguồn Google/YouTube
+   Ads chính thức, dẫn nguồn từ v1.20): "Attention-**Branding-Connection-Direction**" — khác acronym,
+   khác cả nguyên tắc cốt lõi (Branding xuất hiện SỚM vì quảng cáo có thể bị bỏ qua). Giữ định nghĩa
+   đã có trong code (đã dẫn nguồn, đã kiểm chứng), KHÔNG dùng định nghĩa bản nháp.
+2. **Onboarding bị giới hạn nhầm chỉ cho Mẹ & Bé.** Bản nháp ghi "Dành cho sản phẩm nhạy cảm (Mẹ &
+   Bé)". Mâu thuẫn trực tiếp với chính quyết định (2) ở trên (mở rộng phạm vi ra MỌI sản phẩm). Giữ
+   định nghĩa gốc đã có trong code (v1.20, nguồn leadde.ai): khách hàng ĐÃ MUA cần SOP/hướng dẫn sử
+   dụng, không giới hạn ngành hàng.
+
+**Việc XOÁ khỏi codebase (xác nhận trực tiếp bởi người dùng trước khi xoá):**
+
+- `Features/FormulaAdvisor/Support/FormulaDecisionTree.php` — cây quyết định PHP, không còn vai trò.
+- `Features/FormulaAdvisor/Actions/RecommendVideoFormulaAction.php` — wrapper của class trên.
+- `tests/Unit/Modules/AIVideoStudioTemplate/FormulaDecisionTreeTest.php` — 12 test của 2 class trên.
+- Form wizard 9 câu hỏi trên `formula-advisor.blade.php`.
+- 2 nút "Tạo project với công thức này" (catalog panel + wizard result) — không còn `primary` do PHP
+  tính ra để prefill `video_formula`, nên bỏ hẳn thay vì giữ nút trỏ tới dữ liệu không còn đáng tin.
+- Cơ chế `$prefill` ở `ProjectController::create()`/`_form.blade.php`/`create.blade.php` (thêm ở
+  v1.23, sửa ở v1.24) — REVERT nguyên trạng vì không còn nơi gọi sau khi bỏ 2 nút trên. Đây là bài
+  học lặp lại đúng lỗi đã sửa ở v1.24 (`forbid_formulas` là dữ liệu chết) — không giữ lại hạ tầng
+  không ai dùng, dù bản thân cơ chế đó không có bug.
+
+**Việc GIỮ LẠI (không xoá, chỉ đổi vai trò):**
+
+- `ProductFormulaCatalog` (36 sản phẩm Mẹ & Bé, `const BANNED_CATEGORIES`/`FORBIDDEN_COMBOS`/
+  `PRODUCTION_BUDGET`) — từ "nguồn ra quyết định" (v1.23/v1.24) đổi thành "ngữ cảnh tham khảo tuỳ
+  chọn": người dùng có thể bấm 1 sản phẩm đã biết để chèn ghi chú/cảnh báo/chân dung của nó vào ô Mô
+  tả bổ sung trước khi sinh Master Prompt — vẫn hữu ích (tri thức đã hand-curate không mất đi), nhưng
+  không còn khoá cứng công thức nào (§13.1).
+- `ProductFormulaCatalogTest.php` (6 test, v1.24) — vẫn đúng, catalog không đổi cấu trúc dữ liệu.
+- Route `formula-advisor`, cấu trúc dropdown sidebar (2 `sub-link`) — chỉ đổi tên hiển thị.
+
+### 13.1 Dữ liệu — `ProductFormulaCatalog` (vai trò mới: ngữ cảnh tham khảo)
+
+Không đổi cấu trúc so với v1.23/v1.24 (36 entries: `tier`/`name`/`primary`/`secondary`/`personas`/
+`note`/`warning`/`forbid_formulas`/`sample_script`, xem lịch sử ở §11 nếu cần chi tiết field). Đổi
+CÁCH DÙNG: panel chi tiết sản phẩm (`formula-advisor.blade.php`, `?product=slug`) hiển thị `primary`/
+`secondary` bằng `badge-outline` (không còn `badge-primary` — không còn là "đề xuất chính thức", chỉ
+là "công thức từng dùng trong ma trận nội bộ, THAM KHẢO"), `forbid_formulas` vẫn `badge-error` với
+tiền tố 🚫 (v1.24, vẫn có ý nghĩa cảnh báo dù không còn ai enforce). Nút hành động duy nhất trong panel
+đổi từ "Tạo project với công thức này" → **"Dùng làm ngữ cảnh cho Master Prompt"** — set `topic` =
+tên sản phẩm, `description` = `note` + chân dung + `warning` (nối chuỗi), `is_mother_baby` = 1, rồi
+GET lại `formula-advisor` (route hiện tại, không phải `create`).
+
+`BANNED_CATEGORIES`/`FORBIDDEN_COMBOS`/`PRODUCTION_BUDGET` vẫn hiển thị TĨNH ở cuối trang, gắn nhãn rõ
+"Chỉ áp dụng ngành Mẹ & Bé" (badge-ghost cạnh tiêu đề) — tránh người dùng hiểu nhầm áp dụng cho sản
+phẩm ngoài ngách khi phạm vi đã mở rộng ra mọi sản phẩm (§13.0).
+
+### 13.2 `BuildMasterScriptPromptAction` — render Master Prompt
+
+`Features/FormulaAdvisor/Actions/BuildMasterScriptPromptAction::handle(string $topic, ?string
+$description, bool $isMotherBaby): string` — CHỈ render text, KHÔNG có logic quyết định nào (khác
+hẳn `FormulaDecisionTree` đã xoá). Nội dung prompt gồm:
+
+1. **Vai trò** — "chuyên gia Copywriter... Affiliate Video ngắn (TikTok/Reels)".
+2. **Thông tin đầu vào** — `topic`/`description` (fallback "Không có mô tả chi tiết" nếu rỗng), qua
+   `indentContinuationLines()` (cùng kỹ thuật `BuildShotPromptAction::indentContinuationLines()` §3.1
+   — thụt lề 4 space cho dòng nối, giữ ranh giới `NHÃN: giá trị` không vỡ khi giá trị nhiều dòng).
+3. **Cây quyết định 5 câu hỏi** — nguyên văn logic Phần 2 `spec/ma-tran-cong-thuc-kich-ban.md`, giờ là
+   HƯỚNG DẪN cho AI ngoài tự chạy (không phải PHP tính hộ như v1.23).
+4. **Mô tả chi tiết 7 công thức** — lặp `CompileProjectDirectorPromptAction::FORMULA_TIPS_BY_VIDEO_
+   FORMULA` (đổi `private` → `public` ở v1.25 để tái dùng, tránh chép tay gây lệch định nghĩa — đúng
+   bài học rút ra từ lỗi ABCD ở §13.0). Đủ cả `demo_5part` (không thuộc 6 công thức gốc của ma trận
+   Mẹ & Bé nhưng đã có sẵn trong `VIDEO_FORMULAS`) — hợp lý hơn khi phạm vi mở rộng ra sản phẩm cần
+   demo nhiều tính năng (VD đồ gia dụng), AI được phép đề xuất thay thế nếu phù hợp hơn.
+5. **Ranh giới bắt buộc** — CÓ ĐIỀU KIỆN theo `$isMotherBaby` (khác bản nháp gốc gắn cứng ranh giới Mẹ
+   & Bé cho MỌI sản phẩm dù đã mở phạm vi — mâu thuẫn đã sửa ở §13.0):
+   - `true` — nguyên văn Phần 6/Phần 8 nguồn: không hình ảnh trẻ khóc/đau, không before/after trên cơ
+     thể trẻ em, TPCN/da liễu không cam kết chữa bệnh, nhóm cấm/hạn chế quảng cáo (Nghị định 100/2014/
+     NĐ-CP) không CTA bán hàng trực tiếp.
+   - `false` — nhắc nhở chung: không cam kết hiệu quả chưa kiểm chứng, không thổi phồng nỗi sợ, tuân
+     thủ chính sách quảng cáo nền tảng đăng video.
+6. **Yêu cầu kết quả trả về** — "Công thức đã chọn, Lý do chọn, và Kịch bản chi tiết" (bảng 3 cột:
+   Thời lượng/Nhịp | Hình ảnh/Video Shot | Lời thoại/Audio).
+
+Không bọc `<<<DELIMITER>>>` cho `topic`/`description` (khác convention CLAUDE.md cho module GỌI AI
+Provider) — đúng ghi chú prompt-injection đã có ở `BuildShotPromptAction` (v1.7): module này không
+gọi AI, rủi ro thực tế là VỠ CẤU TRÚC (xử lý bằng `indentContinuationLines()`), không phải injection.
+
+**Test:** 11 Unit test không chạm DB, `tests/Unit/Modules/AIVideoStudioTemplate/
+BuildMasterScriptPromptActionTest.php` — chi tiết hành vi từng nhánh xem §11.
+
+### 13.3 UI — `formula-advisor.blade.php` (viết lại ở v1.25)
+
+Vẫn 1 trang GET duy nhất, không CSRF, không ghi DB (cùng nguyên tắc v1.23). Bố cục:
+
+1. **Form sinh Master Prompt** — `topic` (input, required phía client), `description` (textarea,
+   không bắt buộc), checkbox `is_mother_baby` → submit GET, nếu `topic` không rỗng thì render
+   `masterPrompt` (textarea `readonly` + nút Copy, dùng lại `window.aivsCopy()` đã có sẵn trong
+   `aivideostudiotemplate.js` — nạp thêm `@push('scripts')` cho trang này, không cần JS mới).
+2. **Tra cứu catalog Mẹ & Bé** (§13.1) — ô tìm kiếm (`?q=`) + bảng 36 sản phẩm theo Tier, mỗi hàng
+   link "Xem chi tiết" (`?product=slug`) mở panel tham khảo, có nút "Dùng làm ngữ cảnh cho Master
+   Prompt" (không phải "Tạo project" như v1.23/v1.24).
+3. **Bảng tham khảo tĩnh** — nhóm cấm/hạn chế (Phần 6), cấm ghép công thức × sản phẩm (Phần 8), ngân
+   sách sản xuất (Phần 9) — gắn nhãn "Chỉ áp dụng ngành Mẹ & Bé" (§13.1).
+4. Banner cảnh báo cố định đầu trang — kết quả AI trả về vẫn cần biên tập viên đọc lại, ranh giới pháp
+   lý Mẹ & Bé dựa trên Nghị định 100/2014/NĐ-CP.
+
+### 13.4 Route & Sidebar
+
+Route KHÔNG đổi từ v1.23: `GET dashboard/ai-video-studio/formula-advisor` →
+`backend.aivideostudiotemplate.formula-advisor`, cùng middleware `['auth', 'can:ai_video_studio_
+template.use']` với toàn bộ group (§6), đăng ký TRƯỚC route `{project}` (tránh bị model binding
+`{project}` theo `uuid` nuốt mất).
+
+Sidebar — cấu trúc dropdown 2 `sub-link` KHÔNG đổi từ v1.23; chỉ đổi NHÃN hiển thị sub-link thứ 2 từ
+"Cố vấn công thức" → **"Sinh Master Prompt"** (khớp tên trang mới, §9).
+
+### 13.5 Ngoài phạm vi (v1.25)
+
+- **Không tích hợp ngược vào Project** — v1.23/v1.24 có nút "Tạo project với công thức này" prefill
+  `video_formula`; v1.25 KHÔNG còn vì không có `primary` do hệ thống tính ra để prefill (AI ngoài mới
+  biết công thức cuối cùng, sau khi người dùng đã copy-paste xong). Người dùng lấy kết quả từ AI ngoài
+  rồi tự vào "Tạo project mới" (route `create` bình thường) để tạo Project + chọn `video_formula` phù
+  hợp — không có prefill tự động, chấp nhận thêm 1 bước thao tác tay.
+- **Không fuzzy-match `topic` với catalog** — vẫn giữ quyết định từ v1.23 (§13.0 bản gốc): rủi ro
+  pháp lý không đáng đánh đổi lấy tự động hoá. Người dùng tự tra cứu bằng ô tìm kiếm (§13.1).
+- **Không gọi AI Provider để tự động lấy kết quả** — vẫn đúng nguyên tắc §0 gốc của cả module; Master
+  Prompt CHỈ để copy-paste thủ công, không có tích hợp API OpenAI/Anthropic nào trong tính năng này.
+- **Diễn giải đầy đủ 13 mã chân dung (P1-P13)** — như v1.23, tài liệu "Bộ Chân dung Người Review"
+  không có trong repo.
+- **Không lưu lịch sử Master Prompt đã sinh** — mỗi lần load trang tính lại từ query string, không có
+  bảng `generated_prompts` nào (đúng tinh thần "không cần bảng DB" đã chốt ở §13.0 v1.23 gốc, và đúng
+  quyết định "không lưu lịch sử" đã cân nhắc và từ chối ở bản nháp `technical_spec_laravel_module.md`
+  gốc — bảng `generated_scripts` của bản nháp đó không có ý nghĩa khi kết quả AI không quay lại app).
