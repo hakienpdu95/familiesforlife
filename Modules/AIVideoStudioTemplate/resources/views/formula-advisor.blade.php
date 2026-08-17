@@ -9,7 +9,14 @@
     /** @var \Illuminate\Support\Collection|array $catalog */
     $formulaLabels = \Modules\AIVideoStudioTemplate\Models\AiVideoStudioProject::VIDEO_FORMULAS;
     $tierLabels = ['S' => 'Tier S — ưu tiên cao nhất', 'A' => 'Tier A', 'B' => 'Tier B', 'C' => 'Tier C', 'D' => 'Tier D'];
-    $grouped = collect($catalog)->groupBy('tier');
+    /*
+     * v1.26 (sửa lỗi — "Xem chi tiết" luôn ra rỗng): groupBy() mặc định KHÔNG giữ khoá gốc (slug)
+     * trong từng nhóm, tự đánh lại chỉ số 0/1/2... — mọi link "Xem chi tiết" thành ra trỏ
+     * ?product=0/?product=1... không khớp key nào trong ProductFormulaCatalog::PRODUCTS, nên find()
+     * luôn trả null và panel không bao giờ render (không phải lỗi cuộn trang như chẩn đoán ban đầu).
+     * preserveKeys: true (tham số thứ 2) giữ đúng slug làm khoá.
+     */
+    $grouped = collect($catalog)->groupBy('tier', true);
 @endphp
 
 @section('content')
@@ -92,7 +99,13 @@
 
         @if($selected)
         {{-- ── Panel chi tiết sản phẩm đã chọn ── --}}
-        <div class="border border-primary/30 bg-primary/5 rounded-lg p-4 mb-4">
+        {{-- spec §13.3 (v1.26 — phản hồi người dùng "bấm Xem chi tiết không thấy gì"): panel này
+             nằm ~1/3 dưới trang (sau cả Section 1 "Sinh Master Prompt"), nhưng "Xem chi tiết" là
+             điều hướng cả trang (full GET reload) nên trình duyệt reset scroll về đầu trang — panel
+             render ĐÚNG (đã kiểm chứng server-side) nhưng nằm ngoài khung nhìn, trông như "bấm không
+             có gì". Sửa bằng anchor `#aivsSelectedProduct` (link "Xem chi tiết" trỏ tới `id` này) để
+             trình duyệt tự cuộn xuống panel sau khi tải lại trang — không cần JS. --}}
+        <div id="aivsSelectedProduct" class="border border-primary/30 bg-primary/5 rounded-lg p-4 mb-4 scroll-mt-4">
             <div class="flex items-center justify-between gap-2 flex-wrap">
                 <h3 class="font-bold text-base">{{ $selected['name'] }} <span class="badge badge-ghost badge-sm ml-1">{{ $tierLabels[$selected['tier']] ?? $selected['tier'] }}</span></h3>
                 <a href="{{ route('backend.aivideostudiotemplate.formula-advisor', ['q' => $search]) }}" class="text-xs text-base-content/40 hover:text-base-content">✕ Đóng</a>
@@ -118,7 +131,29 @@
             </div>
 
             <p class="text-sm mt-2">{{ $selected['note'] }}</p>
-            <p class="text-xs text-base-content/50 mt-1">Chân dung khán giả (mã tham khảo — cần tài liệu "Bộ Chân dung Người Review" để diễn giải đầy đủ): <b>{{ $selected['personas'] }}</b></p>
+
+            {{-- spec §13.1 (v1.27) — chân dung diễn giải đầy đủ qua PersonaCatalog (spec/chan-dung-
+                 nguoi-review.md, người dùng cung cấp) — trước v1.27 chỉ hiện mã thô kèm ghi chú
+                 "cần tài liệu... để diễn giải đầy đủ" vì tài liệu chưa có trong repo. --}}
+            <p class="text-xs text-base-content/50 mt-2 mb-1">Chân dung khán giả (thứ tự CHÍNH → PHỤ):</p>
+            <div class="space-y-1.5">
+                @foreach(\Modules\AIVideoStudioTemplate\Features\FormulaAdvisor\Support\PersonaCatalog::parseCodes($selected['personas']) as $i => $code)
+                    @php
+                        $persona = \Modules\AIVideoStudioTemplate\Features\FormulaAdvisor\Support\PersonaCatalog::find($code);
+                    @endphp
+                    <div class="flex items-start gap-2 text-xs">
+                        <span class="badge {{ $i === 0 ? 'badge-primary' : 'badge-outline' }} badge-sm shrink-0">{{ $code }}</span>
+                        @if($persona)
+                        <span><b>{{ $persona['name'] }}</b> — {{ $persona['trust_driver'] }}</span>
+                        @else
+                        <span class="text-base-content/40">Mã chưa có trong Bộ Chân dung Người Review.</span>
+                        @endif
+                    </div>
+                    @if($persona && $persona['warning'])
+                    <div class="alert alert-warning py-1.5 px-3 text-xs ml-7"><span>{{ $persona['warning'] }}</span></div>
+                    @endif
+                @endforeach
+            </div>
 
             @if($selected['warning'])
             <div class="alert alert-error py-2 px-3 text-xs mt-2">
@@ -134,7 +169,13 @@
             @endif
 
             @php
-                $selectedContext = trim($selected['note'].' (Chân dung tham khảo: '.$selected['personas'].($selected['warning'] ? '; '.$selected['warning'] : '').')');
+                // v1.27 — dùng TÊN chân dung (PersonaCatalog) thay vì mã thô, để nội dung chèn vào
+                // Master Prompt tự diễn giải được, không cần người đọc tra cứu mã P1-P13 riêng.
+                $personaNames = array_map(
+                    fn ($code) => (\Modules\AIVideoStudioTemplate\Features\FormulaAdvisor\Support\PersonaCatalog::find($code)['name'] ?? $code),
+                    \Modules\AIVideoStudioTemplate\Features\FormulaAdvisor\Support\PersonaCatalog::parseCodes($selected['personas'])
+                );
+                $selectedContext = trim($selected['note'].' (Chân dung tham khảo: '.implode(' → ', $personaNames).($selected['warning'] ? '; '.$selected['warning'] : '').')');
             @endphp
             <div class="card-actions justify-end mt-3">
                 <a href="{{ route('backend.aivideostudiotemplate.formula-advisor', [
@@ -170,7 +211,7 @@
                             @endif
                         </td>
                         <td class="text-xs text-base-content/60">{{ $item['personas'] }}</td>
-                        <td><a href="{{ route('backend.aivideostudiotemplate.formula-advisor', ['product' => $slug, 'q' => $search]) }}" class="link link-primary text-xs">Xem chi tiết</a></td>
+                        <td><a href="{{ route('backend.aivideostudiotemplate.formula-advisor', ['product' => $slug, 'q' => $search]) }}#aivsSelectedProduct" class="link link-primary text-xs">Xem chi tiết</a></td>
                     </tr>
                     @endforeach
                     @empty

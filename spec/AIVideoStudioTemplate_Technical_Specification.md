@@ -1,12 +1,37 @@
 # AI Video Studio Template — Quản lý Director Prompt Template cho video AI
 
-**Đặc tả Kỹ thuật Chi tiết — ĐÃ triển khai (v1.0/v1.1); v1.2-v1.6 bổ sung techniques từ Hedra/DeepReel/BytePlus/Pyxeljam/LinkedIn; v1.7 rà soát nội bộ; v1.8 bổ sung từ sentx.ai; v1.9 bổ sung từ veed.io; v1.10-v1.13 xem tóm tắt bên dưới; v1.14-v1.15 bổ sung từ mindstudio.ai + imagine.art; v1.16 bổ sung từ tulsainternetmarketingservice.com + swarmify.com; v1.17 UI theo phản hồi người dùng; v1.18 bổ sung từ ngram.com (2 bài); v1.19 UI theo phản hồi người dùng; v1.20 bổ sung từ leadde.ai; v1.21 bổ sung từ buffer.com; v1.22 đối chiếu goepps.com — KHÔNG áp dụng gì; v1.23 thêm tính năng "Cố vấn Công thức Kịch bản" (spec/ma-tran-cong-thuc-kich-ban.md, ngách Mẹ & Bé) — xem §13; v1.24 sửa 2 lỗi tự phát hiện khi rà soát lại v1.23; v1.25 ĐẢO NGƯỢC kiến trúc §13 theo yêu cầu người dùng — AI ngoài tự chọn công thức + viết kịch bản qua Master Prompt, phạm vi mở rộng ra mọi sản phẩm**
+**Đặc tả Kỹ thuật Chi tiết — ĐÃ triển khai (v1.0/v1.1); v1.2-v1.6 bổ sung techniques từ Hedra/DeepReel/BytePlus/Pyxeljam/LinkedIn; v1.7 rà soát nội bộ; v1.8 bổ sung từ sentx.ai; v1.9 bổ sung từ veed.io; v1.10-v1.13 xem tóm tắt bên dưới; v1.14-v1.15 bổ sung từ mindstudio.ai + imagine.art; v1.16 bổ sung từ tulsainternetmarketingservice.com + swarmify.com; v1.17 UI theo phản hồi người dùng; v1.18 bổ sung từ ngram.com (2 bài); v1.19 UI theo phản hồi người dùng; v1.20 bổ sung từ leadde.ai; v1.21 bổ sung từ buffer.com; v1.22 đối chiếu goepps.com — KHÔNG áp dụng gì; v1.23 thêm tính năng "Cố vấn Công thức Kịch bản" (spec/ma-tran-cong-thuc-kich-ban.md, ngách Mẹ & Bé) — xem §13; v1.24 sửa 2 lỗi tự phát hiện khi rà soát lại v1.23; v1.25 ĐẢO NGƯỢC kiến trúc §13 theo yêu cầu người dùng — AI ngoài tự chọn công thức + viết kịch bản qua Master Prompt, phạm vi mở rộng ra mọi sản phẩm; v1.26 sửa lỗi "Xem chi tiết" luôn ra rỗng (groupBy() mất khoá slug); v1.27 thêm PersonaCatalog (spec/chan-dung-nguoi-review.md) diễn giải đầy đủ 13 mã chân dung**
 
-**Phiên bản:** 1.25
+**Phiên bản:** 1.27
 **Ngày:** 2026-08-17
 **Framework:** Laravel 13 (PHP 8.4) + NWIDART Modules + Lorisleiva Actions
 **Module:** `Modules/AIVideoStudioTemplate`
 
+> **v1.27 (2026-08-17, cùng ngày — người dùng cung cấp `spec/chan-dung-nguoi-review.md`, lấp khoảng
+> trống đã ghi nhận từ v1.23 "cần tài liệu 'Bộ Chân dung Người Review' để diễn giải đầy đủ"):** thêm
+> `PersonaCatalog` (13 chân dung P1-P13: tên, "điểm tin cậy", ranh giới bắt buộc nếu có) — panel chi
+> tiết catalog (`formula-advisor.blade.php`) đổi từ hiện mã thô ("P2 → P5 → P6") sang hiện đầy đủ tên
+> + lý do tin cậy cho từng mã, kèm cảnh báo riêng cho 4 persona có ranh giới bắt buộc (P7/P9/P11/P12).
+> Link "Dùng làm ngữ cảnh cho Master Prompt" cũng đổi sang chèn tên chân dung thay vì mã thô. Phát
+> sinh 1 bug Blade trong lúc code (dạng rút gọn `@php($var = call($arg))` 1 dòng với ngoặc lồng nhau
+> làm hỏng compile, lỗi biểu hiện xa vị trí thật) — phát hiện bằng cách biên dịch riêng qua `Blade::
+> compileString()` rồi `php -l` kết quả (không phải `php -l` trên file `.blade.php` gốc, vì cú pháp
+> Blade vẫn hợp lệ). Đã sửa + thêm 8 Unit test (`PersonaCatalogTest`, gồm integrity check mọi mã
+> trong `ProductFormulaCatalog` phải resolve được qua `PersonaCatalog`). Chi tiết đầy đủ: §13.1.
+>
+> **v1.26 (2026-08-17, cùng ngày — người dùng báo "bấm 'Xem chi tiết' không thấy gì", sau đó chỉ ra
+> URL thật đang gọi `?product=1` thay vì slug):** 2 vòng chẩn đoán. Vòng 1 (sai): nghi ngờ lỗi cuộn
+> trang (GET reload reset scroll, panel nằm ngoài khung nhìn) — đã thêm anchor `#aivsSelectedProduct`,
+> vô hại nhưng không phải nguyên nhân thật. Vòng 2 (đúng, nhờ người dùng cung cấp URL thật): `collect
+> ($catalog)->groupBy('tier')` ở `formula-advisor.blade.php` thiếu tham số `preserveKeys: true` — mọi
+> item trong từng nhóm bị đánh lại chỉ số 0/1/2..., link "Xem chi tiết" luôn sinh ra `?product=<số>`
+> thay vì `?product=<slug>`, không khớp key nào trong `ProductFormulaCatalog::PRODUCTS` → panel KHÔNG
+> BAO GIỜ render. Bug tồn tại xuyên suốt từ v1.25 (khi trang được viết lại). Sửa bằng `groupBy('tier',
+> true)` + 1 Unit test mới khoá lại ràng buộc "khoá trong mỗi nhóm phải là slug hợp lệ". Bài học quy
+> trình rút ra (ghi ở §13.3): test link do VIEW tự sinh phải trích xuất href THẬT từ HTML đã render,
+> không tự gõ tay 1 giá trị "hợp lý" để test — cách cũ chỉ xác nhận `find()` đúng, không xác nhận VIEW
+> sinh link đúng, và đã che giấu bug này qua lần kiểm chứng ở v1.25. Chi tiết đầy đủ: §13.3.
+>
 > **v1.25 (2026-08-17, cùng ngày với v1.23/v1.24 — người dùng cung cấp trực tiếp 1 bản đặc tả cập nhật
 > "AI AFFILIATE SCRIPT GENERATOR (UPDATED)", đề xuất kiến trúc khác hẳn v1.23):** ĐẢO NGƯỢC quyết định
 > kiến trúc cốt lõi của §13 — sau khi hỏi rõ và được người dùng xác nhận trực tiếp 2 điểm (xem §13
@@ -461,6 +486,7 @@
 - `spec/ma-tran-cong-thuc-kich-ban.md` (v1.23, do người dùng cung cấp) — "Ma trận Công thức Kịch bản Video Affiliate", ngách Mẹ & Bé: giải phẫu 6 công thức (PSC/BAB/HVC/ABCD/Testimonial 5 phần/Onboarding 5 phần — cả 6 đã có sẵn trong `VIDEO_FORMULAS`), cây quyết định 5 câu hỏi, ma trận 36 nhóm sản phẩm × công thức × chân dung (Tier S/A/B/C/D), nhóm sản phẩm bị cấm/hạn chế quảng cáo (Nghị định 100/2014/NĐ-CP), bảng cấm ghép công thức × sản phẩm, 4 kịch bản mẫu hoàn chỉnh, phân bổ ngân sách sản xuất. Xem §13.
 - `spec/technical_spec_laravel_module.md` (v1.23, do người dùng cung cấp) — bản nháp gốc "AI Affiliate Video Script Generator", đề xuất module Laravel riêng + bảng DB + AI làm rule engine chọn công thức + tự sinh kịch bản. v1.23 dùng làm ĐIỂM KHỞI ĐẦU nhưng KHÔNG theo kiến trúc đề xuất (module riêng/bảng DB) — xem lịch sử ở §13.
 - Bản đặc tả "AI AFFILIATE SCRIPT GENERATOR (UPDATED)" (v1.25, do người dùng cung cấp trực tiếp trong hội thoại, không phải file riêng trong `spec/`) — đề xuất input tự do (`topic`/`description`, không giới hạn danh mục) + "Master Prompt" nhúng cây quyết định 5 câu hỏi để AI ngoài (ChatGPT/Claude) tự chọn công thức VÀ viết kịch bản. Người dùng xác nhận trực tiếp áp dụng kiến trúc này, ĐẢO NGƯỢC quyết định gốc của v1.23 — xem bảng lịch sử phiên bản + lý do đầy đủ ở đầu §13/§13.0. 2 lỗi phát hiện trong bản đặc tả này (định nghĩa ABCD sai, Onboarding bị giới hạn nhầm chỉ Mẹ & Bé) đã sửa trước khi đưa vào `BuildMasterScriptPromptAction`, KHÔNG copy nguyên văn.
+- `spec/chan-dung-nguoi-review.md` (v1.27, do người dùng cung cấp) — "Bộ Chân dung Người Review (KOC Persona) — 13 chân dung × 104 sản phẩm", tài liệu bổ trợ cho `spec/ma-tran-cong-thuc-kich-ban.md` mà `ProductFormulaCatalog::PRODUCTS[...]['personas']` đã tham chiếu (mã P1-P13) từ v1.23 nhưng không có nội dung diễn giải trong repo cho tới lúc này. Chuyển thể thành `PersonaCatalog` (§13.1) — 13 entry `name`/`trust_driver`/`warning`, dùng để hiển thị đầy đủ thay vì mã thô trên panel chi tiết catalog.
 
 ---
 
@@ -1241,6 +1267,12 @@ Thêm 1 mục top-level (không nằm trong nhóm "Bài viết") trong `resource
 - **v1.24 — badge `forbid_formulas` trên UI**: catalog entry có `forbid_formulas` không rỗng (VD `kem_duong_am`) → panel chi tiết (`?product=kem_duong_am`) render thêm badge `badge-error` có tiền tố "🚫" cho MỖI formula bị cấm, cạnh badge tham khảo `primary`/`secondary`; entry không có `forbid_formulas` (đa số) → không có badge nào thêm. Vẫn đúng ở v1.25 (badge chuyển sang `badge-outline` cho `primary`/`secondary` vì không còn là "đề xuất chính thức", nhưng `forbid_formulas` giữ nguyên `badge-error`).
 - **v1.25 — `FormulaDecisionTree`/`RecommendVideoFormulaAction`/`FormulaDecisionTreeTest` ĐÃ XOÁ**: gọi các class này (namespace cũ) → `class not found`; wizard 9 câu hỏi không còn tồn tại trên UI; nút "Tạo project với công thức này" (cả 2 vị trí ở v1.23/v1.24) không còn tồn tại — `ProjectController::create()`/`_form.blade.php`/`create.blade.php` đã REVERT nguyên trạng trước v1.23 (không còn nhận/xử lý `$prefill`).
 - **v1.25 — `BuildMasterScriptPromptAction::handle()` (11 Unit test, `tests/Unit/Modules/AIVideoStudioTemplate/BuildMasterScriptPromptActionTest.php`, không chạm DB/AI)**: chuỗi trả về LUÔN chứa `topic`; `description` rỗng/`null` → chèn "Không có mô tả chi tiết"; `description` có giá trị → chèn nguyên văn, KHÔNG chèn placeholder; `isMotherBaby=true` → chứa "Nghị định 100/2014/NĐ-CP" + "before/after trên cơ thể trẻ em"; `isMotherBaby=false` → KHÔNG chứa 2 cụm đó, thay bằng nhắc nhở chung ("chính sách quảng cáo của nền tảng"); LUÔN chứa đúng cụm "Attention-Branding-Connection-Direction" (định nghĩa ABCD gốc Google, v1.20) và KHÔNG BAO GIỜ chứa "Attention-Benefit-Credibility-Decision" (định nghĩa sai ở bản nháp người dùng cung cấp, §13.0); LUÔN liệt kê đủ 7 công thức (`FORMULA_TIPS_BY_VIDEO_FORMULA`, tái dùng từ `CompileProjectDirectorPromptAction`, đổi `private` → `public` ở v1.25); KHÔNG chứa cụm "dành cho sản phẩm nhạy cảm (Mẹ & Bé)" (định nghĩa Onboarding bị thu hẹp sai ở bản nháp — giữ định nghĩa gốc không giới hạn ngành hàng); `topic`/`description` nhiều dòng → dòng nối được thụt lề 4 space (`indentContinuationLines()`, cùng kỹ thuật `BuildShotPromptAction` §3.1); luôn kết thúc bằng câu yêu cầu trả về "Công thức đã chọn, Lý do chọn".
+- **v1.26 — sửa lỗi "Xem chi tiết" luôn ra rỗng (`ProductFormulaCatalogTest::test_grouping_by_tier_with_preserve_keys_keeps_slugs_as_keys`, thêm vào file test đã có ở v1.24)**: `collect($catalog)->groupBy('tier', true)` — MỌI khoá trong từng nhóm PHẢI là slug string (VD `bim_ta`), KHÔNG được là chỉ số nguyên tự đánh lại; MỌI slug đó PHẢI khớp 1 entry thật qua `ProductFormulaCatalog::find()`. Test FAIL nếu ai đó lỡ bỏ tham số `true` (`preserveKeys`) khi sửa `formula-advisor.blade.php` sau này — đúng bug thật đã xảy ra ở v1.25/v1.26 (§13.3).
+- **v1.26 — link "Xem chi tiết" từ trang catalog thật (không phải slug tự gõ tay)**: trích xuất href thật từ HTML đã render ở trang `formula-advisor` (không query) → parse query string → gọi lại `FormulaAdvisorController::index()` với đúng query đó → `$selected` PHẢI khác `null` và panel (`id="aivsSelectedProduct"`) PHẢI xuất hiện trong HTML. Cách test THIẾU đúng bước "trích xuất href thật" (tự gõ tay 1 slug hợp lệ để test) sẽ KHÔNG phát hiện được bug này — xem bài học ghi lại ở §13.3.
+- **v1.27 — `PersonaCatalog` (8 Unit test, `tests/Unit/Modules/AIVideoStudioTemplate/PersonaCatalogTest.php`, không chạm DB)**: `count(PERSONAS)` = 13; `find('P99')` → `null`; `find('P2')` → chứa "Mẹ bỉm 0–3 tháng"; `parseCodes()` tách đúng thứ tự cho cả 3 kiểu phân cách đã dùng trong catalog (`"P2 → P5 → P6"` → `['P2','P5','P6']`; `"P2 + P9"` → `['P2','P9']`; `"P5 / P6 / P7"` → `['P5','P6','P7']`; `"P5"` → `['P5']`); **mọi mã chân dung xuất hiện trong `ProductFormulaCatalog::PRODUCTS` PHẢI resolve được qua `PersonaCatalog::find()`** (`test_every_persona_code_referenced_in_product_catalog_exists`) — test FAIL nếu catalog tham chiếu 1 mã không tồn tại (VD gõ nhầm "P14").
+- **v1.27 — panel chi tiết catalog hiển thị TÊN chân dung**: `?product=bim_ta` → HTML chứa "Mẹ bỉm 0–3 tháng" (P2, mã đầu = badge `badge-primary`) VÀ "Mẹ tối ưu chi phí" (P5)/"Mẹ kỹ tính về thành phần" (P6, badge `badge-outline`) VÀ KHÔNG còn chứa cụm "cần tài liệu" (caveat cũ đã xoá); `?product=kem_duong_am` (persona P7, có `warning`) → HTML chứa alert riêng "Không dùng từ \"chữa\"/\"trị\"/\"khỏi hẳn\"..." NGAY DƯỚI badge P7 (không lẫn với `$selected['warning']` chung của sản phẩm).
+- **v1.27 — link "Dùng làm ngữ cảnh cho Master Prompt" dùng TÊN chân dung**: query `description` decode ra chứa "Chân dung tham khảo: Mẹ bỉm 0–3 tháng..." (tên đầy đủ nối bằng " → "), KHÔNG còn chứa mã thô kiểu "P2 → P5 → P6" trần trụi.
+- **v1.27 — sửa lỗi Blade `@php($var = expr())` 1 dòng với biểu thức có ngoặc lồng nhau làm hỏng compile**: `formula-advisor.blade.php` compile qua `Blade::compileString()` rồi `php -l` trên kết quả → không còn lỗi `syntax error, unexpected token "endif"`. Bài học quy trình: `Blade::compileString()` KHÔNG tự validate cú pháp PHP của chuỗi compile ra — phải `php -l` (hoặc thực thi) kết quả compile mới phát hiện được lỗi dạng này, riêng `php -l` trên file `.blade.php` gốc KHÔNG phát hiện được (cú pháp Blade hợp lệ, lỗi chỉ lộ SAU khi compile).
 
 **v1.7 — rà soát logic build prompt (xem changelog đầu tài liệu):**
 
@@ -1294,6 +1326,19 @@ Thêm 1 mục top-level (không nằm trong nhóm "Bài viết") trong `resource
 24. `tests/Unit/Modules/AIVideoStudioTemplate/ProductFormulaCatalogTest.php` (6 test, từ v1.24) — còn nguyên, không đổi ở v1.25.
 25. `ProjectController::create()`/`_form.blade.php`/`create.blade.php` — cơ chế `$prefill` (thêm ở v1.23, sửa ở v1.24) đã REVERT nguyên trạng ở v1.25 vì không còn nơi gọi (2 nút "Tạo project với công thức này" đã bỏ khỏi UI, §13.0/§13.5).
 26. `vendor/bin/pint` + `vendor/bin/phpunit tests/Unit/Modules/AIVideoStudioTemplate/` (17 test, không chạm DB) + xác nhận `php artisan route:list --name=aivideostudiotemplate`.
+
+**v1.26 — sửa lỗi "Xem chi tiết" luôn ra rỗng:**
+
+27. `formula-advisor.blade.php` — `collect($catalog)->groupBy('tier', true)` (thêm tham số `preserveKeys`, thiếu ở v1.25) + `id="aivsSelectedProduct"`/anchor `#aivsSelectedProduct` trên link "Xem chi tiết" (§13.3).
+28. `ProductFormulaCatalogTest::test_grouping_by_tier_with_preserve_keys_keeps_slugs_as_keys` — test mới khoá lại ràng buộc.
+
+**v1.27 — thêm `PersonaCatalog` (spec/chan-dung-nguoi-review.md, người dùng cung cấp):**
+
+29. `PersonaCatalog` (`Features/FormulaAdvisor/Support/`) — 13 chân dung, chuyển thể Phần 2 nguồn (§13.1).
+30. `formula-advisor.blade.php` — panel chi tiết catalog đổi từ hiện mã thô sang lặp `PersonaCatalog::parseCodes()`/`find()`, hiện tên + `trust_driver` + `warning` riêng (nếu có); nút "Dùng làm ngữ cảnh" đổi sang dùng tên chân dung thay vì mã thô.
+31. `tests/Unit/Modules/AIVideoStudioTemplate/PersonaCatalogTest.php` (8 test) — bao gồm integrity check mọi mã trong `ProductFormulaCatalog` phải resolve được.
+32. Sửa lỗi Blade phát sinh trong lúc triển khai: `@php($persona = ...)` 1 dòng (ngoặc lồng nhau) → đổi sang `@php ... @endphp` dạng khối (§13.1, ghi chú "Bug phát sinh + sửa").
+33. `vendor/bin/pint` + `vendor/bin/phpunit tests/Unit/Modules/AIVideoStudioTemplate/` (26 test) + `Blade::compileString()` rồi `php -l` trên kết quả compile (không chỉ `php -l` file `.blade.php` gốc).
 
 ---
 
@@ -1370,12 +1415,42 @@ CÁCH DÙNG: panel chi tiết sản phẩm (`formula-advisor.blade.php`, `?produ
 là "công thức từng dùng trong ma trận nội bộ, THAM KHẢO"), `forbid_formulas` vẫn `badge-error` với
 tiền tố 🚫 (v1.24, vẫn có ý nghĩa cảnh báo dù không còn ai enforce). Nút hành động duy nhất trong panel
 đổi từ "Tạo project với công thức này" → **"Dùng làm ngữ cảnh cho Master Prompt"** — set `topic` =
-tên sản phẩm, `description` = `note` + chân dung + `warning` (nối chuỗi), `is_mother_baby` = 1, rồi
-GET lại `formula-advisor` (route hiện tại, không phải `create`).
+tên sản phẩm, `description` = `note` + TÊN chân dung (không phải mã thô, v1.27 — xem `PersonaCatalog`
+bên dưới) + `warning` (nối chuỗi), `is_mother_baby` = 1, rồi GET lại `formula-advisor` (route hiện
+tại, không phải `create`).
 
 `BANNED_CATEGORIES`/`FORBIDDEN_COMBOS`/`PRODUCTION_BUDGET` vẫn hiển thị TĨNH ở cuối trang, gắn nhãn rõ
 "Chỉ áp dụng ngành Mẹ & Bé" (badge-ghost cạnh tiêu đề) — tránh người dùng hiểu nhầm áp dụng cho sản
 phẩm ngoài ngách khi phạm vi đã mở rộng ra mọi sản phẩm (§13.0).
+
+**`PersonaCatalog` (v1.27) — diễn giải 13 mã chân dung.** Từ v1.23, `ProductFormulaCatalog::PRODUCTS
+[...]['personas']` luôn lưu chuỗi mã THÔ (VD `"P2 → P5 → P6"`), hiển thị nguyên văn kèm ghi chú "cần
+tài liệu 'Bộ Chân dung Người Review' để diễn giải đầy đủ" — tài liệu đó KHÔNG có trong repo. Người
+dùng cung cấp trực tiếp `spec/chan-dung-nguoi-review.md` ("Bộ Chân dung Người Review — 13 chân dung ×
+104 sản phẩm"), lấp đúng khoảng trống đã ghi từ v1.23. Thêm `Features/FormulaAdvisor/Support/
+PersonaCatalog` — `const PERSONAS` (13 entries: `name`/`trust_driver`/`warning` nullable, chuyển thể
+từ Phần 2 nguồn) + `find(string $code): ?array` + `parseCodes(string $raw): string[]` (tách chuỗi mã
+thô theo ĐÚNG thứ tự xuất hiện, regex `/P\d+/` — KHÔNG giả định 1 ký tự phân cách cố định vì catalog
+dùng lẫn "→"/"+"/"/" tuỳ entry). Panel chi tiết catalog (§13.3) đổi từ hiện `<b>{{ $selected['personas']
+}}</b>` sang lặp `parseCodes()` + `find()`, hiện TÊN + `trust_driver` cho từng mã (badge đầu tiên =
+`badge-primary`, các mã sau = `badge-outline` — đúng thứ tự CHÍNH → PHỤ nguồn dữ liệu vốn đã mã hoá
+qua "→"), kèm alert cảnh báo riêng nếu persona đó có `warning` (P7/P9/P11/P12 — Phần 2 nguồn có ghi
+"⚠️ Ranh giới bắt buộc"). 4 mã có `warning`: **P7** (không dùng "chữa"/"trị"/"khỏi hẳn"), **P9** (không
+gắn tên với sữa công thức/bình sữa/ti giả, thiết bị y tế không nói tác dụng điều trị), **P11** (dẫn
+hướng bác sĩ, không tự đưa phác đồ chăm sóc vết mổ), **P12** (tránh áp lực giảm cân/lấy lại dáng). Test
+integrity: `PersonaCatalogTest::test_every_persona_code_referenced_in_product_catalog_exists()` — mọi
+mã xuất hiện trong `ProductFormulaCatalog::PRODUCTS` PHẢI tồn tại trong `PersonaCatalog::PERSONAS`
+(§11).
+
+> **Bug phát sinh + sửa trong lúc triển khai (v1.27):** dùng dạng rút gọn 1 dòng `@php($persona =
+> PersonaCatalog::find($code))` bên trong `@foreach` — Blade compile SAI khi biểu thức bên trong có
+> 2 cặp ngoặc lồng nhau (ngoặc của `@php(...)` + ngoặc của `find($code)`), sinh ra `<?php(...)` KHÔNG
+> có `?>` đóng, làm cả phần HTML/Blade phía SAU bị nuốt vào trong 1 khối PHP duy nhất (lỗi biểu hiện
+> xa vị trí thật — `syntax error, unexpected token "endif"` ở tận cuối panel). Phát hiện bằng cách
+> biên dịch riêng file qua `Blade::compileString()` rồi chạy `php -l` trên kết quả (compile không tự
+> validate cú pháp PHP). Sửa: đổi sang dạng khối đầy đủ `@php ... @endphp` (an toàn với biểu thức có
+> ngoặc lồng nhau) — tránh dùng `@php(...)` 1 dòng cho bất kỳ biểu thức nào chứa lời gọi hàm/method có
+> tham số trong ngoặc.
 
 ### 13.2 `BuildMasterScriptPromptAction` — render Master Prompt
 
@@ -1427,6 +1502,30 @@ Vẫn 1 trang GET duy nhất, không CSRF, không ghi DB (cùng nguyên tắc v1
 4. Banner cảnh báo cố định đầu trang — kết quả AI trả về vẫn cần biên tập viên đọc lại, ranh giới pháp
    lý Mẹ & Bé dựa trên Nghị định 100/2014/NĐ-CP.
 
+> **v1.26 (cùng ngày 2026-08-17 — người dùng báo "bấm Xem chi tiết không thấy gì"):** 2 lỗi liên tiếp
+> phát hiện khi điều tra, cả 2 đều nằm ở việc build link "Xem chi tiết", KHÔNG phải ở
+> `FormulaAdvisorController`/`ProductFormulaCatalog::find()` (2 phần này đúng ngay từ v1.25, đã kiểm
+> chứng độc lập trước khi tìm ra lỗi thật):
+> 1. **Chẩn đoán ban đầu SAI** — nghi ngờ do trang GET reload làm mất vị trí cuộn, panel render ĐÚNG
+>    nhưng nằm ngoài khung nhìn (~1/3 dưới trang, sau cả Section 1). Đã thêm `id="aivsSelectedProduct"`
+>    + link trỏ `#aivsSelectedProduct` — vô hại nhưng KHÔNG giải quyết được báo cáo tiếp theo của
+>    người dùng (`?product=1` — số, không phải slug).
+> 2. **Lỗi thật**: `collect($catalog)->groupBy('tier')` — gọi THIẾU tham số thứ 2 `preserveKeys` (mặc
+>    định `false`) — Laravel tự đánh lại chỉ số 0/1/2... cho từng item TRONG mỗi nhóm, làm mất khoá
+>    gốc (slug, VD `bim_ta`) mà link "Xem chi tiết" (`?product={$slug}`) phụ thuộc vào. Kết quả: MỌI
+>    link sinh ra trỏ `?product=0`/`?product=1`/... — không khớp key nào trong `ProductFormulaCatalog::
+>    PRODUCTS`, `find()` luôn trả `null`, panel KHÔNG BAO GIỜ render, bất kể cuộn trang thế nào. **Sửa**:
+>    thêm `preserveKeys: true` — `groupBy('tier', true)`. Bug này tồn tại xuyên suốt từ lúc trang được
+>    viết lại ở v1.25 — trước đó (v1.23/v1.24) không có bug này vì bảng khi đó dùng
+>    `@foreach($items as $slug => $item)` trên cùng biến `$grouped` (cách build không đổi), nghĩa là
+>    bug đã có TỪ v1.23, chỉ là chưa ai click thử "Xem chi tiết" đủ để phát hiện cho tới v1.26.
+>
+> Bài học rút ra (ghi lại để tránh lặp lại): khi test 1 tính năng dựa trên link được VIEW tự sinh ra
+> (không phải URL người test tự gõ), PHẢI kiểm tra bằng cách trích xuất link THẬT từ HTML đã render
+> rồi mới gọi lại — không được tự tay gõ 1 giá trị "hợp lý" (VD `product=bim_ta`) để test, vì cách đó
+> chỉ xác nhận `find()` hoạt động đúng, không xác nhận VIEW sinh link đúng. Lần kiểm chứng v1.25 (§13,
+> đoạn "Now let's render the full page end-to-end") mắc đúng lỗi này.
+
 ### 13.4 Route & Sidebar
 
 Route KHÔNG đổi từ v1.23: `GET dashboard/ai-video-studio/formula-advisor` →
@@ -1448,8 +1547,8 @@ Sidebar — cấu trúc dropdown 2 `sub-link` KHÔNG đổi từ v1.23; chỉ đ
   pháp lý không đáng đánh đổi lấy tự động hoá. Người dùng tự tra cứu bằng ô tìm kiếm (§13.1).
 - **Không gọi AI Provider để tự động lấy kết quả** — vẫn đúng nguyên tắc §0 gốc của cả module; Master
   Prompt CHỈ để copy-paste thủ công, không có tích hợp API OpenAI/Anthropic nào trong tính năng này.
-- **Diễn giải đầy đủ 13 mã chân dung (P1-P13)** — như v1.23, tài liệu "Bộ Chân dung Người Review"
-  không có trong repo.
+- ~~Diễn giải đầy đủ 13 mã chân dung (P1-P13)~~ — **ĐÃ GIẢI QUYẾT ở v1.27** (`PersonaCatalog`, §13.1) —
+  người dùng cung cấp `spec/chan-dung-nguoi-review.md`, không còn là khoảng trống.
 - **Không lưu lịch sử Master Prompt đã sinh** — mỗi lần load trang tính lại từ query string, không có
   bảng `generated_prompts` nào (đúng tinh thần "không cần bảng DB" đã chốt ở §13.0 v1.23 gốc, và đúng
   quyết định "không lưu lịch sử" đã cân nhắc và từ chối ở bản nháp `technical_spec_laravel_module.md`
