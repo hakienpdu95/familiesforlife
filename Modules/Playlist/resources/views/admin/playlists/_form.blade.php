@@ -20,6 +20,7 @@
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
                             <span class="label-text font-medium">Tên <span class="text-error">*</span></span>
+                            <span class="label-text-alt text-xs text-base-content/40">Đưa từ khoá chính lên ĐẦU tên (VD: "Ăn dặm cho bé 6 tháng: Hướng dẫn từ A-Z")</span>
                         </label>
                         <input type="text" name="name" value="{{ old('name', $playlist?->name) }}"
                                class="input input-bordered input-sm w-full @error('name') input-error @enderror"
@@ -46,6 +47,13 @@
                                   class="textarea textarea-bordered textarea-sm w-full @error('description') textarea-error @enderror"
                         >{{ old('description', $playlist?->description) }}</textarea>
                         @error('description')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                        {{-- Gợi ý cấu trúc mô tả chuẩn SEO — spec/tech.md "Cách viết Tiêu đề và Mô tả
+                             chuẩn chỉnh cho Playlist" (§4), phần transfer được sang playlist của
+                             site (không phụ thuộc thuật toán YouTube). Chỉ là text tĩnh tham khảo,
+                             không bắt buộc — xem thêm nút "Gợi ý bằng AI" bên dưới nếu cần viết mới. --}}
+                        <p class="text-xs text-base-content/40 mt-1.5 leading-relaxed">
+                            Gợi ý cấu trúc: (1) câu mở lặp lại từ khoá chính tự nhiên — (2) nêu rõ playlist giúp giải quyết vấn đề gì / học được kỹ năng gì — (3) liệt kê nhanh các chủ đề nổi bật có trong playlist — (4) 1 câu kêu gọi hành động ngắn.
+                        </p>
                     </div>
 
                     <div class="form-control">

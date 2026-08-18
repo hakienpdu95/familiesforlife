@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Modules\Playlist\Features\PlaylistManagement\Actions\AddItemToPlaylistAction;
+use Modules\Playlist\Features\PlaylistManagement\Actions\BuildPlaylistIdeaPromptAction;
 use Modules\Playlist\Features\PlaylistManagement\Actions\CreatePlaylistAction;
 use Modules\Playlist\Features\PlaylistManagement\Actions\DeletePlaylistAction;
 use Modules\Playlist\Features\PlaylistManagement\Actions\RemoveItemFromPlaylistAction;
@@ -49,11 +50,15 @@ class PlaylistAdminController extends Controller
             ->with('success', "Đã tạo playlist \"{$playlist->name}\". Tiếp tục thêm nội dung vào playlist bên dưới.");
     }
 
-    public function edit(Playlist $playlist): View
+    public function edit(Playlist $playlist, BuildPlaylistIdeaPromptAction $buildIdeaPrompt): View
     {
         $playlist->load('items.itemable');
 
-        return view('playlist::admin.playlists.edit', compact('playlist'));
+        // Sinh sẵn ở đây (không phải AJAX riêng) vì $playlist->items đã load xong cho phần quản lý
+        // item ngay bên dưới — tránh 1 endpoint/round-trip thừa chỉ để lặp lại đúng dữ liệu đã có.
+        $ideaPrompt = $buildIdeaPrompt->handle($playlist);
+
+        return view('playlist::admin.playlists.edit', compact('playlist', 'ideaPrompt'));
     }
 
     public function update(Request $request, Playlist $playlist, UpdatePlaylistAction $updatePlaylist): RedirectResponse

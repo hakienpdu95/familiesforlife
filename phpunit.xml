@@ -19,6 +19,7 @@
             <directory>Modules/Ocop/tests/Feature</directory>
             <directory>Modules/Page/tests/Feature</directory>
             <directory>Modules/PensionCalculator/tests/Feature</directory>
+            <directory>Modules/Playlist/tests/Feature</directory>
             <directory>Modules/Post/tests/Feature</directory>
             <directory>Modules/PromptFrameworkStudio/tests/Feature</directory>
             <directory>Modules/RealEstate/tests/Feature</directory>

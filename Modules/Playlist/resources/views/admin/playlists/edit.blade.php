@@ -39,6 +39,35 @@
     @include('playlist::admin.playlists._form', ['playlist' => $playlist])
 </form>
 
+{{-- ── Gợi ý tiêu đề/mô tả/từ khoá qua AI (spec §10, thêm) ───────────────────────────────
+     Sinh prompt COPY-PASTE sang 1 công cụ AI CÓ tìm kiếm web (Perplexity/ChatGPT Search/Claude
+     Web Search...) — module này không gọi app/Services/AI/, cùng kiến trúc "copy-paste, người
+     dùng tự soát lại" đã dùng ở AIVideoStudioTemplate/VideoIdeaExtractor. Prompt đã tính sẵn
+     từ nội dung THẬT đang có trong playlist (đọc lại ở BuildPlaylistIdeaPromptAction), không cần
+     người dùng tự gõ ngữ cảnh. --}}
+<div class="card bg-base-100 shadow-sm border border-base-200 mb-8" x-data="{ copied: false }">
+    <div class="card-body">
+        <h2 class="card-title text-base mb-1">
+            <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+            </svg>
+            Gợi ý tiêu đề, mô tả &amp; từ khoá bằng AI
+        </h2>
+        <p class="text-xs text-base-content/40 mb-3">
+            Copy prompt bên dưới và dán sang 1 công cụ AI có khả năng tìm kiếm web (Perplexity, ChatGPT có Search, Claude có Web Search...). Prompt đã kèm sẵn tên/mô tả hiện tại và {{ $playlist->items->count() }} nội dung đang có trong playlist — đọc kỹ và tự chỉnh sửa kết quả trước khi dùng, không dán thẳng vào form phía trên.
+        </p>
+        <div class="flex items-center justify-end mb-1.5">
+            <button type="button" class="btn btn-primary btn-xs gap-1.5"
+                    @click="navigator.clipboard.writeText($refs.playlistIdeaPrompt.value); copied = true; setTimeout(() => copied = false, 2000)">
+                <span x-show="!copied">Copy</span>
+                <span x-show="copied">Đã copy!</span>
+            </button>
+        </div>
+        <textarea x-ref="playlistIdeaPrompt" readonly rows="10"
+                  class="textarea textarea-bordered w-full font-mono text-xs leading-relaxed">{{ $ideaPrompt }}</textarea>
+    </div>
+</div>
+
 {{-- ── Quản lý nội dung trong playlist (spec §6.7/§5.1/§5.2) ────────────────────────────── --}}
 <div x-data="playlistItemsManager({{ Js::from([
     'playlistId'  => $playlist->id,

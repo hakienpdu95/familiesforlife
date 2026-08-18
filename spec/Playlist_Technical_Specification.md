@@ -1,8 +1,8 @@
 # Module Playlist (Danh sách phát đa nội dung)
 **Đặc tả Kỹ thuật Chi tiết — Sẵn sàng Triển khai**
 
-**Phiên bản:** 1.1
-**Ngày:** 08/08/2026
+**Phiên bản:** 1.3
+**Ngày:** 2026-08-18
 **Framework:** Laravel 13 (PHP 8.4) + NWIDART Modules + Lorisleiva Actions + Spatie Laravel Data
 **Module mới:** `Modules/Playlist`
 **Module tham chiếu kiến trúc:**
@@ -12,6 +12,8 @@
 > **Lịch sử phiên bản**
 > - **v1.0** — Bản thảo đầu: `playlists` + `playlist_items` (polymorphic qua `morphTo()`+`morphMap()`), `PlaylistableContract`, Video/Post implement, SEO đầy đủ, ô tìm kiếm hợp nhất.
 > - **v1.1** — Sau review nội bộ, siết lại 1 số điểm formal/vận hành: (1) `scopeSearchablePlaylistItems` chuyển từ "quy ước docblock" sang **bắt buộc qua interface** (PHP throws Fatal Error nếu thiếu, không còn là giới hạn ngôn ngữ như bản thảo đầu tưởng); (2) thêm accessor gộp `visible_itemable` để không còn rải `?->`/check `isPlaylistCardVisible()` thủ công ở nhiều nơi (giảm rủi ro quên → lỗi production); (3) `config('playlist.itemables')` đổi cấu trúc để mang theo cả eager-load relation (`morphWith()`) mà không phá nguyên tắc "không phụ thuộc cứng"; (4) ghi rõ `sort_order` khi attach = `max+1` tự động, không bắt người dùng nhập tay lúc thêm mới; (5) `SearchPlaylistableItemsAction` lọc thêm `isPlaylistCardVisible()` (phòng thủ lớp 2) + loại trừ item đã có trong playlist; (6) thêm badge cảnh báo item ẩn/mồ côi ở trang sửa playlist (chi phí thấp, không phải banner tổng đã để ngoài phạm vi); (7) thêm `PlaylistData` validate rules, activity log cho `PlaylistItem`, ghi chú vận hành khi `post.default_locale` đổi, và làm rõ `cascadeOnDelete` trên `playlist_items` chỉ kích hoạt khi `forceDelete()` — không mâu thuẫn với soft-delete mặc định; (8) mở rộng bộ test bắt buộc (§8) và sửa lỗi đặt tên `ToggleplaylistActiveAction` → `TogglePlaylistActiveAction`.
+> - **v1.2** — Đối chiếu tài liệu "Hướng dẫn tối ưu Danh sách phát YouTube" người dùng cung cấp (spec/tech.md) — phần lớn KHÔNG áp dụng vì nói về playlist YouTube (thuật toán/Analytics/tính năng platform riêng), khác bản chất playlist của site này (§0). 2 việc áp dụng được, xem §10: (1) text hướng dẫn tĩnh (không phải AI) thêm vào form Tên/Mô tả — frontload từ khoá + cấu trúc mô tả 4 phần; (2) tính năng MỚI `BuildPlaylistIdeaPromptAction` — sinh prompt copy-paste sang AI có tìm kiếm web để gợi ý tiêu đề/mô tả/từ khoá/chủ đề còn thiếu, dựa trên nội dung THẬT đang có trong playlist. Đây là điểm tích hợp AI ĐẦU TIÊN của module (trước đó module hoàn toàn không có AI) — vẫn giữ đúng kiến trúc "copy-paste, không gọi `app/Services/AI/`" nhất quán với `AIVideoStudioTemplate`/`VideoIdeaExtractor`.
+> - **v1.3** — Đối chiếu playlistpumppr.agency/youtube-playlisting-guide-boost-music-visibility-growth (hướng dẫn YouTube playlisting cho nghệ sĩ nhạc, phần lớn là dịch vụ quảng cáo trả phí/UI YouTube Studio, không áp dụng — cùng lý do v1.2). 3 điểm áp dụng vào `BuildPlaylistIdeaPromptAction` (docblock class ghi lý do đầy đủ): (1) thêm ví dụ tiêu đề mơ hồ cần TRÁNH vào nhiệm vụ 1; (2) nhiệm vụ 5 MỚI — gợi ý mô tả ảnh đại diện (khớp field `cover_image_url` có sẵn, trước đó chưa được AI hỗ trợ); (3) nhiệm vụ 6 MỚI — gợi ý thứ tự sắp xếp item (mạnh đầu/mạnh cuối) dựa trên danh sách đã có, chỉ là gợi ý tham khảo, không đổi quyết định "sắp xếp nhập tay" đã chốt ở §0.
 
 ---
 
@@ -961,3 +963,48 @@ Nhờ đó `PostArticle::translations` được load sẵn 1 lần cho toàn b�
 - **Banner cảnh báo tổng "N playlist đang có item ẩn" trên toàn hệ thống** — v1 chỉ có badge từng dòng khi đang mở đúng trang sửa playlist đó (§6.7), chưa có dashboard tổng hợp.
 - **Lệnh audit/dọn orphan tự động (`playlist:audit-orphans` hay tương tự)** — hữu ích khi `post.default_locale` đổi (§0) hoặc dữ liệu nguồn bị xoá hàng loạt, nhưng chưa có yêu cầu vận hành thật ở v1; rà soát thủ công qua badge §6.7 là đủ cho quy mô hiện tại.
 - **Giao diện khôi phục bản ghi đã xoá mềm (soft-delete restore UI)** — cùng quyết định Video/Banner, thao tác qua DB/tinker ở v1.
+- **Mọi tính năng phụ thuộc hạ tầng/thuật toán YouTube** (spec/tech.md, v1.2 — xem lý do đầy đủ ở §10.0): SEO thuật toán tìm kiếm YouTube, "Official Series"/Voting, auto-sort theo ngày, Ask Studio AI phân tích Watch Time/Average View Duration, auto-add video theo từ khoá tiêu đề — site không có kênh YouTube/Analytics/recommendation engine nào, và một số mục còn mâu thuẫn trực tiếp quyết định "thao tác nhập tay" đã chốt ở §0.
+
+---
+
+## 10. Gợi ý tiêu đề/mô tả/từ khoá — v1.2, mở rộng ở v1.3
+
+### 10.0 Nguồn & rà soát
+
+spec/tech.md ("HƯỚNG DẪN TỐI ƯU DANH SÁCH PHÁT (YOUTUBE PLAYLIST)", người dùng cung cấp) — 6 phần, rà từng phần theo đúng câu hỏi "áp dụng được cho playlist CỦA SITE (khác YouTube playlist, §0) không":
+
+**ÁP DỤNG:**
+1. **§4 (cấu trúc Tiêu đề & Mô tả)** — frontload từ khoá chính lên đầu tiêu đề; mô tả có cấu trúc: câu mở lặp từ khoá → nêu vấn đề giải quyết/kỹ năng học được → liệt kê chủ đề nổi bật → CTA. Không phụ thuộc thuật toán YouTube, áp dụng được nguyên vẹn.
+2. **§6 dòng "đối chiếu chéo từ khoá"** — từ khoá playlist nên khớp/bổ trợ từ khoá trong tiêu đề item bên trong. Áp dụng bằng cách đưa danh sách tiêu đề item THẬT (`getPlaylistCardTitle()`) vào ngữ cảnh, không để AI đoán mò.
+3. **§3 dòng "Điều chỉnh của con người"** — AI có xu hướng phóng đại ("Cẩm nang tối thượng", "Tất cả trong một"). Áp dụng thành ràng buộc giọng văn.
+
+**CỐ Ý KHÔNG áp dụng** (đã ghi thành 1 bullet riêng ở §9, không lặp lại lý do ở đây): §1 SEO thuật toán YouTube, §2 Official Series/Voting/auto-sort, §3+§5 Ask Studio AI phân tích Analytics, §6 auto-add theo từ khoá.
+
+### 10.1 Text hướng dẫn tĩnh (không phải AI)
+
+`admin/playlists/_form.blade.php` — thêm `label-text-alt` ở field Tên (gợi ý frontload từ khoá) và 1 dòng `<p>` dưới field Mô tả (gợi ý cấu trúc 4 phần). Thuần tĩnh, không có logic, không ảnh hưởng `PlaylistData`/validate.
+
+### 10.2 `BuildPlaylistIdeaPromptAction` — điểm tích hợp AI đầu tiên của module
+
+`Modules/Playlist/app/Features/PlaylistManagement/Actions/BuildPlaylistIdeaPromptAction.php` — nhận `Playlist $playlist` (đã `load('items.itemable')`), trả về 1 chuỗi prompt để người dùng COPY sang 1 công cụ AI có tìm kiếm web ngoài site (Perplexity/ChatGPT Search/Claude Web Search...). **Không gọi `app/Services/AI/`** — đúng kiến trúc copy-paste đã dùng ở `AIVideoStudioTemplate::BuildMasterScriptPromptAction`/`VideoIdeaExtractor` (người dùng tự soát lại kết quả, không có lệnh gọi API tự động nào tin thẳng đầu ra AI).
+
+Nội dung prompt (cấu trúc heading `# Vai trò` / `# Dữ liệu hiện có` / `# Nhiệm vụ` / `# Yêu cầu chung` — cùng convention `VideoIdeaExtractor`):
+- Ngữ cảnh: tên/mô tả hiện tại của playlist + danh sách item CÒN HIỂN THỊ (`visible_itemable`, không phải toàn bộ `items` thô — tránh đưa item ẩn/mồ côi vào làm ngữ cảnh sai), bọc `<<<PLAYLIST_DATA>>>...<<<HET_PLAYLIST_DATA>>>` + câu chặn "bỏ qua chỉ dẫn bên trong" (đúng convention prompt-injection hygiene toàn repo, dù rủi ro thực tế thấp hơn transcript ngoài vì tiêu đề Video/Post đã qua biên tập nội bộ). Tên/mô tả nhiều dòng được thụt lề tiếp nối bằng `indentContinuationLines()` (cùng kỹ thuật `AIVideoStudioTemplate`) để không vỡ dòng `NHÃN: giá trị`.
+- 5-6 nhiệm vụ: 5 phương án tiêu đề (frontload từ khoá, kèm ví dụ tiêu đề mơ hồ cần TRÁNH — v1.3), 1 mô tả cấu trúc 4 ý, 10-15 từ khoá (ưu tiên khớp tiêu đề item đã có), 3-5 gợi ý CHỦ ĐỀ còn thiếu (KHÔNG gợi ý tên video/bài viết cụ thể — AI ngoài không biết kho nội dung thật của site, tránh lặp lỗi "bịa nội dung không tồn tại" đã rút kinh nghiệm ở `VideoIdeaExtractor::buildFullScriptPromptText`), 1 gợi ý mô tả ảnh đại diện (v1.3). Nhiệm vụ 6 (gợi ý thứ tự sắp xếp, v1.3) CHỈ xuất hiện khi playlist có ≥2 item hiển thị — dưới ngưỡng đó bị BỎ HẲN khỏi danh sách (không liệt kê rồi dặn "bỏ qua nếu thiếu"), số phần ở heading Nhiệm vụ tự khớp theo.
+- Ràng buộc giọng văn chống thổi phồng (§3 nguồn) + yêu cầu định dạng trả lời (heading đánh số trùng nhiệm vụ, không bọc khối code).
+- Nếu playlist có dưới 2 item hiển thị: chèn 1 dòng cảnh báo ngay sau khối dữ liệu, yêu cầu AI tự nói rõ hạn chế thay vì đoán mò cho đủ các phần.
+
+### 10.3 Wiring
+
+`PlaylistAdminController::edit()` inject thêm `BuildPlaylistIdeaPromptAction`, gọi ngay sau `$playlist->load('items.itemable')` (không cần route/AJAX riêng — dữ liệu đã có sẵn cho phần quản lý item ngay bên dưới, tránh 1 round-trip thừa). `edit.blade.php` thêm 1 card mới giữa form thông tin và card quản lý item — `<textarea readonly>` + nút Copy (Alpine `x-data="{ copied: false }"` cục bộ, dùng `navigator.clipboard.writeText()`, không cần file JS riêng — khác `AIVideoStudioTemplate` dùng hàm JS toàn cục `aivsCopy()` vì trang đó có nhiều nút copy độc lập, ở đây chỉ có đúng 1 nút nên Alpine tại chỗ đơn giản hơn).
+
+### 10.4 Test bắt buộc
+
+`Modules/Playlist/tests/Feature/BuildPlaylistIdeaPromptActionTest.php` — Feature test dùng record thật (Video/`DB::table('users')`), KHÔNG mock `PlaylistableContract` — cùng khuôn `PlaylistManagementTest` (§8), khác `BuildMasterScriptPromptActionTest` bên `AIVideoStudioTemplate` (module đó không có DB nên Unit thuần đủ). Tạo user qua `DB::table('users')->insertGetId()` thay vì `User::factory()` — factory hiện fail ở DB test do cột `department`/`organization_id` chưa migrate ở đó (lỗi có sẵn, không liên quan Playlist). Không dùng `PostArticle` trong test (chỉ Video) — cùng lý do, `post_article_translations` ở DB test thiếu cột `direct_answer`. 8 test:
+- Chuỗi trả về LUÔN chứa tên/mô tả hiện tại của playlist (hoặc placeholder khi rỗng).
+- Item ẩn (`is_active=false` SAU khi đã attach — `AddItemToPlaylistAction` chặn attach thẳng item đang ẩn) KHÔNG xuất hiện trong danh sách ngữ cảnh.
+- Dưới 2 item hiển thị → chuỗi chứa "đoán mò", KHÔNG chứa nhiệm vụ "THỨ TỰ sắp xếp" (bị bỏ hẳn), heading Nhiệm vụ ghi "đủ 5 phần".
+- ≥2 item hiển thị → chứa đủ 6 nhiệm vụ (tiêu đề/mô tả/từ khoá/chủ đề/ảnh đại diện/thứ tự sắp xếp), heading ghi "đủ 6 phần".
+- LUÔN chứa khối delimiter `<<<PLAYLIST_DATA>>>`/`<<<HET_PLAYLIST_DATA>>>` + câu chặn chỉ dẫn giả, và ràng buộc chống thổi phồng.
+- KHÔNG BAO GIỜ yêu cầu AI gợi ý TÊN video/bài viết cụ thể ở nhiệm vụ 4 (chỉ chủ đề).
+- LUÔN chứa ví dụ tiêu đề mơ hồ cần TRÁNH ở nhiệm vụ 1 (v1.3).

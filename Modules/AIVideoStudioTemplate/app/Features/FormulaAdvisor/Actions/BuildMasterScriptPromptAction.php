@@ -137,6 +137,68 @@ use Modules\AIVideoStudioTemplate\Features\ProjectManagement\Actions\CompileProj
  *    xem — không có khái niệm "video tiếp theo" trong 1 prompt sinh 1 kịch bản độc lập. Phần "tóm tắt
  *    lại" cũng trùng vai trò bullet "TAKEAWAY LỚN NHẤT" đã có từ v1.28 (đảm bảo người xem nhớ 1 điều
  *    cụ thể, không cần thêm 1 bước tóm tắt riêng).
+ *
+ * spec/AIVideoStudioTemplate_Technical_Specification.md §13.6 (v1.31 — người dùng đưa tiếp 1 đoạn quy
+ * trình 3 giai đoạn "Xây dựng nền móng / Nghiên cứu & Lập cấu trúc / Viết & Tinh chỉnh Kịch bản" từ 1
+ * video hướng dẫn viết kịch bản viral, hỏi có điểm neo nào còn thiếu trong quy trình build prompt hay
+ * không. Rà đủ 3 giai đoạn (14 mục) theo đúng kỷ luật: chỉ áp dụng phần THẬT SỰ khác biệt và đúng vai
+ * trò BƯỚC 2 "viết kịch bản cho 1 công thức/topic đã chọn sẵn":
+ *
+ * ÁP DỤNG — 6 điểm neo mới ở BƯỚC 2:
+ * 1. **Vấn đề bề mặt vs. Vấn đề sâu xa** (Giai đoạn 1, mục 3) — thêm ngay sau bullet "TAKEAWAY LỚN
+ *    NHẤT": phân biệt chủ đề/kỹ thuật đang hướng dẫn trực tiếp (bề mặt) với đấu tranh tâm lý/bài học
+ *    cảm xúc bên dưới nó (sâu xa) — khoảng trống THẬT trong prompt hiện có: bullet Takeaway trước v1.31
+ *    chỉ yêu cầu "1 bài học/thay đổi cụ thể" mà không phân biệt 2 tầng này, dễ khiến AI dừng ở mẹo kỹ
+ *    thuật hời hợt thay vì chạm đến lý do người xem thực sự nhớ video.
+ * 2. **Điểm đầu → điểm cuối của sự biến đổi** (Giai đoạn 2, mục 2 — "Transformation Arc") — thêm ngay
+ *    sau bullet phác khung sườn: yêu cầu xác định rõ người xem đang ở đâu lúc mở đầu và thay đổi nhận
+ *    thức thế nào ở cuối. Đây là phần DÙNG ĐƯỢC của "Hero's Journey" (Giai đoạn 2, mục 3) sau khi rút
+ *    gọn — 7 chặng đầy đủ (Tiếng gọi phiêu lưu/Gặp người dẫn đường/Khủng hoảng/Phần thưởng...) không
+ *    tương xứng độ dài 15 giây-4 phút module phục vụ và phần lớn đã trùng khung sườn Hook→Build-up→
+ *    Core Content→Sub-hook→CTA + mạch Core Content Bối cảnh→Chi tiết→Mâu thuẫn→Cao trào đã có sẵn từ
+ *    v1.29/v1.30; chỉ có khung "điểm đầu/điểm cuối" là còn thiếu thật sự.
+ * 3. **Độ phức tạp tăng dần** (Giai đoạn 3, mục 3 — "Gradual Complexity") — thêm ngay sau bullet khán
+ *    giả mục tiêu cụ thể (gắn trực tiếp vào đối tượng đã xác định ở đó): mở đầu bằng khái niệm cơ bản,
+ *    nâng dần lên chuyên sâu — nguyên lý viết áp dụng độc lập công thức/kênh nào.
+ * 4. **Tương tác hoá thay vì chỉ giảng bài** (Giai đoạn 3, mục 3 — "Make it Interactive") — thêm sau
+ *    bullet mạch Core Content: đặt câu hỏi/gợi mở ở 1-2 điểm mấu chốt thay vì tiết lộ hết ngay.
+ * 5. **Quy tắc "Nhưng/Vì vậy"** (Giai đoạn 3, mục 3 — "But/Therefore rule") — gộp thêm vào bullet mạch
+ *    Core Content sẵn có (Bối cảnh→Chi tiết→Mâu thuẫn→Cao trào): chỉ định rõ cách LIÊN KẾT các câu
+ *    bằng quan hệ nhân quả-xung đột, thay vì liệt kê tuyến tính — cụ thể hoá thêm 1 bước cho mạch đã
+ *    có, không phải khung mới.
+ * 6. **Nhịp điệu câu văn** (Giai đoạn 3, mục 3 — "Sentence Rhythm") — thêm sau bullet giọng văn cảm
+ *    xúc cá nhân: đan xen câu ngắn/trung/dài, tránh đều đều — chỉ dẫn CÁCH VIẾT câu, không phụ thuộc
+ *    công thức/chủ đề nào, đúng vai trò sẵn có của BƯỚC 2.
+ *
+ * CỐ Ý KHÔNG áp dụng (8 mục còn lại, có lý do, không mở lại):
+ * 1. **Ý tưởng vững chắc / Chân dung khán giả** (Giai đoạn 1, mục 1 và 5) — mục 1 là tiêu chí CHỌN CHỦ
+ *    ĐỀ, cùng nhóm lý do đã loại "80/20" (v1.28)/"Packaging" (v1.30): `$topic` đã là input quyết định
+ *    sẵn trước khi vào Action. Mục 5 ("viết ra 1-2 tệp khán giả cụ thể") đã ĐƯỢC PHỦ bởi bullet "khán
+ *    giả mục tiêu cụ thể (độ tuổi, hoàn cảnh, mối quan tâm)" có từ v1.28 — phần thật sự mới của nó
+ *    (điều chỉnh độ phức tạp ngôn từ theo avatar) đã lấy riêng ở mục ÁP DỤNG 3 phía trên.
+ * 2. **Mục tiêu chung giữa người làm và người xem** (Giai đoạn 1, mục 2 — "Aligned Goals") — nguyên lý
+ *    "đừng viết như đang lùa gà bán khoá học" đã THỰC HIỆN SẴN qua 2 bullet có từ trước: "giọng văn
+ *    cảm xúc cá nhân thật, tránh văn phong quảng cáo vô cảm, sáo rỗng" (v1.28) và cụm RANH GIỚI BẮT
+ *    BUỘC "không đưa ra cam kết/tuyên bố hiệu quả chưa kiểm chứng" — thêm 1 bullet riêng sẽ lặp lại ý
+ *    đã có dưới tên gọi khác.
+ * 3. **Hình thu nhỏ & Kỳ vọng ban đầu** (Giai đoạn 1, mục 4 — Packaging/Thumbnail) — ĐÃ LOẠI ở v1.30
+ *    cùng lý do: bước xảy ra TRƯỚC `$topic`, module không sinh nội dung dạng đó ở trang nào.
+ * 4. **Nghiên cứu thị trường & Tìm khoảng trống** (Giai đoạn 2, mục 1 — "Research Gap") — ĐÃ LOẠI ở
+ *    v1.28 cùng lý do với "Research & Shock Value": hoạt động NGHIÊN CỨU CON NGƯỜI làm TRƯỚC khi có
+ *    nội dung; `$description` đã là nơi người dùng gói ghém kết quả nghiên cứu của họ.
+ * 5. **7 chặng đầy đủ của Hero's Journey** (Giai đoạn 2, mục 3, phần KHÔNG rút gọn) — xem giải thích ở
+ *    mục ÁP DỤNG 2: chỉ giữ phần "điểm đầu/điểm cuối", các chặng còn lại (Tiếng gọi phiêu lưu/Gặp
+ *    người dẫn đường/Phần thưởng...) là bộ khung dành cho video dài, ép vào 15s-4 phút sẽ làm kịch bản
+ *    rối thay vì rõ, và phần lõi kể chuyện đã có sẵn qua khung sườn + mạch Core Content hiện tại.
+ * 6. **Xây dựng Vũ trụ Kể chuyện** (Giai đoạn 2, mục 4 — "Universe Building") — cùng lý do đã loại
+ *    "Loop Trap" ở v1.30: nối mạch xuyên suốt NHIỀU video là mục tiêu channel growth, còn Action này
+ *    sinh ĐÚNG 1 kịch bản độc lập mỗi lần gọi, không có khái niệm "video khác trong series".
+ * 7. **Phản biện dàn ý với AI (Outline Roasting)** (Giai đoạn 3, mục 1) — cùng lý do đã loại quy trình
+ *    3 bước hội thoại nhiều lượt ở v1.29: đòi hỏi 1 LƯỢT GỌI AI RIÊNG chỉ để phản biện dàn ý trước khi
+ *    viết, trong khi Action này sinh 1 prompt duy nhất, không trạng thái, để AI tự viết trong 1 lượt.
+ * 8. **Viết nháp tự do (Freewriting)** (Giai đoạn 3, mục 2) — cùng lý do đã loại "Dump Talking" ở
+ *    v1.28: hoạt động CON NGƯỜI làm bằng tay (bấm giờ, gõ liên tục không sửa lỗi) TRƯỚC khi có nội
+ *    dung, không áp dụng được cho 1 prompt yêu cầu AI tự sáng tác kịch bản hoàn chỉnh ngay trong 1 lượt.
  */
 class BuildMasterScriptPromptAction
 {
@@ -171,15 +233,20 @@ class BuildMasterScriptPromptAction
         $lines[] = 'BƯỚC 2: VIẾT KỊCH BẢN';
         $lines[] = 'Dựa vào công thức đã chọn ở Bước 1, hãy viết kịch bản chi tiết:';
         $lines[] = '- Trước khi viết: xác định rõ KHÁN GIẢ MỤC TIÊU CỤ THỂ (độ tuổi, hoàn cảnh, mối quan tâm) — tránh nhắm chung chung "tất cả mọi người", kịch bản sẽ thiếu cá tính và không chạm đúng ai.';
+        $lines[] = '- Sắp xếp nội dung theo ĐỘ PHỨC TẠP TĂNG DẦN: mở đầu bằng khái niệm cơ bản dễ hiểu (phù hợp khán giả mục tiêu vừa xác định ở trên), sau đó mới nâng dần lên kỹ thuật chuyên sâu hơn — tránh làm khán giả mới bị "ngợp" ngay từ đầu.';
         $lines[] = '- Trước khi viết: xác định rõ TAKEAWAY LỚN NHẤT — 1 bài học/thay đổi cụ thể trong suy nghĩ hoặc hành vi mà người xem có thể ghi nhớ và áp dụng NGAY sau khi xem xong. Nội dung không tạo ra sự thay đổi này chỉ là quảng cáo suông, dù đúng công thức tới đâu.';
+        $lines[] = '- Phân biệt VẤN ĐỀ BỀ MẶT (chủ đề/kỹ thuật đang hướng dẫn trực tiếp) và VẤN ĐỀ SÂU XA bên dưới nó (đấu tranh tâm lý/bài học cảm xúc, ví dụ: kiên nhẫn, vượt qua chủ nghĩa hoàn hảo, giữ vững lập trường) — TAKEAWAY LỚN NHẤT nên gắn với vấn đề sâu xa này, không chỉ dừng ở 1 mẹo kỹ thuật bề mặt.';
         $lines[] = '- Độ dài: theo đúng khoảng thời lượng khuyến nghị của công thức đã chọn (xem mô tả ở Bước 1).';
         $lines[] = '- Hình thức: bảng 3 cột (Thời lượng/Nhịp | Hình ảnh/Video Shot | Lời thoại/Audio).';
         $lines[] = '- Trước khi viết lời thoại đầy đủ: phác nhanh khung sườn theo nhịp Hook (mở đầu giữ chân) → Build-up (dẫn dắt) → Core Content (nội dung chính) → Sub-hook (nếu kịch bản dài hơn khoảng 60 giây: chèn 1-2 câu "móc lại" giữa các luận điểm chính, không dồn vào đúng 1 chỗ) → CTA. Với đoạn Hook, cân nhắc ít nhất 2 cách mở đầu khác nhau rồi chọn cách mạnh nhất.';
+        $lines[] = '- Khi phác khung sườn: xác định rõ người xem ĐANG Ở ĐÂU lúc mở đầu (hiểu biết/tâm lý hiện tại) và họ THAY ĐỔI NHẬN THỨC NHƯ THẾ NÀO ở cuối video (VD: từ tìm kiếm sự hoàn hảo → tập trung vào quá trình) — vấn đề sâu xa nêu ở trên nên bộc lộ rõ nhất quanh đoạn Core Content/Sub-hook, trước khi được giải quyết ở phần kết.';
         $lines[] = '- Hook (3-6 giây đầu): xác nhận NGAY nội dung đúng với Chủ đề/Mô tả đã nêu ở trên (không đánh lừa kỳ vọng người xem), đồng thời mở 1 khoảng trống tò mò bằng 1 trong các cách: FOMO (sợ bỏ lỡ), đồng cảm (tình huống quen thuộc), nỗi sợ (cảnh báo 1 mất mát cụ thể), đặt câu hỏi hóc búa, hoặc đi ngược niềm tin thông thường của số đông.';
-        $lines[] = '- Trong Core Content: dẫn dắt theo mạch Bối cảnh → Chi tiết cụ thể → Mâu thuẫn/thử thách → Cao trào-kết luận; xen kẽ nhịp độ thông tin hay/độc đáo với thông tin quen thuộc dễ hiểu (tránh dồn hết phần hay vào 1 chỗ), thỉnh thoảng chèn 1 ví dụ đời thường/hình ảnh ví von bất ngờ để tránh giọng điệu đều đều.';
+        $lines[] = '- Trong Core Content: dẫn dắt theo mạch Bối cảnh → Chi tiết cụ thể → Mâu thuẫn/thử thách → Cao trào-kết luận, liên kết các câu bằng quan hệ nhân quả-xung đột kiểu "...NHƯNG...VÌ VẬY..." thay vì liệt kê tuyến tính "việc này xảy ra, rồi đến việc kia"; xen kẽ nhịp độ thông tin hay/độc đáo với thông tin quen thuộc dễ hiểu (tránh dồn hết phần hay vào 1 chỗ), thỉnh thoảng chèn 1 ví dụ đời thường/hình ảnh ví von bất ngờ để tránh giọng điệu đều đều.';
+        $lines[] = '- Ưu tiên ĐẶT CÂU HỎI/GỢI MỞ để người xem tự suy ngẫm và tự tìm câu trả lời ở 1-2 điểm mấu chốt, thay vì tiết lộ hết mọi thứ ngay từ đầu — tăng tính tương tác thay vì chỉ giảng bài 1 chiều.';
         $lines[] = '- Ưu tiên kể 1 trải nghiệm/câu chuyện thực tế cụ thể (KHÔNG bịa) thay vì liệt kê số liệu/tính năng khô khan — người xem nhớ câu chuyện hơn số liệu.';
         $lines[] = '- Nếu phù hợp với công thức đã chọn, lồng 1 mẹo/framework nhỏ người xem áp dụng được NGAY, không chỉ dừng ở lời khen sản phẩm.';
         $lines[] = '- Giọng văn cần cảm xúc cá nhân thật (tiếc nuối, mừng rỡ, bất ngờ...), tránh văn phong quảng cáo vô cảm, sáo rỗng.';
+        $lines[] = '- Đan xen câu NGẮN, câu TRUNG BÌNH và câu DÀI trong lời thoại để tạo nhịp điệu lôi cuốn — tránh viết toàn câu dài đều nhau gây đơn điệu, dễ khiến người xem mất tập trung.';
         $lines[] = '- Sau khi viết xong: tự rà lại kịch bản 1 lượt, nêu ngắn gọn 1-2 điểm còn có thể yếu/khó hiểu và cách cải thiện, viết thành 1 mục riêng "Tự đánh giá & đề xuất cải thiện" ở cuối.';
         $lines[] = '';
         $lines[] = 'RANH GIỚI BẮT BUỘC:';
