@@ -7,7 +7,7 @@ return [
     // để tính, transcript nói thường dài hơn bài viết cùng nội dung do văn nói lặp/đệm từ) — xem
     // Modules\VideoIdeaExtractor\Enums\TranscriptConfidence.
     'confidence' => [
-        'high_min_words'   => 800,
+        'high_min_words' => 800,
         'medium_min_words' => 150,
     ],
 
@@ -23,22 +23,22 @@ return [
     // hơn hẳn 1 bài viết trung bình, nhiều video full transcript sẽ vượt quá kích thước hợp lý để
     // paste dù mỗi video đã cắt theo max_transcript_chars_per_video.
     'batch' => [
-        'max_videos'                       => 5,
-        'max_transcript_chars_per_video'   => 20000,
+        'max_videos' => 5,
+        'max_transcript_chars_per_video' => 20000,
     ],
 
     // 2026-08 — tự động hoá "Layer 2" qua nút bấm thủ công (KHÔNG tự động sau Layer 1 — kiểm soát
     // chi phí, cùng nguyên tắc CoreIdeaExtractor). max_prompt_chars chặn payload quá lớn gửi lên
     // endpoint. max_output_tokens đủ cho 1 lượt gọi (~25 ý tưởng có cấu trúc kèm lý do mỗi ý).
     'layer2' => [
-        'max_prompt_chars'  => 300000,
+        'max_prompt_chars' => 300000,
         'max_output_tokens' => 4096,
 
         // Goal-based loop (RunVideoIdeaLayer2Action) — target_idea_count khớp "Mục tiêu số lượng"
         // đã nêu trong buildLayer2PromptText() (BƯỚC 1). max_loop_iterations chặn chi phí: tối đa
         // 3 lượt gọi AI/lần bấm "Chạy AI" (1 lượt đầu + tối đa 2 lượt bổ sung nếu chưa đủ) — đủ dư
         // địa cho hầu hết trường hợp thiếu vài ý, không để 1 lần bấm nút âm thầm gọi AI vô hạn lượt.
-        'target_idea_count'   => 8,
+        'target_idea_count' => 8,
         'max_loop_iterations' => 3,
     ],
 
@@ -77,7 +77,16 @@ return [
         // transcript cả video 1-2h) vì toàn bộ bản nháp phải được TRẢ LẠI nguyên văn trong output:
         // trần input này phải cân với max_output_tokens ngay dưới, không nới tự do được.
         // ~12k ký tự tiếng Việt ≈ 2.2k từ ≈ 15 phút đọc thành lời — đủ cho 1 kịch bản video dài.
-        'max_draft_chars'   => 12000,
+        'max_draft_chars' => 12000,
         'max_output_tokens' => 4096,
+    ],
+
+    // 2026-08-18 — spec/tech.md "Cẩm nang sáng tạo Vlog ngắn" Phần 2: tool DUY NHẤT không dùng
+    // transcript làm chất liệu chính — input là 1 đoạn SỰ VIỆC THẬT người dùng tự mô tả (chưa quay/
+    // viết), dựng dàn ý 60-90s theo Hành trình Anh hùng rút gọn (5 nhịp). Cùng nhóm "kịch bản" với
+    // outline/cta/polish (chạy sau khi đã có ý tưởng, không phải bước chọn phương án), output ngắn
+    // hơn outline (5 nhịp cố định, không phải 4-7 phần biến thiên theo ngân sách thời lượng).
+    'vlog_outline' => [
+        'max_output_tokens' => 1200,
     ],
 ];

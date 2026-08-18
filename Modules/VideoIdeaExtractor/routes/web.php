@@ -22,4 +22,5 @@ Route::middleware(['auth', 'can:video_idea_extractor.use'])
         Route::post('outline', [VideoIdeaExtractorController::class, 'outline'])->name('outline');
         Route::post('cta', [VideoIdeaExtractorController::class, 'cta'])->name('cta');
         Route::post('polish', [VideoIdeaExtractorController::class, 'polish'])->name('polish');
+        Route::post('vlog-outline', [VideoIdeaExtractorController::class, 'vlogOutline'])->name('vlog-outline');
     });

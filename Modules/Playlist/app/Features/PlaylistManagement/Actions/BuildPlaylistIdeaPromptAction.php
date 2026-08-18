@@ -15,9 +15,6 @@ class BuildPlaylistIdeaPromptAction
     public function handle(Playlist $playlist): string
     {
         $itemLines = $this->visibleItemLines($playlist);
-        // Nhiệm vụ 6 (gợi ý thứ tự) chỉ có nghĩa khi có ≥2 mục để so sánh — dưới ngưỡng đó thì
-        // BỎ HẲN khỏi danh sách nhiệm vụ thay vì liệt kê rồi dặn "bỏ qua nếu thiếu" (đỡ 1 chỉ
-        // dẫn có điều kiện dễ bị AI làm sai, số phần ở heading cũng tự khớp).
         $hasEnoughItems = $itemLines->count() >= 2;
 
         $tasks = [
@@ -73,11 +70,6 @@ class BuildPlaylistIdeaPromptAction
             ->values();
     }
 
-    /**
-     * Giữ ranh giới dòng `NHÃN: giá trị` không vỡ khi tên/mô tả chứa xuống dòng (mô tả nhập từ
-     * textarea nên hoàn toàn có thể nhiều dòng) — cùng kỹ thuật
-     * `AIVideoStudioTemplate\...\BuildMasterScriptPromptAction::indentContinuationLines()`.
-     */
     private function indentContinuationLines(string $value): string
     {
         $normalized = preg_replace("/\r\n?/", "\n", trim($value));

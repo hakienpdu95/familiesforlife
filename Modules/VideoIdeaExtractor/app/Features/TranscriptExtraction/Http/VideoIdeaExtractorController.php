@@ -44,25 +44,25 @@ class VideoIdeaExtractorController extends Controller
     public function extractBatch(Request $request, ExtractTranscriptAction $extractTranscript, ComputeTranscriptConfidenceAction $computeConfidence): JsonResponse
     {
         $maxVideos = (int) config('video_idea_extractor.batch.max_videos', 5);
-        $maxChars  = (int) config('video_idea_extractor.paste.max_chars', 500_000);
+        $maxChars = (int) config('video_idea_extractor.paste.max_chars', 500_000);
 
         $data = ExtractBatchVideoRequestData::from($request->validate([
-            'videos'              => ['required', 'array', 'min:1', "max:{$maxVideos}"],
-            'videos.*.title'      => ['required', 'string', 'max:255'],
+            'videos' => ['required', 'array', 'min:1', "max:{$maxVideos}"],
+            'videos.*.title' => ['required', 'string', 'max:255'],
             'videos.*.transcript' => ['required', 'string', "max:{$maxChars}"],
-            'topic'               => ['nullable', 'string', 'max:255'],
-            'audience'            => ['nullable', 'string', 'max:500'],
-            'goal'                => ['nullable', 'string', 'max:2000'],
-            'constraints'         => ['nullable', 'string', 'max:500'],
-            'style_sample'        => ['nullable', 'string', 'max:3000'],
+            'topic' => ['nullable', 'string', 'max:255'],
+            'audience' => ['nullable', 'string', 'max:500'],
+            'goal' => ['nullable', 'string', 'max:2000'],
+            'constraints' => ['nullable', 'string', 'max:500'],
+            'style_sample' => ['nullable', 'string', 'max:3000'],
         ]));
 
         $maxTranscriptChars = (int) config('video_idea_extractor.batch.max_transcript_chars_per_video', 20000);
 
         $videos = array_map(function (array $video) use ($extractTranscript, $computeConfidence, $maxTranscriptChars): RawTranscriptData {
-            $extracted        = $extractTranscript->handle($video['transcript']);
+            $extracted = $extractTranscript->handle($video['transcript']);
             $confidenceResult = $computeConfidence->handle($extracted['word_count']);
-            $truncated        = $this->truncateAtBoundary($extracted['transcript'], $maxTranscriptChars);
+            $truncated = $this->truncateAtBoundary($extracted['transcript'], $maxTranscriptChars);
 
             return new RawTranscriptData(
                 title: $video['title'],
@@ -163,6 +163,16 @@ class VideoIdeaExtractorController extends Controller
         return $this->runPrompt($request, $action, 'polish', (int) config('video_idea_extractor.polish.max_output_tokens', 4096));
     }
 
+    /**
+     * "Dàn ý Vlog (Hero's Journey)" — cùng khuôn outline() về mặt vận hành, nhưng chất liệu là 1 sự
+     * việc THẬT người dùng tự mô tả (không phải transcript) — xem docblock
+     * buildVlogOutlinePromptText() ở client cho lý do đầy đủ.
+     */
+    public function vlogOutline(Request $request, RunVideoIdeaAiPromptAction $action): JsonResponse
+    {
+        return $this->runPrompt($request, $action, 'vlog_outline', (int) config('video_idea_extractor.vlog_outline.max_output_tokens', 1200));
+    }
+
     private function runPrompt(Request $request, RunVideoIdeaAiPromptAction $action, string $kind, int $maxOutputTokens): JsonResponse
     {
         $data = $request->validate([
@@ -195,14 +205,14 @@ class VideoIdeaExtractorController extends Controller
             return $text;
         }
 
-        $window        = mb_substr($text, 0, $max);
+        $window = mb_substr($text, 0, $max);
         $minAcceptable = (int) ($max * 0.7);
-        $cutAt         = null;
+        $cutAt = null;
 
         if (preg_match_all('/[.!?](?=\s|$)|\n/u', $window, $matches, PREG_OFFSET_CAPTURE)) {
             [$boundary, $byteOffset] = end($matches[0]);
-            $charOffset              = mb_strlen(substr($window, 0, $byteOffset));
-            $cutAt                   = $boundary === "\n" ? $charOffset : $charOffset + 1;
+            $charOffset = mb_strlen(substr($window, 0, $byteOffset));
+            $cutAt = $boundary === "\n" ? $charOffset : $charOffset + 1;
         }
 
         if ($cutAt !== null && $cutAt >= $minAcceptable) {
@@ -229,7 +239,7 @@ class VideoIdeaExtractorController extends Controller
             return $confidenceNote;
         }
 
-        $percentKept    = (int) round(mb_strlen($truncatedTranscript) / $originalLength * 100);
+        $percentKept = (int) round(mb_strlen($truncatedTranscript) / $originalLength * 100);
         $truncationNote = sprintf(
             'Transcript gốc dài %s ký tự, đã CẮT BỚT còn ~%d%% (trần %s ký tự/video) trước khi đưa vào AI — mọi Tiêu đề/Hook/Ý tưởng/Kịch bản bên dưới chỉ dựa trên phần ĐẦU video, CHƯA phản ánh nội dung phần sau. Cân nhắc tách video này thành nhiều lượt trích xuất theo từng đoạn nếu cần khai thác trọn vẹn.',
             number_format($originalLength),

@@ -43,12 +43,17 @@ class RunVideoIdeaAiPromptAction
      * vừa nêu trong nội dung, không tự do sáng tạo như titles/hooks.
      */
     private const TEMPERATURE_BY_KIND = [
-        'titles'  => 0.7,
-        'hooks'   => 0.7,
-        'shorts'  => 0.3,
+        'titles' => 0.7,
+        'hooks' => 0.7,
+        'shorts' => 0.3,
         'outline' => 0.3,
-        'cta'     => 0.5,
-        'polish'  => 0.2,
+        'cta' => 0.5,
+        'polish' => 0.2,
+        // vlog_outline: cần dựng CUNG BẬC kịch tính (khủng hoảng/đột phá) từ 1 sự việc thật —
+        // sáng tạo hơn outline (0.3, chỉ sắp xếp lại chất liệu có sẵn) nhưng vẫn phải bám đúng sự
+        // việc đã mô tả, không tự do như titles/hooks (0.7, chọn góc tiếp cận hoàn toàn mới) — cùng
+        // mức với cta (0.5, cũng "sáng tạo có ràng buộc").
+        'vlog_outline' => 0.5,
     ];
 
     private const DEFAULT_TEMPERATURE = 0.3;
@@ -61,9 +66,9 @@ class RunVideoIdeaAiPromptAction
     /** @return array{markdown_output: string, model_used: string, cost_usd: float} */
     public function handle(Organization $organization, string $prompt, string $kind, int $maxOutputTokens): array
     {
-        $config   = $organization->ai_provider_config ?? config('ai.default');
+        $config = $organization->ai_provider_config ?? config('ai.default');
         $provider = $config['provider'] ?? 'anthropic';
-        $model    = $config['model'] ?? config('ai.default.model');
+        $model = $config['model'] ?? config('ai.default.model');
 
         $estimatedInputTokens = (int) ceil(mb_strlen($prompt) / 4);
 
@@ -89,18 +94,18 @@ class RunVideoIdeaAiPromptAction
         // kể nguồn gốc; cột `kind` chỉ phục vụ audit/tách chi phí theo tính năng sau này.
         DB::table('video_idea_extractor_layer2_runs')->insert([
             'organization_id' => $organization->id,
-            'kind'            => $kind,
-            'cost_usd'        => $response->costUsd,
-            'model_used'      => $response->modelUsed,
-            'created_at'      => now(),
+            'kind' => $kind,
+            'cost_usd' => $response->costUsd,
+            'model_used' => $response->modelUsed,
+            'created_at' => now(),
         ]);
 
         $decoded = json_decode($response->content, associative: true);
 
         return [
             'markdown_output' => $decoded['markdown_output'] ?? $response->content,
-            'model_used'      => $response->modelUsed,
-            'cost_usd'        => $response->costUsd,
+            'model_used' => $response->modelUsed,
+            'cost_usd' => $response->costUsd,
         ];
     }
 }
