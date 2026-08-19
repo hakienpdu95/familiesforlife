@@ -645,20 +645,33 @@ return [
         // preset này là Ý TƯỞNG 1 video/bài đơn lẻ, tần suất dùng khác hẳn. Dùng field type MỚI
         // `select` (options: khoá => nhãn) — xem RenderPromptFromFrameworkAction (map khoá→nhãn khi
         // render) + StoreGeneratedPromptRequest/UpdateGeneratedPromptRequest (Rule::in theo options).
+        //
+        // spec/AIIdeaMatrixGenerator.md §2.13 (v2.8) — VIẾT LẠI theo bản build-prompt người dùng gửi
+        // nguyên văn, áp dụng "đúng chuẩn" (khác quyết định v2.7/§2.12 vốn CHỈ đổi task_instructions
+        // để giữ rủi ro thấp — người dùng quay lại yêu cầu khớp đúng bản gốc):
+        //   - Bỏ field `red_thread` và `audience` — bản gốc coi "Thông điệp cốt lõi" là HẰNG SỐ BẤT
+        //     BIẾN (không phải biến số người dùng điền), và không có khái niệm "Khán giả mục tiêu".
+        //     Hằng số này chuyển thành 1 dòng CỐ ĐỊNH trong `task_instructions` (không có field nào
+        //     khác để chèn text cố định TRƯỚC field blocks — xem docblock RenderPromptFromFrameworkAction,
+        //     lý do y hệt đã ghi ở §2.12 cho khung vai trò AI).
+        //   - `custom_context` đổi vai trò: từ field OPTIONAL "Ghi chú thêm" cuối cùng thành field
+        //     BẮT BUỘC đầu tiên "Bối cảnh & Cảm xúc hôm nay" — đúng bản gốc coi đây là chất liệu
+        //     input CHÍNH của mỗi lần tạo, không phải ghi chú phụ. Giữ nguyên KHOÁ (không đổi thành
+        //     khoá mới) để không cần sửa RenderPromptFromFrameworkAction/StoreGeneratedPromptRequest.
+        //   - `format`: rút từ 5 xuống ĐÚNG 4 lựa chọn (bỏ `behind_the_scenes` — bản gốc nói rõ "1
+        //     trong 4 Format sau"), đổi nhãn bám sát định nghĩa gốc từng format.
         'heritage_idea_matrix' => [
             'name' => 'Ma trận Ý tưởng Di sản',
             'group' => 'Ý tưởng theo Ma trận',
             'description' => 'Format cố định + Yếu tố Di sản/Sản phẩm + Tình huống gia đình → ý tưởng kịch bản Video ngắn lồng ghép văn hoá vào đời sống thường ngày, không bị lan man.',
             'best_for' => 'Bí ý tưởng khi cần sản xuất đều đặn nội dung quảng bá di sản/sản phẩm văn hoá gắn với gia đình hiện đại — mỗi lần chọn/random 1 tổ hợp là 1 góc kịch bản khác nhau.',
             'fields' => [
-                ['key' => 'red_thread', 'label' => 'Thông điệp cốt lõi', 'hint' => 'Sợi chỉ đỏ xuyên suốt — mặc định gợi ý "Di sản Sống - Gắn kết Gia đình Hiện đại", có thể đổi theo chiến dịch.', 'prompt_heading' => 'Thông điệp cốt lõi (bám sát tuyệt đối)', 'type' => 'text', 'required' => true],
-                ['key' => 'audience', 'label' => 'Khán giả mục tiêu', 'hint' => 'VD: Mẹ bỉm sữa 25-35 tuổi, quan tâm giá trị truyền thống cho con.', 'prompt_heading' => 'Khán giả mục tiêu', 'type' => 'textarea', 'required' => true],
-                ['key' => 'format', 'label' => 'Format nội dung', 'hint' => 'Khung xương kịch bản.', 'prompt_heading' => 'Định dạng kịch bản (Format)', 'type' => 'select', 'options' => [
-                    'pov_parent' => 'POV Bố/Mẹ — góc nhìn thứ nhất, kinh nghiệm thực chiến/xử lý sự cố',
-                    'time_capsule' => 'Chiếc hộp thời gian — hoạt động giáo dục con, tương tác vật lý với sản phẩm',
-                    'walking_family' => 'Gia đình đi bộ — review trải nghiệm sự kiện/du lịch chậm/checklist',
-                    'weekend_kitchen' => 'Nếp nhà cuối tuần — gắn kết đa thế hệ, sinh hoạt ẩm thực, không gian hoài cổ',
-                    'behind_the_scenes' => 'Hậu trường — sự lộn xộn chân thực của làm cha mẹ kết hợp văn hoá',
+                ['key' => 'custom_context', 'label' => 'Bối cảnh & Cảm xúc hôm nay', 'hint' => 'Chất liệu sống thực tế của ngày hôm nay — sự kiện/không khí/cảm xúc đang diễn ra trong gia đình, đây là điểm khởi đầu của toàn bộ kịch bản.', 'custom_placeholder' => 'VD: "Sáng nay mưa to cả nhà kẹt ở trong phòng" / "Mẹ hôm nay đi công tác xa, chỉ có 3 bà cháu và bố" / "Hôm nay chuyển đồ từ nhà cũ sang khu tái định cư"', 'prompt_heading' => 'Bối cảnh & Cảm xúc hôm nay', 'type' => 'textarea', 'required' => true],
+                ['key' => 'format', 'label' => 'Format nội dung', 'hint' => 'Khung xương kịch bản — chọn đúng 1 trong 4 định dạng.', 'prompt_heading' => 'Định dạng kịch bản (Format)', 'type' => 'select', 'options' => [
+                    'pov_parent' => 'POV Parent — góc nhìn thứ nhất của Bố/Mẹ, tái hiện tình huống quen thuộc, hài hước hoặc đồng cảm trong việc nuôi dạy con cái',
+                    'time_capsule' => 'Time Capsule (Chiếc hộp thời gian) — lưu giữ kỷ vật/thông điệp ở hiện tại để mở ra trong tương lai, rèn luyện tư duy, ghi nhận sự trưởng thành của con',
+                    'walking_family' => 'Walking Family (Gia đình đi bộ) — tương tác gắn kết qua thử thách thực tế, dự án chung hoặc chuyến đi chơi để thấu hiểu và lưu giữ kỷ niệm',
+                    'weekend_kitchen' => 'Weekend Kitchen (Nếp nhà cuối tuần) — không gian sinh hoạt ấm cúng, đa thế hệ quây quần nấu nướng, chia sẻ công thức truyền thống và nuôi dưỡng tình cảm',
                 ], 'required' => true],
                 // spec/AIIdeaMatrixGenerator.md §2.5 (v2.1) — 2 field dưới đây là BIẾN SỐ biên tập
                 // (đúng thuật ngữ "Hằng số + Biến số" của tài liệu gốc): `allow_custom` cho nhập tự
@@ -669,11 +682,11 @@ return [
                 // mặc định của field text/textarea) cho phần tự nhập của field `allow_custom`. Lý
                 // do: cả 2 field này về BẢN CHẤT là 1 CỤM TỪ NGẮN neo cảm xúc/văn hoá (xem 21 nhãn
                 // có sẵn, dài nhất ~33 ký tự) — dùng chung `max:5000` với field textarea tự do (VD
-                // `audience`) để hở cửa cho việc dán nguyên khối nội dung quảng cáo/thông cáo báo
-                // chí vào đây, phá đúng mục đích "Hằng số + Biến số" (mô hình cần 1 cụm từ ngắn để
-                // ghép, không phải 1 đoạn văn dài đã tự nó là nội dung hoàn chỉnh) — xem ví dụ thật
-                // đã xảy ra ở docblock `RenderPromptFromFrameworkAction`.
-                ['key' => 'heritage_variable', 'label' => 'Yếu tố Di sản/Sản phẩm', 'hint' => 'Yếu tố văn hoá/vật lý sẽ lồng ghép — chọn từ gợi ý hoặc "Khác (tự nhập)". Tự nhập PHẢI là 1 CỤM TỪ NGẮN (VD "Bánh chưng ngày Tết", "Gốm Chu Đậu") — không dán cả đoạn mô tả/quảng cáo dài vào đây.', 'custom_placeholder' => 'VD: "Bánh chưng ngày Tết", "Gốm Chu Đậu" — 1 cụm từ, không phải đoạn mô tả', 'prompt_heading' => 'Yếu tố Di sản/Sản phẩm', 'type' => 'select', 'allow_custom' => true, 'custom_max_length' => 120, 'options' => [
+                // `custom_context`) để hở cửa cho việc dán nguyên khối nội dung quảng cáo/thông cáo
+                // báo chí vào đây, phá đúng mục đích "Hằng số + Biến số" (mô hình cần 1 cụm từ ngắn
+                // để ghép, không phải 1 đoạn văn dài đã tự nó là nội dung hoàn chỉnh) — xem ví dụ
+                // thật đã xảy ra ở docblock `RenderPromptFromFrameworkAction`.
+                ['key' => 'heritage_variable', 'label' => 'Yếu tố Di sản/Sản phẩm', 'hint' => 'Yếu tố văn hoá/vật lý sẽ lồng ghép — có thể là di sản/sản phẩm chính thức hoặc 1 vật dụng gia đình mang kỷ niệm. Chọn từ gợi ý hoặc "Khác (tự nhập)". Tự nhập PHẢI là 1 CỤM TỪ NGẮN (VD "Bộ ấm chén cũ của ông nội", "Cái áo mưa cánh dơi") — không dán cả đoạn mô tả/quảng cáo dài vào đây.', 'custom_placeholder' => 'VD: "Bộ ấm chén cũ của ông nội", "Cái áo mưa cánh dơi" — 1 cụm từ, không phải đoạn mô tả', 'prompt_heading' => 'Yếu tố Di sản/Sản phẩm', 'type' => 'select', 'allow_custom' => true, 'custom_max_length' => 120, 'options' => [
                     // Di sản
                     'lang_co' => 'Không gian làng cổ', 'le_hoi' => 'Lễ hội dân gian', 'di_tich' => 'Di tích lịch sử', 'dinh_chua' => 'Kiến trúc đình chùa',
                     // Sản phẩm
@@ -688,7 +701,7 @@ return [
                 // `tip` cho 1 trong 2 field allow_custom (đúng convention "1 tip/framework" của cả
                 // config — xem docblock đầu file) nhưng nội dung tip nói về QUAN HỆ giữa CẢ 2 field,
                 // vì `heritage_variable` đứng ngay phía trên trong thứ tự canon.
-                ['key' => 'situation_variable', 'label' => 'Tình huống Gia đình', 'hint' => 'Nỗi đau/sự kiện sinh hoạt đời thường làm điểm neo cảm xúc — chọn từ gợi ý hoặc "Khác (tự nhập)". Tự nhập PHẢI là 1 CỤM TỪ NGẮN mô tả 1 TÌNH HUỐNG (VD "Trẻ sợ đi khám răng") — KHÔNG phải nội dung/thông điệp quảng cáo của chiến dịch (cái đó thuộc ô "Yếu tố Di sản/Sản phẩm" hoặc "Thông điệp cốt lõi").', 'tip' => 'Field này và "Yếu tố Di sản/Sản phẩm" PHẢI ĐỘC LẬP với nhau — nếu cả 2 cùng mô tả lại sản phẩm/sự kiện, kịch bản sinh ra sẽ chỉ đọc lại thông cáo quảng cáo, mất hẳn mạch "vấn đề → giải pháp" mà Nhiệm vụ 1 yêu cầu. Phép thử: xoá tên sản phẩm/sự kiện khỏi câu bạn vừa viết — câu đó có còn ĐÚNG và CÓ NGHĨA không? Có → đúng là 1 tình huống thật. Không → bạn đang mô tả lại sản phẩm, viết lại. Chi tiết dài (ngày giờ, địa điểm, danh sách...) đưa vào "Ghi chú thêm", không nhét vào đây.', 'custom_placeholder' => 'VD: "Trẻ sợ đi khám răng" — 1 tình huống vẫn đúng dù không có sản phẩm này', 'prompt_heading' => 'Tình huống Gia đình', 'type' => 'select', 'allow_custom' => true, 'custom_max_length' => 120, 'options' => [
+                ['key' => 'situation_variable', 'label' => 'Tình huống Gia đình cốt lõi', 'hint' => 'Nỗi đau/sự kiện sinh hoạt đời thường làm điểm neo cảm xúc — chọn từ gợi ý hoặc "Khác (tự nhập)". Tự nhập PHẢI là 1 CỤM TỪ NGẮN mô tả 1 TÌNH HUỐNG (VD "Con gái 2 tuổi lục lọi tủ đồ cũ") — KHÔNG phải nội dung/thông điệp quảng cáo của chiến dịch (cái đó thuộc ô "Yếu tố Di sản/Sản phẩm").', 'tip' => 'Field này và "Yếu tố Di sản/Sản phẩm" PHẢI ĐỘC LẬP với nhau — nếu cả 2 cùng mô tả lại sản phẩm/sự kiện, kịch bản sinh ra sẽ chỉ đọc lại thông cáo quảng cáo, mất hẳn mạch "vấn đề → giải pháp" mà Nhiệm vụ đầu tiên yêu cầu. Phép thử: xoá tên sản phẩm/sự kiện khỏi câu bạn vừa viết — câu đó có còn ĐÚNG và CÓ NGHĨA không? Có → đúng là 1 tình huống thật. Không → bạn đang mô tả lại sản phẩm, viết lại. Chi tiết dài (ngày giờ, địa điểm, danh sách...) đưa vào "Bối cảnh & Cảm xúc hôm nay", không nhét vào đây.', 'custom_placeholder' => 'VD: "Con gái 2 tuổi lục lọi tủ đồ cũ" — 1 tình huống vẫn đúng dù không có sản phẩm này', 'prompt_heading' => 'Tình huống Gia đình cốt lõi', 'type' => 'select', 'allow_custom' => true, 'custom_max_length' => 120, 'options' => [
                     // Khủng hoảng nhỏ
                     'an_va' => 'Trẻ ăn vạ chốn đông người', 'lam_ban' => 'Con làm bẩn đồ mới', 'troi_mua' => 'Trời mưa hỏng kế hoạch đi chơi', 'thich_ipad' => 'Trẻ chỉ thích xem iPad',
                     // Gắn kết
@@ -696,36 +709,36 @@ return [
                     // Áp lực
                     'me_thieu_ngu' => 'Mẹ bỉm thiếu ngủ', 'ngan_sach' => 'Ngân sách cuối tháng eo hẹp', 'hanh_ly' => 'Chuẩn bị hành lý đi chơi quá tải',
                 ], 'required' => true],
-                ['key' => 'custom_context', 'label' => 'Ghi chú thêm', 'hint' => 'Chi tiết riêng cho lần này — bỏ trống nếu không có.', 'prompt_heading' => 'Ghi chú thêm từ biên tập viên', 'type' => 'textarea', 'required' => false],
             ],
+            // spec/AIIdeaMatrixGenerator.md §2.13 (v2.8) — mục [0]/[1] mới: khung vai trò AI + hằng
+            // số "Thông điệp cốt lõi" (trước là field `red_thread` editable, nay CỐ ĐỊNH — xem lý do
+            // ở comment đầu preset). Các mục an toàn/pháp lý (trẻ em/di tích/tài trợ) giữ NGUYÊN từ
+            // v1.0, không có trong bản gốc người dùng gửi nhưng là ràng buộc đã thêm có chủ đích.
             'task_instructions' => [
-                'Mở đầu bằng Tình huống Gia đình đã chọn, sau đó giải quyết bằng Yếu tố Di sản/Sản phẩm, theo đúng góc nhìn của Format đã chọn.',
-                'Tuyệt đối KHÔNG viết văn phong sáo rỗng, quảng cáo lộ liễu — mô tả sự lộn xộn, chân thực của đời sống gia đình (quy tắc "Authenticity").',
-                'KHÔNG để nhân vật nói thẳng ra giá trị văn hoá/quảng cáo (VD "sản phẩm này rất có tính văn hoá") — để nhân vật HÀNH ĐỘNG cùng sản phẩm/bối cảnh đó thay vì kể lại (quy tắc "Show, Don\'t Tell").',
+                'Nhập vai Giám đốc Sáng tạo Nội dung (Creative Director) kiêm Chuyên gia Kịch bản Video ngắn — quan sát nhạy bén, biến những chi tiết sinh hoạt đời thường, dù ngẫu hứng nhất, thành câu chuyện chạm đến cảm xúc người xem.',
+                'Tuyệt đối bám sát sợi chỉ đỏ "Di sản Sống - Gắn kết Gia đình Hiện đại" (hằng số bất biến, không đổi theo từng lần tạo) — thể hiện sự tiếp nối các giá trị văn hoá, gia đình giữa các thế hệ (Bà - Bố Mẹ - Con) thông qua hành động, vật dụng và bối cảnh sinh hoạt chân thực nhất.',
+                'Mở đầu bằng Tình huống Gia đình cốt lõi đã chọn, sau đó giải quyết bằng Yếu tố Di sản/Sản phẩm, theo đúng góc nhìn của Format đã chọn — dựa trên đúng chất liệu sống đã điền ở "Bối cảnh & Cảm xúc hôm nay".',
+                'Bám sát năng lượng và bối cảnh thật của "Bối cảnh & Cảm xúc hôm nay" — không cường điệu hoá cảm xúc, giữ đúng nét ngộ nghĩnh, bất quy tắc của trẻ nhỏ (quy tắc "Authenticity").',
+                'Tuyệt đối KHÔNG viết văn phong sáo rỗng, quảng cáo lộ liễu, KHÔNG để nhân vật nói thẳng ra giá trị văn hoá/quảng cáo (VD "sản phẩm này rất có tính văn hoá") — để hành động tương tác vật lý của gia đình với đồ vật/không gian tự nói lên ý nghĩa (quy tắc "Show, Don\'t Tell").',
+                'Giọng điệu/không khí kịch bản phải khớp với cảm xúc đã điền ở "Bối cảnh & Cảm xúc hôm nay" (VD ngày mưa → tĩnh lặng, hoài niệm; ngày hội chợ → nhộn nhịp, háo hức) — quy tắc "Tone & Mood".',
                 'Nếu bối cảnh có trẻ em: không dàn dựng tình huống nguy hiểm/gây khó chịu thật cho trẻ chỉ để quay hình; không dùng hình ảnh trẻ khóc/hoảng loạn làm điểm nhấn giật gân.',
                 'Nếu bối cảnh diễn ra tại di tích/đình chùa/không gian tín ngưỡng: giữ thái độ tôn trọng, không dàn dựng hành vi phản cảm/thiếu tôn nghiêm tại nơi đó dù chỉ trong kịch bản.',
                 'Nếu nội dung gắn với sản phẩm/dịch vụ tài trợ: đưa 1 câu công khai đây là nội dung có yếu tố quảng bá (VD lồng trong caption), không che giấu quan hệ hợp tác.',
-                'Trả về đúng cấu trúc: (1) TIÊU ĐỀ HOOK — 1 câu giật gân, đồng cảm; (2) KỊCH BẢN CHI TIẾT — bảng 2 cột [Hình ảnh/Góc máy] và [Âm thanh/Lời thoại]; (3) CAPTION ĐĂNG BÀI — tối đa 150 chữ kèm hashtag.',
+                'Trả về đúng cấu trúc: (1) CONCEPT Ý TƯỞNG — phân tích ngắn gọn vì sao chất liệu hôm nay phù hợp với Format và sợi chỉ đỏ đã chọn; (2) HOOK TITLE — 3 phương án tiêu đề khơi gợi sự tò mò/đồng cảm ngay lập tức; (3) KỊCH BẢN CHI TIẾT — bảng 2 cột [Hình ảnh/Hành động cụ thể] và [Âm thanh/Lời thoại/Text on Screen]; (4) GỢI Ý CAPTION & HASHTAG.',
             ],
-            // spec/AIIdeaMatrixGenerator.md §2.10 (v2.5) — ví dụ chuẩn, tách từ 1 thông cáo hội chợ
-            // OCOP thật (Hội chợ Xúc tiến thương mại nông nghiệp, sản phẩm OCOP – HaNoi Agriculture
-            // Fair 2026, AEON MALL Long Biên, 13-16/8/2026) theo ĐÚNG 7 bước ở §2.7 — thay ví dụ cũ
-            // (Gốm sứ Bát Tràng, v2.0-v2.4). Cố ý dùng làm ví dụ MẪU cho cách áp dụng công thức:
-            // `heritage_variable`/`situation_variable` CHỌN TỪ DANH SÁCH CÓ SẴN (không allow_custom)
-            // — minh hoạ bước 1 "kiểm tra danh sách gợi ý trước khi tự nhập"; nguyên liệu gốc liệt
-            // kê ~10 sản phẩm (trà, cà phê, mật ong, đông trùng hạ thảo...) + 3 nghề (tò he, thêu
-            // tay, nặn hoa đất) — CHỈ chọn 1 ("tò he", đã có sẵn trong options) làm trọng tâm video
-            // này (bước 2), phần còn lại dồn vào `custom_context` (bước 7) chứ không nhồi vào 2 field
-            // ngắn. `situation_variable` ("Trẻ chỉ thích xem iPad") KHÔNG có trong nguyên liệu gốc —
-            // tự chọn theo đúng bước 3, đối lập tự nhiên với hoạt động tay chân của nghề tò he (phép
-            // thử: câu này vẫn đúng dù không có hội chợ này).
+            // spec/AIIdeaMatrixGenerator.md §2.13 (v2.8) — đổi ví dụ chuẩn sang đúng 4 field mới,
+            // dùng LUÔN các ví dụ gốc người dùng gợi ý cho "Bối cảnh & Cảm xúc hôm nay"/"Yếu tố Di
+            // sản/Sản phẩm"/"Tình huống gia đình cốt lõi" (chuyển hộ, không sao chép máy móc) — minh
+            // hoạ song song CẢ 2 cách dùng field select: `format` chọn khoá có sẵn, `heritage_
+            // variable`/`situation_variable` dùng `allow_custom` (đồ vật/tình huống gia đình đời
+            // thường thường KHÔNG có sẵn trong 21 nhãn options — đúng đúng tinh thần "options chỉ là
+            // gợi ý" của §2.5). Thay hẳn ví dụ OCOP (v2.5-v2.7), không giữ song song — 1 preset chỉ 1
+            // ví dụ chuẩn (nguyên tắc đã có từ v2.4, xem §2.9).
             'example' => [
-                'red_thread' => 'Di sản Sống - Gắn kết Gia đình Hiện đại',
-                'audience' => 'Gia đình có con nhỏ ở Hà Nội, muốn con trải nghiệm nghề truyền thống thay vì suốt ngày cầm điện thoại',
+                'custom_context' => 'Hôm nay chuyển đồ từ nhà cũ sang khu tái định cư, cả nhà ai cũng bận nhưng vẫn tranh thủ ôn lại kỷ niệm khi dọn đồ.',
                 'format' => 'time_capsule',
-                'heritage_variable' => 'to_he',
-                'situation_variable' => 'thich_ipad',
-                'custom_context' => 'Hội chợ Xúc tiến thương mại nông nghiệp, sản phẩm OCOP – HaNoi Agriculture Fair 2026, 13-16/8/2026 tại AEON MALL Long Biên. Có khu ẩm thực đặc sản (trà, cà phê, mật ong, đông trùng hạ thảo, gạo, miến, mì, gia vị, tổ yến) và trải nghiệm nghề truyền thống (tò he, thêu tay, nặn hoa đất).',
+                'heritage_variable' => 'Bộ ấm chén cũ của ông nội',
+                'situation_variable' => 'Con gái 2 tuổi lục lọi tủ đồ cũ',
             ],
         ],
 

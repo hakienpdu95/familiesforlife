@@ -1,11 +1,15 @@
 # Ma trận Ý tưởng Di sản — bổ sung vào `Modules/PromptFrameworkStudio`
 
-**Đặc tả Kỹ thuật — v2.6 (v2.0 viết lại toàn bộ sau đánh giá đối chiếu codebase; v2.1 sửa lỗi thiết kế "biến số bị đóng cứng thành hằng số" — thêm `allow_custom`, §2.5; v2.2 sửa lỗi phát sinh từ chính v2.1 — mở tự do không giới hạn độ dài, thêm `custom_max_length`, §2.6; v2.3 đưa hướng dẫn dùng đúng field (§2.7) vào trong form qua `tip`/`custom_placeholder`, §2.8; v2.4 thêm khối "Ví dụ tham khảo" toàn cảnh trên field đầu tiên, §2.9; v2.5 đổi `example` chuẩn sang thông cáo hội chợ OCOP thật theo yêu cầu người dùng, §2.10; v2.6 thêm "Trợ lý tách nội dung thô" — sinh prompt cho AI ngoài tự đề xuất giá trị field, §2.11)**
+**Đặc tả Kỹ thuật — v2.7 (v2.0 viết lại toàn bộ sau đánh giá đối chiếu codebase; v2.1 sửa lỗi thiết kế "biến số bị đóng cứng thành hằng số" — thêm `allow_custom`, §2.5; v2.2 sửa lỗi phát sinh từ chính v2.1 — mở tự do không giới hạn độ dài, thêm `custom_max_length`, §2.6; v2.3 đưa hướng dẫn dùng đúng field (§2.7) vào trong form qua `tip`/`custom_placeholder`, §2.8; v2.4 thêm khối "Ví dụ tham khảo" toàn cảnh trên field đầu tiên, §2.9; v2.5 đổi `example` chuẩn sang thông cáo hội chợ OCOP thật theo yêu cầu người dùng, §2.10; v2.6 thêm "Trợ lý tách nội dung thô" — sinh prompt cho AI ngoài tự đề xuất giá trị field, §2.11; v2.7 viết lại `task_instructions` — khung vai trò AI + quy tắc "Tone & Mood" + đầu ra 4 phần, §2.12)**
 
 **Ngày:** 2026-08-17
 **Framework:** Laravel 13 (PHP 8.4) + NWIDART Modules + Lorisleiva Actions
 **Module đích:** `Modules/PromptFrameworkStudio` (KHÔNG còn là module riêng `AIIdeaMatrixGenerator`)
 
+> **v2.7 (2026-08-19): ĐÃ TRIỂN KHAI** — viết lại `task_instructions` của `heritage_idea_matrix`
+> (§2.12), KHÔNG đổi `fields`/validate/render. Chỉ sửa 1 file config
+> (`config/prompt_framework_studio.php`); không cần chạy lại seeder/migration.
+>
 > **Trạng thái: ĐÃ TRIỂN KHAI (2026-08-17, gồm cả v2.1-v2.6).** Toàn bộ §2 (field `select` + nút
 > Randomize + preset `heritage_idea_matrix` + validate + §3 "Dùng lại giá trị từ prompt trước" +
 > §2.5 `allow_custom` + §2.6 `custom_max_length` + §2.8 `tip`/`custom_placeholder` + §2.9 khối "Ví
@@ -402,6 +406,35 @@ hiển thị prompt đã ghép.
 **CỐ Ý KHÔNG tự parse kết quả AI trả về để tự điền form** — người dùng đọc câu trả lời AI rồi tự gõ
 vào từng field, đúng nguyên tắc "gợi ý không quyết định thay" xuyên suốt cả module (rủi ro parse sai
 lặng lẽ điền nhầm field không đáng đánh đổi lấy tiện lợi tự động điền).
+
+### 2.12 Viết lại `task_instructions` — khung vai trò AI + "Tone & Mood" + đầu ra 4 phần (v2.7)
+
+**Yêu cầu:** người dùng gửi 1 bản nội dung build-prompt hoàn chỉnh (vai trò AI, thông điệp cốt lõi,
+4 format, input hôm nay, ranh giới sáng tạo, định dạng đầu ra) muốn áp cho preset này. Đối chiếu với
+cấu trúc hiện có (§2.3), phần lớn đã có chỗ tương đương (`red_thread`/`format`/`heritage_variable`/
+`situation_variable`/`custom_context`) — quyết định (hỏi lại người dùng, chọn phương án rủi ro thấp):
+**giữ nguyên `fields`** (không bỏ `audience`, không đổi `custom_context` thành field bắt buộc mới,
+không rút `format` từ 5 xuống 4 lựa chọn, không khoá `red_thread` thành hằng số cứng) — CHỈ viết lại
+`task_instructions`, vì kiến trúc render (`RenderPromptFromFrameworkAction`) không có chỗ chèn khối
+văn bản cố định TRƯỚC field blocks (xem docblock class đó, thứ tự TOP/MIDDLE/BOTTOM cố định) nên
+"[VAI TRÒ CỦA AI]" được ghép làm mục [0] của khối `## Nhiệm vụ` thay vì khối riêng ở đầu prompt.
+
+**Thay đổi cụ thể trong mảng `task_instructions`:**
+- Mục mới đầu tiên: khung vai trò "Giám đốc Sáng tạo Nội dung kiêm Chuyên gia Kịch bản Video ngắn".
+- Mục mới "Tone & Mood" (giọng điệu khớp cảm xúc của `custom_context`) — chèn sau quy tắc "Show,
+  Don't Tell" hiện có.
+- 4 quy tắc an toàn/pháp lý đã có từ v1.0 (§2.3, trẻ em/di tích/tài trợ) **giữ nguyên, không bỏ** —
+  bản gốc người dùng gửi không đề cập, nhưng đây là ràng buộc đã thêm có chủ đích, xem lý do gốc ở
+  đoạn ngay sau khối `task_instructions` trong §2.3.
+- Mục cuối (định dạng đầu ra) đổi từ 3 phần (TIÊU ĐỀ HOOK 1 câu / KỊCH BẢN / CAPTION) sang 4 phần:
+  CONCEPT Ý TƯỞNG, HOOK TITLE (3 phương án thay vì 1), KỊCH BẢN CHI TIẾT (bảng 2 cột, đổi nhãn cột
+  sang "Hình ảnh/Hành động cụ thể" và "Âm thanh/Lời thoại/Text on Screen"), GỢI Ý CAPTION & HASHTAG.
+
+**Không cần sửa `RenderPromptFromFrameworkAction` hay test** — cơ chế ghép `task_instructions` (đánh
+số 1..N, không phụ thuộc số lượng cố định) đã tổng quát từ trước; không có test nào khoá cứng số dòng
+`task_instructions` của riêng preset này (đã rà `RenderPromptFromFrameworkActionTest.php` trước khi
+sửa — `test_every_framework_renders_from_its_own_example` chỉ kiểm tra render không rỗng/không còn
+placeholder `{{`, không đếm số dòng).
 
 ---
 

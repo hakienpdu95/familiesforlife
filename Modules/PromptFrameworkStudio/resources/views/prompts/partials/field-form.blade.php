@@ -104,8 +104,9 @@
 </details>
 
 {{-- spec/AIIdeaMatrixGenerator.md §2.9 (v2.4) — khối "Ví dụ tham khảo", đặt NGAY TRÊN field đầu
-     tiên (Thông điệp cốt lõi ở heritage_idea_matrix) theo đúng yêu cầu: người dùng thấy được TOÀN
-     CẢNH 1 ví dụ hoàn chỉnh trước khi điền, thay vì tự ghép lại từ placeholder rải rác từng ô. Mở
+     tiên (Bối cảnh & Cảm xúc hôm nay ở heritage_idea_matrix — đổi từ v2.8, §2.13) theo đúng yêu
+     cầu: người dùng thấy được TOÀN CẢNH 1 ví dụ hoàn chỉnh trước khi điền, thay vì tự ghép lại từ
+     placeholder rải rác từng ô. Mở
      sẵn (không phải `<details>` đóng) — đây là thứ CẦN thấy TRƯỚC khi điền, không phải tra cứu thêm
      khi cần (khác khối "Xem trước prompt" ở cuối, vốn chỉ hữu ích SAU khi đã có ít nhất vài field).
      Generic cho MỌI framework — `exampleRows` rỗng thì khối này tự ẩn (framework nào không có
