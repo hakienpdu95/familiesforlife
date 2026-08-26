@@ -108,6 +108,8 @@ class CategoryFoundationController extends Controller
             'audience_behavior' => ['nullable', 'string', 'max:2000'],
             'constraints' => ['nullable', 'string', 'max:500'],
             'style_sample' => ['nullable', 'string', 'max:3000'],
+            'product_service_docs' => ['nullable', 'string', 'max:4000'],
+            'best_example_content' => ['nullable', 'string', 'max:4000'],
             'category_uuids' => ['sometimes', 'array'],
             'category_uuids.*' => ['string', 'uuid', 'exists:post_categories,uuid'],
         ]);

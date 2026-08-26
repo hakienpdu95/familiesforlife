@@ -21,7 +21,10 @@ use Spatie\LaravelData\Data;
  * nào trong Hệ giá trị gia đình Việt Nam; family_conduct_focus (spec §12.11) cùng cơ chế cho 4 cặp
  * quan hệ của Bộ tiêu chí ứng xử trong gia đình (config('content_foundation.family_conduct_
  * standards.items')). Validate danh sách key hợp lệ nằm ở CategoryFoundationController::upsert()
- * ('in:...' đọc động từ config).
+ * ('in:...' đọc động từ config). `product_service_docs`/`best_example_content` (§12.13, martech.org/
+ * how-to-build-an-ai-content-system-that-works) là tài liệu mô tả chi tiết sản phẩm/dịch vụ và ví dụ
+ * nội dung/dàn ý mẫu TỐT NHẤT đã có — 2 phần "Constants" còn thiếu so với mô hình AI content system
+ * chuẩn, khác `style_sample` (chỉ là mẫu giọng văn ngắn).
  */
 class CategoryFoundationData extends Data
 {
@@ -54,5 +57,9 @@ class CategoryFoundationData extends Data
         public readonly ?string $constraints = null,
         #[Nullable, Max(3000)]
         public readonly ?string $style_sample = null,
+        #[Nullable, Max(4000)]
+        public readonly ?string $product_service_docs = null,
+        #[Nullable, Max(4000)]
+        public readonly ?string $best_example_content = null,
     ) {}
 }

@@ -432,6 +432,8 @@
     ],
     [
         "content_foundations///add///__///",
-        "audience_behavior///text///__///_NULL///NULL///__///__"
+        "audience_behavior///text///__///_NULL///NULL///__///__",
+        "product_service_docs///text///__///_NULL///NULL///__///__",
+        "best_example_content///text///__///_NULL///NULL///__///__"
     ]
 ]

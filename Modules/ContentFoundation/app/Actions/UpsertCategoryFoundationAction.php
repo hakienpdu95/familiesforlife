@@ -43,6 +43,8 @@ class UpsertCategoryFoundationAction
                 'audience_behavior' => $data->audience_behavior,
                 'constraints' => $data->constraints,
                 'style_sample' => $data->style_sample,
+                'product_service_docs' => $data->product_service_docs,
+                'best_example_content' => $data->best_example_content,
                 'updated_by' => $userId,
             ]);
 

@@ -68,8 +68,17 @@ class RunLayer2ExtractionAction
                         // đây model không bị bắt buộc trích dẫn đã dùng nguồn nào cho từng ý tưởng
                         // — biên tập viên không tự kiểm chứng lại được khi chạy batch nhiều nguồn.
                         'source_reference' => ['type' => 'string', 'description' => 'Nguồn đã dùng làm căn cứ chính cho ý tưởng này — copy đúng `title` (và `url` nếu có) của (các) nguồn tương ứng trong "Dữ liệu nguồn"; tổng hợp từ nhiều nguồn thì liệt kê cách nhau bằng dấu chấm phẩy.'],
+                        // v1.31 (§12.14, searchengineland.com/guide/topic-clusters-for-ai-search) —
+                        // "Query Fan-out": mạng câu hỏi ngách 1 AI search engine phân rã ra khi
+                        // phụ huynh tìm hiểu sâu chủ đề của ý tưởng — dùng để đánh giá độ bao phủ
+                        // chủ đề, KHÔNG phải danh sách ý tưởng bài viết khác.
+                        'cluster_questions' => ['type' => 'array', 'description' => '3-6 câu hỏi ngách/liên quan mà một AI search engine (Google AI Overview, ChatGPT, Perplexity...) sẽ "phân rã" (fan-out) ra khi một phụ huynh tìm hiểu SÂU chủ đề của chính ý tưởng này. Câu hỏi phải THỰC TẾ phụ huynh sẽ hỏi bằng ngôn ngữ tự nhiên, không bịa thuật ngữ kỹ thuật xa lạ.', 'items' => ['type' => 'string']],
+                        // Ánh xạ trực tiếp sang `content_role` (pillar/cluster) mà ContentOutlines
+                        // đã có sẵn (spec/ContentOutlines_Technical_Specification.md §4.9) — biên
+                        // tập viên chọn content_role khi lên dàn ý dựa gợi ý này.
+                        'content_role_suggestion' => ['type' => 'string', 'enum' => ['pillar', 'cluster'], 'description' => 'Dựa vào `cluster_questions` — "pillar" nếu ý tưởng đủ RỘNG để trả lời TOÀN BỘ mạng câu hỏi trong 1 bài tổng quan (sẽ liên kết XUỐNG các bài cụm hẹp hơn sau này), "cluster" nếu ý tưởng chỉ trả lời 1 nhánh HẸP của mạng câu hỏi (nên liên kết LÊN 1 bài tổng quan rộng hơn).'],
                     ],
-                    'required' => ['idea', 'category', 'matches_core_focus', 'unique_angle', 'serves_goal', 'fits_audience', 'reason', 'suggested_title', 'source_reference'],
+                    'required' => ['idea', 'category', 'matches_core_focus', 'unique_angle', 'serves_goal', 'fits_audience', 'reason', 'suggested_title', 'source_reference', 'cluster_questions', 'content_role_suggestion'],
                 ],
             ],
             // 2026-08-04 — thay field `suggested_product` (1 chuỗi nullable trên TỪNG ý tưởng) bằng
@@ -365,7 +374,7 @@ class RunLayer2ExtractionAction
         if ($hasCategoryColumn) {
             $header[] = 'Chuyên mục đề xuất';
         }
-        $header = array_merge($header, ['Khớp trọng tâm?', 'Góc nhìn độc quyền?', 'Phục vụ mục tiêu?', 'Phù hợp đối tượng?', 'Lý do (1 câu, vì sao đạt cả 4)', 'Đề xuất tiêu đề bài viết', 'Nguồn căn cứ']);
+        $header = array_merge($header, ['Khớp trọng tâm?', 'Góc nhìn độc quyền?', 'Phục vụ mục tiêu?', 'Phù hợp đối tượng?', 'Lý do (1 câu, vì sao đạt cả 4)', 'Đề xuất tiêu đề bài viết', 'Nguồn căn cứ', 'Câu hỏi liên quan (fan-out)', 'Vai trò gợi ý (Trụ cột/Cụm)']);
 
         // Heading cho bảng 1: từ 2026-08-04 output có thể gồm 2 bảng (ý tưởng + sản phẩm), không
         // còn 1 bảng trần như trước — đặt tên đúng bố cục mà nhánh `forExternalChat` của
@@ -388,6 +397,15 @@ class RunLayer2ExtractionAction
             $cells[] = $this->escapeCell($idea['reason'] ?? '');
             $cells[] = $this->escapeCell($idea['suggested_title'] ?? '');
             $cells[] = $this->escapeCell($idea['source_reference'] ?? '');
+            // v1.31 (§12.14) — cluster_questions là mảng, nối bằng "; " cùng quy ước for_ideas/
+            // source_reference (nhiều giá trị ngăn cách bằng dấu chấm phẩy) ở nơi khác trong file.
+            $clusterQuestions = is_array($idea['cluster_questions'] ?? null) ? $idea['cluster_questions'] : [];
+            $cells[] = $this->escapeCell(implode('; ', $clusterQuestions));
+            $cells[] = $this->escapeCell(match ($idea['content_role_suggestion'] ?? null) {
+                'pillar' => 'Trụ cột',
+                'cluster' => 'Cụm',
+                default => '',
+            });
 
             $lines[] = '| '.implode(' | ', $cells).' |';
         }

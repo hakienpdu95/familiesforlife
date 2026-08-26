@@ -196,8 +196,24 @@
                                   class="textarea textarea-bordered textarea-sm w-full"></textarea>
                     </div>
                     <div class="form-control">
-                        <label class="label py-0.5"><span class="label-text text-xs font-medium">Đoạn văn mẫu (giọng văn)</span></label>
+                        <label class="label py-0.5">
+                            <span class="label-text text-xs font-medium">Đoạn văn mẫu (giọng văn) — dán NGUYÊN VĂN 1-2 đoạn đã viết thật, KHÔNG mô tả bằng tính từ (VD "gần gũi, thân thiện" không giúp AI viết đúng giọng bằng 1 đoạn văn mẫu thật)</span>
+                        </label>
                         <textarea x-model="cat._form.style_sample" rows="3"
+                                  class="textarea textarea-bordered textarea-sm w-full text-xs"></textarea>
+                    </div>
+                    <div class="form-control">
+                        <label class="label py-0.5">
+                            <span class="label-text text-xs font-medium">Tài liệu mô tả chi tiết sản phẩm/dịch vụ (thành phần, công dụng, thông số, đối tượng dùng, lưu ý khi dùng...) — dùng làm nguồn sự thật khi nội dung nhắc tới sản phẩm/dịch vụ cụ thể</span>
+                        </label>
+                        <textarea x-model="cat._form.product_service_docs" rows="3"
+                                  class="textarea textarea-bordered textarea-sm w-full text-xs"></textarea>
+                    </div>
+                    <div class="form-control">
+                        <label class="label py-0.5">
+                            <span class="label-text text-xs font-medium">Ví dụ nội dung/dàn ý mẫu TỐT NHẤT đã có (dán nguyên văn 1 bài/dàn ý bạn coi là chuẩn mực cho chuyên mục này) — khác đoạn văn mẫu giọng văn ở trên, đây là 1 bài/dàn ý HOÀN CHỈNH để AI học cấu trúc/độ sâu/cách triển khai</span>
+                        </label>
+                        <textarea x-model="cat._form.best_example_content" rows="3"
                                   class="textarea textarea-bordered textarea-sm w-full text-xs"></textarea>
                     </div>
 
@@ -266,7 +282,7 @@ document.addEventListener('alpine:init', () => {
             familyConductStandards = [], familyConductStandardsRef = '',
         } = serverData;
 
-        const emptyForm = () => ({ core_focus: '', writer_insights: '', unique_angle: '', content_goals: '', pain_points: '', objections: '', decision_criteria: '', family_values_focus: [], family_conduct_focus: [], rejected_ideas: '', audience: '', audience_behavior: '', constraints: '', style_sample: '' });
+        const emptyForm = () => ({ core_focus: '', writer_insights: '', unique_angle: '', content_goals: '', pain_points: '', objections: '', decision_criteria: '', family_values_focus: [], family_conduct_focus: [], rejected_ideas: '', audience: '', audience_behavior: '', constraints: '', style_sample: '', product_service_docs: '', best_example_content: '' });
 
         return {
             categories: [],

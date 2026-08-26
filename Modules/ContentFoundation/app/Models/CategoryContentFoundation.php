@@ -18,6 +18,11 @@ use Spatie\Activitylog\Support\LogOptions;
  * content_foundation_categories (unique post_category_id — 1 category chỉ dùng ĐÚNG 1 bộ tại 1
  * thời điểm), tham chiếu 1 chiều sang Modules\Post — Post KHÔNG biết/không cần đổi gì để hỗ trợ
  * model này (cùng quy ước Ocop → Post).
+ *
+ * §12.13 — `product_service_docs`/`best_example_content` (martech.org/how-to-build-an-ai-content-
+ * system-that-works) là 2 phần "Constants" còn thiếu so với mô hình AI content system chuẩn: tài
+ * liệu mô tả chi tiết sản phẩm/dịch vụ, và ví dụ nội dung/dàn ý mẫu TỐT NHẤT đã có — khác
+ * `style_sample` vốn chỉ là 1 đoạn văn mẫu ngắn về giọng văn, không phải 1 bài/dàn ý hoàn chỉnh.
  */
 class CategoryContentFoundation extends Model
 {
@@ -40,6 +45,8 @@ class CategoryContentFoundation extends Model
         'audience_behavior',
         'constraints',
         'style_sample',
+        'product_service_docs',
+        'best_example_content',
         'created_by',
         'updated_by',
     ];
@@ -87,6 +94,8 @@ class CategoryContentFoundation extends Model
             'audience_behavior' => $this->audience_behavior,
             'constraints' => $this->constraints,
             'style_sample' => $this->style_sample,
+            'product_service_docs' => $this->product_service_docs,
+            'best_example_content' => $this->best_example_content,
             'updated_at' => $this->updated_at?->toIso8601String(),
             'shared_with' => $this->categories
                 ->reject(fn (PostCategory $linked) => $linked->id === $forCategoryId)

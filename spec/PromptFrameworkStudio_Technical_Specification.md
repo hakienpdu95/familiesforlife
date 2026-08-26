@@ -2,8 +2,8 @@
 
 **Đặc tả Kỹ thuật Chi tiết — Sẵn sàng Triển khai**
 
-**Phiên bản:** 2.7
-**Ngày:** 07/08/2026
+**Phiên bản:** 2.8
+**Ngày:** 26/08/2026
 **Framework:** Laravel 13 (PHP 8.4) + NWIDART Modules + Lorisleiva Actions
 **Module mới:** `Modules/PromptFrameworkStudio`
 **Module liên quan:** `Modules/ContentFoundation` (từ v2.7 — đọc `CategoryContentFoundation` để chèn ngữ cảnh biên tập theo chuyên mục; quan hệ 1 chiều, ContentFoundation không biết gì về module này). Trước v2.7 module này hoàn toàn độc lập — xem changelog v2.7 để biết vì sao đổi.
@@ -254,6 +254,19 @@
 > `required` của bất kỳ framework nào — thuần UI/UX + nội dung hướng dẫn, không đổi hành vi sinh
 > prompt.
 
+> **v2.8 (2026-08-26, đối chiếu martech.org/how-to-build-an-ai-content-system-that-works — chuẩn hoá
+> "Constants" dùng chung với `CoreIdeaExtractor`/`ContentOutlines`, xem `CoreIdeaExtractor.md` §12.13
+> cho lý do đầy đủ):** thêm 2 dòng vào `BuildEditorialContextBlockAction` (§4.4) — tài liệu mô tả
+> chi tiết sản phẩm/dịch vụ (`product_service_docs`) và ví dụ nội dung/dàn ý mẫu TỐT NHẤT
+> (`best_example_content`), đọc từ 2 cột mới trên `content_foundations`. Đặt NGAY SAU `style_sample`,
+> cùng cơ chế bọc delimiter + câu rào prompt-injection (mỗi field 1 cặp delimiter riêng —
+> `<<<TAI_LIEU_SAN_PHAM>>>`/`<<<VI_DU_NOI_DUNG_MAU>>>`, không trùng `<<<VAN_PHONG_MAU>>>` của
+> `style_sample` đã có từ v2.7 — tránh model nhầm ranh giới khối khi cả 3 cùng xuất hiện). 3 khuyến
+> nghị còn lại của bài viết (pipeline nhiều bước, agent QA tách context riêng, human-in-the-loop có
+> state) KHÔNG áp dụng — module này về bản chất là công cụ soạn 1 prompt đơn lẻ (không có khái niệm
+> pipeline/agent-role/workflow approval trong dữ liệu), áp đặt 3 khuyến nghị đó là xây lại module
+> theo hướng khác hẳn, ngoài phạm vi bản vá chuẩn hoá Constants này.
+>
 > **v2.7 (SỬA GỐC — người dùng phản hồi v2.6 "vẫn chưa ổn", yêu cầu bám theo `CoreIdeaExtractor` để
 > tối ưu ngữ cảnh biên tập):** v2.6 sửa ở tầng *nhãn/gợi ý của form* nên không chạm tới vấn đề thật.
 > Đối chiếu lại với 2 module anh em cùng nhóm soạn prompt (`ContentOutlines`, `CoreIdeaExtractor`)
@@ -1005,7 +1018,7 @@ Nguồn: `Modules\ContentFoundation\Models\CategoryContentFoundation` — **cùn
 | Thành phần | Vai trò |
 |---|---|
 | `Features\Concerns\ResolvesCategoryFoundation` | Tra `CategoryContentFoundation` theo `post_category_id` — khuôn hệt `ContentOutlines\...\ResolvesCategoryContext::resolveFoundation()`. Dùng bởi 2 Action sinh prompt + API controller. |
-| `BuildEditorialContextBlockAction` | Dựng khối `## Bối cảnh biên tập (chuyên mục "X")`. Trả `''` khi không có foundation hoặc foundation rỗng hoàn toàn (không sinh khối chỉ có tiêu đề). |
+| `BuildEditorialContextBlockAction` | Dựng khối `## Bối cảnh biên tập (chuyên mục "X")`. Trả `''` khi không có foundation hoặc foundation rỗng hoàn toàn (không sinh khối chỉ có tiêu đề). v2.8: thêm `product_service_docs`/`best_example_content` sau `style_sample`, cùng cơ chế bọc delimiter (§12.13 `CoreIdeaExtractor.md`). |
 | `PromptGenerationController::create()/edit()` | Inject `ListCategoryFoundationsAction::handle(withFoundationDetails: false)` cho dropdown — bản rút gọn, không nhồi chi tiết của mọi chuyên mục vào HTML. |
 | `GET backend/api/prompt-studio/editorial-context/{category}` | Trả **đoạn text ĐÃ GHÉP** sẽ được chèn, cho bản xem trước real-time. |
 
