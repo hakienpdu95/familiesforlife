@@ -10,6 +10,7 @@ use Modules\PromptFrameworkStudio\Features\Concerns\ResolvesCategoryFoundation;
 use Modules\PromptFrameworkStudio\Features\PromptGeneration\Actions\BuildEditorialContextBlockAction;
 use Modules\PromptFrameworkStudio\Features\PromptGeneration\Actions\BuildFamilyValuesBlockAction;
 use Modules\PromptFrameworkStudio\Features\PromptGeneration\Actions\FindLatestPromptForFrameworkAction;
+use Modules\PromptFrameworkStudio\Features\PromptGeneration\Actions\FindSimilarSeedKeywordPromptsAction;
 use Modules\PromptFrameworkStudio\Features\PromptGeneration\Http\Resources\GeneratedPromptListResource;
 use Modules\PromptFrameworkStudio\Features\PromptGeneration\Queries\ListGeneratedPromptsForAdminHandler;
 use Modules\PromptFrameworkStudio\Features\PromptGeneration\Queries\ListGeneratedPromptsForAdminQuery;
@@ -95,6 +96,32 @@ class PromptGenerationApiController extends Controller
         return response()->json([
             'found' => $prompt !== null,
             'field_values' => $prompt?->field_values ?? [],
+        ]);
+    }
+
+    /**
+     * (2026-08-28, phản hồi review spec/TopicClusterGenerator.md) — Keyword Cannibalization: gọi
+     * mỗi khi người dùng gõ "Từ khóa hạt giống" ở framework `topiccluster` (debounce phía JS), trả
+     * về các GeneratedPrompt khác đã dùng từ khóa giống/gần giống. `exclude_uuid` dùng ở trang sửa
+     * để không tự cảnh báo với chính bản ghi đang sửa.
+     */
+    public function similarSeedKeywords(Request $request, FindSimilarSeedKeywordPromptsAction $findSimilar): JsonResponse
+    {
+        $validated = $request->validate([
+            'seed_keyword' => ['required', 'string', 'max:255'],
+            'exclude_uuid' => ['nullable', 'string', 'uuid'],
+        ]);
+
+        $matches = $findSimilar->handle($validated['seed_keyword'], $validated['exclude_uuid'] ?? null);
+
+        return response()->json([
+            'matches' => array_map(fn (array $m): array => [
+                'uuid' => $m['uuid'],
+                'label' => $m['label'],
+                'seed_keyword' => $m['seed_keyword'],
+                'created_at' => $m['created_at'],
+                'show_url' => route('backend.promptstudio.prompts.show', $m['uuid']),
+            ], $matches),
         ]);
     }
 }

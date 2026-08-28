@@ -151,11 +151,11 @@
             </p>
 
             <textarea x-show="field.type === 'textarea'" x-model="values[field.key]" rows="3"
-                      @focus="focusedKey = field.key" @blur="focusedKey = null"
+                      @focus="focusedKey = field.key" @blur="focusedKey = null" @input="onFieldInput(field)"
                       :placeholder="'VD: ' + (selectedFramework.example[field.key] || '')"
                       class="textarea textarea-bordered textarea-sm w-full placeholder:text-base-content/30"></textarea>
             <input x-show="field.type === 'text'" x-model="values[field.key]" type="text"
-                   @focus="focusedKey = field.key" @blur="focusedKey = null"
+                   @focus="focusedKey = field.key" @blur="focusedKey = null" @input="onFieldInput(field)"
                    :placeholder="'VD: ' + (selectedFramework.example[field.key] || '')"
                    class="input input-bordered input-sm w-full placeholder:text-base-content/30">
             {{-- spec/AIIdeaMatrixGenerator.md §2.1 — field type MỚI `select`, dùng chung cho mọi
@@ -201,6 +201,24 @@
                 Có vẻ còn ngắn — thử cụ thể hơn để AI hiểu đúng ý bạn?
             </p>
         </div>
+    </template>
+</div>
+
+{{-- (2026-08-28, phản hồi review) — cảnh báo Keyword Cannibalization: từ khóa hạt giống này có vẻ
+     đã dùng ở 1 cụm chủ đề khác cùng framework `topiccluster` — xem
+     FindSimilarSeedKeywordPromptsAction. CHỈ áp dụng framework này (field `seed_keyword` chỉ có ý
+     nghĩa cụm/cannibalization ở đây), không phải cảnh báo chặn submit — chỉ để biên tập viên tự
+     cân nhắc trước khi tạo trùng. --}}
+<div x-show="selectedKey === 'topiccluster' && seedKeywordMatches.length > 0" x-cloak
+     class="rounded border border-warning/40 bg-warning/10 px-3 py-2 text-xs space-y-1">
+    <p class="font-medium text-warning-content/90">
+        ⚠ Từ khóa hạt giống này có vẻ đã dùng ở <span x-text="seedKeywordMatches.length"></span> cụm chủ đề khác — cân nhắc để tránh 2 cụm "ăn thịt" từ khóa của nhau:
+    </p>
+    <template x-for="m in seedKeywordMatches" :key="m.uuid">
+        <p>
+            <a :href="m.show_url" target="_blank" rel="noopener" class="link link-hover font-medium" x-text="m.label"></a>
+            <span class="text-base-content/50"> — từ khóa đã lưu: "<span x-text="m.seed_keyword"></span>"</span>
+        </p>
     </template>
 </div>
 

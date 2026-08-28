@@ -639,6 +639,48 @@ return [
             ],
         ],
 
+        // spec/TopicClusterGenerator.md (2026-08-28, nguồn searchengineland.com/guide/topic-clusters-
+        // for-ai-search) — chỉ 2 field cốt lõi (từ khóa hạt giống + ngữ cảnh đặc thù) + 1 field tùy
+        // chọn cho điểm chạm thương mại, KHÁC 5 mục "Chiến lược nội dung" phía trên vốn luôn yêu cầu
+        // `brand`/`audience` thủ công: bản gốc của spec này CHỦ Ý dựa hẳn vào ngữ cảnh biên tập
+        // (ICP/giọng văn/tài liệu sản phẩm) inject qua chọn chuyên mục (BuildEditorialContextBlockAction,
+        // đã áp dụng CHUNG cho mọi framework từ v2.7 — xem create.blade.php), không lặp lại các field
+        // đó ở đây.
+        //
+        // (2026-08-28, phản hồi review) — bổ sung `business_goal` + 3 nhiệm vụ (EEAT tagging, điểm
+        // chạm thương mại, sơ đồ liên kết nội bộ) và guardrail 4 giá trị gia đình gắn trực tiếp vào
+        // nhiệm vụ Query Fan-out (KHÔNG chỉ dựa vào BuildFamilyValuesBlockAction ở BOTTOM — khối đó
+        // chỉ chèn khi có chọn chuyên mục, xem docblock action, trong khi từ khóa gia đình/trẻ em là
+        // NHẠY CẢM VỀ GIÁ TRỊ ngay cả khi không chọn chuyên mục).
+        'topiccluster' => [
+            'name' => 'Cụm chủ đề & Query Fan-out cho AI Search',
+            'group' => 'Chiến lược nội dung',
+            'description' => 'Từ khóa hạt giống · Ngữ cảnh đặc thù · Mục tiêu kinh doanh → khoảng trống nội dung, mạng lưới câu hỏi Query Fan-out, cây Pillar/Cluster kèm nhãn EEAT, điểm chạm thương mại và sơ đồ liên kết nội bộ.',
+            'best_for' => 'Khi cần dựng 1 cụm chủ đề (topic cluster) đầy đủ từ 1 từ khóa hạt giống trước khi lên lịch bài Pillar + các bài Cluster con — chọn kèm chuyên mục để tự động chèn ICP/giọng văn/tài liệu sản phẩm.',
+            'fields' => [
+                ['key' => 'seed_keyword', 'label' => 'Từ khóa hạt giống', 'hint' => 'Từ khóa/chủ đề gốc muốn xây dựng cụm — càng cụ thể AI càng dễ đào đúng hướng.', 'prompt_heading' => 'Từ khóa/chủ đề hạt giống', 'type' => 'text', 'required' => true],
+                ['key' => 'specific_context', 'label' => 'Ngữ cảnh/nỗi đau đặc thù', 'hint' => 'Nhóm độc giả hoặc nỗi đau cụ thể muốn nhấn mạnh — để trống để AI tự do khai thác theo dữ liệu tìm kiếm thực tế.', 'prompt_heading' => 'Ngữ cảnh bổ sung/Vấn đề trọng tâm', 'type' => 'textarea', 'required' => false],
+                ['key' => 'business_goal', 'label' => 'Mục tiêu kinh doanh (tùy chọn)', 'hint' => 'Sản phẩm/dịch vụ muốn quảng bá qua cụm chủ đề này — để trống nếu chỉ cần cụm nội dung thuần thông tin, không cần điểm chạm thương mại.', 'prompt_heading' => 'Mục tiêu kinh doanh', 'type' => 'text', 'required' => false],
+            ],
+            'task_instructions' => [
+                'Suy luận 3-4 nỗi đau/băn khoăn MỚI NHẤT hoặc sâu kín nhất của đối tượng mục tiêu quanh từ khóa hạt giống — ưu tiên góc độ mà công cụ nghiên cứu từ khóa truyền thống (Ahrefs, Semrush) có thể chưa kịp phản ánh.',
+                'Từ các khoảng trống vừa nêu và từ khóa hạt giống, phân rã (Query Fan-out) thành mạng lưới ít nhất 10-15 câu hỏi ngách, viết bằng đúng ngôn ngữ tự nhiên người dùng thật sự gõ/nói với AI — không dùng lại các cụm từ khóa ngắn, khô cứng. Loại bỏ ngay các câu hỏi/góc nhìn đi ngược 4 giá trị gia đình Việt Nam — Ấm no, Hạnh phúc, Tiến bộ, Văn minh (Quyết định 1189/QĐ-TTg) — như mẹo đối phó/gây mâu thuẫn với người thân (mẹ chồng, họ hàng), né tránh trách nhiệm gia đình, hoặc cổ suý bất bình đẳng giới/bạo lực gia đình.',
+                'Gom các câu hỏi vừa liệt kê thành 1 cây nội dung: đề xuất 1 chủ đề Trụ cột (Pillar) bao quát toàn bộ vấn đề kèm tiêu đề H1, và 3-5 chủ đề Nhánh (Cluster) khoét sâu từng khía cạnh kèm tiêu đề H1 riêng.',
+                'Gắn từng câu hỏi ở nhiệm vụ 2 vào đúng bài Pillar hoặc Cluster tương ứng, dùng làm đề xuất H2/H3 của bài đó.',
+                'Với mỗi bài Pillar/Cluster, chỉ định định dạng trình bày bắt buộc (bảng so sánh, danh sách, hay quy tắc trả lời-trước/BLUF) cho 1-2 thẻ H2 quan trọng nhất để tối ưu khả năng được AI answer engine trích dẫn.',
+                'Đây là chủ đề thuộc nhóm YMYL (ảnh hưởng trực tiếp tới sức khỏe/tài chính/an toàn gia đình người đọc) — với mỗi H2/H3 thuộc nhóm nhạy cảm (tâm lý, sức khỏe, tài chính, an toàn cho trẻ), gắn thêm ngay sau tiêu đề 1 trong các nhãn `[EEAT: Cần chuyên gia]`, `[EEAT: Cần số liệu]`, hoặc `[EEAT: Cần case study]` để biên tập viên biết cần chuẩn bị gì trước khi viết.',
+                'Nếu mục "Mục tiêu kinh doanh" phía trên đã được điền, đề xuất ĐÚNG 1 điểm chạm thương mại tự nhiên (gợi ý sản phẩm/dịch vụ liên quan, không quảng cáo lộ liễu) và chỉ rõ nó nên đặt ở H2 nào của bài Cluster nào; nếu mục đó bỏ trống, bỏ qua nhiệm vụ này và giữ nguyên toàn bộ cụm ở dạng thuần thông tin.',
+                'Vẽ 1 sơ đồ liên kết nội bộ ngắn gọn: với mỗi bài Cluster, nêu anchor text gợi ý để link VỀ bài Pillar, và ít nhất 1 liên kết CHÉO kèm anchor text gợi ý sang 1 bài Cluster khác cùng cụm.',
+                'Trả về 1 khối Markdown duy nhất theo đúng 4 phần: (1) Khoảng trống nội dung, (2) Sơ đồ Query Fan-out, (3) Cấu trúc Cụm chủ đề kèm gợi ý định dạng trích xuất và nhãn EEAT, (4) Điểm chạm thương mại (nếu có) & Sơ đồ liên kết nội bộ — không giải thích dài dòng, đi thẳng vào kết quả.',
+                'Sau 4 phần trên, thêm 1 khối mã (```) RIÊNG để hệ thống nội bộ đọc lại tự động — bên trong khối mã CHỈ có các dòng theo ĐÚNG định dạng sau, không thêm chữ nào khác: dòng đầu tiên "PILLAR: <tiêu đề H1 của bài Pillar> | <1 từ khóa mục tiêu ngắn cho bài Pillar>", các dòng tiếp theo — mỗi dòng 1 bài Cluster — "CLUSTER: <tiêu đề H1 của bài Cluster> | <1 từ khóa mục tiêu ngắn cho bài Cluster>".',
+            ],
+            'example' => [
+                'seed_keyword' => 'bỉm cho bé',
+                'specific_context' => 'Tập trung vào các mẹ bỉm sữa bận rộn, không có thời gian, sợ con dị ứng',
+                'business_goal' => 'Quảng bá bỉm Amor Natural — dòng bỉm mềm, ít gây hăm, phù hợp da nhạy cảm',
+            ],
+        ],
+
         // spec/AIIdeaMatrixGenerator.md §2.3 — "Ma trận Ý tưởng Di sản": ghép Format cố định + 2 trục
         // biến số (Di sản/Sản phẩm + Tình huống gia đình) thành 1 preset. Nhóm RIÊNG "Ý tưởng theo Ma
         // trận" (khác "Chiến lược nội dung" ở trên) — 5 preset trên là tài liệu CHIẾN LƯỢC theo quý,

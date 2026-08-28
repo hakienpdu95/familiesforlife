@@ -26,6 +26,8 @@
           {{ Js::from([
               'editorialContextUrlTemplate' => route('backend.api.promptstudio.editorial-context', ['category' => '__UUID__']),
               'initialCategoryUuid' => old('post_category_uuid', $prompt->category?->uuid),
+              'similarKeywordsUrl' => route('backend.api.promptstudio.topic-cluster.similar-keywords'),
+              'currentPromptUuid' => $prompt->uuid,
           ]) }}
       )">
     @csrf

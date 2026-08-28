@@ -23,6 +23,7 @@
               'editorialContextUrlTemplate' => route('backend.api.promptstudio.editorial-context', ['category' => '__UUID__']),
               'initialCategoryUuid' => old('post_category_uuid'),
               'lastPromptUrlTemplate' => route('backend.api.promptstudio.last-prompt', ['frameworkKey' => '__FRAMEWORK__']),
+              'similarKeywordsUrl' => route('backend.api.promptstudio.topic-cluster.similar-keywords'),
           ]) }}
       )">
     @csrf

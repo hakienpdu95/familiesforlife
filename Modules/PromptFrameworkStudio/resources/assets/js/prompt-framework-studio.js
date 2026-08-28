@@ -352,6 +352,53 @@ document.addEventListener('alpine:init', () => {
 
             return t === '' ? 0 : t.split(/\s+/u).length;
         },
+
+        // ── (2026-08-28, phản hồi review) — cảnh báo Keyword Cannibalization ─────────────────────
+        // Chỉ có ý nghĩa ở framework `topiccluster` (field `seed_keyword` chỉ framework này mới có
+        // khái niệm "cụm" để cannibalize) — endpoint phía server cũng hard-code framework này, xem
+        // FindSimilarSeedKeywordPromptsAction.
+        seedKeywordMatches: [],
+        seedKeywordChecking: false,
+        _seedKeywordTimer: null,
+
+        /** Hook generic gắn ở MỌI field text/textarea (field-form.blade.php) — no-op ngoài field `seed_keyword` của `topiccluster`. */
+        onFieldInput(field) {
+            if (this.selectedKey === 'topiccluster' && field.key === 'seed_keyword') {
+                clearTimeout(this._seedKeywordTimer);
+                this._seedKeywordTimer = setTimeout(() => this.checkSeedKeywordDuplicate(), 500);
+            }
+        },
+
+        async checkSeedKeywordDuplicate() {
+            const seedKeyword = (this.values.seed_keyword ?? '').toString().trim();
+
+            if (!seedKeyword || !serverData.similarKeywordsUrl) {
+                this.seedKeywordMatches = [];
+
+                return;
+            }
+
+            this.seedKeywordChecking = true;
+
+            try {
+                const url = new URL(serverData.similarKeywordsUrl, window.location.origin);
+                url.searchParams.set('seed_keyword', seedKeyword);
+                if (serverData.currentPromptUuid) url.searchParams.set('exclude_uuid', serverData.currentPromptUuid);
+
+                const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                const data = await res.json();
+                // Guard phản hồi trễ: chỉ áp dụng nếu người dùng chưa gõ tiếp sang giá trị khác.
+                if ((this.values.seed_keyword ?? '').toString().trim() !== seedKeyword) return;
+
+                this.seedKeywordMatches = data.matches ?? [];
+            } catch (e) {
+                console.error('[prompt-framework-studio] check seed keyword duplicate failed', e);
+            } finally {
+                this.seedKeywordChecking = false;
+            }
+        },
     }));
 });
 

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\PromptFrameworkStudio\Features\FrameworkLibrary\Http\FrameworkLibraryController;
 use Modules\PromptFrameworkStudio\Features\PromptGeneration\Http\PromptGenerationApiController;
 use Modules\PromptFrameworkStudio\Features\PromptGeneration\Http\PromptGenerationController;
+use Modules\PromptFrameworkStudio\Features\PromptGeneration\Http\TopicClusterResultController;
 
 // spec/PromptFrameworkStudio_Technical_Specification.md §6 — gate phẳng bằng permission
 // 'prompt_framework_studio.use' (cùng nhóm CONTENT_OUTLINES_USE/CORE_IDEA_EXTRACTOR_USE), KHÔNG
@@ -22,6 +23,20 @@ Route::middleware(['auth', 'can:prompt_framework_studio.use'])
             Route::get('{prompt}/edit', [PromptGenerationController::class, 'edit'])->name('edit');
             Route::put('{prompt}', [PromptGenerationController::class, 'update'])->name('update'); // = "Sinh lại"
             Route::delete('{prompt}', [PromptGenerationController::class, 'destroy'])->name('destroy');
+
+            // (2026-08-28, phản hồi review spec/TopicClusterGenerator.md) — dán kết quả AI → duyệt
+            // từng mục (checkbox) → đẩy sang ContentOutlines. CHỈ hợp lệ với framework `topiccluster`
+            // (abort 404 ở Controller cho framework khác) — xem TopicClusterResultController.
+            Route::prefix('{prompt}/topic-cluster-result')->name('topic-cluster-result.')->group(function (): void {
+                Route::get('/', [TopicClusterResultController::class, 'show'])->name('show');
+                Route::post('/', [TopicClusterResultController::class, 'save'])->name('save');
+
+                // `push` TẠO bản ghi ở Modules\ContentOutlines — gác THÊM permission của module đó,
+                // ngoài `prompt_framework_studio.use` đã gác ở group cha (xem docblock Controller).
+                Route::post('push', [TopicClusterResultController::class, 'push'])
+                    ->middleware('can:content_outlines.use')
+                    ->name('push');
+            });
         });
     });
 
@@ -41,4 +56,10 @@ Route::middleware(['auth', 'can:prompt_framework_studio.use'])
         // prompt mới. {frameworkKey} là chuỗi thô (không phải model), validate trong Controller.
         Route::get('last-prompt/{frameworkKey}', [PromptGenerationApiController::class, 'lastPromptForFramework'])
             ->name('last-prompt');
+
+        // (2026-08-28, phản hồi review spec/TopicClusterGenerator.md) — cảnh báo Keyword
+        // Cannibalization khi gõ "Từ khóa hạt giống" ở framework `topiccluster` — xem
+        // FindSimilarSeedKeywordPromptsAction.
+        Route::get('topic-cluster/similar-keywords', [PromptGenerationApiController::class, 'similarSeedKeywords'])
+            ->name('topic-cluster.similar-keywords');
     });
