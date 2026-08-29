@@ -27,6 +27,9 @@ class UpdateContentOutlineRequest extends FormRequest
             'search_intent' => ['nullable', Rule::in(['informational', 'commercial', 'transactional', 'navigational', 'comparison'])],
             'post_category_uuid' => ['nullable', 'string', 'uuid', 'exists:post_categories,uuid'],
             'target_audience' => ['nullable', 'string', 'max:500'],
+            // §4.28 (v1.26) — persona/JTBD/cảm xúc: câu ngắn, không phải đoạn dài như content_goal.
+            'job_to_be_done' => ['nullable', 'string', 'max:300'],
+            'reader_emotional_state' => ['nullable', 'string', 'max:300'],
             'content_goal' => ['nullable', 'string', 'max:2000'],
             // §4.18 (v1.15) — cùng rule StoreContentOutlineRequest.
             'cta_url' => ['nullable', 'url', 'max:500'],
@@ -55,6 +58,8 @@ class UpdateContentOutlineRequest extends FormRequest
             'search_intent' => $this->input('search_intent') ?: null,
             'post_category_id' => $categoryId,
             'target_audience' => $this->input('target_audience') ?: null,
+            'job_to_be_done' => $this->input('job_to_be_done') ?: null,
+            'reader_emotional_state' => $this->input('reader_emotional_state') ?: null,
             'content_goal' => $this->input('content_goal') ?: null,
             'cta_url' => $this->input('cta_url') ?: null,
             'tone_style' => $this->input('tone_style') ?: null,

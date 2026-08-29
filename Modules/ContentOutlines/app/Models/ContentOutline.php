@@ -27,6 +27,8 @@ class ContentOutline extends Model
         'search_intent',
         'post_category_id',
         'target_audience',
+        'job_to_be_done',
+        'reader_emotional_state',
         'content_goal',
         'cta_url',
         'tone_style',

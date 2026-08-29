@@ -20,6 +20,8 @@ class ContentOutlineInputData extends Data
         public readonly ?string $search_intent = null,
         public readonly ?int $post_category_id = null,
         public readonly ?string $target_audience = null,
+        public readonly ?string $job_to_be_done = null, // §4.28 (v1.26) — nhiệm vụ cụ thể độc giả cần giải quyết
+        public readonly ?string $reader_emotional_state = null, // §4.28 (v1.26) — cảm xúc/tâm trạng hiện tại của độc giả
         public readonly ?string $content_goal = null,
         public readonly ?string $cta_url = null, // §4.18 (v1.15) — URL CTA thật, nhúng vào câu chuyển tiếp cuối outline + bài viết
         public readonly ?string $tone_style = null,

@@ -17,6 +17,8 @@
             'outline_depth' => old('outline_depth', $outline?->outline_depth ?? 'standard'),
             'secondary_keywords' => old('secondary_keywords', $outline?->secondary_keywords),
             'target_audience' => old('target_audience', $outline?->target_audience),
+            'job_to_be_done' => old('job_to_be_done', $outline?->job_to_be_done),
+            'reader_emotional_state' => old('reader_emotional_state', $outline?->reader_emotional_state),
             'content_goal' => old('content_goal', $outline?->content_goal),
             'tone_style' => old('tone_style', $outline?->tone_style),
             'competitor_urls' => old('competitor_urls', $outline?->competitor_urls),
@@ -121,10 +123,33 @@
                     <div class="divider my-1">Chi tiết cho dàn ý này</div>
 
                     <div class="form-control">
-                        <label class="label py-0 pb-1.5"><span class="label-text font-medium">Đối tượng độc giả</span></label>
+                        <label class="label py-0 pb-1.5">
+                            <span class="label-text font-medium">Đối tượng độc giả</span>
+                            <span class="label-text-alt text-xs text-base-content/40">Càng cụ thể càng tốt — hoàn cảnh, thói quen, nỗi lo cụ thể, không phải nhãn nhân khẩu học chung chung</span>
+                        </label>
                         <input type="text" name="target_audience" x-model="fields.target_audience"
-                               class="input input-bordered input-sm w-full @error('target_audience') input-error @enderror" maxlength="500">
+                               class="input input-bordered input-sm w-full @error('target_audience') input-error @enderror" maxlength="500"
+                               placeholder="VD: Mẹ bỉm sữa văn phòng, thiếu ngủ, có con 3 tháng tuổi hay quấy khóc ban đêm do hăm tã">
                         @error('target_audience')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label py-0 pb-1.5">
+                            <span class="label-text font-medium">Nhiệm vụ cần giải quyết (Job-to-be-done)</span>
+                            <span class="label-text-alt text-xs text-base-content/40">Độc giả đọc bài này để LÀM được gì</span>
+                        </label>
+                        <input type="text" name="job_to_be_done" x-model="fields.job_to_be_done"
+                               class="input input-bordered input-sm w-full @error('job_to_be_done') input-error @enderror" maxlength="300"
+                               placeholder="VD: Tìm loại bỉm thấm hút tốt, mỏng nhẹ để cả mẹ và con được ngủ xuyên đêm">
+                        @error('job_to_be_done')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label py-0 pb-1.5"><span class="label-text font-medium">Cảm xúc/tâm trạng hiện tại của độc giả</span></label>
+                        <input type="text" name="reader_emotional_state" x-model="fields.reader_emotional_state"
+                               class="input input-bordered input-sm w-full @error('reader_emotional_state') input-error @enderror" maxlength="300"
+                               placeholder="VD: Lo lắng, mệt mỏi, hoang mang, đang tìm sự đồng cảm">
+                        @error('reader_emotional_state')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                     </div>
 
                     <div class="form-control">

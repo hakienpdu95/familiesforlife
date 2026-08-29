@@ -28,6 +28,8 @@ class CreateContentOutlineAction
             'search_intent' => $input->search_intent,
             'post_category_id' => $input->post_category_id,
             'target_audience' => $input->target_audience,
+            'job_to_be_done' => $input->job_to_be_done,
+            'reader_emotional_state' => $input->reader_emotional_state,
             'content_goal' => $input->content_goal,
             'cta_url' => $input->cta_url,
             'tone_style' => $input->tone_style,
