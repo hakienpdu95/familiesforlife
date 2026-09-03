@@ -36,5 +36,6 @@
     "Playlist": true,
     "AIVideoStudioTemplate": true,
     "Heritage": true,
-    "EntityComparison": true
+    "EntityComparison": true,
+    "VideoSeriesPromptStudio": true
 }

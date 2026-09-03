@@ -2,6 +2,7 @@
 
 namespace Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions;
 
+use App\Services\AI\AiBudgetGuard;
 use App\Services\AI\AIProviderManager;
 use App\Services\AI\AIRequestOptions;
 use App\Shared\Tenancy\Models\Organization;
@@ -43,22 +44,22 @@ class RunCoreIdeaAiPromptAction
      */
     private const TEMPERATURE_BY_KIND = [
         'summarization' => 0.2,
-        'rewrite'       => 0.4,
+        'rewrite' => 0.4,
     ];
 
     private const DEFAULT_TEMPERATURE = 0.3;
 
     public function __construct(
         private readonly AIProviderManager $aiProviderManager,
-        private readonly CheckCoreIdeaAiBudgetAction $budget,
+        private readonly AiBudgetGuard $budget,
     ) {}
 
     /** @return array{markdown_output: string, model_used: string, cost_usd: float} */
     public function handle(Organization $organization, string $prompt, string $kind, int $maxOutputTokens): array
     {
-        $config   = $organization->ai_provider_config ?? config('ai.default');
+        $config = $organization->ai_provider_config ?? config('ai.default');
         $provider = $config['provider'] ?? 'anthropic';
-        $model    = $config['model'] ?? config('ai.default.model');
+        $model = $config['model'] ?? config('ai.default.model');
 
         $estimatedInputTokens = (int) ceil(mb_strlen($prompt) / 4);
 
@@ -87,18 +88,18 @@ class RunCoreIdeaAiPromptAction
         // kể nguồn gốc; cột `kind` chỉ phục vụ audit/tách chi phí theo tính năng sau này.
         DB::table('cie_layer2_runs')->insert([
             'organization_id' => $organization->id,
-            'kind'            => $kind,
-            'cost_usd'        => $response->costUsd,
-            'model_used'      => $response->modelUsed,
-            'created_at'      => now(),
+            'kind' => $kind,
+            'cost_usd' => $response->costUsd,
+            'model_used' => $response->modelUsed,
+            'created_at' => now(),
         ]);
 
         $decoded = json_decode($response->content, associative: true);
 
         return [
             'markdown_output' => $decoded['markdown_output'] ?? $response->content,
-            'model_used'      => $response->modelUsed,
-            'cost_usd'        => $response->costUsd,
+            'model_used' => $response->modelUsed,
+            'cost_usd' => $response->costUsd,
         ];
     }
 }

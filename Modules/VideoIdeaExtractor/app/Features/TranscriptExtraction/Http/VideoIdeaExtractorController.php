@@ -3,6 +3,7 @@
 namespace Modules\VideoIdeaExtractor\Features\TranscriptExtraction\Http;
 
 use App\Http\Controllers\Controller;
+use App\Services\AI\Exceptions\AiBudgetExceededException;
 use App\Services\AI\Exceptions\AIProviderConfigException;
 use App\Services\AI\Exceptions\UnknownModelPricingException;
 use App\Shared\Tenancy\TenantContext;
@@ -17,7 +18,6 @@ use Modules\VideoIdeaExtractor\Features\TranscriptExtraction\Actions\RunVideoIde
 use Modules\VideoIdeaExtractor\Features\TranscriptExtraction\Data\ExtractBatchVideoRequestData;
 use Modules\VideoIdeaExtractor\Features\TranscriptExtraction\Data\ExtractBatchVideoResultData;
 use Modules\VideoIdeaExtractor\Features\TranscriptExtraction\Data\RawTranscriptData;
-use Modules\VideoIdeaExtractor\Features\TranscriptExtraction\Exceptions\AiBudgetExceededException;
 
 class VideoIdeaExtractorController extends Controller
 {

@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/video-series-prompt-studio",
+    "description": "",
+    "authors": [
+        {
+            "name": "KienDH",
+            "email": "bonhuyn@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\VideoSeriesPromptStudio\\": "app/",
+            "Modules\\VideoSeriesPromptStudio\\Database\\Factories\\": "database/factories/",
+            "Modules\\VideoSeriesPromptStudio\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\VideoSeriesPromptStudio\\Tests\\": "tests/"
+        }
+    }
+}

@@ -2,11 +2,12 @@
 
 namespace Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions;
 
+use App\Services\AI\AiBudgetGuard;
 use App\Services\AI\AIProviderManager;
 use App\Services\AI\AIRequestOptions;
+use App\Services\AI\Exceptions\AiBudgetExceededException;
 use App\Shared\Tenancy\Models\Organization;
 use Illuminate\Support\Facades\DB;
-use Modules\CoreIdeaExtractor\Features\ContentExtraction\Exceptions\AiBudgetExceededException;
 
 /**
  * Tự động hoá "Layer 2" (spec/CoreIdeaExtractor.md §6/§12.3) — CHỈ chạy khi người dùng bấm nút
@@ -129,7 +130,7 @@ class RunLayer2ExtractionAction
 
     public function __construct(
         private readonly AIProviderManager $aiProviderManager,
-        private readonly CheckCoreIdeaAiBudgetAction $budget,
+        private readonly AiBudgetGuard $budget,
     ) {}
 
     /** @return array{markdown_output: string, model_used: string, cost_usd: float, loop_iterations: int} */

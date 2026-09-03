@@ -395,6 +395,21 @@
         </details>
         @endcan
 
+        {{-- video_series_prompt_studio.use cấp cho platform_content_editor/platform_content_head/
+             platform_section_editor (Modules\VideoSeriesPromptStudio\Database\Seeders\
+             VideoSeriesPromptStudioPermissionSeeder). Thiết kế kiến trúc cho CẢ CHUỖI video nhiều
+             tập (Series Bible) — KHÔNG gọi AI Provider trong app, cùng nguyên tắc
+             PromptFrameworkStudio/ContentOutlines. --}}
+        @can(\App\Enums\PermissionEnum::VIDEO_SERIES_PROMPT_STUDIO_USE->value)
+        <div class="nav-group">
+            <a href="{{ route('backend.videoseriespromptstudio.index') }}"
+               class="nav-link {{ request()->routeIs('backend.videoseriespromptstudio.*') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 16h4m10 0h4M3 4h18v16H3V4z"/></svg>
+                <span class="nav-label">Video Series Prompt Studio</span>
+            </a>
+        </div>
+        @endcan
+
         {{-- spec/ContentCalendar_Technical_Specification.md §6/§13 — content_calendar.view cấp cho
              platform_content_creator/section_editor/content_editor/content_head/viewer
              (Modules\ContentCalendar\Database\Seeders\ContentCalendarPermissionSeeder). --}}

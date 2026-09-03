@@ -3,6 +3,7 @@
 namespace Modules\CoreIdeaExtractor\Features\ContentExtraction\Http;
 
 use App\Http\Controllers\Controller;
+use App\Services\AI\Exceptions\AiBudgetExceededException;
 use App\Services\AI\Exceptions\AIProviderConfigException;
 use App\Services\AI\Exceptions\UnknownModelPricingException;
 use App\Shared\Tenancy\TenantContext;
@@ -25,7 +26,6 @@ use Modules\CoreIdeaExtractor\Features\ContentExtraction\Data\ExtractRequestData
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Data\HeadingData;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Data\RawExtractionData;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Data\SourceStructureData;
-use Modules\CoreIdeaExtractor\Features\ContentExtraction\Exceptions\AiBudgetExceededException;
 use Modules\CoreIdeaExtractor\Features\ContentExtraction\Exceptions\UrlFetchException;
 
 class CoreIdeaExtractorController extends Controller
@@ -60,11 +60,11 @@ class CoreIdeaExtractorController extends Controller
     public function extract(Request $request, FetchArticleHtmlAction $fetch, ExtractRawContentAction $extractRaw, ComputeExtractionConfidenceAction $computeConfidence): JsonResponse
     {
         $data = ExtractRequestData::from($request->validate([
-            'url'                    => ['nullable', 'url', 'max:2048', 'required_without:html'],
-            'html'                   => ['nullable', 'string', 'max:'.config('core_idea_extractor.paste.max_chars', 2_000_000), 'required_without:url'],
-            'main_content_selector'  => ['nullable', 'string', 'max:255'],
-            'force_refresh'          => ['nullable', 'boolean'],
-            'source_language'        => ['nullable', 'string', 'in:vi,en,th,id'],
+            'url' => ['nullable', 'url', 'max:2048', 'required_without:html'],
+            'html' => ['nullable', 'string', 'max:'.config('core_idea_extractor.paste.max_chars', 2_000_000), 'required_without:url'],
+            'main_content_selector' => ['nullable', 'string', 'max:255'],
+            'force_refresh' => ['nullable', 'boolean'],
+            'source_language' => ['nullable', 'string', 'in:vi,en,th,id'],
         ]));
 
         $pasted = $data->html !== null && trim($data->html) !== '';
@@ -92,12 +92,12 @@ class CoreIdeaExtractorController extends Controller
 
         $rawHtmlChars = mb_strlen($html);
 
-        $extracted        = $extractRaw->handle($html, $data->main_content_selector, $data->source_language);
+        $extracted = $extractRaw->handle($html, $data->main_content_selector, $data->source_language);
         $confidenceResult = $computeConfidence->handle($extracted);
-        $notes            = $this->appendSelectorNote($confidenceResult['notes'], $data->main_content_selector, $extracted['custom_selector_matched']);
-        $notes            = $this->appendPastedFragmentNote($notes, $pasted, $extracted['title']);
-        $notes            = $this->appendStructureNote($notes, $extracted['source_structure']);
-        $notes            = $this->appendLanguageMismatchNote($notes, $extracted['language_mismatch_suspected'], $extracted['language']);
+        $notes = $this->appendSelectorNote($confidenceResult['notes'], $data->main_content_selector, $extracted['custom_selector_matched']);
+        $notes = $this->appendPastedFragmentNote($notes, $pasted, $extracted['title']);
+        $notes = $this->appendStructureNote($notes, $extracted['source_structure']);
+        $notes = $this->appendLanguageMismatchNote($notes, $extracted['language_mismatch_suspected'], $extracted['language']);
 
         // sections[] phải tính LẠI trên main_content ĐÃ CẮT (không dùng thẳng $extracted['sections']
         // — vốn tính trên bản CHƯA cắt trong ExtractRawContentAction::handle()) — nếu không, khi
@@ -105,7 +105,7 @@ class CoreIdeaExtractorController extends Controller
         // có thể xảy ra), sections sẽ "rò rỉ" phần nội dung đã bị cắt bỏ ra ngoài, không nhất quán
         // với main_content THẬT SỰ trả về.
         $finalMainContent = $this->truncateMainContent($extracted['main_content']);
-        $notes            = $this->appendMainContentTruncationNote(
+        $notes = $this->appendMainContentTruncationNote(
             $notes,
             mb_strlen($extracted['main_content']),
             mb_strlen($finalMainContent),
@@ -155,21 +155,21 @@ class CoreIdeaExtractorController extends Controller
         $maxUrls = (int) config('core_idea_extractor.batch.max_urls', 7);
 
         $data = ExtractBatchRequestData::from($request->validate([
-            'urls'                   => ['required', 'array', 'min:1', "max:{$maxUrls}"],
-            'urls.*'                 => ['url', 'max:2048', 'distinct'],
-            'topic'                  => ['nullable', 'string', 'max:255'],
-            'audience'               => ['nullable', 'string', 'max:500'],
+            'urls' => ['required', 'array', 'min:1', "max:{$maxUrls}"],
+            'urls.*' => ['url', 'max:2048', 'distinct'],
+            'topic' => ['nullable', 'string', 'max:255'],
+            'audience' => ['nullable', 'string', 'max:500'],
             // max:2000 khớp giới hạn thật của content_goals (CategoryFoundationData) — field này
             // được prefill trực tiếp từ foundation.content_goals ở index.blade.php
             // (applyCategoryFoundation()), không phải input ngắn người tự gõ như audience/constraints.
-            'goal'                   => ['nullable', 'string', 'max:2000'],
-            'constraints'            => ['nullable', 'string', 'max:500'],
-            'style_sample'           => ['nullable', 'string', 'max:3000'],
-            'main_content_selector'  => ['nullable', 'string', 'max:255'],
-            'main_content_selectors'   => ['nullable', 'array'],
+            'goal' => ['nullable', 'string', 'max:2000'],
+            'constraints' => ['nullable', 'string', 'max:500'],
+            'style_sample' => ['nullable', 'string', 'max:3000'],
+            'main_content_selector' => ['nullable', 'string', 'max:255'],
+            'main_content_selectors' => ['nullable', 'array'],
             'main_content_selectors.*' => ['nullable', 'string', 'max:255'],
-            'force_refresh'          => ['nullable', 'boolean'],
-            'source_language'        => ['nullable', 'string', 'in:vi,en,th,id'],
+            'force_refresh' => ['nullable', 'boolean'],
+            'source_language' => ['nullable', 'string', 'in:vi,en,th,id'],
         ]));
 
         $fetched = $fetchBatch->handle($data->urls, $data->force_refresh);
@@ -177,10 +177,10 @@ class CoreIdeaExtractorController extends Controller
         $sources = [];
         $success = 0;
         $blocked = 0;
-        $error   = 0;
+        $error = 0;
 
         foreach ($data->urls as $key => $url) {
-            $item   = $fetched[$key];
+            $item = $fetched[$key];
             $domain = $this->resolveDomain($url);
 
             if ($item['failure'] !== null) {
@@ -200,24 +200,24 @@ class CoreIdeaExtractorController extends Controller
                 continue;
             }
 
-            $selector         = $this->resolveSelectorForUrl($data, $key);
-            $rawHtmlChars     = mb_strlen($item['html']);
-            $extracted        = $extractRaw->handle($item['html'], $selector, $data->source_language);
+            $selector = $this->resolveSelectorForUrl($data, $key);
+            $rawHtmlChars = mb_strlen($item['html']);
+            $extracted = $extractRaw->handle($item['html'], $selector, $data->source_language);
             $confidenceResult = $computeConfidence->handle($extracted);
-            $notes            = $this->appendSelectorNote($confidenceResult['notes'], $selector, $extracted['custom_selector_matched']);
-            $notes            = $this->appendStructureNote($notes, $extracted['source_structure']);
-            $notes            = $this->appendLanguageMismatchNote($notes, $extracted['language_mismatch_suspected'], $extracted['language']);
-            $selection        = $this->truncateBatchMainContent($extracted['main_content'], $data->topic);
-            $mainContent      = $selection['text'];
-            $notes            = $this->appendRelevanceNote($notes, $selection['strategy'] === 'topic', $data->topic);
-            $notes            = $this->appendLeadTailNote($notes, $selection['strategy'] === 'lead_tail');
-            $notes            = $selection['strategy'] === 'none' ? $this->appendMainContentTruncationNote(
+            $notes = $this->appendSelectorNote($confidenceResult['notes'], $selector, $extracted['custom_selector_matched']);
+            $notes = $this->appendStructureNote($notes, $extracted['source_structure']);
+            $notes = $this->appendLanguageMismatchNote($notes, $extracted['language_mismatch_suspected'], $extracted['language']);
+            $selection = $this->truncateBatchMainContent($extracted['main_content'], $data->topic);
+            $mainContent = $selection['text'];
+            $notes = $this->appendRelevanceNote($notes, $selection['strategy'] === 'topic', $data->topic);
+            $notes = $this->appendLeadTailNote($notes, $selection['strategy'] === 'lead_tail');
+            $notes = $selection['strategy'] === 'none' ? $this->appendMainContentTruncationNote(
                 $notes,
                 mb_strlen($extracted['main_content']),
                 mb_strlen($mainContent),
                 (int) config('core_idea_extractor.batch.max_main_content_chars_per_source', 12000),
             ) : $notes;
-            $contentHash      = $this->computeContentHash($mainContent);
+            $contentHash = $this->computeContentHash($mainContent);
             $contentReduction = $this->computeContentReduction($rawHtmlChars, $mainContent);
 
             $sources[] = BatchSourceResultData::success(
@@ -435,7 +435,7 @@ class CoreIdeaExtractorController extends Controller
         $scored = array_map(
             fn (int $index, string $paragraph) => [
                 'index' => $index,
-                'len'   => mb_strlen($paragraph),
+                'len' => mb_strlen($paragraph),
                 'score' => $this->scoreParagraphRelevance($paragraph, $keywords),
             ],
             array_keys($paragraphs),
@@ -443,7 +443,7 @@ class CoreIdeaExtractorController extends Controller
         );
 
         $selected = [$scored[0]['index'] => true];
-        $budget   = $max - $scored[0]['len'];
+        $budget = $max - $scored[0]['len'];
 
         $candidates = array_slice($scored, 1);
         usort($candidates, static fn (array $a, array $b) => $b['score'] <=> $a['score'] ?: $a['index'] <=> $b['index']);
@@ -451,7 +451,7 @@ class CoreIdeaExtractorController extends Controller
         $addedRelevantParagraph = false;
 
         foreach ($candidates as $candidate) {
-            if ($candidate['score'] <= 0 || $candidate['len'] + 2 > $budget) {
+            if ($candidate['score'] <= 0 || $budget < $candidate['len'] + 2) {
                 continue;
             }
 
@@ -475,7 +475,7 @@ class CoreIdeaExtractorController extends Controller
 
         ksort($selected);
 
-        $kept      = [];
+        $kept = [];
         $lastIndex = null;
 
         foreach (array_keys($selected) as $index) {
@@ -483,14 +483,14 @@ class CoreIdeaExtractorController extends Controller
                 $kept[] = '[…]';
             }
 
-            $kept[]    = $paragraphs[$index];
+            $kept[] = $paragraphs[$index];
             $lastIndex = $index;
         }
 
         $assembled = implode("\n\n", $kept);
 
         return [
-            'text'     => mb_strlen($assembled) <= $max ? $assembled : $this->truncateAtBoundary($assembled, $max),
+            'text' => mb_strlen($assembled) <= $max ? $assembled : $this->truncateAtBoundary($assembled, $max),
             'strategy' => 'topic',
         ];
     }
@@ -507,21 +507,21 @@ class CoreIdeaExtractorController extends Controller
      * Nếu ngay cả đầu+cuối cộng lại đã vượt ngân sách (đoạn đầu/cuối tự nó đã rất dài), rơi về
      * truncateAtBoundary() như cũ — không có cách nào giữ được cả 2 đầu mà không vượt trần.
      *
-     * @param string[] $paragraphs
+     * @param  string[]  $paragraphs
      * @return array{text: string, strategy: 'topic'|'lead_tail'|'none'}
      */
     private function selectLeadAndTailContent(array $paragraphs, string $fullText, int $max): array
     {
         $tailIndex = $this->findTailAnchorIndex($paragraphs);
-        $leadLen   = mb_strlen($paragraphs[0]);
-        $tailLen   = mb_strlen($paragraphs[$tailIndex]);
+        $leadLen = mb_strlen($paragraphs[0]);
+        $tailLen = mb_strlen($paragraphs[$tailIndex]);
 
         if ($tailIndex === 0 || $leadLen + $tailLen + 2 > $max) {
             return ['text' => $this->truncateAtBoundary($fullText, $max), 'strategy' => 'none'];
         }
 
         $selected = [0 => true, $tailIndex => true];
-        $budget   = $max - $leadLen - $tailLen - 2;
+        $budget = $max - $leadLen - $tailLen - 2;
 
         for ($i = 1; $i < $tailIndex; $i++) {
             $len = mb_strlen($paragraphs[$i]);
@@ -531,7 +531,7 @@ class CoreIdeaExtractorController extends Controller
             }
 
             $selected[$i] = true;
-            $budget      -= $len + 2;
+            $budget -= $len + 2;
         }
 
         ksort($selected);
@@ -545,7 +545,7 @@ class CoreIdeaExtractorController extends Controller
             }
 
             $kept[] = $paragraphs[$index];
-            $prev   = $index;
+            $prev = $index;
         }
 
         return ['text' => implode("\n\n", $kept), 'strategy' => 'lead_tail'];
@@ -665,7 +665,7 @@ class CoreIdeaExtractorController extends Controller
         }
 
         $percentKept = (int) round($finalLength / $originalLength * 100);
-        $note        = sprintf(
+        $note = sprintf(
             'Nội dung nguồn dài %s ký tự, đã CẮT BỚT còn ~%d%% (trần %s ký tự) trước khi đưa vào AI theo thứ tự xuất hiện (giữ phần đầu, bỏ phần sau) — mọi tóm tắt/viết lại/ý tưởng sinh ra bên dưới chỉ dựa trên phần ĐÃ GIỮ, CHƯA phản ánh phần bị cắt.',
             number_format($originalLength),
             $percentKept,
@@ -779,9 +779,9 @@ class CoreIdeaExtractorController extends Controller
         $mainContentChars = mb_strlen($mainContent);
 
         return [
-            'raw_html_chars'     => $rawHtmlChars,
+            'raw_html_chars' => $rawHtmlChars,
             'main_content_chars' => $mainContentChars,
-            'reduction_percent'  => $rawHtmlChars > 0 ? round((1 - $mainContentChars / $rawHtmlChars) * 100, 1) : 0.0,
+            'reduction_percent' => $rawHtmlChars > 0 ? round((1 - $mainContentChars / $rawHtmlChars) * 100, 1) : 0.0,
         ];
     }
 
@@ -877,14 +877,14 @@ class CoreIdeaExtractorController extends Controller
             return $text;
         }
 
-        $window        = mb_substr($text, 0, $max);
+        $window = mb_substr($text, 0, $max);
         $minAcceptable = (int) ($max * 0.7);
-        $cutAt         = null;
+        $cutAt = null;
 
         if (preg_match_all('/[.!?](?=\s|$)|\n/u', $window, $matches, PREG_OFFSET_CAPTURE)) {
             [$boundary, $byteOffset] = end($matches[0]);
-            $charOffset              = mb_strlen(substr($window, 0, $byteOffset));
-            $cutAt                   = $boundary === "\n" ? $charOffset : $charOffset + 1;
+            $charOffset = mb_strlen(substr($window, 0, $byteOffset));
+            $cutAt = $boundary === "\n" ? $charOffset : $charOffset + 1;
         }
 
         if ($cutAt !== null && $cutAt >= $minAcceptable) {

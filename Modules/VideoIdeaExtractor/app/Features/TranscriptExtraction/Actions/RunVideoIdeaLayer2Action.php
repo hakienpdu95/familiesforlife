@@ -2,11 +2,12 @@
 
 namespace Modules\VideoIdeaExtractor\Features\TranscriptExtraction\Actions;
 
+use App\Services\AI\AiBudgetGuard;
 use App\Services\AI\AIProviderManager;
 use App\Services\AI\AIRequestOptions;
+use App\Services\AI\Exceptions\AiBudgetExceededException;
 use App\Shared\Tenancy\Models\Organization;
 use Illuminate\Support\Facades\DB;
-use Modules\VideoIdeaExtractor\Features\TranscriptExtraction\Exceptions\AiBudgetExceededException;
 
 /**
  * Tương đương RunLayer2ExtractionAction bên CoreIdeaExtractor — tách riêng khỏi
@@ -103,7 +104,7 @@ class RunVideoIdeaLayer2Action
 
     public function __construct(
         private readonly AIProviderManager $aiProviderManager,
-        private readonly CheckVideoIdeaAiBudgetAction $budget,
+        private readonly AiBudgetGuard $budget,
     ) {}
 
     /** @return array{markdown_output: string, model_used: string, cost_usd: float, loop_iterations: int} */

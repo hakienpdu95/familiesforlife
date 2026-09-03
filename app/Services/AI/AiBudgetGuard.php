@@ -1,22 +1,15 @@
 <?php
 
-namespace Modules\VideoIdeaExtractor\Features\TranscriptExtraction\Actions;
+namespace App\Services\AI;
 
-use App\Services\AI\CostCalculator;
+use App\Services\AI\Exceptions\AiBudgetExceededException;
 use App\Shared\Tenancy\Models\Organization;
 use Illuminate\Support\Facades\DB;
-use Modules\VideoIdeaExtractor\Features\TranscriptExtraction\Exceptions\AiBudgetExceededException;
 
-/**
- * Tương đương CheckCoreIdeaAiBudgetAction bên CoreIdeaExtractor — check + ghi nhận chi phí AI vào
- * CÙNG ngân sách tổ chức mà Aicem/CoreIdeaExtractor dùng (bảng `aicem_monthly_budget_usage`,
- * ngân sách AI DÙNG CHUNG cấp tổ chức/tháng cho MỌI tính năng gọi AI, không phải riêng module nào).
- */
-class CheckVideoIdeaAiBudgetAction
+final class AiBudgetGuard
 {
     private const TABLE = 'aicem_monthly_budget_usage';
 
-    /** Ước lượng & chặn TRƯỚC khi gọi AI nếu chắc chắn sẽ vượt hạn mức tháng hiện tại. */
     public function ensureWithinBudget(Organization $organization, int $estimatedInputTokens, int $maxOutputTokens, string $provider, string $model): void
     {
         if ($organization->ai_monthly_budget_usd === null) {
@@ -34,7 +27,6 @@ class CheckVideoIdeaAiBudgetAction
         }
     }
 
-    /** Ghi nhận chi phí THẬT vào `settled_usd` sau khi gọi AI thành công. */
     public function recordActualCost(Organization $organization, float $actualCostUsd): void
     {
         $yearMonth = now()->format('Y-m');
@@ -47,11 +39,11 @@ class CheckVideoIdeaAiBudgetAction
         if ($existing === null) {
             DB::table(self::TABLE)->insert([
                 'organization_id' => $organization->id,
-                'year_month'      => $yearMonth,
-                'reserved_usd'    => 0,
-                'settled_usd'     => $actualCostUsd,
-                'created_at'      => now(),
-                'updated_at'      => now(),
+                'year_month' => $yearMonth,
+                'reserved_usd' => 0,
+                'settled_usd' => $actualCostUsd,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
             return;
@@ -59,9 +51,9 @@ class CheckVideoIdeaAiBudgetAction
 
         if ($existing->deleted_at !== null) {
             DB::table(self::TABLE)->where('id', $existing->id)->update([
-                'deleted_at'  => null,
+                'deleted_at' => null,
                 'settled_usd' => (float) $existing->settled_usd + $actualCostUsd,
-                'updated_at'  => now(),
+                'updated_at' => now(),
             ]);
 
             return;
@@ -71,7 +63,7 @@ class CheckVideoIdeaAiBudgetAction
             ->where('id', $existing->id)
             ->update([
                 'settled_usd' => (float) $existing->settled_usd + $actualCostUsd,
-                'updated_at'  => now(),
+                'updated_at' => now(),
             ]);
     }
 

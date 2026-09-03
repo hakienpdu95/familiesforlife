@@ -1,0 +1,11 @@
+{
+    "name": "VideoSeriesPromptStudio",
+    "alias": "video-series-prompt-studio",
+    "description": "Ghép prompt thiết kế kiến trúc cho CẢ CHUỖI video nhiều tập (Series Bible) — concept, điểm neo nhận diện, khung 1 tập chuẩn lặp lại, và dàn ý liền mạch cho 5-10 tập đầu tiên — thay vì sinh kịch bản cho 1 video đơn lẻ. Dùng chung Category Content Foundation qua module ContentFoundation. KHÔNG gọi AI Provider trong app — chỉ ghép + lưu lại prompt, người dùng tự copy sang ChatGPT/Claude, cùng nguyên tắc ContentOutlines/PromptFrameworkStudio.",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\VideoSeriesPromptStudio\\Providers\\VideoSeriesPromptStudioServiceProvider"
+    ],
+    "files": []
+}

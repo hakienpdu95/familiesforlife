@@ -2,6 +2,7 @@
 
 namespace Modules\VideoIdeaExtractor\Features\TranscriptExtraction\Actions;
 
+use App\Services\AI\AiBudgetGuard;
 use App\Services\AI\AIProviderManager;
 use App\Services\AI\AIRequestOptions;
 use App\Shared\Tenancy\Models\Organization;
@@ -60,7 +61,7 @@ class RunVideoIdeaAiPromptAction
 
     public function __construct(
         private readonly AIProviderManager $aiProviderManager,
-        private readonly CheckVideoIdeaAiBudgetAction $budget,
+        private readonly AiBudgetGuard $budget,
     ) {}
 
     /** @return array{markdown_output: string, model_used: string, cost_usd: float} */

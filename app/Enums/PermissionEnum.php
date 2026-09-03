@@ -257,4 +257,12 @@ enum PermissionEnum: string
     // qua config/permissions.php (Lớp B) — cùng nguyên tắc BANNER_MANAGE/OCOP_MANAGE/
     // HERITAGE_MANAGE/PAGE_MANAGE.
     case ENTITY_COMPARISON_MANAGE = 'entity_comparison.manage';
+
+    // ══ VIDEO SERIES PROMPT STUDIO (thiết kế kiến trúc cho CẢ CHUỖI video nhiều tập — Series
+    // Bible: concept, khung 1 tập chuẩn lặp lại, dàn ý 5-10 tập đầu tiên — KHÔNG gọi AI Provider
+    // trong app, người dùng tự copy-paste sang AI ngoài) ═══
+    // gán cho platform_content_editor/platform_content_head/platform_section_editor
+    // (VideoSeriesPromptStudioPermissionSeeder), KHÔNG qua config/permissions.php (Lớp B) — cùng
+    // nguyên tắc CONTENT_OUTLINES_USE/PROMPT_FRAMEWORK_STUDIO_USE.
+    case VIDEO_SERIES_PROMPT_STUDIO_USE = 'video_series_prompt_studio.use';
 }

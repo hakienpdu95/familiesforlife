@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Log riêng cho từng lần chạy "Layer 2" (RunLayer2ExtractionAction) — CHỈ để dashboard Aicem
  * ("Tổng quan") cộng đúng chi phí thật đã dùng, KHÔNG dùng cho việc chặn hạn mức (việc đó vẫn
- * đọc/ghi `aicem_monthly_budget_usage` như cũ qua CheckCoreIdeaAiBudgetAction).
+ * đọc/ghi `aicem_monthly_budget_usage` như cũ qua App\Services\AI\AiBudgetGuard).
  *
  * Lý do cần bảng riêng thay vì chỉ đọc `aicem_monthly_budget_usage.settled_usd`: cột đó CỘNG
  * DỒN chi phí Layer 2 chung với chi phí các generation run của Aicem (ReconcileBudgetAction) khi
