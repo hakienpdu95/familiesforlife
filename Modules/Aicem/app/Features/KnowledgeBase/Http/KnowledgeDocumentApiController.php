@@ -19,7 +19,7 @@ class KnowledgeDocumentApiController extends Controller
         $this->authorize('viewAny', AicemKnowledgeDocument::class);
 
         $typeKeys = array_keys(config('aicem_subjects.knowledge_slot_definitions', []));
-        $subjectTypeKeys = collect(config('aicem_subjects'))->except('knowledge_slot_definitions')->keys()->all();
+        $subjectTypeKeys = collect(config('aicem_subjects'))->except(['knowledge_slot_definitions', 'knowledge_tier_labels'])->keys()->all();
 
         $validated = $request->validate([
             'page'         => ['nullable', 'integer', 'min:1'],

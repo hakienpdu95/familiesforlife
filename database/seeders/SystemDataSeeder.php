@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Artisan;
 use Modules\ActivityLog\Database\Seeders\ActivityLogPermissionsSeeder;
 use Modules\Aicem\Database\Seeders\AicemDatabaseSeeder;
 use Modules\Approval\Database\Seeders\ApprovalDatabaseSeeder;
-use Modules\Assessment\Database\Seeders\AssessmentDatabaseSeeder;
 use Modules\Auth\Database\Seeders\AuthDatabaseSeeder;
 use Modules\Banner\Database\Seeders\BannerDatabaseSeeder;
 use Modules\ContentFoundation\Database\Seeders\CategoryFoundationSeeder;
@@ -32,7 +31,6 @@ use Modules\ProvinceShowcase\Database\Seeders\ProvinceShowcaseDemoSeeder;
 use Modules\ProvinceShowcase\Database\Seeders\ProvinceSlugBackfillSeeder;
 use Modules\RealEstate\Database\Seeders\RealEstateListingDemoSeeder;
 use Modules\Subscription\Database\Seeders\SubscriptionDatabaseSeeder;
-use Modules\Survey\Database\Seeders\SurveyDatabaseSeeder;
 use Modules\Video\Database\Seeders\VideoDatabaseSeeder;
 use Modules\VideoIdeaExtractor\Database\Seeders\VideoIdeaExtractorDatabaseSeeder;
 
@@ -102,12 +100,6 @@ class SystemDataSeeder extends Seeder
 
             // ── 10. Module Lead: stages + sources cho demo org ────────────
             LeadDatabaseSeeder::class,
-
-            // ── 13. Assessment: TDWCF, 5-Pillar, certifications, sandbox ──
-            AssessmentDatabaseSeeder::class,
-
-            // ── 14. Survey: permissions, AI Readiness, scoring config ──────
-            SurveyDatabaseSeeder::class,
 
             // ── 24. Product: permissions (product.*/product_category.*) — catalog cho Post CTA Box ──
             ProductDatabaseSeeder::class,

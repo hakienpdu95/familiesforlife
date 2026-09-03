@@ -34,9 +34,6 @@ return [
         P::USERS_VIEW->value,
         // Reports: Full
         P::REPORTS_FULL->value,
-        // Assessment: View + Results
-        P::ASSESSMENT_VIEW->value,
-        P::ASSESSMENT_RESULTS->value,
         // Product: Full (CEO tự quản lý catalog sản phẩm/dịch vụ dùng cho Post CTA Box)
         P::PRODUCT_VIEW->value,
         P::PRODUCT_CREATE->value,
@@ -103,9 +100,6 @@ return [
         P::WORKFLOW_EDIT->value,
         // Reports: Operations scope
         P::REPORTS_OPS->value,
-        // Assessment: View + Results
-        P::ASSESSMENT_VIEW->value,
-        P::ASSESSMENT_RESULTS->value,
         // Product: Full (Ops quản lý catalog sản phẩm/dịch vụ dùng cho Post CTA Box)
         P::PRODUCT_VIEW->value,
         P::PRODUCT_CREATE->value,
@@ -175,11 +169,6 @@ return [
         // Workflow: Monitor + AI config
         P::WORKFLOW_MONITOR->value,
         P::WORKFLOW_AI_CONFIG->value,
-        // Assessment: Config + Reprocess
-        P::ASSESSMENT_VIEW->value,
-        P::ASSESSMENT_CONFIG->value,
-        P::ASSESSMENT_RESULTS->value,
-        P::ASSESSMENT_REPROCESS->value,
         // Product: View only
         P::PRODUCT_VIEW->value,
         // Post: View only
@@ -216,11 +205,6 @@ return [
         P::AUDIT_VIEW->value,
         P::SYSTEM_CONFIG->value,
         P::REPORTS_FULL->value,
-        // Assessment: Full config
-        P::ASSESSMENT_VIEW->value,
-        P::ASSESSMENT_CONFIG->value,
-        P::ASSESSMENT_RESULTS->value,
-        P::ASSESSMENT_REPROCESS->value,
         // Product: Full manage (catalog sản phẩm/dịch vụ + quản lý danh mục)
         P::PRODUCT_VIEW->value,
         P::PRODUCT_CREATE->value,

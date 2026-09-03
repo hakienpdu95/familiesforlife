@@ -148,7 +148,7 @@ class AicemDemoDataSeeder extends Seeder
         $line('  <options=bold>TÀI KHOẢN THEO VAI TRÒ</> (mục 12 — quyền quyết định thấy được gì)');
         $hr();
         $line('  <fg=cyan>marketing@demo.test</>  Marketing    → chạy workflow AI, accept/reject đề xuất');
-        $line('  <fg=cyan>ai_op@demo.test</>      AI Operator  → sửa Knowledge Base, duyệt ví dụ mẫu');
+        $line('  <fg=cyan>ai_op@demo.test</>      AI Operator  → sửa Kho tri thức, duyệt ví dụ mẫu');
         $line('  <fg=cyan>admin@demo.test</>      System Admin → cấu hình provider / API key / hạn mức');
         $line('  <fg=cyan>ceo@demo.test</>        CEO          → xem Dashboard tổng quan (read-only)');
         $line();
@@ -156,7 +156,7 @@ class AicemDemoDataSeeder extends Seeder
         $hr();
         $line('  <options=bold>KỊCH BẢN 1 — Cơ chế scope (mục 6.8)</> · login <fg=cyan>marketing@demo.test</>');
         $hr();
-        $line('  2 bài viết cùng loại (post_article) nhưng nhận Knowledge Base KHÁC nhau theo');
+        $line('  2 bài viết cùng loại (post_article) nhưng nhận Kho tri thức KHÁC nhau theo');
         $line('  category/format — mở panel AI dưới trang sửa bài, xem dòng "bối cảnh" (taxonomy):');
         if ($translationSleep) {
             $line('   • Bài "nệm an toàn" (category=an-toan-giac-ngu):');
@@ -189,7 +189,7 @@ class AicemDemoDataSeeder extends Seeder
         $line();
 
         $hr();
-        $line('  <options=bold>KỊCH BẢN 3 — Knowledge Base + version/rollback (Phase 2)</> · login <fg=cyan>ai_op@demo.test</>');
+        $line('  <options=bold>KỊCH BẢN 3 — Kho tri thức + phiên bản/rollback (Phase 2)</> · login <fg=cyan>ai_op@demo.test</>');
         $hr();
         $line('  <fg=cyan>' . $url('backend.aicem.knowledge-documents.index') . '</>');
         $line('  14 tài liệu đủ 3 tầng: DNA chung (skill/brand/persona) · chuyên môn theo');

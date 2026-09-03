@@ -13,4 +13,14 @@ enum SuggestionStatus: string
     case Accepted = 'accepted';
     case Rejected = 'rejected';
     case Stale    = 'stale';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::Pending  => 'Đang chờ',
+            self::Accepted => 'Đã chấp nhận',
+            self::Rejected => 'Đã từ chối',
+            self::Stale    => 'Đã cũ',
+        };
+    }
 }

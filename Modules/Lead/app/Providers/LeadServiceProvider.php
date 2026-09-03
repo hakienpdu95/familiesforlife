@@ -8,7 +8,6 @@ use Modules\Lead\Models\LeadTagDefinition;
 use Modules\Lead\Observers\LeadObserver;
 use Modules\Lead\Policies\LeadPolicy;
 use Modules\Lead\Policies\LeadTagPolicy;
-use Modules\Lead\Workflow\CreateLeadExecutor;
 use Nwidart\Modules\Support\ModuleServiceProvider;
 
 class LeadServiceProvider extends ModuleServiceProvider
@@ -39,12 +38,5 @@ class LeadServiceProvider extends ModuleServiceProvider
         Gate::policy(LeadTagDefinition::class, LeadTagPolicy::class);
 
         Lead::observe(LeadObserver::class);
-
-        if (class_exists(\Modules\WorkflowAutomation\Core\ActionRegistry::class)) {
-            $this->app->booted(function () {
-                app(\Modules\WorkflowAutomation\Core\ActionRegistry::class)
-                    ->register(app(CreateLeadExecutor::class));
-            });
-        }
     }
 }

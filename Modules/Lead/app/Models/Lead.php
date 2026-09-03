@@ -9,11 +9,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Lead\Enums\LeadStatus;
 use Modules\LeadPipelineStage\Models\LeadPipelineStage;
 use Modules\LeadSource\Models\LeadSource;
-use Modules\Assessment\Contracts\ScoringSubjectInterface;
 use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 
-class Lead extends TenantAwareModel implements ScoringSubjectInterface
+class Lead extends TenantAwareModel
 {
     use SoftDeletes;
     use LogsActivity;
@@ -168,52 +167,5 @@ class Lead extends TenantAwareModel implements ScoringSubjectInterface
     public function scopeHot(Builder $query, int $threshold = 70): Builder
     {
         return $query->where('lead_score', '>=', $threshold);
-    }
-
-    // ── ScoringSubjectInterface ───────────────────────────────────────
-
-    public function getScoringSubjectId(): int
-    {
-        return $this->id;
-    }
-
-    public function getScoringSubjectType(): string
-    {
-        return static::class;
-    }
-
-    /**
-     * Trả về assessment code từ org config.
-     * Rỗng = org chưa bật Assessment scoring cho lead → engine bỏ qua.
-     */
-    public function getAssessmentCode(): string
-    {
-        return $this->organization?->lead_assessment_code ?? '';
-    }
-
-    /**
-     * Map lead fields → định dạng answers của Assessment engine.
-     * field_key phải khớp với score_rules.field_key trong assessment wizard.
-     */
-    public function getScoringAnswers(): array
-    {
-        return [
-            // Completeness
-            'has_phone'          => ['type' => 'boolean', 'value' => !empty($this->contact_phone)],
-            'has_email'          => ['type' => 'boolean', 'value' => !empty($this->contact?->email)],
-            'has_company'        => ['type' => 'boolean', 'value' => !empty($this->contact_company)],
-            'has_title'          => ['type' => 'boolean', 'value' => !empty($this->title)],
-            'has_description'    => ['type' => 'boolean', 'value' => !empty($this->description)],
-            // Value
-            'expected_value'     => ['type' => 'number',  'value' => (float) ($this->expected_value ?? 0)],
-            'has_close_date'     => ['type' => 'boolean', 'value' => !empty($this->expected_close_date)],
-            // Pipeline
-            'stage_probability'  => ['type' => 'number',  'value' => (float) ($this->stage?->probability ?? 0)],
-            'has_assigned_owner' => ['type' => 'boolean', 'value' => !empty($this->assigned_to)],
-            // Engagement
-            'activity_count'     => ['type' => 'number',  'value' => (int) $this->activity_count],
-            'days_in_pipeline'   => ['type' => 'number',  'value' => (int) now()->diffInDays($this->created_at)],
-            'lead_score'         => ['type' => 'number',  'value' => (int) ($this->lead_score ?? 0)],
-        ];
     }
 }

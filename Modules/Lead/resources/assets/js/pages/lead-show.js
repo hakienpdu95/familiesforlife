@@ -10,7 +10,6 @@
  *   window.saveStageChange()              — POST change-stage API
  *   window.toggleNotePin(noteId, btn)     — POST toggle-pin API
  *   window.deleteNote(noteId, btn)        — DELETE note API
- *   window.rerunLeadAssessment(btn)       — POST recalculate assessment
  */
 
 // ── Context từ DOM ─────────────────────────────────────────────────────────
@@ -197,35 +196,6 @@ window.deleteNote = async function (noteId, btn) {
         });
         if (res.ok) btn.closest('[data-note-id]')?.remove();
     } finally {
-        btn.disabled = false;
-    }
-};
-
-// ── Assessment rerun ────────────────────────────────────────────────────────
-
-window.rerunLeadAssessment = async function (btn) {
-    if (!confirm('Tính lại đánh giá sâu cho cơ hội này?')) return;
-    const ctx  = _ctx();
-    const code = btn.dataset.assessmentCode;
-    const id   = btn.dataset.assessmentResultId;
-    if (!code || !id) return;
-
-    btn.disabled = true;
-    try {
-        const res  = await fetch(`/dashboard/assessments/${code}/results/${id}/recalculate`, {
-            method: 'POST',
-            headers: _jsonHeaders(ctx.csrf),
-        });
-        const data = await res.json();
-
-        if (data.ok) {
-            setTimeout(() => location.reload(), 800);
-        } else {
-            alert(data.message || 'Lỗi khi tính lại.');
-            btn.disabled = false;
-        }
-    } catch {
-        alert('Lỗi kết nối.');
         btn.disabled = false;
     }
 };

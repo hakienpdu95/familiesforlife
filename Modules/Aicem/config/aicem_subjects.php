@@ -60,18 +60,27 @@ return [
     // subject_type_allowed:  [] = phải là null | [...] = chỉ 1 trong các giá trị này | null = chấp
     //                        nhận bất kỳ subject_type nào đã đăng ký trong registry ở trên.
     'knowledge_slot_definitions' => [
-        'skill'                 => ['tier' => 'dna',         'subject_type_required' => false, 'subject_type_allowed' => []],
-        'brand_guideline'       => ['tier' => 'dna',         'subject_type_required' => false, 'subject_type_allowed' => []],
-        'audience_personas'     => ['tier' => 'dna',         'subject_type_required' => false, 'subject_type_allowed' => []],
-        'eeat_checklist'        => ['tier' => 'specialized', 'subject_type_required' => true,  'subject_type_allowed' => ['post_article']],
-        'category_style_guide'  => ['tier' => 'specialized', 'subject_type_required' => true,  'subject_type_allowed' => ['post_article']],
-        'seo_keyword_rules'     => ['tier' => 'specialized', 'subject_type_required' => true,  'subject_type_allowed' => ['post_article']],
-        'ads_compliance_rules'  => ['tier' => 'specialized', 'subject_type_required' => true,  'subject_type_allowed' => ['product']],
-        'conversion_copy_rules' => ['tier' => 'specialized', 'subject_type_required' => true,  'subject_type_allowed' => ['product']],
-        'pricing_display_rules' => ['tier' => 'specialized', 'subject_type_required' => true,  'subject_type_allowed' => ['product']],
-        'example_good'          => ['tier' => 'example',      'subject_type_required' => true,  'subject_type_allowed' => null],
-        'example_bad'           => ['tier' => 'example',      'subject_type_required' => true,  'subject_type_allowed' => null],
-        'custom_note'           => ['tier' => 'escape_hatch', 'subject_type_required' => false, 'subject_type_allowed' => null],
+        'skill'                 => ['tier' => 'dna',         'subject_type_required' => false, 'subject_type_allowed' => [], 'label' => 'Giọng văn & Phong cách viết'],
+        'brand_guideline'       => ['tier' => 'dna',         'subject_type_required' => false, 'subject_type_allowed' => [], 'label' => 'Quy chuẩn thương hiệu'],
+        'audience_personas'     => ['tier' => 'dna',         'subject_type_required' => false, 'subject_type_allowed' => [], 'label' => 'Chân dung đối tượng đọc'],
+        'eeat_checklist'        => ['tier' => 'specialized', 'subject_type_required' => true,  'subject_type_allowed' => ['post_article'], 'label' => 'Checklist E-E-A-T (Bài viết)'],
+        'category_style_guide'  => ['tier' => 'specialized', 'subject_type_required' => true,  'subject_type_allowed' => ['post_article'], 'label' => 'Văn phong theo chuyên mục (Bài viết)'],
+        'seo_keyword_rules'     => ['tier' => 'specialized', 'subject_type_required' => true,  'subject_type_allowed' => ['post_article'], 'label' => 'Quy tắc từ khoá SEO (Bài viết)'],
+        'ads_compliance_rules'  => ['tier' => 'specialized', 'subject_type_required' => true,  'subject_type_allowed' => ['product'], 'label' => 'Quy định tuân thủ quảng cáo (Sản phẩm)'],
+        'conversion_copy_rules' => ['tier' => 'specialized', 'subject_type_required' => true,  'subject_type_allowed' => ['product'], 'label' => 'Ngôn từ thúc đẩy chuyển đổi (Sản phẩm)'],
+        'pricing_display_rules' => ['tier' => 'specialized', 'subject_type_required' => true,  'subject_type_allowed' => ['product'], 'label' => 'Quy tắc hiển thị giá (Sản phẩm)'],
+        'example_good'          => ['tier' => 'example',      'subject_type_required' => true,  'subject_type_allowed' => null, 'label' => 'Ví dụ nên làm theo'],
+        'example_bad'           => ['tier' => 'example',      'subject_type_required' => true,  'subject_type_allowed' => null, 'label' => 'Ví dụ cần tránh'],
+        'custom_note'           => ['tier' => 'escape_hatch', 'subject_type_required' => false, 'subject_type_allowed' => null, 'label' => 'Ghi chú đặc thù / tạm thời'],
+    ],
+
+    // Tên nhóm hiển thị cho <optgroup> ở dropdown "Loại tri thức" (create/edit Knowledge Base) —
+    // đúng thứ tự hiển thị mong muốn, key khớp `tier` ở knowledge_slot_definitions phía trên.
+    'knowledge_tier_labels' => [
+        'dna'          => 'DNA chung — Cốt lõi tổ chức',
+        'specialized'  => 'Chuyên biệt theo đối tượng',
+        'example'      => 'Ví dụ minh hoạ',
+        'escape_hatch' => 'Ghi chú tự do',
     ],
 
 ];

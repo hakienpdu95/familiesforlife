@@ -128,21 +128,6 @@
                         Lịch sử
                     </button>
 
-                    @if($assessmentResult)
-                    <button type="button" role="tab" :aria-selected="tab === 'assessment'"
-                            @click="tab = 'assessment'"
-                            class="flex items-center gap-1.5 px-1 py-3.5 text-sm font-medium border-b-2 transition-colors"
-                            :class="tab === 'assessment'
-                                ? 'border-primary text-primary'
-                                : 'border-transparent text-base-content/50 hover:text-base-content hover:border-base-content/20'">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                        </svg>
-                        Đánh giá sâu
-                        <span class="badge badge-xs badge-primary">{{ round($assessmentResult->overall_score) }}</span>
-                    </button>
-                    @endif
-
                 </nav>
             </div>
 
@@ -354,93 +339,6 @@
                 </div>
             </div>
 
-            {{-- ── Tab: Đánh giá sâu ───────────────────────────────────── --}}
-            @if($assessmentResult)
-            <div x-show="tab === 'assessment'">
-                <div class="space-y-4">
-
-                    <div class="card bg-base-100 shadow-sm border border-base-200">
-                        <div class="card-body py-3 px-3">
-                            <div class="grid grid-cols-3 gap-4 text-center">
-                                <div>
-                                    <p class="text-xs text-base-content/50 mb-1">Điểm tổng</p>
-                                    <p class="text-4xl font-bold text-primary">{{ round($assessmentResult->overall_score, 1) }}</p>
-                                    <p class="text-xs text-base-content/40 mt-0.5">/ 100</p>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-base-content/50 mb-1">Phân loại</p>
-                                    <span class="badge badge-lg badge-soft badge-info font-semibold">
-                                        {{ $assessmentResult->maturity_level ?? '—' }}
-                                    </span>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-base-content/50 mb-1">Cập nhật</p>
-                                    <p class="text-sm font-medium">{{ $assessmentResult->calculated_at?->format('d/m H:i') ?? '—' }}</p>
-                                    @can('assessment.reprocess')
-                                    <button type="button"
-                                            data-assessment-code="{{ $assessmentResult->assessment_code }}"
-                                            data-assessment-result-id="{{ $assessmentResult->id }}"
-                                            onclick="rerunLeadAssessment(this)"
-                                            class="btn btn-xs btn-ghost text-warning mt-1" title="Tính lại">
-                                        ↻ Tính lại
-                                    </button>
-                                    @endcan
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    @if($assessmentResult->domainScores->isNotEmpty())
-                    <div class="card bg-base-100 shadow-sm border border-base-200">
-                        <div class="px-5 py-3 border-b border-base-200 font-semibold text-sm">Điểm theo domain</div>
-                        <div class="divide-y divide-base-200">
-                            @foreach($assessmentResult->domainScores as $ds)
-                            <div class="px-5 py-3 flex items-center gap-4">
-                                <div class="w-36 shrink-0 text-sm font-medium">{{ $ds->domain_code }}</div>
-                                <div class="flex-1 flex items-center gap-3">
-                                    <div class="flex-1 bg-base-200 rounded-full h-2 overflow-hidden">
-                                        <div class="h-2 rounded-full bg-primary transition-all"
-                                             style="width: {{ min(100, round($ds->normalized_score)) }}%"></div>
-                                    </div>
-                                    <span class="text-sm font-bold text-primary w-10 text-right">
-                                        {{ round($ds->normalized_score, 1) }}
-                                    </span>
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
-                    </div>
-                    @endif
-
-                    @if($assessmentResult->painPoints->isNotEmpty())
-                    <div class="card bg-base-100 shadow-sm border border-base-200">
-                        <div class="px-5 py-3 border-b border-base-200 font-semibold text-sm text-warning">⚠ Điểm yếu</div>
-                        <div class="px-5 py-3 flex flex-wrap gap-2">
-                            @foreach($assessmentResult->painPoints as $pp)
-                            <span class="badge badge-sm badge-soft badge-warning font-mono">{{ $pp->pain_point_code }}</span>
-                            @endforeach
-                        </div>
-                    </div>
-                    @endif
-
-                    @if($assessmentResult->recommendations->isNotEmpty())
-                    <div class="card bg-base-100 shadow-sm border border-base-200">
-                        <div class="px-5 py-3 border-b border-base-200 font-semibold text-sm">💡 Đề xuất hành động</div>
-                        <div class="divide-y divide-base-200">
-                            @foreach($assessmentResult->recommendations as $rec)
-                            <div class="px-5 py-3 flex items-center gap-3">
-                                <span class="badge badge-xs badge-ghost w-6 text-center shrink-0">#{{ $rec->priority }}</span>
-                                <span class="text-sm font-mono text-base-content/70">{{ $rec->recommendation_code }}</span>
-                            </div>
-                            @endforeach
-                        </div>
-                    </div>
-                    @endif
-
-                </div>
-            </div>
-            @endif
-
         </div>{{-- /left --}}
 
         {{-- ── RIGHT: Sidebar ─────────────────────────────────────────── --}}
@@ -525,20 +423,6 @@
                                 @if($lead->survey_band_code)
                                 <span class="badge badge-xs badge-ghost ml-1">{{ $lead->survey_band_code }}</span>
                                 @endif
-                            </dd>
-                        </div>
-                        @endif
-                        @if($surveyResponseUrl)
-                        <div class="flex items-center justify-between gap-2">
-                            <dt class="text-xs text-base-content/50 shrink-0">Khảo sát</dt>
-                            <dd>
-                                <a href="{{ $surveyResponseUrl }}" target="_blank"
-                                   class="link link-primary text-xs flex items-center gap-1">
-                                    Xem chi tiết
-                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                    </svg>
-                                </a>
                             </dd>
                         </div>
                         @endif

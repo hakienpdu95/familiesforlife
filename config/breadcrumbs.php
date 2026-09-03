@@ -57,7 +57,6 @@ return [
         'tokens'              => 'Mã tham gia',
         'stats'               => 'Thống kê',
         'results'             => 'Kết quả',
-        'scoring'             => 'Chấm điểm',
 
         // ── CRM / Lead ────────────────────────────────────────────────────
         'leads'               => 'Danh sách Lead',
@@ -67,10 +66,6 @@ return [
         // ── Activity Log ──────────────────────────────────────────────────
         'activity-logs'       => 'Nhật ký hoạt động',
         'alert-rules'         => 'Quy tắc cảnh báo',
-
-        // ── Assessment ────────────────────────────────────────────────────
-        'assessments'         => 'Bộ đánh giá',
-        'config'              => 'Cấu hình',
 
         // ── Workflow ──────────────────────────────────────────────────────
         'workflows'           => 'Luồng tự động',

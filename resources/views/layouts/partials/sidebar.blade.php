@@ -65,57 +65,6 @@
         </div>
         @endif
 
-        @auth
-        <a href="{{ route('backend.surveys.my') }}"
-           class="nav-link {{ request()->routeIs('backend.surveys.my') ? 'active' : '' }}">
-            <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-            </svg>
-            <span class="nav-label">Khảo sát</span>
-        </a>
-        @endauth
-
-        @can('survey.view')
-        <details {{ request()->routeIs('backend.surveys.*') && !request()->routeIs('backend.surveys.my') ? 'open' : '' }}>
-            <summary class="nav-summary {{ request()->routeIs('backend.surveys.*') && !request()->routeIs('backend.surveys.my') && !request()->routeIs('backend.surveys.take*') ? 'active' : '' }}">
-                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
-                <span class="nav-label">Quản lý khảo sát</span>
-                <svg class="nav-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m9 18 6-6-6-6"/></svg>
-            </summary>
-            <div class="sub-menu">
-                <a href="{{ route('backend.surveys.index') }}" class="sub-link {{ request()->routeIs('backend.surveys.index') ? 'active' : '' }}">Danh sách khảo sát</a>
-                @can('survey.create')
-                <a href="{{ route('backend.surveys.create') }}" class="sub-link {{ request()->routeIs('backend.surveys.create') ? 'active' : '' }}">Tạo khảo sát</a>
-                @endcan
-            </div>
-        </details>
-        @endcan
-
-        @if(auth()->user()?->hasAnyPermission(['assessment.view','assessment.config','assessment.results']))
-        <details {{ request()->routeIs('assessments.*') ? 'open' : '' }}>
-            <summary class="nav-summary {{ request()->routeIs('assessments.*') ? 'active' : '' }}">
-                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                <span class="nav-label">Chấm điểm</span>
-                <svg class="nav-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m9 18 6-6-6-6"/></svg>
-            </summary>
-            <div class="sub-menu">
-                @can('assessment.view')
-                <a href="{{ route('assessments.index') }}"
-                   class="sub-link {{ request()->routeIs('assessments.index') ? 'active' : '' }}">
-                    Danh sách Assessment
-                </a>
-                @endcan
-                @can('assessment.config')
-                <a href="{{ route('assessments.create') }}"
-                   class="sub-link {{ request()->routeIs('assessments.create') ? 'active' : '' }}">
-                    Tạo Assessment mới
-                </a>
-                @endcan
-            </div>
-        </details>
-        @endif
-
         @can(\App\Enums\PermissionEnum::PRODUCT_VIEW->value)
         <details {{ request()->routeIs('backend.products.*') ? 'open' : '' }}>
             <summary class="nav-summary {{ request()->routeIs('backend.products.*') ? 'active' : '' }}">
@@ -524,7 +473,7 @@
                 <a href="{{ route('backend.aicem.dashboard') }}"
                    class="sub-link {{ request()->routeIs('backend.aicem.dashboard') ? 'active' : '' }}">Tổng quan</a>
                 <a href="{{ route('backend.aicem.knowledge-documents.index') }}"
-                   class="sub-link {{ request()->routeIs('backend.aicem.knowledge-documents.*') ? 'active' : '' }}">Knowledge Base</a>
+                   class="sub-link {{ request()->routeIs('backend.aicem.knowledge-documents.*') ? 'active' : '' }}">Kho tri thức</a>
                 @can('create', \Modules\Aicem\Models\AicemKnowledgeDocument::class)
                 <a href="{{ route('backend.aicem.knowledge-documents.create') }}"
                    class="sub-link {{ request()->routeIs('backend.aicem.knowledge-documents.create') ? 'active' : '' }}">Thêm tri thức</a>
@@ -723,28 +672,6 @@
                 </div>
             </details>
             @endif
-
-            @can(\App\Enums\PermissionEnum::WORKFLOW_MONITOR->value)
-            <details {{ request()->routeIs('workflows.*') ? 'open' : '' }}>
-                <summary class="nav-summary {{ request()->routeIs('workflows.*') ? 'active' : '' }}">
-                    <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                    <span class="nav-label">Workflow</span>
-                    <svg class="nav-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m9 18 6-6-6-6"/></svg>
-                </summary>
-                <div class="sub-menu">
-                    <a href="{{ route('workflows.index') }}"
-                       class="sub-link {{ request()->routeIs('workflows.index') ? 'active' : '' }}">
-                        Danh sách workflow
-                    </a>
-                    @can(\App\Enums\PermissionEnum::WORKFLOW_EDIT->value)
-                    <a href="{{ route('workflows.create') }}"
-                       class="sub-link {{ request()->routeIs('workflows.create') ? 'active' : '' }}">
-                        Tạo workflow mới
-                    </a>
-                    @endcan
-                </div>
-            </details>
-            @endcan
 
             <details {{ request()->routeIs('backend.settings.*') ? 'open' : '' }}>
                 <summary class="nav-summary {{ request()->routeIs('backend.settings.*') ? 'active' : '' }}">

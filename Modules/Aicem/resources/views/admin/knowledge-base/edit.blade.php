@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', 'Sửa tri thức — Knowledge Base')
+@section('title', 'Sửa tri thức — Kho tri thức')
 
 @section('content')
 
@@ -7,8 +7,8 @@
     <div>
         <h1 class="text-2xl font-bold text-base-content">{{ $document->title }}</h1>
         <p class="text-sm text-base-content/50 mt-0.5 flex items-center gap-2">
-            <span class="badge badge-sm badge-ghost font-mono">{{ $document->type }}</span>
-            <span>{{ $document->subject_type ?? 'DNA chung' }}</span>
+            <span class="badge badge-sm badge-ghost">{{ config("aicem_subjects.knowledge_slot_definitions.{$document->type}.label", $document->type) }}</span>
+            <span>{{ $document->subject_type ? config("aicem_subjects.{$document->subject_type}.label", $document->subject_type) : 'DNA chung' }}</span>
             <span>· v{{ $document->current_version }}</span>
         </p>
     </div>
@@ -86,7 +86,7 @@
                     <div class="space-y-4">
                         <div class="form-control">
                             <label class="label py-0 pb-1.5">
-                                <span class="label-text font-medium">Scope (JSON)</span>
+                                <span class="label-text font-medium">Phạm vi (JSON)</span>
                                 <span class="label-text-alt text-xs text-base-content/40">Để trống = áp dụng mọi bài/sản phẩm</span>
                             </label>
                             @php
@@ -111,7 +111,7 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div class="form-control">
                                 <label class="label py-0 pb-1.5">
-                                    <span class="label-text font-medium">Scope match</span>
+                                    <span class="label-text font-medium">Kiểu khớp phạm vi</span>
                                 </label>
                                 <select name="scope_match" class="select select-bordered select-sm w-full">
                                     <option value="any" {{ old('scope_match', $document->scope_match->value) === 'any' ? 'selected' : '' }}>any — khớp 1 key là đủ</option>
@@ -120,7 +120,7 @@
                             </div>
                             <div class="form-control">
                                 <label class="label py-0 pb-1.5">
-                                    <span class="label-text font-medium">Priority</span>
+                                    <span class="label-text font-medium">Độ ưu tiên</span>
                                 </label>
                                 <input type="number" name="priority" min="1" max="999"
                                        value="{{ old('priority', $document->priority) }}"
@@ -147,7 +147,7 @@
             <div class="card-body">
                 <h2 class="card-title text-base mb-1">Lịch sử phiên bản</h2>
                 <p class="text-xs text-base-content/40 mb-4">
-                    Mỗi lần lưu tạo 1 version mới lưu lại trạng thái trước đó. Khôi phục sẽ tạo thêm 1 version mới
+                    Mỗi lần lưu tạo 1 phiên bản mới lưu lại trạng thái trước đó. Khôi phục sẽ tạo thêm 1 phiên bản mới
                     (không xoá lịch sử) — bản thân thao tác khôi phục cũng được audit lại được.
                 </p>
 
@@ -163,7 +163,7 @@
                     </div>
                     @can('rollback', $document)
                     <form method="POST" action="{{ route('backend.aicem.knowledge-documents.versions.restore', [$document, $version]) }}"
-                          onsubmit="return confirm('Khôi phục về phiên bản v{{ $version->version }}? Trạng thái hiện tại sẽ được lưu thành 1 version mới trước khi ghi đè.')">
+                          onsubmit="return confirm('Khôi phục về phiên bản v{{ $version->version }}? Trạng thái hiện tại sẽ được lưu thành 1 phiên bản mới trước khi ghi đè.')">
                         @csrf
                         <button class="btn btn-ghost btn-xs shrink-0">Khôi phục</button>
                     </form>
@@ -180,8 +180,9 @@
         <div class="card bg-base-100 shadow-sm border border-base-200">
             <div class="card-body p-4 text-sm space-y-2">
                 <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-1">Thông tin</p>
-                <p><span class="text-base-content/50">Type:</span> <span class="font-mono">{{ $document->type }}</span></p>
-                <p><span class="text-base-content/50">Subject:</span> {{ $document->subject_type ?? 'DNA chung' }}</p>
+                <p><span class="text-base-content/50">Loại:</span> {{ config("aicem_subjects.knowledge_slot_definitions.{$document->type}.label", $document->type) }}
+                    <span class="text-xs font-mono text-base-content/30">({{ $document->type }})</span></p>
+                <p><span class="text-base-content/50">Đối tượng áp dụng:</span> {{ $document->subject_type ? config("aicem_subjects.{$document->subject_type}.label", $document->subject_type) : 'DNA chung' }}</p>
                 <p><span class="text-base-content/50">Tạo bởi:</span> {{ $document->creator?->name ?? '—' }}</p>
                 <p><span class="text-base-content/50">Sửa lần cuối bởi:</span> {{ $document->updater?->name ?? '—' }}</p>
                 <p class="text-xs text-base-content/30 pt-2 border-t border-base-200">

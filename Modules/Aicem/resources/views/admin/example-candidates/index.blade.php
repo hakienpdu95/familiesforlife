@@ -19,10 +19,10 @@
         <div>
             <h1 class="text-2xl font-bold text-base-content">Duyệt ví dụ mẫu (example_good)</h1>
             <p class="text-sm text-base-content/50 mt-0.5">
-                Đề xuất tự động từ bài viết đã xuất bản và đánh dấu "Nổi bật" — bạn duyệt trước khi lưu vào Knowledge Base
+                Đề xuất tự động từ bài viết đã xuất bản và đánh dấu "Nổi bật" — bạn duyệt trước khi lưu vào Kho tri thức
             </p>
         </div>
-        <a href="{{ route('backend.aicem.knowledge-documents.index') }}" class="btn btn-ghost btn-sm">← Knowledge Base</a>
+        <a href="{{ route('backend.aicem.knowledge-documents.index') }}" class="btn btn-ghost btn-sm">← Kho tri thức</a>
     </div>
 
     <form method="GET" class="flex flex-wrap gap-2 mb-5">
@@ -46,7 +46,7 @@
                                 'approved' => 'badge-success',
                                 'rejected' => 'badge-ghost',
                                 default => 'badge-warning',
-                            } }}">{{ $candidate->status->value }}</span>
+                            } }}">{{ $candidate->status->label() }}</span>
                         </div>
                         <p class="text-xs text-base-content/40">
                             {{ $candidate->subject_type }}#{{ $candidate->subject_id }} ·
@@ -87,7 +87,7 @@
             </div>
         </div>
         @empty
-        <div class="text-center py-12 text-base-content/40 text-sm">Không có candidate nào.</div>
+        <div class="text-center py-12 text-base-content/40 text-sm">Không có đề xuất nào.</div>
         @endforelse
     </div>
 

@@ -1,12 +1,12 @@
 @extends('layouts.backend')
-@section('title', 'Thêm tri thức — Knowledge Base')
+@section('title', 'Thêm tri thức — Kho tri thức')
 
 @section('content')
 
 <div class="flex items-center justify-between mb-6">
     <div>
         <h1 class="text-2xl font-bold text-base-content">Thêm tri thức</h1>
-        <p class="text-sm text-base-content/50 mt-0.5">Thêm 1 tài liệu vào Knowledge Base dùng làm ngữ cảnh cho AICEM</p>
+        <p class="text-sm text-base-content/50 mt-0.5">Thêm 1 tài liệu vào Kho tri thức dùng làm ngữ cảnh cho AICEM</p>
     </div>
     <a href="{{ route('backend.aicem.knowledge-documents.index') }}" class="btn btn-ghost btn-sm gap-1.5">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -44,7 +44,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="form-control">
                             <label class="label py-0 pb-1.5">
-                                <span class="label-text font-medium">Subject_type</span>
+                                <span class="label-text font-medium">Đối tượng áp dụng</span>
                             </label>
                             <select name="subject_type" x-model="subjectType"
                                     class="select select-bordered select-sm w-full @error('subject_type') select-error @enderror">
@@ -58,22 +58,21 @@
 
                         <div class="form-control">
                             <label class="label py-0 pb-1.5">
-                                <span class="label-text font-medium">Type <span class="text-error">*</span></span>
+                                <span class="label-text font-medium">Loại <span class="text-error">*</span></span>
                             </label>
                             <select name="type" class="select select-bordered select-sm w-full @error('type') select-error @enderror">
                                 <option value="">— Chọn loại tri thức —</option>
-                                @foreach($slotDefinitions as $typeKey => $def)
-                                @php
-                                    $allowed = $def['subject_type_allowed'];
-                                    $hint = match(true) {
-                                        $allowed === [] => 'DNA chung — không gắn subject_type',
-                                        $allowed === null => 'dùng chung mọi subject_type (bắt buộc chọn 1)',
-                                        default => 'chỉ cho: ' . implode(', ', $allowed),
-                                    };
-                                @endphp
-                                <option value="{{ $typeKey }}" {{ old('type') === $typeKey ? 'selected' : '' }}>
-                                    {{ $typeKey }} — {{ $def['tier'] }} ({{ $hint }})
-                                </option>
+                                @foreach(config('aicem_subjects.knowledge_tier_labels') as $tierKey => $tierLabel)
+                                @php $tierItems = collect($slotDefinitions)->where('tier', $tierKey); @endphp
+                                @if($tierItems->isNotEmpty())
+                                <optgroup label="{{ $tierLabel }}">
+                                    @foreach($tierItems as $typeKey => $def)
+                                    <option value="{{ $typeKey }}" {{ old('type') === $typeKey ? 'selected' : '' }}>
+                                        {{ $def['label'] ?? $typeKey }}
+                                    </option>
+                                    @endforeach
+                                </optgroup>
+                                @endif
                                 @endforeach
                             </select>
                             @error('type')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
@@ -118,7 +117,7 @@
                     <div class="space-y-4">
                         <div class="form-control">
                             <label class="label py-0 pb-1.5">
-                                <span class="label-text font-medium">Scope (JSON)</span>
+                                <span class="label-text font-medium">Phạm vi (JSON)</span>
                                 <span class="label-text-alt text-xs text-base-content/40">Không bắt buộc — để trống = áp dụng mọi bài/sản phẩm</span>
                             </label>
                             <textarea name="scope_json" rows="3"
@@ -142,7 +141,7 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div class="form-control">
                                 <label class="label py-0 pb-1.5">
-                                    <span class="label-text font-medium">Scope match</span>
+                                    <span class="label-text font-medium">Kiểu khớp phạm vi</span>
                                 </label>
                                 <select name="scope_match" class="select select-bordered select-sm w-full">
                                     <option value="any" {{ old('scope_match', 'any') === 'any' ? 'selected' : '' }}>any — khớp 1 key là đủ</option>
@@ -151,7 +150,7 @@
                             </div>
                             <div class="form-control">
                                 <label class="label py-0 pb-1.5">
-                                    <span class="label-text font-medium">Priority</span>
+                                    <span class="label-text font-medium">Độ ưu tiên</span>
                                     <span class="label-text-alt text-xs text-base-content/40">Số nhỏ chèn trước</span>
                                 </label>
                                 <input type="number" name="priority" min="1" max="999"

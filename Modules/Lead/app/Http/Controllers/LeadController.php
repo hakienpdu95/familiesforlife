@@ -7,7 +7,6 @@ use App\Shared\Tenancy\TenantContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use Illuminate\View\View;
 use Modules\Lead\Actions\AssignLeadAction;
 use Modules\Lead\Actions\ChangeLeadStageAction;
@@ -97,28 +96,8 @@ class LeadController extends Controller
         $stages  = $stagesHandler->handle(new GetPipelineStagesQuery($orgId));
         $sources = $sourcesHandler->handle(new GetLeadSourcesQuery($orgId));
 
-        $surveyResponseUrl = null;
-        if ($lead->survey_response_id && Route::has('backend.surveys.responses.show')) {
-            $surveyResponse = \Modules\Survey\Models\SurveyResponse::find($lead->survey_response_id);
-            if ($surveyResponse) {
-                $surveyResponseUrl = route('backend.surveys.responses.show', [
-                    $surveyResponse->survey_id,
-                    $surveyResponse->id,
-                ]);
-            }
-        }
-
-        // Assessment result (nếu org đã bật lead assessment)
-        $assessmentResult = null;
-        if (class_exists(\Modules\Assessment\Models\AssessmentResult::class) && $lead->getAssessmentCode()) {
-            $assessmentResult = \Modules\Assessment\Models\AssessmentResult
-                ::forSubject(Lead::class, $lead->id)
-                ->with(['domainScores', 'classification', 'painPoints', 'recommendations', 'roadmapPhases.phase'])
-                ->first();
-        }
-
         return view('lead::leads.show', compact(
-            'lead', 'stages', 'sources', 'maskContact', 'surveyResponseUrl', 'assessmentResult'
+            'lead', 'stages', 'sources', 'maskContact'
         ));
     }
 

@@ -18,7 +18,6 @@
         'task_overdue'=> '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>',
         'leads'       => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>',
         'leads_won'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>',
-        'workflow'    => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 10V3L4 14h7v7l9-11h-7z"/>',
     ];
 
     $colorMap = [
@@ -31,7 +30,6 @@
     ];
 
     $feedIconMap = [
-        'workflow_approval' => ['icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>', 'bg' => 'bg-warning/10', 'text' => 'text-warning'],
         'task_overdue'      => ['icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>', 'bg' => 'bg-error/10', 'text' => 'text-error'],
     ];
 
@@ -45,7 +43,6 @@
 
     // Role-based chart visibility
     $showLeadFunnel     = in_array($roleName, ['ceo','system_admin','ops','ai_operator','sales','marketing']);
-    $showWorkflowHealth = in_array($roleName, ['ceo','system_admin','ops','ai_operator']);
 
     // Shortcuts
     $shortcutIconPaths = [
@@ -127,12 +124,10 @@
         </div>
     </div>
 
-    {{-- ── Row 2: Lead Funnel + Workflow Health ────────────────────────── --}}
-    @if($showLeadFunnel || $showWorkflowHealth)
-    <div class="grid grid-cols-1 {{ ($showLeadFunnel && $showWorkflowHealth) ? 'lg:grid-cols-2' : '' }} gap-5">
+    {{-- ── Row 2: Lead Funnel ─────────────────────────────────────────── --}}
+    @if($showLeadFunnel)
+    <div class="grid grid-cols-1 gap-5">
 
-        {{-- Lead Funnel --}}
-        @if($showLeadFunnel)
         <div class="card bg-base-100 border border-base-200 shadow-sm">
             <div class="card-body p-3">
                 <div class="mb-3">
@@ -147,42 +142,6 @@
                 </div>
             </div>
         </div>
-        @endif
-
-        {{-- Workflow Health --}}
-        @if($showWorkflowHealth)
-        <div class="card bg-base-100 border border-base-200 shadow-sm">
-            <div class="card-body p-3">
-                <div class="flex items-center justify-between mb-3">
-                    <div>
-                        <h3 class="font-semibold text-sm text-base-content">Workflow Health</h3>
-                        <p class="text-xs text-base-content/40 mt-0.5">Trạng thái lần chạy theo ngày</p>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-2 text-xs">
-                        <span class="flex items-center gap-1 text-base-content/50">
-                            <span class="inline-block w-2 h-2 rounded-sm bg-success"></span> Thành công
-                        </span>
-                        <span class="flex items-center gap-1 text-base-content/50">
-                            <span class="inline-block w-2 h-2 rounded-sm bg-error"></span> Lỗi
-                        </span>
-                        <span class="flex items-center gap-1 text-base-content/50">
-                            <span class="inline-block w-2 h-2 rounded-sm bg-warning"></span> Halted
-                        </span>
-                        <span class="flex items-center gap-1 text-base-content/50">
-                            <span class="inline-block w-2 h-2 rounded-sm bg-info"></span> Chờ
-                        </span>
-                    </div>
-                </div>
-                <div id="chart-workflow-health"
-                     class="w-full"
-                     style="height: 260px;"
-                     data-chart="workflow-health"
-                     :data-days="days">
-                    <div class="skeleton w-full h-full rounded-xl" id="skel-workflow-health"></div>
-                </div>
-            </div>
-        </div>
-        @endif
 
     </div>
     @endif
@@ -208,7 +167,6 @@
                     <span class="badge badge-error badge-xs">{{ count($action_feed) }}</span>
                     @endif
                 </div>
-                <a href="{{ route('workflow.tasks.my') }}" class="text-xs text-primary hover:underline">Xem tất cả</a>
             </div>
 
             @if(empty($action_feed))
@@ -305,9 +263,7 @@
     <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">Truy cập nhanh</p>
     <div class="flex flex-wrap gap-2">
         @php
-        $shortcuts = [
-            ['label' => 'Workflows',   'route' => route('workflows.index'),              'icon' => 'bolt'],
-        ];
+        $shortcuts = [];
         if (in_array('crm', $visibleModules))
             $shortcuts[] = ['label' => 'CRM / Leads', 'route' => route('lead.index'), 'icon' => 'crm'];
         if (in_array('users', $visibleModules))
@@ -367,8 +323,6 @@ document.addEventListener('alpine:init', () => {
         setRange(val) {
             this.days = val;
             sessionStorage.setItem('dash_days', String(val));
-            // Re-render time-series charts
-            this._renderChart('workflow-health',  this._workflowHealthOptions.bind(this));
         },
 
         _isDark() {
@@ -377,7 +331,6 @@ document.addEventListener('alpine:init', () => {
 
         _renderAll() {
             this._renderChart('lead-funnel',      this._leadFunnelOptions.bind(this));
-            this._renderChart('workflow-health',  this._workflowHealthOptions.bind(this));
         },
 
         _reTheme() {
@@ -394,10 +347,9 @@ document.addEventListener('alpine:init', () => {
             const skel = document.getElementById('skel-' + id);
 
             // Build URL with current days param where applicable
-            const needsDays = ['workflow-health'].includes(id);
+            const needsDays = [].includes(id);
             const baseUrls  = {
                 'lead-funnel':     '{{ route("backend.dashboard.charts.lead-funnel") }}',
-                'workflow-health': '{{ route("backend.dashboard.charts.workflow-health") }}',
             };
             const url = (baseUrls[id] ?? '') + (needsDays ? `?days=${this.days}` : '');
 
@@ -481,44 +433,6 @@ document.addEventListener('alpine:init', () => {
                         },
                     })),
                 }],
-            };
-        },
-
-        _workflowHealthOptions(d) {
-            const isDark    = this._isDark();
-            const textColor = isDark ? '#94a3b8' : '#64748b';
-            const gridColor = isDark ? '#1e293b' : '#f1f5f9';
-
-            return {
-                backgroundColor: 'transparent',
-                grid: { top: 16, right: 16, bottom: 36, left: 40, containLabel: false },
-                tooltip: {
-                    trigger: 'axis', axisPointer: { type: 'shadow' },
-                    backgroundColor: isDark ? '#1e293b' : '#fff',
-                    borderColor:     isDark ? '#334155' : '#e2e8f0',
-                    textStyle:       { color: isDark ? '#e2e8f0' : '#1e293b', fontSize: 12 },
-                },
-                xAxis: {
-                    type: 'category', data: d.labels,
-                    axisLine:  { lineStyle: { color: gridColor } },
-                    axisTick:  { show: false },
-                    axisLabel: {
-                        color: textColor, fontSize: 11,
-                        interval: Math.floor(d.labels.length / 5),
-                    },
-                },
-                yAxis: {
-                    type: 'value', minInterval: 1,
-                    splitLine: { lineStyle: { color: gridColor, type: 'dashed' } },
-                    axisLabel: { color: textColor, fontSize: 11 },
-                    axisLine: { show: false }, axisTick: { show: false },
-                },
-                series: [
-                    { name: 'Thành công', type: 'bar', data: d.pass,    stack: 'wf', itemStyle: { color: '#22c55e', borderRadius: [0,0,0,0] }, barMaxWidth: 32 },
-                    { name: 'Chờ duyệt', type: 'bar', data: d.waiting, stack: 'wf', itemStyle: { color: '#3b82f6' }, barMaxWidth: 32 },
-                    { name: 'Halted',    type: 'bar', data: d.halted,  stack: 'wf', itemStyle: { color: '#f97316' }, barMaxWidth: 32 },
-                    { name: 'Lỗi',       type: 'bar', data: d.fail,    stack: 'wf', itemStyle: { color: '#ef4444', borderRadius: [3,3,0,0] }, barMaxWidth: 32 },
-                ],
             };
         },
 

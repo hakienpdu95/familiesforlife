@@ -98,7 +98,7 @@
                 <table class="table table-xs">
                     <thead class="text-xs uppercase tracking-wide text-base-content/40">
                         <tr>
-                            <th>Field</th>
+                            <th>Trường</th>
                             <th class="text-right">Chấp nhận</th>
                             <th class="text-right">Từ chối</th>
                             <th class="text-right">Tỷ lệ</th>
@@ -133,7 +133,7 @@
                             <th>Subject</th>
                             <th>Người chạy</th>
                             <th class="text-center">Trạng thái</th>
-                            <th class="text-right">Cost</th>
+                            <th class="text-right">Chi phí</th>
                             <th>Lúc</th>
                         </tr>
                     </thead>
@@ -149,7 +149,7 @@
                                 'failed' => 'badge-error',
                                 'running' => 'badge-warning',
                                 default => 'badge-ghost',
-                            } }}">{{ $run->status->value }}</span>
+                            } }}">{{ $run->status->label() }}</span>
                         </td>
                         <td class="text-right text-xs font-mono">{{ $run->cost_usd !== null ? '$' . number_format($run->cost_usd, 4) : '—' }}</td>
                         <td class="text-xs text-base-content/40">{{ $run->created_at->format('d/m H:i') }}</td>

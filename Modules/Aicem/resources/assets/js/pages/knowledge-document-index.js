@@ -56,22 +56,23 @@ const COLUMNS = [
         formatter(cell) { return '<span class="badge badge-sm badge-ghost font-mono">' + esc(cell.getValue()) + '</span>'; },
     },
     {
-        title: 'Subject', field: 'subject_type', minWidth: 140, headerSort: false,
+        title: 'Đối tượng', field: 'subject_type', minWidth: 140, headerSort: false,
         formatter(cell) { return esc(cell.getValue()) || 'DNA chung'; },
     },
     {
-        title: 'Scope', field: 'scope_count', minWidth: 170, headerSort: false,
+        title: 'Phạm vi', field: 'scope_count', minWidth: 170, headerSort: false,
         formatter(cell) {
             const d = cell.getRow().getData();
             if (d.scope_count == null) return '<span class="text-base-content/30">Mọi bài/sản phẩm</span>';
-            return '<span class="badge badge-sm badge-info">' + d.scope_count + ' điều kiện (' + esc(d.scope_match) + ')</span>';
+            const matchLabel = { any: 'khớp 1', all: 'khớp mọi' }[d.scope_match] ?? esc(d.scope_match);
+            return '<span class="badge badge-sm badge-info">' + d.scope_count + ' điều kiện (' + matchLabel + ')</span>';
         },
     },
     {
-        title: 'Priority', field: 'priority', width: 100, hozAlign: 'center', sorter: 'number',
+        title: 'Độ ưu tiên', field: 'priority', width: 100, hozAlign: 'center', sorter: 'number',
     },
     {
-        title: 'Version', field: 'current_version', width: 100, hozAlign: 'center', sorter: 'number',
+        title: 'Phiên bản', field: 'current_version', width: 100, hozAlign: 'center', sorter: 'number',
         formatter(cell) { return 'v' + cell.getValue(); },
     },
     {

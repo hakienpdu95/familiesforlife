@@ -10,8 +10,6 @@ use Illuminate\Support\Collection;
 use Modules\ActivityLog\Models\ActivityLog;
 use Modules\Lead\Enums\LeadStatus;
 use Modules\Lead\Models\Lead;
-use Modules\WorkflowAutomation\Models\WorkflowExecution;
-use Modules\WorkflowAutomation\Models\WorkflowUserTask;
 
 class DashboardService
 {
@@ -34,24 +32,10 @@ class DashboardService
     {
         $cards = [];
 
-        // ── Always: pending workflow approvals for me ─────────────────────
-        $myApprovals = $this->countMyPendingApprovals($user, $orgId);
-        $cards[] = [
-            'id'      => 'workflow_approvals',
-            'label'   => 'Chờ tôi phê duyệt',
-            'value'   => $myApprovals,
-            'icon'    => 'approval',
-            'color'   => $myApprovals > 0 ? 'warning' : 'ghost',
-            'urgent'  => $myApprovals > 0,
-            'link'    => route('workflow.tasks.my'),
-            'hint'    => 'Workflow user task đang chờ',
-        ];
-
         // ── Role-specific cards ───────────────────────────────────────────
         if ($this->isFull($role)) {
             // CEO / Admin / Ops / AI_OP
             $cards[] = $this->cardLeadsActive($orgId);
-            $cards[] = $this->cardWorkflowToday($orgId);
         } elseif ($role === RoleEnum::SALES->value) {
             $cards[] = $this->cardMyLeads($user, $orgId);
             $cards[] = $this->cardLeadsConvertedThisMonth($orgId);
@@ -130,84 +114,11 @@ class DashboardService
         ];
     }
 
-    private function cardWorkflowToday(?int $orgId): array
-    {
-        $count = WorkflowExecution::where('organization_id', $orgId)
-            ->whereDate('created_at', today())
-            ->count();
-
-        $failed = WorkflowExecution::where('organization_id', $orgId)
-            ->whereDate('created_at', today())
-            ->where('status', 3) // Fail
-            ->count();
-
-        return [
-            'id'     => 'workflow_today',
-            'label'  => 'Workflow chạy hôm nay',
-            'value'  => $count,
-            'icon'   => 'workflow',
-            'color'  => $failed > 0 ? 'warning' : 'secondary',
-            'urgent' => $failed > 0,
-            'link'   => route('workflows.index'),
-            'hint'   => $failed > 0 ? "{$failed} lỗi cần kiểm tra" : 'Tất cả thành công',
-        ];
-    }
-
-    // ── Helpers ───────────────────────────────────────────────────────────────
-
-    private function countMyPendingApprovals(User $user, ?int $orgId): int
-    {
-        $roles = $user->getRoleNames()->toArray();
-
-        return WorkflowUserTask::where('organization_id', $orgId)
-            ->where('status', WorkflowUserTask::STATUS_PENDING)
-            ->where(function ($q) use ($user, $roles) {
-                $q->where('assignee_id', $user->id)
-                  ->orWhereIn('assignee_role', $roles);
-            })
-            ->count();
-    }
-
     // ── Action Feed ───────────────────────────────────────────────────────────
 
     private function actionFeed(User $user, ?int $orgId): array
     {
-        $items = [];
-
-        // Pending workflow approvals
-        $roles    = $user->getRoleNames()->toArray();
-        $approvals = WorkflowUserTask::where('organization_id', $orgId)
-            ->where('status', WorkflowUserTask::STATUS_PENDING)
-            ->where(function ($q) use ($user, $roles) {
-                $q->where('assignee_id', $user->id)
-                  ->orWhereIn('assignee_role', $roles);
-            })
-            ->with('execution.workflow')
-            ->orderBy('due_at')
-            ->orderByDesc('created_at')
-            ->limit(5)
-            ->get();
-
-        foreach ($approvals as $task) {
-            $dueAt   = $task->due_at ? Carbon::parse($task->due_at) : null;
-            $overdue = $dueAt && $dueAt->isPast();
-            $items[] = [
-                'type'       => 'workflow_approval',
-                'title'      => $task->title,
-                'subtitle'   => 'Workflow: ' . ($task->execution->workflow->name ?? '—'),
-                'urgent'     => $overdue,
-                'badge'      => $overdue ? 'Quá hạn' : ($dueAt ? $dueAt->diffForHumans() : 'Đang chờ'),
-                'badge_color'=> $overdue ? 'error' : 'warning',
-                'link'       => route('workflow.tasks.show', $task->task_token),
-                'created_at' => $task->created_at,
-            ];
-        }
-
-        // Sort: urgent first, then by created_at
-        usort($items, fn ($a, $b) => $b['urgent'] <=> $a['urgent']
-            ?: $a['created_at']->timestamp <=> $b['created_at']->timestamp);
-
-        return array_slice($items, 0, 8);
+        return [];
     }
 
     // ── Recent Activity ───────────────────────────────────────────────────────

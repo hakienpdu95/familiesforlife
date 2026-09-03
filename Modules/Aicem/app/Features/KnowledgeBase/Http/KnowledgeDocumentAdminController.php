@@ -123,7 +123,7 @@ class KnowledgeDocumentAdminController extends Controller
     private function taxonomySchema(): array
     {
         return collect(config('aicem_subjects'))
-            ->except('knowledge_slot_definitions')
+            ->except(['knowledge_slot_definitions', 'knowledge_tier_labels'])
             ->map(fn (array $cfg): array => $cfg['taxonomy_keys'] ?? [])
             ->all();
     }
@@ -132,7 +132,7 @@ class KnowledgeDocumentAdminController extends Controller
     private function subjectTypeOptions(): array
     {
         return collect(config('aicem_subjects'))
-            ->except('knowledge_slot_definitions')
+            ->except(['knowledge_slot_definitions', 'knowledge_tier_labels'])
             ->map(fn ($cfg, $key) => ['key' => $key, 'label' => $cfg['label']])
             ->values()
             ->all();
@@ -140,7 +140,7 @@ class KnowledgeDocumentAdminController extends Controller
 
     private function validated(Request $request, ?AicemKnowledgeDocument $document = null): array
     {
-        $subjectTypeKeys = collect(config('aicem_subjects'))->except('knowledge_slot_definitions')->keys()->all();
+        $subjectTypeKeys = collect(config('aicem_subjects'))->except(['knowledge_slot_definitions', 'knowledge_tier_labels'])->keys()->all();
 
         $rules = [
             'title'       => ['required', 'string', 'max:255'],

@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', 'AICEM — Knowledge Base')
+@section('title', 'AICEM — Kho tri thức')
 
 @section('content')
 <div x-data="knowledgeDocumentListPage({{ Js::from([
@@ -28,7 +28,7 @@
 
     <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div>
-            <h1 class="text-2xl font-bold text-base-content">Knowledge Base</h1>
+            <h1 class="text-2xl font-bold text-base-content">Kho tri thức</h1>
             <p class="text-sm text-base-content/50 mt-0.5">
                 Bộ DNA nội dung (giọng văn, đối tượng đọc, quy chuẩn SEO...) dùng làm ngữ cảnh cho AICEM khi soạn bài/sản phẩm
             </p>
@@ -76,9 +76,9 @@
                 </div>
 
                 <div class="form-control w-56">
-                    <label class="label py-0.5"><span class="label-text text-xs font-medium">Subject</span></label>
+                    <label class="label py-0.5"><span class="label-text text-xs font-medium">Đối tượng</span></label>
                     <select x-model="filters.subject_type" @change="onFilterChange()" class="select select-sm select-bordered w-full">
-                        <option value="">— Mọi subject —</option>
+                        <option value="">— Mọi đối tượng —</option>
                         @foreach($subjectTypes as $st)
                         <option value="{{ $st['key'] }}">{{ $st['label'] }}</option>
                         @endforeach

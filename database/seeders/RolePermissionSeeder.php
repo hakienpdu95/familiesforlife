@@ -82,10 +82,6 @@ class RolePermissionSeeder extends Seeder
 
                 P::AUDIT_VIEW->value,
 
-                // Assessment: view + results
-                P::ASSESSMENT_VIEW->value,
-                P::ASSESSMENT_RESULTS->value,
-
                 // Pension Calculator: view only (spec/bhxh/PensionCalculator_Technical_Specification.md §9.3)
                 P::PENSION_CALCULATOR_VIEW->value,
             ],
@@ -129,10 +125,6 @@ class RolePermissionSeeder extends Seeder
                 P::WORKFLOW_EDIT->value,
 
                 P::REPORTS_OPS->value,
-
-                // Assessment: view + results
-                P::ASSESSMENT_VIEW->value,
-                P::ASSESSMENT_RESULTS->value,
             ],
 
             // ─────────────────────────────────────────────────────────
@@ -173,12 +165,6 @@ class RolePermissionSeeder extends Seeder
 
                 P::WORKFLOW_MONITOR->value,
                 P::WORKFLOW_AI_CONFIG->value,
-
-                // Assessment: full (config + reprocess)
-                P::ASSESSMENT_VIEW->value,
-                P::ASSESSMENT_CONFIG->value,
-                P::ASSESSMENT_RESULTS->value,
-                P::ASSESSMENT_REPROCESS->value,
             ],
 
             // ─────────────────────────────────────────────────────────
@@ -211,12 +197,6 @@ class RolePermissionSeeder extends Seeder
                 P::INTEGRATION_MANAGE->value,
                 P::AUDIT_VIEW->value,
                 P::SYSTEM_CONFIG->value,
-
-                // Assessment: full
-                P::ASSESSMENT_VIEW->value,
-                P::ASSESSMENT_CONFIG->value,
-                P::ASSESSMENT_RESULTS->value,
-                P::ASSESSMENT_REPROCESS->value,
 
                 // Menu: Full manage (điều hướng header/footer)
                 P::MENU_MANAGE->value,
