@@ -32,13 +32,19 @@ return new class extends Migration {
             if (!Schema::hasColumn('content_outlines', 'review_prompt')) {
                 $table->longText('review_prompt')->nullable()->after('drafted_article');
             }
+            if (!Schema::hasColumn('content_outlines', 'job_to_be_done')) {
+                $table->string('job_to_be_done', 300)->nullable()->after('review_prompt');
+            }
+            if (!Schema::hasColumn('content_outlines', 'reader_emotional_state')) {
+                $table->string('reader_emotional_state', 300)->nullable()->after('job_to_be_done');
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('content_outlines', function (Blueprint $table) {
-            $cols = array_filter(['outline_depth', 'content_role', 'approved_outline', 'article_draft_prompt', 'cta_url', 'drafted_article', 'review_prompt'], fn($c) => Schema::hasColumn('content_outlines', $c));
+            $cols = array_filter(['outline_depth', 'content_role', 'approved_outline', 'article_draft_prompt', 'cta_url', 'drafted_article', 'review_prompt', 'job_to_be_done', 'reader_emotional_state'], fn($c) => Schema::hasColumn('content_outlines', $c));
             if (!empty($cols)) $table->dropColumn(array_values($cols));
         });
     }

@@ -42,10 +42,7 @@ const JS_OUTPUT = {
   'organization':         'assets/modules/organization.[hash].js',
   'lead-pipeline-stage':  'assets/modules/lead-pipeline-stage.[hash].js',
   'lead-source':          'assets/modules/lead-source.[hash].js',
-  'survey':               'assets/modules/survey.[hash].js',
-  'assessment':           'assets/modules/assessment.[hash].js',
   'activity-log':           'assets/modules/activity-log.[hash].js',
-  'workflow-automation':    'assets/modules/workflow-automation.[hash].js',
   'subscription':           'assets/modules/subscription.[hash].js',
   'report':                 'assets/modules/report.[hash].js',
   'post':                   'assets/modules/post.[hash].js',
@@ -79,10 +76,7 @@ const CSS_OUTPUT = {
   'organization.css':         'assets/modules/organization.[hash].css',
   'lead-pipeline-stage.css':  'assets/modules/lead-pipeline-stage.[hash].css',
   'lead-source.css':          'assets/modules/lead-source.[hash].css',
-  'survey.css':               'assets/modules/survey.[hash].css',
-  'assessment.css':           'assets/modules/assessment.[hash].css',
   'activity-log.css':           'assets/modules/activity-log.[hash].css',
-  'workflow-automation.css':    'assets/modules/workflow-automation.[hash].css',
   'subscription.css':           'assets/modules/subscription.[hash].css',
   'ai-copilot.css':             'assets/modules/ai-copilot.[hash].css',
   'report.css':                 'assets/modules/report.[hash].css',
@@ -116,18 +110,9 @@ const MODULE_ENTRIES = [
   // LeadSource
   'Modules/LeadSource/resources/assets/sass/lead-source.scss',
   'Modules/LeadSource/resources/assets/js/lead-source.js',
-  // Survey
-  'Modules/Survey/resources/assets/sass/survey.scss',
-  'Modules/Survey/resources/assets/js/survey.js',
-  // Assessment
-  'Modules/Assessment/resources/assets/sass/assessment.scss',
-  'Modules/Assessment/resources/assets/js/assessment.js',
   // ActivityLog
   'Modules/ActivityLog/resources/assets/sass/activity-log.scss',
   'Modules/ActivityLog/resources/assets/js/activity-log.js',
-  // WorkflowAutomation
-  'Modules/WorkflowAutomation/resources/assets/sass/workflow-automation.scss',
-  'Modules/WorkflowAutomation/resources/assets/js/workflow-automation.js',
   // Subscription
   'Modules/Subscription/resources/assets/sass/subscription.scss',
   'Modules/Subscription/resources/assets/js/subscription.js',

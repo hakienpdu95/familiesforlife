@@ -14,13 +14,19 @@ return new class extends Migration {
             if (!Schema::hasColumn('content_foundations', 'audience_behavior')) {
                 $table->text('audience_behavior')->nullable();
             }
+            if (!Schema::hasColumn('content_foundations', 'product_service_docs')) {
+                $table->text('product_service_docs')->nullable()->after('audience_behavior');
+            }
+            if (!Schema::hasColumn('content_foundations', 'best_example_content')) {
+                $table->text('best_example_content')->nullable()->after('product_service_docs');
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('content_foundations', function (Blueprint $table) {
-            $cols = array_filter(['audience_behavior'], fn($c) => Schema::hasColumn('content_foundations', $c));
+            $cols = array_filter(['audience_behavior', 'product_service_docs', 'best_example_content'], fn($c) => Schema::hasColumn('content_foundations', $c));
             if (!empty($cols)) $table->dropColumn(array_values($cols));
         });
     }

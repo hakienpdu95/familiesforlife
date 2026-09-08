@@ -2667,5 +2667,31 @@
         "__index///unique///__///__///__///entity_type_id,criterion_id|uq_entity_type_criterion///__",
         "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
         "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật"
+    ],
+    [
+        "topic_cluster_results///__///__///",
+        "generated_prompt_id///unsignedBigInteger///__///NOT_NULL///__///->constrained('generated_prompts')->onDelete('cascade')///__",
+        "ai_result_raw///longText///__///NOT_NULL///__///__///__",
+        "structured///json///__///NOT_NULL///__///__///__",
+        "created_by///unsignedBigInteger///__///_NULL///NULL///->constrained('users')->onDelete('set null')///__",
+        "updated_by///unsignedBigInteger///__///_NULL///NULL///->constrained('users')->onDelete('set null')///__",
+        "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
+        "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật"
+    ],
+    [
+        "video_series_prompts///__///__///",
+        "post_category_id///unsignedBigInteger///__///_NULL///NULL///->constrained('post_categories')->onDelete('set null')///__",
+        "label///string///150///NOT_NULL///__///__///__",
+        "series_topic///string///255///NOT_NULL///__///__///__",
+        "pov///string///500///_NULL///NULL///__///__",
+        "business_goal///text///__///_NULL///NULL///__///__",
+        "episode_count///unsignedTinyInteger///__///NOT_NULL///5///__///__",
+        "platform///string///20///NOT_NULL///'short_form'///__///__",
+        "rendered_prompt///text///__///NOT_NULL///__///__///__",
+        "created_by///unsignedBigInteger///__///_NULL///NULL///->constrained('users')->onDelete('set null')///__",
+        "updated_by///unsignedBigInteger///__///_NULL///NULL///->constrained('users')->onDelete('set null')///__",
+        "__index///index///__///__///__///post_category_id///__",
+        "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
+        "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật"
     ]
 ]

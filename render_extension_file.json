@@ -386,7 +386,9 @@
         "article_draft_prompt///longText///__///_NULL///NULL///__///__",
         "cta_url///string///500///_NULL///NULL///__///__",
         "drafted_article///longText///__///_NULL///NULL///__///__",
-        "review_prompt///longText///__///_NULL///NULL///__///__"
+        "review_prompt///longText///__///_NULL///NULL///__///__",
+        "job_to_be_done///string///300///_NULL///NULL///__///__",
+        "reader_emotional_state///string///300///_NULL///NULL///__///__"
     ],
     [
         "generated_prompts///add///__///",
