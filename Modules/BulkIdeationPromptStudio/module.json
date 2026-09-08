@@ -1,0 +1,11 @@
+{
+    "name": "BulkIdeationPromptStudio",
+    "alias": "bulk-ideation-prompt-studio",
+    "description": "Ghép prompt \"nhào nặn\" ý tưởng bài viết từ 1 mớ từ khóa/câu hỏi/ý tưởng vụn vặt biên tập viên dán rời rạc (copy nhặt trên mạng, group, v.v.) — kết hợp ngữ cảnh ICP/brand voice/sản phẩm từ ContentFoundation để ra 5 Content Ideas sắc bén. Dựa trên spec/BulkIdeationPromptStudio.md. KHÔNG gọi AI Provider trong app — chỉ ghép + lưu lại prompt, người dùng tự copy sang ChatGPT/Claude, cùng nguyên tắc ContentOutlines/PromptFrameworkStudio/VideoSeriesPromptStudio.",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\BulkIdeationPromptStudio\\Providers\\BulkIdeationPromptStudioServiceProvider"
+    ],
+    "files": []
+}

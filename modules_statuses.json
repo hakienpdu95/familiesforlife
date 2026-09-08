@@ -34,5 +34,6 @@
     "AIVideoStudioTemplate": true,
     "Heritage": true,
     "EntityComparison": true,
-    "VideoSeriesPromptStudio": true
+    "VideoSeriesPromptStudio": true,
+    "BulkIdeationPromptStudio": true
 }

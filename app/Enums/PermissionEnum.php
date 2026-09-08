@@ -258,4 +258,12 @@ enum PermissionEnum: string
     // (VideoSeriesPromptStudioPermissionSeeder), KHÔNG qua config/permissions.php (Lớp B) — cùng
     // nguyên tắc CONTENT_OUTLINES_USE/PROMPT_FRAMEWORK_STUDIO_USE.
     case VIDEO_SERIES_PROMPT_STUDIO_USE = 'video_series_prompt_studio.use';
+
+    // ══ BULK IDEATION PROMPT STUDIO (spec/BulkIdeationPromptStudio.md — ghép prompt "nhào nặn" ý
+    // tưởng bài viết từ 1 mớ từ khóa/câu hỏi/ý tưởng vụn vặt dán rời rạc — KHÔNG gọi AI Provider
+    // trong app, người dùng tự copy-paste sang AI ngoài) ═══
+    // gán cho platform_content_editor/platform_content_head/platform_section_editor
+    // (BulkIdeationPromptStudioPermissionSeeder), KHÔNG qua config/permissions.php (Lớp B) — cùng
+    // nguyên tắc CONTENT_OUTLINES_USE/PROMPT_FRAMEWORK_STUDIO_USE/VIDEO_SERIES_PROMPT_STUDIO_USE.
+    case BULK_IDEATION_PROMPT_STUDIO_USE = 'bulk_ideation_prompt_studio.use';
 }

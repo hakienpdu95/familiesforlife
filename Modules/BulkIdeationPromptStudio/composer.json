@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/bulk-ideation-prompt-studio",
+    "description": "",
+    "authors": [
+        {
+            "name": "KienDH",
+            "email": "bonhuyn@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\BulkIdeationPromptStudio\\": "app/",
+            "Modules\\BulkIdeationPromptStudio\\Database\\Factories\\": "database/factories/",
+            "Modules\\BulkIdeationPromptStudio\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\BulkIdeationPromptStudio\\Tests\\": "tests/"
+        }
+    }
+}

@@ -55,6 +55,7 @@ const JS_OUTPUT = {
   'content-calendar':       'assets/modules/content-calendar.[hash].js',
   'playlist':               'assets/modules/playlist.[hash].js',
   'entitycomparison':       'assets/modules/entitycomparison.[hash].js',
+  'bulk-ideation-prompt-studio': 'assets/modules/bulk-ideation-prompt-studio.[hash].js',
 };
 
 /** CSS asset name → output path.
@@ -87,6 +88,7 @@ const CSS_OUTPUT = {
   'ocop.css':                   'assets/modules/ocop.[hash].css',
   'realestate.css':             'assets/modules/realestate.[hash].css',
   'content-calendar.css':       'assets/modules/content-calendar.[hash].css',
+  'bulk-ideation-prompt-studio.css': 'assets/modules/bulk-ideation-prompt-studio.[hash].css',
 };
 
 // ─── Module input entries ─────────────────────────────────────────────
@@ -168,6 +170,9 @@ const MODULE_ENTRIES = [
   'Modules/AIVideoStudioTemplate/resources/assets/js/aivideostudiotemplate.js',
   // EntityComparison
   'Modules/EntityComparison/resources/assets/js/entitycomparison.js',
+  // BulkIdeationPromptStudio
+  'Modules/BulkIdeationPromptStudio/resources/assets/sass/bulk-ideation-prompt-studio.scss',
+  'Modules/BulkIdeationPromptStudio/resources/assets/js/bulk-ideation-prompt-studio.js',
 ];
 
 // ─────────────────────────────────────────────────────────────────────
