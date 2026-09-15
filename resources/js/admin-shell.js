@@ -5,14 +5,12 @@
  *  · Sidebar collapse/expand (desktop)
  *  · Sidebar drawer (mobile)
  *  · Dropdown menus (notifications, user)
- *  · Theme toggle (light / dark)
  *  · Keyboard shortcut ⌘K / Ctrl+K → focus search
  *  · Sidebar accordion (đóng menu khác khi mở)
  * ─────────────────────────────────────────────────────────────────────
  */
 
 const SK = 'ap_sidebar_collapsed'; // localStorage key — sidebar state
-const TK = 'ap_theme';             // localStorage key — theme
 
 /* ────────────────────────────────────────────────────────────────────
    SIDEBAR
@@ -119,54 +117,6 @@ function initDropdowns() {
 }
 
 /* ────────────────────────────────────────────────────────────────────
-   THEME
-   ──────────────────────────────────────────────────────────────────── */
-
-function initTheme() {
-    const themeBtn = document.getElementById('themeBtn');
-    const iconSun  = document.getElementById('iconSun');
-    const iconMoon = document.getElementById('iconMoon');
-    const sidebar  = document.getElementById('sidebar');
-    const topbar   = document.querySelector('.topbar');
-    const footer   = document.querySelector('.page-footer');
-
-    function applyTheme(dark) {
-        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-
-        const surf = dark ? '#1e293b' : '#ffffff';
-        const bord = dark ? '#334155' : '#e2e8f0';
-        const bg   = dark ? '#0f172a' : '#f1f5f9';
-
-        document.body.style.background = bg;
-
-        if (sidebar) {
-            sidebar.style.background      = surf;
-            sidebar.style.borderRightColor = bord;
-        }
-        if (topbar) {
-            topbar.style.background          = surf;
-            topbar.style.borderBottomColor   = bord;
-        }
-        if (footer) {
-            footer.style.background        = surf;
-            footer.style.borderTopColor    = bord;
-        }
-
-        if (iconSun)  iconSun.style.display  = dark ? 'none'  : 'block';
-        if (iconMoon) iconMoon.style.display = dark ? 'block' : 'none';
-
-        localStorage.setItem(TK, dark ? 'dark' : 'light');
-    }
-
-    // Khôi phục theme đã lưu
-    applyTheme(localStorage.getItem(TK) === 'dark');
-
-    themeBtn?.addEventListener('click', () =>
-        applyTheme(localStorage.getItem(TK) !== 'dark')
-    );
-}
-
-/* ────────────────────────────────────────────────────────────────────
    KEYBOARD SHORTCUTS
    ──────────────────────────────────────────────────────────────────── */
 
@@ -187,6 +137,5 @@ function initShortcuts() {
 export function initAdminShell() {
     initSidebar();
     initDropdowns();
-    initTheme();
     initShortcuts();
 }

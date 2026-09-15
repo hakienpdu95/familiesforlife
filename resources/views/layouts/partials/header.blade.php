@@ -19,11 +19,6 @@
 
     <div class="topbar-right">
 
-        <button class="icon-btn" id="themeBtn" title="Đổi giao diện">
-            <svg id="iconSun" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M18.66 5.34l1.41-1.41"/></svg>
-            <svg id="iconMoon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" style="display:none"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-        </button>
-
         {{-- Bell Dropdown — Alpine component --}}
         <div x-data="notifBell()" @click.outside="open = false" class="dd-wrap">
 
