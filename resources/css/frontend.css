@@ -396,30 +396,27 @@
 }
 
 .site-header__content .header-logo .logo.first .brand-name .br-1 {
-    color: #003366;
+    color: #4CAF50;
 }
 
 .site-header__content .header-logo .logo.first .brand-name .br-2 {
-    color: #4CAF50;
+    color: #ED1C24;
 }
 
 .site-header__content .header-logo .logo.first .brand-name .br-3 {
     top: 9px;
     right: 0px;
-    color: #003366;
+    color: #4CAF50;
     font-size: 0.6em;
 }
 
 .site-header__content .header-logo .logo.second .brand-name > span {
-    margin-left: 8px;
-    font-size: 12px;
+    font-family: Merriweather;
+    font-size: 10px;
     font-weight: 400;
     opacity: 0.6;
 }
 
-.site-header__content .header-logo .logo.third.slg-actd {
-    top: 1px;
-}
 
 .site-header__content .header-logo .logo.third.slg-actd > span.slogan-actd {
     font-size: 15px;
