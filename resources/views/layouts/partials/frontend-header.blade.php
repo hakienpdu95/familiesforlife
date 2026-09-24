@@ -1,13 +1,3 @@
-{{-- site-header — cấu trúc DOM + CSS copy 1:1 từ spec/header.html + spec/main.css (site tham
-     khảo). Nội dung/thương hiệu bên trong là của familiesforlife: $menuTree (Modules/Menu, view
-     composer ở MenuServiceProvider) thay cho danh mục/link của site tham khảo — xem
-     Modules\Menu\Database\Seeders\MenuDatabaseSeeder.
-     3 phần spec KHÔNG cung cấp (chỉ HTML+CSS tĩnh, không có JS/font gốc):
-       - glyph icon-* thật (spec chỉ @import 1 file fontello.css không kèm theo) → CSS mask tự vẽ.
-       - JS gắn .is-active/.is-open/.is-pinned khi bấm nút/cuộn trang → thay bằng Alpine (state
-         dùng chung frontendNav, resources/js/frontend.js — initHeaderPin() port lại 1:1
-         windowScroll() ở spec/app.js) — phần CSS phản ứng các class này đã copy y hệt
-         spec/main.css trong resources/css/frontend.css. --}}
 @php($brand = config('app.site_name'))
 <header class="site-header" id="site-header"
         :class="pinned ? 'is-pinned' : ''"
@@ -47,20 +37,33 @@
 
         <div class="site-header__content">
             <div class="row">
-                <div class="col-12 col-lg-3">
-                    <h3 class="logo">
+                <div class="col-12 col-lg-4">
+                    <div class="header-logo">
                         <a href="{{ route('post.public.home') }}" title="{{ $brand }}">
-                            <span class="logo__mark">{{ \Illuminate\Support\Str::of($brand)->substr(0, 2)->upper() }}</span>
-                            <span class="logo__text">{{ \Illuminate\Support\Str::upper($brand) }}</span>
+                            <img src="{{ asset('images/logo.png') }}" alt="{{ $brand }}" class="img-fluid" width="100" height="100" />
+                            <div class="inline-flex flex-col relative" style="left: -12px;">
+                                <p class="logo first relative">
+                                    <strong class="brand-name relative">
+                                        <span class="br-1">Vì</span>
+                                        <span class="br-2">Gia đình</span>
+                                        <span class="br-3 absolute">.vn</span>
+                                    </strong>
+                                </p>
+                                <p class="logo second relative">
+                                    <strong class="brand-name p-0">
+                                        <span class="br-">Trang tin tức tổng hợp</span>
+                                    </strong>
+                                </p>
+                                <p class="logo third slg-actd relative">
+                                    <span class="slogan-actd">Hạnh phúc cho mọi gia đình...</span>
+                                </p>
+                            </div>
                         </a>
-                    </h3>
+                    </div>
                 </div>
 
-                <div class="col-12 col-lg-9">
+                <div class="col-12 col-lg-8">
                     <div class="text-right m-none">
-                        {{-- spec/Banner_Management_Technical_Specification.md §7.2 — ô quảng cáo cạnh
-                             logo (header_ad), quản lý qua dashboard/banners. Không có ngữ cảnh category
-                             ở đây (§2) nên không truyền :context — luôn chỉ nhận banner "Toàn site". --}}
                         <x-frontend.banner-slot placement="header_ad" />
                     </div>
                 </div>
@@ -109,11 +112,6 @@
                             >
                                 @if($child->icon)<i class="{{ $child->icon }} mr-1"></i>@endif{{ $child->label }}
                             </a>
-
-                            {{-- Cấp 3 (VD "Babies"/"Toddler & Kids" > giai đoạn tuổi > mục lá, xem
-                                 MenuDatabaseSeeder::seedNestedUrlGroup()) — hiện flyout sang phải
-                                 khi hover đúng <li> giai đoạn tuổi này (xem .nav-sub .nav-sub trong
-                                 frontend.css), không phải khi hover cả nhóm cấp 1. --}}
                             @if($hasGrandchildren)
                             <ul class="nav-sub">
                                 @foreach($child->children as $grandchild)

@@ -1,5 +1,4 @@
 @import "tailwindcss";
-
 /**
  * resources/css/frontend.css
  * ────────────────────────────────────────────────────────────────────
@@ -20,16 +19,13 @@
     logs:   false;
 }
 
-/* Theme "portal" — bảng màu lấy từ spec/honeykids/honeykids-home.html,
- * ánh xạ vào token DaisyUI 5 để mọi component (btn, badge, card...) tự
- * nhất quán theo màu thương hiệu portal thay vì phải tô tay từng nơi. */
 @plugin "daisyui/theme" {
     name: "portal";
     default: true;
     prefersdark: false;
     color-scheme: light;
 
-    --color-base-100: #fbfaf7;
+    /*--color-base-100: #fbfaf7;*/
     --color-base-200: #f3f1ea;
     --color-base-300: #e7e3d8;
     --color-base-content: #292524;
@@ -55,18 +51,13 @@
     --radius-field: 0.5rem;
     --radius-selector: 1rem;
 
-    /* BUG phát hiện 2026-08-05: theme tuỳ biến (không phải "light"/"dark" có sẵn của daisyUI)
-     * không tự kế thừa --border/--depth/--noise từ theme mặc định — thiếu 3 biến này khiến
-     * `.input`/`.select`/`.checkbox`... (mọi component daisyUI dùng var(--border) cho viền)
-     * bị border-width fallback về 0 (Tailwind preflight reset), tức MẤT VIỀN khi không focus,
-     * trên toàn bộ frontend công khai dùng theme "portal". Giá trị dưới khớp mặc định daisyUI. */
     --border: 1px;
     --depth: 1;
     --noise: 0;
 }
 
 @theme {
-    --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-sans: 'Roboto', ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 [x-cloak] { display: none !important; }
@@ -383,23 +374,66 @@
 
 .site-header__content::after { display: block; content: ""; clear: both; }
 
-.site-header__content .logo {
-    height: 3.6rem;
+.site-header__content .header-logo {
     margin: 0 auto;
-    font-size: 0;
-    text-align: center;
 }
 
-.site-header__content .logo .img-fluid {
+.site-header__content .header-logo .img-fluid {
     height: 100%;
     width: auto;
     object-fit: scale-down;
 }
 
+.site-header__content .header-logo .logo.first {
+    font-family: Merriweather;
+    bottom: -8px;
+}
+
+.site-header__content .header-logo .logo.first .brand-name {
+    font-size: 23px;
+    padding-top: 20px;
+    font-weight: bold;
+}
+
+.site-header__content .header-logo .logo.first .brand-name .br-1 {
+    color: #003366;
+}
+
+.site-header__content .header-logo .logo.first .brand-name .br-2 {
+    color: #4CAF50;
+}
+
+.site-header__content .header-logo .logo.first .brand-name .br-3 {
+    top: 9px;
+    right: 0px;
+    color: #003366;
+    font-size: 0.6em;
+}
+
+.site-header__content .header-logo .logo.second .brand-name > span {
+    margin-left: 8px;
+    font-size: 12px;
+    font-weight: 400;
+    opacity: 0.6;
+}
+
+.site-header__content .header-logo .logo.third.slg-actd {
+    top: 1px;
+}
+
+.site-header__content .header-logo .logo.third.slg-actd > span.slogan-actd {
+    font-size: 15px;
+    float: left;
+    text-transform: none;
+    font-style: italic;
+    font-weight: normal;
+    color: red;
+}
+
 @media (min-width: 594px) {
-    .site-header__content .logo { height: 132px; padding: 1rem 0; }
+    .site-header__content .header-logo { height: 132px; padding: 1rem 0; }
     .site-header__content { position: relative; }
-    .site-header__content .logo { text-align: center; }
+    .site-header__content .header-logo { text-align: left; }
     .site-header__content .date,
     .site-header__content .links { display: block; }
 }
@@ -533,7 +567,8 @@
 .site-header .nav-link {
     padding: .75rem 1rem;
     display: block;
-    transition: .2s all ease-in-out;
+    transition: background-color .2s ease-in-out, color .2s ease-in-out;
+    font-family: 'Merriweather';
 }
 
 .site-header .nav-sub {
@@ -787,8 +822,8 @@
  * (spec/header.html trỏ tới logo của site tham khảo — KHÔNG dùng vì không phải thương hiệu
  * familiesforlife, xem frontend-header.blade.php). Không có ảnh logo thật để thay thế nên
  * dùng logo chữ (mark tròn + tên thương hiệu) — cần font-size riêng vì kế thừa font-size:0
- * từ .logo sẽ làm chữ biến mất hoàn toàn. ─────────────────────────────────────────────── */
-.site-header .logo a {
+ * từ .header-logo sẽ làm chữ biến mất hoàn toàn. ─────────────────────────────────────────────── */
+.site-header .header-logo a {
     display: inline-flex;
     align-items: center;
     gap: .5rem;
@@ -1100,3 +1135,5 @@
     background: linear-gradient(to right, transparent, var(--color-error));
     pointer-events: none;
 }
+
+html { visibility: visible; }
