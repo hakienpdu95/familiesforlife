@@ -30,8 +30,9 @@ class PublicEventController extends Controller
     public function index(Request $request, ListPublishedEventsHandler $handler): View
     {
         $search = $request->string('q')->trim()->value() ?: null;
+        $period = in_array($request->query('thoi-gian'), ['tuan-nay', 'thang-nay'], true) ? $request->query('thoi-gian') : null;
         $page = max(1, $request->integer('page', 1));
-        $isMagazine = ! $search && $page === 1;
+        $isMagazine = ! $search && ! $period && $page === 1;
 
         // "Tin to" (size=lg, cùng bố cục danh-muc/{slug} của Post) — ưu tiên sự kiện
         // is_featured=true (mới ĐANG SẮP DIỄN RA nhất trong số đó), fallback sự kiện sắp diễn
@@ -42,11 +43,12 @@ class PublicEventController extends Controller
             page: $page,
             search: $search,
             excludeEventIds: $lead ? [$lead->id] : [],
+            period: $period,
         ));
 
         $eventCategories = EventCategory::navTree();
 
-        return view('event::public.index', compact('events', 'eventCategories', 'search', 'lead'));
+        return view('event::public.index', compact('events', 'eventCategories', 'search', 'lead', 'period'));
     }
 
     public function category(Request $request, EventCategory $category, ListPublishedEventsHandler $handler): View

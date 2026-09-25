@@ -19,7 +19,7 @@ class Province extends Model
 
     protected function casts(): array
     {
-        return ['is_active' => 'boolean'];
+        return ['is_active' => 'boolean', 'is_featured' => 'boolean'];
     }
 
     public function region(): BelongsTo

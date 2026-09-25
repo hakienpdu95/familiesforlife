@@ -141,6 +141,8 @@ const MODULE_ENTRIES = [
   // Ocop
   'Modules/Ocop/resources/assets/sass/ocop.scss',
   'Modules/Ocop/resources/assets/js/ocop.js',
+  // ProvinceShowcase
+  'Modules/ProvinceShowcase/resources/assets/js/province-showcase.js',
   // Heritage
   'Modules/Heritage/resources/assets/sass/heritage.scss',
   'Modules/Heritage/resources/assets/js/heritage.js',

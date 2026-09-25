@@ -14,6 +14,8 @@ use Modules\Post\Features\PublicReading\Queries\LoadMoreArticlesQuery;
 use Modules\Post\Models\PostArticleTranslation;
 use Modules\Post\Models\PostBreakingNews;
 use Modules\Post\Models\PostCategory;
+use Modules\ProvinceShowcase\Features\PublicShowcase\Queries\ListFeaturedProvincesHandler;
+use Modules\ProvinceShowcase\Features\PublicShowcase\Queries\ListFeaturedProvincesQuery;
 
 /**
  * Cổng thông tin công khai chỉ phục vụ 1 locale (config('post.default_locale')) — không còn
@@ -23,7 +25,7 @@ use Modules\Post\Models\PostCategory;
  */
 class PublicCategoryController extends Controller
 {
-    public function index(Request $request, ListPublishedArticlesHandler $handler): View
+    public function index(Request $request, ListPublishedArticlesHandler $handler, ListFeaturedProvincesHandler $featuredProvincesHandler): View
     {
         $locale = config('post.default_locale');
         $search = $request->string('q')->trim()->value() ?: null;
@@ -65,13 +67,17 @@ class PublicCategoryController extends Controller
 
         $categories = PostCategory::navTree();
 
+        $featuredProvinces = $featuredProvincesHandler->handle(new ListFeaturedProvincesQuery(
+            limit: (int) config('provinceshowcase.featured_max', 5),
+        ));
+
         // spec/Breaking_News_Ticker_Technical_Specification.md §7.1 — loại trừ khi đang tìm
         // kiếm, cùng cách $featured bị đặt null khi $search (§0 "Vị trí hiển thị" — chỉ trang chủ).
         $breakingNews = $search ? collect() : PostBreakingNews::currentList(
             (int) config('post.breaking_news.max_ticker_items', 8)
         );
 
-        return view('post::public.home', compact('articles', 'categories', 'locale', 'featured', 'heroSide', 'upcomingEvents', 'search', 'breakingNews'));
+        return view('post::public.home', compact('articles', 'categories', 'locale', 'featured', 'heroSide', 'upcomingEvents', 'search', 'breakingNews', 'featuredProvinces'));
     }
 
     /**

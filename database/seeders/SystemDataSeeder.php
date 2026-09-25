@@ -27,7 +27,9 @@ use Modules\Post\Database\Seeders\PostDatabaseSeeder;
 use Modules\Post\Database\Seeders\PostDemoSeeder;
 use Modules\Post\Database\Seeders\ProvinceShowcaseCategorySeeder;
 use Modules\Product\Database\Seeders\ProductDatabaseSeeder;
+use Modules\ProvinceShowcase\Database\Seeders\ProvincePermissionSeeder;
 use Modules\ProvinceShowcase\Database\Seeders\ProvinceShowcaseDemoSeeder;
+use Modules\ProvinceShowcase\Database\Seeders\ProvinceFeaturedSeeder;
 use Modules\ProvinceShowcase\Database\Seeders\ProvinceSlugBackfillSeeder;
 use Modules\RealEstate\Database\Seeders\RealEstateListingDemoSeeder;
 use Modules\Subscription\Database\Seeders\SubscriptionDatabaseSeeder;
@@ -168,7 +170,9 @@ class SystemDataSeeder extends Seeder
             // Technical_Specification.md §8 ──
             ProvinceShowcaseCategorySeeder::class,
             OcopDatabaseSeeder::class,
+            ProvincePermissionSeeder::class,
             ProvinceShowcaseDemoSeeder::class,
+            ProvinceFeaturedSeeder::class,
 
             // ── 28c. Heritage demo: 5 di tích (Huế/Cà Mau) + cross-link tay tới Post/Event/Ocop
             // demo đã seed ở bước 28/28b — PHẢI đứng sau ProvinceShowcaseDemoSeeder (spec/

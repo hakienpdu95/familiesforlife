@@ -17,22 +17,10 @@ use Modules\Event\Features\PublicSubmission\Actions\SubmitEventAction;
 use Modules\Event\Features\PublicSubmission\Data\EventSubmitterData;
 use Modules\Event\Models\EventCategory;
 
-/**
- * spec/Event_Management_Technical_Specification.md §8 — form public không {locale}, cùng
- * quyết định đã áp dụng cho Post (bỏ hẳn locale khỏi URL công khai).
- */
 class EventSubmissionController extends Controller
 {
     public function create(ListEventCategoriesForAdminHandler $handler): View
     {
-        // navTree() (root+children) đủ cho <select> — dùng lại đúng query danh mục sẵn có
-        // (EventCategory::navTree()) thay vì ListEventCategoriesForAdminHandler (bảng phẳng
-        // kèm parent/đếm sự kiện, dư thông tin không cần cho form public).
-        //
-        // Đặt tên $eventCategories (KHÔNG phải $categories) — layouts.frontend include sẵn
-        // frontend-nav/frontend-footer/promo-bar, các partial đó đọc biến $categories mong đợi
-        // là CÂY DANH MỤC POST (điều hướng toàn site) — trùng tên sẽ khiến nav site hiển thị
-        // nhầm danh mục Event thay vì danh mục Post thật (bug đã gặp khi test).
         $eventCategories = EventCategory::navTree();
 
         return view('event::public.submit-form', compact('eventCategories'));

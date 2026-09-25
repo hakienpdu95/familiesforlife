@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\ProvinceShowcase\Features\ProvinceManagement\Http\ProvinceAdminController;
+use Modules\ProvinceShowcase\Features\ProvinceManagement\Http\ProvinceApiController;
 use Modules\ProvinceShowcase\Features\PublicShowcase\Http\ProvincePublicController;
 
 /**
@@ -21,3 +23,19 @@ Route::name('province.public.')->group(function (): void {
         ->whereIn('type', ['tinh', 'thanh-pho'])
         ->name('show');
 });
+
+Route::middleware(['auth', 'tenant'])
+    ->prefix('dashboard/provinces')
+    ->name('backend.provinces.')
+    ->group(function (): void {
+        Route::get('/', [ProvinceAdminController::class, 'index'])->name('index');
+        Route::get('{province}/edit', [ProvinceAdminController::class, 'edit'])->name('edit');
+        Route::put('{province}', [ProvinceAdminController::class, 'update'])->name('update');
+    });
+
+Route::middleware(['auth', 'tenant'])
+    ->prefix('backend/api/provinces')
+    ->name('backend.api.provinces.')
+    ->group(function (): void {
+        Route::get('items', [ProvinceApiController::class, 'index'])->name('items');
+    });

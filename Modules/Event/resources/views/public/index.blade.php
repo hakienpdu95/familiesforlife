@@ -1,6 +1,10 @@
 @extends('layouts.frontend')
 
-@section('title', $search ? "Tìm sự kiện: {$search}" : 'Sự Kiện')
+@php
+    $periodTitle = ['tuan-nay' => 'Sự Kiện Tuần Này', 'thang-nay' => 'Sự Kiện Tháng Này'][$period ?? ''] ?? null;
+@endphp
+
+@section('title', $search ? "Tìm sự kiện: {$search}" : ($periodTitle ?? 'Sự Kiện'))
 @section('meta_description', 'Sự kiện, hoạt động vui chơi và trải nghiệm cho gia đình — cập nhật liên tục.')
 
 @push('meta')
@@ -8,9 +12,7 @@
 @endpush
 
 @php
-    // "Tin to" + "Xem thêm sự kiện" (load-more) chỉ áp dụng trang 1/không tìm kiếm — cùng
-    // nguyên tắc danh-muc/{slug} của Post (public/category.blade.php).
-    $isMagazine    = ! $search && $events->currentPage() === 1;
+    $isMagazine    = ! $search && ! $period && $events->currentPage() === 1;
     $collection    = $events->getCollection();
     $shownEventIds = $isMagazine
         ? $collection->pluck('id')->when($lead, fn ($ids) => $ids->push($lead->id))->values()
@@ -34,12 +36,13 @@
     <div class="py-10">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
             <h1 class="text-2xl font-bold text-base-content">
-                {{ $search ? "Kết quả tìm kiếm: “{$search}”" : 'Sự Kiện Sắp Diễn Ra' }}
+                {{ $search ? "Kết quả tìm kiếm: “{$search}”" : ($periodTitle ?? 'Sự Kiện Sắp Diễn Ra') }}
             </h1>
             <a href="{{ route('event.public.submit.form') }}" class="btn btn-sm border-none bg-secondary text-white hover:bg-secondary/90">Gửi Sự Kiện Của Bạn</a>
         </div>
 
-        <form method="GET" class="mb-6">
+        <form method="GET" class="mb-6" id="tim-su-kien">
+            @if($period)<input type="hidden" name="thoi-gian" value="{{ $period }}">@endif
             <input type="text" name="q" value="{{ $search }}" placeholder="Tìm sự kiện..."
                    class="input input-bordered input-sm w-full sm:w-72">
         </form>

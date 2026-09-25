@@ -32,6 +32,7 @@ export default defineConfig(({ mode }) => {
 
       laravel({
         input: [
+          'resources/css/icon.css',
           'resources/css/frontend.css',
           'resources/js/frontend.js',
 
@@ -62,6 +63,7 @@ export default defineConfig(({ mode }) => {
           'resources/views/layouts/frontend.blade.php',
           'resources/views/layouts/partials/frontend-*.blade.php',
           'resources/views/components/frontend/**/*.blade.php',
+          'resources/css/icon.css',
           'resources/css/frontend.css',
           'resources/js/frontend.js',
           'resources/css/anland.css',

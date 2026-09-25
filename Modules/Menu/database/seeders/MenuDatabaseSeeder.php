@@ -187,10 +187,7 @@ class MenuDatabaseSeeder extends Seeder
         // ".nav-siteinfo"). Chưa có trang Chính sách/Điều khoản thật nên dùng '#' placeholder. ──
         $createdFooter += $this->seedFooterGroup($userId, 'Pháp lý', 30, [
             ['Chính sách bảo mật', '#'],
-            ['Khả năng tiếp cận', '#'],
             ['Điều khoản sử dụng', '#'],
-            ['Về quảng cáo của chúng tôi', '#'],
-            ['Không bán thông tin của tôi', '#'],
             ['Thuật ngữ', '#'],
         ]);
 

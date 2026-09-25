@@ -25,7 +25,7 @@
     prefersdark: false;
     color-scheme: light;
 
-    /*--color-base-100: #fbfaf7;*/
+    --color-base-100: #ffffff;
     --color-base-200: #f3f1ea;
     --color-base-300: #e7e3d8;
     --color-base-content: #292524;
@@ -99,7 +99,8 @@
     align-items: center;
     width: 100%;
     max-width: 460px;
-    padding: 48px 56px;
+    padding: 25px;
+    overflow: hidden;
 }
 
 .news-letter.homepage-row .nl-content,
@@ -173,11 +174,11 @@
 
 .news-letter.homepage-row .checkbox-wrapper {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 8px;
     margin-top: 18px;
     text-align: left;
-    font-size: 12px;
+    font-size: 13px;
     color: #4a4a4a;
 }
 
@@ -588,10 +589,20 @@
 
 @media (min-width: 594px) {
     .site-header .nav-sub .nav-link::before { display: none; }
+
+    .site-header nav::after {
+        content: '';
+        display: block;
+        position: relative;
+        bottom: -0.1rem;
+        background-color: #212121;
+        height: 1px;
+        width: 100%;
+    }
 }
 
 .site-header .nav .input-wrap { display: block; margin: 0 1rem; }
-.site-header .nav .icon-home { color: #ED1D26; }
+.site-header .nav .ic-home { color: #ED1D26; }
 
 @media (min-width: 594px) {
     .site-header .nav {
@@ -802,24 +813,12 @@
     mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 11a9 9 0 019 9'/%3E%3Cpath d='M4 4a16 16 0 0116 16'/%3E%3Ccircle cx='5' cy='19' r='1'/%3E%3C/svg%3E");
 }
 
-/* ── Bổ sung 2/2 — bật/tắt mobile nav + toggle icon .btn-expand: spec/
- * main.css chỉ có phần CSS phản ứng với .is-active/.is-open, phần JS gắn
- * class (site gốc tự viết, không kèm theo spec) được thay bằng Alpine
- * (:class trong frontend-header.blade.php, state dùng chung frontendNav
- * — resources/js/frontend.js). ─────────────────────────────────────── */
+
 .site-header .m-btn.btn-expand.is-active .icon-bars { display: none; }
 .site-header .m-btn.btn-expand.is-active .icon-times { display: inline-block; }
 
-/* spec/main.css chỉ ẩn .input-wrap mặc định (display:none), không có rule hiện lại theo
- * .is-active (JS gốc set trực tiếp qua $(...).slideToggle(), không dùng class) — bổ sung
- * đúng 1 rule hiện lại khi .links (cha #searchDesktop) có .is-active. */
 .site-header__topbar .links.is-active .input-wrap { display: block; }
 
-/* ── Bổ sung 3/3 — spec/main.css đặt .logo{font-size:0} vì site gốc dùng 1 thẻ <img> thật
- * (spec/header.html trỏ tới logo của site tham khảo — KHÔNG dùng vì không phải thương hiệu
- * familiesforlife, xem frontend-header.blade.php). Không có ảnh logo thật để thay thế nên
- * dùng logo chữ (mark tròn + tên thương hiệu) — cần font-size riêng vì kế thừa font-size:0
- * từ .header-logo sẽ làm chữ biến mất hoàn toàn. ─────────────────────────────────────────────── */
 .site-header .header-logo a {
     display: inline-flex;
     align-items: center;
@@ -852,26 +851,10 @@
     .site-header .nav.is-open { display: flex; flex-direction: column; }
 }
 
-/* ══════════════════════════════════════════════════════════════════
- * footer — cấu trúc DOM copy 1:1 từ spec/footer.html (site tham khảo),
- * ghép cùng resources/views/layouts/partials/frontend-footer.blade.php.
- * Nội dung là của familiesforlife (KHÔNG dùng nhãn/link "Motherly"),
- * menu 2 cột + thanh pháp lý cuối trang lấy từ $footerMenuTree
- * (MenuItem::tree('footer'), giống hệt cơ chế header — xem
- * Modules\Menu\Database\Seeders\MenuDatabaseSeeder).
- *
- * KHÔNG có stylesheet gốc đi kèm lần này (chỉ spec/footer.html + ảnh
- * chụp spec/footer.png) — CSS dưới đây là bản tự viết bám theo màu
- * sắc/bố cục trong ảnh (nền than chì tối, chữ trắng/xám nhạt), không
- * phải copy nguyên văn như phần site-header (đã có main.css thật ở
- * task trước). Icon mạng xã hội (tiktok/pinterest/facebook/instagram/
- * youtube) cũng không có font/SVG gốc đi kèm — vẽ lại bằng CSS mask,
- * cùng kỹ thuật đã dùng cho icon-* ở site-header.
- * ══════════════════════════════════════════════════════════════════ */
 
 .footer {
-    background: #3a3a3a;
-    color: #cfcfcf;
+    background: #28225A;
+    color: #fff;
     padding-top: 3rem;
 }
 
@@ -917,7 +900,7 @@
 
 .footer .nav-footer__list a,
 .footer .nav-siteinfo__list a {
-    color: #b9b9b9;
+    color: #fff;
     font-size: .875rem;
 }
 
@@ -938,12 +921,12 @@
     width: 2.5rem;
     height: 2.5rem;
     border-radius: 9999px;
-    background: #2b2b2b;
-    color: #fff;
+    background: #fff;
+    color: #28225a;
     transition: background-color .15s ease-in-out;
 }
 
-.footer .social-icons-list__link:hover { background: #4a4a4a; }
+.footer .social-icons-list__link:hover { background: #f59120; }
 
 .footer .social-icons-list__link .tiktok,
 .footer .social-icons-list__link .pinterest,
@@ -1004,7 +987,7 @@
 /* DOM giữ đúng thứ tự spec/footer.html (.nav-siteinfo trước .copyright) — dùng `order` để
  * hiển thị bản quyền bên trái/link pháp lý bên phải như spec/footer.png mà không phải đảo
  * thứ tự thẻ trong Blade. */
-.footer .copyright { order: 1; font-size: .8125rem; color: #a8a8a8; }
+.footer .copyright { order: 1; font-size: .8125rem; color: #fff; }
 .footer .copyright p { margin: 0; }
 
 .footer .nav-siteinfo { order: 2; }
@@ -1024,20 +1007,6 @@
     .footer .container { padding-inline: 1rem; }
     .footer .copyright-siteinfo { flex-direction: column; align-items: flex-start; }
 }
-
-/* ══════════════════════════════════════════════════════════════════
- * vgd-news-hightl-h — khối hero 5 tin dưới menu, thay banner cũ (1 bài
- * + blob trang trí). Cấu trúc DOM + tên class copy sát spec/hero.html
- * (site tham khảo: eva.vn) — xem resources/views/components/frontend/
- * hero.blade.php + hero-story.blade.php. Không có stylesheet gốc đi
- * kèm (chỉ HTML + spec/hero.png) nên CSS dưới đây tự viết bám theo tỉ
- * lệ/bố cục trong ảnh (3 cột 1:2:1, ảnh 4:3, tiêu đề line-clamp 3).
- *
- * .flex-1 KHÔNG định nghĩa lại — trùng tên với utility có sẵn của
- * Tailwind (flex:1 1 0%), dùng thẳng, không xung đột.
- * ══════════════════════════════════════════════════════════════════ */
-
-.vgd-news-hightl-h { padding-block: 2rem; }
 
 .vgd-news-hightl-h .row {
     display: grid;
@@ -1066,6 +1035,49 @@
 .vgd-news-hightl-big-h__tit { font-size: 1.25rem; }
 .vgd-news-hightl-sma-h__tit { font-size: .9375rem; }
 
+.vgd-events h2 {
+    text-align: center;
+    font-size: 38px;
+    font-weight: 400;
+    margin-bottom: 25px;
+    color: #FFF;
+    letter-spacing: 2.5px;
+    margin-left: -2.5px;
+}
+
+.vgd-events h3.subtitle {
+    text-align: left;
+    font-size: 19px;
+    font-weight: 400;
+    color: #FFF;
+    letter-spacing: 2.5px;
+    margin-left: 0;
+    margin-bottom: 12px;  
+}
+
+.vgd-events-filters {
+    padding: 0;
+    margin: 0 auto !important;
+    max-width: 100%;
+    background: #161616 url(/images/vgd-events-filter-bg.jpg) repeat-y center center;
+}
+
+.vgd-events-filter-2 {
+    background: #304497;
+}
+
+.vgd-events-filter-3 {
+    background: #ea1d76;
+}
+
+.vgd-events-filter-4 {
+    background: #eab02d;
+}
+
+.vgd-events-filter-5 {
+    background: #64d89e;
+}
+
 .hero-story__badge {
     top: .625rem;
     left: .625rem;
@@ -1073,7 +1085,6 @@
     text-transform: uppercase;
 }
 
-/* ── Utility (tên/giá trị copy theo quy ước class trong spec/hero.html) ── */
 .pos-rel { position: relative; }
 .pos-ab { position: absolute; }
 .mw-0 { min-width: 0; }
@@ -1100,28 +1111,11 @@
 .img-fluid { max-width: 100%; height: auto; display: block; }
 .img-cover { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-/* ══════════════════════════════════════════════════════════════════
- * banner-slot — x-frontend.banner-slot (spec/Banner_Management_Technical_Specification.md §7.1).
- * Ảnh do admin tự chọn kích thước theo gợi ý mỗi placement (config('banner.placements')),
- * nên .banner-slot__img chỉ scale vừa khung chứa, KHÔNG áp 1 aspect-ratio cứng — mỗi placement
- * tự khống chế kích thước container qua .banner-slot--{placement} nếu cần (chưa cần ở v1.1,
- * mọi placement hiện tại đều để full-width tự nhiên).
- * ══════════════════════════════════════════════════════════════════ */
 .banner-slot { display: flex; flex-direction: column; gap: .5rem; }
 .banner-slot__link { position: relative; display: block; }
 .banner-slot__img { display: block; width: 100%; height: auto; border-radius: var(--radius-box, .75rem); }
 .banner-slot__badge { position: absolute; top: .5rem; left: .5rem; z-index: 10; text-transform: uppercase; }
 
-/* ══════════════════════════════════════════════════════════════════
- * breaking-news-ticker — resources/js/frontend.js initBreakingNewsTicker(). slidesPerView:
- * 'auto' nên mỗi .swiper-slide phải tự co theo nội dung (không bị Swiper/Tailwind ép width
- * bằng nhau) — tiêu đề dài hiển thị TRỌN VẸN trên 1 hàng, không cắt "...", không marquee.
- *
- * Băng chuyển liên tục (không gom nhóm, không cố canh sát mép trái — xem comment trong
- * frontend.js) nên tiêu đề ở mép phải luôn có lúc bị cắt nửa chừng khi đang trượt vào; che
- * bằng gradient mờ dần sang màu nền của ticker, giống hệt kỹ thuật ".news:before" của
- * nhandan.vn — nhìn giống "làm mờ có chủ đích" thay vì bị cắt cụt.
- * ══════════════════════════════════════════════════════════════════ */
 #breaking-news-ticker .swiper-slide { width: auto; }
 #breaking-news-ticker .swiper { position: relative; }
 #breaking-news-ticker .swiper::after {

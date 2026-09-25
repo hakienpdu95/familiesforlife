@@ -27,4 +27,9 @@ return [
 
     // Số item tối đa mỗi khối trên trang landing.
     'section_limit' => 6,
+
+    'featured_max' => 5,
+
+    'default_theme_color' => '#1d4ed8',
+
 ];

@@ -80,7 +80,7 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('post.public.home') }}" title="Trang chủ">
-                        <i class="icon icon-home mr-1"></i>
+                        <i class="fa-regular fa-house ic-home mr-1"></i>
                     </a>
                 </li>
                 @foreach($menuTree ?? [] as $item)

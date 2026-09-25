@@ -31,7 +31,7 @@ class MenuServiceProvider extends ModuleServiceProvider
         // spec/Menu_Navigation_Technical_Specification.md §7.1 — nav công khai (Phase 3) đọc
         // MenuItem::tree() qua composer dùng chung, thay vì mỗi controller Post/Event tự gọi
         // PostCategory::navTree(). $categories (PostCategory) vẫn được các controller truyền
-        // riêng cho mục đích KHÁC nav (vd promo-bar/cta-band ở trang chủ) — không đụng tới.
+        // riêng cho mục đích KHÁC nav (vd promo-bar ở trang chủ) — không đụng tới.
         // once(): 'layouts.frontend' (JSON-LD §7.2.1) + 'frontend-header' (đã gộp topbar/
         // toolbar/nav — cấu trúc/CSS copy 1:1 spec/header.html+main.css, xem resources/views/
         // layouts/partials/frontend-header.blade.php — không còn drawer riêng, mobile dùng

@@ -3,20 +3,9 @@
     'side' => null, // Collection<PostArticleTranslation> tối đa 4 bài — 2 "col-left" + 2 "col-right"
 ])
 
-{{-- vgd-news-hightl-h — cấu trúc DOM + tên class copy sát spec/hero.html (site tham khảo:
-     eva.vn), thay khối banner cũ (1 bài + blob trang trí) dưới menu. Nội dung là bài viết thật
-     của familiesforlife ($featured/$side do PublicCategoryController::index() truyền vào —
-     xem heroSideArticles()), không dùng ảnh/link/tiêu đề của eva.vn.
-
-     Badge góc ảnh trong spec là icon "video"/"HOT" theo taxonomy riêng của eva.vn (không có
-     tương đương trong Post) — thay bằng badge tên category (DaisyUI `badge`) ở đúng vị trí đó,
-     vẫn giữ nguyên cấu trúc pos-rel/pos-ab overlay góc trên-trái.
-
-     Alpine chỉ đảm nhận 1 hiệu ứng fade-in nhẹ khi tải trang (x-data/x-init) — bản thân layout
-     tĩnh, không cần tương tác gì thêm. --}}
 @php($side = ($side ?? collect())->values())
 
-<section class="vgd-news-hightl-h transition-opacity duration-700 ease-out"
+<section class="vgd-news-hightl-h transition-opacity duration-700 ease-out mb-6"
          x-data="{ shown: false }"
          x-init="requestAnimationFrame(() => shown = true)"
          :class="shown ? 'opacity-100' : 'opacity-0'">

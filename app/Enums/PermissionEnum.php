@@ -139,6 +139,8 @@ enum PermissionEnum: string
     // — cùng nguyên tắc BANNER_MANAGE.
     case OCOP_MANAGE = 'ocop.manage';
 
+    case PROVINCE_MANAGE = 'province.manage';
+
     // ══ HERITAGE (Di tích/di sản có cấu trúc — loại hình, xếp hạng, toạ độ; trục liên kết
     // Post/Event/Ocop) ═══
     // spec/Heritage_Technical_Specification.md §4 — gán cho platform_ops + platform_content_head

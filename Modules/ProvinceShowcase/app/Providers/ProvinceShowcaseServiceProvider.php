@@ -2,11 +2,14 @@
 
 namespace Modules\ProvinceShowcase\Providers;
 
+use App\Models\Province;
+use Illuminate\Support\Facades\Gate;
+use Modules\ProvinceShowcase\Policies\ProvincePolicy;
 use Nwidart\Modules\Support\ModuleServiceProvider;
 
 /**
  * spec/Province_Showcase_Technical_Specification.md §6.2 — module này KHÔNG có admin CRUD,
- * chỉ migration (slug)/config/route công khai/view — không cần đăng ký Policy nào.
+ * chỉ có trang danh sách read-only dashboard/provinces (ProvinceManagement slice).
  */
 class ProvinceShowcaseServiceProvider extends ModuleServiceProvider
 {
@@ -16,4 +19,11 @@ class ProvinceShowcaseServiceProvider extends ModuleServiceProvider
     protected array $providers = [
         RouteServiceProvider::class,
     ];
+
+    public function boot(): void
+    {
+        parent::boot();
+
+        Gate::policy(Province::class, ProvincePolicy::class);
+    }
 }

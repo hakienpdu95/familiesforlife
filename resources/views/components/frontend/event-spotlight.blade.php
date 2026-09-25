@@ -2,21 +2,16 @@
     'events', // Collection<Modules\Event\Models\Event> (with category loaded) — sắp diễn ra, gần nhất trước
 ])
 
-{{--
-  spec/Event_Management_Technical_Specification.md §12 — thay x-frontend.sponsor-spotlight
-  (đang dùng post_articles.is_sponsored làm placeholder "Sự Kiện Cho Bé") bằng dữ liệu Event
-  thật, giữ đúng bố cục 1 khối lớn + danh sách bên cạnh của bản mẫu tĩnh gốc.
---}}
 @if($events->isNotEmpty())
 @php
     $lead = $events->first();
     $rest = $events->slice(1);
 @endphp
-<section class="bg-neutral text-neutral-content pt-12 pb-10">
+<section class="vgd-events bg-neutral text-neutral-content pt-10 pb-10">
     <div class="container">
-        <div class="flex items-center justify-between mb-10">
-            <h2 class="font-normal text-3xl tracking-wide">Sự Kiện Sắp Diễn Ra</h2>
-            <a href="{{ route('event.public.home') }}" class="text-sm font-bold uppercase tracking-wide text-primary hover:underline">Xem Tất Cả</a>
+        <div class="flex flex-col items-center text-center">
+            <h2 class="font-normal text-3xl tracking-wide">Sự kiện sắp diễn ra</h2>
+            <h3 class="subtitle">Sự kiện nổi bật</h3>
         </div>
 
         <div class="grid lg:grid-cols-[5fr_7fr] gap-6 items-stretch">
@@ -52,4 +47,26 @@
         </div>
     </div>
 </section>
+
+@php
+    $eventFilters = [
+        ['label' => 'Tất cả sự kiện', 'url' => route('event.public.home')],
+        ['label' => 'Tuần này', 'url' => route('event.public.home', ['thoi-gian' => 'tuan-nay'])],
+        ['label' => 'Tháng này', 'url' => route('event.public.home', ['thoi-gian' => 'thang-nay'])],
+        ['label' => 'Đăng sự kiện', 'url' => route('event.public.submit.form')],
+        ['label' => 'Tìm kiếm sự kiện', 'url' => route('event.public.home').'#tim-su-kien'],
+    ];
+@endphp
+<nav class="vgd-events-filters bg-neutral" aria-label="Lọc sự kiện">
+    <div class="container">
+        <div class="flex justify-between flex-wrap">
+            @foreach($eventFilters as $i => $filter)
+            <div class="vgd-events-filter vgd-events-filter-{{ $i + 1 }} grow basis-0 max-w-full">
+                <a href="{{ $filter['url'] }}" title="{{ $filter['label'] }}"
+                   class="block px-3 py-3.5 text-center text-white text-xs font-medium uppercase">{{ $filter['label'] }}</a>
+            </div>
+            @endforeach
+        </div>        
+    </div>
+</nav>
 @endif

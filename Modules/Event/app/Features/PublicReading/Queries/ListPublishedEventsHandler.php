@@ -28,6 +28,11 @@ class ListPublishedEventsHandler implements QueryHandlerInterface
                 ->orWhere('short_title', 'like', "%{$search}%"));
         }
 
+        if ($range = $this->periodRange($query->period)) {
+            $q->where('start_date', '<=', $range[1]->toDateString())
+                ->where('end_date', '>=', $range[0]->toDateString());
+        }
+
         if ($query->excludeEventIds) {
             $q->whereNotIn('id', $query->excludeEventIds);
         }
@@ -40,5 +45,14 @@ class ListPublishedEventsHandler implements QueryHandlerInterface
             ->orderBy('id')
             ->paginate($query->perPage, ['*'], 'page', $query->page)
             ->withQueryString();
+    }
+
+    private function periodRange(?string $period): ?array
+    {
+        return match ($period) {
+            'tuan-nay' => [now()->startOfWeek(), now()->endOfWeek()],
+            'thang-nay' => [now()->startOfMonth(), now()->endOfMonth()],
+            default => null,
+        };
     }
 }
