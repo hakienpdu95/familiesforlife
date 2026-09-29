@@ -29,7 +29,7 @@
         @if($event->category)
         <span class="text-xs font-black uppercase tracking-[0.2em] text-primary">{{ $event->category->name }}</span>
         @endif
-        <h3 class="mt-3 text-2xl sm:text-3xl font-extrabold leading-snug group-hover:text-primary">{{ $event->title }}</h3>
+        <h3 class="mt-3 text-2xl sm:text-3xl font-medium leading-snug group-hover:text-primary">{{ $event->title }}</h3>
         <p class="mt-4 text-sm text-base-content/60">{{ $event->locationLabel() }}</p>
         <p class="mt-1 text-sm font-bold text-secondary">{{ $event->priceLabel() }}</p>
     </div>

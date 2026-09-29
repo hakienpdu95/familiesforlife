@@ -4,9 +4,9 @@
 @section('meta_description', 'Sản phẩm đặc trưng OCOP các địa phương — hạng sao, nhà sản xuất, thông tin liên hệ mua hàng.')
 
 @section('content')
-<div class="container py-10">
+<div class="container">
 
-    <div class="text-xs breadcrumbs mb-4">
+    <div class="text-xs breadcrumbs">
         <ul>
             <li><a href="{{ route('post.public.home') }}">Trang Chủ</a></li>
             <li>Sản phẩm OCOP</li>

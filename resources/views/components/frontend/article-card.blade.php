@@ -25,7 +25,7 @@
         @if($category)
         <span class="text-xs font-black uppercase tracking-[0.2em] text-primary">{{ $category->name }}</span>
         @endif
-        <h3 class="mt-3 text-2xl sm:text-3xl font-extrabold leading-snug group-hover:text-primary">{{ $translation->title }}</h3>
+        <h3 class="mt-3 text-2xl sm:text-3xl font-medium leading-snug group-hover:text-primary">{{ $translation->title }}</h3>
         <p class="mt-4 text-sm font-bold text-secondary">Bởi {{ $article?->createdBy?->name ?? 'Ban biên tập' }}</p>
     </div>
 </a>

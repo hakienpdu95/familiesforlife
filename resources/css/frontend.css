@@ -1127,4 +1127,21 @@
     pointer-events: none;
 }
 
+.vgd-load-more-button {
+    text-align: center;
+    background: #304497;
+    padding: 15px 30px;
+    font-size: 16px;
+    color: #FFF;
+    border: 1px solid #304497;
+    box-shadow: none;
+    border-radius: 0;
+    font-weight: 400;
+    text-transform: uppercase;
+}
+
+.vgd-load-more-button span {
+    line-height: 1.4;
+}
+
 html { visibility: visible; }

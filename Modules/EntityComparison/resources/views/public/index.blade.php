@@ -4,9 +4,9 @@
 @section('meta_description', $entityType->description ?? "So sánh {$entityType->name} theo tiêu chí — lọc và chọn tối đa " . config('entity_comparison.max_compare_entities') . ' đối tượng để so sánh.')
 
 @section('content')
-<div class="container py-10">
+<div class="container">
 
-    <div class="text-xs breadcrumbs mb-4">
+    <div class="text-xs breadcrumbs">
         <ul>
             <li><a href="{{ route('post.public.home') }}">Trang Chủ</a></li>
             <li>{{ $entityType->name }}</li>

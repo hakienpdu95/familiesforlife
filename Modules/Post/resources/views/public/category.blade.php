@@ -70,19 +70,9 @@
 @endpush
 
 @php
-    // "Tin to" (card lớn, cùng kiểu x-frontend.section-feature ở trang chủ; $lead do
-    // PublicCategoryController::show() truyền vào — ưu tiên is_featured, fallback mới nhất,
-    // xem leadArticleForCategory()) + "Xem thêm bài viết" (load-more, thay cho Previous/Next)
-    // chỉ áp dụng ở trang 1, không tìm kiếm — cùng nguyên tắc $isMagazineLayout ở
-    // public/home.blade.php. Trang 2+/tìm kiếm giữ nguyên phân trang cổ điển
-    // (LoadMoreArticlesQuery dùng cursor, không hỗ trợ offset/search) và không có tin to.
     $isMagazine = ! $search && $articles->currentPage() === 1;
     $collection = $articles->getCollection();
 
-    // $lead đã bị loại khỏi $articles ngay từ query (excludeArticleIds) — lưới ($collection)
-    // luôn đủ đúng số bài của trang, không cần "bóc" phần tử đầu ra khỏi nó nữa.
-    // exclude = mọi article_id đã hiển thị (tin to + lưới ban đầu), CỐ ĐỊNH, không phình theo
-    // số lần bấm "Xem thêm" — cùng nguyên tắc $shownArticleIds ở public/home.blade.php.
     $shownArticleIds = $isMagazine
         ? $collection->pluck('article_id')->when($lead, fn ($ids) => $ids->push($lead->article_id))->values()
         : collect();
@@ -90,9 +80,9 @@
 @endphp
 
 @section('content')
-<div class="container py-10">
+<div class="container">
 
-    <nav class="text-xs breadcrumbs mb-4" aria-label="Breadcrumb">
+    <nav class="text-xs breadcrumbs" aria-label="Breadcrumb">
         <ul>
             <li><a href="{{ route('post.public.home') }}">Trang Chủ</a></li>
             @foreach($breadcrumb as $node)

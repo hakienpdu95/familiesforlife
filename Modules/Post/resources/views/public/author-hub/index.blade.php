@@ -22,9 +22,9 @@
 @endpush
 
 @section('content')
-<div class="container py-10">
+<div class="container">
 
-    <nav class="text-xs breadcrumbs mb-4" aria-label="Breadcrumb">
+    <nav class="text-xs breadcrumbs" aria-label="Breadcrumb">
         <ul>
             <li><a href="{{ route('post.public.home') }}">Trang Chủ</a></li>
             <li>Tác giả</li>

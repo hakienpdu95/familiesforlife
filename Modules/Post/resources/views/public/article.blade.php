@@ -69,7 +69,7 @@
 @section('content')
 <article class="max-w-3xl mx-auto px-4 py-10">
 
-    <nav class="text-xs breadcrumbs mb-4" aria-label="Breadcrumb">
+    <nav class="text-xs breadcrumbs" aria-label="Breadcrumb">
         <ul>
             <li><a href="{{ route('post.public.home') }}">Trang Chủ</a></li>
             @if($article->categories->isNotEmpty())

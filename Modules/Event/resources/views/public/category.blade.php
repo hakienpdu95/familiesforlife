@@ -19,9 +19,9 @@
 @endphp
 
 @section('content')
-<div class="container py-10">
+<div class="container">
 
-    <div class="text-xs breadcrumbs mb-4">
+    <div class="text-xs breadcrumbs">
         <ul>
             <li><a href="{{ route('event.public.home') }}">Sự Kiện</a></li>
             @if($category->parent)

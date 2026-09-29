@@ -92,7 +92,7 @@
 
         @if($isMagazineLayout)
         <div class="pt-10 flex justify-center" x-show="hasMore" x-cloak>
-            <button type="button" class="btn btn-primary" @click="loadMore()" :disabled="loading">
+            <button type="button" class="btn btn-primary vgd-load-more-button" @click="loadMore()" :disabled="loading">
                 <span x-show="!loading" x-cloak>Xem thêm bài viết</span>
                 <span x-show="loading" x-cloak>Đang tải...</span>
             </button>

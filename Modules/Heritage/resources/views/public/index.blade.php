@@ -4,9 +4,9 @@
 @section('meta_description', 'Di tích, di sản văn hóa có cấu trúc — loại hình, xếp hạng, toạ độ — cùng bài viết, lễ hội và sản phẩm OCOP liên quan.')
 
 @section('content')
-<div class="container py-10">
+<div class="container">
 
-    <div class="text-xs breadcrumbs mb-4">
+    <div class="text-xs breadcrumbs">
         <ul>
             <li><a href="{{ route('post.public.home') }}">Trang Chủ</a></li>
             <li>Di sản & Văn hóa</li>

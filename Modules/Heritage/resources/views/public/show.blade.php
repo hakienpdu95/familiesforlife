@@ -4,9 +4,9 @@
 @section('meta_description', \Illuminate\Support\Str::limit($site->description ?: $site->name, 160))
 
 @section('content')
-<div class="container py-10">
+<div class="container">
 
-    <div class="text-xs breadcrumbs mb-4">
+    <div class="text-xs breadcrumbs">
         <ul>
             <li><a href="{{ route('post.public.home') }}">Trang Chủ</a></li>
             <li><a href="{{ route('heritage.public.index') }}">Di sản & Văn hóa</a></li>

@@ -21,7 +21,7 @@
 @section('content')
 <div class="max-w-3xl mx-auto px-4 py-10">
 
-    <div class="text-xs breadcrumbs mb-4">
+    <div class="text-xs breadcrumbs">
         <ul>
             <li><a href="{{ route('event.public.home') }}">Sự Kiện</a></li>
             @if($event->category)

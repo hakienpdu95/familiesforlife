@@ -11,7 +11,7 @@
 @section('content')
 <div class="container py-10 max-w-4xl mx-auto">
 
-    <div class="text-xs breadcrumbs mb-4">
+    <div class="text-xs breadcrumbs">
         <ul>
             <li><a href="{{ route('post.public.home') }}">Trang Chủ</a></li>
             <li><a href="{{ route($isSale ? 'real-estate.public.sale.index' : 'real-estate.public.rent.index') }}">{{ $isSale ? 'Nhà đất bán' : 'Nhà đất thuê' }}</a></li>

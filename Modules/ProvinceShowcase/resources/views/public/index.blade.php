@@ -4,9 +4,9 @@
 @section('meta_description', 'Di sản, văn hóa, ẩm thực và sản phẩm OCOP đặc trưng theo từng tỉnh/thành.')
 
 @section('content')
-<div class="container py-10">
+<div class="container">
 
-    <div class="text-xs breadcrumbs mb-4">
+    <div class="text-xs breadcrumbs">
         <ul>
             <li><a href="{{ route('post.public.home') }}">Trang Chủ</a></li>
             <li>Chuyên đề địa phương</li>

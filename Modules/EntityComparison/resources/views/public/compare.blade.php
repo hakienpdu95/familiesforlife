@@ -4,9 +4,9 @@
 @section('meta_description', "Bảng so sánh {$entityType->name} theo tiêu chí.")
 
 @section('content')
-<div class="container py-10">
+<div class="container">
 
-    <div class="text-xs breadcrumbs mb-4">
+    <div class="text-xs breadcrumbs">
         <ul>
             <li><a href="{{ route('post.public.home') }}">Trang Chủ</a></li>
             <li><a href="{{ route('entity_comparison.public.index', $entityType) }}">{{ $entityType->name }}</a></li>
