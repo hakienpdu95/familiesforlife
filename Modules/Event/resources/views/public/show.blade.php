@@ -19,7 +19,7 @@
 @endpush
 
 @section('content')
-<div class="max-w-3xl mx-auto px-4 py-10">
+<div class="container">
 
     <div class="text-xs breadcrumbs">
         <ul>

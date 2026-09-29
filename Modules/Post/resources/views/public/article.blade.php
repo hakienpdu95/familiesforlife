@@ -67,7 +67,7 @@
     ENTITY chính của trang, không chỉ dựa vào JSON-LD. Không đổi class/style, chỉ đổi tên thẻ.
 --}}
 @section('content')
-<article class="max-w-3xl mx-auto px-4 py-10">
+<div class="container">
 
     <nav class="text-xs breadcrumbs" aria-label="Breadcrumb">
         <ul>
@@ -183,5 +183,5 @@
 
     <x-frontend.related-posts :articles="$relatedArticles" />
 
-</article>
+</div>
 @endsection

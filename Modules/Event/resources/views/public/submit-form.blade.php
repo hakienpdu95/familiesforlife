@@ -4,7 +4,7 @@
 @section('meta_description', 'Chia sẻ sự kiện dành cho gia đình và trẻ em lên cổng thông tin — miễn phí, chỉ cần điền form.')
 
 @section('content')
-<div class="max-w-3xl mx-auto px-4 py-10">
+<div class="container">
 
     <div class="text-center mb-8">
         <span class="inline-block rounded-full bg-primary/10 px-6 py-2 font-black text-xs uppercase tracking-widest text-primary">Gửi Sự Kiện</span>
