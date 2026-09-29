@@ -225,9 +225,6 @@ class GetRelatedArticlesHandler implements QueryHandlerInterface
     }
 
     /**
-     * §5.5 — lấp chỗ trống bằng bài published phổ biến nhất khi pool có điểm rỗng/thiếu, đảm
-     * bảo khối "Bài viết liên quan" không bao giờ trống (trừ khi toàn site chỉ có 1 bài
-     * published). Điểm các bài bổ sung này = 0, không giả vờ là "liên quan".
      *
      * @return Collection<int, PostArticleTranslation>
      */

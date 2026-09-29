@@ -732,12 +732,6 @@
     </div>
     </template>
 
-    {{-- Bài toán #30 (spec/giadinh.md — "hệ sinh thái kinh tế phục vụ xã hội già hóa") — nối
-         công cụ tính lương hưu với nội dung biên tập cùng chủ đề (nếu tòa soạn đã tạo chuyên mục
-         "{{ \Modules\PensionCalculator\Features\PublicEstimation\Http\PensionCalculatorController::RELATED_CONTENT_CATEGORY_SLUG }}"
-         qua Post\CategoryAdminController có sẵn) — biến 1 tool đơn lẻ thành hệ sinh thái tool +
-         content. Không có bài nào thì $relatedArticles rỗng, khối này tự ẩn hoàn toàn, không lỗi.
-         Đặt NGOÀI x-data (không cần Alpine) — luôn hiển thị bất kể đang ở tab nào. --}}
     @if($relatedArticles->isNotEmpty())
     <div class="card bg-base-100 shadow-sm border border-base-200 print:hidden">
         <div class="card-body py-4 px-4">

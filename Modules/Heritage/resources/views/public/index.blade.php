@@ -18,7 +18,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         @forelse($sites as $site)
         <a href="{{ route('heritage.public.show', ['slug' => $site->slug, 'id' => $site->id]) }}" class="group flex flex-col gap-3">
-            <div class="aspect-[4/3] rounded-xl overflow-hidden bg-base-200">
+            <div class="aspect-[4/3] rounded-sm overflow-hidden bg-base-200">
                 <img src="{{ $site->getFirstMediaUrl('cover') ? $site->getFirstMediaUrl('cover', 'medium') : asset('images/post-cover-placeholder.svg') }}"
                      alt="{{ $site->name }}" class="h-full w-full object-cover" loading="lazy">
             </div>

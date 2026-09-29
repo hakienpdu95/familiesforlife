@@ -48,11 +48,10 @@
     </div>
     @endif
 
-    {{-- ── Bài viết liên quan ───────────────────────────────────────────── --}}
     @if($articles->isNotEmpty())
     <section class="mt-10 pt-8 border-t border-base-200">
         <h2 class="text-xl font-bold text-base-content mb-4">Bài viết liên quan</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             @foreach($articles as $article)
             @php($t = $article->mainTranslation())
             @if($t)
@@ -96,7 +95,7 @@
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-5">
             @foreach($products as $product)
             <a href="{{ route('ocop.public.show', ['slug' => $product->slug, 'id' => $product->id]) }}" class="group flex flex-col gap-2">
-                <div class="aspect-square rounded-xl overflow-hidden bg-base-200">
+                <div class="aspect-square rounded-sm overflow-hidden bg-base-200">
                     <img src="{{ $product->getFirstMediaUrl('cover') ?: asset('images/post-cover-placeholder.svg') }}"
                          alt="{{ $product->name }}" class="h-full w-full object-cover" loading="lazy">
                 </div>

@@ -46,9 +46,7 @@ class PublicEventController extends Controller
             period: $period,
         ));
 
-        $eventCategories = EventCategory::navTree();
-
-        return view('event::public.index', compact('events', 'eventCategories', 'search', 'lead', 'period'));
+        return view('event::public.index', compact('events', 'search', 'lead', 'period'));
     }
 
     public function category(Request $request, EventCategory $category, ListPublishedEventsHandler $handler): View
@@ -66,9 +64,7 @@ class PublicEventController extends Controller
             excludeEventIds: $lead ? [$lead->id] : [],
         ));
 
-        $eventCategories = EventCategory::navTree();
-
-        return view('event::public.category', compact('events', 'category', 'eventCategories', 'search', 'lead'));
+        return view('event::public.category', compact('events', 'category', 'search', 'lead'));
     }
 
     /**

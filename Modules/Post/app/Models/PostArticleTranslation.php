@@ -19,14 +19,6 @@ use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 use Spatie\MediaLibrary\HasMedia;
 
-/**
- * spec/Platform_RBAC_Phase2_Specification.md §3.3 (v3.0) — không extends TenantAwareModel
- * nữa, Post không thuộc tenant/Organization nào.
- *
- * spec/Media_Library_Technical_Specification.md §5.2/§7.2 — ảnh chèn qua Jodit vào content
- * block gắn vào chính translation (collection `jodit_content`), qua
- * `UpdateTranslationAction::reassociateOrphans()`.
- */
 class PostArticleTranslation extends Model implements HasMedia
 {
     use HasFactory;

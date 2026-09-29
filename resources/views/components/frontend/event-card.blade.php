@@ -37,7 +37,7 @@
 @else
 <a href="{{ route('event.public.show', ['slug' => $event->slug, 'id' => $event->id]) }}"
    class="group flex flex-col {{ $styles['gap'] }}">
-    <div class="{{ $styles['ratio'] }} rounded-xl overflow-hidden bg-base-200 relative">
+    <div class="{{ $styles['ratio'] }} rounded-sm overflow-hidden bg-base-200 relative">
         <img src="{{ $posterUrl }}" alt="{{ $event->poster_alt ?? $event->title }}"
              class="h-full w-full object-cover" loading="lazy">
         <span class="absolute top-2 left-2 rounded-md bg-base-100/90 px-2 py-1 text-[11px] font-black uppercase tracking-wide text-secondary">

@@ -36,7 +36,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         @forelse($products as $product)
         <a href="{{ route('ocop.public.show', ['slug' => $product->slug, 'id' => $product->id]) }}" class="group flex flex-col gap-3">
-            <div class="aspect-square rounded-xl overflow-hidden bg-base-200">
+            <div class="aspect-square rounded-sm overflow-hidden bg-base-200">
                 <img src="{{ $product->getFirstMediaUrl('cover') ? $product->getFirstMediaUrl('cover', 'medium') : asset('images/post-cover-placeholder.svg') }}"
                      alt="{{ $product->name }}" class="h-full w-full object-cover" loading="lazy">
             </div>

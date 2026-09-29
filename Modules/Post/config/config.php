@@ -26,7 +26,7 @@ return [
     // quan. Đổi trọng số ở đây KHÔNG cần sửa code, chỉ cần deploy lại config (không có UI chỉnh
     // ở v1, §0).
     'related_posts' => [
-        'max_results'            => 6,   // số bài hiển thị trong khối "Bài viết liên quan"
+        'max_results'            => 8,   // số bài hiển thị trong khối "Bài viết liên quan"
         'candidate_pool_limit'   => 200, // chặn trần số ứng viên đưa vào tính điểm PHP (§5.2), tránh quét toàn bảng khi site có hàng chục nghìn bài
         'cache_ttl_hours'        => 6,   // §0 "Thời điểm tính gợi ý" — TTL cache theo article_id
         'behavior_lookback_days' => 90,  // cửa sổ thời gian tính đồng-xem (§5.3) — cũng là retention của post_article_view_events (§6.2)

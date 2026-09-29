@@ -6,10 +6,6 @@
 @endif
 
 @php
-    // AEO/GEO (2026-07-28) — Open Graph + Twitter Card: site trước đó KHÔNG có thẻ nào, ảnh
-    // hưởng cả chia sẻ social lẫn 1 số AI crawler dùng OG làm nguồn tóm tắt trang. Cùng độ ưu
-    // tiên description với ArticleStructuredDataBuilder (seo_description > direct_answer > excerpt)
-    // để nhất quán giữa JSON-LD và meta tag.
     $ogTitle       = $translation->seo_title ?: $translation->title;
     $ogDescription = $translation->seo_description ?: $translation->direct_answer ?: $translation->excerpt;
     $ogImage       = $article->cover_image_url;
@@ -18,9 +14,6 @@
 
 @push('meta')
 <link rel="canonical" href="{{ $canonicalUrl }}">
-{{-- spec/Markdown_Content_Negotiation_Technical_Specification.md §5 (v2.1) — TỰ TRỎ về chính
-     URL đang xem (KHÔNG phải 1 URL .md khác — thiết kế đó đã bị xoá ở v2.0), khai báo trước cho
-     tool/crawler "URL này có thể lấy dạng Markdown qua Accept header", không cần thử mù. --}}
 <link rel="alternate" type="text/markdown" href="{{ $canonicalUrl }}">
 
 <meta property="og:type" content="article">
@@ -50,22 +43,12 @@
 @endif
 
 @if(!empty($structuredData))
-{{--
-    AEO/GEO (2026-07-28) — Article + BreadcrumbList JSON-LD (xem ArticleStructuredDataBuilder).
-    2 node độc lập trong 1 script — hợp lệ theo schema.org (không cần bọc @graph).
---}}
 @foreach($structuredData as $node)
 <script type="application/ld+json">{!! json_encode($node, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
 @endforeach
 @endif
 @endpush
 
-{{--
-    Technical GEO (2026-07-28, đợt 9) — thêm thẻ semantic HTML5 (<article>/<header>/<nav>) thay
-    <div> chung chung — các nguồn content-engineering (visibilitystack.ai, higoodie.com) đều nhấn
-    mạnh AI search platform đọc "accessibility structure" (landmarks/semantic tags) để xác định
-    ENTITY chính của trang, không chỉ dựa vào JSON-LD. Không đổi class/style, chỉ đổi tên thẻ.
---}}
 @section('content')
 <div class="container">
 
@@ -78,14 +61,6 @@
         </ul>
     </nav>
 
-    {{-- spec/dac-ta-ky-thuat-bai-viet-tai-tro.md §12 — disclosure_text rỗng chỉ có thể xảy ra
-         nếu dữ liệu vào thẳng DB bỏ qua Action/validation (vd import tay, sửa trực tiếp) —
-         validation ở §6.2 đã chặn ở lối vào bình thường, nhưng khối bắt buộc-không-thể-ẩn theo
-         §4.3 v1.0 không nên phụ thuộc HOÀN TOÀN vào validation tầng nhập liệu, nên vẫn guard
-         thêm ở tầng hiển thị (defense-in-depth). Đặt NGAY TRÊN tiêu đề, không có toggle/JS nào
-         có thể tắt khối này — render server-side vô điều kiện khi isCurrentlySponsored() và có
-         disclosure_text. §12.1 — {{ }} (không phải {!! !!}) tự động escape, chặn XSS phản chiếu
-         qua sponsor_name/disclosure_text mà không cần xử lý thêm. --}}
     @if($article->isCurrentlySponsored() && $translation->disclosure_text)
     <div class="alert alert-warning mb-4 flex items-center gap-2">
         @if($article->sponsor_logo_url)
@@ -96,18 +71,37 @@
     </div>
     @endif
 
-    {{-- Bố cục đầu bài căn giữa (badge danh mục + tiêu đề + tác giả/ngày đăng) — tham khảo
-         giao diện spec/page-detail, giữ nguyên màu/font theo theme hiện tại của site, không
-         đổi bộ nhận diện thương hiệu. --}}
+    <article class="detail-wrap">
+        <header class="detail__header">
+            <div class="detail__meta">06:29 29/09/2026</div>
+            <h1 id="btn_exp_edit" class="detail__title" data-id="10076" style="font-family: 'VNE1', sans-serif; font-weight: 700;"> Thiếu sách giáo khoa, phụ huynh nên làm gì để con không gián đoạn việc học? </h1>
+            <div class="detail__tools print-hide">
+                <div class="detail__author">
+                    <img src="/templates/themes/images/favicon.jpg" style="width: 30px; height: 30px; border-radius: 50%;position: relative;top: -2px;" alt="Icon No Avatar Tre Em Viet Nam">
+                    <strong>Hương Giang</strong>
+                </div>
+                <div class="detail__share">
+                    <iframe title="Like share" src="https://www.facebook.com/plugins/like.php?href=https://treemvietnam.net.vn/thieu-sach-giao-khoa-phu-huynh-nen-lam-gi-de-con-khong-gian-doan-viec-hoc-d10076.html&amp;width=175&amp;layout=button_count&amp;action=like&amp;size=small&amp;share=true&amp;height=35" width="138" height="20" style="border: none; overflow: hidden;width: 138px;" scrolling="no" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+                </div>
+            </div>
+            <h2 class="detail__summary" style="text-align: justify;">Khi sách giáo khoa chưa kịp đến tay học sinh, việc tìm một bản sách để con học tạm là nhu cầu hoàn toàn dễ hiểu của nhiều gia đình. Tuy nhiên, nếu lựa chọn tải file trên mạng rồi in, photocopy, phụ huynh cũng cần biết một số quy định về quyền tác giả để tìm được cách vừa giúp con có tài liệu học tập, vừa phù hợp với pháp luật.</h2>
+        </header>    
+
+        <div class="detail__content">
+            <div id="content_detail" class="content_detail"></div>
+        </div>
+
+        <div class="detail__footer print-hide">
+            <section class="zone"></section>
+        </div>
+    </article>
+
     <header class="text-center mb-4">
         <span class="text-xs font-black uppercase tracking-wide text-primary">
             {{ $article->categories->first()?->name }}
         </span>
         <h1 class="text-3xl font-bold text-base-content mt-1 mb-2">{{ $translation->title }}</h1>
         @php
-            // spec/Author_Contributor_Hub_Technical_Specification.md §7.4 — byline trở thành
-            // liên kết tới /tac-gia/{slug} NẾU tác giả có hồ sơ is_public=true VÀ vẫn isPlatform()
-            // (§0 v1.2) — giữ text thường (không link) trong mọi trường hợp khác.
             $authorProfile = $article->createdBy?->authorProfile;
             $authorIsLinkable = $authorProfile?->is_public
                 && \Modules\Post\Features\AuthorHub\Support\AuthorRoleResolver::isEligible($article->createdBy);
@@ -120,10 +114,6 @@
                 {{ $article->createdBy?->name ?? 'Ban biên tập' }}
             @endif
             · {{ $translation->published_at?->format('d/m/Y') }}
-            {{-- Freshness (2026-08-01) — tín hiệu "đã rà soát gần đây" cho người đọc lẫn AI answer
-                 engine (spec Content_Freshness_AEO), không chỉ nằm trong JSON-LD/OG meta như trước.
-                 So sánh theo NGÀY (không phải timestamp) để tránh hiện "Cập nhật" giả do các lần
-                 lưu vặt cùng ngày xuất bản. --}}
             @if($translation->updated_at && $translation->published_at
                 && $translation->updated_at->format('Y-m-d') !== $translation->published_at->format('Y-m-d'))
             · Cập nhật: {{ $translation->updated_at->format('d/m/Y') }}
@@ -139,11 +129,6 @@
     </div>
     @endif
 
-    {{--
-        AEO (2026-07-28) — câu trả lời trực tiếp đặt NGAY ĐẦU bài, TRƯỚC excerpt/nội dung chính,
-        để cả người đọc lẫn AI answer engine (Google AI Overview, ChatGPT...) thấy câu trả lời
-        thẳng vào câu hỏi chính của bài trong những từ đầu tiên — xem ArticleStructuredDataBuilder.
-    --}}
     @if($translation->direct_answer)
     <div class="alert bg-base-200 border-0 mb-4">
         <span class="text-sm font-medium">{{ $translation->direct_answer }}</span>
@@ -160,12 +145,6 @@
         </div>
     </div>
 
-    {{-- §12/§12.1 — CTA render cuối bài dưới dạng <a> thường (không qua
-         ArticleContentRenderer::sanitizeTextHtml(), field này chỉ là string thuần không phải
-         HTML). rel="sponsored nofollow" set cứng (khuyến nghị Google cho link quảng cáo/tài trợ,
-         tránh truyền PageRank cho link ngoài không kiểm soát được nội dung đích) + noopener vì
-         mở target="_blank" (chuẩn bảo mật window.opener). Cùng điều kiện isCurrentlySponsored()
-         với disclosure — hết hạn tài trợ thì ẩn CTA luôn, nhất quán với việc ẩn disclosure. --}}
     @if($article->isCurrentlySponsored() && $translation->cta_text && $translation->cta_url)
     <div class="mt-4">
         <a href="{{ $translation->cta_url }}" target="_blank" rel="sponsored nofollow noopener"

@@ -8,7 +8,7 @@
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-5">
             @foreach($products as $product)
             <a href="{{ route('ocop.public.show', ['slug' => $product->slug, 'id' => $product->id]) }}" class="group flex flex-col gap-2">
-                <div class="aspect-square rounded-xl overflow-hidden bg-base-200">
+                <div class="aspect-square rounded-sm overflow-hidden bg-base-200">
                     <img src="{{ $product->getFirstMediaUrl('cover') ?: asset('images/post-cover-placeholder.svg') }}"
                          alt="{{ $product->name }}" class="h-full w-full object-cover" loading="lazy">
                 </div>
