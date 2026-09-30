@@ -1144,4 +1144,139 @@
     line-height: 1.4;
 }
 
+.detail-wrap {
+    margin-bottom: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #000;
+}
+
+.breadcrumbs .category {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.breadcrumbs .category-main a {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: inherit;
+}
+
+.breadcrumbs .category-sub {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.25rem;
+}
+
+.breadcrumbs .category-sub a {
+    font-size: 1rem;
+    font-weight: 700;
+    color: inherit;
+}
+
+.breadcrumbs .category-main a:hover,
+.breadcrumbs .category-sub a:hover {
+    color: var(--color-primary, #c00);
+}
+
+.detail__header {
+    position: relative;
+    margin-bottom: 1.5rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.detail__meta {
+    font-size: 1rem;
+    opacity: 1;
+    margin-bottom: 1rem;
+}
+
+.detail__title {
+    margin: 0 0 1rem;
+    line-height: 1.3;
+    font-weight: bold;
+    font-size: 1.75rem;
+}
+
+@media (min-width: 594px) {
+    .detail__title {
+        font-size: 2rem;
+    }
+}
+
+@media (min-width: 1200px) {
+    .detail__title {
+        font-size: 2.5rem;
+    }
+}
+
+.detail__tools {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    position: relative;
+    flex-direction: column;
+}
+
+.detail__tools::after {
+    position: absolute;
+    display: block;
+    content: "";
+    height: 1px;
+    width: 50%;
+    left: 50%;
+    margin-left: -25%;
+    bottom: 0;
+    background-color: #000;
+}
+
+.detail__tools .detail__author {
+    margin-bottom: 1rem;
+}
+
+@media (min-width: 992px) {
+    .detail__tools {
+        flex-direction: row;
+    }
+
+    .detail__tools .detail__author {
+        margin-bottom: 0rem;
+        margin-right: 1rem;
+    }
+}
+
+.detail__content {
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.detail__author,
+.detail__summary,
+.detail__avatar figcaption,
+.detail__content {
+    font-size: 1.25rem;
+}
+
+.detail__share {
+    line-height: 2rem;
+    display: flex;
+}
+
+.detail__footer {
+    margin: 1.5rem auto 0;
+    max-width: 650px;
+}
+
+
 html { visibility: visible; }

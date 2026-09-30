@@ -88,9 +88,9 @@ class SitemapController extends Controller
             $lines[] = '';
         }
 
-        $lines[] = 'Sitemap: ' . route('post.public.sitemap');
+        $lines[] = 'Sitemap: '.route('post.public.sitemap');
 
-        return response(implode("\n", $lines) . "\n", 200, ['Content-Type' => 'text/plain']);
+        return response(implode("\n", $lines)."\n", 200, ['Content-Type' => 'text/plain']);
     }
 
     /**

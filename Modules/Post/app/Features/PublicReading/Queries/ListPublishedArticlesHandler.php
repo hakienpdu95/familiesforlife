@@ -21,7 +21,7 @@ class ListPublishedArticlesHandler implements QueryHandlerInterface
             } catch (Throwable $e) {
                 Log::warning('Meilisearch search thất bại, fallback về LIKE query.', [
                     'search' => $query->search,
-                    'error'  => $e->getMessage(),
+                    'error' => $e->getMessage(),
                 ]);
             }
         }

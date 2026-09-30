@@ -14,9 +14,9 @@ class RecordArticleRedirectClickAction
     public function handle(PostArticle $article): void
     {
         PostArticleRedirectClick::create([
-            'article_id'  => $article->id,
-            'referrer'    => request()->header('referer') ? mb_substr(request()->header('referer'), 0, 500) : null,
-            'created_at'  => now(),
+            'article_id' => $article->id,
+            'referrer' => request()->header('referer') ? mb_substr(request()->header('referer'), 0, 500) : null,
+            'created_at' => now(),
         ]);
     }
 }

@@ -5,6 +5,7 @@ namespace Modules\Post\Features\PublicReading\Http;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Modules\Event\Models\Event;
 use Modules\Post\Features\PublicReading\Queries\ListPublishedArticlesHandler;
@@ -35,7 +36,7 @@ class PublicCategoryController extends Controller
         // bên). Không tìm kiếm thì loại cả 5 khỏi lưới bên dưới để tránh trùng lặp.
         $featured = $search ? null : $this->featuredArticle($locale);
         $heroSide = ($featured && ! $search) ? $this->heroSideArticles($locale, $featured->article_id) : collect();
-        $page     = max(1, $request->integer('page', 1));
+        $page = max(1, $request->integer('page', 1));
 
         // Trang chủ (không tìm kiếm, trang 1) dựng bố cục "tạp chí": 6 bài đầu vào feature
         // chunks (x-frontend.section-feature) + 8 bài vào khối lưới "Thêm Bài Viết" — khối lưới
@@ -96,8 +97,8 @@ class PublicCategoryController extends Controller
      */
     public function loadMore(Request $request, LoadMoreArticlesHandler $handler): JsonResponse
     {
-        $maxTotal  = (int) config('post.load_more_max_total');
-        $loaded    = max(0, $request->integer('loaded', 0));
+        $maxTotal = (int) config('post.load_more_max_total');
+        $loaded = max(0, $request->integer('loaded', 0));
         $remaining = $maxTotal - $loaded;
 
         if ($remaining <= 0) {
@@ -114,7 +115,7 @@ class PublicCategoryController extends Controller
         // danh mục gửi 12 (đúng số bài/trang ban đầu, xem category.blade.php). min(24, ...):
         // giới hạn cứng phía server bất kể client gửi gì, chống bị sửa request thủ công.
         $requestedLimit = $request->filled('limit') ? $request->integer('limit') : 8;
-        $limit          = min(24, max(1, $requestedLimit), $remaining);
+        $limit = min(24, max(1, $requestedLimit), $remaining);
 
         $result = $handler->handle(new LoadMoreArticlesQuery(
             locale: config('post.default_locale'),
@@ -126,15 +127,15 @@ class PublicCategoryController extends Controller
         ));
 
         $articles = $result['articles'];
-        $last     = $articles->last();
+        $last = $articles->last();
 
         return response()->json([
-            'html'        => view('post::public.partials.article-grid-items', ['articles' => $articles])->render(),
-            'count'       => $articles->count(),
+            'html' => view('post::public.partials.article-grid-items', ['articles' => $articles])->render(),
+            'count' => $articles->count(),
             // Cursor của dòng cuối vừa trả — client dùng cho lần "Xem thêm" kế tiếp, không tự
             // suy ra được từ HTML nên phải trả riêng.
             'next_cursor' => $last ? ['published_at' => $last->published_at->toISOString(), 'id' => $last->id] : null,
-            'has_more'    => $result['has_more'] && ($loaded + $articles->count()) < $maxTotal,
+            'has_more' => $result['has_more'] && ($loaded + $articles->count()) < $maxTotal,
         ]);
     }
 
@@ -149,7 +150,7 @@ class PublicCategoryController extends Controller
     }
 
     /** 4 bài mới nhất kế tiếp (sau bài ghim) cho col-left/col-right của x-frontend.hero. */
-    private function heroSideArticles(string $locale, int $excludeArticleId): \Illuminate\Support\Collection
+    private function heroSideArticles(string $locale, int $excludeArticleId): Collection
     {
         return PostArticleTranslation::published()
             ->where('locale', $locale)
@@ -166,7 +167,7 @@ class PublicCategoryController extends Controller
     {
         $locale = config('post.default_locale');
         $search = $request->string('q')->trim()->value() ?: null;
-        $page   = max(1, $request->integer('page', 1));
+        $page = max(1, $request->integer('page', 1));
         $isMagazine = ! $search && $page === 1;
 
         // "Tin to" (size=lg) — ưu tiên bài is_featured=true CỦA ĐÚNG danh mục này (mới nhất

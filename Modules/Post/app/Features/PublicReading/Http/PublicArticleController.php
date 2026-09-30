@@ -9,6 +9,7 @@ use Illuminate\Http\Response;
 use Illuminate\View\View;
 use Modules\Post\Features\PublicReading\Actions\IncrementArticleViewCountAction;
 use Modules\Post\Features\PublicReading\Actions\RecordArticleRedirectClickAction;
+use Modules\Post\Features\PublicReading\Actions\ResolveArticleCategoryHeaderAction;
 use Modules\Post\Features\RelatedPosts\Actions\RecordArticleViewEventAction;
 use Modules\Post\Features\RelatedPosts\Queries\GetRelatedArticlesHandler;
 use Modules\Post\Features\RelatedPosts\Queries\GetRelatedArticlesQuery;
@@ -41,6 +42,7 @@ class PublicArticleController extends Controller
         GetRelatedArticlesHandler $relatedHandler,
         ArticleContentRenderer $renderer,
         ArticleStructuredDataBuilder $structuredDataBuilder,
+        ResolveArticleCategoryHeaderAction $categoryHeaderAction,
     ): View|RedirectResponse|Response {
         $translation = PostArticleTranslation::published()
             ->where('locale', config('post.default_locale'))
@@ -95,6 +97,8 @@ class PublicArticleController extends Controller
             limit: (int) config('post.related_posts.max_results', 6),
         ));
 
+        $categoryHeader = $categoryHeaderAction->handle($article);
+
         $canonicalUrl = route('post.public.article', ['slug' => $translation->slug, 'id' => $translation->id]);
 
         // Không còn truyền 'categories' — Phase 3 chuyển nav sang MenuItem::tree() qua View
@@ -112,6 +116,9 @@ class PublicArticleController extends Controller
             'relatedArticles' => $related,
             'canonicalUrl' => $canonicalUrl,
             'structuredData' => $structuredDataBuilder->build($article, $translation, $canonicalUrl),
+            'currentCategory' => $categoryHeader['current'],
+            'leftCategory' => $categoryHeader['left'],
+            'rightCategories' => $categoryHeader['right'],
         ])->header('Vary', 'Accept');
     }
 
