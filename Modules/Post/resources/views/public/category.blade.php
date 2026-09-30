@@ -80,7 +80,7 @@
     @endif
 
     @if($isMagazine)
-    <div x-data="loadMoreArticles({
+    <div class="mb-10" x-data="loadMoreArticles({
              endpoint: '{{ route('post.public.load-more') }}',
              exclude: '{{ $shownArticleIds->implode(',') }}',
              afterPublishedAt: {{ $lastArticle ? "'".$lastArticle->published_at->toISOString()."'" : 'null' }},
