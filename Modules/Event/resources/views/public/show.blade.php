@@ -21,15 +21,6 @@
 @section('content')
 <div class="container">
 
-    <div class="text-xs breadcrumbs">
-        <ul>
-            <li><a href="{{ route('event.public.home') }}">Sự Kiện</a></li>
-            @if($event->category)
-            <li><a href="{{ route('event.public.category', ['category' => $event->category->slug]) }}">{{ $event->category->name }}</a></li>
-            @endif
-        </ul>
-    </div>
-
     @if($event->poster_path)
     <div class="aspect-[16/9] overflow-hidden bg-base-200 mb-6">
         <img src="{{ \Illuminate\Support\Facades\Storage::url($event->poster_path) }}" alt="{{ $event->poster_alt ?? $event->title }}" class="h-full w-full object-cover">

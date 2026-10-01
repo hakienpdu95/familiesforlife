@@ -6,13 +6,6 @@
 @section('content')
 <div class="container">
 
-    <div class="text-xs breadcrumbs">
-        <ul>
-            <li><a href="{{ route('post.public.home') }}">Trang Chủ</a></li>
-            <li>Sản phẩm OCOP</li>
-        </ul>
-    </div>
-
     <h1 class="text-2xl font-bold text-base-content mb-6">Sản phẩm OCOP</h1>
 
     <form method="GET" class="flex flex-wrap gap-2 mb-6">

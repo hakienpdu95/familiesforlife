@@ -24,13 +24,6 @@
 @section('content')
 <div class="container">
 
-    <nav class="text-xs breadcrumbs" aria-label="Breadcrumb">
-        <ul>
-            <li><a href="{{ route('post.public.home') }}">Trang Chủ</a></li>
-            <li>Tác giả</li>
-        </ul>
-    </nav>
-
     <h1 class="text-2xl font-bold text-base-content mb-6">Tác giả</h1>
 
     <section class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">

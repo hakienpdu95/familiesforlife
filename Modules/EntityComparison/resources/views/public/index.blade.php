@@ -6,13 +6,6 @@
 @section('content')
 <div class="container">
 
-    <div class="text-xs breadcrumbs">
-        <ul>
-            <li><a href="{{ route('post.public.home') }}">Trang Chủ</a></li>
-            <li>{{ $entityType->name }}</li>
-        </ul>
-    </div>
-
     <h1 class="text-2xl font-bold text-base-content mb-1">{{ $entityType->name }}</h1>
     @if($entityType->description)
     <p class="text-sm text-base-content/60 mb-6">{{ $entityType->description }}</p>

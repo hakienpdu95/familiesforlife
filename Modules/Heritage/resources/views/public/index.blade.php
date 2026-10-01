@@ -6,13 +6,6 @@
 @section('content')
 <div class="container">
 
-    <div class="text-xs breadcrumbs">
-        <ul>
-            <li><a href="{{ route('post.public.home') }}">Trang Chủ</a></li>
-            <li>Di sản & Văn hóa</li>
-        </ul>
-    </div>
-
     <h1 class="text-2xl font-bold text-base-content mb-6">Di sản & Văn hóa</h1>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

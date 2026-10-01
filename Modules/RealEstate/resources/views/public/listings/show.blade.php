@@ -11,14 +11,6 @@
 @section('content')
 <div class="container py-10 max-w-4xl mx-auto">
 
-    <div class="text-xs breadcrumbs">
-        <ul>
-            <li><a href="{{ route('post.public.home') }}">Trang Chủ</a></li>
-            <li><a href="{{ route($isSale ? 'real-estate.public.sale.index' : 'real-estate.public.rent.index') }}">{{ $isSale ? 'Nhà đất bán' : 'Nhà đất thuê' }}</a></li>
-            <li>{{ $pageTitle }}</li>
-        </ul>
-    </div>
-
     {{-- ── Gallery ảnh (§7.3 spec Bán) ─────────────────────────────────────── --}}
     @php $images = $listing->galleryUrls('medium'); @endphp
     @if(!empty($images))

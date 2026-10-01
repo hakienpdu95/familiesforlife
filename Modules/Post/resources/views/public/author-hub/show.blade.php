@@ -40,14 +40,6 @@
 @section('content')
 <div class="container">
 
-    <nav class="text-xs breadcrumbs" aria-label="Breadcrumb">
-        <ul>
-            <li><a href="{{ route('post.public.home') }}">Trang Chủ</a></li>
-            <li><a href="{{ route('post.public.author-hub.index') }}">Tác giả</a></li>
-            <li>{{ $authorProfile->displayName() }}</li>
-        </ul>
-    </nav>
-
     {{-- ── Header — avatar to, tên, bio, mạng xã hội (§7.3). KHÔNG hiển thị số liệu hiệu
          suất (view_count) — chỉ số lượng bài đã xuất bản (§0). ─────────────────────── --}}
     <header class="flex flex-col sm:flex-row items-center sm:items-start gap-5 mb-10 text-center sm:text-left">

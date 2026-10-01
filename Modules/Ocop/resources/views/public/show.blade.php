@@ -6,14 +6,6 @@
 @section('content')
 <div class="container">
 
-    <div class="text-xs breadcrumbs">
-        <ul>
-            <li><a href="{{ route('post.public.home') }}">Trang Chủ</a></li>
-            <li><a href="{{ route('ocop.public.index') }}">Sản phẩm OCOP</a></li>
-            <li>{{ $product->name }}</li>
-        </ul>
-    </div>
-
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
         <div class="aspect-square rounded-sm overflow-hidden bg-base-200">
             <img src="{{ $product->getFirstMediaUrl('cover') ? $product->getFirstMediaUrl('cover', 'preview') : asset('images/post-cover-placeholder.svg') }}"

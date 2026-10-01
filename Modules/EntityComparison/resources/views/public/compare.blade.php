@@ -6,14 +6,6 @@
 @section('content')
 <div class="container">
 
-    <div class="text-xs breadcrumbs">
-        <ul>
-            <li><a href="{{ route('post.public.home') }}">Trang Chủ</a></li>
-            <li><a href="{{ route('entity_comparison.public.index', $entityType) }}">{{ $entityType->name }}</a></li>
-            <li>So sánh</li>
-        </ul>
-    </div>
-
     <h1 class="text-2xl font-bold text-base-content mb-1">So sánh {{ $entityType->name }}</h1>
     <p class="text-sm text-base-content/60 mb-6">
         <a href="{{ route('entity_comparison.public.index', $entityType) }}" class="link">← Quay lại danh sách để đổi lựa chọn</a>

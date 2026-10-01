@@ -6,14 +6,6 @@
 @section('content')
 <div class="container">
 
-    <div class="text-xs breadcrumbs">
-        <ul>
-            <li><a href="{{ route('post.public.home') }}">Trang Chủ</a></li>
-            <li><a href="{{ route('heritage.public.index') }}">Di sản & Văn hóa</a></li>
-            <li>{{ $site->name }}</li>
-        </ul>
-    </div>
-
     {{-- ── Hero ─────────────────────────────────────────────────────────── --}}
     <div class="aspect-[21/9] rounded-xl overflow-hidden bg-base-200 mb-6">
         <img src="{{ $site->getFirstMediaUrl('cover') ? $site->getFirstMediaUrl('cover', 'preview') : asset('images/post-cover-placeholder.svg') }}"

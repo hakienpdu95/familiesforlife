@@ -76,7 +76,7 @@
 <div x-data="frontendNav" class="flex flex-col min-h-screen">
     @include('layouts.partials.frontend-header')
 
-    <main class="site-content flex-1">
+    <main class="site-content flex-1 mb-6">
         @yield('content')
     </main>
 

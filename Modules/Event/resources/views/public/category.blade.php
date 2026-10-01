@@ -21,16 +21,6 @@
 @section('content')
 <div class="container">
 
-    <div class="text-xs breadcrumbs">
-        <ul>
-            <li><a href="{{ route('event.public.home') }}">Sự Kiện</a></li>
-            @if($category->parent)
-            <li><a href="{{ route('event.public.category', ['category' => $category->parent->slug]) }}">{{ $category->parent->name }}</a></li>
-            @endif
-            <li><a href="{{ route('event.public.category', ['category' => $category->slug]) }}">{{ $category->name }}</a></li>
-        </ul>
-    </div>
-
     <h1 class="text-2xl font-bold text-base-content mb-6">
         {{ $search ? "Kết quả tìm kiếm trong “{$category->name}”: {$search}" : $category->name }}
     </h1>

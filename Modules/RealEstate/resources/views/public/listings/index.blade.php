@@ -12,13 +12,6 @@
 @section('content')
 <div class="container">
 
-    <div class="text-xs breadcrumbs">
-        <ul>
-            <li><a href="{{ route('post.public.home') }}">Trang Chủ</a></li>
-            <li>{{ $pageTitle }}</li>
-        </ul>
-    </div>
-
     <h1 class="text-2xl font-bold text-base-content mb-6">{{ $pageTitle }}</h1>
 
     {{-- ── Bộ lọc — filter trực tiếp trên cột SQL thật, không cần Meilisearch (§7.2 spec Bán) --}}
