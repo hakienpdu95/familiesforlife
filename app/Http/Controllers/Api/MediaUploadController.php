@@ -42,7 +42,8 @@ class MediaUploadController extends Controller
      * jodit_content is exclusively managed by MediaJoditUploadController.
      */
     private const ALLOWED_COLLECTIONS = [
-        'avatar', 'logo', 'thumbnail', 'cover', 'banner', 'real_estate_gallery',
+        'avatar', 'logo', 'thumbnail', 'cover', 'banner', 'real_estate_gallery', 'ocop_gallery',
+        'ocop_label_docs', 'ocop_quality_declaration', 'ocop_test_reports', 'ocop_quality_certs',
         'attachments', 'attachments_private',
     ];
 
@@ -145,7 +146,8 @@ class MediaUploadController extends Controller
     {
         $media = Media::withoutTenant()
             ->where('uuid', $uuid)
-            ->where('organization_id', TenantContext::getOrganizationId())
+            ->where(fn ($q) => $q->where('organization_id', TenantContext::getOrganizationId())
+                ->orWhereNull('organization_id'))
             ->first();
 
         if (! $media) {

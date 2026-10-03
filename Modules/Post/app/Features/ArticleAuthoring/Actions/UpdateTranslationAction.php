@@ -3,6 +3,7 @@
 namespace Modules\Post\Features\ArticleAuthoring\Actions;
 
 use App\Services\Media\MediaUploadService;
+use App\Services\Media\MediaUrlService;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Modules\Post\Enums\ContentBlockType;
@@ -19,6 +20,7 @@ class UpdateTranslationAction
         private readonly SyncContentBlocksAction $syncContentBlocks,
         private readonly CreateArticleVersionAction $createVersion,
         private readonly MediaUploadService $mediaUpload,
+        private readonly MediaUrlService $mediaUrl,
     ) {}
 
     /** Slug giữ nguyên sau khi tạo (tránh vỡ link đã chia sẻ) nếu không truyền slug mới tường minh. */
@@ -45,6 +47,7 @@ class UpdateTranslationAction
             // text_html) cho tới khi bài được lưu — touch-point này "nhận" ảnh vào chính
             // translation thật, đồng thời gỡ ảnh không còn được nhắc tới trong nội dung mới.
             $this->mediaUpload->reassociateOrphans($translation, $this->mediaUuidsIn($translation));
+            $this->refreshEmbeddedImageUrls($translation);
 
             // spec/Post_VersionHistory_Technical_Specification.md §9.4 — snapshot đóng gói
             // đồng bộ ngay đây (đọc lại dữ liệu vừa ghi), ghi DB thật sự bất đồng bộ qua queue.
@@ -52,6 +55,21 @@ class UpdateTranslationAction
 
             return $translation;
         });
+    }
+
+    /**
+     * Sau reassociateOrphans() file ảnh đã chuyển từ thư mục JoditDraft sang thư mục của
+     * translation — cập nhật lại `src` nhúng trong text_html (vẫn trỏ path draft cũ, 403).
+     */
+    private function refreshEmbeddedImageUrls(PostArticleTranslation $translation): void
+    {
+        foreach ($translation->contentBlocks()->where('type', ContentBlockType::Text)->get(['id', 'text_html']) as $block) {
+            $html = $this->mediaUrl->refreshEmbeddedImageUrls($block->text_html);
+
+            if ($html !== $block->text_html) {
+                $translation->contentBlocks()->whereKey($block->id)->update(['text_html' => $html]);
+            }
+        }
     }
 
     /**

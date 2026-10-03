@@ -16,6 +16,14 @@ class OcopProductData extends Data
         public readonly int $star_rating,
         public readonly ?string $description = null,
 
+        public readonly ?string $story = null,
+        public readonly ?string $origin = null,
+        public readonly ?string $production_date = null,
+        public readonly ?string $shelf_life = null,
+        public readonly ?string $ingredients = null,
+        public readonly ?string $usage_instructions = null,
+        public readonly ?string $storage_instructions = null,
+
         public readonly ?string $province_code = null,
         public readonly ?string $ward_code = null,
         public readonly ?string $producer_name = null,
@@ -26,10 +34,13 @@ class OcopProductData extends Data
 
         /**
          * spec/Media_Library_Technical_Specification.md §8 — UUID media FilePond (collection
-         * `cover`) chờ gắn vào sản phẩm vừa tạo — CHỈ dùng ở luồng tạo mới (create form, chưa có
-         * product.id để attach trực tiếp). Form sửa gắn ảnh thẳng qua context header.
+         * `ocop_gallery`) chờ gắn vào sản phẩm vừa tạo — CHỈ dùng ở luồng tạo mới (create form,
+         * chưa có product.id để attach trực tiếp). Form sửa gắn ảnh thẳng qua context header.
          */
-        public readonly ?string $cover_media_uuid = null,
+        public readonly array $media_uuids = [],
+
+        /** UUID ảnh hiện có bị editor đánh dấu xoá — CHỈ dùng ở form sửa. */
+        public readonly array $remove_media_uuids = [],
 
         public readonly ?string $purchase_url = null,
         public readonly string $status = 'draft',

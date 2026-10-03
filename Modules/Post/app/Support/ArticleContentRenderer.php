@@ -384,6 +384,35 @@ class ArticleContentRenderer
             $script->parentNode->removeChild($script);
         }
 
+        // Wrapper tạm của Jodit (<jodit data-jodit-temp>) đôi khi lọt vào giá trị submit — gỡ vỏ,
+        // giữ nội dung bên trong.
+        foreach (iterator_to_array($dom->getElementsByTagName('jodit')) as $wrapper) {
+            while ($wrapper->firstChild) {
+                $wrapper->parentNode->insertBefore($wrapper->firstChild, $wrapper);
+            }
+            $wrapper->parentNode->removeChild($wrapper);
+        }
+
+        // Chỉ giữ iframe YouTube, ép về embed_domain (youtube-nocookie) — trùng CSP frame-src
+        // (app/Http/Middleware/SecurityHeaders.php); iframe nguồn khác bị xoá.
+        foreach (iterator_to_array($dom->getElementsByTagName('iframe')) as $iframe) {
+            $videoId = preg_match(
+                '#(?:youtube(?:-nocookie)?\.com/(?:watch\?(?:.*&)?v=|embed/|shorts/|live/|v/)|youtu\.be/)([\w-]{11})#i',
+                $iframe->getAttribute('src'),
+                $m
+            ) ? $m[1] : null;
+
+            if (! $videoId) {
+                $iframe->parentNode->removeChild($iframe);
+
+                continue;
+            }
+
+            $iframe->setAttribute('src', 'https://'.config('video.embed_domain', 'www.youtube-nocookie.com').'/embed/'.$videoId);
+            $iframe->removeAttribute('sandbox');
+            $iframe->removeAttribute('style');
+        }
+
         $xpath = new \DOMXPath($dom);
         foreach ($xpath->query('//*') as $el) {
             if (! $el instanceof \DOMElement) {

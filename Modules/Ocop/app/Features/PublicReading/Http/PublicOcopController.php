@@ -3,6 +3,7 @@
 namespace Modules\Ocop\Features\PublicReading\Http;
 
 use App\Http\Controllers\Controller;
+use App\Services\Media\MediaUrlService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\Heritage\Models\HeritageSite;
@@ -38,7 +39,7 @@ class PublicOcopController extends Controller
     {
         $product = OcopProduct::where('status', OcopProductStatus::Published)
             ->where('slug', $slug)
-            ->with('category')
+            ->with('category.parent.parent')
             ->first();
 
         abort_unless($product, 404);
@@ -49,6 +50,14 @@ class PublicOcopController extends Controller
             ? HeritageSite::published()->find($product->heritage_site_id)
             : null;
 
-        return view('ocop::public.show', compact('product', 'heritageSite'));
+        $mediaUrl = app(MediaUrlService::class);
+        $images = $product->getMedia(OcopProduct::IMAGE_COLLECTION)
+            ->map(fn ($media) => [
+                'full' => $mediaUrl->url($media, 'preview'),
+                'thumb' => $mediaUrl->url($media, 'thumb'),
+            ])
+            ->values();
+
+        return view('ocop::public.show', compact('product', 'heritageSite', 'images'));
     }
 }

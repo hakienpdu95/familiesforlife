@@ -53,11 +53,13 @@ class MediaUploadService
         // Only stamp organization_id for tenant-scoped targets — platform-wide content
         // (Post/Ocop/Banner) must NOT be owned by whichever tenant happened to upload it,
         // see spec/Media_Library_Technical_Specification.md §5.1/§7.1.
+        $oldBasePath = rtrim(dirname($media->getPathRelativeToRoot()), '/');
         $media->organization_id = Media::targetIsTenantScoped($model)
             ? TenantContext::getOrganizationId()
             : null;
         $media->uploaded_at     = now();
         $media->save();
+        $this->moveMediaFiles($media, $oldBasePath);
 
         // Synchronous image conversions (no queue)
         $this->runConversions($media, $collectionConfig['conversions'] ?? []);

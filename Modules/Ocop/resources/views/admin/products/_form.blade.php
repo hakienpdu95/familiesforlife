@@ -1,18 +1,21 @@
 {{-- Dùng chung create/edit — cùng convention Modules/Banner/resources/views/admin/banners/_form.blade.php.
-     Tab-based form (docs/form-ui-spec.md §10) — 13 trường / 2 nhóm rõ ràng (cơ bản + nhà sản xuất). --}}
+     Tab-based form (docs/form-ui-spec.md §10) — 4 nhóm: cơ bản, nhà sản xuất, chi tiết & câu chuyện,
+     hồ sơ & tiêu chuẩn. --}}
 <div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-6 items-start"
      x-data="{
         tab: 'basic',
         tabFields: {
             basic:    ['name', 'category_id', 'star_rating', 'description', 'image'],
             producer: ['province_code', 'ward_code', 'producer_name', 'producer_address', 'purchase_url'],
+            details:  ['story', 'origin', 'production_date', 'shelf_life', 'ingredients', 'usage_instructions', 'storage_instructions'],
+            documents: {{ Js::from(collect(\Modules\Ocop\Models\OcopProduct::DOCUMENT_COLLECTIONS)->map(fn ($c) => "documents.$c")->values()) }},
         },
         errs: {{ Js::from($errors->keys()) }},
         errCount(t) {
-            return this.tabFields[t].filter(f => this.errs.includes(f)).length;
+            return this.tabFields[t].filter(f => this.errs.some(e => e === f || e.startsWith(f + '.'))).length;
         },
         init() {
-            const order = ['basic', 'producer'];
+            const order = ['basic', 'producer', 'details', 'documents'];
             for (const t of order) {
                 if (this.errCount(t) > 0) { this.tab = t; break; }
             }
@@ -24,7 +27,7 @@
 
         {{-- Tab navigation --}}
         <div class="border-b border-base-200 px-3">
-            <nav class="flex -mb-px" role="tablist" aria-label="Form sections">
+            <nav class="flex -mb-px overflow-x-auto whitespace-nowrap" role="tablist" aria-label="Form sections">
 
                 <button type="button" role="tab" :aria-selected="tab === 'basic'"
                         @click="tab = 'basic'"
@@ -39,12 +42,34 @@
 
                 <button type="button" role="tab" :aria-selected="tab === 'producer'"
                         @click="tab = 'producer'"
-                        class="flex items-center gap-1.5 px-1 py-4 text-sm font-medium border-b-2 transition-colors"
+                        class="flex items-center gap-1.5 px-1 py-4 mr-6 text-sm font-medium border-b-2 transition-colors"
                         :class="tab === 'producer'
                             ? 'border-primary text-primary'
                             : 'border-transparent text-base-content/50 hover:text-base-content hover:border-base-content/20'">
                     Nhà sản xuất
                     <span x-show="errCount('producer') > 0" x-text="errCount('producer')"
+                          class="badge badge-error badge-xs"></span>
+                </button>
+
+                <button type="button" role="tab" :aria-selected="tab === 'details'"
+                        @click="tab = 'details'"
+                        class="flex items-center gap-1.5 px-1 py-4 mr-6 text-sm font-medium border-b-2 transition-colors"
+                        :class="tab === 'details'
+                            ? 'border-primary text-primary'
+                            : 'border-transparent text-base-content/50 hover:text-base-content hover:border-base-content/20'">
+                    Chi tiết &amp; Câu chuyện
+                    <span x-show="errCount('details') > 0" x-text="errCount('details')"
+                          class="badge badge-error badge-xs"></span>
+                </button>
+
+                <button type="button" role="tab" :aria-selected="tab === 'documents'"
+                        @click="tab = 'documents'"
+                        class="flex items-center gap-1.5 px-1 py-4 text-sm font-medium border-b-2 transition-colors"
+                        :class="tab === 'documents'
+                            ? 'border-primary text-primary'
+                            : 'border-transparent text-base-content/50 hover:text-base-content hover:border-base-content/20'">
+                    Hồ sơ &amp; Tiêu chuẩn
+                    <span x-show="errCount('documents') > 0" x-text="errCount('documents')"
                           class="badge badge-error badge-xs"></span>
                 </button>
 
@@ -128,18 +153,33 @@
                     <label class="label py-0 pb-1.5">
                         <span class="label-text font-medium">Ảnh sản phẩm</span>
                     </label>
-                    @if($product?->getFirstMediaUrl('cover'))
-                    <img src="{{ $product->getFirstMediaUrl('cover', 'thumb') }}" alt=""
-                         class="h-20 w-auto rounded border border-base-300 mb-2 object-cover">
+                    @php($images = $product?->getMedia(\Modules\Ocop\Models\OcopProduct::IMAGE_COLLECTION) ?? collect())
+                    @if($images->isNotEmpty())
+                    <div class="flex flex-wrap gap-2 mb-2">
+                        @foreach($images as $image)
+                        <label class="relative cursor-pointer group" title="Đánh dấu để xoá ảnh này khi lưu">
+                            <input type="checkbox" name="remove_media_uuids[]" value="{{ $image->uuid }}" class="peer sr-only"
+                                   @checked(in_array($image->uuid, old('remove_media_uuids', []), true))>
+                            <img src="{{ app(\App\Services\Media\MediaUrlService::class)->url($image, 'thumb') }}" alt=""
+                                 class="h-20 w-20 rounded border border-base-300 object-cover peer-checked:opacity-30 peer-checked:border-error">
+                            @if($loop->first)
+                            <span class="badge badge-primary badge-xs absolute bottom-1 left-1">Ảnh chính</span>
+                            @endif
+                            <span class="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-base-100/90 text-xs text-error shadow peer-checked:bg-error peer-checked:text-white">✕</span>
+                        </label>
+                        @endforeach
+                    </div>
                     @endif
                     @if($product)
-                    <div id="cover-filepond" data-context-type="ocop_product" data-context-id="{{ $product->id }}"></div>
-                    <p class="text-xs text-base-content/40 mt-1.5">Tải ảnh mới sẽ tự động thay ảnh hiện tại.</p>
+                    <div id="gallery-filepond" data-context-type="ocop_product" data-context-id="{{ $product->id }}"
+                         data-max-files="{{ max(1, \Modules\Ocop\Models\OcopProduct::MAX_IMAGES - $images->count()) }}"></div>
+                    <p class="text-xs text-base-content/40 mt-1.5">Tối đa {{ \Modules\Ocop\Models\OcopProduct::MAX_IMAGES }} ảnh. Ảnh đầu tiên là ảnh chính. Bấm ✕ trên ảnh để xoá khi lưu.</p>
                     @else
-                    <div id="cover-filepond"></div>
-                    <input type="hidden" name="cover_media_uuid" id="cover-media-uuid" value="{{ old('cover_media_uuid') }}">
+                    <div id="gallery-filepond"></div>
+                    <input type="hidden" name="media_uuids" id="gallery-media-uuids" value="">
+                    <p class="text-xs text-base-content/40 mt-1.5">Tối đa {{ \Modules\Ocop\Models\OcopProduct::MAX_IMAGES }} ảnh. Ảnh đầu tiên là ảnh chính.</p>
                     @endif
-                    @error('cover_media_uuid')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                    @error('media_uuids')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                 </div>
 
                 {{-- Tab footer: next --}}
@@ -226,6 +266,113 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                         </svg>
                         Thông tin sản phẩm
+                    </button>
+                    <button type="button" @click="tab = 'details'" class="btn btn-ghost btn-sm gap-1.5">
+                        Tiếp theo: Chi tiết &amp; Câu chuyện
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+                </div>
+
+            </div>
+
+            {{-- Panel: Chi tiết & Câu chuyện --}}
+            <div x-show="tab === 'details'" x-cloak data-tab-label="Chi tiết &amp; Câu chuyện" class="space-y-4">
+
+                <div class="form-control">
+                    <label class="label py-0 pb-1.5">
+                        <span class="label-text font-medium">Câu chuyện sản phẩm</span>
+                        <span class="label-text-alt text-xs text-base-content/40">Nguồn gốc, truyền thống, điểm khác biệt</span>
+                    </label>
+                    <textarea id="ocop-story" name="story" class="jodit-editor" data-jodit-preset="standard">{{ old('story', $product?->story) }}</textarea>
+                    @error('story')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                </div>
+
+                <div class="divider my-1 text-xs text-base-content/40">Thông số kỹ thuật</div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    @foreach(['origin' => ['Xuất xứ', 255, 'VD: Phú Vang, Thừa Thiên Huế'], 'production_date' => ['Ngày sản xuất', 100, 'VD: Xem trên bao bì'], 'shelf_life' => ['Hạn sử dụng', 100, 'VD: 12 tháng kể từ NSX']] as $field => [$label, $max, $placeholder])
+                    <div class="form-control">
+                        <label class="label py-0 pb-1.5">
+                            <span class="label-text font-medium">{{ $label }}</span>
+                        </label>
+                        <input type="text" name="{{ $field }}" value="{{ old($field, $product?->{$field}) }}"
+                               data-val-maxlength="{{ $max }}" maxlength="{{ $max }}" placeholder="{{ $placeholder }}"
+                               class="input input-bordered input-sm w-full @error($field) input-error @enderror">
+                        @error($field)<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
+                    </div>
+                    @endforeach
+                </div>
+
+                @foreach(['ingredients' => ['Thành phần', 'VD: Trà xanh 70%, hoa sen 20%, cam thảo 10%'], 'usage_instructions' => ['Hướng dẫn sử dụng', 'VD: Hãm 5g trà với 200ml nước 90°C trong 3–5 phút'], 'storage_instructions' => ['Hướng dẫn bảo quản', 'VD: Nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp']] as $field => [$label, $placeholder])
+                <div class="form-control">
+                    <label class="label py-0 pb-1.5">
+                        <span class="label-text font-medium">{{ $label }}</span>
+                    </label>
+                    <textarea name="{{ $field }}" rows="3" maxlength="5000" placeholder="{{ $placeholder }}"
+                              class="textarea textarea-bordered textarea-sm w-full @error($field) textarea-error @enderror">{{ old($field, $product?->{$field}) }}</textarea>
+                    @error($field)<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                </div>
+                @endforeach
+
+                <div class="flex items-center justify-between pt-2">
+                    <button type="button" @click="tab = 'producer'" class="btn btn-ghost btn-sm gap-1.5">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                        Nhà sản xuất
+                    </button>
+                    <button type="button" @click="tab = 'documents'" class="btn btn-ghost btn-sm gap-1.5">
+                        Tiếp theo: Hồ sơ &amp; Tiêu chuẩn
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+                </div>
+
+            </div>
+
+            {{-- Panel: Hồ sơ & Tiêu chuẩn --}}
+            <div x-show="tab === 'documents'" x-cloak data-tab-label="Hồ sơ &amp; Tiêu chuẩn" class="space-y-5">
+
+                <div>
+                    <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">Nhãn mác &amp; Bao bì</p>
+                    @include('ocop::admin.products._document-field', [
+                        'collection' => 'ocop_label_docs',
+                        'label' => 'Tài liệu thiết kế nhãn mác, bao bì',
+                        'hint' => 'Tài liệu thiết kế nhãn sản phẩm đúng quy định pháp luật (thể hiện rõ tên, logo OCOP, hạn sử dụng, hướng dẫn bảo quản) và quy cách bao bì phù hợp với thị trường.',
+                    ])
+                </div>
+
+                <div class="divider my-1"></div>
+
+                <div class="space-y-5">
+                    <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide">Chất lượng &amp; Tiêu chuẩn kỹ thuật</p>
+                    @include('ocop::admin.products._document-field', [
+                        'collection' => 'ocop_quality_declaration',
+                        'label' => 'Hồ sơ công bố chất lượng',
+                        'hint' => 'Bản tự công bố sản phẩm hoặc số công bố tiêu chuẩn chất lượng (TCCS, TCVN, QCVN...).',
+                    ])
+                    @include('ocop::admin.products._document-field', [
+                        'collection' => 'ocop_test_reports',
+                        'label' => 'Phiếu kiểm nghiệm định kỳ',
+                        'hint' => 'Kết quả kiểm nghiệm các chỉ tiêu an toàn thực phẩm, sinh học, hóa lý còn thời hạn.',
+                    ])
+                    @include('ocop::admin.products._document-field', [
+                        'collection' => 'ocop_quality_certs',
+                        'label' => 'Chứng nhận quản lý chất lượng',
+                        'badge' => 'Bắt buộc với sản phẩm 4–5 sao',
+                        'hint' => 'Hồ sơ chứng minh cơ sở đạt điều kiện ATTP, hoặc các tiêu chuẩn nâng cao như ISO, HACCP, GMP. Đặc biệt bắt buộc đối với sản phẩm hướng tới 4–5 sao.',
+                    ])
+                </div>
+
+                <div class="flex items-center justify-between pt-2">
+                    <button type="button" @click="tab = 'details'" class="btn btn-ghost btn-sm gap-1.5">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                        Chi tiết &amp; Câu chuyện
                     </button>
                     <span class="text-xs text-base-content/40">Điền xong? Nhấn <strong>{{ $product ? 'Lưu thay đổi' : 'Tạo mới' }}</strong> ở bên phải</span>
                 </div>

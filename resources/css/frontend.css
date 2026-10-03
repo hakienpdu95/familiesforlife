@@ -11,6 +11,8 @@
  * Blade: @vite(['resources/css/frontend.css','resources/js/frontend.js'], 'build/frontend')
  */
 
+@plugin "@tailwindcss/typography";
+
 @plugin "daisyui" {
     themes: portal --default;
     base:   true;
@@ -1276,6 +1278,20 @@
 .detail__footer {
     margin: 1.5rem auto 0;
     max-width: 650px;
+}
+
+
+/* Video nhúng từ Jodit (iframe YouTube mang width/height cứng 560×315) — ép full chiều ngang,
+   tỷ lệ 16:9 trong mọi vùng nội dung .prose. */
+.prose iframe {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    border: 0;
+    border-radius: 0.5rem;
+    margin-block: 1.5em;
 }
 
 

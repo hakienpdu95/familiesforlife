@@ -70,6 +70,12 @@ const COLLECTION_MAX_SIZE = {
     thumbnail:            '5MB',
     cover:                '10MB',
     banner:               '10MB',
+    real_estate_gallery:  '10MB',
+    ocop_gallery:         '10MB',
+    ocop_label_docs:      '20MB',
+    ocop_quality_declaration: '20MB',
+    ocop_test_reports:    '20MB',
+    ocop_quality_certs:   '20MB',
     jodit_content:        '10MB',
     attachments:          '50MB',
     attachments_private:  '50MB',
@@ -82,6 +88,12 @@ const COLLECTION_MIME = {
     thumbnail:           'image/jpeg, image/png, image/webp',
     cover:               'image/jpeg, image/png, image/webp',
     banner:              'image/jpeg, image/png, image/webp',
+    real_estate_gallery: 'image/jpeg, image/png, image/webp',
+    ocop_gallery:        'image/jpeg, image/png, image/webp',
+    ocop_label_docs:     'application/pdf, image/jpeg, image/png, image/webp',
+    ocop_quality_declaration: 'application/pdf, image/jpeg, image/png, image/webp',
+    ocop_test_reports:   'application/pdf, image/jpeg, image/png, image/webp',
+    ocop_quality_certs:  'application/pdf, image/jpeg, image/png, image/webp',
     attachments:         null,  // any
     attachments_private: null,  // any
 };
@@ -178,6 +190,7 @@ function initFilePondUpload(selector, options = {}) {
 
     const pond = FilePond.create(el, {
         ...DEFAULTS,
+        name:          'file',
         allowMultiple: !isSingle,
         maxFiles:      isSingle ? 1 : (rest.maxFiles ?? 10),
         maxFileSize:   maxSize,

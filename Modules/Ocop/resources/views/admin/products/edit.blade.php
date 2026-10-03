@@ -44,18 +44,25 @@
         'resources/js/modules/toastify.js',
         'resources/js/modules/tom-select.js',
         'resources/js/modules/filepond.js',
+        'resources/js/modules/jodit.js',
         'Modules/Ocop/resources/assets/js/ocop.js',
     ], 'build/backend')
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const coverEl = document.getElementById('cover-filepond');
-        if (window.initFilePondUpload && coverEl) {
-            initFilePondUpload(coverEl, {
-                collection: 'cover',
-                contextType: coverEl.dataset.contextType,
-                contextId: coverEl.dataset.contextId,
+        const galleryEl = document.getElementById('gallery-filepond');
+        if (window.initFilePondUpload && galleryEl) {
+            initFilePondUpload(galleryEl, {
+                collection: 'ocop_gallery',
+                contextType: galleryEl.dataset.contextType,
+                contextId: galleryEl.dataset.contextId,
+                maxFiles: Number(galleryEl.dataset.maxFiles),
                 allowRevert: true,
             });
+        }
+
+        const storyEl = document.getElementById('ocop-story');
+        if (window.initJodit && storyEl) {
+            initJodit(storyEl, { showWordsCounter: true, showCharsCounter: true });
         }
     });
     </script>

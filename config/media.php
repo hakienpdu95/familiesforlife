@@ -69,6 +69,40 @@ return [
             'is_public'    => true,
             'conversions'  => ['thumb', 'medium'],
         ],
+        'ocop_gallery' => [
+            'max_size_kb'  => 10240,
+            'allowed_mime' => ['image/jpeg', 'image/png', 'image/webp'],
+            'is_public'    => true,
+            'conversions'  => ['thumb', 'medium', 'preview'],
+        ],
+        'ocop_label_docs' => [
+            'max_size_kb'  => 20480,
+            'allowed_mime' => ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'],
+            'is_public'    => false,
+            'disk'         => 'local',
+            'conversions'  => [],
+        ],
+        'ocop_quality_declaration' => [
+            'max_size_kb'  => 20480,
+            'allowed_mime' => ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'],
+            'is_public'    => false,
+            'disk'         => 'local',
+            'conversions'  => [],
+        ],
+        'ocop_test_reports' => [
+            'max_size_kb'  => 20480,
+            'allowed_mime' => ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'],
+            'is_public'    => false,
+            'disk'         => 'local',
+            'conversions'  => [],
+        ],
+        'ocop_quality_certs' => [
+            'max_size_kb'  => 20480,
+            'allowed_mime' => ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'],
+            'is_public'    => false,
+            'disk'         => 'local',
+            'conversions'  => [],
+        ],
         // spec/Media_Library_Technical_Specification.md §7.5 — collection riêng cho Banner,
         // KHÔNG dùng chung `cover`: `.banner-slot__img { width:100%; height:auto }` không ép
         // aspect ratio cố định, trong khi `cover.thumb` crop cứng 150×150 vuông sẽ làm méo/cắt

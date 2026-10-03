@@ -430,7 +430,14 @@
     ],
     [
         "ocop_products///add///__///",
-        "heritage_site_id///unsignedBigInteger///__///_NULL///NULL///->constrained('heritage_sites')->onDelete('set null')///__"
+        "heritage_site_id///unsignedBigInteger///__///_NULL///NULL///->constrained('heritage_sites')->onDelete('set null')///__",
+        "story///longText///__///_NULL///NULL///__///Câu chuyện sản phẩm (HTML từ Jodit)",
+        "origin///string///255///_NULL///NULL///__///Xuất xứ",
+        "production_date///string///100///_NULL///NULL///__///Ngày sản xuất",
+        "shelf_life///string///100///_NULL///NULL///__///Hạn sử dụng",
+        "ingredients///text///__///_NULL///NULL///__///Thành phần",
+        "usage_instructions///text///__///_NULL///NULL///__///Hướng dẫn sử dụng",
+        "storage_instructions///text///__///_NULL///NULL///__///Hướng dẫn bảo quản"
     ],
     [
         "content_foundations///add///__///",

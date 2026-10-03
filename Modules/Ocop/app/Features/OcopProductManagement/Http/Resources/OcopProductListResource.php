@@ -14,7 +14,7 @@ class OcopProductListResource extends JsonResource
 
         return [
             'id'          => $this->id,
-            'image_url'   => $this->getFirstMediaUrl('cover', 'thumb'),
+            'image_url'   => $this->imageUrl('thumb'),
             'name'        => $this->name,
             'is_featured' => (bool) $this->is_featured,
             'category'    => $this->category?->name,

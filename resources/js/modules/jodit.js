@@ -35,6 +35,7 @@
 import { Jodit } from 'jodit';
 import 'jodit/esm/plugins/all.js';
 import 'jodit/es2021/jodit.min.css';
+import '../../css/jodit-overrides.css';
 import { Dom } from 'jodit/esm/core/dom/index.js';
 import { css } from 'jodit/esm/core/helpers/utils/css.js';
 import { hAlignElement } from 'jodit/esm/core/helpers/utils/align.js';
@@ -115,6 +116,24 @@ window.addEventListener('pagehide', () => {
     }).catch(() => {});
 });
 
+// ── Video embed (YouTube) ──────────────────────────────────────────────
+// Thay convertMediaUrlToVideoEmbed mặc định của Jodit: (1) CSP frame-src chỉ cho phép
+// www.youtube-nocookie.com (app/Http/Middleware/SecurityHeaders.php, cùng embed_domain của
+// Modules/Video) — iframe www.youtube.com/embed của Jodit bị chặn; (2) bản gốc không nhận
+// link chia sẻ youtu.be/ID?si=..., /shorts/ID, m.youtube.com.
+const YOUTUBE_ID = /(?:youtube(?:-nocookie)?\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/|v\/)|youtu\.be\/)([\w-]{11})/i;
+
+function youtubeEmbed(url) {
+    const match = String(url).trim().match(YOUTUBE_ID);
+    if (!match) return url;
+
+    return '<iframe width="560" height="315" '
+        + `src="https://www.youtube-nocookie.com/embed/${match[1]}" `
+        + 'title="YouTube video" frameborder="0" '
+        + 'allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" '
+        + 'referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>';
+}
+
 // ── Editor config ──────────────────────────────────────────────────────
 
 const BASE_UPLOADER = {
@@ -144,6 +163,10 @@ const BASE = {
     theme:                'default',
     toolbar:              true,
     toolbarInline:        true,
+    // Jodit mặc định co toolbar theo bề rộng editor (< 900px → bộ buttonsMD riêng của Jodit
+    // kèm nút "⋮"), bỏ qua `buttons` của preset — cùng 1 preset nhưng khác nút tuỳ cột chứa
+    // editor rộng/hẹp. Tắt để mọi nơi luôn dùng đúng `buttons` của preset; màn hẹp thì xuống dòng.
+    toolbarAdaptive:      false,
     showCharsCounter:     false,
     showWordsCounter:     false,
     showXPathInStatusbar: false,
@@ -158,6 +181,21 @@ const BASE = {
     // (độc lập với sourceEditor ở trên) — cùng lý do, tắt hẳn để không phụ thuộc CDN ngoài.
     beautifyHTML:         false,
     uploader:             BASE_UPLOADER,
+    // Jodit 4 mặc định denyTags có 'iframe' → video vừa chèn bị xoá ngay, chỉ còn wrapper
+    // <jodit data-jodit_iframe_wrapper> rỗng; sandboxIframesInContent gắn sandbox="" khiến
+    // YouTube không phát. Chỉ iframe YouTube được giữ lại khi lưu — lọc phía server
+    // (ArticleContentRenderer::sanitizeTextHtml).
+    cleanHTML: {
+        denyTags:                'script,object,embed',
+        sandboxIframesInContent: false,
+    },
+    // Plugin resizer bọc mọi iframe vào <jodit data-jodit_iframe_wrapper> với width/height cứng
+    // đo tại thời điểm bọc (0×0 nếu editor khởi tạo trong tab ẩn) + lớp phủ :after chặn click —
+    // video thành khối trống. Bỏ 'iframe' để render iframe trực tiếp; co giãn bằng jodit-overrides.css.
+    allowResizeTags: new Set(['img', 'table', 'jodit']),
+    video: {
+        parseUrlToVideoEmbed: youtubeEmbed,
+    },
     popup: {
         img: [
             {
@@ -231,7 +269,7 @@ const PRESETS = {
             'bold', 'italic', 'underline', 'strikethrough', '|',
             'ul', 'ol', '|',
             'font', 'fontsize', 'paragraph', '|',
-            'image', 'link', '|',
+            'image', 'video', 'link', '|',
             'align', '|',
             'undo', 'redo', '|',
             'hr', 'fullsize', 'source',

@@ -17,16 +17,6 @@ use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 use Spatie\MediaLibrary\HasMedia;
 
-/**
- * spec/Province_Showcase_Technical_Specification.md §3.4 — sản phẩm OCOP, tài sản nền tảng
- * (không organization_id). province_code/ward_code KHÔNG FK cứng — cùng convention PostArticle/
- * Event (denormalize tên tại thời điểm chọn), NHƯNG khác Post ở chỗ đây LÀ địa chỉ thật của nhà
- * sản xuất (bắt buộc chọn khi tạo sản phẩm, xem §4.2), không phải gắn lỏng cho mục đích lọc.
- *
- * spec/Media_Library_Technical_Specification.md §7.5/§8 — ảnh sản phẩm qua Media (collection
- * `cover`, dùng nguyên trạng — đã chốt phù hợp vì hiển thị vuông mọi nơi), thay 4 cột phẳng
- * `image_path`/`image_width`/`image_height`/`image_size_bytes` cũ (đã xoá).
- */
 class OcopProduct extends Model implements HasMedia
 {
     use HasTenantMedia;
@@ -34,10 +24,25 @@ class OcopProduct extends Model implements HasMedia
     use Searchable;
     use SoftDeletes;
 
+    public const IMAGE_COLLECTION = 'ocop_gallery';
+
+    public const MAX_IMAGES = 10;
+
+    public const DOCUMENT_COLLECTIONS = [
+        'ocop_label_docs',
+        'ocop_quality_declaration',
+        'ocop_test_reports',
+        'ocop_quality_certs',
+    ];
+
+    public const MAX_DOCUMENTS = 10;
+
     protected $table = 'ocop_products';
 
     protected $fillable = [
         'uuid', 'category_id', 'name', 'slug', 'star_rating', 'description',
+        'story', 'origin', 'production_date', 'shelf_life',
+        'ingredients', 'usage_instructions', 'storage_instructions',
         'province_code', 'province_name', 'ward_code', 'ward_name',
         'producer_name', 'producer_address', 'heritage_site_id',
         'purchase_url', 'status', 'is_featured', 'sort_order',
@@ -94,6 +99,21 @@ class OcopProduct extends Model implements HasMedia
     public function updatedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    // ── Media ────────────────────────────────────────────────────────
+
+    public function imageUrl(string $conversion = ''): string
+    {
+        return $this->getFirstMediaUrl(self::IMAGE_COLLECTION, $conversion);
+    }
+
+    /** UUID ảnh Jodit (`data-media-uuid`) đang được nhắc tới trong câu chuyện sản phẩm. */
+    public function storyMediaUuids(): array
+    {
+        preg_match_all('/data-media-uuid="([^"]+)"/', (string) $this->story, $matches);
+
+        return array_values(array_unique($matches[1]));
     }
 
     // ── Scopes ───────────────────────────────────────────────────────

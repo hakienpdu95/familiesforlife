@@ -38,7 +38,7 @@ class PublicHeritageController extends Controller
      */
     public function show(string $slug): View
     {
-        $site = HeritageSite::published()->where('slug', $slug)->first();
+        $site = HeritageSite::published()->with('createdBy.authorProfile')->where('slug', $slug)->first();
 
         abort_unless($site, 404);
 

@@ -76,6 +76,22 @@ class OcopCategory extends Model
         return $this->hasMany(self::class, 'parent_id')->orderBy('sort_order');
     }
 
+    /** Mã đầy đủ theo cây danh mục, VD `I.5.b` (Ngành I → Nhóm 5 → Phân nhóm b). */
+    public function fullCode(): ?string
+    {
+        $codes = [];
+        $node = $this;
+
+        while ($node) {
+            if (filled($node->code)) {
+                array_unshift($codes, $node->code);
+            }
+            $node = $node->parent_id ? $node->parent : null;
+        }
+
+        return $codes ? implode('.', $codes) : null;
+    }
+
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(\App\Models\User::class, 'created_by');

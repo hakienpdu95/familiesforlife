@@ -1,0 +1,10 @@
+/* Video YouTube nhúng trong vùng soạn thảo Jodit — co theo bề rộng editor, giữ tỷ lệ 16:9. */
+.jodit-wysiwyg iframe {
+    display: block;
+    width: 100%;
+    max-width: 560px;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    border: 0;
+    margin: 0.75em 0;
+}
