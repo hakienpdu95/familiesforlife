@@ -20,6 +20,8 @@ use Modules\Ocop\Features\OcopProductManagement\Actions\UpdateOcopProductAction;
 use Modules\Ocop\Features\OcopProductManagement\Data\OcopProductData;
 use Modules\Ocop\Models\OcopCategory;
 use Modules\Ocop\Models\OcopProduct;
+use Modules\OcopSubject\Features\OcopSubjectManagement\Queries\ListOcopSubjectsForPickerHandler;
+use Modules\OcopSubject\Features\OcopSubjectManagement\Queries\ListOcopSubjectsForPickerQuery;
 
 /** spec/Province_Showcase_Technical_Specification.md §6.1 — Post-style (draft/published), không có bước duyệt. */
 class OcopProductAdminController extends Controller
@@ -37,15 +39,19 @@ class OcopProductAdminController extends Controller
         return view('ocop::admin.products.index', compact('categories'));
     }
 
-    public function create(): View
+    public function create(Request $request, ListOcopSubjectsForPickerHandler $ocopSubjectPicker): View
     {
         // Cây danh mục OCOP chính thức (spec/danhmuc.html) dạng phẳng kèm depth — <select> hiển
         // thị thụt lề đúng cấp bậc I → Nhóm → Phân nhóm, thay vì liệt kê phẳng theo tên.
         $categoryTree = OcopCategory::flatTree();
         $statuses = OcopProductStatus::cases();
         $heritageSites = $this->heritageSitesForPicker();
+        $ocopSubjects = $ocopSubjectPicker->handle(new ListOcopSubjectsForPickerQuery);
 
-        return view('ocop::admin.products.create', compact('categoryTree', 'statuses', 'heritageSites'));
+        $selectedSubjectId = $request->integer('subject_id');
+        $selectedSubjectId = $ocopSubjects->contains('id', $selectedSubjectId) ? $selectedSubjectId : null;
+
+        return view('ocop::admin.products.create', compact('categoryTree', 'statuses', 'heritageSites', 'ocopSubjects', 'selectedSubjectId'));
     }
 
     public function store(Request $request, CreateOcopProductAction $action, StoreOcopProductDocumentsAction $storeDocuments): RedirectResponse
@@ -59,14 +65,15 @@ class OcopProductAdminController extends Controller
             ->with('success', "Đã tạo sản phẩm OCOP \"{$product->name}\".");
     }
 
-    public function edit(OcopProduct $product): View
+    public function edit(OcopProduct $product, ListOcopSubjectsForPickerHandler $ocopSubjectPicker): View
     {
         // Cùng lý do create() ở trên.
         $categoryTree = OcopCategory::flatTree();
         $statuses = OcopProductStatus::cases();
         $heritageSites = $this->heritageSitesForPicker();
+        $ocopSubjects = $ocopSubjectPicker->handle(new ListOcopSubjectsForPickerQuery($product->ocop_subject_id));
 
-        return view('ocop::admin.products.edit', compact('product', 'categoryTree', 'statuses', 'heritageSites'));
+        return view('ocop::admin.products.edit', compact('product', 'categoryTree', 'statuses', 'heritageSites', 'ocopSubjects'));
     }
 
     public function update(Request $request, OcopProduct $product, UpdateOcopProductAction $action, StoreOcopProductDocumentsAction $storeDocuments): RedirectResponse
@@ -141,10 +148,7 @@ class OcopProductAdminController extends Controller
             'ingredients' => ['nullable', 'string', 'max:5000'],
             'usage_instructions' => ['nullable', 'string', 'max:5000'],
             'storage_instructions' => ['nullable', 'string', 'max:5000'],
-            'province_code' => ['nullable', 'string', 'size:2', 'exists:provinces,province_code'],
-            'ward_code' => ['nullable', 'string', 'exists:wards,ward_code'],
-            'producer_name' => ['nullable', 'string', 'max:150'],
-            'producer_address' => ['nullable', 'string', 'max:255'],
+            'ocop_subject_id' => ['required', 'integer', Rule::exists('ocop_subjects', 'id')->whereNull('deleted_at')],
             // spec/Heritage_Technical_Specification.md §8.2 — tuỳ chọn.
             'heritage_site_id' => ['nullable', 'integer', 'exists:heritage_sites,id'],
             // spec/Media_Library_Technical_Specification.md §8 — media_uuids chỉ dùng ở create
@@ -167,10 +171,8 @@ class OcopProductAdminController extends Controller
             'name.max' => 'Tên sản phẩm không được vượt quá :max ký tự.',
             'star_rating.required' => 'Vui lòng chọn hạng sao.',
             'star_rating.in' => 'Hạng sao không hợp lệ — chỉ chấp nhận 3, 4 hoặc 5 sao.',
-            'province_code.exists' => 'Tỉnh/thành được chọn không hợp lệ.',
-            'ward_code.exists' => 'Phường/xã được chọn không hợp lệ.',
-            'producer_name.max' => 'Tên nhà sản xuất không được vượt quá :max ký tự.',
-            'producer_address.max' => 'Địa chỉ nhà sản xuất không được vượt quá :max ký tự.',
+            'ocop_subject_id.required' => 'Vui lòng chọn chủ thể sản xuất.',
+            'ocop_subject_id.exists' => 'Chủ thể được chọn không hợp lệ.',
             'media_uuids.max' => 'Tối đa :max ảnh cho mỗi sản phẩm.',
             'documents.*.max' => 'Tối đa :max tệp cho mỗi loại hồ sơ.',
             'documents.*.*.file' => 'Tệp tải lên không hợp lệ.',

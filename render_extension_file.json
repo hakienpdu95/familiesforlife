@@ -345,7 +345,9 @@
     ],
     [
         "provinces///add///__///",
-        "slug///string///255///_NULL///NULL///->unique()///__"
+        "slug///string///255///_NULL///NULL///->unique()///__",
+        "is_featured///boolean///__///NOT_NULL///false///->index()///__",
+        "theme_color///string///7///_NULL///NULL///__///__"
     ],
     [
         "ocop_categories///add///__///",

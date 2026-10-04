@@ -110,32 +110,6 @@
             <p class="mt-4 text-base-content/80 leading-relaxed">{{ $product->description }}</p>
             @endif
 
-            <h2 class="text-xs font-semibold text-base-content/50 uppercase tracking-wide mb-3">Thông tin sản phẩm</h2>
-
-            <div class="border border-base-300 rounded-lg p-4 flex gap-3 mb-3">
-                <svg class="w-6 h-6 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                <div>
-                    <p class="text-sm font-semibold">Chứng nhận OCOP {{ $product->star_rating }} sao</p>
-                    <p class="text-sm text-base-content/60">Sản phẩm được đánh giá, phân hạng theo Chương trình Mỗi xã một sản phẩm.</p>
-                </div>
-            </div>
-
-            <div class="border border-base-300 rounded-lg p-4 flex gap-3 mb-3">
-                <svg class="w-6 h-6 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                <div>
-                    <p class="text-sm font-semibold">Nhà sản xuất</p>
-                    <p class="text-sm text-base-content/60">{{ $product->producer_name ?: 'Chưa cập nhật thông tin.' }}</p>
-                </div>
-            </div>
-
-            <div class="border border-base-300 rounded-lg p-4 flex gap-3 mb-3">
-                <svg class="w-6 h-6 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                <div>
-                    <p class="text-sm font-semibold">Địa chỉ</p>
-                    <p class="text-sm text-base-content/60">{{ $address ?: 'Chưa cập nhật thông tin.' }}</p>
-                </div>
-            </div>
-
             @if($heritageSite)
             <div class="border border-base-300 rounded-lg p-4 flex gap-3 mb-3">
                 <svg class="w-6 h-6 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg>
@@ -199,44 +173,72 @@
                 </div>
 
                 <aside class="lg:col-span-4 space-y-6">
-                    @if($product->producer_name)
-                    <div class="rounded-xl border border-base-300 p-4">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50 mb-3">Thương hiệu</p>
-                        <div class="flex gap-3">
-                            <div class="avatar avatar-placeholder shrink-0">
-                                <div class="w-14 rounded-lg bg-primary/10 text-primary">
-                                    <span class="text-xl font-bold">{{ mb_strtoupper(mb_substr($product->producer_name, 0, 1)) }}</span>
-                                </div>
+                    @php
+                        $brandName = $subject?->name ?? $product->producer_name;
+                        $brandAddress = $subject?->fullAddress() ?: $address;
+                    @endphp
+                    @if($brandName)
+                    @php
+                        $brandDesc = collect([$subject?->organization_type?->label(), $brandAddress])->filter()->implode(' · ');
+                        $brandContacts = collect([
+                            'Hotline' => $subject?->hotline ? ['tel:'.preg_replace('/[^0-9+]/', '', $subject->hotline), $subject->hotline, false] : null,
+                            'Email' => $subject?->email ? ['mailto:'.$subject->email, $subject->email, false] : null,
+                            'Website' => $subject?->website ? [$subject->website, preg_replace('#^https?://#', '', rtrim($subject->website, '/')), true] : null,
+                        ])->filter();
+                    @endphp
+                    <div class="overflow-hidden rounded-sm bg-[#f8f9fa]">
+                        <div class="border-b border-[#e0e0e0] px-4 py-3 text-base font-semibold text-[#333]">Thương hiệu</div>
+                        <div class="flex items-center gap-4 p-4">
+                            @if($subjectImages->isNotEmpty())
+                            <a href="{{ $subjectImages[0]['full'] }}" target="_blank" rel="noopener"
+                               class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[#e0e0e0] bg-white">
+                                <img src="{{ $subjectImages[0]['thumb'] }}" alt="{{ $brandName }}" class="h-full w-full object-contain">
+                            </a>
+                            @else
+                            <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border border-[#e0e0e0] bg-white text-2xl font-bold text-[#117a3a]">
+                                {{ mb_strtoupper(mb_substr($brandName, 0, 1)) }}
                             </div>
-                            <div class="min-w-0">
-                                <p class="font-semibold leading-snug">{{ $product->producer_name }}</p>
-                                @if($address)
-                                <p class="mt-1 text-sm text-base-content/60 line-clamp-2">{{ $address }}</p>
+                            @endif
+                            <div class="flex min-w-0 flex-col gap-1">
+                                <h4 class="font-bold uppercase leading-snug text-[#117a3a]">{{ $brandName }}</h4>
+                                @if($brandDesc)
+                                <p class="line-clamp-2 text-sm leading-relaxed text-[#555]">{{ $brandDesc }}</p>
                                 @endif
                                 @if($producerMoreUrl)
-                                <a href="{{ $producerMoreUrl }}" class="mt-1 inline-flex items-center gap-0.5 text-sm font-medium text-primary hover:underline">
+                                <a href="{{ $producerMoreUrl }}" class="inline-flex items-center gap-0.5 self-start text-sm font-medium text-[#117a3a] hover:underline">
                                     Xem thêm
                                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                                 </a>
                                 @endif
                             </div>
                         </div>
+                        @if($brandContacts->isNotEmpty())
+                        <dl class="space-y-1.5 border-t border-[#e0e0e0] px-4 py-3 text-sm">
+                            @foreach($brandContacts as $label => [$href, $text, $external])
+                            <div class="flex gap-2">
+                                <dt class="shrink-0 text-[#555]">{{ $label }}:</dt>
+                                <dd class="min-w-0 break-all">
+                                    <a href="{{ $href }}" @if($external) target="_blank" rel="noopener nofollow" @endif class="text-[#333] hover:text-[#117a3a] hover:underline">{{ $text }}</a>
+                                </dd>
+                            </div>
+                            @endforeach
+                        </dl>
+                        @endif
                     </div>
                     @endif
 
                     <div>
-                        <h3 class="text-base font-bold mb-3">Thông số kỹ thuật</h3>
-                        <div class="overflow-hidden rounded-xl border border-base-300">
-                            <table class="w-full text-sm">
-                                <tbody class="divide-y divide-base-300">
+                        <div class="overflow-hidden rounded-sm bg-[#f8f9fa]">
+                            <table class="w-full table-fixed border-collapse text-sm text-[#333]">
+                                <tbody>
                                     @foreach($specs as $label => $value)
-                                    <tr class="even:bg-base-200/60 align-top">
-                                        <th scope="row" class="w-2/5 px-3 py-2.5 text-left font-medium text-base-content/60">{{ $label }}</th>
-                                        <td class="px-3 py-2.5 break-words">
+                                    <tr class="border-b border-[#e5e5e5] align-top last:border-b-0">
+                                        <th scope="row" class="w-[38%] px-4 py-3 text-left font-semibold">{{ $label }}:</th>
+                                        <td class="px-4 py-3 font-normal break-words">
                                             @if(filled($value))
                                             {!! nl2br(e($value)) !!}
                                             @else
-                                            <span class="text-base-content/40">Đang cập nhật</span>
+                                            <span class="text-[#999]">Đang cập nhật</span>
                                             @endif
                                         </td>
                                     </tr>

@@ -11,10 +11,13 @@ use App\Shared\Tenancy\TenantContext;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Modules\Banner\Models\Banner;
 use Modules\Heritage\Models\HeritageSite;
 use Modules\Ocop\Models\OcopProduct;
+use Modules\OcopSubject\Models\OcopSubject;
 use Modules\Organization\Models\Organization;
 use Modules\Post\Models\PostArticle;
 use Modules\Post\Models\PostAuthorProfile;
@@ -44,6 +47,7 @@ class MediaUploadController extends Controller
     private const ALLOWED_COLLECTIONS = [
         'avatar', 'logo', 'thumbnail', 'cover', 'banner', 'real_estate_gallery', 'ocop_gallery',
         'ocop_label_docs', 'ocop_quality_declaration', 'ocop_test_reports', 'ocop_quality_certs',
+        'ocop_subject_gallery',
         'attachments', 'attachments_private',
     ];
 
@@ -64,6 +68,7 @@ class MediaUploadController extends Controller
         'post_article' => PostArticle::class,
         'post_author_profile' => PostAuthorProfile::class,
         'ocop_product' => OcopProduct::class,
+        'ocop_subject' => OcopSubject::class,
         'heritage_site' => HeritageSite::class,
         'banner' => Banner::class,
         'real_estate_listing' => RealEstateListing::class,
@@ -93,11 +98,26 @@ class MediaUploadController extends Controller
 
         $collectionConfig = config("media.collections.{$collection}", []);
 
-        $request->validate([
-            'file' => ['required', 'file', 'max:'.($collectionConfig['max_size_kb'] ?? 10240)],
-        ]);
+        $uploaded = $request->file('file');
 
-        $file = $request->file('file');
+        if ($uploaded instanceof UploadedFile && ! $uploaded->isValid()) {
+            Log::warning('media.upload.php_error', [
+                'collection' => $collection,
+                'error' => $uploaded->getError(),
+                'message' => $uploaded->getErrorMessage(),
+                'content_length' => $request->header('Content-Length'),
+            ]);
+
+            return in_array($uploaded->getError(), [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)
+                ? response()->json(['message' => 'File vượt giới hạn upload của máy chủ (upload_max_filesize = '.ini_get('upload_max_filesize').').'], 413)
+                : response()->json(['message' => 'Upload thất bại: '.$uploaded->getErrorMessage()], 422);
+        }
+
+        Validator::make(['file' => $uploaded], [
+            'file' => ['required', 'file', 'max:'.($collectionConfig['max_size_kb'] ?? 10240)],
+        ])->validate();
+
+        $file = $uploaded;
         $allowedMime = $collectionConfig['allowed_mime'] ?? ['*'];
 
         if ($allowedMime !== ['*'] && ! in_array($file->getMimeType(), $allowedMime, true)) {

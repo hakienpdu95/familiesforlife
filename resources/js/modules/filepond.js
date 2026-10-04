@@ -76,6 +76,7 @@ const COLLECTION_MAX_SIZE = {
     ocop_quality_declaration: '20MB',
     ocop_test_reports:    '20MB',
     ocop_quality_certs:   '20MB',
+    ocop_subject_gallery: '10MB',
     jodit_content:        '10MB',
     attachments:          '50MB',
     attachments_private:  '50MB',
@@ -94,6 +95,7 @@ const COLLECTION_MIME = {
     ocop_quality_declaration: 'application/pdf, image/jpeg, image/png, image/webp',
     ocop_test_reports:   'application/pdf, image/jpeg, image/png, image/webp',
     ocop_quality_certs:  'application/pdf, image/jpeg, image/png, image/webp',
+    ocop_subject_gallery: 'image/jpeg, image/png, image/webp',
     attachments:         null,  // any
     attachments_private: null,  // any
 };

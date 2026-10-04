@@ -1,0 +1,11 @@
+{
+    "name": "OcopSubject",
+    "alias": "ocopsubject",
+    "description": "Chủ thể OCOP (doanh nghiệp/HTX/hộ kinh doanh) — hồ sơ pháp lý, địa chỉ, chứng nhận; 1 chủ thể có nhiều sản phẩm OCOP (spec/OcopSubject_Technical_Specification.md).",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\OcopSubject\\Providers\\OcopSubjectServiceProvider"
+    ],
+    "files": []
+}

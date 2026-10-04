@@ -407,6 +407,16 @@
         </div>
         @endcan
 
+        @can(\App\Enums\PermissionEnum::OCOP_SUBJECT_MANAGE->value)
+        <div class="nav-group">
+            <a href="{{ route('backend.ocop-subjects.index') }}"
+               class="nav-link {{ request()->routeIs('backend.ocop-subjects.*') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6"/></svg>
+                <span class="nav-label">Chủ thể OCOP</span>
+            </a>
+        </div>
+        @endcan
+
         @can(\App\Enums\PermissionEnum::PROVINCE_MANAGE->value)
         <div class="nav-group">
             <a href="{{ route('backend.provinces.index') }}"

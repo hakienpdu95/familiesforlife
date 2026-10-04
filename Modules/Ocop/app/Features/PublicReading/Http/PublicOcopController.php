@@ -12,6 +12,7 @@ use Modules\Ocop\Features\PublicReading\Queries\ListPublishedOcopProductsHandler
 use Modules\Ocop\Features\PublicReading\Queries\ListPublishedOcopProductsQuery;
 use Modules\Ocop\Models\OcopCategory;
 use Modules\Ocop\Models\OcopProduct;
+use Modules\OcopSubject\Models\OcopSubject;
 
 /**
  * spec/Province_Showcase_Technical_Specification.md §8 (Definition of Done #5) — trang chi tiết
@@ -39,7 +40,7 @@ class PublicOcopController extends Controller
     {
         $product = OcopProduct::where('status', OcopProductStatus::Published)
             ->where('slug', $slug)
-            ->with('category.parent.parent')
+            ->with(['category.parent.parent', 'ocopSubject.media'])
             ->first();
 
         abort_unless($product, 404);
@@ -58,6 +59,16 @@ class PublicOcopController extends Controller
             ])
             ->values();
 
-        return view('ocop::public.show', compact('product', 'heritageSite', 'images'));
+        $subject = $product->ocopSubject;
+        $subjectImages = $subject
+            ? $subject->getMedia(OcopSubject::IMAGE_COLLECTION)
+                ->map(fn ($media) => [
+                    'full' => $mediaUrl->url($media, 'medium'),
+                    'thumb' => $mediaUrl->url($media, 'thumb'),
+                ])
+                ->values()
+            : collect();
+
+        return view('ocop::public.show', compact('product', 'heritageSite', 'images', 'subject', 'subjectImages'));
     }
 }

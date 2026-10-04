@@ -14,13 +14,19 @@ return new class extends Migration {
             if (!Schema::hasColumn('provinces', 'slug')) {
                 $table->string('slug', 255)->nullable()->unique();
             }
+            if (!Schema::hasColumn('provinces', 'is_featured')) {
+                $table->boolean('is_featured')->default(false)->index()->after('slug');
+            }
+            if (!Schema::hasColumn('provinces', 'theme_color')) {
+                $table->string('theme_color', 7)->nullable()->after('is_featured');
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('provinces', function (Blueprint $table) {
-            $cols = array_filter(['slug'], fn($c) => Schema::hasColumn('provinces', $c));
+            $cols = array_filter(['slug', 'is_featured', 'theme_color'], fn($c) => Schema::hasColumn('provinces', $c));
             if (!empty($cols)) $table->dropColumn(array_values($cols));
         });
     }

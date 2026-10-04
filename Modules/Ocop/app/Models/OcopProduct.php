@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
 use Modules\Ocop\Enums\OcopProductStatus;
+use Modules\OcopSubject\Models\OcopSubject;
 use Modules\Post\Models\PostArticle;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
@@ -40,7 +41,7 @@ class OcopProduct extends Model implements HasMedia
     protected $table = 'ocop_products';
 
     protected $fillable = [
-        'uuid', 'category_id', 'name', 'slug', 'star_rating', 'description',
+        'uuid', 'category_id', 'ocop_subject_id', 'name', 'slug', 'star_rating', 'description',
         'story', 'origin', 'production_date', 'shelf_life',
         'ingredients', 'usage_instructions', 'storage_instructions',
         'province_code', 'province_name', 'ward_code', 'ward_name',
@@ -83,6 +84,11 @@ class OcopProduct extends Model implements HasMedia
     public function category(): BelongsTo
     {
         return $this->belongsTo(OcopCategory::class, 'category_id');
+    }
+
+    public function ocopSubject(): BelongsTo
+    {
+        return $this->belongsTo(OcopSubject::class, 'ocop_subject_id');
     }
 
     /** §3.4.1 — bài viết Post nhắc tới sản phẩm này (many-to-many, tuỳ chọn). */

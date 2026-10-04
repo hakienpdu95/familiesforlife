@@ -24,10 +24,7 @@ class OcopProductData extends Data
         public readonly ?string $usage_instructions = null,
         public readonly ?string $storage_instructions = null,
 
-        public readonly ?string $province_code = null,
-        public readonly ?string $ward_code = null,
-        public readonly ?string $producer_name = null,
-        public readonly ?string $producer_address = null,
+        public readonly ?int $ocop_subject_id = null,
 
         // spec/Heritage_Technical_Specification.md §8.2 — làng nghề/di tích liên quan, tuỳ chọn.
         public readonly ?int $heritage_site_id = null,

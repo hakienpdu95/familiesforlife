@@ -139,6 +139,8 @@ enum PermissionEnum: string
     // — cùng nguyên tắc BANNER_MANAGE.
     case OCOP_MANAGE = 'ocop.manage';
 
+    case OCOP_SUBJECT_MANAGE = 'ocop_subject.manage';
+
     case PROVINCE_MANAGE = 'province.manage';
 
     // ══ HERITAGE (Di tích/di sản có cấu trúc — loại hình, xếp hạng, toạ độ; trục liên kết

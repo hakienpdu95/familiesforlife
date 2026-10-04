@@ -5,8 +5,8 @@
      x-data="{
         tab: 'basic',
         tabFields: {
-            basic:    ['name', 'category_id', 'star_rating', 'description', 'image'],
-            producer: ['province_code', 'ward_code', 'producer_name', 'producer_address', 'purchase_url'],
+            basic:    ['ocop_subject_id', 'name', 'category_id', 'star_rating', 'description', 'image'],
+            producer: ['heritage_site_id', 'purchase_url'],
             details:  ['story', 'origin', 'production_date', 'shelf_life', 'ingredients', 'usage_instructions', 'storage_instructions'],
             documents: {{ Js::from(collect(\Modules\Ocop\Models\OcopProduct::DOCUMENT_COLLECTIONS)->map(fn ($c) => "documents.$c")->values()) }},
         },
@@ -81,6 +81,54 @@
 
             {{-- Panel: Thông tin sản phẩm --}}
             <div x-show="tab === 'basic'" data-tab-label="Thông tin sản phẩm" class="space-y-4">
+
+                @php($selectedSubjectId = (string) old('ocop_subject_id', $selectedSubjectId ?? $product?->ocop_subject_id ?? ''))
+                <div class="form-control"
+                     x-data="{
+                        subjects: {{ Js::from($ocopSubjects->keyBy('id')) }},
+                        selectedId: {{ Js::from($selectedSubjectId) }},
+                        get selected() { return this.subjects[this.selectedId] ?? null; },
+                     }">
+                    <label class="label py-0 pb-1.5">
+                        <span class="label-text font-medium">Chủ thể sản xuất <span class="text-error">*</span></span>
+                        @can('create', \Modules\OcopSubject\Models\OcopSubject::class)
+                        <a href="{{ route('backend.ocop-subjects.create') }}" target="_blank" rel="noopener"
+                           class="label-text-alt link link-primary text-xs">+ Thêm chủ thể mới</a>
+                        @endcan
+                    </label>
+                    <select id="ts-ocop_subject_id" name="ocop_subject_id"
+                            data-req="Vui lòng chọn chủ thể sản xuất"
+                            @change="selectedId = $event.target.value"
+                            class="select select-bordered select-sm w-full ts-init @error('ocop_subject_id') select-error @enderror"
+                            data-ts-placeholder="— Tìm theo tên hoặc mã số định danh —">
+                        <option value=""></option>
+                        @foreach($ocopSubjects as $p)
+                        <option value="{{ $p['id'] }}" @selected($selectedSubjectId === (string) $p['id'])>
+                            {{ $p['name'] }} — {{ $p['tax_code'] }}
+                        </option>
+                        @endforeach
+                    </select>
+                    @error('ocop_subject_id')<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
+
+                    <div x-show="selected" x-cloak x-transition.opacity
+                         class="mt-3 rounded-lg border border-base-300 bg-base-200/40 p-3">
+                        <div class="flex items-start justify-between gap-3">
+                            <p class="font-semibold leading-snug" x-text="selected?.name"></p>
+                            <span class="badge badge-ghost badge-sm shrink-0" x-text="selected?.type"></span>
+                        </div>
+                        <dl class="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
+                            <dt class="text-base-content/50">Mã số định danh</dt>
+                            <dd class="font-mono" x-text="selected?.tax_code"></dd>
+                            <dt class="text-base-content/50">Địa chỉ</dt>
+                            <dd x-text="selected?.address || '—'"></dd>
+                        </dl>
+                        <p class="mt-2 text-xs text-base-content/40">Tỉnh/thành và địa chỉ của sản phẩm lấy theo chủ thể này.</p>
+                    </div>
+
+                    @if($ocopSubjects->isEmpty())
+                    <p class="mt-2 text-xs text-warning">Chưa có chủ thể nào — tạo chủ thể trước khi thêm sản phẩm.</p>
+                    @endif
+                </div>
 
                 <div class="form-control">
                     <label class="label py-0 pb-1.5">
@@ -196,34 +244,6 @@
 
             {{-- Panel: Nhà sản xuất --}}
             <div x-show="tab === 'producer'" data-tab-label="Nhà sản xuất" class="space-y-4">
-
-                <x-address-picker
-                    instance-id="ocop-product"
-                    :province-value="old('province_code', $product?->province_code)"
-                    :ward-value="old('ward_code', $product?->ward_code)"
-                />
-
-                <div class="form-control">
-                    <label class="label py-0 pb-1.5">
-                        <span class="label-text font-medium">Tên nhà sản xuất</span>
-                    </label>
-                    <input type="text" name="producer_name" value="{{ old('producer_name', $product?->producer_name) }}"
-                           data-val-maxlength="150"
-                           class="input input-bordered input-sm w-full @error('producer_name') input-error @enderror"
-                           maxlength="150">
-                    @error('producer_name')<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
-                </div>
-
-                <div class="form-control">
-                    <label class="label py-0 pb-1.5">
-                        <span class="label-text font-medium">Địa chỉ nhà sản xuất</span>
-                    </label>
-                    <input type="text" name="producer_address" value="{{ old('producer_address', $product?->producer_address) }}"
-                           data-val-maxlength="255"
-                           class="input input-bordered input-sm w-full @error('producer_address') input-error @enderror"
-                           maxlength="255">
-                    @error('producer_address')<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
-                </div>
 
                 {{-- spec/Heritage_Technical_Specification.md §8.2 — tuỳ chọn, ưu tiên hiện di
                      tích/làng nghề (intangible/historical_monument) đầu danh sách. --}}

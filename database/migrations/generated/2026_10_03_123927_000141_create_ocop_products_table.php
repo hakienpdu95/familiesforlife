@@ -30,10 +30,6 @@ return new class extends Migration
             $table->string('ward_name', 255)->nullable();
             $table->string('producer_name', 150)->nullable();
             $table->string('producer_address', 255)->nullable();
-            $table->string('image_path', 255)->nullable();
-            $table->unsignedInteger('image_width')->nullable();
-            $table->unsignedInteger('image_height')->nullable();
-            $table->unsignedInteger('image_size_bytes')->nullable();
             $table->string('purchase_url', 500)->nullable();
             $table->string('status', 20)->default('draft');
             $table->boolean('is_featured')->default(false);

@@ -50,6 +50,7 @@ const JS_OUTPUT = {
   'event':                  'assets/modules/event.[hash].js',
   'menu':                   'assets/modules/menu.[hash].js',
   'ocop':                   'assets/modules/ocop.[hash].js',
+  'ocop-subject':               'assets/modules/ocop-subject.[hash].js',
   'realestate':             'assets/modules/realestate.[hash].js',
   'video':                  'assets/modules/video.[hash].js',
   'content-calendar':       'assets/modules/content-calendar.[hash].js',
@@ -86,6 +87,7 @@ const CSS_OUTPUT = {
   'event.css':                  'assets/modules/event.[hash].css',
   'menu.css':                   'assets/modules/menu.[hash].css',
   'ocop.css':                   'assets/modules/ocop.[hash].css',
+  'ocop-subject.css':               'assets/modules/ocop-subject.[hash].css',
   'realestate.css':             'assets/modules/realestate.[hash].css',
   'content-calendar.css':       'assets/modules/content-calendar.[hash].css',
   'bulk-ideation-prompt-studio.css': 'assets/modules/bulk-ideation-prompt-studio.[hash].css',
@@ -141,6 +143,8 @@ const MODULE_ENTRIES = [
   // Ocop
   'Modules/Ocop/resources/assets/sass/ocop.scss',
   'Modules/Ocop/resources/assets/js/ocop.js',
+  'Modules/OcopSubject/resources/assets/sass/ocop-subject.scss',
+  'Modules/OcopSubject/resources/assets/js/ocop-subject.js',
   // ProvinceShowcase
   'Modules/ProvinceShowcase/resources/assets/js/province-showcase.js',
   // Heritage

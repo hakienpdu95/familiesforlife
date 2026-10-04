@@ -35,5 +35,6 @@
     "Heritage": true,
     "EntityComparison": true,
     "VideoSeriesPromptStudio": true,
-    "BulkIdeationPromptStudio": true
+    "BulkIdeationPromptStudio": true,
+    "OcopSubject": true
 }
