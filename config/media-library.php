@@ -16,7 +16,7 @@ return [
 
     'disk_name' => env('MEDIA_DISK', 'public'),
 
-    'max_file_size' => 1024 * 1024 * 50, // 50 MB global cap
+    'max_file_size' => 1024 * 1024 * 500, // 500 MB global cap — per-collection limits live in config/media.php
 
     'temporary_upload_expiration_time_in_minutes' => 30,
 

@@ -44,11 +44,8 @@ return [
 
     'site_logo_url' => env('APP_SITE_LOGO_URL'),
 
-    // Phân tách bằng dấu phẩy trong .env, VD: APP_SITE_SOCIAL_LINKS="https://facebook.com/...,https://youtube.com/..."
     'site_social_links' => array_filter(explode(',', (string) env('APP_SITE_SOCIAL_LINKS', ''))),
 
-    // Trước đây hardcode riêng trong Modules/Post/resources/views/public/home.blade.php — gộp về
-    // đây để Organization JSON-LD site-wide (layouts/frontend.blade.php) dùng chung 1 nguồn.
     'site_description' => env('APP_SITE_DESCRIPTION', 'Cẩm nang gia đình — hoạt động, trường học, nuôi dạy con và trải nghiệm cho cả nhà.'),
 
     /*
@@ -101,7 +98,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'Asia/Ho_Chi_Minh',
 
     /*
     |--------------------------------------------------------------------------

@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\FilePondDraft;
 use App\Models\JoditDraft;
 use App\Models\Media;
+use App\Services\Media\FilePondChunkService;
 use App\Services\Media\MediaUploadService;
 use App\Shared\Tenancy\OrganizationScope;
 use Illuminate\Console\Command;
@@ -40,6 +41,12 @@ class MediaCleanupOrphansCommand extends Command
         $this->cleanupJoditOrphans($isDryRun);
         $this->line('');
         $this->cleanupFilePondOrphans($isDryRun);
+
+        if (! $isDryRun) {
+            $purged = app(FilePondChunkService::class)->purgeOlderThan((int) config('media.filepond_orphan_ttl_hours', 72));
+            $this->line('');
+            $this->info("[FilePond] Purged {$purged} unfinished chunk upload(s).");
+        }
 
         return self::SUCCESS;
     }

@@ -15,10 +15,15 @@
         <a href="{{ route('province.public.show', ['type' => $p->place_type, 'slug' => $p->slug]) }}"
            class="group flex flex-col overflow-hidden rounded-xl border border-base-300"
            style="background: linear-gradient(135deg, {{ $item['config']['accent_color'] }} 0%, color-mix(in srgb, {{ $item['config']['accent_color'] }} 60%, black) 100%);">
-            <div class="p-8 text-white">
-                <span class="text-xs font-black uppercase tracking-[0.3em] text-white/70">Chuyên đề</span>
-                <h2 class="text-2xl font-extrabold mt-2 group-hover:underline">{{ $p->name }}</h2>
-                <p class="text-white/85 mt-1.5 text-sm">{{ $item['config']['tagline'] }}</p>
+            <div class="flex items-center gap-5 p-8 text-white">
+                @if($p->logo)
+                <img src="{{ $p->logoUrl() }}" alt="Logo {{ $p->name }}" class="h-16 w-16 shrink-0 rounded-full bg-white object-contain p-1.5" loading="lazy">
+                @endif
+                <div class="min-w-0">
+                    <span class="text-xs font-black uppercase tracking-[0.3em] text-white/70">Chuyên đề</span>
+                    <h2 class="text-2xl font-extrabold mt-2 group-hover:underline">{{ $p->name }}</h2>
+                    <p class="text-white/85 mt-1.5 text-sm">{{ $p->slogan ?: $item['config']['tagline'] }}</p>
+                </div>
             </div>
         </a>
         @endforeach

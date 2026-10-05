@@ -27,6 +27,7 @@ import 'filepond/dist/filepond.min.css';
 import FilePondPluginImagePreview         from 'filepond-plugin-image-preview';
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
 import FilePondPluginFileValidateSize     from 'filepond-plugin-file-validate-size';
+import FilePondPluginFileValidateType     from 'filepond-plugin-file-validate-type';
 import FilePondPluginFileRename           from 'filepond-plugin-file-rename';
 import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orientation';
 
@@ -34,8 +35,26 @@ FilePond.registerPlugin(
     FilePondPluginImageExifOrientation,
     FilePondPluginImagePreview,
     FilePondPluginFileValidateSize,
+    FilePondPluginFileValidateType,
     FilePondPluginFileRename,
 );
+
+const EXTENSION_MIME = {
+    jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif',
+    pdf: 'application/pdf', zip: 'application/zip',
+    mp4: 'video/mp4', webm: 'video/webm', mov: 'video/quicktime',
+};
+
+const MIME_LABEL = {
+    'image/jpeg': 'JPG', 'image/png': 'PNG', 'image/webp': 'WEBP', 'image/gif': 'GIF',
+    'application/pdf': 'PDF', 'application/zip': 'ZIP',
+    'video/mp4': 'MP4', 'video/webm': 'WEBM', 'video/quicktime': 'MOV',
+};
+
+const detectFileType = (file, type) => new Promise((resolve) => {
+    const extension = (file.name ?? '').split('.').pop().toLowerCase();
+    resolve(EXTENSION_MIME[extension] ?? type);
+});
 
 // ── Shared defaults ────────────────────────────────────────────────────
 
@@ -46,10 +65,14 @@ const DEFAULTS = {
     labelIdle:                'Kéo thả file vào đây hoặc <span class="filepond--label-action">Duyệt file</span>',
     labelMaxFileSizeExceeded: 'File quá lớn',
     labelMaxFileSize:         'Kích thước tối đa: {filesize}',
-    labelFileTypeNotAllowed:  'Loại file không được hỗ trợ',
+    labelFileTypeNotAllowed:  'Định dạng file không hợp lệ',
+    fileValidateTypeLabelExpectedTypes:    'Chỉ chấp nhận: {allTypes}',
+    fileValidateTypeLabelExpectedTypesMap: MIME_LABEL,
+    fileValidateTypeDetectType:            detectFileType,
     labelFileProcessing:      'Đang tải lên...',
     labelFileProcessingComplete: 'Tải lên hoàn tất',
     labelFileProcessingAborted:  'Đã hủy',
+    labelFileProcessingError: (error) => error?.body || 'Tải lên thất bại',
     labelTapToCancel:         'nhấn để hủy',
     labelTapToRetry:          'nhấn để thử lại',
     labelTapToUndo:           'nhấn để xóa',
@@ -99,6 +122,8 @@ const COLLECTION_MIME = {
     attachments:         null,  // any
     attachments_private: null,  // any
 };
+
+const chunkSize = () => Number(document.querySelector('meta[name="upload-chunk-size"]')?.content) || 2 * 1024 * 1024 - 64 * 1024;
 
 // Single-file collections — UI shows 1 file max, replaces on new upload
 const SINGLE_FILE_COLLECTIONS = new Set(['avatar', 'logo', 'thumbnail', 'cover', 'banner']);
@@ -197,15 +222,26 @@ function initFilePondUpload(selector, options = {}) {
         maxFiles:      isSingle ? 1 : (rest.maxFiles ?? 10),
         maxFileSize:   maxSize,
         ...(mimeTypes ? { acceptedFileTypes: mimeTypes.split(', ') } : {}),
+        chunkUploads:  true,
+        chunkSize:     chunkSize(),
 
         server: {
             // process: upload file → returns JSON {uuid, url, thumb_url, original}
             process: {
                 url:     '/api/v1/media/upload',
                 method:  'POST',
-                headers: buildHeaders,
-                onload(response) {
-                    const data = JSON.parse(response);
+                headers: (file) => ({
+                    ...buildHeaders(),
+                    ...(file instanceof Blob ? {
+                        'Upload-Length': String(file.size),
+                        'Upload-Name':   encodeURIComponent(file.name ?? 'upload'),
+                    } : {}),
+                }),
+                onload(response, method) {
+                    const isXhr = response instanceof XMLHttpRequest;
+                    if (isXhr && method === 'HEAD') return response.getResponseHeader('Upload-Offset');
+                    if (isXhr && method !== 'POST') return null;
+                    const data = JSON.parse(isXhr ? response.response : response);
                     // ── bindTo: auto-populate hidden input ──────────────
                     if (bindInput) {
                         if (isSingle) {
@@ -226,6 +262,15 @@ function initFilePondUpload(selector, options = {}) {
                         return 'Upload thất bại';
                     }
                 },
+            },
+
+            patch: {
+                url:     '/api/v1/media/upload/chunk/',
+                headers: (chunk) => ({
+                    ...buildHeaders(),
+                    'Content-Type':  'application/offset+octet-stream',
+                    'Upload-Offset': String(chunk.offset),
+                }),
             },
 
             // revert: DELETE /api/v1/media/upload/{uuid}

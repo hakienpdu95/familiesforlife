@@ -30,6 +30,8 @@ Route::middleware(['auth', 'tenant'])
         // FilePond form-field upload (avatar, logo, thumbnail, cover, attachments)
         Route::post('upload',         [MediaUploadController::class, 'store'])->name('upload');
         Route::delete('upload/{uuid}',[MediaUploadController::class, 'destroy'])->name('upload.destroy');
+        Route::patch('upload/chunk/{id}', [MediaUploadController::class, 'chunkAppend'])->whereUuid('id')->name('upload.chunk');
+        Route::match(['HEAD'], 'upload/chunk/{id}', [MediaUploadController::class, 'chunkOffset'])->whereUuid('id')->name('upload.chunk.offset');
     });
 
 /*

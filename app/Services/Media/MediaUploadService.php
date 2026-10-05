@@ -2,6 +2,7 @@
 
 namespace App\Services\Media;
 
+use App\Models\FilePondDraft;
 use App\Models\Media;
 use App\Shared\Tenancy\TenantContext;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +12,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Intervention\Image\Encoders\WebpEncoder;
 use Intervention\Image\Laravel\Facades\Image;
+use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
+use Symfony\Component\Mime\MimeTypes;
 
 class MediaUploadService
 {
@@ -58,6 +61,9 @@ class MediaUploadService
             ? TenantContext::getOrganizationId()
             : null;
         $media->uploaded_at     = now();
+        if (! empty($options['uuid'])) {
+            $media->uuid = $options['uuid'];
+        }
         $media->save();
         $this->moveMediaFiles($media, $oldBasePath);
 
@@ -176,6 +182,30 @@ class MediaUploadService
      * @param  string[]  $uuids       UUIDs collected from FilePond bindTo / onUploaded
      * @param  string    $collection  'avatar' | 'logo' | 'thumbnail' | 'cover' | 'attachments' | 'attachments_private'
      */
+    public function attachFilePondDrafts(HasMedia&Model $model, array $uuids, string $collection, int $userId): int
+    {
+        if (empty($uuids)) {
+            return 0;
+        }
+
+        $draftIds = FilePondDraft::query()->where('user_id', $userId)->pluck('id');
+
+        return Media::withoutTenant()
+            ->whereIn('uuid', $uuids)
+            ->where('collection_name', $collection)
+            ->where('model_type', FilePondDraft::class)
+            ->whereIn('model_id', $draftIds)
+            ->get()
+            ->each(function (Media $media) use ($model) {
+                $oldBasePath = rtrim(dirname($media->getPathRelativeToRoot()), '/');
+                $media->model_type = get_class($model);
+                $media->model_id   = $model->getKey();
+                $media->save();
+                $this->moveMediaFiles($media, $oldBasePath);
+            })
+            ->count();
+    }
+
     public function reassociateFilePondDrafts(HasMedia&Model $model, array $uuids, string $collection): void
     {
         if (empty($uuids)) {
@@ -313,16 +343,46 @@ class MediaUploadService
         $maxKb = $collectionConfig['max_size_kb'] ?? 51200;
         if ($file->getSize() > $maxKb * 1024) {
             throw ValidationException::withMessages([
-                'file' => ["File quá lớn. Tối đa {$maxKb} KB."],
+                'file' => [self::tooLargeMessage($file->getClientOriginalName(), $maxKb)],
             ]);
         }
 
         $allowedMime = $collectionConfig['allowed_mime'] ?? ['*'];
         if ($allowedMime !== ['*'] && ! in_array($file->getMimeType(), $allowedMime, true)) {
             throw ValidationException::withMessages([
-                'file' => ['Loại file không được phép.'],
+                'file' => [self::invalidTypeMessage($file->getClientOriginalName(), $allowedMime)],
             ]);
         }
+    }
+
+    public static function invalidTypeMessage(string $fileName, array $allowedMime): string
+    {
+        $labels = collect($allowedMime)
+            ->map(fn (string $mime) => MimeTypes::getDefault()->getExtensions($mime)[0] ?? Str::after($mime, '/'))
+            ->map(fn (string $ext) => strtoupper($ext === 'jpeg' ? 'jpg' : $ext))
+            ->unique()
+            ->implode(', ');
+
+        return "File '{$fileName}' có định dạng không hợp lệ. Chỉ chấp nhận: {$labels}.";
+    }
+
+    public static function tooLargeMessage(string $fileName, int $maxKb): string
+    {
+        $limit = $maxKb >= 1024 ? round($maxKb / 1024).' MB' : $maxKb.' KB';
+
+        return "File '{$fileName}' quá lớn. Tối đa {$limit}.";
+    }
+
+    public static function extensionAllowed(string $fileName, array $allowedMime): bool
+    {
+        if ($allowedMime === ['*']) {
+            return true;
+        }
+
+        $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+
+        return $extension !== ''
+            && array_intersect(MimeTypes::getDefault()->getMimeTypes($extension), $allowedMime) !== [];
     }
 
     private function collectionConfig(string $collection): array

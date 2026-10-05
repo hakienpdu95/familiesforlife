@@ -5,15 +5,18 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\FilePondDraft;
 use App\Models\Media;
+use App\Services\Media\FilePondChunkService;
 use App\Services\Media\MediaUploadService;
 use App\Services\Media\MediaUrlService;
 use App\Shared\Tenancy\TenantContext;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 use Modules\Banner\Models\Banner;
 use Modules\Heritage\Models\HeritageSite;
 use Modules\Ocop\Models\OcopProduct;
@@ -77,6 +80,7 @@ class MediaUploadController extends Controller
     public function __construct(
         private readonly MediaUploadService $uploadService,
         private readonly MediaUrlService $urlService,
+        private readonly FilePondChunkService $chunkService,
     ) {}
 
     /**
@@ -98,6 +102,18 @@ class MediaUploadController extends Controller
 
         $collectionConfig = config("media.collections.{$collection}", []);
 
+        if ($request->hasHeader('Upload-Length') && ! $request->hasFile('file')) {
+            $id = $this->chunkService->start(
+                $this->resolveModel($request),
+                $collection,
+                (int) $request->header('Upload-Length'),
+                (int) auth()->id(),
+                (string) $request->header('Upload-Name', 'upload'),
+            );
+
+            return response()->json(['uuid' => $id]);
+        }
+
         $uploaded = $request->file('file');
 
         if ($uploaded instanceof UploadedFile && ! $uploaded->isValid()) {
@@ -109,19 +125,26 @@ class MediaUploadController extends Controller
             ]);
 
             return in_array($uploaded->getError(), [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)
-                ? response()->json(['message' => 'File vượt giới hạn upload của máy chủ (upload_max_filesize = '.ini_get('upload_max_filesize').').'], 413)
-                : response()->json(['message' => 'Upload thất bại: '.$uploaded->getErrorMessage()], 422);
+                ? response()->json(['message' => "File '{$uploaded->getClientOriginalName()}' vượt giới hạn upload của máy chủ (upload_max_filesize = ".ini_get('upload_max_filesize').').'], 413)
+                : response()->json(['message' => "File '{$uploaded->getClientOriginalName()}' tải lên thất bại: ".$uploaded->getErrorMessage()], 422);
         }
 
+        $maxKb = $collectionConfig['max_size_kb'] ?? 10240;
+        $fileName = $uploaded instanceof UploadedFile ? $uploaded->getClientOriginalName() : '';
+
         Validator::make(['file' => $uploaded], [
-            'file' => ['required', 'file', 'max:'.($collectionConfig['max_size_kb'] ?? 10240)],
+            'file' => ['required', 'file', 'max:'.$maxKb],
+        ], [
+            'file.required' => 'Không nhận được file tải lên.',
+            'file.file' => 'Không nhận được file tải lên.',
+            'file.max' => MediaUploadService::tooLargeMessage($fileName, $maxKb),
         ])->validate();
 
         $file = $uploaded;
         $allowedMime = $collectionConfig['allowed_mime'] ?? ['*'];
 
         if ($allowedMime !== ['*'] && ! in_array($file->getMimeType(), $allowedMime, true)) {
-            return response()->json(['message' => 'Loại file không được hỗ trợ.'], 422);
+            return response()->json(['message' => MediaUploadService::invalidTypeMessage($fileName, $allowedMime)], 422);
         }
 
         $model = $this->resolveModel($request);
@@ -151,6 +174,36 @@ class MediaUploadController extends Controller
         }
     }
 
+    public function chunkOffset(string $id): Response
+    {
+        $offset = $this->chunkService->offset($id, (int) auth()->id());
+
+        return response('', 200, ['Upload-Offset' => $offset]);
+    }
+
+    public function chunkAppend(Request $request, string $id): Response|JsonResponse
+    {
+        $userId = (int) auth()->id();
+        $collection = $this->chunkService->collection($id, $userId);
+
+        try {
+            $media = $this->chunkService->append(
+                $id,
+                $userId,
+                (int) $request->header('Upload-Offset'),
+                $request->getContent(),
+            );
+        } catch (ValidationException $e) {
+            return response()->json(['message' => collect($e->errors())->flatten()->first()], 422);
+        }
+
+        if ($media && ! ($media->model instanceof FilePondDraft) && in_array($collection, self::SINGLE_FILE_COLLECTIONS, true)) {
+            $this->deleteOldMedia($media->model, $collection, $media->uuid);
+        }
+
+        return response('', 204);
+    }
+
     /**
      * DELETE /api/v1/media/upload/{uuid}
      *
@@ -171,7 +224,9 @@ class MediaUploadController extends Controller
             ->first();
 
         if (! $media) {
-            return response()->json(['message' => 'File không tồn tại.'], 404);
+            return $this->chunkService->discardFor($uuid, (int) auth()->id())
+                ? response()->json(['ok' => true])
+                : response()->json(['message' => 'File không tồn tại.'], 404);
         }
 
         $isDraft = $media->model_type === FilePondDraft::class;
