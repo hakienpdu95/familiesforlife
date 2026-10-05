@@ -5,6 +5,7 @@ namespace Modules\Ocop\Features\OcopProductManagement\Actions;
 use App\Services\Media\MediaUploadService;
 use App\Services\Media\MediaUrlService;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Modules\Ocop\Features\OcopProductManagement\Data\OcopProductData;
 use Modules\Ocop\Models\OcopProduct;
@@ -23,6 +24,14 @@ class CreateOcopProductAction
 
     public function handle(OcopProductData $data): OcopProduct
     {
+        $ocopSubject = $data->ocop_subject_id ? OcopSubject::find($data->ocop_subject_id) : null;
+
+        if (! $ocopSubject) {
+            throw ValidationException::withMessages([
+                'ocop_subject_id' => 'Không tìm thấy Chủ thể OCOP hợp lệ để gán cho sản phẩm.',
+            ]);
+        }
+
         $product = OcopProduct::create([
             'category_id' => $data->category_id,
             'name' => $data->name,
@@ -36,7 +45,7 @@ class CreateOcopProductAction
             'ingredients' => $data->ingredients,
             'usage_instructions' => $data->usage_instructions,
             'storage_instructions' => $data->storage_instructions,
-            ...SyncOcopSubjectSnapshotAction::attributesFor(OcopSubject::findOrFail($data->ocop_subject_id)),
+            ...SyncOcopSubjectSnapshotAction::attributesFor($ocopSubject),
             'heritage_site_id' => $data->heritage_site_id,
             'purchase_url' => $data->purchase_url,
             'status' => $data->status,

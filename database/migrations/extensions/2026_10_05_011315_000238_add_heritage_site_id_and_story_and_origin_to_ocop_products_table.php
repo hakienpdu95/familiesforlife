@@ -35,6 +35,9 @@ return new class extends Migration {
             if (!Schema::hasColumn('ocop_products', 'storage_instructions')) {
                 $table->text('storage_instructions')->nullable()->after('usage_instructions')->comment('Hướng dẫn bảo quản');
             }
+            if (!Schema::hasColumn('ocop_products', 'ocop_subject_id')) {
+                $table->foreignId('ocop_subject_id')->nullable()->constrained('ocop_subjects')->restrictOnDelete()->after('storage_instructions');
+            }
         });
     }
 
@@ -42,7 +45,8 @@ return new class extends Migration {
     {
         Schema::table('ocop_products', function (Blueprint $table) {
             if (Schema::hasColumn('ocop_products', 'heritage_site_id')) $table->dropForeign(['heritage_site_id']);
-            $cols = array_filter(['heritage_site_id', 'story', 'origin', 'production_date', 'shelf_life', 'ingredients', 'usage_instructions', 'storage_instructions'], fn($c) => Schema::hasColumn('ocop_products', $c));
+            if (Schema::hasColumn('ocop_products', 'ocop_subject_id')) $table->dropForeign(['ocop_subject_id']);
+            $cols = array_filter(['heritage_site_id', 'story', 'origin', 'production_date', 'shelf_life', 'ingredients', 'usage_instructions', 'storage_instructions', 'ocop_subject_id'], fn($c) => Schema::hasColumn('ocop_products', $c));
             if (!empty($cols)) $table->dropColumn(array_values($cols));
         });
     }

@@ -2,7 +2,9 @@
 
 namespace Modules\ProvinceShowcase\Database\Seeders;
 
+use App\Models\Province;
 use App\Models\User;
+use App\Models\Ward;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -18,6 +20,8 @@ use Modules\Ocop\Features\OcopProductManagement\Actions\CreateOcopProductAction;
 use Modules\Ocop\Features\OcopProductManagement\Data\OcopProductData;
 use Modules\Ocop\Models\OcopCategory;
 use Modules\Ocop\Models\OcopProduct;
+use Modules\OcopSubject\Enums\OcopSubjectOrganizationType;
+use Modules\OcopSubject\Models\OcopSubject;
 use Modules\Post\Features\ArticleAuthoring\Actions\ApproveArticleTranslationAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\CreateArticleAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\CreateTranslationAction;
@@ -320,9 +324,7 @@ class ProvinceShowcaseDemoSeeder extends Seeder
                 'name'              => $def['name'],
                 'star_rating'       => $def['star'],
                 'description'       => $def['description'],
-                'province_code'     => $this->provinceCode($def['province']),
-                'ward_code'         => $def['ward_code'],
-                'producer_name'     => $def['producer_name'],
+                'ocop_subject_id'   => $this->demoOcopSubject($def, $creator)->id,
                 'image_path'        => 'ocop/demo-' . $slug . '.jpg',
                 'image_width'       => 800,
                 'image_height'      => 800,
@@ -334,6 +336,31 @@ class ProvinceShowcaseDemoSeeder extends Seeder
         }
 
         return $created;
+    }
+
+    private function demoOcopSubject(array $def, User $creator): OcopSubject
+    {
+        $provinceCode = $this->provinceCode($def['province']);
+
+        return OcopSubject::firstOrCreate(
+            ['name' => $def['producer_name'], 'province_code' => $provinceCode],
+            [
+                'tax_code'             => 'DEMO' . substr(md5($def['producer_name']), 0, 8),
+                'organization_type'    => str_starts_with($def['producer_name'], 'Hợp tác xã')
+                    ? OcopSubjectOrganizationType::Cooperative
+                    : OcopSubjectOrganizationType::Household,
+                'legal_representative' => 'Người đại diện demo',
+                'address'              => $def['producer_name'],
+                'province_name'        => Province::where('province_code', $provinceCode)->value('name'),
+                'ward_code'            => $def['ward_code'],
+                'ward_name'            => Ward::where('ward_code', $def['ward_code'])->value('name'),
+                'gps_coordinates'      => $provinceCode === self::HUE_CODE ? '16.4637,107.5909' : '9.1769,105.1524',
+                'is_food_business'     => true,
+                'ocop_star'            => $def['star'],
+                'is_active'            => true,
+                'created_by'           => $creator->id,
+            ],
+        );
     }
 
     // ──────────────────────────────────────────────────────────────

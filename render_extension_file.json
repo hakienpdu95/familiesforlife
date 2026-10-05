@@ -439,7 +439,8 @@
         "shelf_life///string///100///_NULL///NULL///__///Hạn sử dụng",
         "ingredients///text///__///_NULL///NULL///__///Thành phần",
         "usage_instructions///text///__///_NULL///NULL///__///Hướng dẫn sử dụng",
-        "storage_instructions///text///__///_NULL///NULL///__///Hướng dẫn bảo quản"
+        "storage_instructions///text///__///_NULL///NULL///__///Hướng dẫn bảo quản",
+        "ocop_subject_id///unsignedBigInteger///__///_NULL///NULL///->constrained('ocop_subjects')->onDelete('restrict')///__"
     ],
     [
         "content_foundations///add///__///",

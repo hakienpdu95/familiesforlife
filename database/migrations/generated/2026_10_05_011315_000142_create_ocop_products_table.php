@@ -28,7 +28,7 @@ return new class extends Migration
             $table->string('province_name', 255)->nullable();
             $table->char('ward_code', 5)->nullable();
             $table->string('ward_name', 255)->nullable();
-            $table->string('producer_name', 150)->nullable();
+            $table->string('producer_name', 255)->nullable();
             $table->string('producer_address', 255)->nullable();
             $table->string('purchase_url', 500)->nullable();
             $table->string('status', 20)->default('draft');
