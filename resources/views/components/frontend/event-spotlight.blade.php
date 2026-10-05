@@ -14,9 +14,9 @@
             <h3 class="subtitle">Sự kiện nổi bật</h3>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-[5fr_7fr] gap-5">
+        <div class="grid grid-cols-1 lg:grid-cols-[5fr_7fr] gap-3">
             <a href="{{ route('event.public.show', ['slug' => $lead->slug, 'id' => $lead->id]) }}"
-               class="group flex flex-col gap-5 h-full">
+               class="group flex flex-col gap-3 h-full">
                 <div class="relative w-full flex-1 min-h-[250px] overflow-hidden bg-base-200 lg:min-h-0">
                     <img src="{{ $lead->posterUrl() }}"
                          alt="{{ $lead->poster_alt ?? $lead->title }}"
@@ -25,7 +25,7 @@
                 <x-frontend.event-spotlight-item :event="$lead" as="div" />
             </a>
 
-            <ul class="flex flex-col gap-5 h-full">
+            <ul class="flex flex-col gap-3 h-full">
                 @foreach($rest as $event)
                 <li class="flex-1">
                     <x-frontend.event-spotlight-item :event="$event" />

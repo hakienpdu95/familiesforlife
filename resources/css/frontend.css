@@ -1295,4 +1295,46 @@
 }
 
 
+.event-submit-flat .ts-wrapper .ts-control,
+.event-submit-flat .select {
+    min-height: 2.875rem;
+    height: auto;
+    border-radius: 0;
+    border: 1px solid var(--color-gray-300);
+    background-color: #fff;
+    box-shadow: none;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+}
+.event-submit-flat .ts-wrapper.focus .ts-control,
+.event-submit-flat .select:focus {
+    border-color: var(--color-primary);
+    box-shadow: none;
+    outline: none;
+}
+.event-submit-flat .ts-dropdown {
+    border-radius: 0;
+    border-color: var(--color-gray-300);
+    box-shadow: 0 10px 25px -10px rgb(0 0 0 / 0.15);
+}
+.event-submit-flat .ts-dropdown .active {
+    background-color: color-mix(in oklab, var(--color-primary) 10%, transparent);
+    color: var(--color-primary);
+}
+.event-submit-flat .form-control .label {
+    padding: 0 0 0.5rem;
+}
+.event-submit-flat .form-control .label-text {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-gray-700);
+}
+.event-submit-flat .form-control .label-text .text-error {
+    color: var(--color-primary);
+}
+.event-submit-flat .grid.gap-4 {
+    gap: 1.5rem;
+}
+
+
 html { visibility: visible; }

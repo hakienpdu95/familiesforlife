@@ -49,14 +49,14 @@
     ]);
 @endphp
 
-<section class="mx-auto my-10 grid max-w-7xl grid-cols-1 items-center gap-8 px-4 md:grid-cols-2 lg:gap-12">
+<section class="container mb-4 grid grid-cols-1 items-center gap-8 px-4 md:grid-cols-2 lg:gap-12">
 
     <div>
         <span class="text-xs font-bold uppercase tracking-widest text-pink-600">
             {{ $event->category?->name ?? 'Sự kiện' }}
         </span>
 
-        <h1 class="mt-4 font-serif text-4xl font-bold leading-tight text-black lg:text-5xl">{{ $event->title }}</h1>
+        <h1 class="mt-4 font-serif text-3xl font-bold leading-tight text-black">{{ $event->title }}</h1>
 
         <div class="mt-8 grid max-w-md grid-cols-2 gap-x-8 gap-y-6">
             <div>
@@ -105,7 +105,7 @@
 
 </section>
 
-<nav class="container" aria-label="Điều hướng sự kiện">
+<nav class="container mb-4" aria-label="Điều hướng sự kiện">
     <div class="grid grid-cols-2 sm:grid-cols-5">
         @foreach($navItems as [$label, $url, $color])
         <a href="{{ $url }}"
@@ -116,7 +116,7 @@
     </div>
 </nav>
 
-<article class="mx-auto mt-10 mb-14 max-w-5xl px-4">
+<article class="container mb-10 px-4">
     <div class="float-left mr-6 mb-4 flex h-32 w-32 rotate-[-10deg] items-center justify-center rounded-full bg-pink-600 text-center text-lg font-bold leading-tight text-white">
         Bạn được<br>mời!
     </div>
