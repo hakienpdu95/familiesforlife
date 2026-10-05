@@ -4,6 +4,7 @@
         'basic' => 'Thông tin cơ bản',
         'location' => 'Địa chỉ & Định vị',
         'certs' => 'Chứng nhận & Hồ sơ',
+        'story' => 'Câu chuyện',
         'contact' => 'Liên hệ',
     ];
     $tabKeys = array_keys($tabs);
@@ -17,6 +18,7 @@
             basic: ['name', 'name_en', 'tax_code', 'organization_type', 'legal_representative', 'position'],
             location: ['address', 'province_code', 'ward_code', 'gps_coordinates', 'factory_code'],
             certs: ['is_food_business', 'ocop_star', 'ocop_cert_expiry', 'documents', 'media_uuids'],
+            story: ['story'],
             contact: ['hotline', 'email', 'website'],
         },
         errs: {{ Js::from($errors->keys()) }},
@@ -268,6 +270,17 @@
                     'requiredWhen' => 'isFood',
                 ])
 
+            </div>
+
+            <div x-show="tab === 'story'" x-cloak data-tab-label="Câu chuyện" class="space-y-4">
+                <div class="form-control">
+                    <label class="label py-0 pb-1.5">
+                        <span class="label-text font-medium">Câu chuyện thương hiệu</span>
+                        <span class="label-text-alt text-xs text-base-content/40">Lịch sử, truyền thống, triết lý sản xuất — hiển thị ở trang thương hiệu công khai</span>
+                    </label>
+                    <textarea id="ocop-subject-story" name="story" class="jodit-editor" data-jodit-preset="standard">{{ old('story', $ocopSubject?->story) }}</textarea>
+                    @error('story')<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
+                </div>
             </div>
 
             <div x-show="tab === 'contact'" x-cloak data-tab-label="Liên hệ" class="space-y-4">

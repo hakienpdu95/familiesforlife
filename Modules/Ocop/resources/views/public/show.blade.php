@@ -143,9 +143,12 @@
             'Hướng dẫn sử dụng' => $product->usage_instructions,
             'Hướng dẫn bảo quản' => $product->storage_instructions,
         ];
-        $producerMoreUrl = $heritageSite
-            ? route('heritage.public.show', ['slug' => $heritageSite->slug, 'id' => $heritageSite->id])
-            : ($product->province_code ? route('ocop.public.index', ['province' => $product->province_code]) : null);
+        $producerMoreUrl = match (true) {
+            (bool) $subject?->is_active => route('ocop-subject.public.show', ['slug' => $subject->slug]),
+            (bool) $heritageSite => route('heritage.public.show', ['slug' => $heritageSite->slug, 'id' => $heritageSite->id]),
+            (bool) $product->province_code => route('ocop.public.index', ['province' => $product->province_code]),
+            default => null,
+        };
     @endphp
 
     <section class="mt-12">

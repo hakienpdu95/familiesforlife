@@ -4,6 +4,7 @@ namespace Modules\Ocop\Features\OcopProductManagement\Actions;
 
 use App\Services\Media\MediaUploadService;
 use App\Services\Media\MediaUrlService;
+use Illuminate\Validation\ValidationException;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Modules\Ocop\Features\OcopProductManagement\Data\OcopProductData;
 use Modules\Ocop\Models\OcopProduct;
@@ -22,6 +23,14 @@ class UpdateOcopProductAction
 
     public function handle(OcopProduct $product, OcopProductData $data): OcopProduct
     {
+        $ocopSubject = $data->ocop_subject_id ? OcopSubject::find($data->ocop_subject_id) : null;
+
+        if (! $ocopSubject) {
+            throw ValidationException::withMessages([
+                'ocop_subject_id' => 'Không tìm thấy Chủ thể OCOP hợp lệ để gán cho sản phẩm.',
+            ]);
+        }
+
         // Ảnh mới KHÔNG cần xử lý ở đây — form sửa gắn thẳng qua FilePond context header
         // (X-Context-Type=ocop_product, X-Context-Id=$product->id), upload đi thẳng vào Media
         // của chính sản phẩm này (spec §8). Chỉ xoá ảnh cũ editor đã đánh dấu.
@@ -37,7 +46,7 @@ class UpdateOcopProductAction
             'ingredients' => $data->ingredients,
             'usage_instructions' => $data->usage_instructions,
             'storage_instructions' => $data->storage_instructions,
-            ...SyncOcopSubjectSnapshotAction::attributesFor(OcopSubject::findOrFail($data->ocop_subject_id)),
+            ...SyncOcopSubjectSnapshotAction::attributesFor($ocopSubject),
             'heritage_site_id' => $data->heritage_site_id,
             'purchase_url' => $data->purchase_url,
             'status' => $data->status,

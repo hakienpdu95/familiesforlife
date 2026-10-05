@@ -10,7 +10,7 @@
     };
     $sameDay = $event->start_date?->isSameDay($event->end_date);
     $dateLabel = $event->start_date?->format('d/m').(! $sameDay ? ' – '.$event->end_date?->format('d/m') : '');
-    $posterUrl = $event->poster_path ? \Illuminate\Support\Facades\Storage::url($event->poster_path) : asset('images/post-cover-placeholder.svg');
+    $posterUrl = $event->posterUrl();
 @endphp
 
 @if($size === 'lg')
@@ -20,6 +20,7 @@
    class="group grid grid-cols-1 sm:grid-cols-5 sm:items-stretch overflow-hidden bg-base-100 border border-base-300">
     <div class="sm:col-span-3 aspect-[16/10] sm:aspect-auto bg-base-200 relative">
         <img src="{{ $posterUrl }}" alt="{{ $event->poster_alt ?? $event->title }}"
+             onerror="this.onerror=null;this.src='{{ asset(\Modules\Event\Models\Event::DEFAULT_POSTER) }}'"
              class="h-full w-full object-cover" loading="lazy">
         <span class="absolute top-2 left-2 rounded-md bg-base-100/90 px-2 py-1 text-[11px] font-black uppercase tracking-wide text-secondary">
             {{ $dateLabel }}
@@ -39,6 +40,7 @@
    class="group flex flex-col {{ $styles['gap'] }}">
     <div class="{{ $styles['ratio'] }} rounded-sm overflow-hidden bg-base-200 relative">
         <img src="{{ $posterUrl }}" alt="{{ $event->poster_alt ?? $event->title }}"
+             onerror="this.onerror=null;this.src='{{ asset(\Modules\Event\Models\Event::DEFAULT_POSTER) }}'"
              class="h-full w-full object-cover" loading="lazy">
         <span class="absolute top-2 left-2 rounded-md bg-base-100/90 px-2 py-1 text-[11px] font-black uppercase tracking-wide text-secondary">
             {{ $dateLabel }}

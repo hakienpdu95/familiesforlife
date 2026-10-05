@@ -78,11 +78,9 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($events as $event)
             <a href="{{ route('event.public.show', ['slug' => $event->slug, 'id' => $event->id]) }}" class="group flex flex-col gap-2">
-                @if($event->poster_path)
                 <div class="aspect-[16/9] overflow-hidden bg-base-200 rounded-md">
-                    <img src="{{ \Illuminate\Support\Facades\Storage::url($event->poster_path) }}" alt="{{ $event->title }}" class="h-full w-full object-cover" loading="lazy">
+                    <img src="{{ $event->posterUrl() }}" alt="{{ $event->title }}" class="h-full w-full object-cover" loading="lazy">
                 </div>
-                @endif
                 <h3 class="font-bold text-sm leading-snug group-hover:text-primary line-clamp-2">{{ $event->title }}</h3>
                 <p class="text-xs text-base-content/50">{{ $event->start_date?->format('d/m/Y') }}</p>
             </a>

@@ -38,6 +38,7 @@
         'resources/js/modules/toastify.js',
         'resources/js/modules/tom-select.js',
         'resources/js/modules/filepond.js',
+        'resources/js/modules/jodit.js',
         'Modules/OcopSubject/resources/assets/js/ocop-subject.js',
     ], 'build/backend')
 @endpush

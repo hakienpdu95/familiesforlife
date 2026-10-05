@@ -27,6 +27,7 @@ class OcopSubjectData extends Data
         public readonly ?string $hotline = null,
         public readonly ?string $email = null,
         public readonly ?string $website = null,
+        public readonly ?string $story = null,
         public readonly bool $is_active = true,
 
         public readonly array $media_uuids = [],

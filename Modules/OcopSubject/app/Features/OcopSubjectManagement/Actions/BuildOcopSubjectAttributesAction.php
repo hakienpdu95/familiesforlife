@@ -6,10 +6,15 @@ use App\Models\Province;
 use App\Models\Ward;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Modules\OcopSubject\Features\OcopSubjectManagement\Data\OcopSubjectData;
+use Modules\Post\Support\ArticleContentRenderer;
 
 class BuildOcopSubjectAttributesAction
 {
     use AsAction;
+
+    public function __construct(
+        private readonly ArticleContentRenderer $renderer,
+    ) {}
 
     public function handle(OcopSubjectData $data): array
     {
@@ -33,6 +38,7 @@ class BuildOcopSubjectAttributesAction
             'hotline' => $data->hotline,
             'email' => $data->email,
             'website' => $data->website,
+            'story' => $this->renderer->sanitizeTextHtml($data->story) ?: null,
             'is_active' => $data->is_active,
         ];
     }

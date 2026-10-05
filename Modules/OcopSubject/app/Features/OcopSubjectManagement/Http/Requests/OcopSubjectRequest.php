@@ -63,6 +63,7 @@ class OcopSubjectRequest extends FormRequest
             'hotline' => ['nullable', 'string', 'max:20', 'regex:/^[0-9+().\s-]{8,20}$/'],
             'email' => ['nullable', 'email', 'max:150'],
             'website' => ['nullable', 'url', 'max:255'],
+            'story' => ['nullable', 'string'],
             'is_active' => ['boolean'],
 
             'media_uuids' => ['nullable', 'array', 'max:'.OcopSubject::MAX_IMAGES],

@@ -13,7 +13,15 @@ document.addEventListener('DOMContentLoaded', () => {
     setupTabGuard(form);
     initAllTomSelects(form);
     initGallery();
+    initStoryEditor();
 });
+
+function initStoryEditor() {
+    const el = document.getElementById('ocop-subject-story');
+    if (!el || !window.initJodit) return;
+
+    initJodit(el, { showWordsCounter: true, showCharsCounter: true });
+}
 
 function initGallery() {
     const el = document.getElementById('ocop-subject-gallery-filepond');

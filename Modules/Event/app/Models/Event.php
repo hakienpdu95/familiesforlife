@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Modules\Event\Enums\EventLocationType;
 use Modules\Event\Enums\EventPriceType;
@@ -38,6 +39,8 @@ class Event extends Model
             ->logOnlyDirty()
             ->dontLogEmptyChanges();
     }
+
+    public const DEFAULT_POSTER = 'images/post-cover-placeholder.svg';
 
     protected $fillable = [
         'uuid',
@@ -185,6 +188,13 @@ class Event extends Model
             EventPriceType::Single => number_format((float) $this->price_amount, 0, ',', '.').'đ',
             EventPriceType::Range => number_format((float) $this->price_min, 0, ',', '.').'đ – '.number_format((float) $this->price_max, 0, ',', '.').'đ',
         };
+    }
+
+    public function posterUrl(): string
+    {
+        return $this->poster_path && Storage::disk('public')->exists($this->poster_path)
+            ? Storage::url($this->poster_path)
+            : asset(self::DEFAULT_POSTER);
     }
 
     public function locationLabel(): string

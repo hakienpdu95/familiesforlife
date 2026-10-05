@@ -41,17 +41,24 @@ class OcopSubject extends Model implements HasMedia
         self::DOC_FOOD_SAFETY_CERT,
     ];
 
+    public const DOCUMENT_LABELS = [
+        self::DOC_BUSINESS_LICENSE => 'Giấy chứng nhận đăng ký kinh doanh',
+        self::DOC_OCOP_CERT => 'Quyết định phê duyệt hạng sao OCOP',
+        self::DOC_QUALITY_CERT => 'Chứng nhận chất lượng',
+        self::DOC_FOOD_SAFETY_CERT => 'Giấy chứng nhận cơ sở đủ điều kiện ATTP',
+    ];
+
     public const MAX_DOCUMENTS = 10;
 
     protected $table = 'ocop_subjects';
 
     protected $fillable = [
-        'uuid', 'name', 'name_en', 'tax_code', 'organization_type',
+        'uuid', 'name', 'name_en', 'slug', 'tax_code', 'organization_type',
         'legal_representative', 'position',
         'address', 'province_code', 'province_name', 'ward_code', 'ward_name',
         'gps_coordinates', 'factory_code', 'is_food_business',
         'ocop_star', 'ocop_cert_expiry',
-        'hotline', 'email', 'website', 'is_active',
+        'hotline', 'email', 'website', 'story', 'is_active',
         'created_by', 'updated_by',
     ];
 
@@ -77,7 +84,25 @@ class OcopSubject extends Model implements HasMedia
             if (empty($model->uuid)) {
                 $model->uuid = (string) Str::uuid();
             }
+
+            if (empty($model->slug)) {
+                $model->slug = self::uniqueSlug($model->name);
+            }
         });
+    }
+
+    public static function uniqueSlug(string $name): string
+    {
+        $base = Str::slug($name) ?: 'chu-the';
+        $slug = $base;
+        $i = 2;
+
+        while (static::withTrashed()->where('slug', $slug)->exists()) {
+            $slug = "{$base}-{$i}";
+            $i++;
+        }
+
+        return $slug;
     }
 
     public function getRouteKeyName(): string
@@ -98,6 +123,13 @@ class OcopSubject extends Model implements HasMedia
     public function updatedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function storyMediaUuids(): array
+    {
+        preg_match_all('/data-media-uuid="([^"]+)"/', (string) $this->story, $matches);
+
+        return array_values(array_unique($matches[1]));
     }
 
     public function fullAddress(): string

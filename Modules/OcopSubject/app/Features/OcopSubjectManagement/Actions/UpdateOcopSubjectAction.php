@@ -3,6 +3,7 @@
 namespace Modules\OcopSubject\Features\OcopSubjectManagement\Actions;
 
 use App\Services\Media\MediaUploadService;
+use App\Services\Media\MediaUrlService;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Modules\Ocop\Features\OcopProductManagement\Actions\SyncOcopSubjectSnapshotAction;
 use Modules\OcopSubject\Features\OcopSubjectManagement\Data\OcopSubjectData;
@@ -15,6 +16,7 @@ class UpdateOcopSubjectAction
     public function __construct(
         private readonly BuildOcopSubjectAttributesAction $buildAttributes,
         private readonly MediaUploadService $mediaUpload,
+        private readonly MediaUrlService $mediaUrl,
         private readonly SyncOcopSubjectSnapshotAction $syncProducts,
     ) {}
 
@@ -35,6 +37,13 @@ class UpdateOcopSubjectAction
 
         if ($ocopSubject->wasChanged(['name', 'address', 'province_code', 'ward_code'])) {
             $this->syncProducts->handle($ocopSubject);
+        }
+
+        $this->mediaUpload->reassociateOrphans($ocopSubject, $ocopSubject->storyMediaUuids());
+
+        $story = $this->mediaUrl->refreshEmbeddedImageUrls($ocopSubject->story);
+        if ($story !== $ocopSubject->story) {
+            $ocopSubject->forceFill(['story' => $story])->saveQuietly();
         }
 
         return $ocopSubject;
