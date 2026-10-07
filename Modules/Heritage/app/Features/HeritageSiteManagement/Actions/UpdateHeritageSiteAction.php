@@ -4,14 +4,23 @@ namespace Modules\Heritage\Features\HeritageSiteManagement\Actions;
 
 use App\Models\Province;
 use App\Models\Ward;
+use App\Services\Media\MediaUploadService;
+use App\Services\Media\MediaUrlService;
 use Illuminate\Validation\ValidationException;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Modules\Heritage\Features\HeritageSiteManagement\Data\HeritageSiteData;
 use Modules\Heritage\Models\HeritageSite;
+use Modules\Post\Support\ArticleContentRenderer;
 
 class UpdateHeritageSiteAction
 {
     use AsAction;
+
+    public function __construct(
+        private readonly MediaUploadService $mediaUpload,
+        private readonly MediaUrlService $mediaUrl,
+        private readonly ArticleContentRenderer $renderer,
+    ) {}
 
     public function handle(HeritageSite $site, HeritageSiteData $data): HeritageSite
     {
@@ -40,6 +49,7 @@ class UpdateHeritageSiteAction
             'rank' => $data->rank,
             'era' => $data->era,
             'description' => $data->description,
+            'content' => $this->renderer->sanitizeTextHtml($data->content) ?: null,
             'province_code' => $data->province_code,
             'province_name' => $provinceName,
             'ward_code' => $data->ward_code,
@@ -53,6 +63,15 @@ class UpdateHeritageSiteAction
             'sort_order' => $data->sort_order,
             'updated_by' => auth()->id(),
         ]);
+
+        // Cùng UpdateOcopProductAction — ảnh chèn qua Jodit sống tạm ở JoditDraft cho tới khi lưu,
+        // "nhận" vào di tích thật và dọn ảnh không còn trong nội dung.
+        $this->mediaUpload->reassociateOrphans($site, $site->contentMediaUuids());
+
+        $content = $this->mediaUrl->refreshEmbeddedImageUrls($site->content);
+        if ($content !== $site->content) {
+            $site->forceFill(['content' => $content])->saveQuietly();
+        }
 
         return $site;
     }

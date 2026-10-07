@@ -17,6 +17,7 @@ class HeritageSiteData extends Data
         public readonly string $rank = 'unranked',
         public readonly ?string $era = null,
         public readonly ?string $description = null,
+        public readonly ?string $content = null,
 
         public readonly ?string $province_code = null,
         public readonly ?string $ward_code = null,

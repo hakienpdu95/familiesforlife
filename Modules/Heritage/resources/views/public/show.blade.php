@@ -44,7 +44,15 @@
             @if($site->description)
             <h2 class="detail__summary" style="text-align: justify;">{{ $site->description }}</h2>
             @endif
-        </header>    
+        </header>
+
+        @if(filled($site->content))
+        <div class="detail__content">
+            <div id="content_detail" class="content_detail">
+                {!! $site->content !!}
+            </div>
+        </div>
+        @endif
 
         <div class="detail__footer print-hide">
             <section class="zone"></section>

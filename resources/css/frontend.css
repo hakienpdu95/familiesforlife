@@ -1258,9 +1258,15 @@
 }
 
 .detail__content {
-    max-width: 640px;
+    max-width: 650px;
     margin-left: auto;
     margin-right: auto;
+    line-height: 1.5;
+}
+
+.detail__content p {
+    margin-top: 0;
+    margin-bottom: 1rem;
 }
 
 .detail__author,

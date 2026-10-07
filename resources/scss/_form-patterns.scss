@@ -209,13 +209,21 @@
 
     // Sticky behavior — chỉ khi cần thiết, không áp dụng mặc định
     &--sticky {
-        position:   sticky;
-        bottom:     0;
-        background: t.$base-100;
-        padding:    .75rem 1.5rem;
-        margin:     0 -1.5rem;   // bù padding card-body
-        z-index:    10;
-        box-shadow: 0 -1px 0 t.$border;
+        position:        sticky;
+        bottom:          0;
+        z-index:         50;
+        flex-wrap:       wrap;
+        justify-content: space-between;
+        background:      t.$base-100;
+        padding:         1rem 1.5rem;
+        margin:          1.25rem 0 0;
+        box-shadow:      0 -4px 6px -1px rgb(0 0 0 / .1);
+
+        .ts-dropdown {
+            top:    auto !important;
+            bottom: 100%;
+            margin: 0 0 .25rem;
+        }
     }
 
     .submit-actions { margin-left: auto; display: flex; gap: .5rem; }

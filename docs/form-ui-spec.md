@@ -1,6 +1,6 @@
 # Form UI/UX Specification — Backend SaaS
 
-> **Version:** 5.0  
+> **Version:** 5.1  
 > **Stack:** Laravel 13 · DaisyUI 5 · Tailwind CSS 4 · Alpine.js 3 · TomSelect · SCSS (sass) · Vite 8  
 > **Gold Standard:** `Modules/Organization/resources/views/`  
 > **Build:** `vite.config.backend.js` — **một build duy nhất** cho toàn backend
@@ -16,19 +16,19 @@
 5. [Vite build — Cách đăng ký module mới](#5-vite-build)
 6. [Blade — Cách load asset](#6-blade)
 7. [Page Shell](#7-page-shell)
-8. **[Quyết định bố cục form — Flat vs Tab](#8-quyết-định-bố-cục-form)** ← NEW v5
+8. **[Quyết định bố cục form — Flat vs Tab](#8-quyết-định-bố-cục-form)** ← NEW v5 · UPDATED v5.1 (8.4 vị trí nút Lưu)
 9. **[Flat Form (≤ ~10 trường)](#9-flat-form)**
 10. **[Tab-Based Form (> 10 trường / ≥ 3 nhóm)](#10-tab-based-form)** ← NEW v5
-11. **[Sidebar Publish Block](#11-sidebar-publish-block)** ← NEW v5
+11. **[Sticky Submit Bar (Tab form)](#11-sticky-submit-bar)** ← v5.1 thay Sidebar Publish Block
 12. [Card Section](#12-card-section)
 13. [Grid & bố cục cột](#13-grid)
 14. [Form Control — cấu trúc bắt buộc](#14-form-control)
-15. [Input types](#15-input-types)
+15. [Input types](#15-input-types) ← UPDATED v5.1 (File & Image Upload)
 16. [Validation](#16-validation)
-17. **[Tab-Aware Submit Guard (JS)](#17-tab-aware-submit-guard)** ← NEW v5
-18. **[Slug Auto-fill (JS)](#18-slug-auto-fill)** ← NEW v5
+17. **[Tab-Aware Submit Guard (JS)](#17-tab-aware-submit-guard)** ← NEW v5 · UPDATED v5.1 (17.7 Dirty Form Guard)
+18. **[Slug Auto-fill (JS)](#18-slug-auto-fill)** ← NEW v5 · UPDATED v5.1 (debounce)
 19. [Interactive states & Loading](#19-interactive-states)
-20. [Submit Actions Bar](#20-submit-bar)
+20. [Submit Actions Bar](#20-submit-bar) ← UPDATED v5.1
 21. [Wizard Multi-step](#21-wizard)
 22. [TomSelect](#22-tomselect)
 23. [Ngôn ngữ](#23-ngôn-ngữ)
@@ -57,11 +57,12 @@ Input height:    input-sm  = 2.25rem (36px)
 Card gap:        space-y-5 = 1.25rem (20px)   ← giữa các card
 Field gap:       gap-4     = 1rem    (16px)    ← giữa fields trong card
 Label→Input:     pb-1.5    = 6px
-Sidebar width:   300px     (xl:grid-cols-[1fr_300px])
+Form width:      full-width — <form> không giới hạn max-width
 ```
 
-> ⚠️ **v5 breaking change:** Không dùng `max-w-3xl` làm container form.
-> Form dùng layout grid full-width + sidebar thay thế.
+> ⚠️ **v5.1 breaking change:** Bỏ Sidebar Publish Block và grid `xl:grid-cols-[1fr_300px]`.
+> Mọi form dùng layout **1 cột full-width** (`<form>` không thêm class giới hạn chiều rộng); nút Lưu/Hủy + meta **luôn nằm dưới cùng** form —
+> static với flat form ([Section 20](#20-submit-bar)), sticky với tab form ([Section 11](#11-sticky-submit-bar)).
 
 ---
 
@@ -363,6 +364,18 @@ return redirect()->back()->with('error', 'Có lỗi xảy ra');
 | HR — Hồ sơ nhân viên | Tab | 20+ trường: cơ bản + công việc + địa chỉ + liên hệ |
 | Assessment — Tạo đánh giá | Wizard | Tuần tự: cấu hình → câu hỏi → phân phối |
 
+### 8.4 Vị trí khối nút bấm (Submit / Hủy)
+
+Nút Submit, Cancel và meta (trạng thái, ngày tạo/sửa) **LUÔN LUÔN nằm dưới cùng form** — một luồng code duy nhất cho mọi bố cục, thân thiện mobile (1 cột). Chỉ khác nhau ở cách hiển thị:
+
+| Bố cục | Hiển thị khối nút | Cấu trúc dùng |
+|---|---|---|
+| **Flat Form** (ngắn, không cuộn) | **Static** — `.form-submit-bar`, ngay dưới các trường, ngăn cách bằng `border-top` | [Section 20 — Submit Actions Bar](#20-submit-bar) |
+| **Tab-Based Form** (dài, cần cuộn) | **Sticky** — ghim ở mép dưới viewport (`sticky bottom-0`) | [Section 11 — Sticky Submit Bar](#11-sticky-submit-bar) |
+| **Wizard** | Footer từng bước (Trước / Tiếp theo / Hoàn tất) | [Section 21](#21-wizard) |
+
+> **Lý do sticky cho tab form:** user đang ở tab nào, cuộn tới đâu cũng luôn thấy nút "Lưu lại" — không phải cuộn xuống cuối mới tìm thấy. Footer của tab panel chỉ chứa nút điều hướng Prev/Next ([10.4](#104-tab-panels)), không chứa submit.
+
 ---
 
 ## 9. Flat Form
@@ -406,9 +419,11 @@ Dùng khi ≤ 10 trường hoặc 1–2 nhóm cùng ngữ cảnh.
     </div>
 
     {{-- Submit bar --}}
-    <div class="flex gap-2 pt-4 mt-2 border-t border-base-200">
-        <button type="submit" class="btn btn-primary btn-sm gap-1.5">Tạo [entity]</button>
-        <a href="{{ route('...index') }}" class="btn btn-ghost btn-sm">Hủy</a>
+    <div class="form-submit-bar">
+        <div class="submit-actions">
+            <a href="{{ route('...index') }}" class="btn btn-ghost btn-sm">Hủy</a>
+            <button type="submit" class="btn btn-primary btn-sm gap-1.5">Tạo [entity]</button>
+        </div>
     </div>
 
 </form>
@@ -437,17 +452,19 @@ Dùng khi > 10 trường hoặc có từ 3+ nhóm thông tin riêng biệt.
 ### 10.1 Layout tổng thể
 
 ```
-┌─────────────────────────────────┬──────────────────┐
-│  [Tab 1] [Tab 2] [Tab 3]        │                  │
-│  ─────────────────────────────  │   SIDEBAR        │
-│                                 │   (sticky)       │
-│  Chỉ hiện 1 tab tại 1 thời điểm│                  │
-│  → không bao giờ scroll form    │   - Trạng thái   │
-│                                 │   - Submit/Hủy   │
-│  [← Trước]       [Tiếp theo →] │   - Meta         │
-└─────────────────────────────────┴──────────────────┘
+            ┌──────────────── full-width ───────────────┐
+            │  [Tab 1] [Tab 2] [Tab 3]                  │
+            │  ───────────────────────────────────────  │
+            │                                           │
+            │  Chỉ hiện 1 tab tại 1 thời điểm           │
+            │                                           │
+            │  [← Trước]                 [Tiếp theo →]  │
+            └───────────────────────────────────────────┘
+════════════╪═══════════════════════════════════════════╪════  ← mép dưới viewport
+            │ Trạng thái / Meta          [Hủy] [Lưu lại]│  ← Sticky Submit Bar
+            └───────────────────────────────────────────┘
 
-Grid: xl:grid-cols-[1fr_300px] gap-6 items-start
+Container: <form> full-width — 1 cột, không sidebar
 ```
 
 ### 10.2 Alpine x-data — cấu trúc
@@ -543,7 +560,7 @@ Tab state quản lý bằng Alpine inline (đủ đơn giản, không cần file
             <button type="button" @click="tab = 'contact'" class="btn btn-ghost btn-sm gap-1.5">
                 <svg ...>← arrow</svg> Liên hệ
             </button>
-            <span class="text-xs text-base-content/40">Nhấn <strong>Lưu</strong> ở bên phải khi xong</span>
+            <span class="text-xs text-base-content/40">Nhấn <strong>Lưu lại</strong> ở thanh dưới cùng khi xong</span>
         </div>
     </div>
 
@@ -569,26 +586,21 @@ Tab state quản lý bằng Alpine inline (đủ đơn giản, không cần file
 <form method="POST" action="..." novalidate data-[entity]-form>
     @csrf
 
-    <div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-6 items-start">
-
-        {{-- Card chính: tab nav + panels --}}
-        <div class="card bg-base-100 shadow-sm border border-base-200">
-            <div class="border-b border-base-200 px-3">
-                <nav class="flex -mb-px" role="tablist">
-                    {{-- Tab buttons --}}
-                </nav>
-            </div>
-            <div class="p-3">
-                {{-- Tab panels (x-show + data-tab-label) --}}
-            </div>
+    {{-- Card chính: tab nav + panels --}}
+    <div class="card bg-base-100 shadow-sm border border-base-200">
+        <div class="border-b border-base-200 px-3">
+            <nav class="flex -mb-px" role="tablist">
+                {{-- Tab buttons --}}
+            </nav>
         </div>
-
-        {{-- Sidebar sticky --}}
-        <div class="xl:sticky xl:top-4 space-y-4">
-            {{-- Publish block (Section 11) --}}
+        <div class="p-3">
+            {{-- Tab panels (x-show + data-tab-label) --}}
         </div>
-
     </div>
+
+    {{-- Sticky Submit Bar (Section 11) — con TRỰC TIẾP, cuối cùng của <form> --}}
+    <div class="form-submit-bar form-submit-bar--sticky">...</div>
+
 </form>
 </div>
 @endsection
@@ -596,96 +608,91 @@ Tab state quản lý bằng Alpine inline (đủ đơn giản, không cần file
 
 ---
 
-## 11. Sidebar Publish Block
+## 11. Sticky Submit Bar
 
-Block sidebar xuất hiện trong cả flat form (nếu cần sidebar) và tab form. Mục đích: tổng hợp trạng thái + action submit vào 1 vị trí cố định, không bao giờ bị cuộn khuất.
+Khối nút bấm của **tab form** — vẫn nằm dưới cùng form như flat form ([8.4](#84-vị-trí-khối-nút-bấm-submit--hủy)), nhưng ghim `sticky bottom-0` để luôn hiện ở mép dưới viewport trong khi user cuộn/chuyển tab.
+
+> ⚠️ **v5.1:** Thay thế hoàn toàn Sidebar Publish Block (v5). Không còn cột sidebar trong form.
+
+**Bố cục:** Trái — trạng thái hoặc meta (ngày tạo/sửa). Phải — Hủy (ghost) + Lưu (primary) trong `.submit-actions`.
+
+**Class:** `form-submit-bar form-submit-bar--sticky` — định nghĩa trong `resources/scss/_form-patterns.scss` (mục 8). Module SCSS phải có `@use 'form-patterns'` ([3.2](#32-module-scss-entry)). Không viết lại chuỗi class Tailwind cho bar.
+
+| Class | Vai trò |
+|---|---|
+| `.form-submit-bar` | Base: `flex`, `align-items: center`, `gap: .75rem`, `border-top` |
+| `.form-submit-bar--sticky` | `sticky bottom-0`, `z-index: 50`, `flex-wrap`, `justify-content: space-between`, nền `base-100`, padding `1rem 1.5rem`, `margin-top: 1.25rem`, bóng hắt lên `0 -4px 6px -1px rgb(0 0 0 / .1)`, TomSelect dropdown mở lên trên |
+| `.submit-actions` | Nhóm nút bên phải: `margin-left: auto`, `flex`, `gap: .5rem` |
 
 ### 11.1 Create form
 
 ```blade
-<div class="card bg-base-100 shadow-sm border border-base-200">
-    <div class="card-body p-3">
+<div class="form-submit-bar form-submit-bar--sticky">
 
-        <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">
-            Xuất bản
-        </p>
-
-        <div class="form-control mb-4">
-            <label class="label py-0 pb-1">
-                <span class="label-text text-xs font-medium">
-                    Trạng thái <span class="text-error">*</span>
-                </span>
-            </label>
-            <select name="status"
-                    class="select select-bordered select-sm w-full @error('status') select-error @enderror">
-                <option value="active"    {{ old('status', 'active') === 'active'    ? 'selected' : '' }}>Hoạt động</option>
-                <option value="inactive"  {{ old('status') === 'inactive'            ? 'selected' : '' }}>Không hoạt động</option>
-                <option value="suspended" {{ old('status') === 'suspended'           ? 'selected' : '' }}>Tạm khóa</option>
-            </select>
-            @error('status')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
-        </div>
-
-        {{-- 2 nút ngang nhau — không full-width stacked --}}
-        <div class="flex gap-2">
-            <a href="{{ route('...index') }}" class="btn btn-ghost btn-sm flex-1">Hủy</a>
-            <button type="submit" class="btn btn-primary btn-sm flex-1 gap-1.5">
-                <svg class="w-3.5 h-3.5" ...>+ icon</svg>
-                Tạo mới
-            </button>
-        </div>
-
-        <p class="text-center text-xs text-base-content/30 mt-2.5">
-            <span class="text-error">*</span> là trường bắt buộc
-        </p>
-
+    {{-- Trái: trạng thái (hoặc để trống nếu entity không có status) --}}
+    <div class="flex items-center gap-2">
+        <span class="text-xs font-medium text-base-content/60">Trạng thái <span class="text-error">*</span></span>
+        <select id="ts-status" name="status"
+                class="select select-bordered select-sm w-44 @error('status') select-error @enderror">
+            <option value="active"   {{ old('status', 'active') === 'active' ? 'selected' : '' }}>Hoạt động</option>
+            <option value="inactive" {{ old('status') === 'inactive'         ? 'selected' : '' }}>Không hoạt động</option>
+        </select>
     </div>
+
+    {{-- Phải: Hủy + Lưu --}}
+    <div class="submit-actions">
+        <a href="{{ route('...index') }}" class="btn btn-ghost btn-sm">Hủy</a>
+        <button type="submit" class="btn btn-primary btn-sm gap-1.5">
+            <svg class="w-3.5 h-3.5" ...>+ icon</svg>
+            Tạo mới
+        </button>
+    </div>
+
 </div>
 ```
 
 ### 11.2 Edit form (thêm meta timestamps)
 
 ```blade
-<div class="card bg-base-100 shadow-sm border border-base-200">
-    <div class="card-body p-3">
+<div class="form-submit-bar form-submit-bar--sticky">
 
-        <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">
-            Xuất bản
-        </p>
+    <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
+        {{-- Status select (như 11.1, old() fallback về model) --}}
+        <div class="flex items-center gap-2">...</div>
 
-        {{-- Status select (như trên, old() fallback về model) --}}
-        <div class="form-control mb-3">...</div>
-
-        {{-- Meta: 1 dòng inline, không block riêng --}}
-        <div class="flex justify-between text-xs text-base-content/40 mb-4 px-0.5">
-            <span>Tạo {{ $model->created_at->format('d/m/Y') }}</span>
-            <span>Sửa {{ $model->updated_at->diffForHumans() }}</span>
-        </div>
-
-        <div class="flex gap-2">
-            <a href="{{ route('...show', $model) }}" class="btn btn-ghost btn-sm flex-1">Hủy</a>
-            <button type="submit" class="btn btn-primary btn-sm flex-1 gap-1.5">
-                <svg class="w-3.5 h-3.5" ...>✓ icon</svg>
-                Lưu lại
-            </button>
-        </div>
-
-        <p class="text-center text-xs text-base-content/30 mt-2.5">
-            <span class="text-error">*</span> là trường bắt buộc
-        </p>
-
+        {{-- Meta: 1 dòng inline --}}
+        <span class="text-xs text-base-content/40">
+            Tạo {{ $model->created_at->format('d/m/Y') }} · Sửa {{ $model->updated_at->diffForHumans() }}
+        </span>
     </div>
+
+    <div class="submit-actions">
+        <a href="{{ route('...show', $model) }}" class="btn btn-ghost btn-sm">Hủy</a>
+        <button type="submit" class="btn btn-primary btn-sm gap-1.5">
+            <svg class="w-3.5 h-3.5" ...>✓ icon</svg>
+            Lưu lại
+        </button>
+    </div>
+
 </div>
 ```
 
-### 11.3 Nguyên tắc thiết kế
+### 11.3 Nguyên tắc & điều kiện để sticky hoạt động
 
 | Nguyên tắc | Lý do |
 |---|---|
-| Title dùng `text-xs uppercase tracking-wide` (không phải `h3`) | Phân biệt rõ với section title trong card chính |
-| Label trạng thái dùng `text-xs` | Sidebar nhỏ hơn main content |
-| 2 nút `flex-1` nằm ngang | Full-width stacked button trông thừa và nặng |
-| Meta timestamps trên 1 dòng | Không dùng `dl/dt/dd` block riêng — quá nặng cho sidebar |
-| Padding `p-4` (không phải `card-body` default) | Card sidebar cần compact hơn card main |
+| Bar là **con trực tiếp, cuối cùng của `<form>`** (ngoài card chính) | `sticky` chỉ ghim trong phạm vi phần tử cha — đặt trong card/tab panel thì hết card là bar trôi mất; nút submit cũng phải nằm trong `<form>` |
+| Không có ancestor nào giữa bar và `.main-area` dùng `overflow: hidden/auto` | Ancestor có overflow tạo scroll container mới → `sticky` mất tác dụng. Scroll container của backend là `.main-area` |
+| Không override nền / shadow / z-index của bar bằng Tailwind | Nền `base-100` che nội dung cuộn phía sau, bóng hắt lên tách bar khỏi nội dung, `z-index: 50` nằm dưới topbar (`100`) và sidebar app (`200`) — đã có sẵn trong class |
+| Nhóm nút phải bọc trong `.submit-actions` | `margin-left: auto` giữ nút căn phải kể cả khi không có khối trạng thái/meta bên trái; mobile: `flex-wrap` đẩy meta lên dòng trên |
+| Nút **không** `flex-1` / full-width | Bar nằm ngang toàn khung — nút full-width trông thừa và nặng |
+| Ghi chú "`*` là trường bắt buộc" | Bỏ khỏi bar (bar cần gọn 1 hàng) — đặt dưới tab nav hoặc đầu panel nếu cần |
+
+**Select trạng thái trong bar — TomSelect phải mở lên trên.** Bar nằm sát mép dưới viewport nên dropdown mở xuống sẽ bị khuất. `.form-submit-bar--sticky .ts-dropdown` đã đảo hướng sẵn (`bottom: 100%`), nhưng chỉ có tác dụng khi dropdown render **trong** wrapper — mặc định factory render vào `<body>`. Vì vậy select trong bar **không** dùng `ts-init`, khởi tạo thủ công:
+
+```js
+createTs('#ts-status', { dropdownParent: null, placeholder: 'Chọn trạng thái' });
+```
 
 ---
 
@@ -748,17 +755,14 @@ Card dùng trong cả flat form và tab panel:
 | Slug | Half (nằm dưới tên) |
 | Textarea, rich text | Full (ngoài grid) |
 
-### 13.3 Grid tổng thể form (tab + sidebar)
+### 13.3 Container tổng thể form
 
 ```blade
-{{-- Tab form --}}
-<div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-6 items-start">
-    <div>{{-- card chính --}}</div>
-    <div class="xl:sticky xl:top-4 space-y-4">{{-- sidebar --}}</div>
-</div>
-
-{{-- Flat form — không dùng grid tổng thể, để form chiếm full width --}}
-<form class="space-y-5">...</form>
+{{-- Mọi form (flat + tab): 1 cột full-width — không max-width, không grid tổng thể, không sidebar --}}
+<form>
+    {{-- card(s) --}}
+    {{-- Flat: Submit bar static (Section 20) | Tab: Sticky Submit Bar (Section 11) --}}
+</form>
 ```
 
 ---
@@ -960,6 +964,101 @@ initDatePicker(form.querySelector('[name="special_date"]'), { minDate: 'today' }
 />
 ```
 `instance-id` phải unique trên trang.
+
+### File & Image Upload ← NEW v5.1
+
+> Form có upload file phải có `enctype="multipart/form-data"` trên thẻ `<form>` (trừ khi dùng FilePond — file đã upload async, form chỉ submit uuid).
+
+**Bảng chọn component:**
+
+| Trường hợp | Component |
+|---|---|
+| 1 tài liệu (PDF, DOCX...) | `file-input` DaisyUI |
+| 1 ảnh có preview (logo, ảnh đại diện, ảnh bìa) | `file-input` DaisyUI + khung preview Alpine |
+| Nhiều ảnh / nhiều file cùng lúc | FilePond — `initFilePondUpload()` |
+
+#### Upload cơ bản (tài liệu / PDF)
+
+```blade
+<div class="form-control">
+    <label class="label py-0 pb-1.5">
+        <span class="label-text font-medium">Tài liệu đính kèm</span>
+        <span class="label-text-alt text-xs text-base-content/40">PDF, tối đa 10MB</span>
+    </label>
+    <input type="file" name="document" accept="application/pdf"
+           class="file-input file-input-bordered file-input-sm w-full @error('document') file-input-error @enderror">
+    @error('document')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+</div>
+```
+
+#### Upload hình ảnh có preview
+
+- **Create:** bắt buộc có khung preview ảnh nhỏ **phía trên** nút upload — hiện ngay khi user chọn file.
+- **Edit:** hiển thị lại ảnh đã lưu kèm nút X / icon thùng rác **"Xóa ảnh hiện tại"**. Khi bấm xóa → bật hidden input `name="remove_[field]" value="1"` (VD: `remove_image`) để báo backend xóa hẳn ảnh cũ.
+- Chọn ảnh mới sau khi đã bấm xóa → tự hủy cờ xóa (ảnh mới thay thế ảnh cũ).
+
+```blade
+{{-- Edit: $model->image_url có thể null. Create: truyền null --}}
+<div class="form-control"
+     x-data="{
+         preview: {{ Js::from($model?->image_url) }},
+         remove: false,
+         pick(e) {
+             const f = e.target.files[0];
+             if (!f) return;
+             this.preview = URL.createObjectURL(f);
+             this.remove  = false;
+         },
+         clear() {
+             this.preview = null;
+             this.remove  = true;
+             this.$refs.file.value = '';
+         },
+     }">
+    <label class="label py-0 pb-1.5">
+        <span class="label-text font-medium">Ảnh đại diện</span>
+        <span class="label-text-alt text-xs text-base-content/40">JPG, PNG, WEBP · tối đa 2MB</span>
+    </label>
+
+    {{-- Preview — phía trên nút upload --}}
+    <div x-show="preview" x-cloak class="relative w-32 h-32 mb-2">
+        <img :src="preview" alt="" class="w-full h-full object-cover rounded-lg border border-base-200">
+        <button type="button" @click="clear()" title="Xóa ảnh hiện tại"
+                class="btn btn-circle btn-xs btn-error absolute -top-2 -right-2">✕</button>
+    </div>
+
+    <input type="file" name="image" accept="image/jpeg,image/png,image/webp" x-ref="file" @change="pick($event)"
+           class="file-input file-input-bordered file-input-sm w-full @error('image') file-input-error @enderror">
+
+    {{-- Edit only — Create không cần cờ xóa --}}
+    <input type="hidden" name="remove_image" value="1" :disabled="!remove">
+
+    @error('image')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+</div>
+```
+
+- Hidden input dùng `:disabled="!remove"` → chỉ được submit khi user thực sự bấm xóa.
+- Backend: `'remove_image' => ['nullable', 'boolean']`; xử lý theo thứ tự **có file mới → thay thế**, **không có file mới + `remove_image` = 1 → xóa ảnh cũ**, còn lại giữ nguyên.
+
+#### Nhiều ảnh / nhiều file — FilePond
+
+Dự án đã có wrapper `resources/js/modules/filepond.js` — **thống nhất dùng `initFilePondUpload()`** (nối sẵn `MediaUploadService`, CSRF, giới hạn MIME/size theo collection). Không tự cấu hình `FilePond.create()` trong module.
+
+```blade
+<input type="file" id="gallery-filepond" multiple>
+<input type="hidden" name="gallery_uuids" id="gallery-uuids">
+```
+
+```js
+initFilePondUpload('#gallery-filepond', {
+    collection: 'attachments',      // 'avatar'|'logo'|'thumbnail'|'cover'|'attachments'|'attachments_private'
+    bindTo:     '#gallery-uuids',   // 1-n collection → JSON array uuid
+    // Edit: thêm contextType + contextId để gắn thẳng vào entity
+});
+```
+
+- Create: backend gọi `MediaUploadService::reassociateFilePondDrafts($model, $uuids, $collection)` sau khi lưu.
+- Load `resources/js/modules/filepond.js` **trước** module JS trong `@push('scripts')`.
 
 ---
 
@@ -1220,11 +1319,82 @@ document.addEventListener('DOMContentLoaded', () => {
 
 > **Nguyên tắc:** Mỗi conditional required field cần 1 guard riêng. Đặt tên theo pattern `_setup[Field]Validation(form)`.
 
+### 17.7 Dirty Form Guard — cảnh báo mất dữ liệu chưa lưu
+
+**Vấn đề:** Tab form dài (hàng chục trường) — user lỡ bấm Back, đóng tab trình duyệt hoặc click link ở sidebar → mất sạch dữ liệu đã nhập.
+
+**Giải pháp:**
+1. Bắt `input` / `change` trên toàn form → set cờ `isDirty = true`.
+2. Khi `isDirty === true` → gắn `beforeunload` để trình duyệt hiện hộp thoại xác nhận rời trang.
+3. Khi user bấm Lưu/Submit (và submit **không** bị chặn bởi guard/validation) → `isDirty = false` để cho phép điều hướng.
+
+```js
+// Trong pages/[entity]-form.js
+
+function _setupDirtyGuard(form) {
+    let isDirty = false;
+
+    const onBeforeUnload = (e) => {
+        e.preventDefault();
+        e.returnValue = '';   // Chrome/Edge cũ cần returnValue để hiện dialog
+    };
+
+    const markDirty = () => {
+        if (isDirty) return;
+        isDirty = true;
+        window.addEventListener('beforeunload', onBeforeUnload);
+    };
+
+    const clearDirty = () => {
+        isDirty = false;
+        window.removeEventListener('beforeunload', onBeforeUnload);
+    };
+
+    form.addEventListener('input',  markDirty, { passive: true });
+    form.addEventListener('change', markDirty, { passive: true });
+
+    // Lắng nghe ở document (bubble) → chạy SAU Tab Guard (capture) và initFormValidation (bubble trên form).
+    // Submit bị chặn (thiếu field) → defaultPrevented = true → giữ nguyên cờ dirty.
+    document.addEventListener('submit', (e) => {
+        if (e.target === form && !e.defaultPrevented) clearDirty();
+    });
+}
+```
+
+**Gọi SAU khi đã init TomSelect / Flatpickr / Jodit** — tránh việc khởi tạo component tự bắn `change` làm form bị đánh dấu dirty ngay khi load:
+
+```js
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector(FORM_SEL);
+    if (!form) return;
+
+    initFormValidation(FORM_SEL);
+    _setupTabGuard(form);
+    initAllTomSelects(form);
+    window.initAllDatePickers?.(form);
+    _setupSlugAutoFill(form);
+    _setupDirtyGuard(form);          // ← luôn gọi cuối
+});
+```
+
+**Lưu ý:**
+
+| Tình huống | Xử lý |
+|---|---|
+| Nội dung hộp thoại | Trình duyệt hiện đại **bỏ qua** message tùy biến, chỉ hiện câu mặc định ("Rời khỏi trang web? Các thay đổi có thể chưa được lưu"). Không cố set text riêng. |
+| TomSelect | `onChange` dispatch native `change` trên `<select>` gốc → tự được bắt |
+| Jodit (rich text) | Jodit không luôn bắn `input` trên textarea gốc → nối thêm `editor.events.on('change', markDirty)` bên trong `_setupDirtyGuard` nếu form có Jodit |
+| Gán value bằng JS (auto-fill slug, cascade ward reset) | Không bắn event → không đánh dấu dirty — đúng mong muốn |
+| Nút "Hủy" (link về index) | Vẫn hiện cảnh báo nếu dirty — đúng mong muốn (user chủ động rời đi cần xác nhận) |
+| Phạm vi áp dụng | **Bắt buộc** cho tab form; tùy chọn cho flat form ngắn |
+
 ---
 
 ## 18. Slug Auto-fill
 
 ### 18.1 Pattern
+
+> **v5.1:** Tạo slug được bọc trong **debounce 300ms** — không chạy `_toSlug` trên từng phím gõ; user dừng tay ~0.3s mới gen slug và điền xuống ô bên dưới. Khi submit, slug đang chờ được **flush** ngay để không gửi slug cũ.
 
 ```js
 // Trong pages/[entity]-form.js
@@ -1245,6 +1415,19 @@ const VI_MAP = Object.freeze({
     đ:'d',
 });
 
+const SLUG_DEBOUNCE_MS = 300;
+
+function _debounce(fn, wait) {
+    let timer = null;
+    const debounced = (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => { timer = null; fn(...args); }, wait);
+    };
+    debounced.cancel = () => { clearTimeout(timer); timer = null; };
+    debounced.flush  = () => { if (timer) { debounced.cancel(); fn(); } };
+    return debounced;
+}
+
 function _setupSlugAutoFill(form) {
     const nameInput = form.querySelector('[name="name"]');
     const slugInput = form.querySelector('[name="slug"]');
@@ -1253,9 +1436,17 @@ function _setupSlugAutoFill(form) {
     // Edit: slug đã có giá trị → locked = true từ đầu
     let locked = slugInput.value.trim() !== '';
 
-    slugInput.addEventListener('input',  () => { locked = slugInput.value.trim() !== ''; }, { passive: true });
+    // Kiểm tra locked tại thời điểm chạy (sau 300ms), không phải lúc gõ phím
+    const fillSlug = _debounce(() => {
+        if (!locked) slugInput.value = _toSlug(nameInput.value);
+    }, SLUG_DEBOUNCE_MS);
+
+    slugInput.addEventListener('input',  () => { locked = slugInput.value.trim() !== ''; if (locked) fillSlug.cancel(); }, { passive: true });
     slugInput.addEventListener('change', () => { if (!slugInput.value.trim()) locked = false; }, { passive: true });
-    nameInput.addEventListener('input',  () => { if (!locked) slugInput.value = _toSlug(nameInput.value); }, { passive: true });
+    nameInput.addEventListener('input',  fillSlug, { passive: true });
+
+    // capture → flush trước Tab Guard / initFormValidation
+    form.addEventListener('submit', () => fillSlug.flush(), true);
 }
 
 function _toSlug(str) {
@@ -1269,7 +1460,9 @@ function _toSlug(str) {
 
 | Tình huống | Hành vi |
 |---|---|
-| Create, slug trống | Auto-fill từ tên khi user gõ |
+| Create, slug trống | Auto-fill từ tên sau khi user **dừng gõ 300ms** (debounce) |
+| Create, user submit khi debounce chưa chạy | `flush()` trong submit (capture) → gen slug ngay, không gửi slug cũ |
+| Create, user gõ vào slug khi debounce đang chờ | `cancel()` → không ghi đè slug user vừa nhập |
 | Create, user tự điền slug | `locked = true` → không auto-fill nữa |
 | Create, user xoá hết slug | `locked = false` → auto-fill trở lại |
 | Edit, slug đã có giá trị | `locked = true` từ đầu — không bao giờ auto-fill |
@@ -1311,22 +1504,35 @@ function _toSlug(str) {
 
 ## 20. Submit Actions Bar
 
-Dùng cho flat form (không có sidebar). Tab form dùng sidebar publish block (Section 11).
+Dùng cho **flat form** — khối nút **luôn nằm dưới cùng** form, sau card cuối cùng, là con trực tiếp cuối cùng của `<form>` ([8.4](#84-vị-trí-khối-nút-bấm-submit--hủy)).
+
+**Class:** `.form-submit-bar` (base, static) — định nghĩa trong `resources/scss/_form-patterns.scss` (mục 8), cùng họ với `.form-submit-bar--sticky` của tab form. Module SCSS phải có `@use 'form-patterns'`. Không viết lại bằng chuỗi Tailwind.
+
+| Class | Vai trò |
+|---|---|
+| `.form-submit-bar` | `flex`, `align-items: center`, `gap: .75rem`, `border-top`, `padding: 1rem 0 .5rem`, `margin-top: 1rem` |
+| `.submit-actions` | Nhóm nút: `margin-left: auto` (căn phải), `flex`, `gap: .5rem` |
+
+**Thứ tự nút:** Hủy (ghost) → Lưu (primary), căn phải — giống hệt Sticky Submit Bar.
+
+> Tab form dùng cùng vị trí (dưới cùng form) và cùng class, thêm modifier `form-submit-bar--sticky` — xem [Section 11](#11-sticky-submit-bar). Form flat lớn dần thành tab form → chỉ cần thêm modifier. Không đặt 2 bar trong cùng 1 form.
 
 ```blade
 {{-- Cơ bản --}}
-<div class="flex gap-2 pt-4 mt-2 border-t border-base-200">
-    <button type="submit" class="btn btn-primary btn-sm gap-1.5">Tạo [entity]</button>
-    <a href="{{ route('...index') }}" class="btn btn-ghost btn-sm">Hủy</a>
+<div class="form-submit-bar">
+    <div class="submit-actions">
+        <a href="{{ route('...index') }}" class="btn btn-ghost btn-sm">Hủy</a>
+        <button type="submit" class="btn btn-primary btn-sm gap-1.5">Tạo [entity]</button>
+    </div>
 </div>
 
-{{-- Có validation state (Alpine) --}}
-<div class="flex items-center gap-3 pt-4 mt-2 border-t border-base-200">
+{{-- Có validation state (Alpine) — thông báo lỗi bên trái, nhóm nút vẫn căn phải --}}
+<div class="form-submit-bar">
     <div x-show="attempted && !isValid" x-transition class="flex items-center gap-2 text-sm text-error">
         <svg class="w-4 h-4 shrink-0" .../>
         Vui lòng kiểm tra lại các trường bắt buộc
     </div>
-    <div class="ml-auto flex gap-2">
+    <div class="submit-actions">
         <a href="..." class="btn btn-ghost btn-sm">Hủy</a>
         <button type="submit" class="btn btn-sm gap-1.5 transition-all"
                 :class="attempted && !isValid ? 'btn-error' : 'btn-primary'">
@@ -1628,9 +1834,8 @@ Slug:  "ten-slug-vd"
 
 | Thành phần | Class |
 |---|---|
-| Grid tab form | `grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-6 items-start` |
+| Form container (mọi form) | `<form>` full-width — không thêm `max-w-*` |
 | Card chính (tab) | `card bg-base-100 shadow-sm border border-base-200` |
-| Sidebar wrapper | `xl:sticky xl:top-4 space-y-4` |
 | Tab nav container | `border-b border-base-200 px-6` |
 | Tab nav inner | `flex -mb-px` |
 | Tab button active | `border-b-2 border-primary text-primary` |
@@ -1638,11 +1843,10 @@ Slug:  "ten-slug-vd"
 | Tab panel | `x-show="tab === 'key'" data-tab-label="Label"` |
 | Tab panel body | `p-6` |
 | Tab footer nav | `flex items-center justify-between pt-2` |
-| Sidebar card | `card bg-base-100 shadow-sm border border-base-200` |
-| Sidebar card body | `card-body p-4` |
-| Sidebar title | `text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3` |
-| Sidebar 2-btn row | `flex gap-2` + từng nút `btn btn-sm flex-1` |
-| Sidebar meta | `flex justify-between text-xs text-base-content/40 mb-4 px-0.5` |
+| Sticky Submit Bar (tab form) | `form-submit-bar form-submit-bar--sticky` |
+| Sticky bar — nhóm nút phải | `submit-actions` |
+| Sticky bar — meta | `text-xs text-base-content/40` |
+| Static Submit Bar (flat form) | `form-submit-bar` + nhóm nút `submit-actions` |
 
 ### Cards & sections
 
@@ -1681,8 +1885,6 @@ Slug:  "ten-slug-vd"
 |---|---|
 | Primary submit | `btn btn-primary btn-sm gap-1.5` |
 | Cancel / ghost | `btn btn-ghost btn-sm` |
-| Sidebar submit | `btn btn-primary btn-sm flex-1 gap-1.5` |
-| Sidebar cancel | `btn btn-ghost btn-sm flex-1` |
 | Tab nav prev/next | `btn btn-ghost btn-sm gap-1.5` |
 | Loading spinner | `loading loading-spinner loading-xs` |
 
@@ -1694,14 +1896,22 @@ Slug:  "ten-slug-vd"
 
 | ❌ Sai | ✅ Đúng |
 |---|---|
-| `max-w-3xl` làm container form | Grid `xl:grid-cols-[1fr_300px]` + sidebar |
-| Full-width stacked submit buttons trong sidebar | 2 nút `flex-1` nằm ngang |
+| Grid `xl:grid-cols-[1fr_300px]` + sidebar | 1 cột full-width |
+| Giới hạn `max-w-*` / `mx-auto` trên `<form>` | `<form>` full-width |
+| Sidebar Publish Block (v5) | Submit bar dưới cùng form — static (flat) / sticky (tab) |
+| Nút submit full-width / `flex-1` trong bar | Nút kích thước tự nhiên, nhóm căn phải |
 | Icon box màu (`bg-primary/10 rounded-lg`) trong section header | Icon inline `w-4 h-4 text-primary` |
 | Subtitle dưới section header | Bỏ — dùng hint dưới field nếu cần giải thích |
 | Icon wrapper trong input (phone, email) | Input thông thường, không icon prefix |
 | `input-md` hoặc không size | `input-sm` |
 | 3+ separate cards cho các section khi dùng tab | 1 card với tab nav bên trong |
 | Hardcode tab label trong JS (`const TAB_LABELS = {...}`) | Đọc từ `data-tab-label` attr trên panel |
+| Tab form dùng submit bar static ở cuối → phải cuộn mới thấy nút Lưu | Sticky Submit Bar `sticky bottom-0` ([Section 11](#11-sticky-submit-bar)) |
+| Sticky bar đặt trong card / tab panel | Con trực tiếp, cuối cùng của `<form>` — ngoài card |
+| Tự viết bar bằng chuỗi Tailwind (`flex gap-2 pt-4 border-t ...`, `sticky bottom-0 z-50 ...`) | `form-submit-bar` (flat) / `form-submit-bar form-submit-bar--sticky` (tab) |
+| Đặt nút Lưu ở đầu form / trong footer từng tab panel | Luôn dưới cùng form ([8.4](#84-vị-trí-khối-nút-bấm-submit--hủy)) |
+| Select trạng thái trong sticky bar dùng `ts-init` (dropdown mở xuống bị khuất) | `createTs(..., { dropdownParent: null })` — `.form-submit-bar--sticky` tự mở dropdown lên trên |
+| Edit ảnh không có cách xóa ảnh cũ | Nút X "Xóa ảnh hiện tại" + hidden `remove_[field]=1` |
 
 ### JS
 
@@ -1713,6 +1923,10 @@ Slug:  "ten-slug-vd"
 | `forEach` không thể `break` sớm | `for...of` + `continue`/`break` |
 | Không có `{ passive: true }` trên input listeners | Thêm `passive: true` khi không cần `preventDefault` |
 | `Alpine.data(...)` trong `<script>` blade | Đăng ký trong JS file, event `alpine:init` |
+| `_toSlug` chạy trên từng phím gõ | Debounce 300ms + `flush()` khi submit ([18.1](#181-pattern)) |
+| Tab form không cảnh báo khi rời trang có dữ liệu chưa lưu | `_setupDirtyGuard(form)` ([17.7](#177-dirty-form-guard--cảnh-báo-mất-dữ-liệu-chưa-lưu)) |
+| Clear cờ dirty ngay trong submit listener capture | Clear ở `document` (bubble) và chỉ khi `!e.defaultPrevented` |
+| Tự gọi `FilePond.create()` trong module | `initFilePondUpload()` từ `resources/js/modules/filepond.js` |
 
 ### TomSelect
 
@@ -1795,9 +2009,10 @@ Slug:  "ten-slug-vd"
 
 ### Flat form
 
-- [ ] Form không có `max-w-3xl`
+- [ ] `<form>` full-width — không `max-w-*`, không sidebar
 - [ ] `data-[entity]-form` hoặc `x-data` đúng pattern
-- [ ] Submit bar dùng Section 20 pattern
+- [ ] Submit bar `.form-submit-bar` + `.submit-actions` (Section 20) — con trực tiếp cuối cùng của `<form>`, **dưới** mọi card; thứ tự Hủy → Lưu
+- [ ] Module SCSS có `@use 'form-patterns'`
 - [ ] Edit form: tất cả value `old('field', $model->field)`
 
 ### Tab form (bổ sung)
@@ -1807,8 +2022,12 @@ Slug:  "ten-slug-vd"
 - [ ] `[data-req]` trên mọi required field
 - [ ] `toastify.js` load trước module JS trong `@push('scripts')`
 - [ ] `_setupTabGuard(form)` được gọi trong page controller
-- [ ] Sidebar dùng Section 11 pattern (không full-width stacked buttons)
-- [ ] Grid `xl:grid-cols-[1fr_300px]` với `xl:sticky xl:top-4` trên sidebar
+- [ ] Nút Lưu/Hủy + trạng thái/meta nằm trong `.form-submit-bar.form-submit-bar--sticky` (Section 11) — con trực tiếp, cuối cùng của `<form>`; nhóm nút trong `.submit-actions`
+- [ ] Module SCSS có `@use 'form-patterns'`
+- [ ] Không ancestor nào của bar có `overflow-hidden/auto` (sticky phải ghim được khi cuộn)
+- [ ] Select trong bar (nếu có): không `ts-init`, `createTs(..., { dropdownParent: null })`
+- [ ] `_setupDirtyGuard(form)` được gọi **cuối cùng** trong page controller (sau TomSelect/Flatpickr/Jodit)
+- [ ] `<form>` full-width — không grid sidebar
 - [ ] Mỗi tab panel có footer nav (Prev/Next buttons)
 - [ ] `init()` trong x-data tự chuyển tab có lỗi server
 
@@ -1818,6 +2037,15 @@ Slug:  "ten-slug-vd"
 - [ ] `_setupSlugAutoFill(form)` được gọi trong page controller
 - [ ] `VI_MAP` được `Object.freeze()`
 - [ ] Edit form: slug có giá trị → `locked = true` từ đầu
+- [ ] Auto-fill bọc debounce 300ms, có `flush()` trong submit (capture) và `cancel()` khi user gõ vào slug
+
+### File & Image Upload (khi form có upload)
+
+- [ ] `file-input file-input-bordered file-input-sm w-full` cho upload đơn; form có `enctype="multipart/form-data"`
+- [ ] Ảnh: khung preview phía trên nút upload (create + edit)
+- [ ] Edit ảnh: nút X "Xóa ảnh hiện tại" + `<input type="hidden" name="remove_[field]" value="1" :disabled="!remove">`
+- [ ] Backend validate `remove_[field]` (`nullable|boolean`) và xử lý: file mới → thay; không file + remove=1 → xóa; còn lại giữ nguyên
+- [ ] Nhiều file: `initFilePondUpload()`, `filepond.js` load trước module JS
 
 ### UX
 
