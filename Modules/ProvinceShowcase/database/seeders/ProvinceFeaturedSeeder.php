@@ -13,7 +13,7 @@ use Modules\ProvinceShowcase\Support\ProvinceTabColor;
 class ProvinceFeaturedSeeder extends Seeder
 {
     private const THEME_COLORS = [
-        'ha-noi' => '#ea1d76',
+        'ha-noi' => '#ed1c24',
         'cao-bang' => null,
         'tuyen-quang' => null,
         'dien-bien' => null,

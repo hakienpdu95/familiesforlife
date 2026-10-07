@@ -41,6 +41,20 @@ const COLUMNS = [
         },
     },
     {
+        title: 'Hiển thị ở', field: 'menu_placements', minWidth: 200, headerSort: false,
+        formatter(cell) {
+            const d = cell.getRow().getData();
+            const items = d.menu_placements || [];
+            if (!items.length) return '<span class="text-xs text-base-content/30">Chưa gắn menu</span>';
+            const hiddenNote = d.is_published ? '' : ' · ẩn vì trang chưa xuất bản';
+            return items.map(p => '<a href="' + esc(p.edit_url) + '" class="block text-xs hover:text-primary'
+                + (p.is_active && d.is_published ? '' : ' text-base-content/40') + '"'
+                + ' title="Mục menu: ' + esc(p.label) + (p.is_active ? '' : ' (đang tắt)') + hiddenNote + '">'
+                + esc(p.path) + (p.is_active ? '' : ' <span class="badge badge-ghost badge-xs">Tắt</span>')
+                + '</a>').join('');
+        },
+    },
+    {
         title: 'Cập nhật', field: 'updated_at', width: 140, hozAlign: 'center', sorter: 'string',
     },
     {

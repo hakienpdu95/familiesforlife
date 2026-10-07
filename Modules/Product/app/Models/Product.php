@@ -4,16 +4,19 @@ namespace Modules\Product\Models;
 
 use App\Foundation\Models\TenantAwareModel;
 use App\Shared\Tenancy\OrganizationScope;
+use App\Traits\HasTenantMedia;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Approval\Concerns\HasApproval;
 use Modules\Product\Enums\ProductStatus;
 use Modules\Product\Enums\ProductType;
 use Illuminate\Support\Str;
+use Spatie\MediaLibrary\HasMedia;
 
-class Product extends TenantAwareModel
+class Product extends TenantAwareModel implements HasMedia
 {
     use HasApproval;
+    use HasTenantMedia;
 
     protected $table = 'products';
 
@@ -27,6 +30,7 @@ class Product extends TenantAwareModel
         'type',
         'short_description',
         'description',
+        'content',
         'price',
         'price_label',
         'currency',
@@ -69,6 +73,14 @@ class Product extends TenantAwareModel
         static::forceDeleted(function (self $model): void {
             $model->approvalSubject?->forceDelete();
         });
+    }
+
+    /** UUID ảnh Jodit (`data-media-uuid`) đang được nhắc tới trong nội dung sản phẩm. */
+    public function contentMediaUuids(): array
+    {
+        preg_match_all('/data-media-uuid="([^"]+)"/', (string) $this->content, $matches);
+
+        return array_values(array_unique($matches[1]));
     }
 
     public function getRouteKeyName(): string
@@ -115,7 +127,7 @@ class Product extends TenantAwareModel
      */
     public function approvalWatchedAttributes(): array
     {
-        return ['name', 'short_description', 'description', 'cover_image_url'];
+        return ['name', 'short_description', 'description', 'content', 'cover_image_url'];
     }
 
     // ── Helpers ──────────────────────────────────────────────────────

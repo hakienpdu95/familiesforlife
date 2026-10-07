@@ -58,7 +58,7 @@ Base classes enforce tenant isolation:
 
 ### RBAC
 
-Eight core roles (`app/Enums/RoleEnum.php`: CEO, Sales, Ops, Marketing, HR, AI_Operator, System_Admin, Viewer) with permissions defined in `config/permissions.php` — the sidebar UI is rendered from this config, not hardcoded. Separately, the content/AI research modules (CoreIdeaExtractor, VideoIdeaExtractor, ContentFoundation) grant their own additional Spatie roles (`platform_content_editor`, `platform_content_head`, `platform_section_editor`) via their own `*PermissionSeeder.php` — these are **not** part of `RoleEnum`. When touching permissions for those modules, check the module's seeder rather than assuming the 8 core roles are the full picture.
+Eight core roles (`app/Enums/RoleEnum.php`: CEO, Sales, Ops, Marketing, HR, AI_Operator, System_Admin, Viewer) with permissions defined in `config/permissions.php`. The backend sidebar is **not** rendered from that config — it is hand-written Blade in `resources/views/layouts/partials/sidebar.blade.php`, grouped by `<x-sidebar-section>` (Không gian làm việc / Nội dung / Dữ liệu chuyên ngành / AI Studio / CRM / Hệ thống & Tổ chức / Phân tích); each item keeps its own `@can`/`@if`, and a section hides itself when none of its items are visible. Add a new module's menu entry inside the matching section. Separately, the content/AI research modules (CoreIdeaExtractor, VideoIdeaExtractor, ContentFoundation) grant their own additional Spatie roles (`platform_content_editor`, `platform_content_head`, `platform_section_editor`) via their own `*PermissionSeeder.php` — these are **not** part of `RoleEnum`. When touching permissions for those modules, check the module's seeder rather than assuming the 8 core roles are the full picture.
 
 ### AI Provider Layer
 

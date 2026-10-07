@@ -53,8 +53,11 @@ class ProductAdminController extends Controller
         $data    = ProductData::from($this->validated($request));
         $product = $action->handle($data);
 
-        return redirect()->route('backend.products.index')
-            ->with('success', "Sản phẩm \"{$product->name}\" đã được tạo.");
+        // "Tạo & thêm tiếp" — nhập nhiều sản phẩm liên tục, quay lại form trống thay vì danh sách.
+        $route = $request->input('after_save') === 'new' ? 'backend.products.create' : 'backend.products.index';
+
+        return redirect()->route($route)
+            ->with('success', "Sản phẩm \"{$product->name}\" đã được tạo và gửi duyệt.");
     }
 
     public function edit(Product $product, ListCategoriesForAdminHandler $categoryHandler): string
@@ -88,7 +91,8 @@ class ProductAdminController extends Controller
         // (đổi route convention hiện có, tốn công hơn cần thiết cho 1 role).
         abort_if($request->user()?->isPlatformViewer(), 403);
 
-        $data = ProductData::from($this->validated($request, $product->id));
+        // Form không còn ô nhập URL ảnh — giữ ảnh hiện tại trừ khi có ảnh FilePond mới / remove_cover.
+        $data = ProductData::from([...$this->validated($request, $product->id), 'cover_image_url' => $product->cover_image_url]);
 
         try {
             $action->handle($product, $data);
@@ -212,16 +216,51 @@ class ProductAdminController extends Controller
             'sku'                    => ['nullable', 'string', 'max:60'],
             'short_description'      => ['nullable', 'string', 'max:300'],
             'description'            => ['nullable', 'string'],
+            'content'                => ['nullable', 'string', 'max:65000'],
             'price'                  => ['nullable', 'numeric', 'min:0'],
             'price_label'            => ['nullable', 'string', 'max:100'],
             'currency'               => ['nullable', 'string', 'size:3'],
-            'cover_image_url'        => ['nullable', 'string', 'max:500'],
+            'cover_media_uuid'       => ['nullable', 'uuid'],
+            'remove_cover'           => ['boolean'],
             'shopee_url'             => $urlRule,
             'tiktok_url'             => $urlRule,
             'supplier_url'           => $urlRule,
             'supplier_homepage_url'  => $urlRule,
             'is_featured'            => ['boolean'],
             'sort_order'             => ['integer', 'min:0'],
+        ], [
+            'category_id.exists'           => 'Danh mục được chọn không hợp lệ.',
+            'name.required'                => 'Vui lòng nhập tên sản phẩm.',
+            'name.max'                     => 'Tên sản phẩm không được vượt quá :max ký tự.',
+            'type.required'                => 'Vui lòng chọn loại sản phẩm.',
+            'type.in'                      => 'Loại sản phẩm không hợp lệ.',
+            'status.required'              => 'Vui lòng chọn trạng thái.',
+            'status.in'                    => 'Trạng thái không hợp lệ.',
+            'sku.max'                      => 'SKU không được vượt quá :max ký tự.',
+            'short_description.max'        => 'Mô tả ngắn không được vượt quá :max ký tự.',
+            'content.string'               => 'Nội dung không hợp lệ.',
+            'content.max'                  => 'Nội dung quá dài (tối đa :max ký tự, tính cả mã HTML).',
+            'price.numeric'                => 'Giá phải là số.',
+            'price.min'                    => 'Giá không được âm.',
+            'price_label.max'              => 'Nhãn giá không được vượt quá :max ký tự.',
+            'currency.size'                => 'Tiền tệ phải là mã 3 ký tự (VD: VND, USD).',
+            'cover_media_uuid.uuid'        => 'Ảnh đại diện tải lên không hợp lệ — vui lòng tải lại.',
+            'remove_cover.boolean'         => 'Giá trị "Xóa ảnh hiện tại" không hợp lệ.',
+            'shopee_url.url'               => 'Link Shopee không đúng định dạng URL.',
+            'shopee_url.regex'             => 'Link Shopee phải bắt đầu bằng http:// hoặc https://.',
+            'shopee_url.max'               => 'Link Shopee không được vượt quá :max ký tự.',
+            'tiktok_url.url'               => 'Link TikTok Shop không đúng định dạng URL.',
+            'tiktok_url.regex'             => 'Link TikTok Shop phải bắt đầu bằng http:// hoặc https://.',
+            'tiktok_url.max'               => 'Link TikTok Shop không được vượt quá :max ký tự.',
+            'supplier_url.url'             => 'Link sản phẩm tại NCC không đúng định dạng URL.',
+            'supplier_url.regex'           => 'Link sản phẩm tại NCC phải bắt đầu bằng http:// hoặc https://.',
+            'supplier_url.max'             => 'Link sản phẩm tại NCC không được vượt quá :max ký tự.',
+            'supplier_homepage_url.url'    => 'Website nhà cung cấp không đúng định dạng URL.',
+            'supplier_homepage_url.regex'  => 'Website nhà cung cấp phải bắt đầu bằng http:// hoặc https://.',
+            'supplier_homepage_url.max'    => 'Website nhà cung cấp không được vượt quá :max ký tự.',
+            'is_featured.boolean'          => 'Giá trị "Sản phẩm nổi bật" không hợp lệ.',
+            'sort_order.integer'           => 'Thứ tự hiển thị phải là số nguyên.',
+            'sort_order.min'               => 'Thứ tự hiển thị không được âm.',
         ]);
     }
 }

@@ -7,6 +7,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Auth;
 use Modules\Menu\Enums\MenuLinkType;
 use Modules\Menu\Models\MenuItem;
+use Modules\Page\Models\Page;
 use Modules\Post\Features\CategoryManagement\Actions\CreateCategoryAction;
 use Modules\Post\Features\CategoryManagement\Data\CategoryData;
 use Modules\Post\Models\PostCategory;
@@ -172,29 +173,30 @@ class MenuDatabaseSeeder extends Seeder
 
         // ── 1. Kết nối (nhóm — cột "nav-footer__content") ────────────────────
         $createdFooter += $this->seedFooterGroup($userId, 'Kết nối', 10, [
-            ['Liên hệ', 'mailto:lienhe@viagiadinh.test'],
+            ['Liên hệ', 'mailto:lienhe@viagiadinh.test', 'lien-he'],
             ['Hợp tác quảng cáo', 'mailto:hoptac@viagiadinh.test'],
             ['Góp ý nội dung', 'mailto:gopy@viagiadinh.test'],
         ]);
 
         // ── 2. Về chúng tôi (nhóm — cột "nav-footer__content") ───────────────
         $createdFooter += $this->seedFooterGroup($userId, 'Về chúng tôi', 20, [
-            ['Câu chuyện của chúng tôi', route('post.public.home')],
+            ['Câu chuyện của chúng tôi', '/', 'gioi-thieu'],
         ]);
 
         // ── 3. Pháp lý (sort_order CAO NHẤT — frontend-footer.blade.php render nhóm cuối
         // cùng này thành thanh link pháp lý cuối trang thay vì 1 cột, khớp spec/footer.html
-        // ".nav-siteinfo"). Chưa có trang Chính sách/Điều khoản thật nên dùng '#' placeholder. ──
+        // ".nav-siteinfo"). Phần tử thứ 3 = slug trang tĩnh (Modules/Page) — có trang thì link
+        // theo MenuLinkType::Page, chưa có thì dùng URL dự phòng ở phần tử thứ 2. ──
         $createdFooter += $this->seedFooterGroup($userId, 'Pháp lý', 30, [
-            ['Chính sách bảo mật', '#'],
-            ['Điều khoản sử dụng', '#'],
+            ['Chính sách bảo mật', '#', 'chinh-sach-bao-mat'],
+            ['Điều khoản sử dụng', '#', 'dieu-khoan-su-dung'],
             ['Thuật ngữ', '#'],
         ]);
 
         $this->command->info("  ✓ Menu (footer) demo data seeded ({$createdFooter} mục mới).");
     }
 
-    /** @param array<int, array{0: string, 1: string}> $links [label, url][] */
+    /** @param array<int, array{0: string, 1: string, 2?: string}> $links [label, url dự phòng, slug trang tĩnh?][] */
     private function seedFooterGroup(int $userId, string $label, int $sortOrder, array $links): int
     {
         $created = 0;
@@ -217,26 +219,32 @@ class MenuDatabaseSeeder extends Seeder
             $created++;
         }
 
-        foreach ($links as $childSortOrder => [$childLabel, $url]) {
-            // Khoá theo CẢ url lẫn label — nhóm "Pháp lý" dùng chung placeholder '#' cho nhiều
-            // link (chưa có trang Chính sách/Điều khoản thật), chỉ khoá theo url sẽ khiến các
-            // mục sau bị coi là trùng lặp (đã bỏ qua) dù label khác nhau.
-            $exists = MenuItem::where('location', 'footer')
-                ->where('parent_id', $parent->id)
-                ->where('link_type', MenuLinkType::Url)
-                ->where('url', $url)
-                ->where('label', $childLabel)
-                ->exists();
+        foreach ($links as $childSortOrder => $link) {
+            [$childLabel, $url] = $link;
+            $pageId = isset($link[2]) ? Page::where('slug', $link[2])->value('id') : null;
 
-            if ($exists) {
+            // Khoá theo label trong cùng nhóm — nhóm "Pháp lý" dùng chung placeholder '#' cho
+            // nhiều link, khoá theo url sẽ coi các mục sau là trùng dù label khác nhau.
+            $existing = MenuItem::where('location', 'footer')
+                ->where('parent_id', $parent->id)
+                ->where('label', $childLabel)
+                ->first();
+
+            if ($existing) {
+                // Nâng cấp mục placeholder cũ (url) sang trỏ trang tĩnh khi trang đã tồn tại.
+                if ($pageId && $existing->link_type !== MenuLinkType::Page) {
+                    $existing->update(['link_type' => MenuLinkType::Page, 'page_id' => $pageId, 'url' => null]);
+                }
+
                 continue;
             }
 
             MenuItem::create([
                 'location'   => 'footer',
                 'parent_id'  => $parent->id,
-                'link_type'  => MenuLinkType::Url,
-                'url'        => $url,
+                'link_type'  => $pageId ? MenuLinkType::Page : MenuLinkType::Url,
+                'page_id'    => $pageId,
+                'url'        => $pageId ? null : $url,
                 'label'      => $childLabel,
                 'sort_order' => $childSortOrder,
                 'depth'      => 1,

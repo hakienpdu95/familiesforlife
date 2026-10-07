@@ -5,6 +5,7 @@ namespace Modules\Post\Features\PublicReading\Http;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Modules\Event\Models\Event;
@@ -87,7 +88,7 @@ class PublicCategoryController extends Controller
      * (resources/js/frontend.js `loadMoreArticles`). Trả JSON (html đã render + has_more) thay
      * vì điều hướng trang.
      *
-     * Cursor (after_published_at/after_id) thay offset — xem LoadMoreArticlesQuery. exclude
+     * Cursor (after_ts/after_id) thay offset — xem LoadMoreArticlesQuery. exclude
      * chỉ gồm bài hero + feature chunks (cố định, không phình theo số lần bấm). `category_id`
      * (tuỳ chọn) — có khi gọi từ trang danh mục, lọc thêm đúng danh mục đó.
      *
@@ -119,7 +120,7 @@ class PublicCategoryController extends Controller
 
         $result = $handler->handle(new LoadMoreArticlesQuery(
             locale: config('post.default_locale'),
-            afterPublishedAt: $request->string('after_published_at')->value() ?: null,
+            afterPublishedAt: $this->cursorTime($request),
             afterId: $request->filled('after_id') ? $request->integer('after_id') : null,
             excludeArticleIds: $excludeArticleIds,
             limit: $limit,
@@ -134,9 +135,37 @@ class PublicCategoryController extends Controller
             'count' => $articles->count(),
             // Cursor của dòng cuối vừa trả — client dùng cho lần "Xem thêm" kế tiếp, không tự
             // suy ra được từ HTML nên phải trả riêng.
-            'next_cursor' => $last ? ['published_at' => $last->published_at->toISOString(), 'id' => $last->id] : null,
+            // ts = số giây Unix — không mang múi giờ, client chỉ việc gửi lại nguyên con số.
+            'next_cursor' => $last ? ['ts' => $last->published_at->getTimestamp(), 'id' => $last->id] : null,
             'has_more' => $result['has_more'] && ($loaded + $articles->count()) < $maxTotal,
         ]);
+    }
+
+    /**
+     * Mốc cursor → thời điểm theo múi giờ app (đúng cách Eloquent ghi published_at). Nhận
+     * after_ts (số giây Unix — chuẩn hiện tại, không phụ thuộc múi giờ); after_published_at
+     * (ISO, bản JS cũ) chỉ giữ để các tab đang mở trước khi cập nhật không bị gãy. Giá trị
+     * hỏng → bỏ cursor (tải từ đầu trừ exclude) thay vì lỗi 500.
+     */
+    private function cursorTime(Request $request): ?Carbon
+    {
+        $timezone = config('app.timezone');
+
+        if ($request->filled('after_ts')) {
+            $ts = filter_var($request->query('after_ts'), FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
+
+            return $ts === false ? null : Carbon::createFromTimestamp($ts, $timezone);
+        }
+
+        if ($request->filled('after_published_at')) {
+            try {
+                return Carbon::parse($request->string('after_published_at')->value())->setTimezone($timezone);
+            } catch (\Throwable) {
+                return null;
+            }
+        }
+
+        return null;
     }
 
     private function featuredArticle(string $locale): ?PostArticleTranslation

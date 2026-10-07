@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Modules\Menu\Enums\MenuLinkType;
+use Modules\Page\Enums\PageStatus;
+use Modules\Page\Models\Page;
 use Modules\Post\Models\PostCategory;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
@@ -28,7 +30,7 @@ class MenuItem extends Model
     protected $fillable = [
         'uuid', 'location', 'parent_id', 'depth', 'label', 'icon',
         'sort_order', 'is_active', 'open_in_new_tab',
-        'link_type', 'category_id', 'url', 'created_by', 'updated_by',
+        'link_type', 'category_id', 'page_id', 'url', 'created_by', 'updated_by',
     ];
 
     protected $casts = [
@@ -78,6 +80,11 @@ class MenuItem extends Model
         return $this->belongsTo(PostCategory::class, 'category_id');
     }
 
+    public function page(): BelongsTo
+    {
+        return $this->belongsTo(Page::class, 'page_id');
+    }
+
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(\App\Models\User::class, 'created_by');
@@ -105,6 +112,14 @@ class MenuItem extends Model
         return $query->where('location', $location);
     }
 
+    /** Loại mục trỏ tới trang tĩnh chưa xuất bản / đã xoá — tránh link 404 trên nav công khai. */
+    public function scopeVisible($query)
+    {
+        return $query->where(fn ($q) => $q
+            ->where('link_type', '!=', MenuLinkType::Page->value)
+            ->orWhereHas('page', fn ($p) => $p->published()));
+    }
+
     /**
      * Cây 3 cấp (root → children → grandchildren), active-only, dùng cho nav công khai.
      * Eager-load `category:id,slug,is_active` ở CẢ 3 cấp — thiếu ở bất kỳ cấp nào cũng vỡ
@@ -113,10 +128,12 @@ class MenuItem extends Model
      */
     public static function tree(string $location = 'header'): Collection
     {
-        return static::active()->root()->location($location)
-            ->with(['category:id,slug,is_active', 'children' => fn ($q) => $q->active()
-                ->with(['category:id,slug,is_active', 'children' => fn ($q2) => $q2->active()
-                    ->with('category:id,slug,is_active')
+        $targets = ['category:id,slug,is_active', 'page:id,slug,status,published_at'];
+
+        return static::active()->visible()->root()->location($location)
+            ->with([...$targets, 'children' => fn ($q) => $q->active()->visible()
+                ->with([...$targets, 'children' => fn ($q2) => $q2->active()->visible()
+                    ->with($targets)
                     ->orderBy('sort_order')])
                 ->orderBy('sort_order')])
             ->orderBy('sort_order')
@@ -129,6 +146,9 @@ class MenuItem extends Model
         return match ($this->link_type) {
             MenuLinkType::Category => $this->category?->is_active
                 ? route('post.public.category', ['category' => $this->category->slug])
+                : null,
+            MenuLinkType::Page => $this->page?->status === PageStatus::Published && $this->page->published_at
+                ? url($this->page->slug)
                 : null,
             MenuLinkType::Url  => $this->url,
             MenuLinkType::None => null,

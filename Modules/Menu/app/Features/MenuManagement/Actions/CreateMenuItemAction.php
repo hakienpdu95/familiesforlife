@@ -40,6 +40,7 @@ class CreateMenuItemAction
             'open_in_new_tab' => $data->open_in_new_tab,
             'link_type'       => $data->link_type,
             'category_id'     => $data->category_id,
+            'page_id'         => $data->page_id,
             'url'             => $data->url,
             'created_by'      => auth()->id(),
         ]);

@@ -26,6 +26,8 @@ class PageListResource extends JsonResource
 
             'updated_at' => $this->updated_at->format('d/m/Y H:i'),
 
+            'menu_placements' => $this->menu_placements ?? [],
+
             'edit_url'      => route('backend.page.items.edit', $this->resource),
             'destroy_url'   => route('backend.page.items.destroy', $this->resource),
             'publish_url'   => route('backend.page.items.publish', $this->resource),

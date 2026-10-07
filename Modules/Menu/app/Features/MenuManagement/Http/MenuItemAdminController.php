@@ -15,6 +15,8 @@ use Modules\Menu\Features\MenuManagement\Actions\ReorderMenuItemsAction;
 use Modules\Menu\Features\MenuManagement\Actions\UpdateMenuItemAction;
 use Modules\Menu\Features\MenuManagement\Data\MenuItemData;
 use Modules\Menu\Models\MenuItem;
+use Modules\Page\Enums\PageStatus;
+use Modules\Page\Models\Page;
 use Modules\Post\Models\PostCategory;
 
 class MenuItemAdminController extends Controller
@@ -35,6 +37,7 @@ class MenuItemAdminController extends Controller
         return view('menu::admin.menu-items.create', [
             'parentOptions'   => $this->parentOptions(),
             'categoryOptions' => $this->categoryOptions(),
+            'pageOptions'     => $this->pageOptions(),
         ]);
     }
 
@@ -53,6 +56,7 @@ class MenuItemAdminController extends Controller
             'menuItem'        => $menuItem,
             'parentOptions'   => $this->parentOptions($menuItem),
             'categoryOptions' => $this->categoryOptions(),
+            'pageOptions'     => $this->pageOptions(),
         ]);
     }
 
@@ -126,11 +130,21 @@ class MenuItemAdminController extends Controller
                 'prohibited_unless:link_type,' . MenuLinkType::Category->value,
                 Rule::exists('post_categories', 'id')->where('is_active', true),
             ],
+            'page_id'         => [
+                'nullable', 'integer',
+                'required_if:link_type,' . MenuLinkType::Page->value,
+                'prohibited_unless:link_type,' . MenuLinkType::Page->value,
+                Rule::exists('pages', 'id')->whereNull('deleted_at'),
+            ],
             'url'             => [
                 'nullable', 'string', 'max:2048',
                 'required_if:link_type,' . MenuLinkType::Url->value,
                 'prohibited_unless:link_type,' . MenuLinkType::Url->value,
             ],
+        ], [
+            'page_id.required_if'       => 'Vui lòng chọn trang tĩnh.',
+            'page_id.prohibited_unless' => 'Chỉ chọn trang tĩnh khi đích liên kết là "Trang tĩnh".',
+            'page_id.exists'            => 'Trang tĩnh được chọn không hợp lệ hoặc đã bị xoá.',
         ]);
     }
 
@@ -147,5 +161,17 @@ class MenuItemAdminController extends Controller
     private function categoryOptions(): \Illuminate\Support\Collection
     {
         return PostCategory::active()->orderBy('name')->get(['id', 'name']);
+    }
+
+    /** Liệt kê cả trang Nháp — mục menu tự ẩn trên nav công khai cho tới khi trang được xuất bản. */
+    private function pageOptions(): \Illuminate\Support\Collection
+    {
+        return Page::query()->orderBy('title')->get(['id', 'title', 'slug', 'status', 'published_at'])
+            ->map(fn (Page $page) => (object) [
+                'id'           => $page->id,
+                'title'        => $page->title,
+                'slug'         => $page->slug,
+                'is_published' => $page->status === PageStatus::Published && $page->published_at !== null,
+            ]);
     }
 }

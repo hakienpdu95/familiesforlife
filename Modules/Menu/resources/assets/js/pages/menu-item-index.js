@@ -32,7 +32,7 @@ const COLUMNS = [
         title: 'Đích liên kết', field: 'link_target', minWidth: 200, headerSort: false,
         formatter(cell) {
             const d = cell.getRow().getData();
-            if (d.link_type === 'category') return '<span class="text-sm">' + esc(d.link_target) + '</span>';
+            if (d.link_type === 'category' || d.link_type === 'page') return '<span class="text-sm">' + esc(d.link_target) + '</span>';
             if (d.link_type === 'url') {
                 let html = '<span class="font-mono text-xs">' + esc((d.link_target || '').slice(0, 40)) + '</span>';
                 if (d.open_in_new_tab) html += ' <span class="badge badge-xs badge-ghost">tab mới</span>';

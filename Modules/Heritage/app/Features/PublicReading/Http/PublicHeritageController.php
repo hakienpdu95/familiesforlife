@@ -3,6 +3,7 @@
 namespace Modules\Heritage\Features\PublicReading\Http;
 
 use App\Http\Controllers\Controller;
+use App\Models\Province;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\Event\Models\Event;
@@ -20,12 +21,16 @@ class PublicHeritageController extends Controller
 {
     public function index(Request $request, ListPublishedHeritageSitesHandler $handler): View
     {
+        $provinceCode = $request->string('province')->trim()->value() ?: null;
+
         $sites = $handler->handle(new ListPublishedHeritageSitesQuery(
-            provinceCode: $request->string('province')->value() ?: null,
+            provinceCode: $provinceCode,
             page: max(1, $request->integer('page', 1)),
         ));
 
-        return view('heritage::public.index', compact('sites'));
+        $provinceName = $provinceCode ? Province::where('province_code', $provinceCode)->value('name') : null;
+
+        return view('heritage::public.index', compact('sites', 'provinceCode', 'provinceName'));
     }
 
     /**

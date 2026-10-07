@@ -73,7 +73,7 @@
          x-data="loadMoreArticles({
              endpoint: '{{ route('post.public.load-more') }}',
              exclude: '{{ $shownArticleIds->implode(',') }}',
-             afterPublishedAt: {{ $lastArticle ? "'".$lastArticle->published_at->toISOString()."'" : 'null' }},
+             afterTs: {{ $lastArticle?->published_at?->getTimestamp() ?? 'null' }},
              afterId: {{ $lastArticle?->id ?? 'null' }},
              loaded: {{ $shownArticleIds->count() }},
              maxTotal: {{ config('post.load_more_max_total') }},

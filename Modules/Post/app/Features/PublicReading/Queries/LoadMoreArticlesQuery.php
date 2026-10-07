@@ -3,6 +3,7 @@
 namespace Modules\Post\Features\PublicReading\Queries;
 
 use App\Shared\Contracts\QueryInterface;
+use Carbon\CarbonInterface;
 
 /**
  * "Xem thêm bài viết" (trang chủ, khối lưới cuối cùng trước footer) — keyset/cursor pagination
@@ -23,7 +24,12 @@ class LoadMoreArticlesQuery implements QueryInterface
 {
     public function __construct(
         public readonly string $locale,
-        public readonly ?string $afterPublishedAt = null,
+        /**
+         * Mốc published_at của bài cuối đã hiển thị — LUÔN là đối tượng thời gian đã quy về múi
+         * giờ app (không nhận chuỗi): client gửi số giây Unix (after_ts), controller quy đổi 1 chỗ
+         * duy nhất. Tránh lặp lại lỗi so chuỗi ISO UTC với cột lưu theo giờ app (lệch 7 tiếng).
+         */
+        public readonly ?CarbonInterface $afterPublishedAt = null,
         public readonly ?int $afterId = null,
         /** @var int[] */
         public readonly array $excludeArticleIds = [],

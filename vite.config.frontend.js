@@ -39,6 +39,7 @@ export default defineConfig(({ mode }) => {
           // Widget libs — lazy per-page (spec/Event_Management_Technical_Specification.md
           // §10.6: chỉ load ở trang submit-event, không load site-wide).
           'resources/js/modules/tom-select.js',
+          'resources/scss/tom-select-frontend.scss', // theme TomSelect DaisyUI dùng chung với backend
           'resources/js/modules/flatpickr.js',
 
           // spec/Breaking_News_Ticker_Technical_Specification.md — hiệu ứng trượt ngang cho
@@ -50,6 +51,9 @@ export default defineConfig(({ mode }) => {
           // Event public submission form
           'Modules/Event/resources/assets/js/event-public.js',
 
+          // /ocop — TomSelect bộ lọc danh mục (phân cấp)
+          'Modules/Ocop/resources/assets/js/ocop-public.js',
+
           // Anland (/anland) — portal BĐS riêng, CSS/JS KHÔNG dùng chung frontend.css/frontend.js
           // (theme màu + component khác hẳn trang chủ familiesforlife).
           'resources/css/anland.css',
@@ -59,6 +63,7 @@ export default defineConfig(({ mode }) => {
         refresh: [
           'Modules/Post/resources/views/public/**/*.blade.php',
           'Modules/Event/resources/views/public/**/*.blade.php',
+          'Modules/Ocop/resources/views/public/**/*.blade.php',
           'Modules/RealEstate/resources/views/public/anland/**/*.blade.php',
           'resources/views/layouts/frontend.blade.php',
           'resources/views/layouts/partials/frontend-*.blade.php',

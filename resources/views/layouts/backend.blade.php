@@ -33,6 +33,9 @@
     </div>
 </div>
 
+@if(session('success') || session('error'))
+@vite(['resources/js/modules/toastify.js'], 'build/backend')
+@endif
 @if(session('success'))
 <script>document.addEventListener('DOMContentLoaded',()=>window.Toast?.success(@js(session('success'))))</script>
 @endif
