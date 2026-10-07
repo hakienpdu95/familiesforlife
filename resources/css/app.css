@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
 @import "tailwindcss";
 
 @plugin "daisyui" {
@@ -35,8 +36,15 @@
 [x-cloak] { display: none !important; }
 
 /* ── Admin Layout ─────────────────────────────── */
-body { margin: 0; padding: 0; background: #f1f5f9; }
+body { margin: 0; padding: 0; background: #f1f5f9; font-family: 'Open Sans', sans-serif; }
 .admin-shell { display: flex; overflow: hidden; }
+
+.section-page {
+    margin-bottom: 30px;
+    box-shadow: 0 1px 8px 0 rgba(0,0,0,.16);
+    -webkit-box-shadow: 0 1px 8px 0 rgba(0,0,0,.16);
+    background: #fff;
+}
 
 /* ── Sidebar ──────────────────────────────────── */
 .sidebar {
@@ -66,8 +74,8 @@ body { margin: 0; padding: 0; background: #f1f5f9; }
 .sidebar-overlay.active { display: block; }
 
 @media (max-width: 1023px) {
-    .sidebar { transform: translateX(-100%); }
-    .sidebar.mobile-open { transform: translateX(0); }
+    .sidebar { transform: translateX(-100%); background: #fff; }
+    .sidebar.mobile-open { transform: translateX(0); background: #fff;}
 }
 
 /* ── Main area ────────────────────────────────── */
