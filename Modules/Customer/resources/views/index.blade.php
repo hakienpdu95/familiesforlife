@@ -157,7 +157,7 @@
                 {{-- Reset --}}
                 <div class="form-control ml-auto">
                     <label class="label py-0.5 invisible"><span class="label-text text-xs">.</span></label>
-                    <button @click="reset()" x-show="hasFilters" x-transition
+                    <button @click="reset()" x-show="hasFilters" x-cloak x-transition
                             class="btn btn-ghost btn-sm gap-1.5 text-error">
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
@@ -169,7 +169,7 @@
             </div>
 
             {{-- Active chips --}}
-            <div x-show="activeChips.length > 0" x-transition
+            <div x-show="activeChips.length > 0" x-cloak x-transition
                  class="flex flex-wrap gap-2 pt-1 border-t border-base-200">
                 <span class="text-xs text-base-content/40 self-center">Đang lọc:</span>
                 <template x-for="chip in activeChips" :key="chip.key">

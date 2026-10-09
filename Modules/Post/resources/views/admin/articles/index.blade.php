@@ -102,7 +102,7 @@
                 </div>
 
                 <div class="flex justify-end">
-                    <button @click="reset()" x-show="hasFilters" x-transition
+                    <button @click="reset()" x-show="hasFilters" x-cloak x-transition
                             class="btn btn-ghost btn-sm gap-1.5 text-error mt-1">
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -112,7 +112,7 @@
                     </button>
                 </div>
 
-                <div x-show="activeChips.length > 0" x-transition
+                <div x-show="activeChips.length > 0" x-cloak x-transition
                      class="flex flex-wrap gap-2 pt-3 mt-3 border-t border-base-200">
                     <span class="text-xs text-base-content/40 self-center">Đang lọc:</span>
                     <template x-for="chip in activeChips" :key="chip.key">

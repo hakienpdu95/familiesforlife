@@ -42,7 +42,7 @@
                            class="input input-sm input-bordered w-full" placeholder="Nhập từ khoá tìm kiếm...">
                 </div>
                 <div class="form-control">
-                    <button @click="reset()" x-show="hasFilters" x-transition
+                    <button @click="reset()" x-show="hasFilters" x-cloak x-transition
                             class="btn btn-ghost btn-sm gap-1.5 text-error">
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

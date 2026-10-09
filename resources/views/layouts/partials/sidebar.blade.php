@@ -1,4 +1,5 @@
 <aside class="sidebar" id="sidebar">
+<script>try{if(localStorage.getItem('ap_sidebar_collapsed')==='1')document.currentScript.parentElement.classList.add('collapsed')}catch(e){}</script>
 
     <div class="brand">
         <div class="brand-logo">
