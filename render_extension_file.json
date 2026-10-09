@@ -347,7 +347,13 @@
         "provinces///add///__///",
         "slug///string///255///_NULL///NULL///->unique()///__",
         "is_featured///boolean///__///NOT_NULL///false///->index()///__",
-        "theme_color///string///7///_NULL///NULL///__///__"
+        "theme_color///string///7///_NULL///NULL///__///__",
+        "slogan///string///255///_NULL///NULL///__///__",
+        "description///text///__///_NULL///NULL///__///__",
+        "cover_image///string///255///_NULL///NULL///__///__",
+        "tvc_video_url///string///500///_NULL///NULL///__///__",
+        "vr360_map_url///string///500///_NULL///NULL///__///__",
+        "highlight_tags///json///__///_NULL///NULL///__///__"
     ],
     [
         "ocop_categories///add///__///",
@@ -447,5 +453,11 @@
         "audience_behavior///text///__///_NULL///NULL///__///__",
         "product_service_docs///text///__///_NULL///NULL///__///__",
         "best_example_content///text///__///_NULL///NULL///__///__"
+    ],
+    [
+        "ocop_subjects///add///__///",
+        "slug///string///255///_NULL///NULL///__///__",
+        "story///longText///__///_NULL///NULL///__///__",
+        "__index///unique///__///__///__///slug///__"
     ]
 ]
