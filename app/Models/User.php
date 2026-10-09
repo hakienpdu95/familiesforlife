@@ -280,6 +280,11 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
+    public static function assignablePlatformRoles(): array
+    {
+        return array_values(array_diff(array_keys(self::platformRoleLabels()), ['super-admin']));
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()

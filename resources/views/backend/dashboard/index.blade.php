@@ -8,7 +8,8 @@
     /** @var \App\Models\User $authUser */
     $authUser  = auth()->user();
     $roleName  = $primary_role ?? 'viewer';
-    $roleLabel = \App\Enums\RoleEnum::tryFrom($roleName)?->label() ?? ucfirst($roleName);
+    $roleLabel = \App\Enums\RoleEnum::tryFrom($roleName)?->label()
+        ?? (\App\Models\User::platformRoleLabels()[$roleName] ?? ucfirst($roleName));
     $greeting  = $greeting  ?? (function () { $h = (int) now()->format('H'); return $h < 12 ? 'Chào buổi sáng' : ($h < 18 ? 'Chào buổi chiều' : 'Chào buổi tối'); })();
     $today_str = $today_str ?? \Illuminate\Support\Carbon::now()->isoFormat('dddd, D MMMM YYYY');
 
@@ -74,6 +75,9 @@
     </div>
 </div>
 
+@if($content)
+    @include('backend.dashboard.partials.content')
+@else
 {{-- ── KPI Cards ─────────────────────────────────────────────────────────── --}}
 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 mb-6">
     @foreach($kpi_cards as $card)
@@ -283,6 +287,7 @@
         @endforeach
     </div>
 </div>
+@endif
 
 @endsection
 

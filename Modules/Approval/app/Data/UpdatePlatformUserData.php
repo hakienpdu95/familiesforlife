@@ -2,6 +2,8 @@
 
 namespace Modules\Approval\Data;
 
+use App\Models\User;
+use Illuminate\Validation\Rule;
 use Spatie\LaravelData\Attributes\Validation\Max;
 use Spatie\LaravelData\Attributes\Validation\Required;
 use Spatie\LaravelData\Attributes\Validation\StringType;
@@ -14,16 +16,6 @@ use Spatie\LaravelData\Data;
  */
 class UpdatePlatformUserData extends Data
 {
-    private const ALLOWED_ROLES = [
-        'platform_content_head',
-        'platform_content_editor',
-        'platform_content_creator',
-        'platform_section_editor',
-        'platform_content_moderator',
-        'platform_ops',
-        'platform_viewer',
-    ];
-
     public function __construct(
         #[Required, StringType, Max(255)]
         public readonly string $name,
@@ -34,7 +26,7 @@ class UpdatePlatformUserData extends Data
     public static function rules(): array
     {
         return [
-            'role' => ['required', 'string', 'in:' . implode(',', self::ALLOWED_ROLES)],
+            'role' => ['required', 'string', Rule::in(User::assignablePlatformRoles())],
         ];
     }
 

@@ -16,7 +16,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Development
 npm run dev                  # Vite dev server (port 5173)
 php artisan serve            # Laravel dev server
-php artisan queue:listen     # Queue worker
+php artisan horizon          # Queue worker (QUEUE_CONNECTION=redis, dashboard /horizon)
 
 # Build
 npm run build                 # Frontend assets
@@ -59,6 +59,10 @@ Base classes enforce tenant isolation:
 ### RBAC
 
 Eight core roles (`app/Enums/RoleEnum.php`: CEO, Sales, Ops, Marketing, HR, AI_Operator, System_Admin, Viewer) with permissions defined in `config/permissions.php`. The backend sidebar is **not** rendered from that config — it is hand-written Blade in `resources/views/layouts/partials/sidebar.blade.php`, grouped by `<x-sidebar-section>` (Không gian làm việc / Nội dung / Dữ liệu chuyên ngành / AI Studio / CRM / Hệ thống & Tổ chức / Phân tích); each item keeps its own `@can`/`@if`, and a section hides itself when none of its items are visible. Add a new module's menu entry inside the matching section. Separately, the content/AI research modules (CoreIdeaExtractor, VideoIdeaExtractor, ContentFoundation) grant their own additional Spatie roles (`platform_content_editor`, `platform_content_head`, `platform_section_editor`) via their own `*PermissionSeeder.php` — these are **not** part of `RoleEnum`. When touching permissions for those modules, check the module's seeder rather than assuming the 8 core roles are the full picture.
+
+### Monitoring
+
+Queue chạy trên Redis qua Horizon (`/horizon`, gate `viewHorizon` = super-admin/platform_ops, kể cả môi trường local). Trang `dashboard/system-monitor` (gate `viewSystemMonitor`) tự viết bằng Blade + Alpine + ECharts — KHÔNG dùng Livewire/Pulse. Số liệu request (middleware `RecordRequestMetrics`) và query chậm (`DB::listen`) ghi vào Redis bucket theo phút, ngưỡng trong `config/monitoring.php`.
 
 ### AI Provider Layer
 

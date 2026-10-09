@@ -27,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         // InjectRequestId phải chạy đầu tiên để tất cả request đều có X-Request-Id
         $middleware->prepend(\App\Http\Middleware\RemoveServerHeaders::class);
+        $middleware->append(\App\Http\Middleware\RecordRequestMetrics::class);
         $middleware->prepend(\Modules\ActivityLog\Http\Middleware\InjectRequestId::class);
         // IdentifyOrganization phải chạy SAU StartSession nhưng TRƯỚC SubstituteBindings
         // để TenantContext được set trước khi route model binding resolve tenant-scoped models.
@@ -45,6 +46,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->prependToGroup('api', \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class);
         $middleware->appendToGroup('api', \Illuminate\Routing\Middleware\ThrottleRequests::class . ':api');
         $middleware->appendToGroup('api', \Modules\ActivityLog\Http\Middleware\CaptureHttpContext::class);
+        $middleware->appendToGroup('api', \App\Http\Middleware\EnsureUserIsActive::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

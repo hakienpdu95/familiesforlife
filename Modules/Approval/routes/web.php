@@ -26,5 +26,9 @@ Route::middleware(['auth'])
     ->prefix('dashboard')
     ->name('backend.')
     ->group(function (): void {
+        Route::patch('platform-users/{platform_user}/activate', [PlatformUserController::class, 'activate'])
+            ->name('platform-users.activate');
+        Route::patch('platform-users/{platform_user}/reset-password', [PlatformUserController::class, 'resetPassword'])
+            ->name('platform-users.reset-password');
         Route::resource('platform-users', PlatformUserController::class)->except(['show']);
     });

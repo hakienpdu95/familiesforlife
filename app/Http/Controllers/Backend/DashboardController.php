@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
+use App\Services\Dashboard\ContentDashboardService;
 use App\Services\Dashboard\DashboardService;
 use Illuminate\Support\Carbon;
 
@@ -10,6 +11,7 @@ class DashboardController extends Controller
 {
     public function __construct(
         private readonly DashboardService $service,
+        private readonly ContentDashboardService $contentService,
     ) {}
 
     public function index()
@@ -17,7 +19,12 @@ class DashboardController extends Controller
         $user = auth()->user();
         $data = $this->service->getData($user);
 
+        $content = $this->contentService->isContentAudience($user)
+            ? $this->contentService->getData($user)
+            : null;
+
         return view('backend.dashboard.index', array_merge($data, [
+            'content'    => $content,
             'greeting'   => $this->greeting(),
             'today_str'  => Carbon::now()->isoFormat('dddd, D MMMM YYYY'),
         ]));

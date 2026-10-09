@@ -585,7 +585,7 @@
         </div>
 
         {{-- Chỉ super-admin — spec/Platform_RBAC_Phase2_Specification.md §2.7 --}}
-        @if(auth()->user()?->hasRole('super-admin'))
+        @can('platform-users.manage')
         <div class="nav-group">
             <a href="{{ route('backend.platform-users.index') }}"
                class="nav-link {{ request()->routeIs('backend.platform-users.*') ? 'active' : '' }}">
@@ -593,7 +593,17 @@
                 <span class="nav-label">Quản lý nhân sự Platform</span>
             </a>
         </div>
-        @endif
+        @endcan
+
+        @can('viewSystemMonitor')
+        <div class="nav-group">
+            <a href="{{ route('backend.system-monitor') }}"
+               class="nav-link {{ request()->routeIs('backend.system-monitor') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                <span class="nav-label">Giám sát hệ thống</span>
+            </a>
+        </div>
+        @endcan
 
         <div class="nav-group">
         <details {{ request()->routeIs('backend.users.*') ? 'open' : '' }}>

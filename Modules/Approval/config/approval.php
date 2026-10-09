@@ -36,4 +36,8 @@ return [
             'initial_status_resolver' => \App\Shared\Tenancy\Support\OrganizationInitialApprovalStatusResolver::class,
         ],
     ],
+
+    'platform_users' => [
+        'default_password' => env('PLATFORM_USER_DEFAULT_PASSWORD', 'vgd@123!'),
+    ],
 ];
