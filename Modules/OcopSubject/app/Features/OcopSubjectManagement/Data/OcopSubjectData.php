@@ -8,13 +8,14 @@ class OcopSubjectData extends Data
 {
     public function __construct(
         public readonly string $name,
-        public readonly string $tax_code,
-        public readonly string $organization_type,
-        public readonly string $legal_representative,
-        public readonly string $address,
         public readonly string $province_code,
         public readonly string $ward_code,
-        public readonly string $gps_coordinates,
+
+        public readonly ?string $tax_code = null,
+        public readonly ?string $organization_type = null,
+        public readonly ?string $legal_representative = null,
+        public readonly ?string $address = null,
+        public readonly ?string $gps_coordinates = null,
 
         public readonly ?string $name_en = null,
         public readonly ?string $position = null,

@@ -7,6 +7,8 @@
  * Server data truyền vào qua x-data="bannerListPage({{ Js::from([...]) }})".
  */
 
+import { createTs } from '@shared/tom-select-factory.js';
+
 function esc(v) {
     if (v == null) return '';
     return String(v)
@@ -140,7 +142,11 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('bannerListPage', (serverData = {}) => {
         const { apiUrl = '' } = serverData;
 
-        let tableInst = null;
+        let tableInst    = null;
+        let tsPlacement  = null;
+        let tsTargetType = null;
+
+        const optText = (ts, v) => ts?.options?.[v]?.text ?? v;
 
         return {
             filters: { placement: '', target_type: '' },
@@ -149,11 +155,35 @@ document.addEventListener('alpine:init', () => {
                 return !!(this.filters.placement || this.filters.target_type);
             },
 
+            get activeChips() {
+                const chips = [], f = this.filters;
+                if (f.placement)   chips.push({ key: 'placement',   label: optText(tsPlacement, f.placement) });
+                if (f.target_type) chips.push({ key: 'target_type', label: optText(tsTargetType, f.target_type) });
+                return chips;
+            },
+
             init() {
                 const p = new URLSearchParams(location.search);
                 if (p.has('pl')) this.filters.placement   = p.get('pl');
                 if (p.has('tt')) this.filters.target_type = p.get('tt');
-                this.$nextTick(() => this._setup());
+                this.$nextTick(() => { this._setup(); this._initTomSelects(); });
+            },
+
+            _initTomSelects() {
+                const placementEl  = document.getElementById('ts-placement');
+                const targetTypeEl = document.getElementById('ts-target_type');
+                if (!placementEl || !targetTypeEl) return;
+
+                tsPlacement = createTs(placementEl, {
+                    placeholder: 'Tất cả vị trí',
+                    maxOptions: null,
+                    onChange() { placementEl.dispatchEvent(new Event('change', { bubbles: true })); },
+                });
+
+                tsTargetType = createTs(targetTypeEl, {
+                    placeholder: 'Tất cả target',
+                    onChange() { targetTypeEl.dispatchEvent(new Event('change', { bubbles: true })); },
+                });
             },
 
             _setup() {
@@ -214,8 +244,16 @@ document.addEventListener('alpine:init', () => {
                 tableInst?.replaceData();
             },
 
+            removeChip(key) {
+                if (key === 'placement')   { this.filters.placement = ''; tsPlacement?.setValue('', true); }
+                if (key === 'target_type') { this.filters.target_type = ''; tsTargetType?.setValue('', true); }
+                this.onFilterChange();
+            },
+
             reset() {
                 this.filters = { placement: '', target_type: '' };
+                tsPlacement?.setValue('', true);
+                tsTargetType?.setValue('', true);
                 history.replaceState(null, '', location.pathname);
                 tableInst?.replaceData();
             },

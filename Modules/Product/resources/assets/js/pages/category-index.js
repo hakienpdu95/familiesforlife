@@ -129,6 +129,16 @@ document.addEventListener('alpine:init', () => {
         return {
             filters: { search: '' },
 
+            get hasFilters() {
+                return !!this.filters.search;
+            },
+
+            get activeChips() {
+                const chips = [];
+                if (this.filters.search) chips.push({ key: 'search', label: 'Tìm: ' + this.filters.search });
+                return chips;
+            },
+
             init() {
                 const p = new URLSearchParams(location.search);
                 if (p.has('q')) this.filters.search = p.get('q');
@@ -178,6 +188,17 @@ document.addEventListener('alpine:init', () => {
             clearSearch() {
                 this.filters.search = '';
                 this.onFilterChange();
+            },
+
+            removeChip(key) {
+                if (key === 'search') this.filters.search = '';
+                this.onFilterChange();
+            },
+
+            reset() {
+                this.filters = { search: '' };
+                history.replaceState(null, '', location.pathname);
+                tableInst?.replaceData();
             },
         };
     });

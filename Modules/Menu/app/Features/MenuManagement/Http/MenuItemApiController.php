@@ -64,6 +64,11 @@ class MenuItemApiController extends Controller
             'link_type'       => $item->link_type->value,
             'link_target'     => match ($item->link_type->value) {
                 'category' => $item->category ? "Danh mục: {$item->category->name}" : '— (đã xoá) —',
+                'page'     => match (true) {
+                    ! $item->page               => 'Trang: — (đã xoá) —',
+                    $item->resolveUrl() === null => "Trang: {$item->page->title} (Nháp — đang ẩn)",
+                    default                      => "Trang: {$item->page->title} (/{$item->page->slug})",
+                },
                 'url'      => $item->url,
                 default    => null,
             },

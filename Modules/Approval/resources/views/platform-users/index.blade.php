@@ -46,19 +46,35 @@
                         @endif
                     </td>
                     <td class="text-right">
-                        @unless ($u->hasRole('super-admin'))
+                        @can('platform-users.update', $u)
                             <a href="{{ route('backend.platform-users.edit', $u) }}" class="btn btn-ghost btn-xs">Sửa</a>
-                            @if ($u->is_active && $u->id !== auth()->id())
+                            @can('platform-users.resetPassword', $u)
+                            <form method="POST" action="{{ route('backend.platform-users.reset-password', $u) }}" class="inline"
+                                  onsubmit="return confirm('Bạn có chắc chắn muốn reset mật khẩu tài khoản này về mặc định?');">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="btn btn-ghost btn-xs text-warning">Reset mật khẩu</button>
+                            </form>
+                            @endcan
+                            @can('platform-users.deactivate', $u)
                             <form method="POST" action="{{ route('backend.platform-users.destroy', $u) }}" class="inline">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-ghost btn-xs text-error"
                                         onclick="return confirm('Vô hiệu hoá tài khoản này?')">Vô hiệu hoá</button>
                             </form>
-                            @endif
+                            @endcan
+                            @can('platform-users.activate', $u)
+                            <form method="POST" action="{{ route('backend.platform-users.activate', $u) }}" class="inline">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="btn btn-ghost btn-xs text-success"
+                                        onclick="return confirm('Kích hoạt lại tài khoản này?')">Kích hoạt lại</button>
+                            </form>
+                            @endcan
                         @else
                             <span class="text-xs text-base-content/30">Không thể sửa qua đây</span>
-                        @endunless
+                        @endcan
                     </td>
                 </tr>
                 @empty

@@ -5,11 +5,13 @@ namespace Modules\Heritage\Features\HeritageSiteManagement\Actions;
 use App\Models\Province;
 use App\Models\Ward;
 use App\Services\Media\MediaUploadService;
+use App\Services\Media\MediaUrlService;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Modules\Heritage\Features\HeritageSiteManagement\Data\HeritageSiteData;
 use Modules\Heritage\Models\HeritageSite;
+use Modules\Post\Support\ArticleContentRenderer;
 
 /**
  * spec/Heritage_Technical_Specification.md §3.5 — LUÔN tra lại tên thật từ bảng provinces/wards
@@ -19,7 +21,11 @@ class CreateHeritageSiteAction
 {
     use AsAction;
 
-    public function __construct(private readonly MediaUploadService $mediaUpload) {}
+    public function __construct(
+        private readonly MediaUploadService $mediaUpload,
+        private readonly MediaUrlService $mediaUrl,
+        private readonly ArticleContentRenderer $renderer,
+    ) {}
 
     public function handle(HeritageSiteData $data): HeritageSite
     {
@@ -47,6 +53,7 @@ class CreateHeritageSiteAction
             'rank' => $data->rank,
             'era' => $data->era,
             'description' => $data->description,
+            'content' => $this->renderer->sanitizeTextHtml($data->content) ?: null,
             'province_code' => $data->province_code,
             'province_name' => $provinceName,
             'ward_code' => $data->ward_code,
@@ -60,6 +67,15 @@ class CreateHeritageSiteAction
             'sort_order' => $data->sort_order,
             'created_by' => auth()->id(),
         ]);
+
+        // Cùng UpdateOcopProductAction — ảnh chèn qua Jodit sống tạm ở JoditDraft cho tới khi lưu,
+        // "nhận" vào di tích thật và dọn ảnh không còn trong nội dung.
+        $this->mediaUpload->reassociateOrphans($site, $site->contentMediaUuids());
+
+        $content = $this->mediaUrl->refreshEmbeddedImageUrls($site->content);
+        if ($content !== $site->content) {
+            $site->forceFill(['content' => $content])->saveQuietly();
+        }
 
         // spec/Media_Library_Technical_Specification.md §8 — form tạo mới chưa có site.id lúc
         // FilePond upload, ảnh tạm gắn ở FilePondDraft — "nhận" vào di tích vừa tạo.

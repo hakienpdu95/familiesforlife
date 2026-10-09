@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\MediaJoditUploadController;
 use App\Http\Controllers\Api\MediaUploadController;
 use App\Http\Controllers\Backend\Api\DashboardChartController;
 use App\Http\Controllers\Backend\DashboardController;
+use App\Http\Controllers\Backend\SystemMonitorController;
 use App\Http\Controllers\Backend\NotificationCenterController;
 use App\Http\Controllers\Backend\NotificationPreferenceController;
 use Illuminate\Support\Facades\Route;
@@ -45,10 +46,14 @@ Route::middleware(['auth'])->prefix('dashboard')->name('backend.')->group(functi
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
+    Route::get('system-monitor', [SystemMonitorController::class, 'index'])->name('system-monitor');
+    Route::get('system-monitor/data', [SystemMonitorController::class, 'data'])->name('system-monitor.data');
+
     // ── Dashboard chart API ───────────────────────────────────────────────
     Route::prefix('api/dashboard/charts')->name('dashboard.charts.')->middleware('tenant')->group(function () {
         Route::get('lead-funnel',     [DashboardChartController::class, 'leadFunnel'])    ->name('lead-funnel');
         Route::get('workflow-health', [DashboardChartController::class, 'workflowHealth'])->name('workflow-health');
+        Route::get('content-trend',   [DashboardChartController::class, 'contentTrend'])  ->name('content-trend');
     });
 
     // ── Placeholder routes (modules chưa triển khai) ──────────────────

@@ -3,6 +3,7 @@
 namespace Modules\OcopSubject\Features\OcopSubjectManagement\Http;
 
 use App\Http\Controllers\Controller;
+use App\Models\Province;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -11,9 +12,11 @@ use Illuminate\View\View;
 use Modules\OcopSubject\Enums\OcopSubjectOrganizationType;
 use Modules\OcopSubject\Features\OcopSubjectManagement\Actions\CreateOcopSubjectAction;
 use Modules\OcopSubject\Features\OcopSubjectManagement\Actions\DeleteOcopSubjectAction;
+use Modules\OcopSubject\Features\OcopSubjectManagement\Actions\ImportOcopSubjectsAction;
 use Modules\OcopSubject\Features\OcopSubjectManagement\Actions\StoreOcopSubjectDocumentsAction;
 use Modules\OcopSubject\Features\OcopSubjectManagement\Actions\UpdateOcopSubjectAction;
 use Modules\OcopSubject\Features\OcopSubjectManagement\Data\OcopSubjectData;
+use Modules\OcopSubject\Features\OcopSubjectManagement\Http\Requests\OcopSubjectImportRequest;
 use Modules\OcopSubject\Features\OcopSubjectManagement\Http\Requests\OcopSubjectRequest;
 use Modules\OcopSubject\Models\OcopSubject;
 
@@ -27,8 +30,20 @@ class OcopSubjectAdminController extends Controller
     public function index(): View
     {
         $types = OcopSubjectOrganizationType::cases();
+        $provinces = Province::where('is_active', true)->orderBy('name')->get(['province_code', 'name']);
 
-        return view('ocopsubject::admin.index', compact('types'));
+        return view('ocopsubject::admin.index', compact('types', 'provinces'));
+    }
+
+    public function import(OcopSubjectImportRequest $request, ImportOcopSubjectsAction $action): RedirectResponse
+    {
+        $this->authorize('create', OcopSubject::class);
+
+        $result = $action->handle($request->file('file')->getRealPath(), $request->validated('province_code'));
+
+        return redirect()->route('backend.ocop-subjects.index')
+            ->with('success', "Import xong: thêm mới {$result['created']} chủ thể, bỏ qua {$result['duplicates']} chủ thể đã tồn tại, ".count($result['errors']).' dòng lỗi.')
+            ->with('import_errors', $result['errors']);
     }
 
     public function create(): View

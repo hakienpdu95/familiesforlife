@@ -1,3 +1,5 @@
+import { createTs } from '@shared/tom-select-factory.js';
+
 function esc(v) {
     if (v == null) return '';
     return String(v)
@@ -87,9 +89,14 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('provinceListPage', (serverData = {}) => {
         const { apiUrl = '' } = serverData;
 
-        let tableInst = null;
+        let tableInst    = null;
+        let tsRegion     = null;
+        let tsPlaceType  = null;
+        let tsIsFeatured = null;
+        let tsIsActive   = null;
 
         const emptyFilters = () => ({ search: '', region_id: '', place_type: '', is_active: '', is_featured: '' });
+        const optText = (ts, v) => ts?.options?.[v]?.text ?? v;
 
         return {
             filters: emptyFilters(),
@@ -99,9 +106,47 @@ document.addEventListener('alpine:init', () => {
                 return !!(f.search || f.region_id || f.place_type || f.is_active !== '' || f.is_featured !== '');
             },
 
+            get activeChips() {
+                const chips = [], f = this.filters;
+                if (f.search)             chips.push({ key: 'search',      label: 'Tìm: ' + f.search });
+                if (f.region_id)          chips.push({ key: 'region_id',   label: optText(tsRegion, f.region_id) });
+                if (f.place_type)         chips.push({ key: 'place_type',  label: optText(tsPlaceType, f.place_type) });
+                if (f.is_featured !== '') chips.push({ key: 'is_featured', label: optText(tsIsFeatured, f.is_featured) });
+                if (f.is_active !== '')   chips.push({ key: 'is_active',   label: optText(tsIsActive, f.is_active) });
+                return chips;
+            },
+
             init() {
                 this.loadState();
-                this.$nextTick(() => this._setup());
+                this.$nextTick(() => { this._setup(); this._initTomSelects(); });
+            },
+
+            _initTomSelects() {
+                const regionEl     = document.getElementById('ts-region');
+                const placeTypeEl  = document.getElementById('ts-place_type');
+                const isFeaturedEl = document.getElementById('ts-is_featured');
+                const isActiveEl   = document.getElementById('ts-is_active');
+                if (!regionEl || !placeTypeEl || !isFeaturedEl || !isActiveEl) return;
+
+                tsRegion = createTs(regionEl, {
+                    placeholder: 'Tất cả vùng',
+                    onChange() { regionEl.dispatchEvent(new Event('change', { bubbles: true })); },
+                });
+
+                tsPlaceType = createTs(placeTypeEl, {
+                    placeholder: 'Tất cả loại',
+                    onChange() { placeTypeEl.dispatchEvent(new Event('change', { bubbles: true })); },
+                });
+
+                tsIsFeatured = createTs(isFeaturedEl, {
+                    placeholder: 'Tất cả',
+                    onChange() { isFeaturedEl.dispatchEvent(new Event('change', { bubbles: true })); },
+                });
+
+                tsIsActive = createTs(isActiveEl, {
+                    placeholder: 'Tất cả trạng thái',
+                    onChange() { isActiveEl.dispatchEvent(new Event('change', { bubbles: true })); },
+                });
             },
 
             _setup() {
@@ -178,8 +223,22 @@ document.addEventListener('alpine:init', () => {
             onFilterChange() { this.saveState(); this.refresh(); },
             clearSearch()    { this.filters.search = ''; this.saveState(); this.refresh(); },
 
+            removeChip(key) {
+                if (key === 'search')      this.filters.search = '';
+                if (key === 'region_id')   { this.filters.region_id = ''; tsRegion?.setValue('', true); }
+                if (key === 'place_type')  { this.filters.place_type = ''; tsPlaceType?.setValue('', true); }
+                if (key === 'is_featured') { this.filters.is_featured = ''; tsIsFeatured?.setValue('', true); }
+                if (key === 'is_active')   { this.filters.is_active = ''; tsIsActive?.setValue('', true); }
+                this.saveState();
+                this.refresh();
+            },
+
             reset() {
                 this.filters = emptyFilters();
+                tsRegion?.setValue('', true);
+                tsPlaceType?.setValue('', true);
+                tsIsFeatured?.setValue('', true);
+                tsIsActive?.setValue('', true);
                 history.replaceState(null, '', location.pathname);
                 this.refresh();
             },

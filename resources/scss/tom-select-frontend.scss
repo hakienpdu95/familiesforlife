@@ -1,0 +1,8 @@
+// resources/scss/tom-select-frontend.scss
+// Entry cho bundle CỔNG THÔNG TIN (vite.config.frontend.js) — dùng LẠI đúng theme TomSelect của
+// backend (_tom-select.scss, token = biến CSS DaisyUI 5 nên tự ăn theo theme "portal"), thay vì
+// để CSS mặc định của TomSelect lệch giao diện. Bundle backend vẫn @use 'tom-select' qua SCSS module.
+//
+// Blade: @vite(['resources/scss/tom-select-frontend.scss'], 'build/frontend')
+
+@use 'tom-select';

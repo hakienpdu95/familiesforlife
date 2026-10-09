@@ -26,9 +26,6 @@
         </div>
 
         <div class="site-header__toolbar">
-            <span class="btn-search m-btn" role="button" tabindex="0" aria-label="Tìm kiếm" @click="search = !search">
-                <i class="icon-search"></i>
-            </span>
             <span class="btn-expand m-btn" role="button" tabindex="0" aria-label="Mở menu" :class="mobileNavOpen ? 'is-active' : ''" @click="mobileNavOpen = !mobileNavOpen">
                 <i class="icon-bars"></i>
                 <i class="icon-times"></i>

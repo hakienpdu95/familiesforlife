@@ -14,12 +14,20 @@ class EnsureUserIsActive
         $user = $request->user();
 
         if ($user && (! $user->is_active || ! $user->account_type->canLogin())) {
-            Auth::guard('web')->logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
+            $message = 'Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.';
 
-            return redirect()->route('login')
-                ->withErrors(['email' => 'Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.']);
+            Auth::guard('web')->logout();
+
+            if ($request->hasSession()) {
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+            }
+
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json(['message' => $message], Response::HTTP_UNAUTHORIZED);
+            }
+
+            return redirect()->route('login')->withErrors(['email' => $message]);
         }
 
         return $next($request);

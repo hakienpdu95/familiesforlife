@@ -17,23 +17,63 @@
     <div class="alert alert-success text-sm mb-4">{{ session('success') }}</div>
 @endif
 
-<div class="card bg-base-100 shadow-sm border border-base-200 mb-4">
-    <div class="card-body py-3 px-4">
-        <form method="GET" action="{{ route('backend.bulkideationpromptstudio.index') }}" class="flex flex-wrap gap-3 items-end">
-            <div class="form-control w-72">
-                <label class="label py-0.5"><span class="label-text text-xs font-medium">Tìm theo tên prompt</span></label>
-                <input type="text" name="search" value="{{ $search }}"
-                       class="input input-sm input-bordered w-full" placeholder="Nhập từ khoá tìm kiếm...">
-            </div>
-            <button type="submit" class="btn btn-sm">Tìm</button>
-            @if ($search !== '')
-                <a href="{{ route('backend.bulkideationpromptstudio.index') }}" class="btn btn-ghost btn-sm text-error">Đặt lại</a>
-            @endif
-        </form>
-    </div>
-</div>
+<div class="section-page">
+    <div class="card bg-base-100 mb-4">
+        <div class="card-body filter-bar py-3 px-3">
+            <form method="GET" action="{{ route('backend.bulkideationpromptstudio.index') }}" class="filter-grid">
 
-<div class="card bg-base-100 shadow-sm border border-base-200">
+                <div class="form-control filter-grid-wide">
+                    <label class="label py-0.5">
+                        <span class="label-text text-xs font-medium">Tìm kiếm</span>
+                        <span class="label-text-alt text-xs text-base-content/40">Tên prompt — Enter để tìm</span>
+                    </label>
+                    <div class="input input-sm input-bordered flex items-center gap-2 bg-base-100">
+                        <svg class="w-3.5 h-3.5 text-base-content/40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        <input type="text" name="search" value="{{ $search }}"
+                               onchange="this.form.requestSubmit()"
+                               placeholder="Nhập từ khoá tìm kiếm..." class="grow bg-transparent outline-none text-sm">
+                        @if ($search !== '')
+                        <a href="{{ route('backend.bulkideationpromptstudio.index') }}"
+                           class="text-base-content/30 hover:text-base-content transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </a>
+                        @endif
+                    </div>
+                </div>
+
+            </form>
+
+            @if ($search !== '')
+            <div class="flex justify-end">
+                <a href="{{ route('backend.bulkideationpromptstudio.index') }}"
+                   class="btn btn-ghost btn-sm gap-1.5 text-error mt-1">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    Đặt lại
+                </a>
+            </div>
+
+            <div class="flex flex-wrap gap-2 pt-3 mt-3 border-t border-base-200">
+                <span class="text-xs text-base-content/40 self-center">Đang lọc:</span>
+                <a href="{{ route('backend.bulkideationpromptstudio.index') }}"
+                   class="badge badge-sm gap-1 cursor-pointer hover:badge-error transition-colors">
+                    <span>Tìm: {{ $search }}</span>
+                    <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </a>
+            </div>
+            @endif
+        </div>
+    </div>
+
+    <div class="card">
     <div class="card-body py-3 px-3">
         @if ($promptList->isEmpty())
             <p class="text-sm text-base-content/50 py-6 text-center">
@@ -85,5 +125,10 @@
             <div class="mt-3">{{ $promptList->links() }}</div>
         @endif
     </div>
+    </div>
 </div>
 @endsection
+
+@push('styles')
+    @vite(['Modules/BulkIdeationPromptStudio/resources/assets/sass/bulk-ideation-prompt-studio.scss'], 'build/backend')
+@endpush

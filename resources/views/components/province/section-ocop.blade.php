@@ -14,7 +14,7 @@
                 </div>
                 <div>
                     <h3 class="text-sm font-bold leading-snug group-hover:text-primary line-clamp-2">{{ $product->name }}</h3>
-                    <p class="mt-0.5 text-xs text-warning">{{ str_repeat('★', $product->star_rating) }}</p>
+                    <p class="mt-0.5 text-xs text-warning">{{ str_repeat('★', (int) $product->star_rating) }}</p>
                 </div>
             </a>
             @endforeach

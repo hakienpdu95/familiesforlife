@@ -3,6 +3,7 @@
 namespace Modules\Ocop\Features\OcopProductManagement\Http;
 
 use App\Http\Controllers\Controller;
+use App\Models\Province;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,6 +16,7 @@ use Modules\Heritage\Models\HeritageSite;
 use Modules\Ocop\Enums\OcopProductStatus;
 use Modules\Ocop\Features\OcopProductManagement\Actions\CreateOcopProductAction;
 use Modules\Ocop\Features\OcopProductManagement\Actions\DeleteOcopProductAction;
+use Modules\Ocop\Features\OcopProductManagement\Actions\ImportOcopProductsAction;
 use Modules\Ocop\Features\OcopProductManagement\Actions\StoreOcopProductDocumentsAction;
 use Modules\Ocop\Features\OcopProductManagement\Actions\UpdateOcopProductAction;
 use Modules\Ocop\Features\OcopProductManagement\Data\OcopProductData;
@@ -35,8 +37,31 @@ class OcopProductAdminController extends Controller
     public function index(): View
     {
         $categories = OcopCategory::active()->orderBy('name')->get(['id', 'name']);
+        $provinces = Province::where('is_active', true)->orderBy('name')->get(['province_code', 'name']);
 
-        return view('ocop::admin.products.index', compact('categories'));
+        return view('ocop::admin.products.index', compact('categories', 'provinces'));
+    }
+
+    public function import(Request $request, ImportOcopProductsAction $action): RedirectResponse
+    {
+        $this->authorize('create', OcopProduct::class);
+
+        $validated = $request->validate([
+            'province_code' => ['required', 'string', 'size:2', 'exists:provinces,province_code'],
+            'file' => ['required', 'file', 'mimes:xlsx,csv,txt', 'max:10240'],
+        ], [
+            'province_code.required' => 'Vui lòng chọn tỉnh/thành.',
+            'province_code.exists' => 'Tỉnh/thành được chọn không hợp lệ.',
+            'file.required' => 'Vui lòng chọn file Excel.',
+            'file.mimes' => 'Chỉ chấp nhận file .xlsx hoặc .csv.',
+            'file.max' => 'File tối đa 10MB.',
+        ]);
+
+        $result = $action->handle($request->file('file')->getRealPath(), $validated['province_code']);
+
+        return redirect()->route('backend.ocop.products.index')
+            ->with('success', "Import xong: thêm mới {$result['created']}, cập nhật hạng sao {$result['updated']}, không đổi {$result['unchanged']} sản phẩm, ".count($result['errors']).' dòng lỗi.')
+            ->with('import_errors', $result['errors']);
     }
 
     public function create(Request $request, ListOcopSubjectsForPickerHandler $ocopSubjectPicker): View
@@ -136,7 +161,7 @@ class OcopProductAdminController extends Controller
         }
 
         return $request->validate([
-            'category_id' => ['required', 'integer', 'exists:ocop_categories,id'],
+            'category_id' => ['nullable', 'integer', 'exists:ocop_categories,id'],
             'name' => ['required', 'string', 'max:150'],
             // §4.2 — chương trình OCOP quốc gia chỉ chấm từ 3 sao trở lên mới được công nhận.
             'star_rating' => ['required', 'in:3,4,5'],
@@ -165,7 +190,6 @@ class OcopProductAdminController extends Controller
             'is_featured' => ['boolean'],
             'sort_order' => ['integer', 'min:0'],
         ], [
-            'category_id.required' => 'Vui lòng chọn danh mục.',
             'category_id.exists' => 'Danh mục được chọn không hợp lệ.',
             'name.required' => 'Vui lòng nhập tên sản phẩm.',
             'name.max' => 'Tên sản phẩm không được vượt quá :max ký tự.',

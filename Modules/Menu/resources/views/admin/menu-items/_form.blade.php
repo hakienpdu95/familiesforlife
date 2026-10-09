@@ -114,6 +114,28 @@
                         @error('category_id')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                     </div>
 
+                    <div class="form-control {{ $linkType === 'page' ? '' : 'hidden' }}" data-link-target="page">
+                        <label class="label py-0 pb-1.5">
+                            <span class="label-text font-medium">Trang tĩnh <span class="text-error">*</span></span>
+                            <a href="{{ route('backend.page.items.create') }}" target="_blank" rel="noopener" class="label-text-alt text-xs link link-primary">+ Tạo trang mới</a>
+                        </label>
+                        <select name="page_id" id="ts-page"
+                                class="select select-bordered select-sm w-full ts-init @error('page_id') select-error @enderror"
+                                data-ts-placeholder="— Tìm và chọn trang —">
+                            <option value="">— Tìm và chọn trang —</option>
+                            @foreach($pageOptions as $page)
+                            <option value="{{ $page->id }}" data-title="{{ $page->title }}"
+                                    {{ (string) old('page_id', $menuItem?->page_id) === (string) $page->id ? 'selected' : '' }}>
+                                {{ $page->title }} — /{{ $page->slug }}{{ $page->is_published ? '' : ' (Nháp)' }}
+                            </option>
+                            @endforeach
+                        </select>
+                        @error('page_id')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
+                        <p class="mt-1 text-xs text-base-content/40">
+                            Link tự cập nhật khi đổi đường dẫn trang. Trang ở trạng thái Nháp sẽ tạm ẩn khỏi menu cho tới khi được xuất bản.
+                        </p>
+                    </div>
+
                     <div class="{{ $linkType === 'url' ? '' : 'hidden' }}" data-link-target="url">
                         <div class="form-control">
                             <label class="label py-0 pb-1.5">

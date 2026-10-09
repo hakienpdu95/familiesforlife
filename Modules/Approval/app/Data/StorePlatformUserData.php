@@ -2,6 +2,7 @@
 
 namespace Modules\Approval\Data;
 
+use App\Models\User;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Spatie\LaravelData\Attributes\Validation\Max;
@@ -17,16 +18,6 @@ use Spatie\LaravelData\Data;
  */
 class StorePlatformUserData extends Data
 {
-    private const ALLOWED_ROLES = [
-        'platform_content_head',
-        'platform_content_editor',
-        'platform_content_creator',
-        'platform_section_editor',
-        'platform_content_moderator',
-        'platform_ops',
-        'platform_viewer',
-    ];
-
     public function __construct(
         #[Required, StringType, Max(255)]
         public readonly string $name,
@@ -44,7 +35,7 @@ class StorePlatformUserData extends Data
                 'required', 'string', 'confirmed',
                 Password::min(8)->letters()->mixedCase()->numbers(),
             ],
-            'role' => ['required', 'string', 'in:' . implode(',', self::ALLOWED_ROLES)],
+            'role' => ['required', 'string', Rule::in(User::assignablePlatformRoles())],
         ];
     }
 

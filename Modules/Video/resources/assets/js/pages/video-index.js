@@ -7,6 +7,8 @@
  * Server data truyền vào qua x-data="videoListPage({{ Js::from([...]) }})".
  */
 
+import { createTs } from '@shared/tom-select-factory.js';
+
 function esc(v) {
     if (v == null) return '';
     return String(v)
@@ -166,7 +168,10 @@ document.addEventListener('alpine:init', () => {
         const { apiUrl = '' } = serverData;
 
         let tableInst = null;
+        let tsActive  = null;
         let reloadChain = Promise.resolve();
+
+        const optText = (ts, v) => ts?.options?.[v]?.text ?? v;
 
         /**
          * Xếp hàng các lần reload thay vì gọi tableInst.replaceData() trực tiếp — tránh lỗi
@@ -190,6 +195,13 @@ document.addEventListener('alpine:init', () => {
                 return !!(this.filters.search || this.filters.is_active !== '');
             },
 
+            get activeChips() {
+                const chips = [], f = this.filters;
+                if (f.search)           chips.push({ key: 'search',    label: 'Tìm: ' + f.search });
+                if (f.is_active !== '') chips.push({ key: 'is_active', label: optText(tsActive, f.is_active) });
+                return chips;
+            },
+
             init() {
                 const p = new URLSearchParams(location.search);
                 if (p.has('q')) this.filters.search = p.get('q');
@@ -209,7 +221,17 @@ document.addEventListener('alpine:init', () => {
                 this.$watch('filters.search', () => this.onFilterChange());
                 this.$watch('filters.is_active', () => this.onFilterChange());
 
-                this.$nextTick(() => this._setup());
+                this.$nextTick(() => { this._setup(); this._initTomSelects(); });
+            },
+
+            _initTomSelects() {
+                const activeEl = document.getElementById('ts-is_active');
+                if (!activeEl) return;
+
+                tsActive = createTs(activeEl, {
+                    placeholder: 'Tất cả trạng thái',
+                    onChange() { activeEl.dispatchEvent(new Event('change', { bubbles: true })); },
+                });
             },
 
             _setup() {
@@ -274,9 +296,15 @@ document.addEventListener('alpine:init', () => {
                 queueReload();
             },
 
+            removeChip(key) {
+                if (key === 'search')    this.filters.search = '';
+                if (key === 'is_active') { this.filters.is_active = ''; tsActive?.setValue('', true); }
+            },
+
             reset() {
                 this.filters.search = '';
                 this.filters.is_active = '';
+                tsActive?.setValue('', true);
                 history.replaceState(null, '', location.pathname);
                 queueReload();
             },

@@ -1,2 +1,6 @@
 @use 'form-patterns';
 @use 'tom-select';
+
+#ocopSubjectImportModal .ts-wrapper {
+    overflow: visible;
+}

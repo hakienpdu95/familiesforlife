@@ -37,9 +37,8 @@ class HeritageSiteAdminController extends Controller
         $heritageTypes = HeritageType::cases();
         $ranks = HeritageRank::cases();
         $visitingStatuses = HeritageVisitingStatus::cases();
-        $statuses = HeritageSiteStatus::cases();
 
-        return view('heritage::admin.sites.create', compact('heritageTypes', 'ranks', 'visitingStatuses', 'statuses'));
+        return view('heritage::admin.sites.create', compact('heritageTypes', 'ranks', 'visitingStatuses'));
     }
 
     public function store(Request $request, CreateHeritageSiteAction $action): RedirectResponse
@@ -47,8 +46,11 @@ class HeritageSiteAdminController extends Controller
         $data = HeritageSiteData::from($this->validated($request));
         $site = $action->handle($data);
 
-        return redirect()->route('backend.heritage.sites.index')
-            ->with('success', "Đã tạo di tích \"{$site->name}\".");
+        $message = $site->status === HeritageSiteStatus::Published
+            ? "Đã tạo và xuất bản di tích \"{$site->name}\"."
+            : "Đã lưu nháp di tích \"{$site->name}\".";
+
+        return redirect()->route('backend.heritage.sites.index')->with('success', $message);
     }
 
     public function edit(HeritageSite $site): View
@@ -56,18 +58,24 @@ class HeritageSiteAdminController extends Controller
         $heritageTypes = HeritageType::cases();
         $ranks = HeritageRank::cases();
         $visitingStatuses = HeritageVisitingStatus::cases();
-        $statuses = HeritageSiteStatus::cases();
 
-        return view('heritage::admin.sites.edit', compact('site', 'heritageTypes', 'ranks', 'visitingStatuses', 'statuses'));
+        return view('heritage::admin.sites.edit', compact('site', 'heritageTypes', 'ranks', 'visitingStatuses'));
     }
 
     public function update(Request $request, HeritageSite $site, UpdateHeritageSiteAction $action): RedirectResponse
     {
         $data = HeritageSiteData::from($this->validated($request, $site));
+        $wasPublished = $site->status === HeritageSiteStatus::Published;
         $action->handle($site, $data);
+        $isPublished = $site->status === HeritageSiteStatus::Published;
 
-        return redirect()->route('backend.heritage.sites.index')
-            ->with('success', 'Cập nhật di tích thành công.');
+        $message = match (true) {
+            ! $wasPublished && $isPublished => "Đã xuất bản di tích \"{$site->name}\".",
+            $wasPublished && ! $isPublished => "Đã chuyển di tích \"{$site->name}\" về nháp — không còn hiển thị công khai.",
+            default => 'Cập nhật di tích thành công.',
+        };
+
+        return redirect()->route('backend.heritage.sites.index')->with('success', $message);
     }
 
     public function destroy(Request $request, HeritageSite $site, DeleteHeritageSiteAction $action): RedirectResponse|JsonResponse
@@ -96,6 +104,7 @@ class HeritageSiteAdminController extends Controller
             'rank' => ['required', 'string', Rule::in(array_column(HeritageRank::cases(), 'value'))],
             'era' => ['nullable', 'string', 'max:100'],
             'description' => ['nullable', 'string', 'max:3000'],
+            'content' => ['nullable', 'string', 'max:65000'],
             'province_code' => ['nullable', 'string', 'exists:provinces,province_code'],
             'ward_code' => ['nullable', 'string', 'exists:wards,ward_code'],
             'address' => ['nullable', 'string', 'max:255'],
@@ -111,13 +120,26 @@ class HeritageSiteAdminController extends Controller
             'name.required' => 'Vui lòng nhập tên di tích.',
             'name.max' => 'Tên di tích không được vượt quá :max ký tự.',
             'slug.unique' => 'Đường dẫn (slug) này đã được dùng — vui lòng chọn giá trị khác hoặc để trống để tự sinh.',
+            'slug.max' => 'Đường dẫn (slug) không được vượt quá :max ký tự.',
+            'slug.alpha_dash' => 'Đường dẫn (slug) chỉ được chứa chữ, số, dấu - và _.',
             'heritage_type.required' => 'Vui lòng chọn loại hình di tích.',
+            'heritage_type.in' => 'Loại hình di tích không hợp lệ.',
             'rank.required' => 'Vui lòng chọn xếp hạng.',
+            'rank.in' => 'Xếp hạng không hợp lệ.',
+            'era.max' => 'Niên đại không được vượt quá :max ký tự.',
+            'description.max' => 'Mô tả không được vượt quá :max ký tự.',
+            'content.max' => 'Nội dung quá dài (tối đa :max ký tự, tính cả mã HTML).',
             'province_code.exists' => 'Tỉnh/thành được chọn không hợp lệ.',
             'ward_code.exists' => 'Phường/xã được chọn không hợp lệ.',
+            'address.max' => 'Địa chỉ chi tiết không được vượt quá :max ký tự.',
+            'latitude.numeric' => 'Vĩ độ phải là số.',
             'latitude.between' => 'Vĩ độ phải trong khoảng -90 đến 90.',
+            'longitude.numeric' => 'Kinh độ phải là số.',
             'longitude.between' => 'Kinh độ phải trong khoảng -180 đến 180.',
+            'visiting_status.in' => 'Tình trạng tham quan không hợp lệ.',
             'status.required' => 'Vui lòng chọn trạng thái.',
+            'status.in' => 'Trạng thái không hợp lệ.',
+            'is_featured.boolean' => 'Giá trị "Di tích nổi bật" không hợp lệ.',
             'sort_order.integer' => 'Thứ tự hiển thị phải là số nguyên.',
             'sort_order.min' => 'Thứ tự hiển thị không được âm.',
         ]);

@@ -7,6 +7,8 @@
  * Server data truyền vào qua x-data="ocopProductListPage({{ Js::from([...]) }})".
  */
 
+import { createTs } from '@shared/tom-select-factory.js';
+
 function esc(v) {
     if (v == null) return '';
     return String(v)
@@ -41,7 +43,7 @@ const COLUMNS = [
     },
     {
         title: 'Hạng sao', field: 'star_rating', width: 110, hozAlign: 'center', sorter: 'number',
-        formatter(cell) { return cell.getValue() + ' ★'; },
+        formatter(cell) { return cell.getValue() ? cell.getValue() + ' ★' : '<span class="text-base-content/25 text-xs">—</span>'; },
     },
     {
         title: 'Tỉnh/thành', field: 'province_name', minWidth: 150, headerSort: false,
@@ -93,6 +95,11 @@ window.ocopProductDeleteConfirm = function (url, name) {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+    const importProvince = document.getElementById('ts-import-province');
+    if (importProvince) {
+        createTs(importProvince, { placeholder: importProvince.dataset.tsPlaceholder, dropdownParent: null });
+    }
+
     const confirmBtn = document.getElementById('ocopProductConfirmDeleteBtn');
     if (!confirmBtn) return;
 
@@ -140,7 +147,11 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('ocopProductListPage', (serverData = {}) => {
         const { apiUrl = '' } = serverData;
 
-        let tableInst = null;
+        let tableInst  = null;
+        let tsCategory = null;
+        let tsStatus   = null;
+
+        const optText = (ts, v) => ts?.options?.[v]?.text ?? v;
 
         return {
             filters: { search: '', category_id: '', status: '' },
@@ -150,9 +161,34 @@ document.addEventListener('alpine:init', () => {
                 return !!(f.search || f.category_id || f.status);
             },
 
+            get activeChips() {
+                const chips = [], f = this.filters;
+                if (f.search)      chips.push({ key: 'search',      label: 'Tìm: ' + f.search });
+                if (f.category_id) chips.push({ key: 'category_id', label: optText(tsCategory, f.category_id) });
+                if (f.status)      chips.push({ key: 'status',      label: optText(tsStatus, f.status) });
+                return chips;
+            },
+
             init() {
                 this.loadState();
-                this.$nextTick(() => this._setup());
+                this.$nextTick(() => { this._setup(); this._initTomSelects(); });
+            },
+
+            _initTomSelects() {
+                const categoryEl = document.getElementById('ts-category');
+                const statusEl   = document.getElementById('ts-status');
+                if (!categoryEl || !statusEl) return;
+
+                tsCategory = createTs(categoryEl, {
+                    placeholder: 'Tất cả danh mục',
+                    maxOptions: null,
+                    onChange() { categoryEl.dispatchEvent(new Event('change', { bubbles: true })); },
+                });
+
+                tsStatus = createTs(statusEl, {
+                    placeholder: 'Tất cả trạng thái',
+                    onChange() { statusEl.dispatchEvent(new Event('change', { bubbles: true })); },
+                });
             },
 
             _setup() {
@@ -225,8 +261,18 @@ document.addEventListener('alpine:init', () => {
             onFilterChange() { this.saveState(); this.refresh(); },
             clearSearch()    { this.filters.search = ''; this.saveState(); this.refresh(); },
 
+            removeChip(key) {
+                if (key === 'search')      this.filters.search = '';
+                if (key === 'category_id') { this.filters.category_id = ''; tsCategory?.setValue('', true); }
+                if (key === 'status')      { this.filters.status = ''; tsStatus?.setValue('', true); }
+                this.saveState();
+                this.refresh();
+            },
+
             reset() {
                 this.filters = { search: '', category_id: '', status: '' };
+                tsCategory?.setValue('', true);
+                tsStatus?.setValue('', true);
                 history.replaceState(null, '', location.pathname);
                 this.refresh();
             },

@@ -8,6 +8,8 @@
  * Server data truyền vào qua x-data="pageListPage({{ Js::from([...]) }})".
  */
 
+import { createTs } from '@shared/tom-select-factory.js';
+
 function esc(v) {
     if (v == null) return '';
     return String(v)
@@ -38,6 +40,20 @@ const COLUMNS = [
         formatter(cell) {
             const d = cell.getRow().getData();
             return '<span class="badge badge-sm ' + (d.is_published ? 'badge-success' : 'badge-ghost') + '">' + esc(d.status_label) + '</span>';
+        },
+    },
+    {
+        title: 'Hiển thị ở', field: 'menu_placements', minWidth: 200, headerSort: false,
+        formatter(cell) {
+            const d = cell.getRow().getData();
+            const items = d.menu_placements || [];
+            if (!items.length) return '<span class="text-xs text-base-content/30">Chưa gắn menu</span>';
+            const hiddenNote = d.is_published ? '' : ' · ẩn vì trang chưa xuất bản';
+            return items.map(p => '<a href="' + esc(p.edit_url) + '" class="block text-xs hover:text-primary'
+                + (p.is_active && d.is_published ? '' : ' text-base-content/40') + '"'
+                + ' title="Mục menu: ' + esc(p.label) + (p.is_active ? '' : ' (đang tắt)') + hiddenNote + '">'
+                + esc(p.path) + (p.is_active ? '' : ' <span class="badge badge-ghost badge-xs">Tắt</span>')
+                + '</a>').join('');
         },
     },
     {
@@ -150,6 +166,9 @@ document.addEventListener('alpine:init', () => {
         const { apiUrl = '' } = serverData;
 
         let tableInst = null;
+        let tsStatus  = null;
+
+        const optText = (ts, v) => ts?.options?.[v]?.text ?? v;
 
         return {
             filters: { search: '', status: '' },
@@ -158,11 +177,28 @@ document.addEventListener('alpine:init', () => {
                 return !!(this.filters.search || this.filters.status);
             },
 
+            get activeChips() {
+                const chips = [], f = this.filters;
+                if (f.search) chips.push({ key: 'search', label: 'Tìm: ' + f.search });
+                if (f.status) chips.push({ key: 'status', label: optText(tsStatus, f.status) });
+                return chips;
+            },
+
             init() {
                 const p = new URLSearchParams(location.search);
                 if (p.has('q'))  this.filters.search = p.get('q');
                 if (p.has('st')) this.filters.status = p.get('st');
-                this.$nextTick(() => this._setup());
+                this.$nextTick(() => { this._setup(); this._initTomSelects(); });
+            },
+
+            _initTomSelects() {
+                const statusEl = document.getElementById('ts-status');
+                if (!statusEl) return;
+
+                tsStatus = createTs(statusEl, {
+                    placeholder: 'Tất cả trạng thái',
+                    onChange() { statusEl.dispatchEvent(new Event('change', { bubbles: true })); },
+                });
             },
 
             _setup() {
@@ -225,8 +261,15 @@ document.addEventListener('alpine:init', () => {
 
             clearSearch() { this.filters.search = ''; this.onFilterChange(); },
 
+            removeChip(key) {
+                if (key === 'search') this.filters.search = '';
+                if (key === 'status') { this.filters.status = ''; tsStatus?.setValue('', true); }
+                this.onFilterChange();
+            },
+
             reset() {
                 this.filters = { search: '', status: '' };
+                tsStatus?.setValue('', true);
                 history.replaceState(null, '', location.pathname);
                 tableInst?.replaceData();
             },

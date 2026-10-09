@@ -26,6 +26,7 @@ class MenuItemData extends Data
 
         public readonly MenuLinkType $link_type = MenuLinkType::None,
         public readonly ?int $category_id = null,
+        public readonly ?int $page_id = null,
         public readonly ?string $url = null,
     ) {}
 }

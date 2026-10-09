@@ -183,6 +183,7 @@ class OcopProduct extends Model implements HasMedia
             'star_rating' => $this->star_rating,
             'is_featured' => (bool) $this->is_featured,
             'province_code' => $this->province_code,
+            'ward_code' => $this->ward_code,
             'category_id' => $this->category_id,
             'category_name' => $this->category?->name,
             'category_slug' => $this->category?->slug,

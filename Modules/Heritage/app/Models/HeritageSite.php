@@ -39,7 +39,7 @@ class HeritageSite extends Model implements HasMedia
     protected $table = 'heritage_sites';
 
     protected $fillable = [
-        'uuid', 'name', 'slug', 'heritage_type', 'rank', 'era', 'description',
+        'uuid', 'name', 'slug', 'heritage_type', 'rank', 'era', 'description', 'content',
         'province_code', 'province_name', 'ward_code', 'ward_name', 'address',
         'latitude', 'longitude', 'visiting_status', 'status', 'is_featured', 'sort_order',
         'created_by', 'updated_by',
@@ -95,6 +95,16 @@ class HeritageSite extends Model implements HasMedia
     public function updatedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    // ── Media ────────────────────────────────────────────────────────
+
+    /** UUID ảnh Jodit (`data-media-uuid`) đang được nhắc tới trong nội dung di tích. */
+    public function contentMediaUuids(): array
+    {
+        preg_match_all('/data-media-uuid="([^"]+)"/', (string) $this->content, $matches);
+
+        return array_values(array_unique($matches[1]));
     }
 
     // ── Scopes ───────────────────────────────────────────────────────

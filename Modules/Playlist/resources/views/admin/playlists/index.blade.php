@@ -34,29 +34,44 @@
         </div>
     </div>
 
-    {{-- ── Filter bar ───────────────────────────────────────────────────── --}}
-    <div class="card bg-base-100 shadow-sm border border-base-200 mb-4">
-        <div class="card-body py-3 px-4">
-            <div class="flex flex-wrap gap-3 items-end">
+    <div class="section-page">
+        <div class="card bg-base-100 mb-4">
+            <div class="card-body filter-bar py-3 px-3">
+                <div class="filter-grid">
 
-                <div class="form-control w-64">
-                    <label class="label py-0.5"><span class="label-text text-xs font-medium">Tìm theo tên</span></label>
-                    <input type="text" x-model.debounce.400ms="filters.search"
-                           class="input input-sm input-bordered w-full" placeholder="Nhập tên playlist...">
+                    <div class="form-control filter-grid-wide">
+                        <label class="label py-0.5"><span class="label-text text-xs font-medium">Tìm theo tên</span></label>
+                        <div class="input input-sm input-bordered flex items-center gap-2 bg-base-100">
+                            <svg class="w-3.5 h-3.5 text-base-content/40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                            <input type="text" x-model.debounce.400ms="filters.search"
+                                   placeholder="Nhập tên playlist..." class="grow bg-transparent outline-none text-sm">
+                            <button x-show="filters.search" @click="filters.search = ''"
+                                    class="text-base-content/30 hover:text-base-content transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label py-0.5"><span class="label-text text-xs font-medium">Trạng thái</span></label>
+                        <select id="ts-is_active" x-model="filters.is_active"
+                                data-ts-placeholder="Tất cả trạng thái"
+                                class="select select-sm select-bordered w-full">
+                            <option value="">Tất cả</option>
+                            <option value="1">Đang hiển thị</option>
+                            <option value="0">Đã tắt</option>
+                        </select>
+                    </div>
+
                 </div>
 
-                <div class="form-control w-56">
-                    <label class="label py-0.5"><span class="label-text text-xs font-medium">Trạng thái</span></label>
-                    <select x-model="filters.is_active" class="select select-sm select-bordered w-full">
-                        <option value="">— Tất cả trạng thái —</option>
-                        <option value="1">Đang hiển thị</option>
-                        <option value="0">Đã tắt</option>
-                    </select>
-                </div>
-
-                <div class="form-control">
-                    <button @click="reset()" x-show="hasFilters" x-transition
-                            class="btn btn-ghost btn-sm gap-1.5 text-error">
+                <div class="flex justify-end">
+                    <button @click="reset()" x-show="hasFilters" x-cloak x-transition
+                            class="btn btn-ghost btn-sm gap-1.5 text-error mt-1">
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
@@ -65,14 +80,26 @@
                     </button>
                 </div>
 
+                <div x-show="activeChips.length > 0" x-cloak x-transition
+                     class="flex flex-wrap gap-2 pt-3 mt-3 border-t border-base-200">
+                    <span class="text-xs text-base-content/40 self-center">Đang lọc:</span>
+                    <template x-for="chip in activeChips" :key="chip.key">
+                        <span class="badge badge-sm gap-1 cursor-pointer hover:badge-error transition-colors"
+                              @click="removeChip(chip.key)">
+                            <span x-text="chip.label"></span>
+                            <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </span>
+                    </template>
+                </div>
             </div>
         </div>
-    </div>
 
-    {{-- ── Tabulator table ──────────────────────────────────────────────── --}}
-    <div class="card bg-base-100 shadow-sm border border-base-200">
-        <div class="card-body p-0 overflow-hidden tabulator-daisy">
-            <div id="playlist-table"></div>
+        <div class="card">
+            <div class="card-body p-0 overflow-hidden tabulator-daisy">
+                <div id="playlist-table"></div>
+            </div>
         </div>
     </div>
 
@@ -94,11 +121,13 @@
 
 @push('styles')
     <x-tabulator-theme />
+    @vite(['Modules/Playlist/resources/assets/sass/playlist.scss'], 'build/backend')
 @endpush
 
 @push('scripts')
     @vite([
         'resources/js/modules/tabulator.js',
+        'resources/js/modules/tom-select.js',
         'Modules/Playlist/resources/assets/js/playlist.js',
     ], 'build/backend')
 @endpush

@@ -20,7 +20,7 @@ class ListOcopSubjectsForPickerHandler implements QueryHandlerInterface
                 'id' => $p->id,
                 'name' => $p->name,
                 'tax_code' => $p->tax_code,
-                'type' => $p->organization_type->label(),
+                'type' => $p->organization_type?->label(),
                 'address' => $p->fullAddress(),
             ]);
     }

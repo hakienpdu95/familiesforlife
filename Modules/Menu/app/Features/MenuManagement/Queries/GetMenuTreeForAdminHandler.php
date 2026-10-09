@@ -14,7 +14,7 @@ class GetMenuTreeForAdminHandler implements QueryHandlerInterface
     {
         /** @var GetMenuTreeForAdminQuery $query */
         $all = MenuItem::query()
-            ->with('category:id,name,slug,is_active')
+            ->with(['category:id,name,slug,is_active', 'page:id,title,slug,status,published_at'])
             ->when($query->location, fn ($q) => $q->where('location', $query->location))
             ->when($query->search, fn ($q) => $q->where('label', 'like', '%' . $query->search . '%'))
             ->orderBy('sort_order')

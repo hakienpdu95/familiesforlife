@@ -51,6 +51,7 @@ class ProductSubjectResolver implements AicemSubjectResolver
             sku:                    $product->sku,
             short_description:      $field === 'short_description' ? $suggestedText : $product->short_description,
             description:            $field === 'description' ? $suggestedText : $product->description,
+            content:                $product->content,
             price:                  $product->price !== null ? (float) $product->price : null,
             price_label:            $product->price_label,
             currency:               $product->currency,

@@ -75,7 +75,8 @@ document.addEventListener('alpine:init', () => {
      * lưới — không điều hướng trang, không dùng Previous/Next nữa.
      *
      * Hiệu năng:
-     *   - Cursor (afterPublishedAt/afterId) thay offset/exclude phình dần — xem
+     *   - Cursor (afterTs/afterId) thay offset/exclude phình dần — afterTs là số giây Unix (không
+     *     mang múi giờ, server tự quy đổi về giờ app), KHÔNG gửi chuỗi ISO UTC — xem
      *     LoadMoreArticlesQuery (docblock PHP) để biết lý do (tránh OFFSET quét bỏ N dòng đầu
      *     và whereNotIn với mảng ngày càng lớn).
      *   - maxTotal chặn cứng ở CẢ 2 phía: client dừng gọi thêm khi đã đạt (đỡ hẳn request thừa),
@@ -90,7 +91,7 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('loadMoreArticles', (config) => ({
         endpoint: config.endpoint,
         exclude: config.exclude,
-        afterPublishedAt: config.afterPublishedAt,
+        afterTs: config.afterTs,
         afterId: config.afterId,
         loaded: config.loaded,
         maxTotal: config.maxTotal,
@@ -119,7 +120,7 @@ document.addEventListener('alpine:init', () => {
                 const url = new URL(this.endpoint, window.location.origin);
                 url.searchParams.set('loaded', this.loaded);
                 url.searchParams.set('exclude', this.exclude);
-                if (this.afterPublishedAt) url.searchParams.set('after_published_at', this.afterPublishedAt);
+                if (this.afterTs) url.searchParams.set('after_ts', this.afterTs);
                 if (this.afterId) url.searchParams.set('after_id', this.afterId);
                 if (this.limit) url.searchParams.set('limit', this.limit);
                 if (this.categoryId) url.searchParams.set('category_id', this.categoryId);
@@ -139,7 +140,7 @@ document.addEventListener('alpine:init', () => {
 
                 this.loaded += data.count ?? 0;
                 if (data.next_cursor) {
-                    this.afterPublishedAt = data.next_cursor.published_at;
+                    this.afterTs = data.next_cursor.ts;
                     this.afterId = data.next_cursor.id;
                 }
                 this.hasMore = data.has_more && this.loaded < this.maxTotal;
@@ -179,7 +180,7 @@ document.addEventListener('alpine:init', () => {
     /**
      * loadMoreEvents — "Xem thêm sự kiện" (su-kien, su-kien/danh-muc/{slug}) — cùng cấu trúc
      * loadMoreArticles ở trên, chỉ khác tên cursor (afterStartDate/after_start_date thay
-     * afterPublishedAt/after_published_at) vì Event sort ASC theo start_date (sắp diễn ra gần
+     * afterTs/after_ts) vì Event sort ASC theo start_date (sắp diễn ra gần
      * nhất trước), không phải DESC theo published_at như Post.
      */
     Alpine.data('loadMoreEvents', (config) => ({

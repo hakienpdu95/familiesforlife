@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use App\Models\User;
 use App\Notifications\Channels\WebPushChannel;
+use App\Services\Monitoring\MetricsRecorder;
 use App\Services\WebPushService;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\ChannelManager;
@@ -19,6 +21,8 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->app->singleton(MetricsRecorder::class);
+
         // Đăng ký 3 thư mục migration con để `php artisan migrate` luôn phát hiện được
         // (Laravel glob chỉ scan 1 cấp — không đệ quy — nên cần đăng ký tường minh).
         // migration:generate --fresh vẫn dùng --path= riêng, không bị ảnh hưởng.
@@ -48,7 +52,18 @@ class AppServiceProvider extends ServiceProvider
         }
 
         // super-admin bypass toàn bộ Gate checks
+        Gate::define('viewSystemMonitor', fn (User $user) => $user->hasGlobalRole('super-admin') || $user->isPlatformOps());
+
+        if (config('monitoring.enabled')) {
+            DB::listen(fn (QueryExecuted $query) => $this->app->make(MetricsRecorder::class)
+                ->recordQuery($query->sql, $query->time, $query->connectionName));
+        }
+
         Gate::before(function (User $user, string $ability): ?bool {
+            if (str_starts_with($ability, 'platform-users.')) {
+                return null;
+            }
+
             return $user->hasRole('super-admin') ? true : null;
         });
 

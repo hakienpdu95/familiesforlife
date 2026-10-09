@@ -7,6 +7,8 @@
  * Server data truyền vào qua x-data="realEstateListPage({{ Js::from([...]) }})".
  */
 
+import { createTs } from '@shared/tom-select-factory.js';
+
 function esc(v) {
     if (v == null) return '';
     return String(v)
@@ -131,7 +133,12 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('realEstateListPage', (serverData = {}) => {
         const { apiUrl = '' } = serverData;
 
-        let tableInst = null;
+        let tableInst        = null;
+        let tsListingType    = null;
+        let tsPropertyType   = null;
+        let tsApprovalStatus = null;
+
+        const optText = (ts, v) => ts?.options?.[v]?.text ?? v;
 
         return {
             filters: { search: '', listing_type: '', property_type: '', approval_status: '' },
@@ -141,9 +148,40 @@ document.addEventListener('alpine:init', () => {
                 return !!(f.search || f.listing_type || f.property_type || f.approval_status);
             },
 
+            get activeChips() {
+                const chips = [], f = this.filters;
+                if (f.search)          chips.push({ key: 'search',          label: 'Tìm: ' + f.search });
+                if (f.listing_type)    chips.push({ key: 'listing_type',    label: optText(tsListingType, f.listing_type) });
+                if (f.property_type)   chips.push({ key: 'property_type',   label: optText(tsPropertyType, f.property_type) });
+                if (f.approval_status) chips.push({ key: 'approval_status', label: optText(tsApprovalStatus, f.approval_status) });
+                return chips;
+            },
+
             init() {
                 this.loadState();
-                this.$nextTick(() => this._setup());
+                this.$nextTick(() => { this._setup(); this._initTomSelects(); });
+            },
+
+            _initTomSelects() {
+                const listingTypeEl    = document.getElementById('ts-listing_type');
+                const propertyTypeEl   = document.getElementById('ts-property_type');
+                const approvalStatusEl = document.getElementById('ts-approval_status');
+                if (!listingTypeEl || !propertyTypeEl || !approvalStatusEl) return;
+
+                tsListingType = createTs(listingTypeEl, {
+                    placeholder: 'Tất cả loại tin',
+                    onChange() { listingTypeEl.dispatchEvent(new Event('change', { bubbles: true })); },
+                });
+
+                tsPropertyType = createTs(propertyTypeEl, {
+                    placeholder: 'Tất cả loại hình',
+                    onChange() { propertyTypeEl.dispatchEvent(new Event('change', { bubbles: true })); },
+                });
+
+                tsApprovalStatus = createTs(approvalStatusEl, {
+                    placeholder: 'Tất cả trạng thái',
+                    onChange() { approvalStatusEl.dispatchEvent(new Event('change', { bubbles: true })); },
+                });
             },
 
             _setup() {
@@ -221,8 +259,20 @@ document.addEventListener('alpine:init', () => {
             onFilterChange() { this.saveState(); this.refresh(); },
             clearSearch()    { this.filters.search = ''; this.saveState(); this.refresh(); },
 
+            removeChip(key) {
+                if (key === 'search')          this.filters.search = '';
+                if (key === 'listing_type')    { this.filters.listing_type = ''; tsListingType?.setValue('', true); }
+                if (key === 'property_type')   { this.filters.property_type = ''; tsPropertyType?.setValue('', true); }
+                if (key === 'approval_status') { this.filters.approval_status = ''; tsApprovalStatus?.setValue('', true); }
+                this.saveState();
+                this.refresh();
+            },
+
             reset() {
                 this.filters = { search: '', listing_type: '', property_type: '', approval_status: '' };
+                tsListingType?.setValue('', true);
+                tsPropertyType?.setValue('', true);
+                tsApprovalStatus?.setValue('', true);
                 history.replaceState(null, '', location.pathname);
                 this.refresh();
             },

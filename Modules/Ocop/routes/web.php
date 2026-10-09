@@ -14,6 +14,7 @@ use Modules\Ocop\Features\PublicReading\Http\PublicOcopController;
 // KHÔNG còn create/store/edit/update/destroy.
 Route::middleware(['auth'])->prefix('dashboard/ocop')->name('backend.ocop.')->group(function (): void {
     Route::get('categories', [OcopCategoryAdminController::class, 'index'])->name('categories.index');
+    Route::post('products/import', [OcopProductAdminController::class, 'import'])->name('products.import');
     Route::resource('products', OcopProductAdminController::class)->except(['show']);
 });
 

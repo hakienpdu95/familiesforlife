@@ -27,8 +27,8 @@ class OcopSubjectRequest extends FormRequest
         $this->merge([
             'media_uuids' => is_string($mediaUuids) ? (json_decode($mediaUuids, true) ?: []) : ($mediaUuids ?? []),
             'remove_media_uuids' => $this->input('remove_media_uuids') ?? [],
-            'tax_code' => preg_replace('/\s+/', '', (string) $this->input('tax_code')),
-            'gps_coordinates' => trim((string) $this->input('gps_coordinates')),
+            'tax_code' => preg_replace('/\s+/', '', (string) $this->input('tax_code')) ?: null,
+            'gps_coordinates' => trim((string) $this->input('gps_coordinates')) ?: null,
         ]);
     }
 
@@ -40,20 +40,20 @@ class OcopSubjectRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'name_en' => ['nullable', 'string', 'max:255'],
             'tax_code' => [
-                'required', 'string', 'regex:'.self::TAX_CODE_REGEX,
+                'nullable', 'string', 'regex:'.self::TAX_CODE_REGEX,
                 Rule::unique('ocop_subjects', 'tax_code')->ignore($ocopSubject?->id)->withoutTrashed(),
             ],
-            'organization_type' => ['required', Rule::enum(OcopSubjectOrganizationType::class)],
-            'legal_representative' => ['required', 'string', 'max:150'],
+            'organization_type' => ['nullable', Rule::enum(OcopSubjectOrganizationType::class)],
+            'legal_representative' => ['nullable', 'string', 'max:150'],
             'position' => ['nullable', 'string', 'max:100'],
 
-            'address' => ['required', 'string', 'max:255'],
+            'address' => ['nullable', 'string', 'max:255'],
             'province_code' => ['required', 'string', 'size:2', 'exists:provinces,province_code'],
             'ward_code' => [
                 'required', 'string',
                 Rule::exists('wards', 'ward_code')->where('province_code', (string) $this->input('province_code')),
             ],
-            'gps_coordinates' => ['required', 'string', 'max:60', $this->gpsRule()],
+            'gps_coordinates' => ['nullable', 'string', 'max:60', $this->gpsRule()],
             'factory_code' => ['nullable', 'string', 'max:50'],
             'is_food_business' => ['boolean'],
 
@@ -87,18 +87,13 @@ class OcopSubjectRequest extends FormRequest
         return [
             'name.required' => 'Vui lòng nhập tên chủ thể.',
             'name.max' => 'Tên chủ thể không được vượt quá :max ký tự.',
-            'tax_code.required' => 'Vui lòng nhập mã số định danh.',
             'tax_code.regex' => 'Mã số định danh không hợp lệ — MST 10 số (hoặc 10 số kèm -XXX), hoặc CCCD 12 số với hộ kinh doanh.',
             'tax_code.unique' => 'Mã số định danh này đã được dùng cho một chủ thể khác.',
-            'organization_type.required' => 'Vui lòng chọn loại hình tổ chức.',
             'organization_type.enum' => 'Loại hình tổ chức không hợp lệ.',
-            'legal_representative.required' => 'Vui lòng nhập người đại diện pháp luật.',
-            'address.required' => 'Vui lòng nhập địa chỉ trụ sở.',
             'province_code.required' => 'Vui lòng chọn tỉnh/thành.',
             'province_code.exists' => 'Tỉnh/thành được chọn không hợp lệ.',
             'ward_code.required' => 'Vui lòng chọn phường/xã.',
             'ward_code.exists' => 'Phường/xã không thuộc tỉnh/thành đã chọn.',
-            'gps_coordinates.required' => 'Vui lòng nhập toạ độ GPS.',
             'ocop_star.required' => 'Hộ kinh doanh bắt buộc khai báo hạng sao OCOP.',
             'ocop_star.in' => 'Hạng sao không hợp lệ — chỉ chấp nhận 3, 4 hoặc 5 sao.',
             'ocop_cert_expiry.required_with' => 'Vui lòng nhập ngày hết hạn chứng nhận OCOP.',

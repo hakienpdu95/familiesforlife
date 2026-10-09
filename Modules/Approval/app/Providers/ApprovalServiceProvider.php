@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Gate;
 use Modules\Approval\Console\Commands\AuditPlatformRoleScopeCommand;
 use Modules\Approval\Console\Commands\BackfillApprovalSubjectsCommand;
 use Modules\Approval\Console\Commands\CreatePlatformUserCommand;
+use Modules\Approval\Policies\PlatformUserPolicy;
 use Nwidart\Modules\Support\ModuleServiceProvider;
 
 class ApprovalServiceProvider extends ModuleServiceProvider
@@ -81,5 +82,11 @@ class ApprovalServiceProvider extends ModuleServiceProvider
         // Gate riêng cho trang Lịch sử duyệt đầy đủ (§11 mở rộng) — rộng hơn viewDashboard
         // (thấy MỌI log, không chỉ pending item user tự duyệt được), dành cho vai trò giám sát.
         Gate::define('viewApprovalHistory', fn (User $user) => $user->can('approval.view_history') || $user->isPlatformContentModerator() || $user->isPlatformViewer());
+
+        Gate::define('platform-users.manage', [PlatformUserPolicy::class, 'manage']);
+        Gate::define('platform-users.update', [PlatformUserPolicy::class, 'update']);
+        Gate::define('platform-users.deactivate', [PlatformUserPolicy::class, 'deactivate']);
+        Gate::define('platform-users.activate', [PlatformUserPolicy::class, 'activate']);
+        Gate::define('platform-users.resetPassword', [PlatformUserPolicy::class, 'resetPassword']);
     }
 }

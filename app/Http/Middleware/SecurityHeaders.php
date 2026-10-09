@@ -72,12 +72,24 @@ class SecurityHeaders
             $dev ? 'ws://localhost:* wss://localhost:* http://localhost:*' : null,
         ]));
 
+        // img-src: origin của disk media — URL ảnh (Spatie Media, Jodit) sinh tuyệt đối từ
+        // filesystems.disks.{disk}.url (mặc định APP_URL/storage, hoặc CDN/S3), có thể khác
+        // origin trình duyệt đang mở (vd APP_URL=127.0.0.1 nhưng truy cập qua localhost)
+        $imgSrc = implode(' ', array_unique(array_filter([
+            "'self'",
+            'data:',
+            'blob:',
+            $this->mediaOrigin(),
+            'https://api.dicebear.com',
+            'https://i.ytimg.com', // thumbnail video YouTube (Modules/Video)
+        ])));
+
         return implode('; ', [
             "default-src 'self'",
             "script-src {$scriptSrc}",
             "style-src {$styleSrc}",
             "font-src 'self' https://fonts.bunny.net https://fonts.gstatic.com data:",
-            "img-src 'self' data: blob: https://api.dicebear.com https://i.ytimg.com", // i.ytimg.com — thumbnail video YouTube (Modules/Video)
+            "img-src {$imgSrc}",
             "connect-src {$connectSrc}",
             "frame-src https://challenges.cloudflare.com https://www.youtube-nocookie.com", // youtube-nocookie.com — lightbox video công khai (Modules/Video, xem config/video.php embed_domain)
             "frame-ancestors 'none'",
@@ -86,5 +98,17 @@ class SecurityHeaders
             "base-uri 'self'",
             "form-action 'self'",
         ]);
+    }
+
+    private function mediaOrigin(): ?string
+    {
+        $disk = config('media-library.disk_name', 'public');
+        $parts = parse_url((string) config("filesystems.disks.{$disk}.url"));
+
+        if (empty($parts['scheme']) || empty($parts['host'])) {
+            return null;
+        }
+
+        return $parts['scheme'].'://'.$parts['host'].(isset($parts['port']) ? ':'.$parts['port'] : '');
     }
 }
