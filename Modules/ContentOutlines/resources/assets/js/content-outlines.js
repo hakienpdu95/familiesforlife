@@ -334,6 +334,12 @@ document.addEventListener('alpine:init', () => {
                 return !!this.filters.search;
             },
 
+            get activeChips() {
+                const chips = [];
+                if (this.filters.search) chips.push({ key: 'search', label: 'Tìm: ' + this.filters.search });
+                return chips;
+            },
+
             init() {
                 this.$watch('filters.search', () => queueReload());
                 this.$nextTick(() => this._setup());
@@ -386,6 +392,10 @@ document.addEventListener('alpine:init', () => {
                 });
 
                 window.contentOutlinesTable = tableInst;
+            },
+
+            removeChip(key) {
+                if (key === 'search') this.filters.search = '';
             },
 
             reset() {

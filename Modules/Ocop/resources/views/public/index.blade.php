@@ -162,7 +162,7 @@
                     </div>
                     <div>
                         @if($product->category)
-                        <span class="text-xs font-black uppercase tracking-wide text-primary">{{ $product->category->name }}</span>
+                        <span class="text-xs font-black uppercase tracking-wide text-primary">{{ $product->category?->name }}</span>
                         @endif
                         <h3 class="font-bold leading-snug group-hover:text-primary mt-1">{{ $product->name }}</h3>
                         <p class="mt-1 text-xs text-base-content/60">

@@ -8,6 +8,8 @@
  * Server data truyền vào qua x-data="menuItemListPage({{ Js::from([...]) }})".
  */
 
+import { createTs } from '@shared/tom-select-factory.js';
+
 function esc(v) {
     if (v == null) return '';
     return String(v)
@@ -178,7 +180,10 @@ document.addEventListener('alpine:init', () => {
         const { apiUrl = '', reorderUrl = '' } = serverData;
         window.menuItemReorderUrl = reorderUrl;
 
-        let tableInst = null;
+        let tableInst  = null;
+        let tsLocation = null;
+
+        const optText = (ts, v) => ts?.options?.[v]?.text ?? v;
 
         return {
             filters: { search: '', location: '' },
@@ -187,11 +192,28 @@ document.addEventListener('alpine:init', () => {
                 return !!(this.filters.search || this.filters.location);
             },
 
+            get activeChips() {
+                const chips = [], f = this.filters;
+                if (f.search)   chips.push({ key: 'search',   label: 'Tìm: ' + f.search });
+                if (f.location) chips.push({ key: 'location', label: optText(tsLocation, f.location) });
+                return chips;
+            },
+
             init() {
                 const p = new URLSearchParams(location.search);
                 if (p.has('q'))   this.filters.search   = p.get('q');
                 if (p.has('loc')) this.filters.location = p.get('loc');
-                this.$nextTick(() => this._setup());
+                this.$nextTick(() => { this._setup(); this._initTomSelects(); });
+            },
+
+            _initTomSelects() {
+                const locationEl = document.getElementById('ts-location');
+                if (!locationEl) return;
+
+                tsLocation = createTs(locationEl, {
+                    placeholder: 'Tất cả vị trí',
+                    onChange() { locationEl.dispatchEvent(new Event('change', { bubbles: true })); },
+                });
             },
 
             _setup() {
@@ -257,8 +279,15 @@ document.addEventListener('alpine:init', () => {
 
             clearSearch() { this.filters.search = ''; this.onFilterChange(); },
 
+            removeChip(key) {
+                if (key === 'search')   this.filters.search = '';
+                if (key === 'location') { this.filters.location = ''; tsLocation?.setValue('', true); }
+                this.onFilterChange();
+            },
+
             reset() {
                 this.filters = { search: '', location: '' };
+                tsLocation?.setValue('', true);
                 history.replaceState(null, '', location.pathname);
                 tableInst?.replaceData();
             },

@@ -88,6 +88,14 @@ const CSS_OUTPUT = {
   'menu.css':                   'assets/modules/menu.[hash].css',
   'ocop.css':                   'assets/modules/ocop.[hash].css',
   'ocop-subject.css':               'assets/modules/ocop-subject.[hash].css',
+  'video.css':                  'assets/modules/video.[hash].css',
+  'playlist.css':               'assets/modules/playlist.[hash].css',
+  'page.css':                   'assets/modules/page.[hash].css',
+  'banner.css':                 'assets/modules/banner.[hash].css',
+  'newsletter.css':             'assets/modules/newsletter.[hash].css',
+  'province-showcase.css':      'assets/modules/province-showcase.[hash].css',
+  'heritage.css':               'assets/modules/heritage.[hash].css',
+  'aivideostudiotemplate.css':  'assets/modules/aivideostudiotemplate.[hash].css',
   'realestate.css':             'assets/modules/realestate.[hash].css',
   'content-calendar.css':       'assets/modules/content-calendar.[hash].css',
   'bulk-ideation-prompt-studio.css': 'assets/modules/bulk-ideation-prompt-studio.[hash].css',
@@ -140,6 +148,7 @@ const MODULE_ENTRIES = [
   'Modules/Menu/resources/assets/js/menu.js',
   // Banner
   'Modules/Banner/resources/assets/js/banner.js',
+  'Modules/Banner/resources/assets/sass/banner.scss',
   // Ocop
   'Modules/Ocop/resources/assets/sass/ocop.scss',
   'Modules/Ocop/resources/assets/js/ocop.js',
@@ -147,13 +156,16 @@ const MODULE_ENTRIES = [
   'Modules/OcopSubject/resources/assets/js/ocop-subject.js',
   // ProvinceShowcase
   'Modules/ProvinceShowcase/resources/assets/js/province-showcase.js',
+  'Modules/ProvinceShowcase/resources/assets/sass/province-showcase.scss',
   // Heritage
   'Modules/Heritage/resources/assets/sass/heritage.scss',
   'Modules/Heritage/resources/assets/js/heritage.js',
   // Newsletter
   'Modules/Newsletter/resources/assets/js/newsletter.js',
+  'Modules/Newsletter/resources/assets/sass/newsletter.scss',
   // Page
   'Modules/Page/resources/assets/js/page.js',
+  'Modules/Page/resources/assets/sass/page.scss',
   // Aicem
   'Modules/Aicem/resources/assets/js/aicem.js',
   // RealEstate
@@ -161,8 +173,10 @@ const MODULE_ENTRIES = [
   'Modules/RealEstate/resources/assets/js/realestate.js',
   // Video
   'Modules/Video/resources/assets/js/video.js',
+  'Modules/Video/resources/assets/sass/video.scss',
   // Playlist
   'Modules/Playlist/resources/assets/js/playlist.js',
+  'Modules/Playlist/resources/assets/sass/playlist.scss',
   // ContentCalendar
   'Modules/ContentCalendar/resources/assets/sass/content-calendar.scss',
   'Modules/ContentCalendar/resources/assets/js/content-calendar.js',
@@ -174,6 +188,7 @@ const MODULE_ENTRIES = [
   'Modules/PromptFrameworkStudio/resources/assets/js/prompt-framework-studio.js',
   // AIVideoStudioTemplate
   'Modules/AIVideoStudioTemplate/resources/assets/js/aivideostudiotemplate.js',
+  'Modules/AIVideoStudioTemplate/resources/assets/sass/aivideostudiotemplate.scss',
   // EntityComparison
   'Modules/EntityComparison/resources/assets/js/entitycomparison.js',
   // BulkIdeationPromptStudio

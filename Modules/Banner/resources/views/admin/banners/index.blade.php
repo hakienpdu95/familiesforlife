@@ -34,34 +34,40 @@
         </div>
     </div>
 
-    {{-- ── Filter bar ───────────────────────────────────────────────────── --}}
-    <div class="card bg-base-100 shadow-sm border border-base-200 mb-4">
-        <div class="card-body py-3 px-4">
-            <div class="flex flex-wrap gap-3 items-end">
+    <div class="section-page">
+        <div class="card bg-base-100 mb-4">
+            <div class="card-body filter-bar py-3 px-3">
+                <div class="filter-grid">
 
-                <div class="form-control w-64">
-                    <label class="label py-0.5"><span class="label-text text-xs font-medium">Vị trí</span></label>
-                    <select x-model="filters.placement" @change="onFilterChange()" class="select select-sm select-bordered w-full">
-                        <option value="">— Tất cả vị trí —</option>
-                        @foreach($placements as $key => $p)
-                        <option value="{{ $key }}">{{ $p['label'] }}</option>
-                        @endforeach
-                    </select>
+                    <div class="form-control">
+                        <label class="label py-0.5"><span class="label-text text-xs font-medium">Vị trí</span></label>
+                        <select id="ts-placement" x-model="filters.placement" @change="onFilterChange()"
+                                data-ts-placeholder="Tất cả vị trí"
+                                class="select select-sm select-bordered w-full">
+                            <option value="">Tất cả</option>
+                            @foreach($placements as $key => $p)
+                            <option value="{{ $key }}">{{ $p['label'] }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label py-0.5"><span class="label-text text-xs font-medium">Target</span></label>
+                        <select id="ts-target_type" x-model="filters.target_type" @change="onFilterChange()"
+                                data-ts-placeholder="Tất cả target"
+                                class="select select-sm select-bordered w-full">
+                            <option value="">Tất cả</option>
+                            @foreach($targetTypes as $key => $label)
+                            <option value="{{ $key }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
                 </div>
 
-                <div class="form-control w-56">
-                    <label class="label py-0.5"><span class="label-text text-xs font-medium">Target</span></label>
-                    <select x-model="filters.target_type" @change="onFilterChange()" class="select select-sm select-bordered w-full">
-                        <option value="">— Tất cả target —</option>
-                        @foreach($targetTypes as $key => $label)
-                        <option value="{{ $key }}">{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="form-control">
+                <div class="flex justify-end">
                     <button @click="reset()" x-show="hasFilters" x-transition
-                            class="btn btn-ghost btn-sm gap-1.5 text-error">
+                            class="btn btn-ghost btn-sm gap-1.5 text-error mt-1">
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
@@ -70,14 +76,26 @@
                     </button>
                 </div>
 
+                <div x-show="activeChips.length > 0" x-transition
+                     class="flex flex-wrap gap-2 pt-3 mt-3 border-t border-base-200">
+                    <span class="text-xs text-base-content/40 self-center">Đang lọc:</span>
+                    <template x-for="chip in activeChips" :key="chip.key">
+                        <span class="badge badge-sm gap-1 cursor-pointer hover:badge-error transition-colors"
+                              @click="removeChip(chip.key)">
+                            <span x-text="chip.label"></span>
+                            <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </span>
+                    </template>
+                </div>
             </div>
         </div>
-    </div>
 
-    {{-- ── Tabulator table ──────────────────────────────────────────────── --}}
-    <div class="card bg-base-100 shadow-sm border border-base-200">
-        <div class="card-body p-0 overflow-hidden tabulator-daisy">
-            <div id="banner-table"></div>
+        <div class="card">
+            <div class="card-body p-0 overflow-hidden tabulator-daisy">
+                <div id="banner-table"></div>
+            </div>
         </div>
     </div>
 
@@ -99,11 +117,13 @@
 
 @push('styles')
     <x-tabulator-theme />
+    @vite(['Modules/Banner/resources/assets/sass/banner.scss'], 'build/backend')
 @endpush
 
 @push('scripts')
     @vite([
         'resources/js/modules/tabulator.js',
+        'resources/js/modules/tom-select.js',
         'Modules/Banner/resources/assets/js/banner.js',
     ], 'build/backend')
 @endpush

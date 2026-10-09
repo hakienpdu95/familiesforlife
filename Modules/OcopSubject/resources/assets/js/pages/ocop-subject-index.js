@@ -1,3 +1,5 @@
+import { createTs } from '@shared/tom-select-factory.js';
+
 function esc(v) {
     if (v == null) return '';
     return String(v)
@@ -57,6 +59,11 @@ window.ocopSubjectDeleteConfirm = function (url, name) {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+    const importProvince = document.getElementById('ts-import-province');
+    if (importProvince) {
+        createTs(importProvince, { placeholder: importProvince.dataset.tsPlaceholder, dropdownParent: null });
+    }
+
     const confirmBtn = document.getElementById('ocopSubjectConfirmDeleteBtn');
     if (!confirmBtn) return;
 
@@ -100,7 +107,9 @@ document.addEventListener('DOMContentLoaded', () => {
 document.addEventListener('alpine:init', () => {
     Alpine.data('ocopSubjectListPage', ({ apiUrl = '' } = {}) => {
         let tableInst = null;
+        let tsType    = null;
         const emptyFilters = () => ({ search: '', organization_type: '' });
+        const optText = (ts, v) => ts?.options?.[v]?.text ?? v;
 
         return {
             filters: emptyFilters(),
@@ -109,11 +118,28 @@ document.addEventListener('alpine:init', () => {
                 return !!(this.filters.search || this.filters.organization_type);
             },
 
+            get activeChips() {
+                const chips = [], f = this.filters;
+                if (f.search)            chips.push({ key: 'search',            label: 'Tìm: ' + f.search });
+                if (f.organization_type) chips.push({ key: 'organization_type', label: optText(tsType, f.organization_type) });
+                return chips;
+            },
+
             init() {
                 const p = new URLSearchParams(location.search);
                 if (p.has('q')) this.filters.search = p.get('q');
                 if (p.has('type')) this.filters.organization_type = p.get('type');
-                this.$nextTick(() => this.setup());
+                this.$nextTick(() => { this.setup(); this._initTomSelects(); });
+            },
+
+            _initTomSelects() {
+                const typeEl = document.getElementById('ts-organization_type');
+                if (!typeEl) return;
+
+                tsType = createTs(typeEl, {
+                    placeholder: 'Tất cả loại hình',
+                    onChange() { typeEl.dispatchEvent(new Event('change', { bubbles: true })); },
+                });
             },
 
             setup() {
@@ -172,8 +198,17 @@ document.addEventListener('alpine:init', () => {
 
             onFilterChange() { this.saveState(); tableInst?.replaceData(); },
 
+            clearSearch() { this.filters.search = ''; this.onFilterChange(); },
+
+            removeChip(key) {
+                if (key === 'search') this.filters.search = '';
+                if (key === 'organization_type') { this.filters.organization_type = ''; tsType?.setValue('', true); }
+                this.onFilterChange();
+            },
+
             reset() {
                 this.filters = emptyFilters();
+                tsType?.setValue('', true);
                 this.onFilterChange();
             },
         };

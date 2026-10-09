@@ -80,10 +80,9 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Loại hình tổ chức <span class="text-error">*</span></span>
+                            <span class="label-text font-medium">Loại hình tổ chức</span>
                         </label>
                         <select id="ts-organization_type" name="organization_type"
-                                data-req="Vui lòng chọn loại hình tổ chức"
                                 @change="orgType = $event.target.value"
                                 class="select select-bordered select-sm w-full ts-init @error('organization_type') select-error @enderror"
                                 data-ts-placeholder="— Chọn loại hình —">
@@ -96,11 +95,11 @@
                     </div>
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Mã số định danh <span class="text-error">*</span></span>
+                            <span class="label-text font-medium">Mã số định danh</span>
                             <span class="label-text-alt text-xs text-base-content/40">MST hoặc CCCD (hộ kinh doanh)</span>
                         </label>
                         <input type="text" name="tax_code" value="{{ old('tax_code', $ocopSubject?->tax_code) }}"
-                               data-req="Vui lòng nhập mã số định danh" maxlength="20" inputmode="numeric"
+                               maxlength="20" inputmode="numeric"
                                placeholder="VD: 3301234567"
                                class="input input-bordered input-sm w-full font-mono @error('tax_code') input-error @enderror">
                         @error('tax_code')<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
@@ -110,10 +109,10 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Người đại diện pháp luật <span class="text-error">*</span></span>
+                            <span class="label-text font-medium">Người đại diện pháp luật</span>
                         </label>
                         <input type="text" name="legal_representative" value="{{ old('legal_representative', $ocopSubject?->legal_representative) }}"
-                               data-req="Vui lòng nhập người đại diện pháp luật" maxlength="150"
+                               maxlength="150"
                                class="input input-bordered input-sm w-full @error('legal_representative') input-error @enderror">
                         @error('legal_representative')<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
                     </div>
@@ -171,11 +170,11 @@
 
                 <div class="form-control">
                     <label class="label py-0 pb-1.5">
-                        <span class="label-text font-medium">Địa chỉ trụ sở <span class="text-error">*</span></span>
+                        <span class="label-text font-medium">Địa chỉ trụ sở</span>
                         <span class="label-text-alt text-xs text-base-content/40">Số nhà, đường, thôn/xóm</span>
                     </label>
                     <input type="text" name="address" value="{{ old('address', $ocopSubject?->address) }}"
-                           data-req="Vui lòng nhập địa chỉ trụ sở" maxlength="255"
+                           maxlength="255"
                            class="input input-bordered input-sm w-full @error('address') input-error @enderror">
                     @error('address')<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
                 </div>
@@ -183,11 +182,11 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Toạ độ GPS <span class="text-error">*</span></span>
+                            <span class="label-text font-medium">Toạ độ GPS</span>
                             <span class="label-text-alt text-xs text-base-content/40">vĩ độ, kinh độ</span>
                         </label>
                         <input type="text" name="gps_coordinates" value="{{ old('gps_coordinates', $ocopSubject?->gps_coordinates) }}"
-                               data-req="Vui lòng nhập toạ độ GPS" maxlength="60" placeholder="VD: 16.4637, 107.5909"
+                               maxlength="60" placeholder="VD: 16.4637, 107.5909"
                                class="input input-bordered input-sm w-full font-mono @error('gps_coordinates') input-error @enderror">
                         @error('gps_coordinates')<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
                     </div>

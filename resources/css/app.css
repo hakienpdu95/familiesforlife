@@ -46,6 +46,17 @@ body { margin: 0; padding: 0; background: #f1f5f9; font-family: 'Open Sans', san
     background: #fff;
 }
 
+.filter-bar { container-type: inline-size; }
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: .75rem;
+    align-items: end;
+}
+@container (min-width: 25rem) {
+    .filter-grid > .filter-grid-wide { grid-column: span 2; }
+}
+
 /* ── Sidebar ──────────────────────────────────── */
 .sidebar {
     width: 256px; min-width: 256px;

@@ -8,7 +8,7 @@
     </a>
     <div class="flex flex-1 flex-col gap-1.5 p-3">
         @if($product->category)
-        <span class="line-clamp-1 text-[11px] font-semibold uppercase tracking-wide text-[#117a3a]">{{ $product->category->name }}</span>
+        <span class="line-clamp-1 text-[11px] font-semibold uppercase tracking-wide text-[#117a3a]">{{ $product->category?->name }}</span>
         @endif
         <a href="{{ $productUrl }}" class="line-clamp-2 text-sm font-semibold leading-snug text-[#333] hover:text-[#117a3a]">{{ $product->name }}</a>
         <div class="mt-auto flex items-center justify-between gap-2 pt-1">

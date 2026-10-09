@@ -7,6 +7,8 @@
  * Server data truyền vào qua x-data="productListPage({{ Js::from([...]) }})".
  */
 
+import { createTs } from '@shared/tom-select-factory.js';
+
 function esc(v) {
     if (v == null) return '';
     return String(v)
@@ -145,7 +147,12 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('productListPage', (serverData = {}) => {
         const { apiUrl = '' } = serverData;
 
-        let tableInst = null;
+        let tableInst  = null;
+        let tsCategory = null;
+        let tsType     = null;
+        let tsStatus   = null;
+
+        const optText = (ts, v) => ts?.options?.[v]?.text ?? v;
 
         return {
             filters: { search: '', category_id: '', status: '', type: '' },
@@ -155,9 +162,41 @@ document.addEventListener('alpine:init', () => {
                 return !!(f.search || f.category_id || f.status || f.type);
             },
 
+            get activeChips() {
+                const chips = [], f = this.filters;
+                if (f.search)      chips.push({ key: 'search',      label: 'Tìm: ' + f.search });
+                if (f.category_id) chips.push({ key: 'category_id', label: optText(tsCategory, f.category_id) });
+                if (f.type)        chips.push({ key: 'type',        label: optText(tsType, f.type) });
+                if (f.status)      chips.push({ key: 'status',      label: optText(tsStatus, f.status) });
+                return chips;
+            },
+
             init() {
                 this.loadState();
-                this.$nextTick(() => this._setup());
+                this.$nextTick(() => { this._setup(); this._initTomSelects(); });
+            },
+
+            _initTomSelects() {
+                const categoryEl = document.getElementById('ts-category');
+                const typeEl     = document.getElementById('ts-type');
+                const statusEl   = document.getElementById('ts-status');
+                if (!categoryEl || !typeEl || !statusEl) return;
+
+                tsCategory = createTs(categoryEl, {
+                    placeholder: 'Tất cả danh mục',
+                    maxOptions: null,
+                    onChange() { categoryEl.dispatchEvent(new Event('change', { bubbles: true })); },
+                });
+
+                tsType = createTs(typeEl, {
+                    placeholder: 'Tất cả loại',
+                    onChange() { typeEl.dispatchEvent(new Event('change', { bubbles: true })); },
+                });
+
+                tsStatus = createTs(statusEl, {
+                    placeholder: 'Tất cả trạng thái',
+                    onChange() { statusEl.dispatchEvent(new Event('change', { bubbles: true })); },
+                });
             },
 
             _setup() {
@@ -233,8 +272,20 @@ document.addEventListener('alpine:init', () => {
             onFilterChange() { this.saveState(); this.refresh(); },
             clearSearch()    { this.filters.search = ''; this.saveState(); this.refresh(); },
 
+            removeChip(key) {
+                if (key === 'search')      this.filters.search = '';
+                if (key === 'category_id') { this.filters.category_id = ''; tsCategory?.setValue('', true); }
+                if (key === 'type')        { this.filters.type = ''; tsType?.setValue('', true); }
+                if (key === 'status')      { this.filters.status = ''; tsStatus?.setValue('', true); }
+                this.saveState();
+                this.refresh();
+            },
+
             reset() {
                 this.filters = { search: '', category_id: '', status: '', type: '' };
+                tsCategory?.setValue('', true);
+                tsType?.setValue('', true);
+                tsStatus?.setValue('', true);
                 history.replaceState(null, '', location.pathname);
                 this.refresh();
             },

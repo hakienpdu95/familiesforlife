@@ -1,0 +1,9 @@
+// Modules/Playlist/resources/assets/sass/playlist.scss
+// Build: vite.config.backend.js → public/build/backend/assets/modules/playlist.[hash].css
+//
+// Blade:
+//   @push('styles')
+//       @vite(['Modules/Playlist/resources/assets/sass/playlist.scss'], 'build/backend')
+//   @endpush
+
+@use 'tom-select';      // TomSelect dark/light theme

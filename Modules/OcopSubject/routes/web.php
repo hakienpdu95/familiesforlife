@@ -6,6 +6,7 @@ use Modules\OcopSubject\Features\OcopSubjectManagement\Http\OcopSubjectApiContro
 use Modules\OcopSubject\Features\PublicReading\Http\BrandController;
 
 Route::middleware(['auth'])->prefix('dashboard')->name('backend.')->group(function (): void {
+    Route::post('ocop-subjects/import', [OcopSubjectAdminController::class, 'import'])->name('ocop-subjects.import');
     Route::resource('ocop-subjects', OcopSubjectAdminController::class)->except(['show']);
 });
 

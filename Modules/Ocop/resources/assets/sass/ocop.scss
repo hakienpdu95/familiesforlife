@@ -8,3 +8,7 @@
 
 @use 'form-patterns';   // .color-picker-combo, .field-readonly, .form-submit-bar, .empty-state
 @use 'tom-select';      // TomSelect dark/light theme
+
+#ocopProductImportModal .ts-wrapper {
+    overflow: visible;
+}

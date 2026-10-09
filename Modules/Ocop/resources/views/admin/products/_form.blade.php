@@ -145,7 +145,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Danh mục <span class="text-error">*</span></span>
+                            <span class="label-text font-medium">Danh mục</span>
                         </label>
                         {{-- spec/danhmuc.html — danh mục OCOP chính thức 3 cấp (Nhóm lớn → Nhóm →
                              Phân nhóm), $categoryTree đã phẳng hóa kèm depth (OcopCategory::flatTree()),
@@ -153,7 +153,6 @@
                              như space thường). Nhóm còn "con" (không phải cấp sâu nhất của nhánh)
                              bị disable — sản phẩm chỉ được gán vào đúng phân nhóm cụ thể nhất. --}}
                         <select id="ts-category_id" name="category_id"
-                                data-req="Vui lòng chọn danh mục"
                                 class="select select-bordered select-sm w-full ts-init @error('category_id') select-error @enderror"
                                 data-ts-placeholder="— Chọn danh mục —">
                             <option value="">— Chọn danh mục —</option>

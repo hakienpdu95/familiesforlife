@@ -16,7 +16,7 @@ class OcopSubjectListResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'tax_code' => $this->tax_code,
-            'organization_type' => $this->organization_type->label(),
+            'organization_type' => $this->organization_type?->label(),
             'province_name' => $this->province_name,
             'ocop_star' => $this->ocop_star,
             'products_count' => (int) $this->products_count,

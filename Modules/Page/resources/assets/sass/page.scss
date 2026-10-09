@@ -1,0 +1,9 @@
+// Modules/Page/resources/assets/sass/page.scss
+// Build: vite.config.backend.js → public/build/backend/assets/modules/page.[hash].css
+//
+// Blade:
+//   @push('styles')
+//       @vite(['Modules/Page/resources/assets/sass/page.scss'], 'build/backend')
+//   @endpush
+
+@use 'tom-select';      // TomSelect dark/light theme

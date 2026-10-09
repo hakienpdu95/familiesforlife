@@ -11,9 +11,9 @@ use Spatie\LaravelData\Data;
 class OcopProductData extends Data
 {
     public function __construct(
-        public readonly int $category_id,
         public readonly string $name,
         public readonly int $star_rating,
+        public readonly ?int $category_id = null,
         public readonly ?string $description = null,
 
         public readonly ?string $story = null,
