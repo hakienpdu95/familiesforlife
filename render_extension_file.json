@@ -337,7 +337,8 @@
         "__index///index///__///__///__///locale,status,published_at|idx_post_trans_status_pub///__",
         "ga_views_30d///unsignedInteger///__///_NULL///NULL///__///__",
         "ga_synced_at///timestamp///__///_NULL///NULL///__///__",
-        "__index///index///__///__///__///ga_views_30d///__"
+        "__index///index///__///__///__///ga_views_30d///__",
+        "__index///index///__///__///__///status,published_at|idx_post_trans_status_published///__"
     ],
     [
         "post_categories///add///__///",
@@ -459,5 +460,26 @@
         "slug///string///255///_NULL///NULL///__///__",
         "story///longText///__///_NULL///NULL///__///__",
         "__index///unique///__///__///__///slug///__"
+    ],
+    [
+        "approval_subjects///add///__///",
+        "__index///index///__///__///__///status,subject_type|idx_approval_status_type///__"
+    ],
+    [
+        "heritage_sites///add///__///",
+        "content///longText///__///_NULL///NULL///__///__"
+    ],
+    [
+        "menu_items///add///__///",
+        "page_id///unsignedBigInteger///__///_NULL///NULL///->constrained('pages')->onDelete('set null')///__",
+        "__index///index///__///__///__///page_id,location|idx_menu_item_page///__"
+    ],
+    [
+        "post_article_view_events///add///__///",
+        "__index///index///__///__///__///viewed_at|idx_post_view_events_viewed_at///__"
+    ],
+    [
+        "products///add///__///",
+        "content///longText///__///_NULL///NULL///__///__"
     ]
 ]

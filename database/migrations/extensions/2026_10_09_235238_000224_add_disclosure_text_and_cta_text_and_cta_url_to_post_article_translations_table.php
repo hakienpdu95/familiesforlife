@@ -38,6 +38,9 @@ return new class extends Migration {
             if (!Schema::hasIndex('post_article_translations', 'post_article_translations_ga_views_30d_index')) {
                 $table->index('ga_views_30d');
             }
+            if (!Schema::hasIndex('post_article_translations', 'idx_post_trans_status_published')) {
+                $table->index(['status', 'published_at'], 'idx_post_trans_status_published');
+            }
         });
     }
 

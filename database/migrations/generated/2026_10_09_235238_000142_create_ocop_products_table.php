@@ -19,10 +19,10 @@ return new class extends Migration
             $table->id();
             $table->uuid()->nullable()->unique()->comment('Public UUID — expose ra ngoài, không phải PK');
             $table->unsignedInteger('order_column')->nullable()->index()->comment('Thứ tự sắp xếp — Spatie Sortable / ORDER BY');
-            $table->foreignId('category_id')->constrained('ocop_categories')->restrictOnDelete();
+            $table->foreignId('category_id')->nullable()->constrained('ocop_categories')->restrictOnDelete();
             $table->string('name', 150);
             $table->string('slug', 180)->unique();
-            $table->unsignedTinyInteger('star_rating');
+            $table->unsignedTinyInteger('star_rating')->nullable();
             $table->text('description')->nullable();
             $table->char('province_code', 2)->nullable();
             $table->string('province_name', 255)->nullable();
