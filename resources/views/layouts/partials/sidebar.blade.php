@@ -3,7 +3,7 @@
 
     <div class="brand">
         <div class="brand-logo">
-            <img src="{{ asset('logo.png') }}" alt="{{ config('app.name') }}" class="brand-logo-img">
+            <img src="{{ asset('logo.png') }}" alt="{{ config('app.name') }}" width="143" height="36" class="brand-logo-img">
         </div>
         {{-- brand-name ẩn: tên đã có trong logo image --}}
     </div>

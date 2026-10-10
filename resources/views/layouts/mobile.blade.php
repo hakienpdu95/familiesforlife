@@ -7,6 +7,7 @@
     <meta name="theme-color" content="#3b82f6">
     @auth<meta name="user-id" content="{{ auth()->id() }}">@endauth
     <title>@yield('title', 'Khảo sát') — {{ config('app.name') }}</title>
+    @include('layouts.partials.font-preload', ['fonts' => ['open-sans'], 'build' => 'build/backend'])
     @vite(['resources/css/app.css', 'resources/js/app.js'], 'build/backend')
     <style>
         body { min-height: 100dvh; }

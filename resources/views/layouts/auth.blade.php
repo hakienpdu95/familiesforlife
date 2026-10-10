@@ -7,11 +7,12 @@
 
     <title>@yield('title', config('app.name')) — {{ config('app.name') }}</title>
 
+    @include('layouts.partials.font-preload', ['fonts' => ['open-sans'], 'build' => 'build/backend'])
     @vite(['resources/css/app.css', 'resources/js/app.js'], 'build/backend')
 
     @stack('styles')
 </head>
-<body class="bg-base-200 min-h-screen flex items-center justify-center px-4 py-8">
+<body class="@yield('body_class', 'bg-base-200 min-h-screen flex items-center justify-center px-4 py-8')">
 
     @yield('content')
 

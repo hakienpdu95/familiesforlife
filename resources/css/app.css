@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+@import '@fontsource-variable/open-sans/wght.css';
+@import '@fontsource-variable/open-sans/wght-italic.css';
 @import "tailwindcss";
 
 @plugin "daisyui" {
@@ -36,7 +37,7 @@
 [x-cloak] { display: none !important; }
 
 /* ── Admin Layout ─────────────────────────────── */
-body { margin: 0; padding: 0; background: #f1f5f9; font-family: 'Open Sans', sans-serif; }
+body { margin: 0; padding: 0; background: #f1f5f9; font-family: 'Open Sans Variable', 'Open Sans', sans-serif; }
 .admin-shell { display: flex; overflow: hidden; }
 
 .section-page {
