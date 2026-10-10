@@ -57,6 +57,7 @@ const JS_OUTPUT = {
   'playlist':               'assets/modules/playlist.[hash].js',
   'entitycomparison':       'assets/modules/entitycomparison.[hash].js',
   'bulk-ideation-prompt-studio': 'assets/modules/bulk-ideation-prompt-studio.[hash].js',
+  'approval':               'assets/modules/approval.[hash].js',
 };
 
 /** CSS asset name → output path.
@@ -94,6 +95,7 @@ const CSS_OUTPUT = {
   'page.css':                   'assets/modules/page.[hash].css',
   'banner.css':                 'assets/modules/banner.[hash].css',
   'newsletter.css':             'assets/modules/newsletter.[hash].css',
+  'approval.css':               'assets/modules/approval.[hash].css',
   'province-showcase.css':      'assets/modules/province-showcase.[hash].css',
   'heritage.css':               'assets/modules/heritage.[hash].css',
   'aivideostudiotemplate.css':  'assets/modules/aivideostudiotemplate.[hash].css',
@@ -195,6 +197,9 @@ const MODULE_ENTRIES = [
   // BulkIdeationPromptStudio
   'Modules/BulkIdeationPromptStudio/resources/assets/sass/bulk-ideation-prompt-studio.scss',
   'Modules/BulkIdeationPromptStudio/resources/assets/js/bulk-ideation-prompt-studio.js',
+  // Approval
+  'Modules/Approval/resources/assets/sass/approval.scss',
+  'Modules/Approval/resources/assets/js/approval.js',
 ];
 
 // ─────────────────────────────────────────────────────────────────────

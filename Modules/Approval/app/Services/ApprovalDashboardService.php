@@ -4,6 +4,7 @@ namespace Modules\Approval\Services;
 
 use App\Models\User;
 use App\Shared\Tenancy\OrganizationScope;
+use App\Shared\Tenancy\TenantContext;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Modules\Approval\Enums\ApprovalStatus;
@@ -14,6 +15,13 @@ use Modules\Approval\Models\ApprovalSubject;
  */
 class ApprovalDashboardService
 {
+    public function pendingForUser(User $user): Collection
+    {
+        return $user->organization_id === null
+            ? $this->pendingForModerator($user)
+            : $this->pendingFor($user, TenantContext::getOrganizationId());
+    }
+
     /**
      * @return Collection<int, ApprovalSubject> mỗi phần tử đã eager-load `subject`, nhóm sẵn
      *         theo `subject_type` để Controller/Blade group hiển thị (dùng `label` ở config).

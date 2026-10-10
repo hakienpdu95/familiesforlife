@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Approval\Http\Controllers\Api\ApprovalApiController;
 use Modules\Approval\Http\Controllers\ApprovalDashboardController;
 use Modules\Approval\Http\Controllers\ApprovalHistoryController;
 use Modules\Approval\Http\Controllers\PlatformUserController;
@@ -16,6 +17,11 @@ Route::middleware(['auth', 'tenant'])->group(function (): void {
     // khác dashboard ở trên (chỉ hiển thị pending item user hiện tại có quyền duyệt).
     Route::get('dashboard/approvals/history', [ApprovalHistoryController::class, 'index'])
         ->name('backend.approval.history');
+});
+
+Route::middleware(['auth', 'tenant'])->prefix('backend/api/approval')->name('backend.api.approval.')->group(function (): void {
+    Route::get('pending', [ApprovalApiController::class, 'pending'])->name('pending');
+    Route::get('history', [ApprovalApiController::class, 'history'])->name('history');
 });
 
 // spec/Platform_RBAC_Phase2_Specification.md §2 — Quản lý nhân sự Platform

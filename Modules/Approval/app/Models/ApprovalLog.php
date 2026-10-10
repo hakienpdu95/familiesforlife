@@ -13,6 +13,15 @@ class ApprovalLog extends Model
 
     const UPDATED_AT = null;
 
+    const ACTION_LABELS = [
+        'submit' => 'Gửi duyệt',
+        'approve' => 'Duyệt',
+        'reject' => 'Từ chối',
+        'publish' => 'Xuất bản',
+        'archive' => 'Lưu trữ',
+        'revise' => 'Sửa nội dung (tự động chờ duyệt lại)',
+    ];
+
     protected $table = 'approval_logs';
 
     protected $fillable = [
@@ -38,14 +47,6 @@ class ApprovalLog extends Model
     /** Nhãn tiếng Việt cho cột `action` — dùng ở trang Lịch sử duyệt (§12 mở rộng). */
     public function actionLabel(): string
     {
-        return match ($this->action) {
-            'submit'  => 'Gửi duyệt',
-            'approve' => 'Duyệt',
-            'reject'  => 'Từ chối',
-            'publish' => 'Xuất bản',
-            'archive' => 'Lưu trữ',
-            'revise'  => 'Sửa nội dung (tự động chờ duyệt lại)',
-            default   => $this->action,
-        };
+        return self::ACTION_LABELS[$this->action] ?? $this->action;
     }
 }

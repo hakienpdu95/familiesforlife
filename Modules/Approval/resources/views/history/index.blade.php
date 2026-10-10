@@ -2,95 +2,97 @@
 @section('title', 'Lịch sử duyệt')
 
 @section('content')
-<div class="flex items-center justify-between mb-6">
-    <div>
-        <h1 class="text-2xl font-bold text-base-content">Lịch sử duyệt</h1>
-        <p class="text-sm text-base-content/50 mt-0.5">
-            Toàn bộ hành động duyệt nội dung (mọi loại sản phẩm/entity, mọi trạng thái) — dành cho giám sát/kiểm tra.
-        </p>
+<div x-data="approvalHistoryPage({{ Js::from([
+    'apiUrl' => route('backend.api.approval.history'),
+]) }})">
+
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <div>
+            <h1 class="text-2xl font-bold text-base-content">Lịch sử duyệt</h1>
+            <p class="text-sm text-base-content/50 mt-0.5">Toàn bộ hành động duyệt nội dung (mọi loại, mọi trạng thái) — dành cho giám sát/kiểm tra</p>
+        </div>
+        @can('viewDashboard')
+        <a href="{{ route('backend.approval.dashboard') }}" class="btn btn-ghost btn-sm">Chờ duyệt của tôi</a>
+        @endcan
     </div>
-    <a href="{{ route('backend.approval.dashboard') }}" class="btn btn-ghost btn-sm">Chờ duyệt của tôi</a>
-</div>
 
-<form method="GET" class="flex flex-wrap gap-2 mb-5">
-    <select name="subject_type" class="select select-bordered select-sm">
-        <option value="">— Tất cả loại —</option>
-        @foreach (config('approval.subjects', []) as $type => $cfg)
-            <option value="{{ $type }}" @selected($subjectTypeFilter === $type)>{{ $cfg['label'] ?? $type }}</option>
-        @endforeach
-    </select>
-    <select name="action" class="select select-bordered select-sm">
-        <option value="">— Tất cả hành động —</option>
-        @foreach (['submit' => 'Gửi duyệt', 'approve' => 'Duyệt', 'reject' => 'Từ chối', 'publish' => 'Xuất bản', 'archive' => 'Lưu trữ', 'revise' => 'Sửa nội dung'] as $value => $label)
-            <option value="{{ $value }}" @selected($actionFilter === $value)>{{ $label }}</option>
-        @endforeach
-    </select>
-    <button class="btn btn-sm btn-neutral">Lọc</button>
-    @if ($subjectTypeFilter || $actionFilter)
-        <a href="{{ route('backend.approval.history') }}" class="btn btn-sm btn-ghost">Xoá lọc</a>
-    @endif
-</form>
+    <div class="section-page">
+        <div class="card bg-base-100 mb-4">
+            <div class="card-body filter-bar py-3 px-3">
+                <div class="filter-grid">
 
-<div class="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
-    <div class="overflow-x-auto">
-        <table class="table table-sm">
-            <thead class="bg-base-200/60 text-xs uppercase tracking-wide">
-                <tr>
-                    <th>Thời gian</th>
-                    <th>Entity</th>
-                    <th>Hành động</th>
-                    <th>Chuyển trạng thái</th>
-                    <th>Người thực hiện</th>
-                    <th>Lý do</th>
-                </tr>
-            </thead>
-            <tbody>
-            @forelse ($logs as $log)
-                @php($entity = $log->subject?->subject)
-                <tr class="hover">
-                    <td class="text-xs text-base-content/50 whitespace-nowrap">
-                        {{ $log->created_at->format('d/m/Y H:i') }}
-                    </td>
-                    <td class="text-sm">
-                        @if ($entity)
-                            <span class="font-medium">{{ class_basename($entity) }} #{{ $entity->id }}</span>
-                            @if (($entity->name ?? null))
-                                <span class="text-base-content/60"> — {{ $entity->name }}</span>
-                            @endif
-                            @if (method_exists($entity, 'getAttribute') && ($entity->approvalDashboardUrl ?? null))
-                                <a href="{{ $entity->approvalDashboardUrl }}" class="link link-primary text-xs ml-1">Xem</a>
-                            @endif
-                        @else
-                            <span class="text-base-content/30 italic">Entity đã bị xoá</span>
-                        @endif
-                    </td>
-                    <td class="text-sm">{{ $log->actionLabel() }}</td>
-                    <td class="text-xs">
-                        @if ($log->from_status)
-                            <span class="badge badge-ghost badge-sm">{{ \Modules\Approval\Enums\ApprovalStatus::tryFrom($log->from_status)?->label() ?? $log->from_status }}</span>
-                            →
-                        @endif
-                        <span class="badge badge-sm {{ \Modules\Approval\Enums\ApprovalStatus::tryFrom($log->to_status)?->badgeClass() }}">
-                            {{ \Modules\Approval\Enums\ApprovalStatus::tryFrom($log->to_status)?->label() ?? $log->to_status }}
+                    <div class="form-control">
+                        <label class="label py-0.5"><span class="label-text text-xs font-medium">Loại nội dung</span></label>
+                        <select id="ts-history-subject-type" x-model="filters.subject_type" @change="onFilterChange()"
+                                data-ts-placeholder="Tất cả loại"
+                                class="select select-sm select-bordered w-full">
+                            <option value="">Tất cả</option>
+                            @foreach ($subjectTypes as $type => $label)
+                            <option value="{{ $type }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label py-0.5"><span class="label-text text-xs font-medium">Hành động</span></label>
+                        <select id="ts-history-action" x-model="filters.action" @change="onFilterChange()"
+                                data-ts-placeholder="Tất cả hành động"
+                                class="select select-sm select-bordered w-full">
+                            <option value="">Tất cả</option>
+                            @foreach ($actions as $value => $label)
+                            <option value="{{ $value }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="flex justify-end">
+                    <button @click="reset()" x-show="hasFilters" x-cloak x-transition
+                            class="btn btn-ghost btn-sm gap-1.5 text-error mt-1">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        Đặt lại
+                    </button>
+                </div>
+
+                <div x-show="activeChips.length > 0" x-cloak x-transition
+                     class="flex flex-wrap gap-2 pt-3 mt-3 border-t border-base-200">
+                    <span class="text-xs text-base-content/40 self-center">Đang lọc:</span>
+                    <template x-for="chip in activeChips" :key="chip.key">
+                        <span class="badge badge-sm gap-1 cursor-pointer hover:badge-error transition-colors"
+                              @click="removeChip(chip.key)">
+                            <span x-text="chip.label"></span>
+                            <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
                         </span>
-                    </td>
-                    <td class="text-sm text-base-content/60">
-                        {{ $log->performedBy?->name ?? 'Hệ thống (job/command)' }}
-                    </td>
-                    <td class="text-sm text-base-content/60 max-w-xs truncate" title="{{ $log->reason }}">
-                        {{ $log->reason ?? '—' }}
-                    </td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="6" class="text-center py-8 text-base-content/40">Chưa có lịch sử duyệt nào.</td>
-                </tr>
-            @endforelse
-            </tbody>
-        </table>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body p-0 overflow-hidden tabulator-daisy">
+                <div id="approval-history-table"></div>
+            </div>
+        </div>
     </div>
-    @if ($logs->hasPages())
-    <div class="p-3 border-t border-base-200">{{ $logs->links() }}</div>
-    @endif
+
 </div>
 @endsection
+
+@push('styles')
+    <x-tabulator-theme />
+    @vite(['Modules/Approval/resources/assets/sass/approval.scss'], 'build/backend')
+@endpush
+
+@push('scripts')
+    @vite([
+        'resources/js/modules/tabulator.js',
+        'resources/js/modules/tom-select.js',
+        'Modules/Approval/resources/assets/js/approval.js',
+    ], 'build/backend')
+@endpush
