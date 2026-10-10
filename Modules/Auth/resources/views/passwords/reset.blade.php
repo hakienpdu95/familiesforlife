@@ -1,88 +1,29 @@
-@extends('layouts.auth')
+@extends('auth::layouts.split')
 
 @section('title', 'Đặt lại mật khẩu')
 
-@section('content')
-<div class="w-full max-w-sm">
-    <div class="card bg-base-100 shadow-xl">
-        <div class="card-body gap-4">
+@section('heading', 'Đặt lại mật khẩu')
 
-            <div class="text-center">
-                <h1 class="text-2xl font-bold text-primary">Đặt lại mật khẩu</h1>
-                <p class="text-base-content/60 text-sm mt-1">Nhập mật khẩu mới của bạn</p>
-            </div>
+@section('subheading', 'Tạo mật khẩu mới cho tài khoản của bạn.')
 
-            @if ($errors->any())
-                <div class="alert alert-error text-sm">
-                    <ul class="list-disc list-inside">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+@section('form')
+<form method="POST" action="{{ route('password.update') }}" class="flex flex-col gap-5">
+    @csrf
 
-            <form method="POST" action="{{ route('password.update') }}" class="flex flex-col gap-3">
-                @csrf
+    <input type="hidden" name="token" value="{{ $request->route('token') }}" />
 
-                <input type="hidden" name="token" value="{{ $request->route('token') }}" />
+    <x-auth::field name="email" type="email" label="Email" :value="$request->email" placeholder="you@example.com" autofocus autocomplete="username" />
 
-                <label class="form-control w-full">
-                    <div class="label">
-                        <span class="label-text font-medium">Email</span>
-                    </div>
-                    <input
-                        type="email"
-                        name="email"
-                        value="{{ old('email', $request->email) }}"
-                        placeholder="you@example.com"
-                        class="input input-bordered w-full @error('email') input-error @enderror"
-                        required autofocus autocomplete="username"
-                    />
-                    @error('email')
-                        <div class="label">
-                            <span class="label-text-alt text-error">{{ $message }}</span>
-                        </div>
-                    @enderror
-                </label>
+    <x-auth::password-field name="password" label="Mật khẩu mới" placeholder="Tối thiểu 8 ký tự" autocomplete="new-password" />
 
-                <label class="form-control w-full">
-                    <div class="label">
-                        <span class="label-text font-medium">Mật khẩu mới</span>
-                    </div>
-                    <input
-                        type="password"
-                        name="password"
-                        placeholder="Tối thiểu 8 ký tự"
-                        class="input input-bordered w-full @error('password') input-error @enderror"
-                        required autocomplete="new-password"
-                    />
-                    @error('password')
-                        <div class="label">
-                            <span class="label-text-alt text-error">{{ $message }}</span>
-                        </div>
-                    @enderror
-                </label>
+    <x-auth::password-field name="password_confirmation" label="Xác nhận mật khẩu mới" placeholder="Nhập lại mật khẩu" autocomplete="new-password" />
 
-                <label class="form-control w-full">
-                    <div class="label">
-                        <span class="label-text font-medium">Xác nhận mật khẩu mới</span>
-                    </div>
-                    <input
-                        type="password"
-                        name="password_confirmation"
-                        placeholder="Nhập lại mật khẩu"
-                        class="input input-bordered w-full"
-                        required autocomplete="new-password"
-                    />
-                </label>
+    <button type="submit" class="btn btn-primary btn-lg btn-block font-semibold uppercase tracking-wide">
+        Đặt lại mật khẩu
+    </button>
+</form>
 
-                <button type="submit" class="btn btn-primary w-full mt-1">
-                    Đặt lại mật khẩu
-                </button>
-            </form>
-
-        </div>
-    </div>
-</div>
+<p class="mt-6 text-center text-sm text-base-content/75">
+    <a href="{{ route('login') }}" class="link link-primary link-hover font-medium">Quay lại đăng nhập</a>
+</p>
 @endsection

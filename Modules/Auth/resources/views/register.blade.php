@@ -1,137 +1,46 @@
-@extends('layouts.auth')
+@extends('auth::layouts.split')
 
 @section('title', 'Đăng ký tổ chức')
 
-@section('content')
-<div class="w-full max-w-md">
-    <div class="card bg-base-100 shadow-xl">
-        <div class="card-body gap-4">
+@section('heading', 'Tạo tổ chức mới')
 
-            <div class="text-center">
-                <h1 class="text-2xl font-bold text-primary">{{ config('app.name') }}</h1>
-                <p class="text-base-content/60 text-sm mt-1">Tạo tổ chức & tài khoản quản trị</p>
-            </div>
+@section('subheading', 'Đăng ký tổ chức và tài khoản quản trị để bắt đầu sử dụng Hệ thống Quản trị Nội dung.')
 
-            @if ($errors->any())
-                <div class="alert alert-error text-sm">
-                    <ul class="list-disc list-inside">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+@section('form')
+<form method="POST" action="{{ route('register') }}" class="flex flex-col gap-5">
+    @csrf
 
-            <form method="POST" action="{{ route('register') }}" class="flex flex-col gap-3">
-                @csrf
+    <div class="divider divider-start my-0 text-sm font-semibold text-base-content/75">Thông tin tổ chức</div>
 
-                <div class="divider divider-start text-sm font-semibold text-base-content/70">
-                    Thông tin tổ chức
-                </div>
+    <x-auth::field name="organization_name" label="Tên tổ chức" placeholder="VD: Công ty TNHH ABC" autocomplete="organization" />
 
-                <label class="form-control w-full">
-                    <div class="label">
-                        <span class="label-text font-medium">Tên tổ chức <span class="text-error">*</span></span>
-                    </div>
-                    <input
-                        type="text"
-                        name="organization_name"
-                        value="{{ old('organization_name') }}"
-                        placeholder="VD: Công ty TNHH ABC"
-                        class="input input-bordered w-full @error('organization_name') input-error @enderror"
-                        required
-                    />
-                    @error('organization_name')
-                        <div class="label">
-                            <span class="label-text-alt text-error">{{ $message }}</span>
-                        </div>
-                    @enderror
-                </label>
+    <div class="divider divider-start my-0 text-sm font-semibold text-base-content/75">Tài khoản chủ sở hữu (CEO)</div>
 
-                <div class="divider divider-start text-sm font-semibold text-base-content/70 mt-1">
-                    Tài khoản chủ sở hữu (CEO)
-                </div>
+    <x-auth::field name="name" label="Họ và tên" placeholder="Nguyễn Văn A" autofocus autocomplete="name" />
 
-                <label class="form-control w-full">
-                    <div class="label">
-                        <span class="label-text font-medium">Họ và tên <span class="text-error">*</span></span>
-                    </div>
-                    <input
-                        type="text"
-                        name="name"
-                        value="{{ old('name') }}"
-                        placeholder="Nguyễn Văn A"
-                        class="input input-bordered w-full @error('name') input-error @enderror"
-                        required autofocus autocomplete="name"
-                    />
-                    @error('name')
-                        <div class="label">
-                            <span class="label-text-alt text-error">{{ $message }}</span>
-                        </div>
-                    @enderror
-                </label>
+    <x-auth::field name="email" type="email" label="Email" placeholder="you@company.com" autocomplete="username" />
 
-                <label class="form-control w-full">
-                    <div class="label">
-                        <span class="label-text font-medium">Email <span class="text-error">*</span></span>
-                    </div>
-                    <input
-                        type="email"
-                        name="email"
-                        value="{{ old('email') }}"
-                        placeholder="you@company.com"
-                        class="input input-bordered w-full @error('email') input-error @enderror"
-                        required autocomplete="username"
-                    />
-                    @error('email')
-                        <div class="label">
-                            <span class="label-text-alt text-error">{{ $message }}</span>
-                        </div>
-                    @enderror
-                </label>
+    <div class="grid gap-5 sm:grid-cols-2">
+        <x-auth::password-field name="password" label="Mật khẩu" placeholder="Tối thiểu 8 ký tự" autocomplete="new-password" />
 
-                <label class="form-control w-full">
-                    <div class="label">
-                        <span class="label-text font-medium">Mật khẩu <span class="text-error">*</span></span>
-                    </div>
-                    <input
-                        type="password"
-                        name="password"
-                        placeholder="Tối thiểu 8 ký tự"
-                        class="input input-bordered w-full @error('password') input-error @enderror"
-                        required autocomplete="new-password"
-                    />
-                    @error('password')
-                        <div class="label">
-                            <span class="label-text-alt text-error">{{ $message }}</span>
-                        </div>
-                    @enderror
-                </label>
-
-                <label class="form-control w-full">
-                    <div class="label">
-                        <span class="label-text font-medium">Xác nhận mật khẩu <span class="text-error">*</span></span>
-                    </div>
-                    <input
-                        type="password"
-                        name="password_confirmation"
-                        placeholder="Nhập lại mật khẩu"
-                        class="input input-bordered w-full"
-                        required autocomplete="new-password"
-                    />
-                </label>
-
-                <button type="submit" class="btn btn-primary w-full mt-2">
-                    Tạo tổ chức & đăng ký
-                </button>
-            </form>
-
-            <div class="text-center text-sm text-base-content/60">
-                Đã có tài khoản?
-                <a href="{{ route('login') }}" class="text-primary hover:underline font-medium">Đăng nhập</a>
-            </div>
-
-        </div>
+        <x-auth::password-field name="password_confirmation" label="Xác nhận mật khẩu" placeholder="Nhập lại mật khẩu" autocomplete="new-password" />
     </div>
-</div>
+
+    <button type="submit" class="btn btn-primary btn-lg btn-block font-semibold uppercase tracking-wide">
+        Tạo tổ chức &amp; đăng ký
+    </button>
+
+    <p class="text-xs leading-relaxed text-base-content/75">
+        Bằng việc đăng ký, bạn đồng ý với
+        <a href="#" class="link link-primary link-hover">Điều khoản dịch vụ</a>
+        và
+        <a href="#" class="link link-primary link-hover">Chính sách bảo mật</a>
+        của chúng tôi.
+    </p>
+</form>
+
+<p class="mt-6 text-center text-sm text-base-content/75">
+    Đã có tài khoản?
+    <a href="{{ route('login') }}" class="link link-primary link-hover font-medium">Đăng nhập</a>
+</p>
 @endsection
