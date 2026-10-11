@@ -41,7 +41,7 @@
 
         <div class="form-control">
             <label class="label py-0 pb-1.5"><span class="label-text font-medium">Vai trò Platform <span class="text-error">*</span></span></label>
-            <select name="role" class="select select-bordered select-sm w-full @error('role') select-error @enderror">
+            <select id="ts-platform-user-form-role" name="role" data-ts-placeholder="— Chọn vai trò —" class="select select-bordered select-sm w-full @error('role') select-error @enderror">
                 <option value="">— Chọn vai trò —</option>
                 @foreach ($labels as $value => $label)
                     <option value="{{ $value }}" {{ old('role') === $value ? 'selected' : '' }}>{{ $label }}</option>
@@ -54,3 +54,14 @@
     </div>
 </form>
 @endsection
+
+@push('styles')
+    @vite(['Modules/Approval/resources/assets/sass/approval.scss'], 'build/backend')
+@endpush
+
+@push('scripts')
+    @vite([
+        'resources/js/modules/tom-select.js',
+        'Modules/Approval/resources/assets/js/approval.js',
+    ], 'build/backend')
+@endpush

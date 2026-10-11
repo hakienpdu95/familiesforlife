@@ -36,5 +36,14 @@ Route::middleware(['auth'])
             ->name('platform-users.activate');
         Route::patch('platform-users/{platform_user}/reset-password', [PlatformUserController::class, 'resetPassword'])
             ->name('platform-users.reset-password');
+        Route::post('platform-users/bulk-deactivate', [PlatformUserController::class, 'bulkDeactivate'])
+            ->name('platform-users.bulk-deactivate');
         Route::resource('platform-users', PlatformUserController::class)->except(['show']);
+    });
+
+Route::middleware(['auth'])
+    ->prefix('backend/api')
+    ->name('backend.api.')
+    ->group(function (): void {
+        Route::get('platform-users', [PlatformUserController::class, 'data'])->name('platform-users');
     });

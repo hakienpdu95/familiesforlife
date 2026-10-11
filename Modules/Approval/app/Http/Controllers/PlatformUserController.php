@@ -5,14 +5,18 @@ namespace Modules\Approval\Http\Controllers;
 use App\Enums\AccountType;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 use Modules\ActivityLog\Core\ActivityLogger;
+use Modules\Approval\Actions\ListPlatformUsersAction;
 use Modules\Approval\Data\StorePlatformUserData;
 use Modules\Approval\Data\UpdatePlatformUserData;
+use Modules\Approval\Http\Resources\PlatformUserListResource;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -38,15 +42,37 @@ class PlatformUserController extends Controller
 
     public function index(): View
     {
-        $users = User::withoutGlobalScopes()
-            ->whereNull('organization_id')
-            ->with('roles:id,name')
-            ->orderBy('name')
-            ->paginate(20);
-
         return view('approval::platform-users.index', [
-            'users'  => $users,
             'labels' => User::platformRoleLabels(),
+        ]);
+    }
+
+    public function data(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'page' => ['nullable', 'integer', 'min:1'],
+            'size' => ['nullable', 'integer', 'min:5', 'max:100'],
+            'search' => ['nullable', 'string', 'max:200'],
+            'role' => ['nullable', 'string', 'in:'.implode(',', array_keys(User::platformRoleLabels()))],
+            'status' => ['nullable', 'string', 'in:active,inactive'],
+        ]);
+
+        $sortRaw = $request->input('sort.0');
+
+        $users = ListPlatformUsersAction::run(
+            $validated['search'] ?? null,
+            $validated['role'] ?? null,
+            $validated['status'] ?? null,
+            is_array($sortRaw) ? (string) ($sortRaw['field'] ?? 'name') : 'name',
+            is_array($sortRaw) && ($sortRaw['dir'] ?? '') === 'desc' ? 'desc' : 'asc',
+            (int) ($validated['size'] ?? 25),
+            (int) ($validated['page'] ?? 1),
+        );
+
+        return response()->json([
+            'data' => PlatformUserListResource::collection($users->items()),
+            'last_page' => $users->lastPage(),
+            'total' => $users->total(),
         ]);
     }
 
@@ -142,6 +168,28 @@ class PlatformUserController extends Controller
         ActivityLogger::info('User', 'platform_user_deactivated', $platformUser);
 
         return redirect()->route('backend.platform-users.index')->with('success', 'Đã vô hiệu hoá tài khoản.');
+    }
+
+    public function bulkDeactivate(Request $request): RedirectResponse
+    {
+        $ids = $request->validate([
+            'ids' => ['required', 'array', 'min:1', 'max:100'],
+            'ids.*' => ['integer'],
+        ])['ids'];
+
+        $users = User::withoutGlobalScopes()->whereNull('organization_id')->whereIn('id', $ids)->get();
+
+        $deactivated = $users->filter(fn (User $user) => Gate::allows('platform-users.deactivate', $user))
+            ->each(function (User $user) {
+                $user->update(['is_active' => false]);
+                $this->terminateSessions($user);
+                ActivityLogger::info('User', 'platform_user_deactivated', $user, ['via' => 'bulk']);
+            });
+
+        $skipped = count($ids) - $deactivated->count();
+
+        return redirect()->route('backend.platform-users.index')->with('success',
+            "Đã vô hiệu hoá {$deactivated->count()} tài khoản.".($skipped > 0 ? " Bỏ qua {$skipped} tài khoản không đủ điều kiện." : ''));
     }
 
     public function resetPassword(User $platformUser): RedirectResponse
