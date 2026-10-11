@@ -91,10 +91,12 @@
                      }">
                     <label class="label py-0 pb-1.5">
                         <span class="label-text font-medium">Chủ thể sản xuất <span class="text-error">*</span></span>
+                        @if(Route::has('backend.ocop-subjects.create'))
                         @can('create', \Modules\OcopSubject\Models\OcopSubject::class)
                         <a href="{{ route('backend.ocop-subjects.create') }}" target="_blank" rel="noopener"
                            class="label-text-alt link link-primary text-xs">+ Thêm chủ thể mới</a>
                         @endcan
+                        @endif
                     </label>
                     <select id="ts-ocop_subject_id" name="ocop_subject_id"
                             data-req="Vui lòng chọn chủ thể sản xuất"

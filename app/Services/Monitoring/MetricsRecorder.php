@@ -61,6 +61,10 @@ class MetricsRecorder
             return;
         }
 
+        if (! preg_match('/^\s*(select|insert|update|delete|with)\b/i', $sql)) {
+            return;
+        }
+
         $this->recordingQuery = true;
 
         try {

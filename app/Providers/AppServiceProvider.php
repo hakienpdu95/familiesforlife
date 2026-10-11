@@ -54,7 +54,7 @@ class AppServiceProvider extends ServiceProvider
         // super-admin bypass toàn bộ Gate checks
         Gate::define('viewSystemMonitor', fn (User $user) => $user->hasGlobalRole('super-admin') || $user->isPlatformOps());
 
-        if (config('monitoring.enabled')) {
+        if (config('monitoring.enabled') && ! $this->app->runningInConsole()) {
             DB::listen(fn (QueryExecuted $query) => $this->app->make(MetricsRecorder::class)
                 ->recordQuery($query->sql, $query->time, $query->connectionName));
         }

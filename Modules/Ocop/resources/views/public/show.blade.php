@@ -144,7 +144,7 @@
             'Hướng dẫn bảo quản' => $product->storage_instructions,
         ];
         $producerMoreUrl = match (true) {
-            (bool) $subject?->is_active => route('ocop-subject.public.show', ['slug' => $subject->slug]),
+            $subject?->is_active && Route::has('ocop-subject.public.show') => route('ocop-subject.public.show', ['slug' => $subject->slug]),
             (bool) $heritageSite => route('heritage.public.show', ['slug' => $heritageSite->slug, 'id' => $heritageSite->id]),
             (bool) $product->province_code => route('ocop.public.index', ['province' => $product->province_code]),
             default => null,

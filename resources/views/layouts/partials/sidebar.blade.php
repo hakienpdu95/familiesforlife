@@ -258,6 +258,7 @@
         </div>
         @endcan
 
+        @if(Route::has('backend.ocop-subjects.index'))
         @can(\App\Enums\PermissionEnum::OCOP_SUBJECT_MANAGE->value)
         <div class="nav-group">
             <a href="{{ route('backend.ocop-subjects.index') }}"
@@ -267,6 +268,7 @@
             </a>
         </div>
         @endcan
+        @endif
 
         @can(\App\Enums\PermissionEnum::PRODUCT_VIEW->value)
         <details {{ request()->routeIs('backend.products.*') ? 'open' : '' }}>
