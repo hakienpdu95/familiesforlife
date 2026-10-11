@@ -40,12 +40,12 @@ class EventDemoSeeder extends Seeder
 
     public function run(): void
     {
-        $creator = User::withoutGlobalScopes()->where('email', 'content-creator@system.local')->first();
-        $editor  = User::withoutGlobalScopes()->where('email', 'editor@system.local')->first();
-        $head    = User::withoutGlobalScopes()->where('email', 'content-head@system.local')->first();
+        $creator = User::withoutGlobalScopes()->where('email', 'haidang.pv@vigiadinh.vn')->first();
+        $editor  = User::withoutGlobalScopes()->where('email', 'thuha.btv@vigiadinh.vn')->first();
+        $head    = User::withoutGlobalScopes()->where('email', 'quockhanh.tbt@vigiadinh.vn')->first();
 
         if (! $creator || ! $editor || ! $head) {
-            $this->command->warn('  ⚠ Thiếu tài khoản platform (content-creator/editor/content-head@system.local) — chạy ApprovalDatabaseSeeder trước.');
+            $this->command->warn('  ⚠ Thiếu tài khoản platform (haidang.pv/thuha.btv/quockhanh.tbt@vigiadinh.vn) — chạy ApprovalDatabaseSeeder trước.');
 
             return;
         }

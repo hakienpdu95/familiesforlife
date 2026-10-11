@@ -16,7 +16,7 @@ use Spatie\Permission\PermissionRegistrar;
  * từng biên tập viên KHÔNG nằm trong seeder này — làm thủ công qua `post_category_editors`
  * sau khi có danh mục thật (chưa có UI riêng cho việc gán này ở Phase 2A).
  *
- * Tài khoản mặc định: section-editor@system.local (mật khẩu Admin@123!)
+ * Tài khoản mặc định: thanhtung.tcm@vigiadinh.vn (mật khẩu Admin@123!)
  * ⚠️  Đổi mật khẩu ngay sau khi deploy production.
  */
 class PlatformSectionEditorSeeder extends Seeder
@@ -29,9 +29,9 @@ class PlatformSectionEditorSeeder extends Seeder
         $role = Role::firstOrCreate(['name' => 'platform_section_editor', 'guard_name' => 'web']);
 
         $user = User::withoutGlobalScopes()->firstOrCreate(
-            ['email' => 'section-editor@system.local'],
+            ['email' => 'thanhtung.tcm@vigiadinh.vn'],
             [
-                'name'              => 'Section Editor',
+                'name'              => 'Vũ Thanh Tùng',
                 'password'          => Hash::make('Admin@123!'),
                 'organization_id'   => null,
                 'email_verified_at' => now(),
@@ -49,6 +49,6 @@ class PlatformSectionEditorSeeder extends Seeder
 
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $this->command->info('  ✓ platform_section_editor role seeded (section-editor@system.local).');
+        $this->command->info('  ✓ platform_section_editor role seeded (thanhtung.tcm@vigiadinh.vn).');
     }
 }

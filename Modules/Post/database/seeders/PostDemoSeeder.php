@@ -22,8 +22,8 @@ use Modules\Post\Models\PostCategory;
 
 /**
  * Demo content cho Post (bài viết đã xuất bản) — chạy Action THẬT (create → translate →
- * submit → approve → publish) qua đúng 3 tài khoản nền tảng (content-creator/editor/
- * content-head, xem Modules\Approval\Database\Seeders\ContentReviewHierarchySeeder +
+ * submit → approve → publish) qua đúng 3 tài khoản nền tảng (haidang.pv/thuha.btv/
+ * quockhanh.tbt@vigiadinh.vn, xem Modules\Approval\Database\Seeders\ContentReviewHierarchySeeder +
  * PlatformContentCreatorSeeder) để log/timestamp sinh ra thực tế, cùng nguyên tắc
  * PostReviewDemoSeeder. Khác PostReviewDemoSeeder ở chỗ: seeder này CÓ nằm trong
  * SystemDataSeeder (chạy sau ApprovalDatabaseSeeder để 3 tài khoản trên đã tồn tại).
@@ -636,12 +636,12 @@ class PostDemoSeeder extends Seeder
             return;
         }
 
-        $creator = User::withoutGlobalScopes()->where('email', 'content-creator@system.local')->first();
-        $editor  = User::withoutGlobalScopes()->where('email', 'editor@system.local')->first();
-        $head    = User::withoutGlobalScopes()->where('email', 'content-head@system.local')->first();
+        $creator = User::withoutGlobalScopes()->where('email', 'haidang.pv@vigiadinh.vn')->first();
+        $editor  = User::withoutGlobalScopes()->where('email', 'thuha.btv@vigiadinh.vn')->first();
+        $head    = User::withoutGlobalScopes()->where('email', 'quockhanh.tbt@vigiadinh.vn')->first();
 
         if (! $creator || ! $editor || ! $head) {
-            $this->command->warn('  ⚠ Thiếu tài khoản platform (content-creator/editor/content-head@system.local) — chạy ApprovalDatabaseSeeder trước.');
+            $this->command->warn('  ⚠ Thiếu tài khoản platform (haidang.pv/thuha.btv/quockhanh.tbt@vigiadinh.vn) — chạy ApprovalDatabaseSeeder trước.');
 
             return;
         }

@@ -78,7 +78,7 @@ class OcopCategorySeeder extends Seeder
 
     public function run(): void
     {
-        $creatorId = User::withoutGlobalScopes()->where('email', 'content-creator@system.local')->value('id')
+        $creatorId = User::withoutGlobalScopes()->where('email', 'haidang.pv@vigiadinh.vn')->value('id')
             ?? User::withoutGlobalScopes()->value('id');
 
         if (! $creatorId) {

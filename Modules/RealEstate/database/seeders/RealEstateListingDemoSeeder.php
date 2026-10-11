@@ -22,7 +22,7 @@ use Modules\RealEstate\Models\RealEstateListing;
  * EventDemoSeeder — KHÔNG insert thẳng DB.
  *
  * Tài khoản: marketing@demo.test (Organization "demo" — tạo/gửi duyệt, có real_estate.create/
- * edit qua config/permissions.php), moderator@system.local (platform_content_moderator — duyệt
+ * edit qua config/permissions.php), vanphap.kd@vigiadinh.vn (platform_content_moderator — duyệt
  * + publish, RealEstateListingPolicy::approve()/publishApproval()).
  *
  * Idempotent — mỗi tin dùng slug cố định, bỏ qua nếu đã tồn tại.
@@ -40,10 +40,10 @@ class RealEstateListingDemoSeeder extends Seeder
         }
 
         $marketing = User::where('email', 'marketing@demo.test')->first();
-        $moderator = User::withoutGlobalScopes()->where('email', 'moderator@system.local')->first();
+        $moderator = User::withoutGlobalScopes()->where('email', 'vanphap.kd@vigiadinh.vn')->first();
 
         if (! $marketing || ! $moderator) {
-            $this->command->warn('  ⚠ Thiếu tài khoản demo (marketing@demo.test / moderator@system.local) — chạy UserSeeder + ContentModeratorSeeder trước.');
+            $this->command->warn('  ⚠ Thiếu tài khoản demo (marketing@demo.test / vanphap.kd@vigiadinh.vn) — chạy UserSeeder + ContentModeratorSeeder trước.');
 
             return;
         }

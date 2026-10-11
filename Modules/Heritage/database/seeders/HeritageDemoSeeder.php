@@ -80,10 +80,10 @@ class HeritageDemoSeeder extends Seeder
 
     public function run(): void
     {
-        $creator = User::withoutGlobalScopes()->where('email', 'content-creator@system.local')->first();
+        $creator = User::withoutGlobalScopes()->where('email', 'haidang.pv@vigiadinh.vn')->first();
 
         if (! $creator) {
-            $this->command->warn('  ⚠ Thiếu tài khoản platform (content-creator@system.local) — chạy ApprovalDatabaseSeeder trước.');
+            $this->command->warn('  ⚠ Thiếu tài khoản platform (haidang.pv@vigiadinh.vn) — chạy ApprovalDatabaseSeeder trước.');
 
             return;
         }

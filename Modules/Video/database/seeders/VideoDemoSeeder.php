@@ -38,10 +38,10 @@ class VideoDemoSeeder extends Seeder
 
     public function run(): void
     {
-        $creator = User::withoutGlobalScopes()->where('email', 'ops@system.local')->first();
+        $creator = User::withoutGlobalScopes()->where('email', 'minhvan.ops@vigiadinh.vn')->first();
 
         if (! $creator) {
-            $this->command->warn('  ⚠ Thiếu tài khoản platform (ops@system.local) — chạy ApprovalDatabaseSeeder trước.');
+            $this->command->warn('  ⚠ Thiếu tài khoản platform (minhvan.ops@vigiadinh.vn) — chạy ApprovalDatabaseSeeder trước.');
 
             return;
         }

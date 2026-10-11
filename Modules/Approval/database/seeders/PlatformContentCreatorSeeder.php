@@ -19,7 +19,7 @@ use Spatie\Permission\PermissionRegistrar;
  * quyền đó vẫn chỉ `platform_content_head` (xác định qua `isPlatformContentHead()`, không
  * qua Spatie permission — xem `PostArticlePolicy`).
  *
- * Tài khoản mặc định: content-creator@system.local (mật khẩu Admin@123!)
+ * Tài khoản mặc định: haidang.pv@vigiadinh.vn (mật khẩu Admin@123!)
  * ⚠️  Đổi mật khẩu ngay sau khi deploy production.
  */
 class PlatformContentCreatorSeeder extends Seeder
@@ -31,11 +31,11 @@ class PlatformContentCreatorSeeder extends Seeder
         setPermissionsTeamId(null);
         $role = Role::firstOrCreate(['name' => 'platform_content_creator', 'guard_name' => 'web']);
 
-        $this->createAccount('content-creator@system.local', 'Content Creator', $role);
+        $this->createAccount('haidang.pv@vigiadinh.vn', 'Nguyễn Hải Đăng', $role);
 
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $this->command->info('  ✓ platform_content_creator role seeded (content-creator@system.local).');
+        $this->command->info('  ✓ platform_content_creator role seeded (haidang.pv@vigiadinh.vn).');
     }
 
     private function createAccount(string $email, string $name, Role $role): void

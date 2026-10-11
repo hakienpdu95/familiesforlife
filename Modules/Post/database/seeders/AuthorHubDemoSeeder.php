@@ -21,25 +21,25 @@ class AuthorHubDemoSeeder extends Seeder
 {
     /** email user demo (đã có sẵn từ seeder platform user) => hồ sơ tác giả muốn gán. */
     private const PROFILES = [
-        'content-creator@system.local' => [
-            'pen_name'     => 'Minh Quân',
+        'haidang.pv@vigiadinh.vn' => [
+            'pen_name'     => 'Hải Đăng',
             'bio'          => 'Phóng viên mảng đời sống - xã hội, chuyên viết tin tức gia đình và giáo dục con cái.',
-            'social_links' => ['facebook' => 'https://facebook.com/minhquan.reporter'],
+            'social_links' => ['facebook' => 'https://facebook.com/haidang.reporter'],
         ],
-        'editor@system.local' => [
+        'thuha.btv@vigiadinh.vn' => [
             'pen_name'     => 'Thu Hà',
             'bio'          => 'Biên tập viên — duyệt sơ bộ bài viết trước khi chuyển lãnh đạo nội dung xuất bản.',
             'social_links' => ['facebook' => 'https://facebook.com/thuha.editor', 'x' => 'https://x.com/thuha_editor'],
         ],
-        'content-head@system.local' => [
-            'pen_name'     => 'Trần Bảo Nam',
+        'quockhanh.tbt@vigiadinh.vn' => [
+            'pen_name'     => 'Lê Quốc Khánh',
             'bio'          => 'Trưởng phòng nội dung nền tảng — phụ trách duyệt cuối và xuất bản bài viết.',
-            'social_links' => ['linkedin' => 'https://linkedin.com/in/tranbaonam'],
+            'social_links' => ['linkedin' => 'https://linkedin.com/in/lequockhanh'],
         ],
-        'section-editor@system.local' => [
-            'pen_name'     => 'Lê Phương Anh',
+        'thanhtung.tcm@vigiadinh.vn' => [
+            'pen_name'     => 'Vũ Thanh Tùng',
             'bio'          => 'Biên tập viên trưởng chuyên mục Sức khỏe & Dinh dưỡng.',
-            'social_links' => ['website' => 'https://lephuonganh.vn'],
+            'social_links' => ['website' => 'https://vuthanhtung.vn'],
         ],
     ];
 

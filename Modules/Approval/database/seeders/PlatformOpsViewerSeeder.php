@@ -22,7 +22,7 @@ use Spatie\Permission\PermissionRegistrar;
  *
  * Cùng quy ước tài khoản organization_id=null như ContentModeratorSeeder.
  *
- * Tài khoản mặc định: ops@system.local, viewer@system.local (mật khẩu Admin@123!)
+ * Tài khoản mặc định: minhvan.ops@vigiadinh.vn, ngocdung.gs@vigiadinh.vn (mật khẩu Admin@123!)
  * ⚠️  Đổi mật khẩu ngay sau khi deploy production.
  */
 class PlatformOpsViewerSeeder extends Seeder
@@ -47,12 +47,12 @@ class PlatformOpsViewerSeeder extends Seeder
 
         // platform_viewer CỐ Ý không được syncPermissions bất kỳ permission ghi nào — quyền
         // xem dashboard/lịch sử duyệt đến từ Gate OR isPlatformViewer(), không qua permission.
-        $this->createAccount('ops@system.local', 'Platform Ops', $opsRole);
-        $this->createAccount('viewer@system.local', 'Platform Viewer', $viewerRole);
+        $this->createAccount('minhvan.ops@vigiadinh.vn', 'Hoàng Minh Vận', $opsRole);
+        $this->createAccount('ngocdung.gs@vigiadinh.vn', 'Đinh Ngọc Dung', $viewerRole);
 
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $this->command->info('  ✓ platform_ops + platform_viewer roles seeded (ops@system.local, viewer@system.local).');
+        $this->command->info('  ✓ platform_ops + platform_viewer roles seeded (minhvan.ops@vigiadinh.vn, ngocdung.gs@vigiadinh.vn).');
     }
 
     private function createAccount(string $email, string $name, Role $role): void

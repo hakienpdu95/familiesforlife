@@ -41,11 +41,11 @@ class PostReviewDemoSeeder extends Seeder
         }
 
         $marketing = User::where('email', 'marketing@demo.test')->first();
-        $editor    = User::withoutGlobalScopes()->where('email', 'editor@system.local')->first();
-        $head      = User::withoutGlobalScopes()->where('email', 'content-head@system.local')->first();
+        $editor    = User::withoutGlobalScopes()->where('email', 'thuha.btv@vigiadinh.vn')->first();
+        $head      = User::withoutGlobalScopes()->where('email', 'quockhanh.tbt@vigiadinh.vn')->first();
 
         if (! $marketing || ! $editor || ! $head) {
-            $this->command->warn('  ⚠ Thiếu user demo (marketing@demo.test / editor@system.local / content-head@system.local) — chạy UserSeeder + ContentReviewHierarchySeeder trước.');
+            $this->command->warn('  ⚠ Thiếu user demo (marketing@demo.test / thuha.btv@vigiadinh.vn / quockhanh.tbt@vigiadinh.vn) — chạy UserSeeder + ContentReviewHierarchySeeder trước.');
 
             return;
         }

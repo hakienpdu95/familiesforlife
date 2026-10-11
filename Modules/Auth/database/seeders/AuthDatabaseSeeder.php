@@ -19,8 +19,8 @@ use Spatie\Permission\PermissionRegistrar;
  *  - Có tất cả permissions hiện tại
  *
  * Tài khoản mặc định:
- *  admin@system.local        / Admin@123!
- *  super-admin@system.local  / Admin@123!
+ *  admin@vigiadinh.vn        / Admin@123!
+ *  super-admin@vigiadinh.vn  / Admin@123!
  *
  * ⚠️  Đổi mật khẩu ngay sau khi deploy production.
  */
@@ -60,11 +60,11 @@ class AuthDatabaseSeeder extends Seeder
         $admins = [
             [
                 'name'  => 'System Administrator',
-                'email' => 'admin@system.local',
+                'email' => 'admin@vigiadinh.vn',
             ],
             [
                 'name'  => 'Super Administrator',
-                'email' => 'super-admin@system.local',
+                'email' => 'super-admin@vigiadinh.vn',
             ],
         ];
 

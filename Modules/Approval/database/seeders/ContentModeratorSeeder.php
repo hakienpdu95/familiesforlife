@@ -22,7 +22,7 @@ use Spatie\Permission\PermissionRegistrar;
  * thứ tự seeder thay đổi sau này, xem ghi chú trong
  * spec/Workflow_Approval_Technical_Specification.md §17 mở rộng).
  *
- * Tài khoản mặc định: moderator@system.local / Admin@123!
+ * Tài khoản mặc định: vanphap.kd@vigiadinh.vn / Admin@123!
  * ⚠️  Đổi mật khẩu ngay sau khi deploy production.
  */
 class ContentModeratorSeeder extends Seeder
@@ -43,9 +43,9 @@ class ContentModeratorSeeder extends Seeder
         ]);
 
         $user = User::withoutGlobalScopes()->firstOrCreate(
-            ['email' => 'moderator@system.local'],
+            ['email' => 'vanphap.kd@vigiadinh.vn'],
             [
-                'name'              => 'Content Moderator',
+                'name'              => 'Phạm Văn Pháp',
                 'password'          => Hash::make('Admin@123!'),
                 'organization_id'   => null,
                 'email_verified_at' => now(),
@@ -63,6 +63,6 @@ class ContentModeratorSeeder extends Seeder
 
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $this->command->info('  ✓ platform_content_moderator role + moderator@system.local seeded.');
+        $this->command->info('  ✓ platform_content_moderator role + vanphap.kd@vigiadinh.vn seeded.');
     }
 }

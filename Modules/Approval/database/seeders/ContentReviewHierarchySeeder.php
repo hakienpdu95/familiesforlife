@@ -19,7 +19,7 @@ use Spatie\Permission\PermissionRegistrar;
  * cho quy ước chung) — content_head làm được cả việc của content_editor
  * (PostArticlePolicy::approve cho phép cả 2 role), không áp dụng ngược.
  *
- * Tài khoản mặc định: editor@system.local, content-head@system.local (mật khẩu Admin@123!)
+ * Tài khoản mặc định: thuha.btv@vigiadinh.vn, quockhanh.tbt@vigiadinh.vn (mật khẩu Admin@123!)
  * ⚠️  Đổi mật khẩu ngay sau khi deploy production.
  */
 class ContentReviewHierarchySeeder extends Seeder
@@ -36,12 +36,12 @@ class ContentReviewHierarchySeeder extends Seeder
         $editorRole = Role::firstOrCreate(['name' => 'platform_content_editor', 'guard_name' => 'web']);
         $headRole   = Role::firstOrCreate(['name' => 'platform_content_head', 'guard_name' => 'web']);
 
-        $this->createAccount('editor@system.local', 'Content Editor', $editorRole);
-        $this->createAccount('content-head@system.local', 'Content Department Head', $headRole);
+        $this->createAccount('thuha.btv@vigiadinh.vn', 'Trần Thu Hà', $editorRole);
+        $this->createAccount('quockhanh.tbt@vigiadinh.vn', 'Lê Quốc Khánh', $headRole);
 
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $this->command->info('  ✓ platform_content_editor + platform_content_head roles seeded (editor@system.local, content-head@system.local).');
+        $this->command->info('  ✓ platform_content_editor + platform_content_head roles seeded (thuha.btv@vigiadinh.vn, quockhanh.tbt@vigiadinh.vn).');
     }
 
     private function createAccount(string $email, string $name, Role $role): void

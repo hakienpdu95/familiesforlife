@@ -118,7 +118,7 @@ class SystemDataSeeder extends Seeder
             EventDatabaseSeeder::class,
 
             // ── 27. Approval: permission approval.view_dashboard + 3 tài khoản platform
-            // (content-creator/editor/content-head@system.local) — PostDemoSeeder/EventDemoSeeder
+            // (haidang.pv/thuha.btv/quockhanh.tbt@vigiadinh.vn) — PostDemoSeeder/EventDemoSeeder
             // cần các tài khoản này để chạy Action create→submit→approve→publish thật ──
             ApprovalDatabaseSeeder::class,
 
@@ -161,7 +161,7 @@ class SystemDataSeeder extends Seeder
             EventDemoSeeder::class,
 
             // ── 28a. Anland (/anland): tin BĐS mẫu đã publish — PHẢI đứng sau ApprovalDatabaseSeeder
-            // (bước 27, cần moderator@system.local) ──
+            // (bước 27, cần vanphap.kd@vigiadinh.vn) ──
             RealEstateListingDemoSeeder::class,
 
             // ── 28b. Province Showcase: 2 category con "du-lich-gia-dinh" (PHẢI đứng sau

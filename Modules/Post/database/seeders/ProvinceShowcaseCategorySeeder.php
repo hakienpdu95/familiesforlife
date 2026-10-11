@@ -35,7 +35,7 @@ class ProvinceShowcaseCategorySeeder extends Seeder
             return;
         }
 
-        $creator = \App\Models\User::withoutGlobalScopes()->where('email', 'content-creator@system.local')->first();
+        $creator = \App\Models\User::withoutGlobalScopes()->where('email', 'haidang.pv@vigiadinh.vn')->first();
         $previousUser = Auth::user();
         if ($creator) {
             Auth::login($creator);
