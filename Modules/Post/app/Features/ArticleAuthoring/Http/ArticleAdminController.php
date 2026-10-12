@@ -30,9 +30,8 @@ use Modules\Post\Features\ArticleAuthoring\Queries\ListPendingReviewTranslations
 use Modules\Post\Features\ArticleAuthoring\Support\GeoChecklist;
 use Modules\Post\Features\CategoryManagement\Queries\GetCategoryTreeHandler;
 use Modules\Post\Features\CategoryManagement\Queries\GetCategoryTreeQuery;
-use Modules\Post\Features\CategoryManagement\Queries\ListCategoriesForAdminHandler;
-use Modules\Post\Features\CategoryManagement\Queries\ListCategoriesForAdminQuery;
 use Modules\Post\Models\PostArticle;
+use Modules\Post\Models\PostCategory;
 use Modules\Post\Support\ArticleContentRenderer;
 
 /**
@@ -44,13 +43,13 @@ use Modules\Post\Support\ArticleContentRenderer;
 class ArticleAdminController extends Controller
 {
     /** Dữ liệu bảng lấy qua ArticleApiController (Tabulator, remote pagination/sort/filter) — chỉ truyền categories cho dropdown lọc. */
-    public function index(ListCategoriesForAdminHandler $categoryHandler): View
+    public function index(GetCategoryTreeHandler $categoryTreeHandler): View
     {
         $this->authorize('viewAny', PostArticle::class);
 
-        $categories = $categoryHandler->handle(new ListCategoriesForAdminQuery);
+        $categoryTree = PostCategory::flatten($categoryTreeHandler->handle(new GetCategoryTreeQuery));
 
-        return view('post::admin.articles.index', compact('categories'));
+        return view('post::admin.articles.index', compact('categoryTree'));
     }
 
     /**
@@ -77,9 +76,19 @@ class ArticleAdminController extends Controller
     {
         $this->authorize('viewAny', PostArticle::class);
 
-        $translations = $handler->handle(new ListFreshnessReviewTranslationsQuery);
+        $rows = $handler->handle(new ListFreshnessReviewTranslationsQuery)
+            ->map(fn ($t) => [
+                'title' => $t->title,
+                'locale' => strtoupper($t->locale),
+                'view_count' => (int) $t->view_count,
+                'updated_at' => $t->updated_at->toIso8601String(),
+                'updated_at_label' => $t->updated_at->format('d/m/Y'),
+                'updated_at_human' => $t->updated_at->diffForHumans(),
+                'edit_url' => route('backend.post.articles.edit', $t->article).'?locale='.$t->locale,
+            ])
+            ->values();
 
-        return view('post::admin.articles.needs-freshness-review', compact('translations'));
+        return view('post::admin.articles.needs-freshness-review', compact('rows'));
     }
 
     public function create(GetCategoryTreeHandler $categoryTreeHandler): View

@@ -11,7 +11,8 @@
  * Requires globals (lazy bundle):  window.TomSelect (tom-select.js)
  */
 
-import { initAllTomSelects } from '@shared/tom-select-factory.js';
+import { createTs, initAllTomSelects } from '@shared/tom-select-factory.js';
+import { renderCategoryTreeOption } from '@shared/ts-tree-option.js';
 
 // ── Constants & lookup tables ──────────────────────────────────────────────
 
@@ -28,8 +29,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initFormValidation(FORM_SEL);
     _setupTabGuard(form);
+    _initCategorySelect(form);
     initAllTomSelects(form);
 });
+
+function _initCategorySelect(form) {
+    const el = form.querySelector('#ts-category_id');
+    if (!el || el.tomselect) return;
+    createTs(el, {
+        placeholder: el.dataset.tsPlaceholder || '— Chọn danh mục —',
+        maxOptions:  null,
+        render:      { option: renderCategoryTreeOption },
+    });
+}
 
 // ── Tab-aware submit guard ─────────────────────────────────────────────────
 

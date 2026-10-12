@@ -2,7 +2,7 @@
 @section('title', 'Bài viết cần rà soát')
 
 @section('content')
-<div>
+<div x-data="articleFreshnessPage({{ Js::from(['rows' => $rows]) }})">
     <div class="mb-5">
         <h1 class="text-2xl font-bold text-base-content">Bài viết cần rà soát</h1>
         <p class="text-sm text-base-content/50 mt-0.5">
@@ -12,48 +12,23 @@
         </p>
     </div>
 
-    <div class="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="table table-sm">
-                <thead class="bg-base-200/60 text-xs uppercase tracking-wide">
-                    <tr>
-                        <th>Bài viết</th>
-                        <th class="text-center">Lượt xem</th>
-                        <th class="text-center">Cập nhật lần cuối</th>
-                        <th class="w-32"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                @forelse ($translations as $translation)
-                    <tr class="hover">
-                        <td>
-                            <span class="font-medium text-sm">{{ $translation->title }}</span>
-                            <div class="text-xs text-base-content/40">{{ strtoupper($translation->locale) }}</div>
-                        </td>
-                        <td class="text-center text-sm text-base-content/60">
-                            {{ number_format($translation->view_count) }}
-                        </td>
-                        <td class="text-center">
-                            <span class="text-xs text-base-content/60">{{ $translation->updated_at->format('d/m/Y') }}</span>
-                            <div class="badge badge-sm badge-warning mt-0.5">{{ $translation->updated_at->diffForHumans() }}</div>
-                        </td>
-                        <td>
-                            <a href="{{ route('backend.post.articles.edit', $translation->article) }}?locale={{ $translation->locale }}"
-                               class="btn btn-sm btn-primary">
-                                Rà soát
-                            </a>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="4" class="text-center py-8 text-base-content/40">
-                            Không có bài viết nào cần rà soát — mọi bài xem nhiều đều đã cập nhật trong 90 ngày qua.
-                        </td>
-                    </tr>
-                @endforelse
-                </tbody>
-            </table>
+    <div class="card bg-base-100 shadow-sm border border-base-200">
+        <div class="card-body p-0 overflow-hidden tabulator-daisy">
+            <div id="freshness-table"></div>
         </div>
     </div>
 </div>
 @endsection
+
+@push('styles')
+    <x-tabulator-theme />
+    @vite(['Modules/Post/resources/assets/sass/post.scss'], 'build/backend')
+@endpush
+
+@push('scripts')
+    @vite([
+        'resources/js/modules/tabulator.js',
+        'resources/js/modules/tom-select.js',
+        'Modules/Post/resources/assets/js/post.js',
+    ], 'build/backend')
+@endpush

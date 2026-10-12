@@ -14,6 +14,7 @@
 import './pages/post-block-composer.js';
 import './pages/article-form.js';
 import './pages/article-index.js';
+import './pages/article-freshness-index.js';
 import './pages/category-form.js';
 import './pages/category-index.js';
 import './pages/tag-index.js';

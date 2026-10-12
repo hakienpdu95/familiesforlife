@@ -45,7 +45,7 @@ export function createTs(selector, opts = {}) {
     const el = _resolve(selector);
     if (!el) return null;
 
-    return new window.TomSelect(el, { ...DEFAULTS, ...opts });
+    return new window.TomSelect(el, { ...DEFAULTS, ...opts, render: { ...DEFAULTS.render, ...opts.render } });
 }
 
 /**

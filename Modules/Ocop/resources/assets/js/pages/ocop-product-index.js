@@ -8,6 +8,7 @@
  */
 
 import { createTs } from '@shared/tom-select-factory.js';
+import { renderCategoryTreeOption } from '@shared/ts-tree-option.js';
 
 function esc(v) {
     if (v == null) return '';
@@ -182,6 +183,9 @@ document.addEventListener('alpine:init', () => {
                 tsCategory = createTs(categoryEl, {
                     placeholder: 'Tất cả danh mục',
                     maxOptions: null,
+                    render: {
+                        option: renderCategoryTreeOption,
+                    },
                     onChange() { categoryEl.dispatchEvent(new Event('change', { bubbles: true })); },
                 });
 

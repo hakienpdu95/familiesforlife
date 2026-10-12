@@ -69,8 +69,8 @@
                                 data-ts-placeholder="Tất cả danh mục"
                                 class="select select-sm select-bordered w-full">
                             <option value="">Tất cả</option>
-                            @foreach($categories as $c)
-                            <option value="{{ $c->id }}">{{ $c->name }}</option>
+                            @foreach($categoryTree as ['category' => $c, 'depth' => $depth])
+                            <option value="{{ $c->id }}" data-depth="{{ $depth }}">{{ $c->name }}</option>
                             @endforeach
                         </select>
                     </div>

@@ -2,10 +2,12 @@
 
 namespace Modules\Ocop\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
@@ -21,8 +23,8 @@ use Spatie\Activitylog\Support\LogOptions;
  */
 class OcopCategory extends Model
 {
-    use SoftDeletes;
     use LogsActivity;
+    use SoftDeletes;
 
     protected $table = 'ocop_categories';
 
@@ -32,9 +34,9 @@ class OcopCategory extends Model
     ];
 
     protected $casts = [
-        'is_active'  => 'boolean',
+        'is_active' => 'boolean',
         'sort_order' => 'integer',
-        'depth'      => 'integer',
+        'depth' => 'integer',
     ];
 
     public function getActivitylogOptions(): LogOptions
@@ -94,12 +96,12 @@ class OcopCategory extends Model
 
     public function createdBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'created_by');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function updatedBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'updated_by');
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     // ── Scopes ───────────────────────────────────────────────────────
@@ -139,7 +141,7 @@ class OcopCategory extends Model
     {
         $flat = [];
 
-        $walk = function (\Illuminate\Support\Collection $nodes, int $depth) use (&$walk, &$flat): void {
+        $walk = function (Collection $nodes, int $depth) use (&$walk, &$flat): void {
             foreach ($nodes as $node) {
                 $flat[] = ['category' => $node, 'depth' => $depth];
                 $walk($node->children, $depth + 1);
@@ -149,5 +151,30 @@ class OcopCategory extends Model
         $walk(static::tree(), 0);
 
         return $flat;
+    }
+
+    public static function selfAndDescendantIds(int $id): array
+    {
+        $ids = [];
+        $rootDepth = null;
+
+        foreach (static::flatTree() as ['category' => $category, 'depth' => $depth]) {
+            if ($rootDepth === null) {
+                if ($category->id === $id) {
+                    $rootDepth = $depth;
+                    $ids[] = $category->id;
+                }
+
+                continue;
+            }
+
+            if ($depth <= $rootDepth) {
+                break;
+            }
+
+            $ids[] = $category->id;
+        }
+
+        return $ids;
     }
 }

@@ -5,7 +5,10 @@ namespace Modules\Post\Features\ArticleAuthoring\Queries;
 use App\Shared\Contracts\QueryHandlerInterface;
 use App\Shared\Contracts\QueryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Modules\Post\Features\CategoryManagement\Queries\GetCategoryTreeHandler;
+use Modules\Post\Features\CategoryManagement\Queries\GetCategoryTreeQuery;
 use Modules\Post\Models\PostArticle;
+use Modules\Post\Models\PostCategory;
 
 class ListArticlesForAdminHandler implements QueryHandlerInterface
 {
@@ -24,11 +27,15 @@ class ListArticlesForAdminHandler implements QueryHandlerInterface
 
         if ($query->search) {
             $term = $query->search;
-            $q->whereHas('translations', fn ($sub) => $sub->where('title', 'like', '%' . $term . '%'));
+            $q->whereHas('translations', fn ($sub) => $sub->where('title', 'like', '%'.$term.'%'));
         }
 
         if ($query->categoryId) {
-            $q->whereHas('categories', fn ($sub) => $sub->where('post_categories.id', $query->categoryId));
+            $categoryIds = PostCategory::subtreeIds(
+                app(GetCategoryTreeHandler::class)->handle(new GetCategoryTreeQuery),
+                $query->categoryId,
+            ) ?: [$query->categoryId];
+            $q->whereHas('categories', fn ($sub) => $sub->whereIn('post_categories.id', $categoryIds));
         }
 
         if ($query->format) {
@@ -41,7 +48,7 @@ class ListArticlesForAdminHandler implements QueryHandlerInterface
         }
 
         $sortField = in_array($query->sortField, self::SORTABLE, true) ? $query->sortField : 'created_at';
-        $sortDir   = $query->sortDir === 'asc' ? 'asc' : 'desc';
+        $sortDir = $query->sortDir === 'asc' ? 'asc' : 'desc';
 
         // 'title'/'ga_views_30d' sống ở post_article_translations (bản dịch main_locale), không
         // phải post_articles — cùng kỹ thuật leftJoin+orderBy đã dùng cho 'province_name' ở
@@ -49,10 +56,10 @@ class ListArticlesForAdminHandler implements QueryHandlerInterface
         if (in_array($sortField, self::SORTABLE_VIA_TRANSLATION, true)) {
             $q->leftJoin('post_article_translations as sort_trans', function ($join): void {
                 $join->on('sort_trans.article_id', '=', 'post_articles.id')
-                     ->on('sort_trans.locale', '=', 'post_articles.main_locale');
-            })->orderBy('sort_trans.' . $sortField, $sortDir);
+                    ->on('sort_trans.locale', '=', 'post_articles.main_locale');
+            })->orderBy('sort_trans.'.$sortField, $sortDir);
         } else {
-            $q->orderBy('post_articles.' . $sortField, $sortDir);
+            $q->orderBy('post_articles.'.$sortField, $sortDir);
         }
 
         // Secondary sort ổn định trang khi nhiều bản ghi cùng giá trị sort chính.

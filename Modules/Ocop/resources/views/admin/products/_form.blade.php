@@ -151,8 +151,8 @@
                         </label>
                         {{-- spec/danhmuc.html — danh mục OCOP chính thức 3 cấp (Nhóm lớn → Nhóm →
                              Phân nhóm), $categoryTree đã phẳng hóa kèm depth (OcopCategory::flatTree()),
-                             thụt lề bằng ideographic space (không bị trình duyệt gộp khoảng trắng
-                             như space thường). Nhóm còn "con" (không phải cấp sâu nhất của nhánh)
+                             truyền qua data-depth để TomSelect render thụt lề theo cấp
+                             (resources/js/shared/ts-tree-option.js). Nhóm còn "con" (không phải cấp sâu nhất của nhánh)
                              bị disable — sản phẩm chỉ được gán vào đúng phân nhóm cụ thể nhất. --}}
                         <select id="ts-category_id" name="category_id"
                                 class="select select-bordered select-sm w-full ts-init @error('category_id') select-error @enderror"
@@ -162,8 +162,9 @@
                             @php($cat = $row['category'])
                             <option value="{{ $cat->id }}"
                                     {{ (string) old('category_id', $product?->category_id) === (string) $cat->id ? 'selected' : '' }}
+                                    data-depth="{{ $row['depth'] }}"
                                     {{ $cat->children->isNotEmpty() ? 'disabled' : '' }}>
-                                {{ str_repeat('　', $row['depth']) }}{{ $row['depth'] > 0 ? '– ' : '' }}{{ $cat->name }}
+                                {{ $cat->name }}
                             </option>
                             @endforeach
                         </select>

@@ -36,10 +36,10 @@ class OcopProductAdminController extends Controller
     /** Dữ liệu bảng lấy qua OcopProductApiController (Tabulator, remote pagination/sort/filter). */
     public function index(): View
     {
-        $categories = OcopCategory::active()->orderBy('name')->get(['id', 'name']);
+        $categoryTree = OcopCategory::flatTree();
         $provinces = Province::where('is_active', true)->orderBy('name')->get(['province_code', 'name']);
 
-        return view('ocop::admin.products.index', compact('categories', 'provinces'));
+        return view('ocop::admin.products.index', compact('categoryTree', 'provinces'));
     }
 
     public function import(Request $request, ImportOcopProductsAction $action): RedirectResponse
