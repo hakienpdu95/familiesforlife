@@ -2,7 +2,7 @@
 @section('title', 'Thêm bài viết')
 
 @section('content')
-<div class="max-w-2xl">
+<div class="max-w-6xl">
 
 {{-- Page header --}}
 <div class="flex items-center justify-between mb-6">
