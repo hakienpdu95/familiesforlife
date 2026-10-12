@@ -521,7 +521,7 @@ function postVersionHistory(indexUrl, translationStatus, knownLatestId, canResto
             // lỗi parse thật (Blade compile theo regex trên text thô, kể cả bên trong comment).
             $canManageSponsorship = auth()->user()->can('post_article.manage_sponsorship');
         @endphp
-        <form method="POST" action="{{ route('backend.post.articles.update', $article) }}" class="card bg-base-100 shadow-sm border border-base-200"
+        <form method="POST" action="{{ route('backend.post.articles.update', $article) }}" data-article-settings-form class="card bg-base-100 shadow-sm border border-base-200"
               x-data="{ isSponsored: {{ old('is_sponsored', $article->is_sponsored) ? 'true' : 'false' }}, format: '{{ old('format', $article->format->value) }}' }">
             @csrf
             @method('PUT')
@@ -530,7 +530,7 @@ function postVersionHistory(indexUrl, translationStatus, knownLatestId, canResto
 
                 <div class="form-control mb-3">
                     <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Định dạng nội dung</span></label>
-                    <select name="format" x-model="format" class="select select-bordered select-sm w-full @error('format') select-error @enderror">
+                    <select name="format" x-model="format" class="select select-bordered select-sm w-full ts-init @error('format') select-error @enderror">
                         @foreach(\Modules\Post\Enums\ArticleFormat::cases() as $f)
                         <option value="{{ $f->value }}" {{ old('format', $article->format->value) === $f->value ? 'selected' : '' }}>{{ $f->label() }}</option>
                         @endforeach

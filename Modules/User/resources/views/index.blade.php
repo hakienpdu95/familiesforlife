@@ -238,6 +238,7 @@
 
 @push('styles')
 <x-tabulator-theme />
+@vite(['Modules/User/resources/assets/sass/user.scss'], 'build/backend')
 @endpush
 
 @push('scripts')
@@ -512,18 +513,17 @@ document.addEventListener('alpine:init', function () {
                 });
 
                 window.userTable = tableInst;
+                window.enhancePageSizeSelect(tableInst);
 
                 // Restore hidden columns
                 self.hiddenCols.forEach(function (field) { tableInst.hideColumn(field); });
 
                 // ── Organization TomSelect (admin only) ──────────────────
                 if (IS_ADMIN && document.getElementById('filter-org')) {
-                    orgTsInst = new window.TomSelect('#filter-org', {
-                        dropdownParent: 'body',
+                    orgTsInst = window.createTs('#filter-org', {
                         placeholder:    'Tất cả tổ chức...',
                         maxOptions:     null,
                         searchField:    ['text'],
-                        plugins:        ['clear_button'],
                         options:        ORGANIZATIONS.map(function (o) { return { value: String(o.id), text: o.name }; }),
                         items:          self.filters.organization_id ? [String(self.filters.organization_id)] : [],
                         onChange: function (val) {
@@ -531,15 +531,12 @@ document.addEventListener('alpine:init', function () {
                             self.saveState();
                             self.refresh();
                         },
-                        render: { no_results: function () { return '<div class="no-results p-3 text-sm opacity-50">Không tìm thấy</div>'; } },
                     });
                 }
 
                 // ── Role TomSelect ───────────────────────────────────────
-                roleTsInst = new window.TomSelect('#filter-role', {
-                    dropdownParent: 'body',
+                roleTsInst = window.createTs('#filter-role', {
                     placeholder:    'Tất cả vai trò...',
-                    plugins:        ['clear_button'],
                     options:        ROLES,
                     items:          self.filters.role ? [self.filters.role] : [],
                     onChange: function (val) {
@@ -547,14 +544,11 @@ document.addEventListener('alpine:init', function () {
                         self.saveState();
                         self.refresh();
                     },
-                    render: { no_results: function () { return '<div class="no-results p-3 text-sm opacity-50">Không tìm thấy</div>'; } },
                 });
 
                 // ── Status TomSelect ─────────────────────────────────────
-                statusTsInst = new window.TomSelect('#filter-status', {
-                    dropdownParent: 'body',
+                statusTsInst = window.createTs('#filter-status', {
                     placeholder:    'Tất cả trạng thái...',
-                    plugins:        ['clear_button'],
                     options:        STATUSES,
                     items:          self.filters.status ? [self.filters.status] : [],
                     onChange: function (val) {

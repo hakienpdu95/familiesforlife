@@ -30,6 +30,7 @@ const RE_TAB_XSHOW = /tab\s*===\s*['"](\w+)['"]/;
 
 document.addEventListener('DOMContentLoaded', () => {
     window.initAllDatePickers?.();
+    document.querySelectorAll('[data-article-settings-form]').forEach(el => initAllTomSelects(el));
 
     const form = document.querySelector(FORM_SEL);
     if (!form) return;

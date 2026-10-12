@@ -39,4 +39,6 @@
 .ts-wrapper .clear-button:hover { color:var(--color-base-content); }
 .ts-control input { color:var(--color-base-content) !important; }
 .ts-dropdown .no-results { padding:.75rem; opacity:.5; }
+.tabulator .tabulator-footer .ts-wrapper.tabulator-page-size { display:inline-block; vertical-align:middle; width:auto !important; min-width:4.75rem; margin:0 5px; border:0; background:transparent; text-align:left; }
+.tabulator .tabulator-footer .ts-wrapper.tabulator-page-size .ts-control { min-height:1.75rem; font-size:.8rem !important; }
 </style>

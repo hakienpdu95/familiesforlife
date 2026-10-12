@@ -53,7 +53,7 @@
             <label class="label py-0 pb-1">
                 <span class="label-text text-xs font-medium">Ngôn ngữ chính</span>
             </label>
-            <select name="main_locale" class="select select-bordered select-sm w-full @error('main_locale') select-error @enderror">
+            <select name="main_locale" class="select select-bordered select-sm w-full ts-init @error('main_locale') select-error @enderror">
                 @foreach(config('post.locales') as $code => $label)
                 <option value="{{ $code }}" {{ old('main_locale', config('post.default_locale')) === $code ? 'selected' : '' }}>{{ $label }}</option>
                 @endforeach
@@ -65,7 +65,7 @@
             <label class="label py-0 pb-1">
                 <span class="label-text text-xs font-medium">Định dạng nội dung</span>
             </label>
-            <select name="format" x-model="format" class="select select-bordered select-sm w-full @error('format') select-error @enderror">
+            <select name="format" x-model="format" class="select select-bordered select-sm w-full ts-init @error('format') select-error @enderror">
                 @foreach(\Modules\Post\Enums\ArticleFormat::cases() as $f)
                 <option value="{{ $f->value }}" {{ old('format', 'article') === $f->value ? 'selected' : '' }}>{{ $f->label() }}</option>
                 @endforeach

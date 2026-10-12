@@ -158,13 +158,29 @@ export function initAllTomSelects(container = document, afterInit) {
             || el.querySelector('option[value=""]')?.textContent.trim()
             || '— Chọn —';
         const remoteUrl = el.dataset.tsRemoteUrl;
+        const opts = { placeholder };
+        if (!remoteUrl && !el.multiple && !el.querySelector('option[value=""]')) {
+            opts.plugins = [];
+        }
         if (remoteUrl) {
-            createTsRemote(el, { url: remoteUrl, placeholder });
+            createTsRemote(el, { url: remoteUrl, ...opts });
         } else {
-            createTs(el, { placeholder });
+            createTs(el, opts);
         }
     }
     afterInit?.();
+}
+
+export function enhancePageSizeSelect(table) {
+    const apply = () => {
+        const el = table.element.querySelector('select.tabulator-page-size');
+        if (!el || el.tomselect) return;
+        createTs(el, {
+            plugins:      [],
+            controlInput: null,
+        });
+    };
+    table.on('tableBuilt', apply);
 }
 
 /**

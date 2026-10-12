@@ -8,6 +8,7 @@
  */
 import TomSelect from 'tom-select';
 import 'tom-select/dist/css/tom-select.css';
+import { createTs, enhancePageSizeSelect } from '../shared/tom-select-factory.js';
 
 const DEFAULTS = {
     create:          false,
@@ -52,6 +53,8 @@ function initTagsInput(selector, options = {}) {
 window.initTomSelect  = initTomSelect;
 window.initTagsInput  = initTagsInput;
 window.TomSelect      = TomSelect;
+window.createTs       = createTs;
+window.enhancePageSizeSelect = enhancePageSizeSelect;
 
 /**
  * Province → Ward cascading selects.
