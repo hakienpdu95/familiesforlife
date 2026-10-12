@@ -135,11 +135,11 @@
     align-items: center;
     gap: 8px;
     padding: 10px 16px;
-    border-bottom: 1px solid oklch(var(--b2));
+    border-bottom: 1px solid var(--color-base-200);
     transition: background .1s;
 }
 .pref-row:last-child { border-bottom: none; }
-.pref-row:not(.pref-header):hover { background: oklch(var(--b2) / .4); }
+.pref-row:not(.pref-header):hover { background: color-mix(in oklab, var(--color-base-200) 40%, transparent); }
 .pref-header { padding: 6px 16px; background: transparent; }
 .pref-label { min-width: 0; }
 .pref-ch { flex-shrink: 0; }
@@ -148,8 +148,8 @@
 .notif-spinner {
     display: inline-block;
     border-radius: 9999px;
-    border: 2px solid oklch(var(--bc) / .15);
-    border-top-color: oklch(var(--p));
+    border: 2px solid color-mix(in oklab, var(--color-base-content) 15%, transparent);
+    border-top-color: var(--color-primary);
     animation: spin .6s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }

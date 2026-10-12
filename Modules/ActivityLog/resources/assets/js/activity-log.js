@@ -38,8 +38,8 @@ function actorHtml(row) {
     const init  = name.charAt(0) || '?';
 
     const avatarBg = type === 'user'
-        ? 'background:oklch(var(--p));color:oklch(var(--pc))'
-        : 'background:oklch(var(--b3));color:oklch(var(--bc))';
+        ? 'background:var(--color-primary);color:var(--color-primary-content)'
+        : 'background:var(--color-base-300);color:var(--color-base-content)';
 
     const ipTag = ip
         ? `<span class="actlog-props" title="${esc(ip)}">${esc(ip)}</span>`

@@ -20,7 +20,7 @@
                  color        t.$transition-fast;
 
     &:hover {
-        border-color: oklch(var(--p) / .4);
+        border-color: color-mix(in oklab, var(--color-primary) 40%, transparent);
         background:   t.$base-200;
     }
 
@@ -28,7 +28,7 @@
         border-color: t.$primary;
         background:   t.$primary-subtle;
         color:        t.$primary;
-        box-shadow:   0 0 0 1px oklch(var(--p) / .3);
+        box-shadow:   0 0 0 1px color-mix(in oklab, var(--color-primary) 30%, transparent);
     }
 }
 
@@ -57,7 +57,7 @@
 
     td {
         padding:        .375rem .75rem;
-        border-bottom:  1px solid oklch(var(--b3) / .5);
+        border-bottom:  1px solid color-mix(in oklab, var(--color-base-300) 50%, transparent);
         vertical-align: middle;
     }
 

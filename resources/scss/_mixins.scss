@@ -22,7 +22,7 @@
     &:focus-within {
         border-color: t.$border-focus;
         outline:      none;
-        box-shadow:   0 0 0 2px oklch(var(--p) / .2);
+        box-shadow:   0 0 0 2px color-mix(in oklab, var(--color-primary) 20%, transparent);
     }
 }
 

@@ -60,7 +60,7 @@
     .col-body {
         min-height:    200px;
         padding:       .5rem;
-        background:    oklch(var(--b2) / .4);
+        background:    color-mix(in oklab, var(--color-base-200) 40%, transparent);
         border-radius: 0 0 t.$radius-lg t.$radius-lg;
         display:       flex;
         flex-direction: column;

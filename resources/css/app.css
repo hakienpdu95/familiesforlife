@@ -239,6 +239,13 @@ details[open] > .nav-summary .nav-arrow { transform: rotate(90deg); }
     pointer-events: auto !important;
 }
 
+.ts-wrapper.select:focus,
+.ts-wrapper.select:focus-within {
+    outline: none;
+    isolation: auto;
+    box-shadow: none;
+}
+
 /* ── Rich content (HTML output từ Jodit editor) ── */
 .rich-content p  { margin: 0 0 .5em; }
 .rich-content ul { list-style: disc; padding-left: 1.4em; margin: 0 0 .5em; }
@@ -257,11 +264,11 @@ details[open] > .nav-summary .nav-arrow { transform: rotate(90deg); }
 .rich-content hr { border: none; border-top: 1px solid #e2e8f0; margin: .75em 0; }
 .rich-content a { color: #6366f1; text-decoration: underline; }
 
-*:focus,
-*:focus-visible,
-*:focus-within {
-    outline: none !important;
-    outline-offset: 0 !important;
+:focus:not(:focus-visible) {
+    outline: none;
+}
+:is(.input, .select, .textarea, .file-input):is(:focus, :focus-within) {
+    outline: none;
 }
 /* Reset --input-color on focus so DaisyUI's inset box-shadow stays subtle */
 .input:focus,

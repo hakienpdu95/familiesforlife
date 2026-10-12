@@ -209,7 +209,7 @@
     display: flex;
     gap: 4px;
     margin-bottom: 16px;
-    border-bottom: 1px solid oklch(var(--b2));
+    border-bottom: 1px solid var(--color-base-200);
 }
 .nc-tab {
     display: inline-flex;
@@ -218,14 +218,14 @@
     padding: 8px 14px;
     font-size: 14px;
     font-weight: 500;
-    color: oklch(var(--bc) / .5);
+    color: color-mix(in oklab, var(--color-base-content) 50%, transparent);
     border-bottom: 2px solid transparent;
     text-decoration: none;
     margin-bottom: -1px;
     transition: color .15s, border-color .15s;
 }
-.nc-tab:hover { color: oklch(var(--bc)); }
-.nc-tab--active { color: oklch(var(--p)); border-bottom-color: oklch(var(--p)); }
+.nc-tab:hover { color: var(--color-base-content); }
+.nc-tab--active { color: var(--color-primary); border-bottom-color: var(--color-primary); }
 
 .nc-tab-badge {
     display: inline-flex;
@@ -236,13 +236,13 @@
     height: 18px;
     font-size: 11px;
     font-weight: 600;
-    background: oklch(var(--b2));
-    color: oklch(var(--bc) / .6);
+    background: var(--color-base-200);
+    color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
     border-radius: 9999px;
 }
 .nc-tab-badge--unread {
-    background: oklch(var(--p));
-    color: oklch(var(--pc));
+    background: var(--color-primary);
+    color: var(--color-primary-content);
 }
 
 /* ── List items ───────────────────────────────────────────────────── */
@@ -251,13 +251,13 @@
     align-items: flex-start;
     gap: 14px;
     padding: 14px 18px;
-    border-bottom: 1px solid oklch(var(--b2));
+    border-bottom: 1px solid var(--color-base-200);
     transition: background .12s;
 }
 .nc-item:last-child { border-bottom: none; }
-.nc-item:hover { background: oklch(var(--b2) / .5); }
-.nc-item--unread { background: oklch(var(--p) / .04); }
-.nc-item--unread:hover { background: oklch(var(--p) / .08); }
+.nc-item:hover { background: color-mix(in oklab, var(--color-base-200) 50%, transparent); }
+.nc-item--unread { background: color-mix(in oklab, var(--color-primary) 4%, transparent); }
+.nc-item--unread:hover { background: color-mix(in oklab, var(--color-primary) 8%, transparent); }
 
 .nc-body {
     flex: 1;
@@ -271,18 +271,18 @@
 .nc-title {
     font-size: 14px;
     font-weight: 600;
-    color: oklch(var(--bc));
+    color: var(--color-base-content);
     margin: 0 0 2px;
     flex: 1;
     line-height: 1.4;
 }
 .nc-title--read {
     font-weight: 400;
-    color: oklch(var(--bc) / .45);
+    color: color-mix(in oklab, var(--color-base-content) 45%, transparent);
 }
 .nc-desc {
     font-size: 13px;
-    color: oklch(var(--bc) / .55);
+    color: color-mix(in oklab, var(--color-base-content) 55%, transparent);
     margin: 0 0 4px;
     line-height: 1.5;
     overflow: hidden;
@@ -296,10 +296,10 @@
     align-items: center;
     gap: 6px;
     font-size: 12px;
-    color: oklch(var(--bc) / .35);
+    color: color-mix(in oklab, var(--color-base-content) 35%, transparent);
 }
 .nc-type {
-    background: oklch(var(--b2));
+    background: var(--color-base-200);
     padding: 1px 6px;
     border-radius: 4px;
     font-family: monospace;
