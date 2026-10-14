@@ -13,9 +13,9 @@ use Modules\ContentFoundation\Database\Seeders\CategoryFoundationSeeder;
 use Modules\ContentFoundation\Database\Seeders\ContentFoundationDatabaseSeeder;
 use Modules\CoreIdeaExtractor\Database\Seeders\CoreIdeaExtractorDatabaseSeeder;
 use Modules\Event\Database\Seeders\EventDatabaseSeeder;
-use Modules\Event\Database\Seeders\EventDemoSeeder;
+// use Modules\Event\Database\Seeders\EventDemoSeeder;
 use Modules\Heritage\Database\Seeders\HeritageDatabaseSeeder;
-use Modules\Heritage\Database\Seeders\HeritageDemoSeeder;
+// use Modules\Heritage\Database\Seeders\HeritageDemoSeeder;
 use Modules\Lead\Database\Seeders\LeadDatabaseSeeder;
 use Modules\LeadPipelineStage\Database\Seeders\LeadPipelineStageSeeder;
 use Modules\LeadSource\Database\Seeders\LeadSourceSeeder;
@@ -24,14 +24,14 @@ use Modules\Ocop\Database\Seeders\OcopDatabaseSeeder;
 use Modules\Organization\Database\Seeders\OrganizationRolePermissionSeeder;
 use Modules\Page\Database\Seeders\PageDatabaseSeeder;
 use Modules\Post\Database\Seeders\PostDatabaseSeeder;
-use Modules\Post\Database\Seeders\PostDemoSeeder;
+// use Modules\Post\Database\Seeders\PostDemoSeeder;
 use Modules\Post\Database\Seeders\ProvinceShowcaseCategorySeeder;
 use Modules\Product\Database\Seeders\ProductDatabaseSeeder;
 use Modules\ProvinceShowcase\Database\Seeders\ProvincePermissionSeeder;
-use Modules\ProvinceShowcase\Database\Seeders\ProvinceShowcaseDemoSeeder;
+// use Modules\ProvinceShowcase\Database\Seeders\ProvinceShowcaseDemoSeeder;
 use Modules\ProvinceShowcase\Database\Seeders\ProvinceFeaturedSeeder;
 use Modules\ProvinceShowcase\Database\Seeders\ProvinceSlugBackfillSeeder;
-use Modules\RealEstate\Database\Seeders\RealEstateListingDemoSeeder;
+// use Modules\RealEstate\Database\Seeders\RealEstateListingDemoSeeder;
 use Modules\Subscription\Database\Seeders\SubscriptionDatabaseSeeder;
 use Modules\Video\Database\Seeders\VideoDatabaseSeeder;
 use Modules\VideoIdeaExtractor\Database\Seeders\VideoIdeaExtractorDatabaseSeeder;
@@ -157,30 +157,30 @@ class SystemDataSeeder extends Seeder
             HeritageDatabaseSeeder::class,
 
             // ── 28. Demo content: bài viết + sự kiện mẫu đã xuất bản (đọc cho trang public) ──
-            PostDemoSeeder::class,
-            EventDemoSeeder::class,
+            // PostDemoSeeder::class,
+            // EventDemoSeeder::class,
 
             // ── 28a. Anland (/anland): tin BĐS mẫu đã publish — PHẢI đứng sau ApprovalDatabaseSeeder
             // (bước 27, cần vanphap.kd@vigiadinh.vn) ──
-            RealEstateListingDemoSeeder::class,
+            // RealEstateListingDemoSeeder::class,
 
             // ── 28b. Province Showcase: 2 category con "du-lich-gia-dinh" (PHẢI đứng sau
             // PostDemoSeeder — cần category cha tồn tại), rồi permission ocop.manage, rồi demo
             // nội dung Huế/Cà Mau (bài viết/OCOP/sự kiện/banner) — spec/Province_Showcase_
             // Technical_Specification.md §8 ──
-            ProvinceShowcaseCategorySeeder::class,
             OcopDatabaseSeeder::class,
             ProvincePermissionSeeder::class,
-            ProvinceShowcaseDemoSeeder::class,
+            // ProvinceShowcaseDemoSeeder::class,
             ProvinceFeaturedSeeder::class,
 
             // ── 28c. Heritage demo: 5 di tích (Huế/Cà Mau) + cross-link tay tới Post/Event/Ocop
             // demo đã seed ở bước 28/28b — PHẢI đứng sau ProvinceShowcaseDemoSeeder (spec/
             // Heritage_Technical_Specification.md §9) ──
-            HeritageDemoSeeder::class,
+            // HeritageDemoSeeder::class,
 
             // ── 29. Menu (header): mega-menu công khai — cần category_id thật (bước 28) ──
             MenuDatabaseSeeder::class,
+            ProvinceShowcaseCategorySeeder::class,
 
             // ── 30. Category Content Foundation: nội dung ngữ cảnh biên tập THẬT (audience/pain
             // points/style_sample...) cho từng category — PHẢI đứng SAU MenuDatabaseSeeder (bước
