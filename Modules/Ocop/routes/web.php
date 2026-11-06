@@ -18,8 +18,7 @@ Route::middleware(['auth'])->prefix('dashboard/ocop')->name('backend.ocop.')->gr
     Route::resource('products', OcopProductAdminController::class)->except(['show']);
 });
 
-// ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị) —
-// tham chiếu Modules/Organization/routes/web.php (backend.api.organizations) ───────────────
+// ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị) ─────────
 Route::middleware(['auth'])->prefix('backend/api/ocop')->name('backend.api.ocop.')->group(function () {
     Route::get('products', [OcopProductApiController::class, 'index'])->name('products');
 });

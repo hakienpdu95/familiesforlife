@@ -26,7 +26,7 @@ use Modules\Product\Models\Product;
  * luồng thật, do 2 user demo khác nhau thực hiện (marketing gửi duyệt, ceo duyệt/publish) —
  * đúng vai trò thật trong hệ thống phân quyền.
  *
- * KHÔNG nằm trong SystemDataSeeder (demo-only, giống OrganizationDemoSeeder) — chạy thủ công:
+ * KHÔNG nằm trong SystemDataSeeder (demo-only) — chạy thủ công:
  *   php artisan db:seed --class="Modules\Product\Database\Seeders\ProductApprovalDemoSeeder"
  *
  * Idempotent — mỗi sản phẩm demo dùng slug cố định; nếu đã tồn tại thì bỏ qua toàn bộ (không

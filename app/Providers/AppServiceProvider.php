@@ -6,9 +6,11 @@ use App\Models\User;
 use App\Notifications\Channels\WebPushChannel;
 use App\Services\Monitoring\MetricsRecorder;
 use App\Services\WebPushService;
+use App\Shared\Tenancy\Models\Organization;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\ChannelManager;
 use Illuminate\Support\Facades\DB;
@@ -36,6 +38,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Model::shouldBeStrict(!app()->isProduction());
+
+        Relation::morphMap(['organization' => Organization::class], merge: true);
 
         if (app()->isProduction()) {
             DB::disableQueryLog();

@@ -248,8 +248,7 @@ class ArticleAdminController extends Controller
 
         $action->handle($article);
 
-        // dashboard/posts/articles xoá qua AJAX (Tabulator, xem article-index.js) — cùng
-        // pattern OrganizationController::destroy (Modules/Organization).
+        // dashboard/posts/articles xoá qua AJAX (Tabulator, xem article-index.js).
         if ($request->expectsJson()) {
             return response()->json(['message' => 'Đã xoá bài viết "'.$title.'".']);
         }

@@ -8,7 +8,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Modules\Organization\Models\Organization;
+use App\Shared\Tenancy\Models\Organization;
 use Modules\User\Actions\DestroyUserAction;
 use Modules\User\Actions\StoreUserAction;
 use Modules\User\Actions\UpdateUserAction;

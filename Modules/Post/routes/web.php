@@ -91,8 +91,7 @@ Route::middleware(['auth'])
         Route::post('translations/{translation}/archive', [TranslationController::class, 'archive'])->name('translations.archive');
     });
 
-// ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị) —
-// tham chiếu Modules/Organization/routes/web.php (backend.api.organizations) ───────────────
+// ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị) ─────────
 Route::middleware(['auth'])->prefix('backend/api/post')->name('backend.api.post.')->group(function (): void {
     Route::get('articles', [ArticleApiController::class, 'index'])->name('articles');
     // TomSelect remote (chọn bài viết) cho trang Markdown Preview — trả {id: translation_id, text}.

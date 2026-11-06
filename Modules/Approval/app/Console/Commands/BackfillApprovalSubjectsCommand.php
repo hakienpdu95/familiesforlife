@@ -30,8 +30,7 @@ use Modules\Approval\Models\ApprovalSubject;
  * `whereDoesntHave('approvalSubject', fn ($q) => $q->withoutGlobalScope(...))` — bắt buộc bỏ
  * OrganizationScope NGAY TRONG subquery kiểm tra "đã có ApprovalSubject chưa", KHÔNG được để
  * subquery này tự động thừa hưởng ambient TenantContext của vòng lặp org hiện tại. Bug thật
- * thứ hai phát hiện khi backfill subject_type="organization" (Organization KHÔNG tự
- * tenant-scoped — nó LÀ tenant, khác Product): ở vòng lặp org #2, subquery
+ * thứ hai phát hiện khi backfill 1 subject_type không tự tenant-scoped: ở vòng lặp org #2, subquery
  * `whereDoesntHave('approvalSubject')` vô tình bị lọc theo `organization_id = 2` (TenantContext
  * đang set), nên kết luận SAI rằng org #1 (đã có ApprovalSubject với organization_id = 1 từ
  * vòng lặp org #1) "chưa có subject" — cố insert lại, vỡ unique constraint

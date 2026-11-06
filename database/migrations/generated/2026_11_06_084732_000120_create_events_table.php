@@ -31,7 +31,7 @@ return new class extends Migration
             $table->string('location_type', 10)->comment('EventLocationType: physical|online');
             $table->string('venue_name', 150)->nullable()->comment('Tên địa điểm — bắt buộc khi physical (validate ở Action)');
             $table->string('venue_address', 255)->nullable()->comment('Số nhà/tên đường — bắt buộc khi physical');
-            $table->char('province_code', 2)->nullable()->comment('Mã tỉnh/thành — không FK cứng, cùng pattern customers.province_code');
+            $table->char('province_code', 2)->nullable()->comment('Mã tỉnh/thành — không FK cứng');
             $table->string('province_name', 255)->nullable()->comment('Tên tỉnh/thành denormalized tại thời điểm chọn');
             $table->char('ward_code', 5)->nullable()->comment('Mã phường/xã — không FK cứng');
             $table->string('ward_name', 255)->nullable()->comment('Tên phường/xã denormalized');

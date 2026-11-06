@@ -13,9 +13,8 @@ use Modules\Product\Features\CatalogManagement\Queries\ListProductsForAdminQuery
 use Modules\Product\Models\Product;
 
 /**
- * JSON backend cho Tabulator ở dashboard/products — cùng pattern
- * Modules/Organization/app/Http/Controllers/Api/OrganizationApiController (tham chiếu theo
- * yêu cầu): remote pagination/sort/filter, trả {data, last_page, total}. Tenant-scoped tự động
+ * JSON backend cho Tabulator ở dashboard/products —
+ * remote pagination/sort/filter, trả {data, last_page, total}. Tenant-scoped tự động
  * qua TenantAwareModel (Product) — không cần lọc organization_id tường minh ở đây.
  */
 class ProductApiController extends Controller

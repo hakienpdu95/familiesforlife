@@ -2,7 +2,6 @@
 
 > **Version:** 5.1  
 > **Stack:** Laravel 13 · DaisyUI 5 · Tailwind CSS 4 · Alpine.js 3 · TomSelect · SCSS (sass) · Vite 8  
-> **Gold Standard:** `Modules/Organization/resources/views/`  
 > **Build:** `vite.config.backend.js` — **một build duy nhất** cho toàn backend
 
 ---
@@ -147,7 +146,7 @@ Tầng 4 — Module assets Modules/[Name]/resources/assets/
 ### 3.2 Module SCSS entry
 
 ```scss
-// Modules/Organization/resources/assets/sass/organization.scss
+// Modules/Event/resources/assets/sass/event.scss
 @use 'form-patterns';
 @use 'tom-select';
 // Không cần partial riêng khi chỉ dùng DaisyUI + shared
@@ -359,8 +358,6 @@ return redirect()->back()->with('error', 'Có lỗi xảy ra');
 | Tag — Tạo tag màu | Flat | 3 trường: tên, màu, trạng thái |
 | User — Đổi mật khẩu | Flat | 2 trường: mật khẩu mới, xác nhận |
 | User — Tạo tài khoản | Tab | 10+ trường: thông tin cá nhân + phân quyền + mật khẩu |
-| Organization — Tạo/Sửa | Tab | 10+ trường: 3 nhóm rõ ràng |
-| Customer/CRM — Tạo khách hàng | Tab | 15+ trường: thông tin + liên hệ + phân loại |
 | HR — Hồ sơ nhân viên | Tab | 20+ trường: cơ bản + công việc + địa chỉ + liên hệ |
 | Assessment — Tạo đánh giá | Wizard | Tuần tự: cấu hình → câu hỏi → phân phối |
 

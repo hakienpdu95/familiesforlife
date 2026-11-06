@@ -13,7 +13,7 @@ use Spatie\LaravelData\Support\Wrapping\WrapExecutionType;
  *  - Provides toCommand() helper for CQRS pipelines
  *
  * Usage:
- *   class CreateCustomerData extends BaseData
+ *   class CreateProductData extends BaseData
  *   {
  *       public function __construct(
  *           public readonly string $name,
@@ -22,8 +22,8 @@ use Spatie\LaravelData\Support\Wrapping\WrapExecutionType;
  *       ) {}
  *   }
  *
- *   $data = CreateCustomerData::from($request);
- *   CreateCustomer::run($data);
+ *   $data = CreateProductData::from($request);
+ *   CreateProduct::run($data);
  */
 abstract class BaseData extends Data
 {

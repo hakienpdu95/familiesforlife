@@ -2,7 +2,7 @@
 
 Hướng dẫn chuẩn để xây dựng trang danh sách dạng bảng (Tabulator + Alpine.js) cho bất kỳ module nào. Áp dụng cho toàn bộ stack: Laravel 13 / PHP 8.4 + DaisyUI 5 + Alpine.js 3 + Tabulator 6.
 
-> **Nguồn gốc**: Đúc kết từ `Modules/Survey` (responses listing) và `Modules/Organization` (organizations listing) — cả hai đã production-ready.
+> **Nguồn gốc**: Đúc kết từ `Modules/Survey` (responses listing).
 
 ---
 
@@ -218,7 +218,7 @@ $paginator = $query->paginate($perPage, ['*'], 'page', $page);
 
 ### Biến thể B: CQRS Query + Handler (phức tạp)
 
-Dùng khi: query phức tạp (JOIN để sort, eager load relations), hoặc cùng query được gọi từ nhiều controller/job. Ví dụ: `ListOrganizationsHandler`.
+Dùng khi: query phức tạp (JOIN để sort, eager load relations), hoặc cùng query được gọi từ nhiều controller/job. Ví dụ: `ListArticlesForAdminHandler` (Modules/Post).
 
 **Query DTO** — typed, immutable, không có logic:
 ```php
@@ -307,7 +307,7 @@ public function index(Request $request, ListItemsHandler $handler): JsonResponse
 ```
 
 **Khi nào chọn B thay A:**
-- Query cần `leftJoin` để sort theo related column (xem `province_name` sort trong Organization)
+- Query cần `leftJoin` để sort theo related column (xem sort theo cột translation trong `ListArticlesForAdminHandler`)
 - Cùng query được dùng trong scheduled job, export, hoặc test riêng
 - Logic filter > 3 điều kiện và cần unit test độc lập
 
@@ -1284,7 +1284,7 @@ setDatePreset(preset) {
 
 ### C) Chained dropdowns (Province → Ward)
 
-Pattern từ Organization module: khi một filter phụ thuộc vào filter cha.
+Pattern: khi một filter phụ thuộc vào filter cha.
 
 ```js
 // Trong closure của alpine:init:
@@ -1717,4 +1717,4 @@ public function test_handler_sort_field_whitelist(): void
 
 ---
 
-*v2.0 — Đúc kết từ `Modules/Survey` + `Modules/Organization`. Cập nhật khi có pattern mới được chuẩn hóa.*
+*v2.0 — Đúc kết từ `Modules/Survey`. Cập nhật khi có pattern mới được chuẩn hóa.*

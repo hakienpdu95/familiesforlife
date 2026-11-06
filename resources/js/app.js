@@ -248,7 +248,7 @@ document.addEventListener('alpine:init', () => {
  *  · Mọi <script type="module"> (Vite) là deferred — chạy SAU khi HTML parse xong
  *    nhưng TRƯỚC DOMContentLoaded, theo thứ tự xuất hiện trong document.
  *  · Nếu Alpine.start() chạy ngay trong app.js, nó xử lý DOM trước khi
- *    các module script sau (customer.js, organization.js...) kịp đăng ký
+ *    các module script sau (post.js, user.js...) kịp đăng ký
  *    alpine:init listener → "orgListPage is not defined".
  *  · Đặt vào DOMContentLoaded đảm bảo TẤT CẢ module scripts đã chạy
  *    xong và đăng ký xong trước khi Alpine.start() fire alpine:init.

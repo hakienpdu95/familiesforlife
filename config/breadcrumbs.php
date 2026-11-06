@@ -40,7 +40,6 @@ return [
 
         // ── HR / Org ──────────────────────────────────────────────────────
         'employees'           => 'Nhân viên',
-        'organizations'       => 'Tổ chức',
         'users'               => 'Người dùng',
         'roles'               => 'Vai trò',
         'permissions'         => 'Quyền hạn',
@@ -92,7 +91,6 @@ return [
         'notifications'       => 'Thông báo',
         'preferences'         => 'Tuỳ chọn thông báo',
         'platform-users'      => 'Người dùng Platform',
-        'customers'           => 'Khách hàng',
         'orders'              => 'Đơn hàng',
         'products'            => 'Sản phẩm',
 

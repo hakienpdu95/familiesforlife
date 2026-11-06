@@ -59,12 +59,6 @@ class RolePermissionSeeder extends Seeder
             RoleEnum::CEO->value => [
                 P::CEO_DASH_FULL->value,
 
-                P::CUSTOMERS_VIEW_ALL->value,
-                P::CUSTOMERS_CREATE->value,
-                P::CUSTOMERS_EDIT->value,
-                P::CUSTOMERS_DELETE->value,
-                P::CUSTOMERS_EXPORT->value,
-
                 P::SALES_AI_VIEW->value,
 
                 P::WORKFLOW_MONITOR->value,
@@ -78,10 +72,6 @@ class RolePermissionSeeder extends Seeder
             // Sales Team — Own tasks, AI assist
             // ─────────────────────────────────────────────────────────
             RoleEnum::SALES->value => [
-                P::CUSTOMERS_VIEW_ASSIGNED->value,
-                P::CUSTOMERS_CREATE->value,
-                P::CUSTOMERS_EDIT->value,
-
                 P::SALES_AI_USE->value,
 
                 P::WORKFLOW_VIEW_LIMITED->value,
@@ -93,11 +83,6 @@ class RolePermissionSeeder extends Seeder
             RoleEnum::OPS->value => [
                 P::CEO_DASH_VIEW->value,
 
-                P::CUSTOMERS_VIEW_ALL->value,
-                P::CUSTOMERS_CREATE->value,
-                P::CUSTOMERS_EDIT->value,
-                P::CUSTOMERS_EXPORT->value,
-
                 P::WORKFLOW_MONITOR->value,
                 P::WORKFLOW_EDIT->value,
             ],
@@ -106,8 +91,6 @@ class RolePermissionSeeder extends Seeder
             // Marketing — Campaign tracking, limited tasks
             // ─────────────────────────────────────────────────────────
             RoleEnum::MARKETING->value => [
-                P::CUSTOMERS_VIEW_ALL->value,
-
                 P::SALES_AI_VIEW->value,
 
                 P::WORKFLOW_VIEW_LIMITED->value,
@@ -128,8 +111,6 @@ class RolePermissionSeeder extends Seeder
             RoleEnum::AI_OP->value => [
                 P::CEO_DASH_VIEW->value,
 
-                P::CUSTOMERS_VIEW_ALL->value,
-
                 P::WORKFLOW_MONITOR->value,
                 P::WORKFLOW_AI_CONFIG->value,
             ],
@@ -140,9 +121,6 @@ class RolePermissionSeeder extends Seeder
             RoleEnum::ADMIN->value => [
                 P::CEO_DASH_VIEW->value,
                 P::CEO_DASH_CONFIG->value,
-
-                P::CUSTOMERS_CONFIG->value,
-                P::CUSTOMERS_VIEW_ALL->value,
 
                 P::SALES_AI_CONFIG->value,
 

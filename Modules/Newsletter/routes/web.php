@@ -29,8 +29,7 @@ Route::middleware(['auth'])->prefix('dashboard/newsletter')->name('backend.newsl
     Route::get('broadcast/logs', [BroadcastAdminController::class, 'logs'])->name('broadcast.logs');
 });
 
-// ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị) —
-// tham chiếu Modules/Organization/routes/web.php (backend.api.organizations) ───────────────
+// ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị) ─────────
 Route::middleware(['auth'])->prefix('backend/api/newsletter')->name('backend.api.newsletter.')->group(function () {
     Route::get('subscribers', [SubscriberApiController::class, 'index'])->name('subscribers');
     Route::get('broadcast-logs', [BroadcastLogApiController::class, 'index'])->name('broadcast-logs');

@@ -20,8 +20,7 @@ Route::middleware(['auth'])->prefix('dashboard/pages')->name('backend.page.')->g
     Route::patch('items/{page}/unpublish', [PageAdminController::class, 'unpublish'])->name('items.unpublish');
 });
 
-// ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị) —
-// tham chiếu Modules/Organization/routes/web.php (backend.api.organizations) ───────────────
+// ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị) ─────────
 Route::middleware(['auth'])->prefix('backend/api/pages')->name('backend.api.pages.')->group(function () {
     Route::get('items', [PageApiController::class, 'index'])->name('items');
 });

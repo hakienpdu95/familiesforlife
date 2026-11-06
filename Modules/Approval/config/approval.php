@@ -22,19 +22,6 @@ return [
             'model' => \Modules\RealEstate\Models\RealEstateListing::class,
             'label' => 'Tin bất động sản',
         ],
-
-        'organization' => [
-            // Class GỐC (App\Shared\Tenancy\Models\Organization), không phải subclass
-            // Modules\Organization\Models\Organization — HasApproval đặt trên class gốc vì
-            // RegisterOrganizationAction (Modules/Auth) tạo Organization qua chính class này,
-            // không qua subclass. getMorphClass() của Organization đã hardcode trả 'organization'
-            // sẵn (App\Shared\Tenancy\Models\Organization::getMorphClass()) — khớp key ở đây.
-            'model' => \App\Shared\Tenancy\Models\Organization::class,
-            'label' => 'Doanh nghiệp / Tổ chức',
-            // Tổ chức có sẵn trước khi tích hợp coi là đã Published (tránh khoá tài khoản đang
-            // hoạt động bình thường) — xem OrganizationInitialApprovalStatusResolver.
-            'initial_status_resolver' => \App\Shared\Tenancy\Support\OrganizationInitialApprovalStatusResolver::class,
-        ],
     ],
 
     'platform_users' => [

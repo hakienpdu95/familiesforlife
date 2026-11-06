@@ -4,7 +4,7 @@ namespace Modules\User\Actions;
 
 use App\Models\User;
 use Lorisleiva\Actions\Concerns\AsAction;
-use Modules\Organization\Models\OrganizationMember;
+use App\Shared\Tenancy\Models\OrganizationMember;
 
 class DestroyUserAction
 {

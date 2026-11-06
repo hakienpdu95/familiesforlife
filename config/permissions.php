@@ -8,12 +8,6 @@ return [
     R::CEO->value => [
         // CEO Dashboard: Full
         P::CEO_DASH_FULL->value,
-        // CRM Customers: Full
-        P::CUSTOMERS_VIEW_ALL->value,
-        P::CUSTOMERS_CREATE->value,
-        P::CUSTOMERS_EDIT->value,
-        P::CUSTOMERS_DELETE->value,
-        P::CUSTOMERS_EXPORT->value,
         // Sales AI: Full (view + use)
         P::SALES_AI_VIEW->value,
         P::SALES_AI_USE->value,
@@ -37,10 +31,6 @@ return [
     ],
 
     R::SALES->value => [
-        // CRM Customers: Assigned
-        P::CUSTOMERS_VIEW_ASSIGNED->value,
-        P::CUSTOMERS_CREATE->value,
-        P::CUSTOMERS_EDIT->value,
         // Sales AI: Use (dùng output, không config)
         P::SALES_AI_USE->value,
         // Workflow: Limited (visibility=public)
@@ -60,11 +50,6 @@ return [
     R::OPS->value => [
         // CEO Dashboard: Limited (view, không có AI brief, không có approve)
         P::CEO_DASH_VIEW->value,
-        // CRM Customers: View + Create + Edit + Export
-        P::CUSTOMERS_VIEW_ALL->value,
-        P::CUSTOMERS_CREATE->value,
-        P::CUSTOMERS_EDIT->value,
-        P::CUSTOMERS_EXPORT->value,
         // Workflow: Monitor/Edit
         P::WORKFLOW_MONITOR->value,
         P::WORKFLOW_EDIT->value,
@@ -84,8 +69,6 @@ return [
     ],
 
     R::MARKETING->value => [
-        // CRM Customers: View only
-        P::CUSTOMERS_VIEW_ALL->value,
         // Sales AI: Limited (view, không use/config)
         P::SALES_AI_VIEW->value,
         // Workflow: Limited
@@ -121,8 +104,6 @@ return [
     R::AI_OP->value => [
         // CEO Dashboard: Limited
         P::CEO_DASH_VIEW->value,
-        // CRM Customers: View only
-        P::CUSTOMERS_VIEW_ALL->value,
         // Sales AI: Config prompt
         P::SALES_AI_CONFIG_PROMPT->value,
         // Workflow: Monitor + AI config
@@ -139,9 +120,6 @@ return [
     R::ADMIN->value => [
         // Config trên tất cả module (độc lập với data)
         P::CEO_DASH_CONFIG->value,
-        // CRM Customers: Config (custom fields) + View
-        P::CUSTOMERS_CONFIG->value,
-        P::CUSTOMERS_VIEW_ALL->value,
         P::SALES_AI_CONFIG->value,
         P::WORKFLOW_MONITOR->value,
         P::WORKFLOW_EDIT->value,

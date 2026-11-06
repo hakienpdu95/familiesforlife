@@ -39,7 +39,6 @@ Route::middleware(['auth', 'tenant'])
 |--------------------------------------------------------------------------
 | Backend Routes — prefix: backend.*
 |--------------------------------------------------------------------------
-| Organization CRUD  → Modules/Organization/routes/web.php
 | User CRUD          → Modules/User/routes/web.php
 */
 Route::middleware(['auth'])->prefix('dashboard')->name('backend.')->group(function () {
@@ -58,8 +57,6 @@ Route::middleware(['auth'])->prefix('dashboard')->name('backend.')->group(functi
     // ── Placeholder routes (modules chưa triển khai) ──────────────────
     // products.index/products.create giờ do Modules/Product/routes/web.php đảm nhiệm
     Route::get('/orders',           fn () => abort(503, 'Module đang phát triển'))->name('orders.index');
-    Route::get('/customers',        fn () => abort(503, 'Module đang phát triển'))->name('customers.index');
-    Route::get('/customers/create', fn () => abort(503, 'Module đang phát triển'))->name('customers.create');
     Route::get('/categories',       fn () => abort(503, 'Module đang phát triển'))->name('categories.index');
     Route::get('/categories/create',fn () => abort(503, 'Module đang phát triển'))->name('categories.create');
     Route::get('/settings',         fn () => abort(503, 'Module đang phát triển'))->name('settings.index');

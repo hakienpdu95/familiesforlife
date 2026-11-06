@@ -14,9 +14,8 @@ use Modules\Post\Models\PostArticle;
 use Modules\Post\Models\PostArticleTranslation;
 
 /**
- * JSON backend cho Tabulator ở dashboard/posts/articles — cùng pattern
- * Modules/Organization/app/Http/Controllers/Api/OrganizationApiController (tham chiếu theo
- * yêu cầu): remote pagination/sort/filter, trả {data, last_page, total}.
+ * JSON backend cho Tabulator ở dashboard/posts/articles —
+ * remote pagination/sort/filter, trả {data, last_page, total}.
  */
 class ArticleApiController extends Controller
 {
@@ -33,8 +32,7 @@ class ArticleApiController extends Controller
             'status' => ['nullable', 'string', 'in:'.implode(',', array_column(TranslationStatus::cases(), 'value'))],
         ]);
 
-        // Tabulator (sortMode: 'remote') gửi mảng sort[{field,dir}] — cùng cách đọc
-        // OrganizationApiController đang dùng.
+        // Tabulator (sortMode: 'remote') gửi mảng sort[{field,dir}].
         $sortRaw = $request->input('sort.0');
         $sortField = is_array($sortRaw) ? (string) ($sortRaw['field'] ?? 'created_at') : 'created_at';
         $sortDir = is_array($sortRaw) && ($sortRaw['dir'] ?? '') === 'asc' ? 'asc' : 'desc';

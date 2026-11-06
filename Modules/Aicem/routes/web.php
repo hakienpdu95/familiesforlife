@@ -41,8 +41,7 @@ Route::middleware(['auth', 'tenant'])
     });
 
 // ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị,
-// tenant-scoped tự động qua TenantAwareModel) — tham chiếu Modules/Organization/routes/web.php
-// (backend.api.organizations) ────────────────────────────────────────────────────────────
+// tenant-scoped tự động qua TenantAwareModel) ─────────────────────────────────────────────
 Route::middleware(['auth', 'tenant'])->prefix('backend/api/aicem')->name('backend.api.aicem.')->group(function () {
     Route::get('knowledge-documents', [KnowledgeDocumentApiController::class, 'index'])->name('knowledge-documents');
 });

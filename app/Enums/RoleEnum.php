@@ -43,13 +43,13 @@ enum RoleEnum: string
     public function visibleModules(): array
     {
         return match($this) {
-            self::CEO    => ['ceo_dashboard','crm','sales_ai','sop','workflow','users','activity_log'],
-            self::SALES  => ['crm','sales_ai','sop'],
-            self::OPS    => ['ceo_dashboard','crm','sop','workflow'],
-            self::MARKETING => ['crm','sales_ai','sop'],
+            self::CEO    => ['ceo_dashboard','sales_ai','sop','workflow','users','activity_log'],
+            self::SALES  => ['sales_ai','sop'],
+            self::OPS    => ['ceo_dashboard','sop','workflow'],
+            self::MARKETING => ['sales_ai','sop'],
             self::HR     => ['sop','users'],
-            self::AI_OP  => ['ceo_dashboard','crm','sop','workflow'],
-            self::ADMIN  => ['ceo_dashboard','crm','sales_ai','sop','workflow','users','roles','integrations','activity_log'],
+            self::AI_OP  => ['ceo_dashboard','sop','workflow'],
+            self::ADMIN  => ['ceo_dashboard','sales_ai','sop','workflow','users','roles','integrations','activity_log'],
             self::VIEWER => ['ceo_dashboard','sop'],
         };
     }

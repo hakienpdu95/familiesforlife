@@ -51,8 +51,7 @@ class ListArticlesForAdminHandler implements QueryHandlerInterface
         $sortDir = $query->sortDir === 'asc' ? 'asc' : 'desc';
 
         // 'title'/'ga_views_30d' sống ở post_article_translations (bản dịch main_locale), không
-        // phải post_articles — cùng kỹ thuật leftJoin+orderBy đã dùng cho 'province_name' ở
-        // ListOrganizationsHandler (Modules/Organization) khi cột sort không nằm trên bảng chính.
+        // phải post_articles — dùng leftJoin+orderBy khi cột sort không nằm trên bảng chính.
         if (in_array($sortField, self::SORTABLE_VIA_TRANSLATION, true)) {
             $q->leftJoin('post_article_translations as sort_trans', function ($join): void {
                 $join->on('sort_trans.article_id', '=', 'post_articles.id')

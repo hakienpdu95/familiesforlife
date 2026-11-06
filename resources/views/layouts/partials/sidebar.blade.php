@@ -487,41 +487,7 @@
         @endcanany
         </x-sidebar-section>
 
-        <x-sidebar-section title="CRM">
-        @if(auth()->user()?->hasAnyPermission(['customers.view_all','customers.view_assigned']))
-        <div class="nav-group">
-            <details {{ request()->routeIs('customer.*') ? 'open' : '' }}>
-                <summary class="nav-summary {{ request()->routeIs('customer.*') ? 'active' : '' }}">
-                    <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    <span class="nav-label">Khách hàng</span>
-                    <svg class="nav-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m9 18 6-6-6-6"/></svg>
-                </summary>
-                <div class="sub-menu">
-                    <a href="{{ route('customer.index') }}" class="sub-link {{ request()->routeIs('customer.index') ? 'active' : '' }}">Danh sách khách hàng</a>
-                    @can('customers.create')
-                    <a href="{{ route('customer.create') }}" class="sub-link {{ request()->routeIs('customer.create') ? 'active' : '' }}">Thêm khách hàng</a>
-                    @endcan
-                </div>
-            </details>
-        </div>
-        @endif
-        </x-sidebar-section>
-
         <x-sidebar-section title="Hệ thống & Tổ chức">
-        <div class="nav-group">
-        <details {{ request()->routeIs('backend.organizations.*') ? 'open' : '' }}>
-            <summary class="nav-summary {{ request()->routeIs('backend.organizations.*') ? 'active' : '' }}">
-                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                <span class="nav-label">Tổ chức</span>
-                <svg class="nav-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m9 18 6-6-6-6"/></svg>
-            </summary>
-            <div class="sub-menu">
-                <a href="{{ route('backend.organizations.index') }}" class="sub-link {{ request()->routeIs('backend.organizations.index') ? 'active' : '' }}">Danh sách tổ chức</a>
-                <a href="{{ route('backend.organizations.create') }}" class="sub-link {{ request()->routeIs('backend.organizations.create') ? 'active' : '' }}">Thêm tổ chức</a>
-            </div>
-        </details>
-        </div>
-
         {{-- Chỉ super-admin — spec/Platform_RBAC_Phase2_Specification.md §2.7 --}}
         @can('platform-users.manage')
         <div class="nav-group">

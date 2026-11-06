@@ -1,9 +1,7 @@
 {
     "Auth": true,
-    "Organization": true,
     "User": true,
     "ActivityLog": true,
-    "Customer": true,
     "Product": true,
     "Post": true,
     "Aicem": true,

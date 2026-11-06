@@ -92,7 +92,7 @@ export function createTsRemote(selector, opts = {}) {
 
 /**
  * Tạo TomSelect cho trường chọn nhân viên phụ trách.
- * Pattern phổ biến trong Customer, Task, Workflow.
+ * Pattern phổ biến trong Task, Workflow.
  *
  * @param {string} selector
  * @param {string} apiUrl       - URL từ data attribute (data-assignable-url)

@@ -7,7 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Lorisleiva\Actions\Concerns\AsAction;
-use Modules\Organization\Models\OrganizationMember;
+use App\Shared\Tenancy\Models\OrganizationMember;
 use Modules\User\Data\UpdateUserData;
 use Modules\User\Events\UserRoleAssigned;
 use Spatie\Permission\PermissionRegistrar;

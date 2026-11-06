@@ -74,7 +74,7 @@ class ApprovalServiceProvider extends ModuleServiceProvider
         // organization_id=null — xem User::isPlatformContentModerator()).
         // platform_viewer (Lớp A, role read-only — spec/Platform_RBAC_Technical_Specification.md
         // §3.3) được OR thêm vào đây, giống isPlatformContentModerator() — chỉ xem, không có ability
-        // approve/reject/publishApproval/archiveApproval nào (Policy của Product/Organization/
+        // approve/reject/publishApproval/archiveApproval nào (Policy của Product/
         // Post không cấp cho isPlatformViewer(), nên nút hành động tự ẩn đúng mà không cần sửa gì
         // thêm ở Blade).
         Gate::define('viewDashboard', fn (User $user) => $user->can('approval.view_dashboard') || $user->isPlatformContentModerator() || $user->isPlatformViewer());

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Lorisleiva\Actions\Concerns\AsAction;
-use Modules\Organization\Models\OrganizationMember;
+use App\Shared\Tenancy\Models\OrganizationMember;
 use Modules\User\Data\StoreUserData;
 use Modules\User\Events\UserCreated;
 use Modules\User\Events\UserRoleAssigned;

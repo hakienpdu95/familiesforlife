@@ -1,7 +1,7 @@
 /**
  * pages/category-index.js
  * Alpine component + Tabulator (dataTree) cho dashboard/posts/categories — cùng pattern
- * article-index.js/organization-index.js nhưng KHÔNG phân trang remote: cây danh mục luôn tải
+ * article-index.js nhưng KHÔNG phân trang remote: cây danh mục luôn tải
  * toàn bộ 1 lượt (CategoryApiController trả cây lồng nhau qua field "children", hoặc danh sách
  * phẳng khi có tìm kiếm — Tabulator tự hiển thị tree/phẳng tương ứng, không cần toggle JS).
  *

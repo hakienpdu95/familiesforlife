@@ -11,8 +11,8 @@
  * BLADE:
  *   Core  : @vite(['resources/css/app.css', 'resources/js/app.js'], 'build/backend')
  *   Widget: @vite(['resources/js/modules/tom-select.js'], 'build/backend')
- *   Module: @vite(['Modules/Customer/resources/assets/sass/customer.scss',
- *                  'Modules/Customer/resources/assets/js/customer.js'], 'build/backend')
+ *   Module: @vite(['Modules/Post/resources/assets/sass/post.scss',
+ *                  'Modules/Post/resources/assets/js/post.js'], 'build/backend')
  */
 
 import { defineConfig } from 'vite';
@@ -38,7 +38,6 @@ const JS_OUTPUT = {
   'qrcode':     'assets/qrcode.[hash].js',
   // Module JS — named [module] to avoid chunk name collision
   'user':                 'assets/modules/user.[hash].js',
-  'organization':         'assets/modules/organization.[hash].js',
   'activity-log':           'assets/modules/activity-log.[hash].js',
   'post':                   'assets/modules/post.[hash].js',
   'product':                'assets/modules/product.[hash].js',
@@ -70,7 +69,6 @@ const CSS_OUTPUT = {
   'swiper.css':                    'assets/swiper.[hash].css',
   // Module SCSS → CSS
   'user.css':                 'assets/modules/user.[hash].css',
-  'organization.css':         'assets/modules/organization.[hash].css',
   'activity-log.css':           'assets/modules/activity-log.[hash].css',
   'ai-copilot.css':             'assets/modules/ai-copilot.[hash].css',
   'post.css':                   'assets/modules/post.[hash].css',
@@ -102,15 +100,9 @@ const MODULE_ENTRIES = [
   // User
   'Modules/User/resources/assets/sass/user.scss',
   'Modules/User/resources/assets/js/user.js',
-  // Organization
-  'Modules/Organization/resources/assets/sass/organization.scss',
-  'Modules/Organization/resources/assets/js/organization.js',
   // ActivityLog
   'Modules/ActivityLog/resources/assets/sass/activity-log.scss',
   'Modules/ActivityLog/resources/assets/js/activity-log.js',
-  // Customer
-  'Modules/Customer/resources/assets/sass/customer.scss',
-  'Modules/Customer/resources/assets/js/customer.js',
   // Post
   'Modules/Post/resources/assets/sass/post.scss',
   'Modules/Post/resources/assets/js/post.js',

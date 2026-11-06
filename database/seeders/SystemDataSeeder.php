@@ -18,7 +18,6 @@ use Modules\Heritage\Database\Seeders\HeritageDatabaseSeeder;
 // use Modules\Heritage\Database\Seeders\HeritageDemoSeeder;
 use Modules\Menu\Database\Seeders\MenuDatabaseSeeder;
 use Modules\Ocop\Database\Seeders\OcopDatabaseSeeder;
-use Modules\Organization\Database\Seeders\OrganizationRolePermissionSeeder;
 use Modules\Page\Database\Seeders\PageDatabaseSeeder;
 use Modules\Post\Database\Seeders\PostDatabaseSeeder;
 // use Modules\Post\Database\Seeders\PostDemoSeeder;
@@ -40,8 +39,7 @@ use Modules\VideoIdeaExtractor\Database\Seeders\VideoIdeaExtractorDatabaseSeeder
  *   php artisan db:seed --class=Database\\Seeders\\SystemDataSeeder
  *
  * Không bao gồm:
- *   - OrganizationDemoSeeder (1000 orgs demo — chỉ chạy thủ công khi cần)
- *   - Các seeder rỗng (Employee, Customer, Branch, Department, Project...)
+ *   - Các seeder rỗng (Employee, Branch, Department, Project...)
  */
 class SystemDataSeeder extends Seeder
 {
@@ -55,7 +53,7 @@ class SystemDataSeeder extends Seeder
 
         // ── 0. Dữ liệu hành chính (regions/provinces/wards) — command riêng (không phải
         // Seeder class) vì đọc trực tiếp datafiles/provinces.json, đã tồn tại từ trước cho
-        // Customer/Event. PHẢI chạy TRƯỚC mọi seeder demo dùng province_code (Event, Post,
+        // Event. PHẢI chạy TRƯỚC mọi seeder demo dùng province_code (Event, Post,
         // Ocop, ProvinceShowcase) — trên fresh DB (migrate:fresh xoá sạch bảng), không chạy lại
         // lệnh này thì provinces/wards rỗng, mọi denormalize province_name/ward_name sẽ null im
         // lặng (không lỗi) — xem spec/Province_Showcase_Technical_Specification.md §8 Phase 1.
@@ -76,9 +74,6 @@ class SystemDataSeeder extends Seeder
 
             // ── 3. Super-admin role + 2 tài khoản hệ thống ───────────────
             AuthDatabaseSeeder::class,
-
-            // ── 4. Template roles cấp org (owner/admin/manager/member) ────
-            OrganizationRolePermissionSeeder::class,
 
             // ── 5. Org hệ thống mặc định (id=1 trên fresh DB) ────────────
             SystemOrganizationSeeder::class,

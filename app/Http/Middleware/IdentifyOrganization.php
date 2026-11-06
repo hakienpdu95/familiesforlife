@@ -78,7 +78,7 @@ class IdentifyOrganization
             return $org;
         }
 
-        if ($user && \Modules\Organization\Models\OrganizationMember::where('organization_id', $org->id)
+        if ($user && \App\Shared\Tenancy\Models\OrganizationMember::where('organization_id', $org->id)
                 ->where('user_id', $user->id)
                 ->exists()) {
             return $org;

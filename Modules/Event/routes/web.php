@@ -33,8 +33,7 @@ Route::middleware(['auth'])
         Route::post('{event}/archive', [EventAdminController::class, 'archive'])->name('archive');
     });
 
-// ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị) —
-// tham chiếu Modules/Organization/routes/web.php (backend.api.organizations) ───────────────
+// ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị) ─────────
 Route::middleware(['auth'])->prefix('backend/api/events')->name('backend.api.events.')->group(function () {
     Route::get('items', [EventApiController::class, 'index'])->name('items');
     Route::get('categories', [EventCategoryApiController::class, 'index'])->name('categories');

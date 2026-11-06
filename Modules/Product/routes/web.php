@@ -33,8 +33,7 @@ Route::middleware(['auth', 'tenant'])
     });
 
 // ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị,
-// tenant-scoped tự động qua TenantAwareModel) — tham chiếu Modules/Organization/routes/web.php
-// (backend.api.organizations) ──────────────────────────────────────────────────────────────
+// tenant-scoped tự động qua TenantAwareModel) ─────────────────────────────────────────────
 Route::middleware(['auth', 'tenant'])->prefix('backend/api/products')->name('backend.api.products.')->group(function (): void {
     Route::get('items', [ProductApiController::class, 'index'])->name('items');
     Route::get('categories', [CategoryApiController::class, 'index'])->name('categories');

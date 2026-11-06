@@ -13,7 +13,7 @@ use Modules\Video\Models\Video;
  * của 1 bên thứ ba ngụ ý liên kết — xem Banner_Management_Technical_Specification.md §0).
  *
  * Chạy thủ công: php artisan db:seed --class="Modules\Video\Database\Seeders\VideoDemoSeeder"
- * KHÔNG tự động trong SystemDataSeeder — cùng lý do OrganizationDemoSeeder/PostReviewDemoSeeder
+ * KHÔNG tự động trong SystemDataSeeder — cùng lý do PostReviewDemoSeeder
  * không tự chạy.
  */
 class VideoDemoSeeder extends Seeder

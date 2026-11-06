@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\GetWardsByProvinceAction;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\UserOptionsController;
 use Illuminate\Support\Facades\Route;
@@ -12,6 +13,9 @@ use Illuminate\Support\Facades\Route;
 | → auth:sanctum works with session cookie from browser AJAX calls.
 | Auto-prefix: /api  (set by withRouting api: in bootstrap/app.php)
 */
+
+Route::get('provinces/{provinceCode}/wards', GetWardsByProvinceAction::class)
+    ->name('api.provinces.wards');
 
 Route::middleware(['auth:sanctum', 'tenant'])
     ->get('v1/users/options', UserOptionsController::class)

@@ -1,8 +1,7 @@
 /**
  * pages/product-index.js
- * Alpine component + Tabulator cho dashboard/products — cùng pattern
- * Modules/Organization/resources/assets/js/pages/organization-index.js (tham chiếu theo
- * yêu cầu): remote pagination/sort/filter qua API, xoá qua AJAX + modal xác nhận.
+ * Alpine component + Tabulator cho dashboard/products —
+ * remote pagination/sort/filter qua API, xoá qua AJAX + modal xác nhận.
  *
  * Server data truyền vào qua x-data="productListPage({{ Js::from([...]) }})".
  */

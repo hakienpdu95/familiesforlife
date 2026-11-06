@@ -1,8 +1,7 @@
 /**
  * pages/banner-index.js
- * Alpine component + Tabulator cho dashboard/banners/items — cùng pattern
- * Modules/Organization/resources/assets/js/pages/organization-index.js (tham chiếu theo
- * yêu cầu): remote pagination/sort/filter qua API, xoá qua AJAX + modal xác nhận.
+ * Alpine component + Tabulator cho dashboard/banners/items —
+ * remote pagination/sort/filter qua API, xoá qua AJAX + modal xác nhận.
  *
  * Server data truyền vào qua x-data="bannerListPage({{ Js::from([...]) }})".
  */

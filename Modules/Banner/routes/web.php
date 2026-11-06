@@ -12,8 +12,7 @@ Route::middleware(['auth'])->prefix('dashboard/banners')->name('backend.banner.'
     Route::resource('items', BannerAdminController::class)->except(['show'])->parameters(['items' => 'banner']);
 });
 
-// ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị) —
-// tham chiếu Modules/Organization/routes/web.php (backend.api.organizations) ───────────────
+// ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị) ─────────
 Route::middleware(['auth'])->prefix('backend/api/banners')->name('backend.api.banners.')->group(function () {
     Route::get('items', [BannerApiController::class, 'index'])->name('items');
 });

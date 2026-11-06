@@ -18,13 +18,13 @@ use Lorisleiva\Actions\Concerns\AsAction;
  *   - organization() / organizationId(): current tenant helpers
  *
  * Usage:
- *   class CreateCustomer extends TenantAwareAction
+ *   class CreateProduct extends TenantAwareAction
  *   {
- *       public function handle(CreateCustomerData $data): Customer { ... }
+ *       public function handle(CreateProductData $data): Product { ... }
  *   }
  *
- *   CreateCustomer::run($data);           // sync
- *   CreateCustomer::dispatch($data);      // queued
+ *   CreateProduct::run($data);           // sync
+ *   CreateProduct::dispatch($data);      // queued
  */
 abstract class TenantAwareAction
 {

@@ -21,7 +21,6 @@ use Modules\Banner\Models\Banner;
 use Modules\Heritage\Models\HeritageSite;
 use Modules\Ocop\Models\OcopProduct;
 use Modules\OcopSubject\Models\OcopSubject;
-use Modules\Organization\Models\Organization;
 use Modules\Post\Models\PostArticle;
 use Modules\Post\Models\PostAuthorProfile;
 use Modules\RealEstate\Models\RealEstateListing;
@@ -67,7 +66,6 @@ class MediaUploadController extends Controller
      * Add new models as they adopt HasTenantMedia.
      */
     private const ENTITY_MAP = [
-        'organization' => Organization::class,
         'post_article' => PostArticle::class,
         'post_author_profile' => PostAuthorProfile::class,
         'ocop_product' => OcopProduct::class,
@@ -89,7 +87,7 @@ class MediaUploadController extends Controller
      * Required headers:
      *   X-Collection   — avatar | logo | thumbnail | cover | attachments | attachments_private
      * Optional headers:
-     *   X-Context-Type — entity_type string (e.g. 'organization')
+     *   X-Context-Type — entity_type string (e.g. 'post_article')
      *   X-Context-Id   — entity numeric ID
      */
     public function store(Request $request): JsonResponse

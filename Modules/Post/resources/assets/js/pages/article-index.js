@@ -1,8 +1,7 @@
 /**
  * pages/article-index.js
- * Alpine component + Tabulator cho dashboard/posts/articles — cùng pattern
- * Modules/Organization/resources/assets/js/pages/organization-index.js (tham chiếu theo
- * yêu cầu): remote pagination/sort/filter qua API, xoá qua AJAX + modal xác nhận.
+ * Alpine component + Tabulator cho dashboard/posts/articles —
+ * remote pagination/sort/filter qua API, xoá qua AJAX + modal xác nhận.
  *
  * Server data truyền vào qua x-data="articleListPage({{ Js::from([...]) }})".
  * Globals: window.Alpine, window.Tabulator, meta[name=csrf-token]
