@@ -5,10 +5,7 @@ namespace Modules\Approval\Providers;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Gate;
-use Modules\Approval\Console\Commands\AuditPlatformRoleScopeCommand;
 use Modules\Approval\Console\Commands\BackfillApprovalSubjectsCommand;
-use Modules\Approval\Console\Commands\CreatePlatformUserCommand;
-use Modules\Approval\Policies\PlatformUserPolicy;
 use Nwidart\Modules\Support\ModuleServiceProvider;
 
 class ApprovalServiceProvider extends ModuleServiceProvider
@@ -30,8 +27,6 @@ class ApprovalServiceProvider extends ModuleServiceProvider
      */
     protected array $commands = [
         BackfillApprovalSubjectsCommand::class,
-        CreatePlatformUserCommand::class,
-        AuditPlatformRoleScopeCommand::class,
     ];
 
     /**
@@ -56,7 +51,7 @@ class ApprovalServiceProvider extends ModuleServiceProvider
         // enforceMorphMap() bật cờ TOÀN CỤC "mọi model dùng trong bất kỳ quan hệ polymorphic
         // nào trong app đều PHẢI có trong morph map, nếu không getMorphClass() ném
         // ClassMorphViolationException" — áp dụng cho MỌI polymorphic relation của toàn bộ
-        // ứng dụng (Spatie Activitylog subject/causer trên TenantAwareModel, Spatie Permission
+        // ứng dụng (Spatie Activitylog subject/causer, Spatie Permission
         // model_has_roles, Laravel notifications notifiable_type…), không chỉ riêng
         // ApprovalSubject.subject. Một module con không có thẩm quyền bật cờ đó cho cả app.
         // morphMap() chỉ đăng ký alias đẹp cho các model khai báo ở đây, không ảnh hưởng model
@@ -69,9 +64,7 @@ class ApprovalServiceProvider extends ModuleServiceProvider
         // Gate riêng cho dashboard xuyên-entity (§11, §12) — không gắn Policy vì không có
         // model cụ thể nào để resolve (khác các ability submitForApproval/approve/… gate trên
         // từng entity ở Modules/Product). content_moderator (Platform Approval Gateway) LUÔN
-        // được xem dashboard — dùng isPlatformContentModerator() (không team-scoped) thay vì
-        // $user->can(...) (Spatie permission team-scoped, không đáng tin cho tài khoản
-        // organization_id=null — xem User::isPlatformContentModerator()).
+        // được xem dashboard.
         // platform_viewer (Lớp A, role read-only — spec/Platform_RBAC_Technical_Specification.md
         // §3.3) được OR thêm vào đây, giống isPlatformContentModerator() — chỉ xem, không có ability
         // approve/reject/publishApproval/archiveApproval nào (Policy của Product/
@@ -82,11 +75,5 @@ class ApprovalServiceProvider extends ModuleServiceProvider
         // Gate riêng cho trang Lịch sử duyệt đầy đủ (§11 mở rộng) — rộng hơn viewDashboard
         // (thấy MỌI log, không chỉ pending item user tự duyệt được), dành cho vai trò giám sát.
         Gate::define('viewApprovalHistory', fn (User $user) => $user->can('approval.view_history') || $user->isPlatformContentModerator() || $user->isPlatformViewer());
-
-        Gate::define('platform-users.manage', [PlatformUserPolicy::class, 'manage']);
-        Gate::define('platform-users.update', [PlatformUserPolicy::class, 'update']);
-        Gate::define('platform-users.deactivate', [PlatformUserPolicy::class, 'deactivate']);
-        Gate::define('platform-users.activate', [PlatformUserPolicy::class, 'activate']);
-        Gate::define('platform-users.resetPassword', [PlatformUserPolicy::class, 'resetPassword']);
     }
 }

@@ -6,7 +6,7 @@ use App\Services\AI\AiBudgetGuard;
 use App\Services\AI\AIProviderManager;
 use App\Services\AI\AIRequestOptions;
 use App\Services\AI\Exceptions\AiBudgetExceededException;
-use App\Shared\Tenancy\Models\Organization;
+use App\Models\AiSetting;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -108,9 +108,9 @@ class RunVideoIdeaLayer2Action
     ) {}
 
     /** @return array{markdown_output: string, model_used: string, cost_usd: float, loop_iterations: int} */
-    public function handle(Organization $organization, string $prompt): array
+    public function handle(string $prompt): array
     {
-        $config = $organization->ai_provider_config ?? config('ai.default');
+        $config = AiSetting::providerConfig();
         $provider = $config['provider'] ?? 'anthropic';
         $model = $config['model'] ?? config('ai.default.model');
 
@@ -158,7 +158,7 @@ class RunVideoIdeaLayer2Action
             $estimatedInputTokens = (int) ceil((mb_strlen($prompt) + mb_strlen($userTurn)) / 4);
 
             try {
-                $this->budget->ensureWithinBudget($organization, $estimatedInputTokens, $maxOutputTokens, $provider, $model);
+                $this->budget->ensureWithinBudget($estimatedInputTokens, $maxOutputTokens, $provider, $model);
             } catch (AiBudgetExceededException $e) {
                 // Hết ngân sách GIỮA vòng lặp (lượt >1) — lượt trước đã tốn tiền thật và tạo ra ý
                 // tưởng hợp lệ, KHÔNG ném exception làm mất trắng kết quả đó. Chỉ lượt 1 (chưa có
@@ -173,12 +173,12 @@ class RunVideoIdeaLayer2Action
                 break;
             }
 
-            $response = $this->aiProviderManager->complete($organization, [
+            $response = $this->aiProviderManager->complete([
                 ['role' => 'system', 'content' => $prompt, 'cacheable' => true],
                 ['role' => 'user', 'content' => $userTurn],
             ], $options);
 
-            $this->budget->recordActualCost($organization, $response->costUsd);
+            $this->budget->recordActualCost($response->costUsd);
             $totalCostUsd += $response->costUsd;
             $modelUsed = $response->modelUsed;
 
@@ -186,7 +186,6 @@ class RunVideoIdeaLayer2Action
             // hiện có: audit/tách chi phí theo tính năng, giờ 1 lần bấm "Chạy AI" có thể tương
             // ứng NHIỀU dòng nếu vòng lặp chạy >1 lượt.
             DB::table('video_idea_extractor_layer2_runs')->insert([
-                'organization_id' => $organization->id,
                 'kind' => 'layer2',
                 'cost_usd' => $response->costUsd,
                 'model_used' => $response->modelUsed,

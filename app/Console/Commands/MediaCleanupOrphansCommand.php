@@ -7,7 +7,6 @@ use App\Models\JoditDraft;
 use App\Models\Media;
 use App\Services\Media\FilePondChunkService;
 use App\Services\Media\MediaUploadService;
-use App\Shared\Tenancy\OrganizationScope;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -60,7 +59,7 @@ class MediaCleanupOrphansCommand extends Command
 
         $this->info("[Jodit] Checking orphans older than {$ttlHours}h" . ($isDryRun ? ' [DRY RUN]' : '') . '...');
 
-        $candidates = Media::withoutTenant()
+        $candidates = Media::query()
             ->where('collection_name', 'jodit_content')
             ->where('model_type', JoditDraft::class)
             ->where(function ($q) use ($cutoff) {
@@ -115,7 +114,7 @@ class MediaCleanupOrphansCommand extends Command
         }
 
         // Prune empty JoditDraft records
-        $emptyQuery = JoditDraft::withoutGlobalScope(OrganizationScope::class)
+        $emptyQuery = JoditDraft::query()
             ->where('created_at', '<', $cutoff)
             ->whereDoesntHave('media', fn ($q) => $q->where('collection_name', 'jodit_content'));
 
@@ -153,7 +152,7 @@ class MediaCleanupOrphansCommand extends Command
         $this->info("[FilePond] Checking orphans older than {$ttlHours}h" . ($isDryRun ? ' [DRY RUN]' : '') . '...');
 
         // FilePond has no touch mechanism — use media.created_at as TTL basis
-        $orphans = Media::withoutTenant()
+        $orphans = Media::query()
             ->where('model_type', FilePondDraft::class)
             ->where(function ($q) use ($cutoff) {
                 $q->where('created_at', '<', $cutoff)
@@ -191,7 +190,7 @@ class MediaCleanupOrphansCommand extends Command
         }
 
         // Prune empty FilePondDraft records
-        $emptyQuery = FilePondDraft::withoutGlobalScope(OrganizationScope::class)
+        $emptyQuery = FilePondDraft::query()
             ->where('created_at', '<', $cutoff)
             ->doesntHave('media');
 

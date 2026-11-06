@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Services\AI\Exceptions\AiBudgetExceededException;
 use App\Services\AI\Exceptions\AIProviderConfigException;
 use App\Services\AI\Exceptions\UnknownModelPricingException;
-use App\Shared\Tenancy\TenantContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -292,14 +291,8 @@ class CoreIdeaExtractorController extends Controller
             'prompt' => ['required', 'string', 'max:'.config('core_idea_extractor.layer2.max_prompt_chars', 300000)],
         ]);
 
-        $organization = TenantContext::get();
-
-        if (! $organization) {
-            return response()->json(['message' => 'Không xác định được tổ chức hiện tại — không thể gọi AI.'], 422);
-        }
-
         try {
-            $result = $action->handle($organization, $data['prompt']);
+            $result = $action->handle($data['prompt']);
         } catch (AiBudgetExceededException|AIProviderConfigException|UnknownModelPricingException $e) {
             return response()->json(['message' => $e->getMessage()], 422);
         }
@@ -320,14 +313,8 @@ class CoreIdeaExtractorController extends Controller
             'prompt' => ['required', 'string', 'max:'.config('core_idea_extractor.layer2.max_prompt_chars', 300000)],
         ]);
 
-        $organization = TenantContext::get();
-
-        if (! $organization) {
-            return response()->json(['message' => 'Không xác định được tổ chức hiện tại — không thể gọi AI.'], 422);
-        }
-
         try {
-            $result = $action->handle($organization, $data['prompt'], 'summarization', (int) config('core_idea_extractor.summarization.max_output_tokens', 800));
+            $result = $action->handle($data['prompt'], 'summarization', (int) config('core_idea_extractor.summarization.max_output_tokens', 800));
         } catch (AiBudgetExceededException|AIProviderConfigException|UnknownModelPricingException $e) {
             return response()->json(['message' => $e->getMessage()], 422);
         }
@@ -346,14 +333,8 @@ class CoreIdeaExtractorController extends Controller
             'prompt' => ['required', 'string', 'max:'.config('core_idea_extractor.layer2.max_prompt_chars', 300000)],
         ]);
 
-        $organization = TenantContext::get();
-
-        if (! $organization) {
-            return response()->json(['message' => 'Không xác định được tổ chức hiện tại — không thể gọi AI.'], 422);
-        }
-
         try {
-            $result = $action->handle($organization, $data['prompt'], 'rewrite', (int) config('core_idea_extractor.rewrite.max_output_tokens', 2000));
+            $result = $action->handle($data['prompt'], 'rewrite', (int) config('core_idea_extractor.rewrite.max_output_tokens', 2000));
         } catch (AiBudgetExceededException|AIProviderConfigException|UnknownModelPricingException $e) {
             return response()->json(['message' => $e->getMessage()], 422);
         }

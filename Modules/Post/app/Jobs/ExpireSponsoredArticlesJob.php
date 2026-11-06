@@ -15,9 +15,7 @@ use Modules\Post\Models\PostArticle;
 
 /**
  * Chạy daily (không cần everyMinute như publish-due) — hết hạn tài trợ tính theo date, không
- * theo giờ. Post không còn tenant-scoped (spec/Platform_RBAC_Phase2_Specification.md §3.3
- * v3.0) nên job này đọc/ghi PostArticle bình thường, không cần withoutTenant()/TenantContext
- * nào — người nhận thông báo cũng không còn theo tổ chức, xem notifyExpired().
+ * theo giờ — xem notifyExpired().
  */
 class ExpireSponsoredArticlesJob implements ShouldQueue
 {
@@ -56,9 +54,8 @@ class ExpireSponsoredArticlesJob implements ShouldQueue
     }
 
     /**
-     * spec/Platform_RBAC_Phase2_Specification.md §3.3 mục 3 (v3.0) — bài viết không còn gắn
-     * với Organization nào (kể cả tổ chức tài trợ — không có UI để chọn, xem lý do đầy đủ ở
-     * spec) nên không thể tự động tìm đúng user của doanh nghiệp tài trợ để báo. Báo cho nhân
+     * spec/Platform_RBAC_Phase2_Specification.md §3.3 mục 3 (v3.0) — hệ thống không lưu tài
+     * khoản của doanh nghiệp tài trợ nên không thể tự động báo cho họ. Báo cho nhân
      * sự nền tảng (platform_content_head/platform_ops) kèm sponsor_name để họ tự liên hệ lại
      * đúng doanh nghiệp qua kênh sales/CRM riêng, ngoài phạm vi hệ thống này.
      */

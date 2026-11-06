@@ -30,7 +30,6 @@ class WriteActivityLogAction
             'causer_type'     => $entry->actorId ? \App\Models\User::class : null,
             'causer_id'       => $entry->actorId,
             'event'           => $entry->action,
-            'organization_id' => $entry->organizationId,
             'level'           => $entry->level->value,
             'module'          => $entry->module,
             'action'          => $entry->action,

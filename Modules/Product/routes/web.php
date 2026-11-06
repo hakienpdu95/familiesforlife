@@ -7,7 +7,7 @@ use Modules\Product\Features\CatalogManagement\Http\ProductAdminController;
 use Modules\Product\Features\CatalogManagement\Http\ProductApiController;
 
 // ── Catalog Sản phẩm & Dịch vụ — lấp route stub backend.products.* có sẵn ──────
-Route::middleware(['auth', 'tenant'])
+Route::middleware(['auth'])
     ->prefix('dashboard/products')
     ->name('backend.products.')
     ->group(function (): void {
@@ -32,9 +32,8 @@ Route::middleware(['auth', 'tenant'])
         Route::post('{product}/archive-content', [ProductAdminController::class, 'archiveContent'])->name('archive-content');
     });
 
-// ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị,
-// tenant-scoped tự động qua TenantAwareModel) ─────────────────────────────────────────────
-Route::middleware(['auth', 'tenant'])->prefix('backend/api/products')->name('backend.api.products.')->group(function (): void {
+// ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị) ─────────────────────────────────────────────
+Route::middleware(['auth'])->prefix('backend/api/products')->name('backend.api.products.')->group(function (): void {
     Route::get('items', [ProductApiController::class, 'index'])->name('items');
     Route::get('categories', [CategoryApiController::class, 'index'])->name('categories');
 });

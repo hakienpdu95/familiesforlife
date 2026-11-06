@@ -5,7 +5,7 @@ namespace Modules\CoreIdeaExtractor\Features\ContentExtraction\Actions;
 use App\Services\AI\AiBudgetGuard;
 use App\Services\AI\AIProviderManager;
 use App\Services\AI\AIRequestOptions;
-use App\Shared\Tenancy\Models\Organization;
+use App\Models\AiSetting;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -55,15 +55,15 @@ class RunCoreIdeaAiPromptAction
     ) {}
 
     /** @return array{markdown_output: string, model_used: string, cost_usd: float} */
-    public function handle(Organization $organization, string $prompt, string $kind, int $maxOutputTokens): array
+    public function handle(string $prompt, string $kind, int $maxOutputTokens): array
     {
-        $config = $organization->ai_provider_config ?? config('ai.default');
+        $config = AiSetting::providerConfig();
         $provider = $config['provider'] ?? 'anthropic';
         $model = $config['model'] ?? config('ai.default.model');
 
         $estimatedInputTokens = (int) ceil(mb_strlen($prompt) / 4);
 
-        $this->budget->ensureWithinBudget($organization, $estimatedInputTokens, $maxOutputTokens, $provider, $model);
+        $this->budget->ensureWithinBudget($estimatedInputTokens, $maxOutputTokens, $provider, $model);
 
         // Gọi AI đồng bộ trong request (nút bấm thủ công, không phải job nền) — nới execution
         // time limit giống RunLayer2ExtractionAction để tránh bị cắt giữa chừng nếu model phản
@@ -77,17 +77,16 @@ class RunCoreIdeaAiPromptAction
             maxTokens: $maxOutputTokens,
         );
 
-        $response = $this->aiProviderManager->complete($organization, [
+        $response = $this->aiProviderManager->complete([
             ['role' => 'user', 'content' => $prompt],
         ], $options);
 
-        $this->budget->recordActualCost($organization, $response->costUsd);
+        $this->budget->recordActualCost($response->costUsd);
 
         // Dùng chung bảng cie_layer2_runs với Layer 2 gốc — GetAicemUsageStatsHandler chỉ
         // SUM(cost_usd) theo tháng, không lọc theo `kind`, nên cộng đúng vào cost_this_month bất
         // kể nguồn gốc; cột `kind` chỉ phục vụ audit/tách chi phí theo tính năng sau này.
         DB::table('cie_layer2_runs')->insert([
-            'organization_id' => $organization->id,
             'kind' => $kind,
             'cost_usd' => $response->costUsd,
             'model_used' => $response->modelUsed,

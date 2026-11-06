@@ -2,6 +2,7 @@
 
 namespace Modules\Aicem\Features\Generation\Actions;
 
+use App\Models\AiSetting;
 use Illuminate\Database\Eloquent\Model;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Modules\Aicem\Enums\GenerationRunStatus;
@@ -12,14 +13,6 @@ use Modules\Aicem\Models\AicemWorkflow;
 /**
  * Tạo AicemGenerationRun(status: pending) rồi dispatch job nền — không gọi AI đồng bộ trong
  * request/response cycle (mục 3: LLM call có thể mất 5-30s).
- *
- * organization_id LUÔN lấy qua resolver->organizationId($subject) (spec/Platform_RBAC_Phase2_Specification.md
- * §3.4, v3.0 — Post không còn organization_id nên không thể đọc trực tiếp từ $subject), KHÔNG
- * dựa vào TenantContext hiện tại của người bấm — vì super-admin (organization_id=NULL,
- * OrganizationScope bypass hoàn toàn) hoàn toàn có thể đang thao tác trên 1 subject thuộc
- * Organization KHÁC với "org hiện tại" (thường là org hệ thống mặc định). Nếu lấy theo
- * TenantContext ambient, job chạy nền sau đó sẽ tìm subject sai Organization → luôn báo
- * "không tồn tại" dù subject vẫn còn — xem RunAicemWorkflowJob.
  */
 class StartGenerationRunAction
 {
@@ -27,11 +20,9 @@ class StartGenerationRunAction
 
     public function handle(Model $subject, string $subjectType, AicemWorkflow $workflow, int $userId): AicemGenerationRun
     {
-        $providerConfig = config('ai.default');
-        $resolver       = app(config("aicem_subjects.{$subjectType}.resolver"));
+        $providerConfig = AiSetting::providerConfig();
 
         $run = AicemGenerationRun::create([
-            'organization_id' => $resolver->organizationId($subject),
             'subject_type'    => $subjectType,
             'subject_id'      => $subject->id,
             'workflow_id'     => $workflow->id,

@@ -6,7 +6,7 @@ use App\Services\AI\AiBudgetGuard;
 use App\Services\AI\AIProviderManager;
 use App\Services\AI\AIRequestOptions;
 use App\Services\AI\Exceptions\AiBudgetExceededException;
-use App\Shared\Tenancy\Models\Organization;
+use App\Models\AiSetting;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -134,9 +134,9 @@ class RunLayer2ExtractionAction
     ) {}
 
     /** @return array{markdown_output: string, model_used: string, cost_usd: float, loop_iterations: int} */
-    public function handle(Organization $organization, string $prompt): array
+    public function handle(string $prompt): array
     {
-        $config = $organization->ai_provider_config ?? config('ai.default');
+        $config = AiSetting::providerConfig();
         $provider = $config['provider'] ?? 'anthropic';
         $model = $config['model'] ?? config('ai.default.model');
 
@@ -183,7 +183,7 @@ class RunLayer2ExtractionAction
             $estimatedInputTokens = (int) ceil((mb_strlen($prompt) + mb_strlen($userTurn)) / 4);
 
             try {
-                $this->budget->ensureWithinBudget($organization, $estimatedInputTokens, $maxOutputTokens, $provider, $model);
+                $this->budget->ensureWithinBudget($estimatedInputTokens, $maxOutputTokens, $provider, $model);
             } catch (AiBudgetExceededException $e) {
                 // Hết ngân sách GIỮA vòng lặp (lượt >1) — lượt trước đã tốn tiền thật và tạo ra ý
                 // tưởng hợp lệ, KHÔNG ném exception làm mất trắng kết quả đó. Chỉ lượt 1 (chưa có
@@ -198,19 +198,18 @@ class RunLayer2ExtractionAction
                 break;
             }
 
-            $response = $this->aiProviderManager->complete($organization, [
+            $response = $this->aiProviderManager->complete([
                 ['role' => 'system', 'content' => $prompt, 'cacheable' => true],
                 ['role' => 'user', 'content' => $userTurn],
             ], $options);
 
-            $this->budget->recordActualCost($organization, $response->costUsd);
+            $this->budget->recordActualCost($response->costUsd);
             $totalCostUsd += $response->costUsd;
             $modelUsed = $response->modelUsed;
 
             // Log riêng cho dashboard Aicem ("Tổng quan") — 1 lần bấm "Chạy Layer 2" giờ có thể
             // tương ứng NHIỀU dòng nếu vòng lặp chạy >1 lượt (mỗi lượt gọi AI thật ghi 1 dòng).
             DB::table('cie_layer2_runs')->insert([
-                'organization_id' => $organization->id,
                 'cost_usd' => $response->costUsd,
                 'model_used' => $response->modelUsed,
                 'created_at' => now(),

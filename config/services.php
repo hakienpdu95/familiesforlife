@@ -20,12 +20,12 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Anthropic (nền tảng, không qua Organization)
+    | Anthropic (nền tảng)
     |--------------------------------------------------------------------------
     | Fallback cuối cùng đọc bởi App\Services\AI\AIProviderManager::makeProvider() khi
-    | tổ chức KHÔNG tự cấu hình BYOK riêng (organizations.ai_provider_config) VÀ
+    | chưa cấu hình BYOK riêng (ai_settings.provider_config) VÀ
     | config('ai.default.api_key') (AI_DEFAULT_API_KEY) cũng chưa set — tức đây là key
-    | nền tảng DÙNG CHUNG cho mọi tổ chức không tự mang key riêng.
+    | nền tảng dùng chung.
     */
     'anthropic' => [
         'api_key' => env('ANTHROPIC_API_KEY'),

@@ -3,7 +3,7 @@
 namespace Modules\Banner\Models;
 
 use App\Models\User;
-use App\Traits\HasTenantMedia;
+use App\Traits\HasManagedMedia;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,7 +27,7 @@ class Banner extends Model implements HasMedia
 {
     use SoftDeletes;
     use LogsActivity;
-    use HasTenantMedia;
+    use HasManagedMedia;
 
     protected $table = 'banners';
 

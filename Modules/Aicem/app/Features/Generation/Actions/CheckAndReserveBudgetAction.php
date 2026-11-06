@@ -3,7 +3,7 @@
 namespace Modules\Aicem\Features\Generation\Actions;
 
 use App\Services\AI\CostCalculator;
-use App\Shared\Tenancy\TenantContext;
+use App\Models\AiSetting;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Modules\Aicem\Features\Generation\Exceptions\BudgetExceededException;
@@ -12,19 +12,19 @@ use Modules\Aicem\Models\AicemMonthlyBudgetUsage;
 
 /**
  * Reserve trần chi phí ước lượng TRƯỚC khi gọi AI — pattern reserve → reconcile chống race
- * (spec/AICEM_Technical_Specification.md mục 13.1). Nếu Organization không đặt
- * ai_monthly_budget_usd (null) thì bỏ qua toàn bộ, không tạo dòng đếm.
+ * (spec/AICEM_Technical_Specification.md mục 13.1). Nếu ai_settings.monthly_budget_usd
+ * null thì bỏ qua toàn bộ, không tạo dòng đếm.
  */
 class CheckAndReserveBudgetAction
 {
     use AsAction;
 
-    /** @param array<int, array{role: string, content: string}> $messages @return float|null estimated_cost_usd đã reserve, null nếu org không giới hạn */
+    /** @param array<int, array{role: string, content: string}> $messages @return float|null estimated_cost_usd đã reserve, null nếu không giới hạn */
     public function handle(AicemGenerationRun $run, array $messages, int $maxTokens): ?float
     {
-        $organization = TenantContext::resolve();
+        $budget = AiSetting::current()->monthly_budget_usd;
 
-        if ($organization->ai_monthly_budget_usd === null) {
+        if ($budget === null) {
             return null;
         }
 
@@ -34,15 +34,14 @@ class CheckAndReserveBudgetAction
 
         $yearMonth = now()->format('Y-m');
 
-        // insertOrIgnore — nhiều job đồng thời cùng org/tháng có thể cùng thấy "chưa có dòng đếm",
-        // unique(organization_id, year_month) đảm bảo chỉ 1 insert thành công, các lần khác bị bỏ
+        // insertOrIgnore — nhiều job đồng thời cùng tháng có thể cùng thấy "chưa có dòng đếm",
+        // unique(year_month) đảm bảo chỉ 1 insert thành công, các lần khác bị bỏ
         // qua an toàn (không throw), rồi lockForUpdate bên dưới mới thật sự tuần tự hoá việc kiểm tra.
-        // Dùng withTrashed() khi tìm lại — model này có SoftDeletes (kế thừa TenantAwareModel) nên
+        // Dùng withTrashed() khi tìm lại — model này có SoftDeletes (kế thừa BaseModel) nên
         // 1 hàng đã bị soft-delete (không nên xảy ra trong vận hành bình thường, phòng vệ) vẫn còn
         // chiếm unique key khiến insertOrIgnore bị bỏ qua trong khi query có scope mặc định lại
         // không thấy hàng đó — phải restore() nếu rơi vào trường hợp này.
         DB::table('aicem_monthly_budget_usage')->insertOrIgnore([
-            'organization_id' => $organization->id,
             'year_month'      => $yearMonth,
             'reserved_usd'    => 0,
             'settled_usd'     => 0,
@@ -50,7 +49,7 @@ class CheckAndReserveBudgetAction
             'updated_at'      => now(),
         ]);
 
-        DB::transaction(function () use ($organization, $yearMonth, $estimated) {
+        DB::transaction(function () use ($budget, $yearMonth, $estimated) {
             /** @var AicemMonthlyBudgetUsage $usage */
             $usage = AicemMonthlyBudgetUsage::withTrashed()
                 ->where('year_month', $yearMonth)
@@ -63,10 +62,10 @@ class CheckAndReserveBudgetAction
 
             $usedSoFar = (float) $usage->reserved_usd + (float) $usage->settled_usd;
 
-            if ($usedSoFar + $estimated > (float) $organization->ai_monthly_budget_usd) {
+            if ($usedSoFar + $estimated > $budget) {
                 throw new BudgetExceededException(sprintf(
                     'Đã vượt hạn mức chi phí AI tháng %s ($%.4f đã dùng/reserve + $%.4f ước tính cho lần chạy này > hạn mức $%.2f/tháng).',
-                    $yearMonth, $usedSoFar, $estimated, (float) $organization->ai_monthly_budget_usd
+                    $yearMonth, $usedSoFar, $estimated, $budget
                 ));
             }
 

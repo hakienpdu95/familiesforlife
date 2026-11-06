@@ -2,9 +2,9 @@
 
 namespace Modules\Post\Database\Seeders;
 
+use App\Enums\RoleEnum;
 use App\Models\User;
-use App\Shared\Tenancy\Models\Organization;
-use App\Shared\Tenancy\TenantContext;
+use Database\Seeders\Concerns\ResolvesPlatformAccounts;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Auth;
 use Modules\Post\Features\ArticleAuthoring\Actions\ApproveArticleTranslationAction;
@@ -32,6 +32,8 @@ use Modules\Post\Models\PostCategory;
  */
 class PostDemoSeeder extends Seeder
 {
+    use ResolvesPlatformAccounts;
+
     /** @var array<int, array{key: string, name: string, icon: string, color: string}> */
     private const CATEGORIES = [
         ['key' => 'parenting',   'name' => 'Nuôi dạy con',        'icon' => 'baby',        'color' => '#F59E0B'],
@@ -629,35 +631,27 @@ class PostDemoSeeder extends Seeder
 
     public function run(): void
     {
-        $org = Organization::withoutGlobalScopes()->where('slug', 'system')->first();
-        if (! $org) {
-            $this->command->warn('  ⚠ Không tìm thấy Organization slug=system — chạy SystemOrganizationSeeder trước.');
+        $accounts = $this->platformAccounts([
+            'creator' => RoleEnum::CONTENT_CREATOR,
+            'editor'  => RoleEnum::CONTENT_EDITOR,
+            'head'    => RoleEnum::CONTENT_HEAD,
+        ]);
 
+        if (! $accounts) {
             return;
         }
 
-        $creator = User::withoutGlobalScopes()->where('email', 'haidang.pv@vigiadinh.vn')->first();
-        $editor  = User::withoutGlobalScopes()->where('email', 'thuha.btv@vigiadinh.vn')->first();
-        $head    = User::withoutGlobalScopes()->where('email', 'quockhanh.tbt@vigiadinh.vn')->first();
-
-        if (! $creator || ! $editor || ! $head) {
-            $this->command->warn('  ⚠ Thiếu tài khoản platform (haidang.pv/thuha.btv/quockhanh.tbt@vigiadinh.vn) — chạy ApprovalDatabaseSeeder trước.');
-
-            return;
-        }
+        ['creator' => $creator, 'editor' => $editor, 'head' => $head] = $accounts;
 
         $previousUser = Auth::user();
         $created      = 0;
+        $categories   = $this->seedCategories($creator);
 
-        TenantContext::runForOrganization($org, function () use ($creator, $editor, $head, &$created) {
-            $categories = $this->seedCategories($creator);
-
-            foreach (self::ARTICLES as $definition) {
-                if ($this->seedArticle($definition, $categories[$definition['category']], $creator, $editor, $head)) {
-                    $created++;
-                }
+        foreach (self::ARTICLES as $definition) {
+            if ($this->seedArticle($definition, $categories[$definition['category']], $creator, $editor, $head)) {
+                $created++;
             }
-        });
+        }
 
         $previousUser ? Auth::login($previousUser) : Auth::logout();
 

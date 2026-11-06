@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Log;
  * Usage:
  *   php artisan media:migrate-disk --from=public --to=s3
  *   php artisan media:migrate-disk --from=public --to=s3 --collection=avatar --batch=50
- *   php artisan media:migrate-disk --from=public --to=s3 --org=5 --dry-run
  *
  * Safety:
  *  - Verifies MD5 checksum before marking each record as migrated.
@@ -26,7 +25,6 @@ class MediaMigrateDiskCommand extends Command
                             {--from=      : Source disk name (required)}
                             {--to=        : Target disk name (required)}
                             {--collection= : Migrate only this collection}
-                            {--org=        : Migrate only this organization_id}
                             {--batch=100   : Records per batch}
                             {--dry-run     : List what would be migrated without copying}';
 
@@ -41,7 +39,6 @@ class MediaMigrateDiskCommand extends Command
         $from       = $this->option('from');
         $to         = $this->option('to');
         $collection = $this->option('collection') ?: null;
-        $org        = $this->option('org') ? (int) $this->option('org') : null;
         $batch      = (int) ($this->option('batch') ?? 100);
         $isDryRun   = (bool) $this->option('dry-run');
 
@@ -54,10 +51,9 @@ class MediaMigrateDiskCommand extends Command
         $this->info("Migrating disk: {$from} → {$to}{$label}");
 
         if ($collection) $this->line("  Collection : {$collection}");
-        if ($org)        $this->line("  Org ID     : {$org}");
         $this->line("  Batch size : {$batch}");
 
-        $total    = $this->service->buildMigrateQuery($from, $collection, $org)->count();
+        $total    = $this->service->buildMigrateQuery($from, $collection)->count();
         $this->info("  Total records eligible: {$total}");
 
         if ($total === 0) {
@@ -74,7 +70,7 @@ class MediaMigrateDiskCommand extends Command
         $bar->start();
 
         while (true) {
-            $records = $this->service->buildMigrateQuery($from, $collection, $org)
+            $records = $this->service->buildMigrateQuery($from, $collection)
                 ->orderBy('id')
                 ->offset($offset)
                 ->limit($batch)

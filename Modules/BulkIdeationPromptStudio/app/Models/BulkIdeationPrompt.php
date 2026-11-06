@@ -11,8 +11,8 @@ use Modules\Post\Models\PostCategory;
 /**
  * Cùng nhóm Modules\PromptFrameworkStudio\Models\GeneratedPrompt và
  * Modules\VideoSeriesPromptStudio\Models\VideoSeriesPrompt — chỉ lưu lại NGUYÊN VĂN prompt đã
- * ghép (BuildBulkIdeationPromptAction), KHÔNG gọi AI Provider trong app. KHÔNG TenantAwareModel/
- * organization_id — công cụ nội bộ đội content, không phải dữ liệu multi-tenant.
+ * ghép (BuildBulkIdeationPromptAction), KHÔNG gọi AI Provider trong app — công cụ nội bộ đội
+ * content.
  */
 class BulkIdeationPrompt extends Model
 {

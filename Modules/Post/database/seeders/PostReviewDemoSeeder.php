@@ -2,9 +2,9 @@
 
 namespace Modules\Post\Database\Seeders;
 
+use App\Enums\RoleEnum;
 use App\Models\User;
-use App\Shared\Tenancy\Models\Organization;
-use App\Shared\Tenancy\TenantContext;
+use Database\Seeders\Concerns\ResolvesPlatformAccounts;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Auth;
 use Modules\Post\Enums\TranslationStatus;
@@ -21,7 +21,7 @@ use Modules\Post\Models\PostArticleTranslation;
 /**
  * Demo dữ liệu minh hoạ 2 tầng duyệt bài viết (platform_content_editor → platform_content_head — Platform
  * Approval Gateway, spec/Workflow_Approval_Technical_Specification.md §18.10). Chạy Action
- * THẬT (không insert thẳng DB) do đúng vai (marketing tạo/gửi, editor duyệt sơ bộ, platform_content_head
+ * THẬT (không insert thẳng DB) do đúng vai (platform_content_creator tạo/gửi, editor duyệt sơ bộ, platform_content_head
  * duyệt cuối) để log/timestamp sinh ra thực tế.
  *
  * KHÔNG nằm trong SystemDataSeeder (demo-only, giống ProductApprovalDemoSeeder) — chạy thủ công:
@@ -31,33 +31,29 @@ use Modules\Post\Models\PostArticleTranslation;
  */
 class PostReviewDemoSeeder extends Seeder
 {
+    use ResolvesPlatformAccounts;
+
     public function run(): void
     {
-        $org = Organization::where('slug', 'demo')->first();
-        if (! $org) {
-            $this->command->warn('  ⚠ Không tìm thấy Organization slug=demo — chạy OrganizationSeeder trước.');
+        $accounts = $this->platformAccounts([
+            'author' => RoleEnum::CONTENT_CREATOR,
+            'editor' => RoleEnum::CONTENT_EDITOR,
+            'head'   => RoleEnum::CONTENT_HEAD,
+        ]);
 
+        if (! $accounts) {
             return;
         }
 
-        $marketing = User::where('email', 'marketing@demo.test')->first();
-        $editor    = User::withoutGlobalScopes()->where('email', 'thuha.btv@vigiadinh.vn')->first();
-        $head      = User::withoutGlobalScopes()->where('email', 'quockhanh.tbt@vigiadinh.vn')->first();
+        ['author' => $author, 'editor' => $editor, 'head' => $head] = $accounts;
 
-        if (! $marketing || ! $editor || ! $head) {
-            $this->command->warn('  ⚠ Thiếu user demo (marketing@demo.test / thuha.btv@vigiadinh.vn / quockhanh.tbt@vigiadinh.vn) — chạy UserSeeder + ContentReviewHierarchySeeder trước.');
-
-            return;
-        }
-
-        TenantContext::set($org);
         $previousUser = Auth::user();
 
-        $this->seedDraft($marketing);
-        $this->seedSubmitted($marketing, 'demo-review-cham-soc-khach-hang', 'Bí quyết chăm sóc khách hàng hiệu quả (Demo — chờ biên tập viên)');
-        $this->seedSubmitted($marketing, 'demo-review-toi-uu-chi-phi', '5 mẹo tối ưu chi phí vận hành doanh nghiệp (Demo — chờ biên tập viên)');
-        $this->seedApproved($marketing, $editor);
-        $this->seedPublished($marketing, $editor, $head);
+        $this->seedDraft($author);
+        $this->seedSubmitted($author, 'demo-review-cham-soc-khach-hang', 'Bí quyết chăm sóc khách hàng hiệu quả (Demo — chờ biên tập viên)');
+        $this->seedSubmitted($author, 'demo-review-toi-uu-chi-phi', '5 mẹo tối ưu chi phí vận hành doanh nghiệp (Demo — chờ biên tập viên)');
+        $this->seedApproved($author, $editor);
+        $this->seedPublished($author, $editor, $head);
 
         $previousUser ? Auth::login($previousUser) : Auth::logout();
 
@@ -90,45 +86,45 @@ class PostReviewDemoSeeder extends Seeder
         return [$translation, true];
     }
 
-    private function seedDraft(User $marketing): void
+    private function seedDraft(User $author): void
     {
         // Không transition gì thêm — mặc định Draft ngay sau khi tạo, chưa gửi duyệt.
-        $this->findOrCreateTranslation('demo-review-xu-huong-marketing-2026', 'Xu hướng marketing số 2026 (Demo — Draft, chưa gửi duyệt)', $marketing);
+        $this->findOrCreateTranslation('demo-review-xu-huong-marketing-2026', 'Xu hướng marketing số 2026 (Demo — Draft, chưa gửi duyệt)', $author);
     }
 
-    private function seedSubmitted(User $marketing, string $slug, string $title): void
+    private function seedSubmitted(User $author, string $slug, string $title): void
     {
-        [$translation, $isNew] = $this->findOrCreateTranslation($slug, $title, $marketing);
+        [$translation, $isNew] = $this->findOrCreateTranslation($slug, $title, $author);
         if (! $isNew) {
             return;
         }
 
-        Auth::login($marketing);
+        Auth::login($author);
         app(SubmitArticleForReviewAction::class)->handle($translation);
     }
 
-    private function seedApproved(User $marketing, User $editor): void
+    private function seedApproved(User $author, User $editor): void
     {
-        [$translation, $isNew] = $this->findOrCreateTranslation('demo-review-bao-cao-thi-truong-q3', 'Báo cáo thị trường quý 3/2026 (Demo — chờ trưởng phòng nội dung duyệt cuối)', $marketing);
+        [$translation, $isNew] = $this->findOrCreateTranslation('demo-review-bao-cao-thi-truong-q3', 'Báo cáo thị trường quý 3/2026 (Demo — chờ trưởng phòng nội dung duyệt cuối)', $author);
         if (! $isNew) {
             return;
         }
 
-        Auth::login($marketing);
+        Auth::login($author);
         app(SubmitArticleForReviewAction::class)->handle($translation);
 
         Auth::login($editor);
         app(ApproveArticleTranslationAction::class)->handle($translation);
     }
 
-    private function seedPublished(User $marketing, User $editor, User $head): void
+    private function seedPublished(User $author, User $editor, User $head): void
     {
-        [$translation, $isNew] = $this->findOrCreateTranslation('demo-review-huong-dan-su-dung-nen-tang', 'Hướng dẫn sử dụng nền tảng Hà Kiên (Demo — đã xuất bản)', $marketing);
+        [$translation, $isNew] = $this->findOrCreateTranslation('demo-review-huong-dan-su-dung-nen-tang', 'Hướng dẫn sử dụng nền tảng Hà Kiên (Demo — đã xuất bản)', $author);
         if (! $isNew) {
             return;
         }
 
-        Auth::login($marketing);
+        Auth::login($author);
         app(SubmitArticleForReviewAction::class)->handle($translation);
 
         Auth::login($editor);

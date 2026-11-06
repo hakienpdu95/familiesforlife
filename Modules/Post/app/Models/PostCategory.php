@@ -13,10 +13,8 @@ use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
 /**
- * spec/Platform_RBAC_Phase2_Specification.md §4 (v3.0) — category dùng chung toàn nền tảng,
- * không extends TenantAwareModel nữa (organization_id vẫn còn cột, nhưng nullable/không còn
- * global-scope — xem migration 2026_07_13_000003). Biên tập viên phụ trách theo category qua
- * bảng post_category_editors (§4.2), không theo tổ chức.
+ * spec/Platform_RBAC_Phase2_Specification.md §4 (v3.0) — category dùng chung toàn nền tảng.
+ * Biên tập viên phụ trách theo category qua bảng post_category_editors (§4.2).
  */
 class PostCategory extends Model
 {
@@ -36,7 +34,6 @@ class PostCategory extends Model
 
     protected $fillable = [
         'uuid',
-        'organization_id',
         'parent_id',
         'name',
         'slug',

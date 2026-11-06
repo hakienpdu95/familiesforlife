@@ -3,7 +3,6 @@
 namespace Modules\Product\Features\CatalogManagement\Http;
 
 use App\Http\Controllers\Controller;
-use App\Shared\Tenancy\TenantContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -60,26 +59,11 @@ class ProductAdminController extends Controller
             ->with('success', "Sản phẩm \"{$product->name}\" đã được tạo và gửi duyệt.");
     }
 
-    public function edit(Product $product, ListCategoriesForAdminHandler $categoryHandler): string
+    public function edit(Product $product, ListCategoriesForAdminHandler $categoryHandler): View
     {
         $categories = $categoryHandler->handle(new ListCategoriesForAdminQuery());
 
-        // platform_content_moderator (organization_id=null) không có TenantContext trỏ tới tổ chức của
-        // $product — nếu không bọc, $product->approvalSubject (OrganizationScope, §7.1) resolve
-        // null khi render Blade, ẩn mất toàn bộ badge/nút "Duyệt nội dung" dù moderator vẫn xem
-        // được trang (Product route binding không tenant-scope). Bug thật phát hiện khi kiểm thử
-        // dashboard "Xem & duyệt" bằng tài khoản platform_content_moderator — cùng nguyên nhân với
-        // runApprovalTransition() ở dưới, chỉ khác là ở đây cần bọc luôn cho GET, không chỉ POST.
-        // PHẢI gọi ->render() NGAY TRONG closure — view() chỉ build đối tượng View (lazy), Blade
-        // thật sự chạy khi Laravel gọi render() sau khi controller return; nếu trả thẳng View
-        // chưa render, finally của runForOrganization() đã phục hồi TenantContext CŨ trước khi
-        // Blade kịp đọc $product->approvalSubject, khiến bug vẫn y nguyên dù có bọc.
-        // Dùng mảng literal, KHÔNG compact() — fn() chỉ auto-capture biến được tham chiếu trực
-        // tiếp bằng tên; compact('product') chỉ truyền chuỗi nên PHP không tự bắt được.
-        return TenantContext::runForOrganization(
-            $product->organization,
-            fn () => view('product::admin.products.edit', ['product' => $product, 'categories' => $categories])->render(),
-        );
+        return view('product::admin.products.edit', compact('product', 'categories'));
     }
 
     public function update(Request $request, Product $product, UpdateProductAction $action): RedirectResponse
@@ -147,14 +131,7 @@ class ProductAdminController extends Controller
     // ── Approval workflow — Platform Approval Gateway (Hà Kiên nội bộ) ─────────────────
     // Trạng thái duyệt nội dung — độc lập với changeStatus() ở trên (trục vận hành/kinh
     // doanh, §2.3). Action không tự check quyền, controller tự authorize trước khi gọi.
-    // approve/reject/publishApproval/archiveApproval do platform_content_moderator xử lý — tài khoản
-    // này KHÔNG thuộc tổ chức nào (organization_id=null) nên TenantContext của chính họ không
-    // trỏ tới tổ chức của $product; runApprovalTransition() bọc lệnh gọi Action trong
-    // TenantContext::runForOrganization($product->organization, ...) để các query nội bộ
-    // (ApprovalSubject, ApprovalLog — đều có OrganizationScope) resolve đúng tổ chức của
-    // CHÍNH sản phẩm đang xử lý, không phải tổ chức (nếu có) của người đang thao tác. Áp dụng
-    // luôn cho submitApproval (thao tác của chính doanh nghiệp) — vô hại vì khi đó
-    // TenantContext đã đúng sẵn tổ chức của họ, set lại cùng giá trị không đổi gì.
+    // approve/reject/publishApproval/archiveApproval do platform_content_moderator xử lý.
 
     public function submitApproval(Product $product, SubmitForApprovalAction $action): RedirectResponse
     {
@@ -196,7 +173,7 @@ class ProductAdminController extends Controller
     private function runApprovalTransition(Product $product, \Closure $callback, string $successMessage): RedirectResponse
     {
         try {
-            TenantContext::runForOrganization($product->organization, $callback);
+            $callback();
         } catch (InvalidTransitionException $e) {
             return back()->with('error', $e->getMessage());
         }

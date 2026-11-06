@@ -7,7 +7,7 @@ use Modules\Aicem\Features\Generation\Http\AicemGenerationController;
 use Modules\Aicem\Features\KnowledgeBase\Http\KnowledgeDocumentAdminController;
 use Modules\Aicem\Features\KnowledgeBase\Http\KnowledgeDocumentApiController;
 
-Route::middleware(['auth', 'tenant'])
+Route::middleware(['auth'])
     ->prefix('dashboard/aicem')
     ->name('backend.aicem.')
     ->group(function (): void {
@@ -19,8 +19,7 @@ Route::middleware(['auth', 'tenant'])
             ->name('knowledge-documents.versions.restore');
 
         // Panel AI (mục 9) — POST tạo run chạy nền, GET status poll, accept/reject suggestion.
-        // {run} tenant-scoped qua route model binding (AicemGenerationRun extends TenantAwareModel);
-        // {suggestion} KHÔNG tenant-scoped (mục 7) nên luôn kiểm generation_run_id === $run->id
+        // {suggestion} luôn kiểm generation_run_id === $run->id
         // trong controller trước khi thao tác — tránh truy cập chéo suggestion của run khác.
         Route::post('generation/run', [AicemGenerationController::class, 'run'])->name('generation.run');
         Route::get('generation/runs/{run}/status', [AicemGenerationController::class, 'status'])->name('generation.status');
@@ -40,8 +39,7 @@ Route::middleware(['auth', 'tenant'])
         Route::post('example-candidates/{candidate}/reject', [ExampleCandidateAdminController::class, 'reject'])->name('example-candidates.reject');
     });
 
-// ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị,
-// tenant-scoped tự động qua TenantAwareModel) ─────────────────────────────────────────────
-Route::middleware(['auth', 'tenant'])->prefix('backend/api/aicem')->name('backend.api.aicem.')->group(function () {
+// ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị) ─────────────────────────────────────────────
+Route::middleware(['auth'])->prefix('backend/api/aicem')->name('backend.api.aicem.')->group(function () {
     Route::get('knowledge-documents', [KnowledgeDocumentApiController::class, 'index'])->name('knowledge-documents');
 });

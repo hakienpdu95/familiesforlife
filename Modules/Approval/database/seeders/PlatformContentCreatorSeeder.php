@@ -28,7 +28,6 @@ class PlatformContentCreatorSeeder extends Seeder
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        setPermissionsTeamId(null);
         $role = Role::firstOrCreate(['name' => 'platform_content_creator', 'guard_name' => 'web']);
 
         $this->createAccount('haidang.pv@vigiadinh.vn', 'Nguyễn Hải Đăng', $role);
@@ -45,7 +44,6 @@ class PlatformContentCreatorSeeder extends Seeder
             [
                 'name'              => $name,
                 'password'          => Hash::make('Admin@123!'),
-                'organization_id'   => null,
                 'email_verified_at' => now(),
                 'trust_level'       => 2,
                 'account_type'      => AccountType::Platform,
@@ -56,7 +54,6 @@ class PlatformContentCreatorSeeder extends Seeder
             $user->forceFill(['account_type' => AccountType::Platform])->save();
         }
 
-        setPermissionsTeamId(null);
         $user->syncRoles($role);
     }
 }

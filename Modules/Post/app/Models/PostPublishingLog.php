@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Audit log append-only — không sửa, không soft-delete, không có updated_at.
- * Không tenant-scoped — Post là tài sản của nền tảng (spec Phase2 §3.3 v3.0).
+ * Post là tài sản của nền tảng (spec Phase2 §3.3 v3.0).
  */
 class PostPublishingLog extends Model
 {

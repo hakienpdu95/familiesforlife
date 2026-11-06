@@ -2,13 +2,13 @@
 
 namespace Modules\Aicem\Models;
 
-use App\Foundation\Models\TenantAwareModel;
+use App\Foundation\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Aicem\Enums\ScopeMatch;
 
-class AicemKnowledgeDocument extends TenantAwareModel
+class AicemKnowledgeDocument extends BaseModel
 {
     protected $table = 'aicem_knowledge_documents';
 

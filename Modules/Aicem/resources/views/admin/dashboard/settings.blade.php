@@ -6,7 +6,7 @@
 <div class="flex items-center justify-between mb-6">
     <div>
         <h1 class="text-2xl font-bold text-base-content">Cấu hình AICEM</h1>
-        <p class="text-sm text-base-content/50 mt-0.5">Provider AI (BYOK), hạn mức chi phí, rate limit cho tổ chức của bạn</p>
+        <p class="text-sm text-base-content/50 mt-0.5">Provider AI (BYOK), hạn mức chi phí, rate limit</p>
     </div>
     <a href="{{ route('backend.aicem.dashboard') }}" class="btn btn-ghost btn-sm">← Tổng quan</a>
 </div>
@@ -30,13 +30,13 @@
     // provider để tránh gõ sai, nhưng vẫn PHẢI giữ được model CŨ nếu nó không nằm trong danh sách
     // preset (đã lưu từ trước khi có select này, hoặc model mới ra sau này) — không thì chuyển
     // sang select sẽ ÂM THẦM đổi model đang dùng khi admin bấm Lưu mà không sửa gì ở đây.
-    $currentModel = old('ai_model', $organization->ai_provider_config['model'] ?? '');
-    // 2026-07-28 — mặc định Provider = Anthropic khi tổ chức CHƯA cấu hình gì (không phải khi đã
+    $currentModel = old('ai_model', $settings->provider_config['model'] ?? '');
+    // 2026-07-28 — mặc định Provider = Anthropic khi CHƯA cấu hình gì (không phải khi đã
     // lưu rỗng có chủ đích để "dùng mặc định nền tảng" — nhưng thực tế provider rỗng (chưa từng
     // lưu) và provider lưu rỗng có chủ đích không phân biệt được trong DB, nên coi rỗng = chưa
     // cấu hình = mặc định Anthropic cho dễ dùng, vẫn còn option "— Dùng mặc định nền tảng —" nếu
     // admin chủ động chọn lại.
-    $currentProvider = old('ai_provider', $organization->ai_provider_config['provider'] ?? '') ?: 'anthropic';
+    $currentProvider = old('ai_provider', $settings->provider_config['provider'] ?? '') ?: 'anthropic';
     // Model Anthropic — ĐÚNG NGUYÊN VĂN theo yêu cầu người dùng (2026-07-28), không tự đổi.
     $anthropicModels = ['claude-opus-4-8', 'claude-sonnet-5', 'claude-haiku-4-5'];
     // Model OpenAI — GPT-5 family (gpt-5/gpt-5-mini/gpt-5-nano), tự chọn theo hiểu biết hiện có,
@@ -107,7 +107,7 @@
                 </label>
                 <input type="password" name="ai_api_key" value=""
                        class="input input-bordered input-sm w-full font-mono @error('ai_api_key') input-error @enderror"
-                       placeholder="{{ ($organization->ai_provider_config['api_key'] ?? null) ? '•••••••••••• (đã lưu)' : 'Chưa cấu hình' }}"
+                       placeholder="{{ ($settings->provider_config['api_key'] ?? null) ? '•••••••••••• (đã lưu)' : 'Chưa cấu hình' }}"
                        autocomplete="new-password">
                 @error('ai_api_key')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
             </div>
@@ -123,7 +123,7 @@
                     <span class="label-text-alt text-xs text-base-content/40">Để trống = không giới hạn</span>
                 </label>
                 <input type="number" step="0.01" min="0" name="ai_monthly_budget_usd"
-                       value="{{ old('ai_monthly_budget_usd', $organization->ai_monthly_budget_usd) }}"
+                       value="{{ old('ai_monthly_budget_usd', $settings->monthly_budget_usd) }}"
                        class="input input-bordered input-sm w-full max-w-xs @error('ai_monthly_budget_usd') input-error @enderror"
                        placeholder="VD: 50.00">
                 @error('ai_monthly_budget_usd')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
@@ -139,14 +139,14 @@
                 <div class="form-control">
                     <label class="label py-0 pb-1.5"><span class="label-text font-medium">Lượt/phút mỗi user</span></label>
                     <input type="number" min="1" name="rate_limit_per_minute"
-                           value="{{ old('rate_limit_per_minute', $organization->ai_rate_limit_override['per_minute'] ?? '') }}"
+                           value="{{ old('rate_limit_per_minute', $settings->rate_limit_override['per_minute'] ?? '') }}"
                            class="input input-bordered input-sm w-full @error('rate_limit_per_minute') input-error @enderror">
                     @error('rate_limit_per_minute')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                 </div>
                 <div class="form-control">
                     <label class="label py-0 pb-1.5"><span class="label-text font-medium">Lượt/ngày mỗi user</span></label>
                     <input type="number" min="1" name="rate_limit_per_day"
-                           value="{{ old('rate_limit_per_day', $organization->ai_rate_limit_override['per_day'] ?? '') }}"
+                           value="{{ old('rate_limit_per_day', $settings->rate_limit_override['per_day'] ?? '') }}"
                            class="input input-bordered input-sm w-full @error('rate_limit_per_day') input-error @enderror">
                     @error('rate_limit_per_day')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                 </div>

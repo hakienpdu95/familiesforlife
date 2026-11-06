@@ -16,7 +16,7 @@ use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
 /**
- * spec/ContentCalendar_Technical_Specification.md §5.2 — KHÔNG extends TenantAwareModel (§4,
+ * spec/ContentCalendar_Technical_Specification.md §5.2 — KHÔNG extends BaseModel (§4,
  * Lớp A — tài sản nền tảng, không thuộc Organization nào, cùng nguyên tắc PostCategory/PostArticle).
  */
 class ContentCalendarEntry extends Model

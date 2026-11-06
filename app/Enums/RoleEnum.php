@@ -1,56 +1,66 @@
 <?php
+
 namespace App\Enums;
 
 enum RoleEnum: string
 {
-    case CEO       = 'ceo';
-    case SALES     = 'sales';
-    case OPS       = 'ops';
-    case MARKETING = 'marketing';
-    case HR        = 'hr';
-    case AI_OP     = 'ai_operator';
-    case ADMIN     = 'system_admin';
-    case VIEWER    = 'viewer';
+    case SUPER_ADMIN = 'super-admin';
+    case CONTENT_HEAD = 'platform_content_head';
+    case CONTENT_EDITOR = 'platform_content_editor';
+    case CONTENT_CREATOR = 'platform_content_creator';
+    case SECTION_EDITOR = 'platform_section_editor';
+    case CONTENT_MODERATOR = 'platform_content_moderator';
+    case OPS = 'platform_ops';
+    case VIEWER = 'platform_viewer';
 
     public function label(): string
     {
-        return match($this) {
-            self::CEO       => 'CEO / Founder',
-            self::SALES     => 'Sales Team',
-            self::OPS       => 'Operations',
-            self::MARKETING => 'Marketing',
-            self::HR        => 'HR / Admin Staff',
-            self::AI_OP     => 'AI Operator',
-            self::ADMIN     => 'System Admin',
-            self::VIEWER    => 'Viewer / Partner',
+        return match ($this) {
+            self::SUPER_ADMIN => 'Super Admin',
+            self::CONTENT_HEAD => 'Tổng biên tập',
+            self::CONTENT_EDITOR => 'Biên tập viên',
+            self::CONTENT_CREATOR => 'Phóng viên / Biên tập viết bài',
+            self::SECTION_EDITOR => 'Biên tập viên trưởng chuyên mục',
+            self::CONTENT_MODERATOR => 'Kiểm duyệt viên (Legal)',
+            self::OPS => 'Vận hành Platform',
+            self::VIEWER => 'Giám sát / Viewer',
         };
     }
 
     public function badgeClass(): string
     {
-        return match($this) {
-            self::CEO       => 'badge-primary',
-            self::ADMIN     => 'badge-error',
-            self::OPS       => 'badge-warning',
-            self::SALES     => 'badge-success',
-            self::HR        => 'badge-info',
-            self::AI_OP     => 'badge-secondary',
-            self::MARKETING => 'badge-accent',
-            self::VIEWER    => 'badge-ghost',
+        return match ($this) {
+            self::SUPER_ADMIN => 'badge-error',
+            self::CONTENT_HEAD => 'badge-primary',
+            self::CONTENT_EDITOR => 'badge-info',
+            self::CONTENT_CREATOR => 'badge-accent',
+            self::SECTION_EDITOR => 'badge-secondary',
+            self::CONTENT_MODERATOR => 'badge-warning',
+            self::OPS => 'badge-success',
+            self::VIEWER => 'badge-neutral',
         };
     }
 
-    public function visibleModules(): array
+    /** @return array<int, self> */
+    public static function assignable(): array
     {
-        return match($this) {
-            self::CEO    => ['ceo_dashboard','sales_ai','sop','workflow','users','activity_log'],
-            self::SALES  => ['sales_ai','sop'],
-            self::OPS    => ['ceo_dashboard','sop','workflow'],
-            self::MARKETING => ['sales_ai','sop'],
-            self::HR     => ['sop','users'],
-            self::AI_OP  => ['ceo_dashboard','sop','workflow'],
-            self::ADMIN  => ['ceo_dashboard','sales_ai','sop','workflow','users','roles','integrations','activity_log'],
-            self::VIEWER => ['ceo_dashboard','sop'],
-        };
+        return array_values(array_filter(self::cases(), fn (self $r) => $r !== self::SUPER_ADMIN));
+    }
+
+    /** @return array<int, string> */
+    public static function assignableValues(): array
+    {
+        return array_map(fn (self $r) => $r->value, self::assignable());
+    }
+
+    /** @return array<string, string> */
+    public static function labels(bool $assignableOnly = false): array
+    {
+        $cases = $assignableOnly ? self::assignable() : self::cases();
+
+        return array_combine(
+            array_map(fn (self $r) => $r->value, $cases),
+            array_map(fn (self $r) => $r->label(), $cases),
+        );
     }
 }

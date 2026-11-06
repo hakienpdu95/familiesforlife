@@ -2,10 +2,10 @@
 
 namespace Modules\Aicem\Models;
 
-use App\Foundation\Models\TenantAwareModel;
+use App\Foundation\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class AicemContextTemplate extends TenantAwareModel
+class AicemContextTemplate extends BaseModel
 {
     protected $table = 'aicem_context_templates';
 

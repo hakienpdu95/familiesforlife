@@ -74,7 +74,7 @@ class UpdateProductAction
 
         if ($data->cover_media_uuid) {
             $this->mediaUpload->reassociateFilePondDrafts($product, [$data->cover_media_uuid], 'cover');
-            $media = Media::withoutTenant()
+            $media = Media::query()
                 ->where('model_type', $product::class)
                 ->where('model_id', $product->getKey())
                 ->where('collection_name', 'cover')
@@ -87,7 +87,7 @@ class UpdateProductAction
         }
 
         if ($data->remove_cover) {
-            Media::withoutTenant()
+            Media::query()
                 ->where('model_type', $product::class)
                 ->where('model_id', $product->getKey())
                 ->where('collection_name', 'cover')

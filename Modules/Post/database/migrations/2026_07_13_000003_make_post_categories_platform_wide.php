@@ -16,6 +16,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (! Schema::hasColumn('post_categories', 'organization_id')) {
+            return;
+        }
+
         if (collect(Schema::getForeignKeys('post_categories'))->contains(fn ($fk) => $fk['columns'] === ['organization_id'])) {
             Schema::table('post_categories', function (Blueprint $table) {
                 $table->dropForeign(['organization_id']);

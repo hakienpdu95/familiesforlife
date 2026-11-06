@@ -45,7 +45,6 @@ class ReconcileBudgetAction
             // soft-delete trong vận hành bình thường, nhưng nếu có thì vẫn phải reconcile đúng vào
             // đúng hàng đó (không tạo hàng mới), không âm thầm bỏ qua.
             $usage = AicemMonthlyBudgetUsage::withTrashed()
-                ->where('organization_id', $run->organization_id)
                 ->where('year_month', $run->created_at->format('Y-m'))
                 ->lockForUpdate()
                 ->first();

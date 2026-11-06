@@ -2,10 +2,8 @@
 
 namespace Modules\RealEstate\Models;
 
-use App\Foundation\Models\TenantAwareModel;
-use App\Shared\Tenancy\OrganizationScope;
-use App\Traits\HasTenantMedia;
-use Illuminate\Database\Eloquent\Builder;
+use App\Foundation\Models\BaseModel;
+use App\Traits\HasManagedMedia;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
@@ -23,19 +21,19 @@ use Spatie\MediaLibrary\HasMedia;
 
 /**
  * spec/RealEstateForSale_Technical_Specification.md §4.1 — 1 bảng dùng chung cho cả bán/thuê
- * (listing_type phân biệt, §0). Tenant-scoped (Organization đăng tin) + workflow duyệt qua
+ * (listing_type phân biệt, §0). Workflow duyệt qua
  * Modules\Approval\Concerns\HasApproval (xuyên-domain, KHÔNG viết lại state machine riêng).
  */
-class RealEstateListing extends TenantAwareModel implements HasMedia
+class RealEstateListing extends BaseModel implements HasMedia
 {
     use HasApproval;
-    use HasTenantMedia;
+    use HasManagedMedia;
     use Searchable;
 
     protected $table = 'real_estate_listings';
 
     protected $fillable = [
-        'organization_id', 'listing_type', 'property_type', 'title', 'slug', 'description',
+        'listing_type', 'property_type', 'title', 'slug', 'description',
         'address_detail', 'province_code', 'ward_code', 'area', 'bedrooms', 'bathrooms',
         'floors', 'interior_status', 'is_price_negotiable', 'price', 'is_urgent', 'urgent_days',
         'monthly_rent', 'deposit', 'rental_period_months',
@@ -121,29 +119,6 @@ class RealEstateListing extends TenantAwareModel implements HasMedia
         ];
     }
 
-    /**
-     * HasApproval::scopePubliclyVisible() lồng whereHas('approvalSubject', ...) — đúng cho
-     * entity KHÔNG tenant-scoped (PostArticle/Event, không extends TenantAwareModel), nhưng
-     * RealEstateListing VÀ ApprovalSubject đều tenant-scoped (OrganizationScope) nên khách
-     * vãng lai (không có TenantContext — App\Shared\Tenancy\OrganizationScope::apply() mặc
-     * định WHERE 0=1 để chống rò rỉ dữ liệu) sẽ luôn nhận tập rỗng ở CẢ 2 bảng. Trang công khai
-     * (/anland, /nha-dat-ban, /nha-dat-thue) gộp tin từ MỌI Organization nên phải bỏ
-     * OrganizationScope ở cả 2 phía — publiclyVisible() (chỉ tin đã publish) đã là gate an toàn
-     * tương đương, bypass tenant scope ở đây không phải lỗ hổng.
-     *
-     * Đặt tên riêng (KHÔNG ghi đè publiclyVisible()) để không âm thầm đổi hành vi scope gốc của
-     * HasApproval ở những nơi khác trong module còn cần lọc theo tenant hiện tại.
-     */
-    public function scopePublicPortalVisible(Builder $query): Builder
-    {
-        return $query->withoutGlobalScope(OrganizationScope::class)
-            ->whereHas('approvalSubject', function (Builder $q) {
-                $q->withoutGlobalScope(OrganizationScope::class)
-                    ->whereNotNull('public_snapshot')
-                    ->where('status', '!=', ApprovalStatus::Archived);
-            });
-    }
-
     // ── Helpers ──────────────────────────────────────────────────────
 
     public function isSale(): bool
@@ -185,7 +160,7 @@ class RealEstateListing extends TenantAwareModel implements HasMedia
 
     /**
      * Ảnh gallery, đã sort theo order_column (§2.4 spec Bán) — max 6, validate ở Action, không
-     * phải DB constraint. Dùng `MediaUrlService` (đúng pattern `HasTenantMedia::getMediaUrl()`
+     * phải DB constraint. Dùng `MediaUrlService` (đúng pattern `HasManagedMedia::getMediaUrl()`
      * dùng chung toàn hệ thống) — KHÔNG gọi thẳng `$media->getUrl()` của Spatie: hàm đó đòi hỏi
      * conversion phải được `registerMediaConversions()` khai báo trước trên model, trong khi
      * `MediaUrlService` tự fallback về ảnh gốc nếu conversion chưa sinh (không cần đăng ký gì).

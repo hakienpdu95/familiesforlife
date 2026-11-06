@@ -8,7 +8,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Modules\RealEstate\Models\RealEstateListing;
 
 /**
- * Danh sách tin của TỔ CHỨC MÌNH (tenant-scoped tự động qua TenantAwareModel, §5.5 spec Bán) —
+ * Danh sách tin cho trang quản trị (§5.5 spec Bán) —
  * cùng pattern ListProductsForAdminHandler (Modules/Product), phục vụ Tabulator remote
  * pagination/sort/filter ở RealEstateListingApiController.
  */

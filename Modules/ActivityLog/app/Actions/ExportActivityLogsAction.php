@@ -17,7 +17,7 @@ class ExportActivityLogsAction
 
     public const ALLOWED_FILTERS = [
         'module', 'action', 'level_min', 'actor_id',
-        'date_from', 'date_to', 'search', 'organization_id',
+        'date_from', 'date_to', 'search',
     ];
 
     public function handle(array $filters, string $exportKey): void
@@ -52,7 +52,6 @@ class ExportActivityLogsAction
 
     private function applyFilters(Builder $q, array $filters): void
     {
-        if (!empty($filters['organization_id'])) $q->where('organization_id', $filters['organization_id']);
         if (!empty($filters['module']))          $q->where('module', $filters['module']);
         if (!empty($filters['action']))          $q->where('action', $filters['action']);
         if (!empty($filters['level_min']))       $q->where('level', '>=', $filters['level_min']);

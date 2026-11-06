@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 
 /**
  * Không soft-delete — vòng đời gắn chặt bản dịch bài viết, xoá cứng theo cascade khi bản dịch/khối bị xoá.
- * Không tenant-scoped — Post là tài sản của nền tảng (spec Phase2 §3.3 v3.0).
+ * Post là tài sản của nền tảng (spec Phase2 §3.3 v3.0).
  */
 class PostProductBlock extends Model
 {

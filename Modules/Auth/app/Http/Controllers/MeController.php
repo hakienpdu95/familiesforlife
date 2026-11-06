@@ -3,7 +3,6 @@
 namespace Modules\Auth\Http\Controllers;
 
 use App\Models\User;
-use App\Shared\Tenancy\TenantContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -22,7 +21,6 @@ class MeController
                 'account_type' => $user->account_type?->value,
                 'trust_level'  => $user->trust_level,
             ],
-            'organization' => TenantContext::get()?->only(['id', 'name', 'slug', 'status']),
             'roles'        => $user->getRoleNames(),
         ];
 

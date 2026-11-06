@@ -24,7 +24,7 @@ Route::name('province.public.')->group(function (): void {
         ->name('show');
 });
 
-Route::middleware(['auth', 'tenant'])
+Route::middleware(['auth'])
     ->prefix('dashboard/provinces')
     ->name('backend.provinces.')
     ->group(function (): void {
@@ -33,7 +33,7 @@ Route::middleware(['auth', 'tenant'])
         Route::put('{province}', [ProvinceAdminController::class, 'update'])->name('update');
     });
 
-Route::middleware(['auth', 'tenant'])
+Route::middleware(['auth'])
     ->prefix('backend/api/provinces')
     ->name('backend.api.provinces.')
     ->group(function (): void {

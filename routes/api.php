@@ -2,7 +2,6 @@
 
 use App\Actions\GetWardsByProvinceAction;
 use App\Http\Controllers\Api\NotificationController;
-use App\Http\Controllers\Api\UserOptionsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,11 +16,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('provinces/{provinceCode}/wards', GetWardsByProvinceAction::class)
     ->name('api.provinces.wards');
 
-Route::middleware(['auth:sanctum', 'tenant'])
-    ->get('v1/users/options', UserOptionsController::class)
-    ->name('api.users.options');
-
-Route::middleware(['auth:sanctum', 'tenant', 'throttle:notifications'])
+Route::middleware(['auth:sanctum', 'throttle:notifications'])
     ->prefix('notifications')
     ->name('api.notifications.')
     ->group(function () {

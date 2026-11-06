@@ -3,7 +3,7 @@
 namespace Modules\Post\Models;
 
 use App\Models\User;
-use App\Traits\HasTenantMedia;
+use App\Traits\HasManagedMedia;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -22,7 +22,7 @@ use Spatie\MediaLibrary\HasMedia;
 class PostArticleTranslation extends Model implements HasMedia
 {
     use HasFactory;
-    use HasTenantMedia;
+    use HasManagedMedia;
     use LogsActivity;
     use Searchable;
     use SoftDeletes;

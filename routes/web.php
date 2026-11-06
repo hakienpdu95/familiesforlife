@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Route;
 | Media API Routes — prefix: api/v1/media
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'tenant'])
+Route::middleware(['auth'])
     ->prefix('api/v1/media')
     ->name('api.media.')
     ->group(function () {
@@ -49,8 +49,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('backend.')->group(functi
     Route::get('system-monitor/data', [SystemMonitorController::class, 'data'])->name('system-monitor.data');
 
     // ── Dashboard chart API ───────────────────────────────────────────────
-    Route::prefix('api/dashboard/charts')->name('dashboard.charts.')->middleware('tenant')->group(function () {
-        Route::get('workflow-health', [DashboardChartController::class, 'workflowHealth'])->name('workflow-health');
+    Route::prefix('api/dashboard/charts')->name('dashboard.charts.')->group(function () {
         Route::get('content-trend',   [DashboardChartController::class, 'contentTrend'])  ->name('content-trend');
     });
 
@@ -62,7 +61,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('backend.')->group(functi
     Route::get('/settings',         fn () => abort(503, 'Module đang phát triển'))->name('settings.index');
 
     // ── Notification Center ───────────────────────────────────────────────
-    Route::middleware('tenant')->prefix('notifications')->name('notifications.')->group(function () {
+    Route::prefix('notifications')->name('notifications.')->group(function () {
         Route::get('/',             [NotificationCenterController::class,    'index'])       ->name('index');
         Route::get('/preferences',  [NotificationPreferenceController::class,'index'])       ->name('preferences');
         Route::patch('/{uuid}/read',[NotificationCenterController::class,    'markRead'])    ->name('mark-read');

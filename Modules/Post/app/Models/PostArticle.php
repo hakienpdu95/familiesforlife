@@ -3,7 +3,7 @@
 namespace Modules\Post\Models;
 
 use App\Models\User;
-use App\Traits\HasTenantMedia;
+use App\Traits\HasManagedMedia;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -26,7 +26,7 @@ use Spatie\MediaLibrary\HasMedia;
 
 /**
  * spec/Platform_RBAC_Phase2_Specification.md §3.3 (v3.0) — Post là tài sản của nền tảng,
- * không thuộc tenant/Organization nào — KHÔNG extends TenantAwareModel (không có
+ * không thuộc tenant/Organization nào — KHÔNG extends BaseModel (không có
  * organization_id, không global-scope theo tổ chức).
  *
  * spec/Media_Library_Technical_Specification.md §8 — cover image qua Media (collection `cover`),
@@ -40,7 +40,7 @@ use Spatie\MediaLibrary\HasMedia;
 class PostArticle extends Model implements HasMedia, PlaylistableContract
 {
     use HasFactory;
-    use HasTenantMedia;
+    use HasManagedMedia;
     use LogsActivity;
     use SoftDeletes;
 

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 /**
- * spec/AIVideoStudioTemplate_Technical_Specification.md §4.1 — KHÔNG TenantAwareModel, KHÔNG
+ * spec/AIVideoStudioTemplate_Technical_Specification.md §4.1 — KHÔNG
  * soft-delete, KHÔNG LogsActivity — cùng lý do ContentOutline (không phải credential/tài sản
  * nghiệp vụ cần audit).
  */

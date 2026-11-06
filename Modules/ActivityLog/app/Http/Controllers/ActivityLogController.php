@@ -9,7 +9,6 @@ use Illuminate\Support\Str;
 use Modules\ActivityLog\Models\ActivityLog;
 use Modules\ActivityLog\Models\ActivityLogContext;
 use Modules\ActivityLog\Models\ActivityLogHttp;
-use App\Shared\Tenancy\TenantContext;
 
 class ActivityLogController extends Controller
 {
@@ -20,14 +19,6 @@ class ActivityLogController extends Controller
 
     public function show(ActivityLog $log): \Illuminate\View\View
     {
-        // Cùng logic với ActivityLog::scopeForOrganization() dùng ở trang danh sách — cho xem
-        // log không gắn tổ chức (organization_id = null, log hệ thống/nền tảng), chỉ chặn khi
-        // log thuộc RÕ 1 tổ chức khác với tổ chức hiện tại.
-        if (TenantContext::isSet() && $log->organization_id !== null
-            && $log->organization_id !== TenantContext::getOrganizationId()) {
-            abort(403);
-        }
-
         $contexts = ActivityLogContext::where('log_id', $log->id)->orderBy('key_name')->get();
         $http     = ActivityLogHttp::where('log_id', $log->id)->first();
 
@@ -60,10 +51,6 @@ class ActivityLogController extends Controller
             'date_to'   => 'nullable|date',
             'search'    => 'nullable|string|max:100',
         ]);
-
-        if (TenantContext::isSet()) {
-            $filters['organization_id'] = TenantContext::getOrganizationId();
-        }
 
         $key = (string) Str::uuid();
         \Modules\ActivityLog\Actions\ExportActivityLogsAction::dispatch($filters, $key)

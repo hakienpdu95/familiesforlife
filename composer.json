@@ -29,7 +29,6 @@
         "predis/predis": "^3.4",
         "rap2hpoutre/fast-excel": "^5.7",
         "resend/resend-laravel": "^1.4",
-        "ringlesoft/laravel-process-approval": "^1.1",
         "ryangjchandler/laravel-cloudflare-turnstile": "^3.0",
         "spatie/browsershot": "^5.4",
         "spatie/laravel-activitylog": "^5.0",

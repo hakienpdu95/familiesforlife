@@ -2,17 +2,16 @@
 
 namespace Modules\Approval\Models;
 
-use App\Foundation\Models\TenantAwareModel;
+use App\Foundation\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Modules\Approval\Enums\ApprovalStatus;
 
-class ApprovalSubject extends TenantAwareModel
+class ApprovalSubject extends BaseModel
 {
     protected $table = 'approval_subjects';
 
     protected $fillable = [
-        'organization_id',
         'subject_type',
         'subject_id',
         'status',

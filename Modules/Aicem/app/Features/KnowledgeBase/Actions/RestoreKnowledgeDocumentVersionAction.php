@@ -25,7 +25,6 @@ class RestoreKnowledgeDocumentVersionAction
 
         return DB::transaction(function () use ($document, $version) {
             $document->versions()->create([
-                'organization_id' => $document->organization_id,
                 'version'         => $document->current_version,
                 'content'         => $document->content,
                 'scope'           => $document->scope,

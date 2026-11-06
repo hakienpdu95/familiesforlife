@@ -3,7 +3,7 @@
 namespace Modules\Page\Models;
 
 use App\Models\User;
-use App\Traits\HasTenantMedia;
+use App\Traits\HasManagedMedia;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,13 +17,13 @@ use Spatie\MediaLibrary\HasMedia;
 
 /**
  * spec/Page_Static_Pages_Technical_Specification.md §0/§2/§3 — trang tĩnh là tài sản nền
- * tảng, KHÔNG organization_id, không extend TenantAwareModel — cùng mô hình MenuItem/Banner.
+ * tảng — cùng mô hình MenuItem/Banner.
  */
 class Page extends Model implements HasMedia
 {
     use SoftDeletes;
     use LogsActivity;
-    use HasTenantMedia;
+    use HasManagedMedia;
 
     protected $table = 'pages';
 

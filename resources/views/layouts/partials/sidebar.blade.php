@@ -20,10 +20,8 @@
         </div>
 
         {{-- @can('viewDashboard') — TÊN GATE thật (ApprovalServiceProvider::boot()), KHÔNG
-             phải chuỗi permission "approval.view_dashboard" — bug thật phát hiện: content_
-             moderator KHÔNG có permission Spatie đó (team-scoped, tài khoản organization_id=
-             null không khớp bất kỳ team nào) nên link menu không hiện dù trang vẫn truy cập
-             được bình thường nếu vào thẳng URL (Gate viewDashboard tự OR thêm isPlatformContentModerator()). --}}
+             phải chuỗi permission "approval.view_dashboard" — content_moderator KHÔNG có
+             permission Spatie đó (Gate viewDashboard tự OR thêm isPlatformContentModerator()). --}}
         @can('viewDashboard')
         <div class="nav-group">
             <a href="{{ route('backend.approval.dashboard') }}"
@@ -487,14 +485,13 @@
         @endcanany
         </x-sidebar-section>
 
-        <x-sidebar-section title="Hệ thống & Tổ chức">
-        {{-- Chỉ super-admin — spec/Platform_RBAC_Phase2_Specification.md §2.7 --}}
-        @can('platform-users.manage')
+        <x-sidebar-section title="Hệ thống">
+        @can('viewAny', \App\Models\User::class)
         <div class="nav-group">
-            <a href="{{ route('backend.platform-users.index') }}"
-               class="nav-link {{ request()->routeIs('backend.platform-users.*') ? 'active' : '' }}">
+            <a href="{{ route('backend.users.index') }}"
+               class="nav-link {{ request()->routeIs('backend.users.*') ? 'active' : '' }}">
                 <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                <span class="nav-label">Quản lý nhân sự Platform</span>
+                <span class="nav-label">Tài khoản</span>
             </a>
         </div>
         @endcan
@@ -510,18 +507,6 @@
         @endcan
 
         <div class="nav-group">
-        <details {{ request()->routeIs('backend.users.*') ? 'open' : '' }}>
-            <summary class="nav-summary {{ request()->routeIs('backend.users.*') ? 'active' : '' }}">
-                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                <span class="nav-label">Tài khoản</span>
-                <svg class="nav-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m9 18 6-6-6-6"/></svg>
-            </summary>
-            <div class="sub-menu">
-                <a href="{{ route('backend.users.index') }}" class="sub-link {{ request()->routeIs('backend.users.index') ? 'active' : '' }}">Danh sách tài khoản</a>
-                <a href="{{ route('backend.users.create') }}" class="sub-link {{ request()->routeIs('backend.users.create') ? 'active' : '' }}">Thêm tài khoản</a>
-            </div>
-        </details>
-
         <a href="{{ route('backend.notifications.index') }}"
            class="nav-link {{ request()->routeIs('backend.notifications.*') ? 'active' : '' }}">
             <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">

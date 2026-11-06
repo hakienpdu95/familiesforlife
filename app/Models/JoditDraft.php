@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Foundation\Models\TenantAwareModel;
-use App\Traits\HasTenantMedia;
+use App\Foundation\Models\BaseModel;
+use App\Traits\HasManagedMedia;
 use Spatie\MediaLibrary\HasMedia;
 
 /**
@@ -15,11 +15,11 @@ use Spatie\MediaLibrary\HasMedia;
  *  3. User saves content → MediaUploadService::reassociateOrphans() moves media to real entity
  *  4. Artisan media:cleanup-orphans deletes JoditDraft media older than 72h (last_touched_at)
  */
-class JoditDraft extends TenantAwareModel implements HasMedia
+class JoditDraft extends BaseModel implements HasMedia
 {
-    use HasTenantMedia;
+    use HasManagedMedia;
 
     protected $table = 'jodit_drafts';
 
-    protected $fillable = ['organization_id', 'user_id', 'context_type', 'context_id'];
+    protected $fillable = ['user_id', 'context_type', 'context_id'];
 }

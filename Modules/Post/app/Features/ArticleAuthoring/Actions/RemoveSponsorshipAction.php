@@ -28,7 +28,7 @@ class RemoveSponsorshipAction
             // không xoá dấu vết dù đã gỡ (khác các field khác).
         ]);
 
-        // Activity log tự động qua TenantAwareModel (logOnlyDirty) — không cần ghi log thủ công.
+        // Activity log tự động qua LogsActivity (logOnlyDirty) — không cần ghi log thủ công.
 
         return $article;
     }

@@ -16,15 +16,11 @@ return [
             // Published ngay khi backfill — tránh gãy catalog hiện có (§9.6).
             'initial_status_resolver' => \Modules\Product\Support\ProductInitialApprovalStatusResolver::class,
         ],
-        // spec/RealEstateForSale_Technical_Specification.md §6 — tin BĐS bán/thuê của
-        // Organization, KHÔNG cần initial_status_resolver (bảng mới, không backfill).
+        // spec/RealEstateForSale_Technical_Specification.md §6 — tin BĐS bán/thuê,
+        // KHÔNG cần initial_status_resolver (bảng mới, không backfill).
         'real_estate_listing' => [
             'model' => \Modules\RealEstate\Models\RealEstateListing::class,
             'label' => 'Tin bất động sản',
         ],
-    ],
-
-    'platform_users' => [
-        'default_password' => env('PLATFORM_USER_DEFAULT_PASSWORD', 'vgd@123!'),
     ],
 ];

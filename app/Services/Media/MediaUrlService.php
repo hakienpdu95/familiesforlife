@@ -86,7 +86,7 @@ class MediaUrlService
                 return $img;
             }
 
-            $media = Media::withoutTenant()->where('uuid', $uuid[1])->first();
+            $media = Media::query()->where('uuid', $uuid[1])->first();
 
             if (! $media) {
                 return $img;

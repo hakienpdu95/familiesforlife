@@ -11,9 +11,9 @@ use Modules\RealEstate\Features\ListingManagement\Data\RealEstateListingData;
 use Modules\RealEstate\Models\RealEstateListing;
 
 /**
- * spec/RealEstateForSale_Technical_Specification.md §5.5 — Organization tạo tin ở trạng thái
+ * spec/RealEstateForSale_Technical_Specification.md §5.5 — tạo tin ở trạng thái
  * Draft (HasApproval::bootHasApproval() tự tạo ApprovalSubject), KHÔNG tự động submit duyệt
- * ngay như Product — tin BĐS có nhiều field/ảnh nên Organization cần chỉnh sửa/hoàn thiện
+ * ngay như Product — tin BĐS có nhiều field/ảnh nên người đăng cần chỉnh sửa/hoàn thiện
  * trước, tự bấm "Gửi duyệt" riêng (route submit-approval, §7.1) khi sẵn sàng.
  */
 class CreateRealEstateListingAction

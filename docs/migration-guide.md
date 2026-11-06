@@ -21,7 +21,6 @@ Mở file, thêm một array mới vào cuối danh sách (trước dấu `]` cu
 ```json
 [
   "tasks///__///__///Bảng quản lý công việc",
-  "organization_id///unsignedBigInteger///__///NOT_NULL///__///->constrained('organizations')->onDelete('cascade')///FK tổ chức",
   "assigned_to///unsignedBigInteger///__///_NULL///NULL///->constrained('users')->onDelete('set null')///Người được giao",
   "title///string///255///NOT_NULL///__///__///Tiêu đề công việc",
   "description///text///__///_NULL///NULL///__///Mô tả chi tiết",
@@ -31,7 +30,7 @@ Mở file, thêm một array mới vào cuối danh sách (trước dấu `]` cu
   "created_at///timestamp///__///_NULL///NULL///__///Thời gian tạo",
   "updated_at///timestamp///__///_NULL///NULL///__///Thời gian cập nhật",
   "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm",
-  "__index///index///__///__///__///organization_id,status,due_date|idx_tasks_org_status///__",
+  "__index///index///__///__///__///status,due_date|idx_tasks_status///__",
   "__index///index///__///__///__///assigned_to,status|idx_tasks_assignee///__"
 ]
 ```
@@ -70,7 +69,7 @@ Mở file, thêm array mới (hoặc **cập nhật entry hiện có** nếu b�
   "tasks///add///__///Thêm priority và parent_task vào tasks",
   "priority///unsignedTinyInteger///__///NOT_NULL///2///__///1=urgent 2=normal 3=low",
   "parent_task_id///unsignedBigInteger///__///_NULL///NULL///->constrained('tasks')->onDelete('set null')///Task cha (subtask)",
-  "__index///index///__///__///__///organization_id,priority,status|idx_tasks_priority///__"
+  "__index///index///__///__///__///priority,status|idx_tasks_priority///__"
 ]
 ```
 
@@ -81,7 +80,7 @@ Mở file, thêm array mới (hoặc **cập nhật entry hiện có** nếu b�
 ```json
 [
   "users///add///email///...",
-  "organization_id///...",
+  "department///...",
   "is_active///...",
   "avatar_url///string///500///_NULL///NULL///__///URL ảnh đại diện"   ← thêm vào đây
 ]

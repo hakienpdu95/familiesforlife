@@ -7,7 +7,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\ActivityLog\Models\ActivityLog;
-use App\Shared\Tenancy\TenantContext;
 
 class ActivityLogApiController extends Controller
 {
@@ -33,7 +32,7 @@ class ActivityLogApiController extends Controller
     /** Cột kỹ thuật/audit — không đưa vào câu mô tả "đã đổi trường nào". */
     private const NOISE_KEYS = [
         'id', 'uuid', 'created_at', 'updated_at', 'deleted_at',
-        'created_by', 'updated_by', 'organization_id',
+        'created_by', 'updated_by',
     ];
 
 
@@ -70,10 +69,6 @@ class ActivityLogApiController extends Controller
                         : 'desc';
 
         $query = ActivityLog::query();
-
-        if (TenantContext::isSet()) {
-            $query->forOrganization(TenantContext::getOrganizationId());
-        }
 
         // Module filter: match custom module column OR Spatie log_name
         if (!empty($v['module'])) {
@@ -269,15 +264,11 @@ class ActivityLogApiController extends Controller
 
     public function stats(Request $request): JsonResponse
     {
-        $days  = min(90, max(1, (int) $request->input('days', 30)));
-        $from  = now()->subDays($days);
-        $orgId = TenantContext::isSet() ? TenantContext::getOrganizationId() : null;
-
-        $base = ActivityLog::where('created_at', '>=', $from)
-            ->when($orgId, fn ($q) => $q->forOrganization($orgId));
+        $days = min(90, max(1, (int) $request->input('days', 30)));
+        $from = now()->subDays($days);
+        $base = ActivityLog::where('created_at', '>=', $from);
 
         $todayCounts = ActivityLog::whereDate('created_at', today())
-            ->when($orgId, fn ($q) => $q->forOrganization($orgId))
             ->selectRaw('
                 SUM(CASE WHEN level >= 4 THEN 1 ELSE 0 END) as error_today,
                 SUM(CASE WHEN level  = 5 THEN 1 ELSE 0 END) as critical_today
@@ -299,8 +290,7 @@ class ActivityLogApiController extends Controller
 
     public function meta(): JsonResponse
     {
-        $orgId = TenantContext::isSet() ? TenantContext::getOrganizationId() : null;
-        $base  = ActivityLog::when($orgId, fn ($q) => $q->forOrganization($orgId));
+        $base = ActivityLog::query();
 
         // Merge custom modules + Spatie log_names into one list
         $customModules  = (clone $base)->whereNotNull('module')->where('module', '!=', '')

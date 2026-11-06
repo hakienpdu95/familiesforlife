@@ -2,7 +2,7 @@
 
 namespace Modules\Aicem\Models;
 
-use App\Foundation\Models\TenantAwareModel;
+use App\Foundation\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Aicem\Enums\ExampleCandidateStatus;
@@ -11,7 +11,7 @@ use Modules\Aicem\Enums\ExampleCandidateStatus;
  * Hàng chờ duyệt thủ công (Phase 5, mục 11/15) — AI_Operator approve/reject trước khi nội dung
  * thật sự trở thành 1 aicem_knowledge_documents(type=example_good).
  */
-class AicemExampleCandidate extends TenantAwareModel
+class AicemExampleCandidate extends BaseModel
 {
     protected $table = 'aicem_example_candidates';
 

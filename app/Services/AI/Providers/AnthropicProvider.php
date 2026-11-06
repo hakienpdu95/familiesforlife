@@ -76,7 +76,7 @@ final class AnthropicProvider implements AIProviderContract
      *
      * Phase 6 (mục 8.7/15) — prompt caching: BuildPromptAction đánh dấu message system chứa khối
      * DNA/knowledge_document bằng `cacheable => true` vì nội dung này lặp lại gần như nguyên văn
-     * qua mọi lần chạy AI của cùng 1 Organization+workflow. Anthropic CHỈ cache được khi `system`
+     * qua mọi lần chạy AI của cùng 1 workflow. Anthropic CHỈ cache được khi `system`
      * là MẢNG content-block (TextBlockParam[]), không cache được khi `system` là string thuần —
      * xác nhận trực tiếp từ SDK (`SystemShape = string|list<TextBlockParam>`). Do đó: có ít nhất 1
      * message cacheable → build mảng TextBlockParam (gắn CacheControlEphemeral trên đúng block đó);

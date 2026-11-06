@@ -49,18 +49,13 @@ php artisan migration:generate --fresh
 
 ## Architecture Overview
 
-### Multi-Tenancy
+### Single tenant
 
-All user data is scoped to an `Organization`. The `TenantContext` static singleton is hydrated by middleware (not the service container) and is read by all tenant-scoped queries. Organization is identified via a 4-layer detection: subdomain → header → authenticated user → session.
-
-Base classes enforce tenant isolation:
-- `app/Foundation/TenantAwareModel.php` — adds `organization_id` global scope
-- `app/Foundation/TenantAwareJob.php` — restores tenant context in queue workers
-- `app/Shared/Tenancy/` — TenantContext, Organization/OrganizationMember models, enums, and traits (no Organization admin module — the CRUD UI was removed)
+There is no multi-tenancy: no `organizations` table, no `organization_id` columns, no `TenantContext`/global scopes, Spatie `teams` is off. Domain models extend `app/Foundation/Models/BaseModel.php` (HasFactory + SoftDeletes + LogsActivity). Platform-wide AI settings (BYOK provider config, monthly budget, rate limit) live in the single-row `ai_settings` table via `App\Models\AiSetting::current()` / `AiSetting::providerConfig()`.
 
 ### RBAC
 
-Eight core roles (`app/Enums/RoleEnum.php`: CEO, Sales, Ops, Marketing, HR, AI_Operator, System_Admin, Viewer) with permissions defined in `config/permissions.php`. The backend sidebar is **not** rendered from that config — it is hand-written Blade in `resources/views/layouts/partials/sidebar.blade.php`, grouped by `<x-sidebar-section>` (Không gian làm việc / Nội dung / Dữ liệu chuyên ngành / AI Studio / Hệ thống & Tổ chức); each item keeps its own `@can`/`@if`, and a section hides itself when none of its items are visible. Add a new module's menu entry inside the matching section. Separately, the content/AI research modules (CoreIdeaExtractor, VideoIdeaExtractor, ContentFoundation) grant their own additional Spatie roles (`platform_content_editor`, `platform_content_head`, `platform_section_editor`) via their own `*PermissionSeeder.php` — these are **not** part of `RoleEnum`. When touching permissions for those modules, check the module's seeder rather than assuming the 8 core roles are the full picture.
+All admin accounts are Platform accounts (`account_type = platform`). `app/Enums/RoleEnum.php` lists the Platform roles (`super-admin` + 7 `platform_*` roles); `super-admin` bypasses Gate checks (`AppServiceProvider` `Gate::before`, except abilities whose subject is a `User`, which `UserPolicy` decides) and can never be assigned through the UI or `platform:user-create`. Each module grants its permissions to `platform_*` roles in its own `*PermissionSeeder.php`; `database/seeders/RolePermissionSeeder.php` only creates the permissions listed in `PermissionEnum`. Accounts are managed only in `Modules/User` (`/dashboard/users`, super-admin only): create sends a set-password link (Laravel password broker), never a password; deactivate instead of delete. Public `/register` and social login create `free` accounts with no role. The backend sidebar is hand-written Blade in `resources/views/layouts/partials/sidebar.blade.php`, grouped by `<x-sidebar-section>` (Không gian làm việc / Nội dung / Dữ liệu chuyên ngành / AI Studio / Hệ thống); each item keeps its own `@can`/`@if`, and a section hides itself when none of its items are visible. Add a new module's menu entry inside the matching section.
 
 ### Monitoring
 

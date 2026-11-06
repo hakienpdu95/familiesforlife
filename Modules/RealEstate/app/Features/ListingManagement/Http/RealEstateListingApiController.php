@@ -16,8 +16,7 @@ use Modules\RealEstate\Models\RealEstateListing;
 /**
  * JSON backend cho Tabulator ở dashboard/real-estate — cùng pattern
  * Modules/Product/app/Features/CatalogManagement/Http/ProductApiController (tham chiếu theo
- * yêu cầu): remote pagination/sort/filter, trả {data, last_page, total}. Tenant-scoped tự động
- * qua TenantAwareModel (RealEstateListing) — không cần lọc organization_id tường minh ở đây.
+ * yêu cầu): remote pagination/sort/filter, trả {data, last_page, total}.
  */
 class RealEstateListingApiController extends Controller
 {

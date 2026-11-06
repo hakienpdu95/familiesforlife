@@ -4,12 +4,11 @@ use Illuminate\Support\Facades\Route;
 use Modules\Approval\Http\Controllers\Api\ApprovalApiController;
 use Modules\Approval\Http\Controllers\ApprovalDashboardController;
 use Modules\Approval\Http\Controllers\ApprovalHistoryController;
-use Modules\Approval\Http\Controllers\PlatformUserController;
 
 // spec/Workflow_Approval_Technical_Specification.md §12, §13 — Approval chỉ sở hữu route
 // dashboard xuyên-entity + lịch sử duyệt; toàn bộ route transition (submit-approval,
 // approve-content…) thuộc về module tiêu thụ (vd Modules/Product/routes/web.php).
-Route::middleware(['auth', 'tenant'])->group(function (): void {
+Route::middleware(['auth'])->group(function (): void {
     Route::get('dashboard/approvals', [ApprovalDashboardController::class, 'index'])
         ->name('backend.approval.dashboard');
 
@@ -19,31 +18,7 @@ Route::middleware(['auth', 'tenant'])->group(function (): void {
         ->name('backend.approval.history');
 });
 
-Route::middleware(['auth', 'tenant'])->prefix('backend/api/approval')->name('backend.api.approval.')->group(function (): void {
+Route::middleware(['auth'])->prefix('backend/api/approval')->name('backend.api.approval.')->group(function (): void {
     Route::get('pending', [ApprovalApiController::class, 'pending'])->name('pending');
     Route::get('history', [ApprovalApiController::class, 'history'])->name('history');
 });
-
-// spec/Platform_RBAC_Phase2_Specification.md §2 — Quản lý nhân sự Platform
-// (organization_id=null). KHÔNG dùng middleware 'tenant' — user Platform không thuộc tổ
-// chức nào, và Controller tự chặn 403 nếu không phải super-admin (§2.3), không cần Policy
-// riêng cho 1 gate boolean duy nhất.
-Route::middleware(['auth'])
-    ->prefix('dashboard')
-    ->name('backend.')
-    ->group(function (): void {
-        Route::patch('platform-users/{platform_user}/activate', [PlatformUserController::class, 'activate'])
-            ->name('platform-users.activate');
-        Route::patch('platform-users/{platform_user}/reset-password', [PlatformUserController::class, 'resetPassword'])
-            ->name('platform-users.reset-password');
-        Route::post('platform-users/bulk-deactivate', [PlatformUserController::class, 'bulkDeactivate'])
-            ->name('platform-users.bulk-deactivate');
-        Route::resource('platform-users', PlatformUserController::class)->except(['show']);
-    });
-
-Route::middleware(['auth'])
-    ->prefix('backend/api')
-    ->name('backend.api.')
-    ->group(function (): void {
-        Route::get('platform-users', [PlatformUserController::class, 'data'])->name('platform-users');
-    });

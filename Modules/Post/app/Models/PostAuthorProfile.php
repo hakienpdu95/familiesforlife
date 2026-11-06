@@ -3,7 +3,7 @@
 namespace Modules\Post\Models;
 
 use App\Models\User;
-use App\Traits\HasTenantMedia;
+use App\Traits\HasManagedMedia;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
@@ -16,7 +16,7 @@ use Spatie\MediaLibrary\HasMedia;
  */
 class PostAuthorProfile extends Model implements HasMedia
 {
-    use HasTenantMedia;
+    use HasManagedMedia;
 
     protected $table = 'post_author_profiles';
 

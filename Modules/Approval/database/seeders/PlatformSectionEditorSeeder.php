@@ -25,7 +25,6 @@ class PlatformSectionEditorSeeder extends Seeder
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        setPermissionsTeamId(null);
         $role = Role::firstOrCreate(['name' => 'platform_section_editor', 'guard_name' => 'web']);
 
         $user = User::withoutGlobalScopes()->firstOrCreate(
@@ -33,7 +32,6 @@ class PlatformSectionEditorSeeder extends Seeder
             [
                 'name'              => 'Vũ Thanh Tùng',
                 'password'          => Hash::make('Admin@123!'),
-                'organization_id'   => null,
                 'email_verified_at' => now(),
                 'trust_level'       => 2,
                 'account_type'      => AccountType::Platform,
@@ -44,7 +42,6 @@ class PlatformSectionEditorSeeder extends Seeder
             $user->forceFill(['account_type' => AccountType::Platform])->save();
         }
 
-        setPermissionsTeamId(null);
         $user->syncRoles($role);
 
         app()[PermissionRegistrar::class]->forgetCachedPermissions();

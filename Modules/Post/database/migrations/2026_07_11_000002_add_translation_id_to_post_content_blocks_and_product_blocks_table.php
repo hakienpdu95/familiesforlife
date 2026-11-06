@@ -15,15 +15,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('post_content_blocks', function (Blueprint $table) {
-            $table->foreignId('translation_id')->nullable()->after('organization_id')
+            $table->foreignId('translation_id')->nullable()
                 ->constrained('post_article_translations')->cascadeOnDelete();
             $table->index(['translation_id', 'sort_order'], 'idx_post_cb_translation_order');
         });
 
         Schema::table('post_product_blocks', function (Blueprint $table) {
-            $table->foreignId('translation_id')->nullable()->after('organization_id')
+            $table->foreignId('translation_id')->nullable()
                 ->constrained('post_article_translations')->cascadeOnDelete();
-            $table->index(['organization_id', 'translation_id'], 'idx_post_pb_org_translation');
+            $table->index('translation_id', 'idx_post_pb_translation');
         });
     }
 
@@ -36,7 +36,7 @@ return new class extends Migration
         });
 
         Schema::table('post_product_blocks', function (Blueprint $table) {
-            $table->dropIndex('idx_post_pb_org_translation');
+            $table->dropIndex('idx_post_pb_translation');
             $table->dropForeign(['translation_id']);
             $table->dropColumn('translation_id');
         });

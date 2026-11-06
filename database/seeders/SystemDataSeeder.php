@@ -66,7 +66,7 @@ class SystemDataSeeder extends Seeder
             // provinces.slug ngay sau khi import xong (route công khai /{type}/{slug}) ──
             ProvinceSlugBackfillSeeder::class,
 
-            // ── 1. IAM: 8 tenant roles + 40+ permissions ─────────────────
+            // ── 1. IAM: permissions từ PermissionEnum ─────────────────────
             RolePermissionSeeder::class,
 
             // ── 2. Additional module permissions (cần roles tồn tại trước)
@@ -74,15 +74,6 @@ class SystemDataSeeder extends Seeder
 
             // ── 3. Super-admin role + 2 tài khoản hệ thống ───────────────
             AuthDatabaseSeeder::class,
-
-            // ── 5. Org hệ thống mặc định (id=1 trên fresh DB) ────────────
-            SystemOrganizationSeeder::class,
-
-            // ── 6. Demo organization (dev/test) ───────────────────────────
-            OrganizationSeeder::class,
-
-            // ── 7. Test users (1 per role) ────────────────────────────────
-            UserSeeder::class,
 
             // ── 24. Product: permissions (product.*/product_category.*) — catalog cho Post CTA Box ──
             ProductDatabaseSeeder::class,

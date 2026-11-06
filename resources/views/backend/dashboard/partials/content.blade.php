@@ -311,7 +311,7 @@
     if (Gate::allows('viewAny', \Modules\Post\Models\PostBreakingNews::class)) $shortcuts[] = ['Tin nóng', route('backend.post.breaking-news.items.index')];
     if ($canEvents) $shortcuts[] = ['Sự kiện', route('backend.event.index')];
     if (Gate::allows('viewDashboard')) $shortcuts[] = ['Hồ sơ chờ kiểm duyệt', route('backend.approval.dashboard')];
-    if (Gate::allows('platform-users.manage')) $shortcuts[] = ['Nhân sự Platform', route('backend.platform-users.index')];
+    if (Gate::allows('viewAny', \App\Models\User::class)) $shortcuts[] = ['Tài khoản', route('backend.users.index')];
 @endphp
 @if($shortcuts)
 <div>

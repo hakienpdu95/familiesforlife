@@ -4,7 +4,6 @@ namespace App\Services\Media;
 
 use App\Models\FilePondDraft;
 use App\Models\Media;
-use App\Shared\Tenancy\TenantContext;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
@@ -52,14 +51,8 @@ class MediaUploadService
             ])
             ->toMediaCollection($collection, $disk);
 
-        // Set organization_id and uploaded_at explicitly (not handled by Spatie).
-        // Only stamp organization_id for tenant-scoped targets — platform-wide content
-        // (Post/Ocop/Banner) must NOT be owned by whichever tenant happened to upload it,
-        // see spec/Media_Library_Technical_Specification.md §5.1/§7.1.
+        // Set uploaded_at explicitly (not handled by Spatie).
         $oldBasePath = rtrim(dirname($media->getPathRelativeToRoot()), '/');
-        $media->organization_id = Media::targetIsTenantScoped($model)
-            ? TenantContext::getOrganizationId()
-            : null;
         $media->uploaded_at     = now();
         if (! empty($options['uuid'])) {
             $media->uuid = $options['uuid'];
@@ -77,7 +70,7 @@ class MediaUploadService
      * Delete a media record and its associated files on disk.
      * Conversions are stored manually alongside the original (not in Spatie's
      * conversions/ subdir), so we delete them explicitly before the record.
-     * Prunes empty ancestor directories up to (not including) the org_id level.
+     * Prunes empty ancestor directories up to (not including) the module level.
      */
     public function delete(Media $media): void
     {
@@ -97,8 +90,8 @@ class MediaUploadService
 
     /**
      * Walk up the directory tree from $leafDir, deleting each level while empty.
-     * Stops at the org_id directory (media/{org_id}) so tenant roots are preserved.
-     * Path convention: media/{org_id}/{module}/{entity_type}/{entity_id}/{uuid}
+     * Stops at the module directory (media/{module}).
+     * Path convention: media/{module}/{entity_type}/{entity_id}/{uuid}
      * → up to 4 levels pruned: uuid, entity_id, entity_type, module.
      */
     public function pruneEmptyAncestors(string $disk, string $leafDir): void
@@ -110,7 +103,7 @@ class MediaUploadService
                 break;
             }
 
-            // Keep org_id dir: path has form "media/{org_id}" (2 segments)
+            // Keep module dir: path has form "media/{module}" (2 segments)
             if (substr_count($path, '/') < 2) {
                 break;
             }
@@ -148,7 +141,7 @@ class MediaUploadService
         // nội dung (không còn UUID nào) khiến media cũ KHÔNG BAO GIỜ được dọn, orphan vĩnh viễn.
         // Bước reassociate (cần $uuids) tách riêng khỏi bước xoá stale (phải chạy dù $uuids rỗng).
         if (! empty($uuids)) {
-            Media::withoutTenant()
+            Media::query()
                 ->whereIn('uuid', $uuids)
                 ->where('collection_name', 'jodit_content')
                 ->get()
@@ -164,7 +157,7 @@ class MediaUploadService
         // Delete stale jodit_content media for this entity not referenced by current content.
         // whereNotIn() với $uuids rỗng tự động khớp TẤT CẢ (đúng ý muốn: không còn UUID nào cần
         // giữ lại thì mọi media cũ của entity này đều là rác).
-        Media::withoutTenant()
+        Media::query()
             ->where('model_type', get_class($model))
             ->where('model_id', $model->getKey())
             ->where('collection_name', 'jodit_content')
@@ -190,7 +183,7 @@ class MediaUploadService
 
         $draftIds = FilePondDraft::query()->where('user_id', $userId)->pluck('id');
 
-        return Media::withoutTenant()
+        return Media::query()
             ->whereIn('uuid', $uuids)
             ->where('collection_name', $collection)
             ->where('model_type', FilePondDraft::class)
@@ -212,7 +205,7 @@ class MediaUploadService
             return;
         }
 
-        Media::withoutTenant()
+        Media::query()
             ->whereIn('uuid', $uuids)
             ->where('collection_name', $collection)
             ->get()
@@ -225,7 +218,7 @@ class MediaUploadService
             });
 
         // Delete stale media for this entity in the same collection not in the new UUID list
-        Media::withoutTenant()
+        Media::query()
             ->where('model_type', get_class($model))
             ->where('model_id', $model->getKey())
             ->where('collection_name', $collection)
@@ -237,7 +230,7 @@ class MediaUploadService
     /**
      * spec/Media_Library_Technical_Specification.md §5.2/§8 — BUGFIX phát hiện qua verify sống:
      * `MediaPathGenerator` tính path DỰA TRÊN `model_type`/`model_id` HIỆN TẠI của record
-     * (`media/{org}/{module}/{entity_type}/{entity_id}/{uuid}`), không phải path đã lưu cố định.
+     * (`media/{module}/{entity_type}/{entity_id}/{uuid}`), không phải path đã lưu cố định.
      * Sau khi `reassociateOrphans()`/`reassociateFilePondDrafts()` đổi `model_type`/`model_id`
      * (JoditDraft/FilePondDraft → entity thật), path TÍNH LẠI đổi theo — nhưng file vật lý vẫn
      * nằm ở path CŨ (`moves_media_on_update=false`, Spatie không tự di chuyển). Kết quả:

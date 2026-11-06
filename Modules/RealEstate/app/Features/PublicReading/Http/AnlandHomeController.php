@@ -18,32 +18,31 @@ class AnlandHomeController extends Controller
 {
     public function index(): View
     {
-        // scopePublicPortalVisible() — xem docblock cùng tên trên RealEstateListing (gộp tin từ
-        // mọi Organization, khách vãng lai không có TenantContext). with('approvalSubject') —
+        // with('approvalSubject') —
         // listing-card.blade.php gọi publicContent() cho từng tin trong vòng lặp, model đọc
         // preventLazyLoading() nên PHẢI eager-load quan hệ này trước, không thể lazy load.
-        $featured = RealEstateListing::publicPortalVisible()
+        $featured = RealEstateListing::publiclyVisible()
             ->with(['approvalSubject', 'province'])
             ->where('is_featured', true)
             ->latest()
             ->limit(6)
             ->get();
 
-        $latestSale = RealEstateListing::publicPortalVisible()
+        $latestSale = RealEstateListing::publiclyVisible()
             ->with(['approvalSubject', 'province'])
             ->where('listing_type', ListingType::Sale)
             ->latest()
             ->limit(8)
             ->get();
 
-        $latestRent = RealEstateListing::publicPortalVisible()
+        $latestRent = RealEstateListing::publiclyVisible()
             ->with(['approvalSubject', 'province'])
             ->where('listing_type', ListingType::Rent)
             ->latest()
             ->limit(4)
             ->get();
 
-        $categoryCounts = RealEstateListing::publicPortalVisible()
+        $categoryCounts = RealEstateListing::publiclyVisible()
             ->selectRaw('property_type, listing_type, count(*) as aggregate')
             ->groupBy('property_type', 'listing_type')
             ->get()

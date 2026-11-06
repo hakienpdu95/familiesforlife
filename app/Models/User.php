@@ -3,8 +3,6 @@
 namespace App\Models;
 
 use App\Enums\AccountType;
-use App\Shared\Tenancy\Models\Organization;
-use App\Shared\Tenancy\TenantContext;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -18,16 +16,15 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Modules\Auth\Models\SocialAccount;
-use App\Shared\Tenancy\Models\OrganizationMember;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable([
     'name', 'email', 'password',
-    'organization_id', 'department', 'is_active', 'last_active_at',
+    'department', 'is_active', 'last_active_at',
     // Phase 0 — Identity Foundation
-    'account_type', 'current_org_id', 'trust_level',
+    'account_type', 'trust_level',
 ])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements MustVerifyEmail
@@ -49,25 +46,10 @@ class User extends Authenticatable implements MustVerifyEmail
 
     // ── Relationships ────────────────────────────────────────────────
 
-    public function organization(): BelongsTo
-    {
-        return $this->belongsTo(Organization::class);
-    }
-
     /** Category mà platform_section_editor này được gán phụ trách (spec/Platform_RBAC_Phase2_Specification.md §4.2). */
     public function postCategoryEditorships(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(\Modules\Post\Models\PostCategory::class, 'post_category_editors', 'user_id', 'post_category_id');
-    }
-
-    public function organizationMembership(): HasOne
-    {
-        return $this->hasOne(OrganizationMember::class);
-    }
-
-    public function organizationMemberships(): HasMany
-    {
-        return $this->hasMany(OrganizationMember::class);
     }
 
     public function pushSubscriptions(): HasMany
@@ -102,11 +84,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->account_type === AccountType::Free;
     }
 
-    public function isOrgMember(): bool
-    {
-        return $this->account_type === AccountType::OrgMember;
-    }
-
     public function isPlatform(): bool
     {
         return $this->account_type === AccountType::Platform;
@@ -117,78 +94,18 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->account_type === AccountType::Suspended;
     }
 
-    // ── Tenant Helpers ───────────────────────────────────────────────
-
-    /**
-     * Returns the organization ID for the current request context.
-     * Used by policies for same-tenant checks.
-     *
-     * Priority: TenantContext (middleware-resolved) → user's own organization_id.
-     */
-    public function getCurrentOrganizationIdAttribute(): ?int
-    {
-        return TenantContext::getOrganizationId() ?? $this->organization_id;
-    }
-
-    public function getCurrentOrganizationAttribute(): ?Organization
-    {
-        return TenantContext::get() ?? $this->organization;
-    }
-
-    public function belongsToOrganization(int $organizationId): bool
-    {
-        return $this->organization_id === $organizationId;
-    }
-
-    /**
-     * Kiểm tra 1 role "xuyên tổ chức" (Platform Approval Gateway —
-     * spec/Workflow_Approval_Technical_Specification.md §18) — organization_id = null, giống
-     * quy ước super-admin. Dùng cho content_moderator (duyệt Doanh nghiệp/Sản phẩm),
-     * content_editor/content_head (2 cấp duyệt bài viết, §18.10).
-     *
-     * CỐ Ý KHÔNG dùng `hasRole()` (Spatie team-scoped) — verify thật cho thấy hasRole() chỉ
-     * trả đúng khi ambient Spatie team (getPermissionsTeamId()) CŨNG đang null tại thời điểm
-     * gọi; vì các tài khoản này thao tác trên dữ liệu của NHIỀU tổ chức khác nhau trong cùng 1
-     * request (mỗi request cần set TenantContext sang đúng tổ chức đang xử lý để
-     * OrganizationScope không chặn), ambient team context không ổn định qua từng bước xử lý.
-     * Query thẳng bảng pivot — không phụ thuộc getPermissionsTeamId() — để kết quả luôn đúng
-     * bất kể đang "đứng" ở tổ chức nào.
-     */
     public function hasGlobalRole(string $role): bool
     {
-        if ($this->organization_id !== null) {
-            return false;
-        }
-
-        return \Illuminate\Support\Facades\DB::table(config('permission.table_names.model_has_roles'))
-            ->join('roles', 'roles.id', '=', config('permission.table_names.model_has_roles') . '.role_id')
-            ->where(config('permission.table_names.model_has_roles') . '.model_id', $this->id)
-            ->where(config('permission.table_names.model_has_roles') . '.model_type', static::class)
-            ->where('roles.name', $role)
-            ->exists();
+        return $this->hasRole($role);
     }
 
     /**
-     * Lấy TẤT CẢ user đang giữ ≥1 trong các role Platform (organization_id=null) truyền vào —
-     * dùng cho các nơi cần tìm danh sách nhân sự nền tảng để gửi thông báo (vd
-     * ExpireSponsoredArticlesJob, TakeDownArticleTranslationAction —
-     * spec/Platform_RBAC_Phase2_Specification.md §3.3). CỐ Ý không dùng `User::role([...])`
-     * (Spatie team-scoped `whereHas('roles', ...)`) — cùng lý do đã tài liệu ở
-     * `hasGlobalRole()`: kết quả phụ thuộc ambient `getPermissionsTeamId()` tại thời điểm gọi,
-     * không ổn định trong queue worker chạy nhiều job liên tiếp. Query thẳng pivot để luôn đúng.
-     *
      * @param  array<int, string>  $roleNames
-     * @return \Illuminate\Support\Collection<int, static>
+     * @return \Illuminate\Database\Eloquent\Collection<int, static>
      */
-    public static function withGlobalRole(array $roleNames): \Illuminate\Support\Collection
+    public static function withGlobalRole(array $roleNames): \Illuminate\Database\Eloquent\Collection
     {
-        $userIds = \Illuminate\Support\Facades\DB::table(config('permission.table_names.model_has_roles'))
-            ->join('roles', 'roles.id', '=', config('permission.table_names.model_has_roles') . '.role_id')
-            ->where(config('permission.table_names.model_has_roles') . '.model_type', static::class)
-            ->whereIn('roles.name', $roleNames)
-            ->pluck(config('permission.table_names.model_has_roles') . '.model_id');
-
-        return static::whereNull('organization_id')->whereIn('id', $userIds)->get();
+        return static::whereHas('roles', fn ($q) => $q->whereIn('name', $roleNames))->get();
     }
 
     /**
@@ -231,9 +148,9 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Vận hành Platform — quản lý tổ chức, hỗ trợ kỹ thuật, xem log hệ thống.
+     * Vận hành Platform — hỗ trợ kỹ thuật, xem log hệ thống.
      * KHÔNG có ability nào trên approve/reject/publishApproval/archiveApproval của
-     * Organization/Product/Post (spec/Platform_RBAC_Technical_Specification.md §3.3).
+     * Product/Post (spec/Platform_RBAC_Technical_Specification.md §3.3).
      */
     /**
      * Biên tập viên trưởng chuyên mục — duyệt sơ bộ (Submitted → Approved) NHƯNG chỉ giới hạn
@@ -257,32 +174,6 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isPlatformViewer(): bool
     {
         return $this->hasGlobalRole('platform_viewer');
-    }
-
-    /**
-     * Tên hiển thị tiếng Việt cho 6 Platform Role (Lớp A) —
-     * spec/Platform_RBAC_Technical_Specification.md §3.1. Chưa có màn hình quản trị nào hiển
-     * thị role Platform ra UI (xem §3.9 — chỉ có CLI `platform:user-create`), nên map này dùng
-     * ngay cho output CLI hiện tại và sẵn sàng tái sử dụng khi có màn hình "Quản lý nhân sự
-     * Platform" (Phase sau).
-     */
-    public static function platformRoleLabels(): array
-    {
-        return [
-            'super-admin'                => 'Super Admin',
-            'platform_content_head'      => 'Tổng biên tập',
-            'platform_content_editor'    => 'Biên tập viên',
-            'platform_content_creator'   => 'Phóng viên / Biên tập viết bài',
-            'platform_section_editor'    => 'Biên tập viên trưởng chuyên mục',
-            'platform_content_moderator' => 'Kiểm duyệt viên (Legal)',
-            'platform_ops'               => 'Vận hành Platform',
-            'platform_viewer'            => 'Giám sát / Viewer',
-        ];
-    }
-
-    public static function assignablePlatformRoles(): array
-    {
-        return array_values(array_diff(array_keys(self::platformRoleLabels()), ['super-admin']));
     }
 
     public function getActivitylogOptions(): LogOptions

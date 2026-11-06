@@ -163,15 +163,6 @@ class TranslationController extends Controller
         return $this->runTransition($translation, fn () => $action->handle($translation), 'Đã lưu trữ bản dịch.');
     }
 
-    /**
-     * spec/Platform_RBAC_Phase2_Specification.md §3.3 mục 7 (v3.0) — trước đây bọc trong
-     * TenantContext::runForOrganization() vì PostArticle/PostArticleTranslation tenant-scoped
-     * (OrganizationScope) nên tài khoản organization_id=null lazy-load $translation->article
-     * có thể resolve null nếu TenantContext ambient không khớp tổ chức của translation. Từ
-     * v3.0, Post không còn tenant-scoped nữa (không organization_id nào để scope theo) nên
-     * lazy-load luôn resolve đúng, không cần wrapper này nữa — xoá tận gốc lớp bug đã tài
-     * liệu hoá ở spec/Workflow_Approval_Technical_Specification.md §18.10 thay vì tiếp tục vá.
-     */
     private function runTransition(PostArticleTranslation $translation, \Closure $callback, string $successMessage): RedirectResponse
     {
         try {

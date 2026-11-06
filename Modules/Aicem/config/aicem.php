@@ -11,8 +11,8 @@ return [
         'truncate_strategy'   => 'drop_lowest_priority', // bỏ document priority THẤP nhất trước
     ],
 
-    // Rate limit theo user cho permission aicem.use — override theo Organization qua
-    // organizations.ai_rate_limit_override (mục 13).
+    // Rate limit theo user cho permission aicem.use — override qua
+    // ai_settings.rate_limit_override (mục 13).
     'rate_limit' => [
         'per_minute' => 15,
         'per_day'    => 100,

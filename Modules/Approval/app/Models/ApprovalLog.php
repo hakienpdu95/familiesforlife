@@ -2,15 +2,12 @@
 
 namespace Modules\Approval\Models;
 
-use App\Shared\Tenancy\Traits\BelongsToOrganization;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /** Audit log append-only — không sửa, không soft-delete, không có updated_at. */
 class ApprovalLog extends Model
 {
-    use BelongsToOrganization;
-
     const UPDATED_AT = null;
 
     const ACTION_LABELS = [
@@ -25,7 +22,6 @@ class ApprovalLog extends Model
     protected $table = 'approval_logs';
 
     protected $fillable = [
-        'organization_id',
         'approval_subject_id',
         'action',
         'from_status',

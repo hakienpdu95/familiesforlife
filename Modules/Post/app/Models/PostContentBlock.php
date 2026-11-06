@@ -9,7 +9,7 @@ use Modules\Post\Enums\ContentBlockType;
 /**
  * 1 block trong composer (text hoặc product) theo đúng thứ tự hiển thị (`sort_order`).
  * Không soft-delete — vòng đời gắn chặt bản dịch bài viết, xoá cứng theo cascade.
- * Không tenant-scoped — Post là tài sản của nền tảng (spec Phase2 §3.3 v3.0).
+ * Post là tài sản của nền tảng (spec Phase2 §3.3 v3.0).
  */
 class PostContentBlock extends Model
 {

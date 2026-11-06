@@ -3,42 +3,42 @@
 namespace App\Services\AI;
 
 use App\Services\AI\Exceptions\AiBudgetExceededException;
-use App\Shared\Tenancy\Models\Organization;
+use App\Models\AiSetting;
 use Illuminate\Support\Facades\DB;
 
 final class AiBudgetGuard
 {
     private const TABLE = 'aicem_monthly_budget_usage';
 
-    public function ensureWithinBudget(Organization $organization, int $estimatedInputTokens, int $maxOutputTokens, string $provider, string $model): void
+    public function ensureWithinBudget(int $estimatedInputTokens, int $maxOutputTokens, string $provider, string $model): void
     {
-        if ($organization->ai_monthly_budget_usd === null) {
+        $budget = AiSetting::current()->monthly_budget_usd;
+
+        if ($budget === null) {
             return;
         }
 
         $estimated = CostCalculator::calculate($provider, $model, $estimatedInputTokens, $maxOutputTokens);
-        $usedSoFar = $this->currentUsage($organization->id);
+        $usedSoFar = $this->currentUsage();
 
-        if ($usedSoFar + $estimated > (float) $organization->ai_monthly_budget_usd) {
+        if ($usedSoFar + $estimated > $budget) {
             throw new AiBudgetExceededException(sprintf(
                 'Đã/sắp vượt hạn mức chi phí AI tháng %s ($%.4f đã dùng + $%.4f ước tính cho lần chạy này > hạn mức $%.2f/tháng). Xem/đổi hạn mức ở "Cấu hình AICEM".',
-                now()->format('Y-m'), $usedSoFar, $estimated, (float) $organization->ai_monthly_budget_usd
+                now()->format('Y-m'), $usedSoFar, $estimated, $budget
             ));
         }
     }
 
-    public function recordActualCost(Organization $organization, float $actualCostUsd): void
+    public function recordActualCost(float $actualCostUsd): void
     {
         $yearMonth = now()->format('Y-m');
 
         $existing = DB::table(self::TABLE)
-            ->where('organization_id', $organization->id)
             ->where('year_month', $yearMonth)
             ->first();
 
         if ($existing === null) {
             DB::table(self::TABLE)->insert([
-                'organization_id' => $organization->id,
                 'year_month' => $yearMonth,
                 'reserved_usd' => 0,
                 'settled_usd' => $actualCostUsd,
@@ -67,10 +67,9 @@ final class AiBudgetGuard
             ]);
     }
 
-    private function currentUsage(int $organizationId): float
+    private function currentUsage(): float
     {
         $row = DB::table(self::TABLE)
-            ->where('organization_id', $organizationId)
             ->where('year_month', now()->format('Y-m'))
             ->whereNull('deleted_at')
             ->first();

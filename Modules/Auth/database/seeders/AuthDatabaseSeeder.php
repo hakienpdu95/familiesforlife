@@ -14,7 +14,6 @@ use Spatie\Permission\PermissionRegistrar;
  * Seed: tạo role super-admin + 2 tài khoản quản trị hệ thống mặc định.
  *
  * super-admin:
- *  - Không thuộc bất kỳ Organization nào (organization_id = null)
  *  - Bypass toàn bộ Gate checks (xem AppServiceProvider::Gate::before)
  *  - Có tất cả permissions hiện tại
  *
@@ -69,13 +68,11 @@ class AuthDatabaseSeeder extends Seeder
         ];
 
         foreach ($admins as $data) {
-            // withoutGlobalScopes: tránh OrganizationScope filter khi seed
-            $user = User::withoutGlobalScopes()->firstOrCreate(
+            $user = User::firstOrCreate(
                 ['email' => $data['email']],
                 [
                     'name'             => $data['name'],
                     'password'         => Hash::make('Admin@123!'),
-                    'organization_id'  => null,
                     // Email pre-verified, trust_level = 2 (bypass toàn bộ eKYC)
                     'email_verified_at' => $now,
                     'trust_level'       => 2,
@@ -91,16 +88,6 @@ class AuthDatabaseSeeder extends Seeder
                     'account_type'      => AccountType::Platform,
                 ])->save();
             }
-
-            // Guard tường minh (spec/Platform_RBAC_Technical_Specification.md §3.6) — super-admin
-            // bypass TOÀN BỘ Gate check (AppServiceProvider::Gate::before) mà không tự kiểm tra
-            // organization_id === null ở tầng đó; chặn ngay tại đây để không lỡ gán role này cho
-            // 1 user thuộc tổ chức (vd nếu email trùng với 1 tài khoản tenant có sẵn).
-            abort_if(
-                $user->organization_id !== null,
-                500,
-                "Không gán role super-admin cho user #{$user->id} ({$data['email']}) vì organization_id không null.",
-            );
 
             $user->syncRoles($role);
         }

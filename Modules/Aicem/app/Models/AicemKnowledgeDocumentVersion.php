@@ -8,8 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Aicem\Enums\ScopeMatch;
 
 /**
- * Không extends TenantAwareModel — luôn truy cập qua AicemKnowledgeDocument cha, không cần
- * global scope riêng, nhưng vẫn giữ organization_id để truy vết trực tiếp khi audit (mục 7).
+ * Không extends BaseModel — luôn truy cập qua AicemKnowledgeDocument cha (mục 7).
  */
 class AicemKnowledgeDocumentVersion extends Model
 {
@@ -19,7 +18,6 @@ class AicemKnowledgeDocumentVersion extends Model
 
     protected $fillable = [
         'knowledge_document_id',
-        'organization_id',
         'version',
         'content',
         'scope',

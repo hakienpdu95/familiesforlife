@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\NotificationPreference;
 use App\Models\User;
-use App\Shared\Tenancy\TenantContext;
 use Illuminate\Support\Collection;
 
 class NotificationPreferenceService
@@ -27,12 +26,10 @@ class NotificationPreferenceService
             return ['database'];
         }
 
-        $orgId    = TenantContext::getOrganizationId() ?? $notifiable->organization_id;
-        $cacheKey = "{$notifiable->id}:{$orgId}:{$eventType}";
+        $cacheKey = "{$notifiable->id}:{$eventType}";
 
         if (!array_key_exists($cacheKey, $this->prefCache)) {
             $this->prefCache[$cacheKey] = NotificationPreference::where('user_id', $notifiable->id)
-                ->where('organization_id', $orgId)
                 ->where('event_type', $eventType)
                 ->first();
         }
@@ -65,10 +62,9 @@ class NotificationPreferenceService
     }
 
     /** Returns saved preferences keyed by event_type. */
-    public function getForUser(User $user, int $organizationId): Collection
+    public function getForUser(User $user): Collection
     {
         return NotificationPreference::where('user_id', $user->id)
-            ->where('organization_id', $organizationId)
             ->get()
             ->keyBy('event_type');
     }
@@ -76,7 +72,6 @@ class NotificationPreferenceService
     /** Create or update a single preference row. */
     public function upsert(
         User $user,
-        int $organizationId,
         string $eventType,
         bool $channelDb,
         bool $channelMail,
@@ -84,9 +79,8 @@ class NotificationPreferenceService
     ): void {
         NotificationPreference::updateOrCreate(
             [
-                'user_id'         => $user->id,
-                'organization_id' => $organizationId,
-                'event_type'      => $eventType,
+                'user_id'    => $user->id,
+                'event_type' => $eventType,
             ],
             [
                 'channel_db'   => $channelDb,

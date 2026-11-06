@@ -8,9 +8,9 @@ use Modules\RealEstate\Models\RealEstateListing;
 /**
  * spec/RealEstateForSale_Technical_Specification.md §6 — copy đúng cấu trúc ProductPolicy
  * (Modules/Product/app/Policies/ProductPolicy.php). CRUD gate qua permission Lớp B
- * `real_estate.*` (Organization); duyệt nội dung (submitForApproval/approve/reject/
+ * `real_estate.*`; duyệt nội dung (submitForApproval/approve/reject/
  * publishApproval/archiveApproval) tách biệt hoàn toàn — `platform_content_moderator` (Lớp A,
- * dùng chung xuyên-domain) duyệt, Organization KHÔNG tự publish.
+ * dùng chung xuyên-domain) duyệt, người đăng KHÔNG tự publish.
  */
 class RealEstateListingPolicy
 {

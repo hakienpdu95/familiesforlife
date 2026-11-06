@@ -2,22 +2,17 @@
 
 namespace Modules\Aicem\Models;
 
-use App\Foundation\Models\TenantAwareModel;
+use App\Foundation\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Aicem\Enums\GenerationRunStatus;
 
-class AicemGenerationRun extends TenantAwareModel
+class AicemGenerationRun extends BaseModel
 {
     protected $table = 'aicem_generation_runs';
 
     protected $fillable = [
-        // organization_id: bình thường trait BelongsToOrganization tự điền theo TenantContext
-        // ambient, nhưng StartGenerationRunAction gán TƯỜNG MINH từ $subject->organization_id
-        // (đúng với super-admin thao tác cross-tenant — xem docblock StartGenerationRunAction) —
-        // cần khai fillable để mass-assignment không bị chặn.
-        'organization_id',
         'subject_type',
         'subject_id',
         'workflow_id',

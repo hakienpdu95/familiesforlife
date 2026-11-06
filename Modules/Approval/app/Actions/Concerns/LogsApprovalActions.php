@@ -51,7 +51,6 @@ trait LogsApprovalActions
             $locked->update(array_merge(['status' => $to], $extraAttributes));
 
             ApprovalLog::create([
-                'organization_id'     => $locked->organization_id,
                 'approval_subject_id' => $locked->id,
                 'action'              => $action,
                 'from_status'         => $from->value,

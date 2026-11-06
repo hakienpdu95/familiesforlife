@@ -8,7 +8,6 @@ use App\Models\Media;
 use App\Services\Media\FilePondChunkService;
 use App\Services\Media\MediaUploadService;
 use App\Services\Media\MediaUrlService;
-use App\Shared\Tenancy\TenantContext;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -62,8 +61,8 @@ class MediaUploadController extends Controller
 
     /**
      * entity_type (X-Context-Type header) → fully-qualified model class.
-     * Only models that implement HasMedia + HasTenantMedia are listed here.
-     * Add new models as they adopt HasTenantMedia.
+     * Only models that implement HasMedia + HasManagedMedia are listed here.
+     * Add new models as they adopt HasManagedMedia.
      */
     private const ENTITY_MAP = [
         'post_article' => PostArticle::class,
@@ -215,11 +214,7 @@ class MediaUploadController extends Controller
      */
     public function destroy(string $uuid): JsonResponse
     {
-        $media = Media::withoutTenant()
-            ->where('uuid', $uuid)
-            ->where(fn ($q) => $q->where('organization_id', TenantContext::getOrganizationId())
-                ->orWhereNull('organization_id'))
-            ->first();
+        $media = Media::query()->where('uuid', $uuid)->first();
 
         if (! $media) {
             return $this->chunkService->discardFor($uuid, (int) auth()->id())
@@ -283,7 +278,6 @@ class MediaUploadController extends Controller
         }
 
         return FilePondDraft::create([
-            'organization_id' => TenantContext::getOrganizationId(),
             'user_id' => auth()->id(),
             'context_type' => $contextType,
             'context_id' => $contextId,
@@ -297,7 +291,7 @@ class MediaUploadController extends Controller
      */
     private function deleteOldMedia(Model&HasMedia $model, string $collection, string $keepUuid): void
     {
-        Media::withoutTenant()
+        Media::query()
             ->where('model_type', get_class($model))
             ->where('model_id', $model->getKey())
             ->where('collection_name', $collection)

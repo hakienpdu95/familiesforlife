@@ -17,7 +17,7 @@ use Spatie\Permission\PermissionRegistrar;
  *  - platform_viewer: chỉ xem (Gate viewDashboard/viewApprovalHistory đã OR thêm
  *    isPlatformViewer() ở ApprovalServiceProvider::boot()) — không được cấp permission ghi nào.
  *
- * Cùng quy ước tài khoản organization_id=null như ContentModeratorSeeder.
+ * Cùng quy ước tài khoản Platform như ContentModeratorSeeder.
  *
  * Tài khoản mặc định: minhvan.ops@vigiadinh.vn, ngocdung.gs@vigiadinh.vn (mật khẩu Admin@123!)
  * ⚠️  Đổi mật khẩu ngay sau khi deploy production.
@@ -28,7 +28,6 @@ class PlatformOpsViewerSeeder extends Seeder
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        setPermissionsTeamId(null);
         $opsRole    = Role::firstOrCreate(['name' => 'platform_ops', 'guard_name' => 'web']);
         $viewerRole = Role::firstOrCreate(['name' => 'platform_viewer', 'guard_name' => 'web']);
 
@@ -49,7 +48,6 @@ class PlatformOpsViewerSeeder extends Seeder
             [
                 'name'              => $name,
                 'password'          => Hash::make('Admin@123!'),
-                'organization_id'   => null,
                 'email_verified_at' => now(),
                 'trust_level'       => 2,
                 'account_type'      => AccountType::Platform,
@@ -60,7 +58,6 @@ class PlatformOpsViewerSeeder extends Seeder
             $user->forceFill(['account_type' => AccountType::Platform])->save();
         }
 
-        setPermissionsTeamId(null);
         $user->syncRoles($role);
     }
 }

@@ -14,8 +14,7 @@ use Modules\Product\Models\Product;
 
 /**
  * JSON backend cho Tabulator ở dashboard/products —
- * remote pagination/sort/filter, trả {data, last_page, total}. Tenant-scoped tự động
- * qua TenantAwareModel (Product) — không cần lọc organization_id tường minh ở đây.
+ * remote pagination/sort/filter, trả {data, last_page, total}.
  */
 class ProductApiController extends Controller
 {

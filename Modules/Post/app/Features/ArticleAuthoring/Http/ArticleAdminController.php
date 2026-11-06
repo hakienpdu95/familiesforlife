@@ -291,8 +291,7 @@ class ArticleAdminController extends Controller
         $user = auth()->user();
 
         // content_editor/content_head (Platform Approval Gateway — 2 tầng duyệt bài viết,
-        // Hà Kiên) không có permission post_article.* nào (tài khoản organization_id=null,
-        // permission team-scoped theo tổ chức) — nhưng cần xem/thao tác được để duyệt
+        // Hà Kiên) không có permission post_article.* nào — nhưng cần xem/thao tác được để duyệt
         // (PostArticlePolicy::approve/publish/…).
         if ($user->isPlatformContentEditor() || $user->isPlatformContentHead()) {
             return;

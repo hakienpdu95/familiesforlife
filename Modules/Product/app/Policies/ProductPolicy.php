@@ -47,10 +47,8 @@ class ProductPolicy
 
     // ── Approval workflow — Platform Approval Gateway ──────────────────────────────────
     // Hệ thống nội bộ Hà Kiên: MỌI yêu cầu duyệt nội dung sản phẩm (approve/reject/publish/
-    // archive) do đội kiểm duyệt tập trung của Hà Kiên xử lý (role content_moderator, tài
-    // khoản organization_id=null), KHÔNG phải tài khoản của doanh nghiệp tự duyệt — dù họ có
-    // product.publish hay không. Doanh nghiệp chỉ tự submitForApproval (gửi duyệt), không tự
-    // approve/publish được nữa. Đặt tên publishApproval/archiveApproval (không phải publish/
+    // archive) do đội kiểm duyệt tập trung của Hà Kiên xử lý (role content_moderator).
+    // Người soạn chỉ tự submitForApproval (gửi duyệt), không tự approve/publish. Đặt tên publishApproval/archiveApproval (không phải publish/
     // archive trần) để tránh trùng ý nghĩa với ability khác có thể thêm sau này trên Product.
 
     public function submitForApproval(User $user, Product $product): bool

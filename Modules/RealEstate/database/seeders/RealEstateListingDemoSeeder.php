@@ -2,9 +2,9 @@
 
 namespace Modules\RealEstate\Database\Seeders;
 
+use App\Enums\RoleEnum;
 use App\Models\User;
-use App\Shared\Tenancy\Models\Organization;
-use App\Shared\Tenancy\TenantContext;
+use Database\Seeders\Concerns\ResolvesPlatformAccounts;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Auth;
 use Modules\Approval\Actions\ApproveAction;
@@ -21,44 +21,37 @@ use Modules\RealEstate\Models\RealEstateListing;
  * Modules\Product\Database\Seeders\ProductApprovalDemoSeeder / Modules\Event\Database\Seeders\
  * EventDemoSeeder — KHÔNG insert thẳng DB.
  *
- * Tài khoản: marketing@demo.test (Organization "demo" — tạo/gửi duyệt, có real_estate.create/
- * edit qua config/permissions.php), vanphap.kd@vigiadinh.vn (platform_content_moderator — duyệt
- * + publish, RealEstateListingPolicy::approve()/publishApproval()).
+ * Tài khoản: platform_ops tạo/gửi duyệt, platform_content_moderator duyệt + publish
+ * (RealEstateListingPolicy::approve()/publishApproval()).
  *
  * Idempotent — mỗi tin dùng slug cố định, bỏ qua nếu đã tồn tại.
  */
 class RealEstateListingDemoSeeder extends Seeder
 {
+    use ResolvesPlatformAccounts;
+
     public function run(): void
     {
-        $org = Organization::where('slug', 'demo')->first();
+        $accounts = $this->platformAccounts([
+            'author'    => RoleEnum::OPS,
+            'moderator' => RoleEnum::CONTENT_MODERATOR,
+        ]);
 
-        if (! $org) {
-            $this->command->warn('  ⚠ Không tìm thấy Organization slug=demo — chạy OrganizationSeeder trước.');
-
+        if (! $accounts) {
             return;
         }
 
-        $marketing = User::where('email', 'marketing@demo.test')->first();
-        $moderator = User::withoutGlobalScopes()->where('email', 'vanphap.kd@vigiadinh.vn')->first();
+        ['author' => $author, 'moderator' => $moderator] = $accounts;
 
-        if (! $marketing || ! $moderator) {
-            $this->command->warn('  ⚠ Thiếu tài khoản demo (marketing@demo.test / vanphap.kd@vigiadinh.vn) — chạy UserSeeder + ContentModeratorSeeder trước.');
-
-            return;
-        }
-
-        TenantContext::set($org);
         $previousUser = Auth::user();
 
         $created = 0;
         foreach ($this->definitions() as $definition) {
-            if ($this->seedListing($definition, $marketing, $moderator)) {
+            if ($this->seedListing($definition, $author, $moderator)) {
                 $created++;
             }
         }
 
-        TenantContext::flush();
         $previousUser ? Auth::login($previousUser) : Auth::logout();
 
         $this->command->info("  ✓ Anland demo listings seeded ({$created} tin mới, đã published).");
@@ -217,13 +210,13 @@ class RealEstateListingDemoSeeder extends Seeder
         ];
     }
 
-    private function seedListing(array $def, User $marketing, User $moderator): bool
+    private function seedListing(array $def, User $author, User $moderator): bool
     {
         if (RealEstateListing::where('slug', $def['slug'])->exists()) {
             return false;
         }
 
-        Auth::login($marketing);
+        Auth::login($author);
 
         $data = RealEstateListingData::from($def);
         $listing = app(CreateRealEstateListingAction::class)->handle($data);

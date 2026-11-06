@@ -6,9 +6,8 @@ use Modules\RealEstate\Features\ListingManagement\Http\RealEstateListingApiContr
 use Modules\RealEstate\Features\PublicReading\Http\AnlandHomeController;
 use Modules\RealEstate\Features\PublicReading\Http\PublicRealEstateController;
 
-// ── Admin (Organization) — spec/RealEstateForSale_Technical_Specification.md §7.1 ──────────
-// middleware ['auth','tenant'] giống Modules/Product (RealEstateListing tenant-scoped).
-Route::middleware(['auth', 'tenant'])->prefix('dashboard/real-estate')->name('backend.real-estate.')
+// ── Admin — spec/RealEstateForSale_Technical_Specification.md §7.1 ──────────
+Route::middleware(['auth'])->prefix('dashboard/real-estate')->name('backend.real-estate.')
     ->group(function (): void {
         Route::get('/', [RealEstateListingAdminController::class, 'index'])->name('index');
         Route::get('create', [RealEstateListingAdminController::class, 'create'])->name('create');
@@ -26,9 +25,8 @@ Route::middleware(['auth', 'tenant'])->prefix('dashboard/real-estate')->name('ba
         Route::post('{listing}/archive-content', [RealEstateListingAdminController::class, 'archiveContent'])->name('archive-content');
     });
 
-// ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị, tenant-scoped
-// tự động qua TenantAwareModel) — tham chiếu Modules/Product/routes/web.php (backend.api.products) ──
-Route::middleware(['auth', 'tenant'])->prefix('backend/api/real-estate')->name('backend.api.real-estate.')->group(function (): void {
+// ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị) — tham chiếu Modules/Product/routes/web.php (backend.api.products) ──
+Route::middleware(['auth'])->prefix('backend/api/real-estate')->name('backend.api.real-estate.')->group(function (): void {
     Route::get('listings', [RealEstateListingApiController::class, 'index'])->name('listings');
 });
 

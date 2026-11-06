@@ -17,8 +17,7 @@ trait HasApproval
     /**
      * Tự tạo ApprovalSubject 'draft' ngay khi entity được tạo — dùng hook boot{Trait}
      * chuẩn của Eloquent (giống cách SoftDeletes/HasFactory tự đăng ký), KHÔNG cần entity
-     * tự gọi tay. Chạy trong event `created` (sau `creating`) nên organization_id đã được
-     * BelongsToOrganization gán xong (TenantAwareModel áp dụng cho mọi domain model).
+     * tự gọi tay.
      *
      * `updating` (KHÔNG phải `updated`) — TỰ ĐỘNG gọi ReviseContentAction mỗi khi 1 trường
      * "nội dung" (khai báo ở approvalWatchedAttributes()) SẮP thay đổi, KHÔNG chờ module tiêu
@@ -69,27 +68,12 @@ trait HasApproval
         }
 
         $created = $this->approvalSubject()->create([
-            'organization_id' => $this->approvalOrganizationId(),
-            'status'          => ApprovalStatus::Draft,
+            'status' => ApprovalStatus::Draft,
         ]);
 
         $this->setRelation('approvalSubject', $created);
 
         return $created;
-    }
-
-    /**
-     * organization_id gán vào ApprovalSubject khi tạo mới. Mặc định đọc `$this->organization_id`
-     * (entity tenant-scoped bình thường, vd Product — thuộc VỀ 1 tổ chức). Entity mà CHÍNH NÓ
-     * là tenant root (vd `Organization` — không có cột `organization_id` trỏ vào chính mình)
-     * PHẢI override method này, trả về `$this->id`. Không default ngầm theo kiểu
-     * `$this->organization_id ?? $this->id` — sai lặng lẽ nếu 1 entity tenant-scoped bình
-     * thường vô tình có organization_id null (bug ẩn), tốt hơn để entity tự khai báo rõ ràng
-     * khi nó thuộc nhóm đặc biệt này.
-     */
-    public function approvalOrganizationId(): int
-    {
-        return $this->organization_id;
     }
 
     /**

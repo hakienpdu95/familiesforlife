@@ -11,8 +11,7 @@ use Modules\Event\Features\PublicSubmission\Http\EventSubmissionController;
 use Modules\Event\Features\PublicSubmission\Http\Middleware\ValidateEventTurnstile;
 
 // ── Quản trị Sự kiện (spec/Event_Management_Technical_Specification.md §13) ────────────────
-// KHÔNG có 'tenant' middleware — Event là tài sản nền tảng (không organization_id), cùng
-// pattern Post (xem §3.2). create/store/edit/update phục vụ staff tự nhập sự kiện trực tiếp
+// Event là tài sản nền tảng, cùng pattern Post (xem §3.2). create/store/edit/update phục vụ staff tự nhập sự kiện trực tiếp
 // (EventPolicy::create()/update() — editor/head/ops). approve/reject/publish/archive dùng
 // role-helper trong EventPolicy (editor/head), không qua permission string.
 Route::middleware(['auth'])

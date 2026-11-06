@@ -24,11 +24,10 @@ class AicemServiceProvider extends ModuleServiceProvider
         parent::boot();
 
         // config/aicem.php tự động merge vào key 'aicem' bởi ModuleServiceProvider::registerConfig()
-        // (tên file == nameLower). aicem_subjects.php/aicem_content_verticals.php merge thủ công dưới
+        // (tên file == nameLower). aicem_subjects.php merge thủ công dưới
         // đây để giữ đúng top-level key phẳng mà spec/AICEM_Technical_Specification.md dùng xuyên suốt
         // (VD config("aicem_subjects.$subjectType.fields")), thay vì lồng dưới 'aicem.aicem_subjects.*'.
         $this->mergeConfigFrom(module_path($this->name, 'config/aicem_subjects.php'), 'aicem_subjects');
-        $this->mergeConfigFrom(module_path($this->name, 'config/aicem_content_verticals.php'), 'aicem_content_verticals');
 
         Gate::policy(AicemKnowledgeDocument::class, AicemKnowledgeDocumentPolicy::class);
 

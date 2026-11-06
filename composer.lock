@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e0135bb3734f05a737d4f885a24e2ca7",
+    "content-hash": "da18ebd40bb3a8fc56f209aa2a1d1c5f",
     "packages": [
         {
             "name": "anthropic-ai/sdk",
@@ -7727,75 +7727,6 @@
                 "source": "https://github.com/resend/resend-php/tree/v1.16.0"
             },
             "time": "2026-09-25T18:18:55+00:00"
-        },
-        {
-            "name": "ringlesoft/laravel-process-approval",
-            "version": "1.1.5",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/ringlesoft/laravel-process-approval.git",
-                "reference": "0cf958fdbbbf32bcc7add22e15fe3c5eea837a2e"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/ringlesoft/laravel-process-approval/zipball/0cf958fdbbbf32bcc7add22e15fe3c5eea837a2e",
-                "reference": "0cf958fdbbbf32bcc7add22e15fe3c5eea837a2e",
-                "shasum": ""
-            },
-            "require": {
-                "illuminate/auth": "^10|^11|^12|^13",
-                "illuminate/broadcasting": "^10|^11|^12|^13",
-                "illuminate/database": "^10|^11|^12|^13",
-                "illuminate/routing": "^10|^11|^12|^13",
-                "php": ">=8.1"
-            },
-            "require-dev": {
-                "roave/security-advisories": "dev-latest"
-            },
-            "type": "laravel-package",
-            "extra": {
-                "laravel": {
-                    "aliases": {
-                        "ProcessApproval": "RingleSoft\\LaravelProcessApproval\\Facade"
-                    },
-                    "providers": [
-                        "RingleSoft\\LaravelProcessApproval\\LaravelProcessApprovalServiceProvider"
-                    ],
-                    "dont-discover": []
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "RingleSoft\\LaravelProcessApproval\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "David Ringle",
-                    "email": "ringunger@gmail.com",
-                    "homepage": "https://ringlesoft.com",
-                    "role": "Developer"
-                }
-            ],
-            "description": "A package to handle process approval flow in a laravel application.",
-            "homepage": "https://ringlesoft.com/packages/laravel-process-approval",
-            "keywords": [
-                "approval",
-                "approve",
-                "flow",
-                "laravel",
-                "procedure",
-                "ringlesoft"
-            ],
-            "support": {
-                "issues": "https://github.com/ringlesoft/laravel-process-approval/issues",
-                "source": "https://github.com/ringlesoft/laravel-process-approval/tree/1.1.5"
-            },
-            "time": "2026-04-20T23:33:26+00:00"
         },
         {
             "name": "ryangjchandler/laravel-cloudflare-turnstile",

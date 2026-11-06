@@ -17,7 +17,6 @@ class PersistSuggestionsAction
         foreach ($validatedSuggestions as $item) {
             AicemSuggestion::create([
                 'generation_run_id' => $run->id,
-                'organization_id'   => $run->organization_id,
                 'field'             => $item['field'],
                 'block_id'          => $item['block_id'],
                 'original_text'     => $item['original_text'],

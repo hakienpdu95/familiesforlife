@@ -2,11 +2,11 @@
 
 namespace Modules\Aicem\Models;
 
-use App\Foundation\Models\TenantAwareModel;
+use App\Foundation\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class AicemWorkflow extends TenantAwareModel
+class AicemWorkflow extends BaseModel
 {
     protected $table = 'aicem_workflows';
 

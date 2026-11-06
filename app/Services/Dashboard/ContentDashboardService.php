@@ -47,7 +47,7 @@ class ContentDashboardService
 
     public function isContentAudience(User $user): bool
     {
-        return $user->organization_id === null;
+        return $user->isPlatform();
     }
 
     public function audience(User $user): array
@@ -271,16 +271,6 @@ class ContentDashboardService
 
     private function globalRoleNames(User $user): Collection
     {
-        if ($user->organization_id !== null) {
-            return collect();
-        }
-
-        $pivot = config('permission.table_names.model_has_roles');
-
-        return DB::table($pivot)
-            ->join('roles', 'roles.id', '=', "{$pivot}.role_id")
-            ->where("{$pivot}.model_id", $user->id)
-            ->where("{$pivot}.model_type", $user::class)
-            ->pluck('roles.name');
+        return $user->getRoleNames();
     }
 }

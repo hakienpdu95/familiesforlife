@@ -9,8 +9,7 @@ use Spatie\Permission\PermissionRegistrar;
 
 /**
  * Seed 4 permission aicem.view/use/config_prompt/config và gán vào role phù hợp
- * (spec/AICEM_Technical_Specification.md mục 12). Chạy 1 lần cho toàn hệ thống, không lặp
- * theo Organization (khác SeedDefaultKnowledgeBaseAction — Phase 2 — chạy theo từng Organization).
+ * (spec/AICEM_Technical_Specification.md mục 12). Chạy 1 lần cho toàn hệ thống.
  * Chạy: php artisan db:seed --class="Modules\Aicem\Database\Seeders\AicemPermissionSeeder"
  */
 class AicemPermissionSeeder extends Seeder

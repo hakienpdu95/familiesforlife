@@ -4,45 +4,7 @@ namespace App\Enums;
 
 enum PermissionEnum: string
 {
-    // ══ CEO DASHBOARD ══════════════════════════════════════════════
-    // CEO=Full | Ops=Limited | AI_OP=Limited | Admin=Config | Viewer=View limited
-    case CEO_DASH_FULL = 'ceo_dashboard.full';    // CEO
-    case CEO_DASH_VIEW = 'ceo_dashboard.view';    // Ops(limited), AI_OP(limited), Viewer
-    case CEO_DASH_CONFIG = 'ceo_dashboard.config';  // System Admin
-
-    // ══ SALES AI ═══════════════════════════════════════════════════
-    // CEO=Full | Sales=Use | Marketing=Limited | AI_OP=Config prompt | Admin=Config
-    case SALES_AI_VIEW = 'sales_ai.view';          // CEO(full), Marketing(limited)
-    case SALES_AI_USE = 'sales_ai.use';           // Sales — gọi AI, nhận output
-    case SALES_AI_CONFIG_PROMPT = 'sales_ai.config_prompt'; // AI Operator
-    case SALES_AI_CONFIG = 'sales_ai.config';        // System Admin
-
-    // ══ WORKFLOW ═══════════════════════════════════════════════════
-    // CEO=Monitor | Sales=Limited | Ops=Monitor/Edit | Marketing=Limited | HR=Limited
-    // AI_OP=AI config | Admin=Full config
-    case WORKFLOW_MONITOR = 'workflow.monitor';      // CEO, Ops
-    case WORKFLOW_EDIT = 'workflow.edit';         // Ops (Monitor/Edit = monitor+edit)
-    case WORKFLOW_VIEW_LIMITED = 'workflow.view_limited'; // Sales, Marketing, HR
-    case WORKFLOW_AI_CONFIG = 'workflow.ai_config';    // AI Operator
-    case WORKFLOW_FULL_CONFIG = 'workflow.full_config';  // System Admin
-
-    // ══ USERS ══════════════════════════════════════════════════════
-    // CEO=View | HR=Limited | Admin=Full
-    case USERS_VIEW = 'users.view';   // CEO
-    case USERS_HR = 'users.hr';     // HR (tạo user nội bộ, onboarding)
-    case USERS_MANAGE = 'users.manage'; // System Admin
-
-    // ══ ROLES & PERMISSIONS ════════════════════════════════════════
-    // Admin=Full only
-    case ROLES_MANAGE = 'roles.manage';
-
-    // ══ SYSTEM ═════════════════════════════════════════════════════
-    case INTEGRATION_MANAGE = 'integration.manage';
-    case AUDIT_VIEW = 'audit.view';
-    case SYSTEM_CONFIG = 'system.config';
-
     // ══ PRODUCT (Danh mục Sản phẩm & Dịch vụ — catalog dùng chung cho Post CTA Box) ═
-    // Marketing/Sales=Soạn thảo | CEO/Ops=Full | System Admin=Full + quản lý danh mục | còn lại=View
     case PRODUCT_CATEGORY_MANAGE = 'product_category.manage';
     case PRODUCT_VIEW = 'product.view';
     case PRODUCT_CREATE = 'product.create';
@@ -50,7 +12,6 @@ enum PermissionEnum: string
     case PRODUCT_DELETE = 'product.delete';
 
     // ══ POST (Bài viết theo danh mục + Product CTA Box) ═════════════
-    // Marketing=Soạn thảo | CEO/Ops=Duyệt & publish | System_Admin=Full + quản lý danh mục | còn lại=View (bài đã published)
     case POST_CATEGORY_MANAGE = 'post_category.manage';
     case POST_TAG_MANAGE = 'post_tag.manage';
     case POST_ARTICLE_VIEW = 'post_article.view';
@@ -76,15 +37,13 @@ enum PermissionEnum: string
     case EVENT_DELETE = 'event.delete';
 
     // ══ AICEM (AI Context Engineering Module — trợ lý AI cho Post & Product) ═
-    // CEO=View | Marketing=Use | Ops=View limited | AI_OP=Config prompt | Admin=Config
     case AICEM_VIEW = 'aicem.view';           // xem knowledge base/lịch sử (read-only)
     case AICEM_USE = 'aicem.use';            // chạy workflow trên bài viết/sản phẩm, accept/reject suggestion
     case AICEM_CONFIG_PROMPT = 'aicem.config_prompt';  // sửa knowledge base, template, workflow
     case AICEM_CONFIG = 'aicem.config';         // cấu hình provider/API key/hạn mức chi phí
 
     // ══ MENU (Điều hướng menu — header/footer, decoupled khỏi PostCategory) ══
-    // spec/Menu_Navigation_Technical_Specification.md §6.3 — chỉ System_Admin quản lý,
-    // cùng nguyên tắc POST_CATEGORY_MANAGE (cấu trúc điều hướng là việc của Admin).
+    // spec/Menu_Navigation_Technical_Specification.md §6.3
     case MENU_MANAGE = 'menu.manage';
 
     // ══ BANNER (Banner quảng cáo/thông báo — nhiều placement, targeting theo category) ═══
@@ -151,10 +110,8 @@ enum PermissionEnum: string
     // (Lớp B) — cùng nguyên tắc BANNER_MANAGE/OCOP_MANAGE/PAGE_MANAGE/CORE_IDEA_EXTRACTOR_USE.
     case BREAKING_NEWS_MANAGE = 'breaking_news.manage';
 
-    // ══ REAL ESTATE (Tin rao bán/thuê bất động sản — listing của Organization) ═══
-    // spec/RealEstateForSale_Technical_Specification.md §6 — Lớp B, qua config/permissions.php
-    // + RoleEnum (CEO/SALES/OPS/MARKETING: view+create+edit; ADMIN: thêm delete) — cùng
-    // nguyên tắc PRODUCT_VIEW/PRODUCT_CREATE/PRODUCT_EDIT/PRODUCT_DELETE.
+    // ══ REAL ESTATE (Tin rao bán/thuê bất động sản) ═══
+    // spec/RealEstateForSale_Technical_Specification.md §6
     case REAL_ESTATE_VIEW = 'real_estate.view';
     case REAL_ESTATE_CREATE = 'real_estate.create';
     case REAL_ESTATE_EDIT = 'real_estate.edit';

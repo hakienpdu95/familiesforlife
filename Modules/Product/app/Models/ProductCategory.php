@@ -2,18 +2,17 @@
 
 namespace Modules\Product\Models;
 
-use App\Foundation\Models\TenantAwareModel;
+use App\Foundation\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
-class ProductCategory extends TenantAwareModel
+class ProductCategory extends BaseModel
 {
     protected $table = 'product_categories';
 
     protected $fillable = [
         'uuid',
-        'organization_id',
         'parent_id',
         'name',
         'slug',

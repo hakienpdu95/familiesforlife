@@ -80,7 +80,7 @@ class CreateProductAction
         $this->mediaUpload->reassociateFilePondDrafts($product, [$uuid], 'cover');
         // Query trực tiếp cùng điều kiện reassociateFilePondDrafts — không qua $product->getMedia()
         // (relation media có thể đã nạp trước khi reassociate, trả rỗng).
-        $media = Media::withoutTenant()
+        $media = Media::query()
             ->where('model_type', $product::class)
             ->where('model_id', $product->getKey())
             ->where('collection_name', 'cover')

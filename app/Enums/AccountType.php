@@ -5,7 +5,6 @@ namespace App\Enums;
 enum AccountType: string
 {
     case Free      = 'free';
-    case OrgMember = 'org_member';
     case Platform  = 'platform';
     case Suspended = 'suspended';
 
@@ -13,7 +12,6 @@ enum AccountType: string
     {
         return match ($this) {
             self::Free      => 'Tự do',
-            self::OrgMember => 'Thành viên tổ chức',
             self::Platform  => 'Nhân sự nền tảng',
             self::Suspended => 'Bị khóa',
         };
@@ -22,10 +20,5 @@ enum AccountType: string
     public function canLogin(): bool
     {
         return $this !== self::Suspended;
-    }
-
-    public function canAccessOrgWorkspace(): bool
-    {
-        return $this === self::OrgMember;
     }
 }

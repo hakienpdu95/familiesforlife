@@ -40,7 +40,7 @@ return [
 
         // ── HR / Org ──────────────────────────────────────────────────────
         'employees'           => 'Nhân viên',
-        'users'               => 'Người dùng',
+        'users'               => 'Tài khoản',
         'roles'               => 'Vai trò',
         'permissions'         => 'Quyền hạn',
 
@@ -90,7 +90,6 @@ return [
         'workflow-health'     => 'Tình trạng luồng tự động',
         'notifications'       => 'Thông báo',
         'preferences'         => 'Tuỳ chọn thông báo',
-        'platform-users'      => 'Người dùng Platform',
         'orders'              => 'Đơn hàng',
         'products'            => 'Sản phẩm',
 

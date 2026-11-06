@@ -3,7 +3,7 @@
 namespace Modules\Heritage\Models;
 
 use App\Models\User;
-use App\Traits\HasTenantMedia;
+use App\Traits\HasManagedMedia;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -32,7 +32,7 @@ use Spatie\MediaLibrary\HasMedia;
  */
 class HeritageSite extends Model implements HasMedia
 {
-    use HasTenantMedia;
+    use HasManagedMedia;
     use LogsActivity;
     use SoftDeletes;
 

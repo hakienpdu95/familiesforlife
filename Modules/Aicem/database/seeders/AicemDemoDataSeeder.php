@@ -2,10 +2,10 @@
 
 namespace Modules\Aicem\Database\Seeders;
 
-use App\Models\User;
+use App\Enums\RoleEnum;
 use App\Services\AI\CostCalculator;
-use App\Shared\Tenancy\Models\Organization;
-use App\Shared\Tenancy\TenantContext;
+use App\Models\AiSetting;
+use Database\Seeders\Concerns\ResolvesPlatformAccounts;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Auth;
 use Modules\Aicem\Enums\GenerationRunStatus;
@@ -62,25 +62,19 @@ use Modules\Product\Models\ProductCategory;
  */
 class AicemDemoDataSeeder extends Seeder
 {
-    private Organization $organization;
+    use ResolvesPlatformAccounts;
+
     private int $userId;
 
     public function run(): void
     {
-        $this->organization = Organization::query()->where('is_system', false)->orderBy('id')->firstOrFail();
+        $accounts = $this->platformAccounts(['author' => RoleEnum::CONTENT_CREATOR]);
 
-        $this->seedDemoUserRoles();
+        if (! $accounts) {
+            return;
+        }
 
-        // Marketing là role thực sự chạy workflow AI (aicem.use, mục 12) — dùng làm "tác giả" cho
-        // dữ liệu demo (created_by) để phản ánh đúng luồng thật, không phải vì lý do kỹ thuật.
-        $demoUser = User::where('organization_id', $this->organization->id)
-            ->where('email', 'marketing@demo.test')
-            ->first()
-            ?? User::where('organization_id', $this->organization->id)
-                ->where('email', 'like', '%@demo.test')
-                ->orderBy('id')
-                ->first()
-            ?? User::where('organization_id', $this->organization->id)->firstOrFail();
+        $demoUser = $accounts['author'];
 
         $this->userId = $demoUser->id;
         Auth::login($demoUser);
@@ -89,21 +83,19 @@ class AicemDemoDataSeeder extends Seeder
         // an toàn gọi lại.
         $this->call(AicemDefaultWorkflowSeeder::class);
 
-        TenantContext::runForOrganization($this->organization, function () {
-            $this->command?->info("Seeding Aicem demo data cho Organization #{$this->organization->id} ({$this->organization->name})...");
+        $this->command?->info('Seeding Aicem demo data...');
 
-            $this->seedKnowledgeBase();
-            [$categorySleep, $categoryFamily] = $this->seedPostCategories();
-            [$translationSleep, $translationFamily] = $this->seedScopeExampleArticles($categorySleep, $categoryFamily);
-            $this->seedDemoProducts();
-            $this->seedGenerationRunsAndSuggestions($translationSleep, $translationFamily);
-            $this->seedBudget();
-            $this->seedExampleCandidateStates();
+        $this->seedKnowledgeBase();
+        [$categorySleep, $categoryFamily] = $this->seedPostCategories();
+        [$translationSleep, $translationFamily] = $this->seedScopeExampleArticles($categorySleep, $categoryFamily);
+        $this->seedDemoProducts();
+        $this->seedGenerationRunsAndSuggestions($translationSleep, $translationFamily);
+        $this->seedBudget();
+        $this->seedExampleCandidateStates();
 
-            $this->command?->info('  ✓ Aicem demo data seeded.');
+        $this->command?->info('  ✓ Aicem demo data seeded.');
 
-            $this->printUsageGuide();
-        });
+        $this->printUsageGuide();
 
         Auth::logout();
     }
@@ -136,7 +128,6 @@ class AicemDemoDataSeeder extends Seeder
         $cmd->line('  <fg=black;bg=cyan> AICEM DEMO — HƯỚNG DẪN THAO TÁC </>');
         $line();
         $line("  Base URL      : <fg=cyan>{$base}</>");
-        $line('  Mật khẩu login: <fg=cyan>password</> (cho mọi tài khoản *@demo.test)');
         $line();
         $line('  <fg=yellow>⚠ Nút "Chạy AI" chỉ hoạt động khi có queue worker chạy nền:</>');
         $line('      <fg=green>php artisan queue:listen --tries=1</>');
@@ -145,16 +136,14 @@ class AicemDemoDataSeeder extends Seeder
         $line();
 
         $hr();
-        $line('  <options=bold>TÀI KHOẢN THEO VAI TRÒ</> (mục 12 — quyền quyết định thấy được gì)');
+        $line('  <options=bold>TÀI KHOẢN</> (mục 12 — quyền quyết định thấy được gì)');
         $hr();
-        $line('  <fg=cyan>marketing@demo.test</>  Marketing    → chạy workflow AI, accept/reject đề xuất');
-        $line('  <fg=cyan>ai_op@demo.test</>      AI Operator  → sửa Kho tri thức, duyệt ví dụ mẫu');
-        $line('  <fg=cyan>admin@demo.test</>      System Admin → cấu hình provider / API key / hạn mức');
-        $line('  <fg=cyan>ceo@demo.test</>        CEO          → xem Dashboard tổng quan (read-only)');
+        $line('  <fg=cyan>super-admin@vigiadinh.vn</> → xem, chạy workflow AI, sửa Kho tri thức, cấu hình');
+        $line('  Các vai trò platform_* chưa được cấp quyền aicem.* — cấp qua seeder quyền của module nếu cần.');
         $line();
 
         $hr();
-        $line('  <options=bold>KỊCH BẢN 1 — Cơ chế scope (mục 6.8)</> · login <fg=cyan>marketing@demo.test</>');
+        $line('  <options=bold>KỊCH BẢN 1 — Cơ chế scope (mục 6.8)</>');
         $hr();
         $line('  2 bài viết cùng loại (post_article) nhưng nhận Kho tri thức KHÁC nhau theo');
         $line('  category/format — mở panel AI dưới trang sửa bài, xem dòng "bối cảnh" (taxonomy):');
@@ -171,7 +160,7 @@ class AicemDemoDataSeeder extends Seeder
         $line();
 
         $hr();
-        $line('  <options=bold>KỊCH BẢN 2 — Accept/Reject đề xuất (Phase 3/9.1)</> · login <fg=cyan>marketing@demo.test</>');
+        $line('  <options=bold>KỊCH BẢN 2 — Accept/Reject đề xuất (Phase 3/9.1)</>');
         $hr();
         $line('  Dữ liệu suggestion đã seed sẵn đủ trạng thái để bấm thử ngay (không cần chạy AI):');
         if ($translationSleep) {
@@ -189,7 +178,7 @@ class AicemDemoDataSeeder extends Seeder
         $line();
 
         $hr();
-        $line('  <options=bold>KỊCH BẢN 3 — Kho tri thức + phiên bản/rollback (Phase 2)</> · login <fg=cyan>ai_op@demo.test</>');
+        $line('  <options=bold>KỊCH BẢN 3 — Kho tri thức + phiên bản/rollback (Phase 2)</>');
         $hr();
         $line('  <fg=cyan>' . $url('backend.aicem.knowledge-documents.index') . '</>');
         $line('  14 tài liệu đủ 3 tầng: DNA chung (skill/brand/persona) · chuyên môn theo');
@@ -198,7 +187,7 @@ class AicemDemoDataSeeder extends Seeder
         $line();
 
         $hr();
-        $line('  <options=bold>KỊCH BẢN 4 — Duyệt ví dụ mẫu tự động (Phase 5)</> · login <fg=cyan>ai_op@demo.test</>');
+        $line('  <options=bold>KỊCH BẢN 4 — Duyệt ví dụ mẫu tự động (Phase 5)</>');
         $hr();
         $line('  <fg=cyan>' . $url('backend.aicem.example-candidates.index') . '</>');
         $line('  Publish bài is_featured=true tự sinh candidate example_good (qua listener thật).');
@@ -209,15 +198,15 @@ class AicemDemoDataSeeder extends Seeder
         $hr();
         $line('  <options=bold>KỊCH BẢN 5 — Dashboard + Cấu hình (Phase 4/6)</>');
         $hr();
-        $line('  CEO xem tổng quan (chi phí tháng, prompt-cache tokens, top workflow, 20 run gần nhất):');
-        $line('   login <fg=cyan>ceo@demo.test</> → <fg=cyan>' . $url('backend.aicem.dashboard') . '</>');
-        $line('  Admin cấu hình provider/API key (BYOK) + hạn mức $20/tháng + rate limit:');
-        $line('   login <fg=cyan>admin@demo.test</> → <fg=cyan>' . $url('backend.aicem.settings') . '</>');
+        $line('  Tổng quan (chi phí tháng, prompt-cache tokens, top workflow, 20 run gần nhất):');
+        $line('   <fg=cyan>' . $url('backend.aicem.dashboard') . '</>');
+        $line('  Cấu hình provider/API key (BYOK) + hạn mức $20/tháng + rate limit:');
+        $line('   <fg=cyan>' . $url('backend.aicem.settings') . '</>');
         $line();
 
         if ($productPrem) {
             $hr();
-            $line('  <options=bold>KỊCH BẢN 6 — Panel AI trên Sản phẩm (module chỉ định thứ 2)</> · <fg=cyan>marketing@demo.test</>');
+            $line('  <options=bold>KỊCH BẢN 6 — Panel AI trên Sản phẩm (module chỉ định thứ 2)</>');
             $hr();
             $line('  Panel AI dùng chung cũng nhúng vào trang sửa sản phẩm (taxonomy = price_tier):');
             $line('   • SP cao cấp (premium) → nhận doc "Copy chuyển đổi cao cấp":');
@@ -229,36 +218,6 @@ class AicemDemoDataSeeder extends Seeder
         $line('  Chi tiết đầy đủ: <fg=cyan>Modules/Aicem/docs/DEMO-WALKTHROUGH.md</>');
         $line('  Chạy lại seeder an toàn (idempotent): không tạo trùng dữ liệu.');
         $line();
-    }
-
-    /**
-     * Các user demo (*@demo.test) trong DB dev hiện KHÔNG có role Spatie nào được gán (khoảng
-     * trống có sẵn từ trước, không liên quan AICEM) — nếu để nguyên, đăng nhập bằng bất kỳ user
-     * demo nào cũng không thấy được panel AI/dashboard/cấu hình vì mọi nơi đều gate theo permission
-     * (mục 12). Gán đúng role khớp tên email để có thể đăng nhập quan sát toàn bộ luồng theo từng
-     * góc nhìn role (Marketing chạy AI, AI Operator sửa knowledge base, System Admin cấu hình...).
-     * CHỈ gán khi user đó chưa có role nào — không đụng vào nếu đã tự cấu hình.
-     */
-    private function seedDemoUserRoles(): void
-    {
-        $emailToRole = [
-            'ceo@demo.test'       => 'ceo',
-            'sales@demo.test'     => 'sales',
-            'ops@demo.test'       => 'ops',
-            'marketing@demo.test' => 'marketing',
-            'hr@demo.test'        => 'hr',
-            'ai_op@demo.test'     => 'ai_operator',
-            'admin@demo.test'     => 'system_admin',
-            'viewer@demo.test'    => 'viewer',
-        ];
-
-        foreach ($emailToRole as $email => $role) {
-            $user = User::where('organization_id', $this->organization->id)->where('email', $email)->first();
-
-            if ($user && $user->roles()->count() === 0) {
-                $user->assignRole($role);
-            }
-        }
     }
 
     /**
@@ -507,7 +466,6 @@ class AicemDemoDataSeeder extends Seeder
             'started_at' => now()->subDays(2), 'completed_at' => now()->subDays(2)->addSeconds(6),
         ]);
         $run1->suggestions()->create([
-            'organization_id' => $this->organization->id,
             'field' => 'seo_description', 'original_text' => $translationSleep->seo_description ?? '',
             'suggested_text' => 'Hướng dẫn chọn nệm, chăn an toàn cho trẻ sơ sinh theo khuyến cáo AAP, giảm nguy cơ SIDS.',
             'reason' => 'Bổ sung "theo khuyến cáo AAP" tăng độ tin cậy (E-E-A-T).',
@@ -530,7 +488,6 @@ class AicemDemoDataSeeder extends Seeder
             'started_at' => now()->subDay(), 'completed_at' => now()->subDay()->addSeconds(8),
         ]);
         $run2->suggestions()->create([
-            'organization_id' => $this->organization->id,
             'field' => 'title', 'original_text' => $translationSleep->title,
             'suggested_text' => 'Chọn Nệm An Toàn Cho Trẻ Sơ Sinh: Hướng Dẫn Từ A-Z',
             'reason' => "Tiêu đề gốc chưa có yếu tố hướng dẫn cụ thể, thêm 'Từ A-Z' tăng CTR.",
@@ -552,7 +509,6 @@ class AicemDemoDataSeeder extends Seeder
             'started_at' => now()->subHours(5), 'completed_at' => now()->subHours(5)->addSeconds(12),
         ]);
         $run3->suggestions()->create([
-            'organization_id' => $this->organization->id,
             'block_id' => $firstBlockId,
             'original_text' => '1. Cùng nấu ăn: giao cho bé 1 nhiệm vụ đơn giản như rửa rau.',
             'suggested_text' => '1. Vào bếp cùng con: hãy để bé rửa rau, một việc nhỏ nhưng giúp con cảm thấy được tin tưởng.',
@@ -561,7 +517,6 @@ class AicemDemoDataSeeder extends Seeder
             'decided_by' => $this->userId, 'decided_at' => now()->subHours(4),
         ]);
         $run3->suggestions()->create([
-            'organization_id' => $this->organization->id,
             'field' => 'excerpt',
             'original_text' => 'Gợi ý hoạt động cuối tuần cho gia đình bận rộn', // KHÁC excerpt thật hiện tại
             'suggested_text' => 'Gợi ý hoạt động cuối tuần cho gia đình bận rộn, dễ thực hiện, không tốn kém.',
@@ -592,8 +547,10 @@ class AicemDemoDataSeeder extends Seeder
 
     private function seedBudget(): void
     {
-        if ($this->organization->ai_monthly_budget_usd === null) {
-            $this->organization->update(['ai_monthly_budget_usd' => 20.00]);
+        $settings = AiSetting::current();
+
+        if ($settings->monthly_budget_usd === null) {
+            $settings->fill(['monthly_budget_usd' => 20.00])->save();
         }
 
         $yearMonth = now()->format('Y-m');

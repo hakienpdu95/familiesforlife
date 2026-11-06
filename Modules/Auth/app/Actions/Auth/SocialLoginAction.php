@@ -10,7 +10,6 @@ use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Contracts\User as SocialUser;
 use Lorisleiva\Actions\Concerns\AsAction;
 use Modules\Auth\Models\SocialAccount;
-use Modules\Auth\Rules\NotOrgDomainEmail;
 
 class SocialLoginAction
 {
@@ -135,19 +134,6 @@ class SocialLoginAction
         }
 
         $email = Str::lower($email);
-
-        // LinkedIn thường bind email công việc → bắt buộc kiểm tra org domain
-        if ($provider === 'linkedin') {
-            $rule   = new NotOrgDomainEmail();
-            $failed = null;
-            $rule->validate('email', $email, function (string $msg) use (&$failed) {
-                $failed = $msg;
-            });
-
-            if ($failed) {
-                throw ValidationException::withMessages(['email' => $failed]);
-            }
-        }
 
         return $email;
     }

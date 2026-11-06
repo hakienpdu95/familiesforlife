@@ -1,20 +1,14 @@
 @extends('auth::layouts.split')
 
-@section('title', 'Đăng ký tổ chức')
+@section('title', 'Đăng ký tài khoản')
 
-@section('heading', 'Tạo tổ chức mới')
+@section('heading', 'Tạo tài khoản')
 
-@section('subheading', 'Đăng ký tổ chức và tài khoản quản trị để bắt đầu sử dụng Hệ thống Quản trị Nội dung.')
+@section('subheading', 'Đăng ký tài khoản để bắt đầu sử dụng hệ thống.')
 
 @section('form')
 <form method="POST" action="{{ route('register') }}" class="flex flex-col gap-5">
     @csrf
-
-    <div class="divider divider-start my-0 text-sm font-semibold text-base-content/75">Thông tin tổ chức</div>
-
-    <x-auth::field name="organization_name" label="Tên tổ chức" placeholder="VD: Công ty TNHH ABC" autocomplete="organization" />
-
-    <div class="divider divider-start my-0 text-sm font-semibold text-base-content/75">Tài khoản chủ sở hữu (CEO)</div>
 
     <x-auth::field name="name" label="Họ và tên" placeholder="Nguyễn Văn A" autofocus autocomplete="name" />
 
@@ -27,7 +21,7 @@
     </div>
 
     <button type="submit" class="btn btn-primary btn-lg btn-block font-semibold uppercase tracking-wide">
-        Tạo tổ chức &amp; đăng ký
+        Đăng ký
     </button>
 
     <p class="text-xs leading-relaxed text-base-content/75">

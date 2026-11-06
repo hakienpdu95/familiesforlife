@@ -2,7 +2,6 @@
 
 namespace Modules\ActivityLog\Core;
 
-use App\Shared\Tenancy\TenantContext;
 use Modules\ActivityLog\Data\HttpSnapshotData;
 use Modules\ActivityLog\Data\LogEntryData;
 use Modules\ActivityLog\Enums\ActorType;
@@ -24,7 +23,6 @@ final class LogEntryBuilder
         ?string  $description,
     ): LogEntryData {
         return new LogEntryData(
-            organizationId: $this->organizationId(),
             actorId:        $this->actorId(),
             actorType:      $this->actorType(),
             actorName:      $this->actorName(),
@@ -42,11 +40,6 @@ final class LogEntryBuilder
             http:           app()->runningInConsole() ? null : HttpSnapshotData::fromRequest(request()),
             loggedAt:       new \DateTimeImmutable(),
         );
-    }
-
-    private function organizationId(): ?int
-    {
-        return TenantContext::isSet() ? TenantContext::getOrganizationId() : null;
     }
 
     private function actorId(): ?int

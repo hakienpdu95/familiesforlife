@@ -11,7 +11,7 @@ use Modules\Post\Models\PostCategory;
 
 /**
  * spec/ContentOutlines_Technical_Specification.md §2.1 — công cụ nghiên cứu nội dung nền tảng,
- * KHÔNG extends TenantAwareModel/organization_id — cùng nhóm content_foundations. KHÔNG soft
+ * KHÔNG extends BaseModel/organization_id — cùng nhóm content_foundations. KHÔNG soft
  * delete, KHÔNG LogsActivity (§2.1 — không phải credential/tài sản nghiệp vụ cần audit).
  */
 class ContentOutline extends Model

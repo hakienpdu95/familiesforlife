@@ -11,6 +11,7 @@ class LogUserCreated
     {
         ActivityLogger::info('User', 'user_created', $event->user, [
             'email' => $event->user->email,
+            'created_via' => $event->via,
         ]);
     }
 }

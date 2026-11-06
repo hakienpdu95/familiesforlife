@@ -4,7 +4,7 @@ namespace Modules\Aicem\Features\Dashboard\Queries;
 
 use App\Shared\Contracts\QueryHandlerInterface;
 use App\Shared\Contracts\QueryInterface;
-use App\Shared\Tenancy\TenantContext;
+use App\Models\AiSetting;
 use Illuminate\Support\Facades\DB;
 use Modules\Aicem\Models\AicemGenerationRun;
 use Modules\Aicem\Models\AicemMonthlyBudgetUsage;
@@ -12,14 +12,14 @@ use Modules\Aicem\Models\AicemWorkflow;
 
 /**
  * Thống kê gọn cho CEO/System Admin xem — tính trực tiếp từ aicem_generation_runs (không chỉ
- * đọc aicem_monthly_budget_usage, vì bảng đó CHỈ tồn tại khi Organization có đặt hạn mức —
- * mục 13.1) để vẫn có số liệu hữu ích ngay cả khi Organization chưa cấu hình budget.
+ * đọc aicem_monthly_budget_usage, vì bảng đó CHỈ có dữ liệu khi có đặt hạn mức — mục 13.1)
+ * để vẫn có số liệu hữu ích ngay cả khi chưa cấu hình budget.
  *
  * `cost_this_month` PHẢI cộng thêm chi phí "Layer 2" của CoreIdeaExtractor (bảng riêng
  * `cie_layer2_runs`, xem RunLayer2ExtractionAction) — Layer 2 gọi AI trừ đúng vào CÙNG ngân sách
- * tổ chức mà Aicem dùng (aicem_monthly_budget_usage), nhưng KHÔNG tạo dòng nào ở
+ * mà Aicem dùng (aicem_monthly_budget_usage), nhưng KHÔNG tạo dòng nào ở
  * aicem_generation_runs (không có khái niệm workflow/subject), nên nếu chỉ sum() bảng đó thì con
- * số hiển thị sẽ THẤP HƠN thực tế đã chi khi tổ chức có dùng cả 2 tính năng.
+ * số hiển thị sẽ THẤP HƠN thực tế đã chi khi dùng cả 2 tính năng.
  */
 class GetAicemUsageStatsHandler implements QueryHandlerInterface
 {
@@ -28,18 +28,17 @@ class GetAicemUsageStatsHandler implements QueryHandlerInterface
         $monthStart = now()->startOfMonth();
         $baseQuery  = fn () => AicemGenerationRun::query()->where('created_at', '>=', $monthStart);
 
-        $organization = TenantContext::resolve();
-        $yearMonth    = now()->format('Y-m');
+        $budgetLimit = AiSetting::current()->monthly_budget_usd;
+        $yearMonth   = now()->format('Y-m');
 
         $budgetUsage = AicemMonthlyBudgetUsage::query()->where('year_month', $yearMonth)->first();
 
         $coreIdeaLayer2CostThisMonth = (float) DB::table('cie_layer2_runs')
-            ->where('organization_id', $organization->id)
             ->where('created_at', '>=', $monthStart)
             ->sum('cost_usd');
 
         return [
-            'suggestion_acceptance' => $this->buildSuggestionAcceptance($organization->id),
+            'suggestion_acceptance' => $this->buildSuggestionAcceptance(),
             'total_runs_this_month'     => $baseQuery()->count(),
             'succeeded_runs_this_month' => $baseQuery()->where('status', 'succeeded')->count(),
             'failed_runs_this_month'    => $baseQuery()->where('status', 'failed')->count(),
@@ -49,7 +48,7 @@ class GetAicemUsageStatsHandler implements QueryHandlerInterface
             // theo từng model/run riêng — xem cache_read_tokens trên từng aicem_generation_runs).
             'cache_read_tokens_this_month'     => (int) $baseQuery()->where('status', 'succeeded')->sum('cache_read_tokens'),
             'cache_creation_tokens_this_month' => (int) $baseQuery()->where('status', 'succeeded')->sum('cache_creation_tokens'),
-            'budget_limit'              => $organization->ai_monthly_budget_usd !== null ? (float) $organization->ai_monthly_budget_usd : null,
+            'budget_limit'              => $budgetLimit,
             'budget_reserved'           => $budgetUsage ? (float) $budgetUsage->reserved_usd : 0.0,
             'top_workflows'             => AicemWorkflow::query()
                 ->withCount(['generationRuns' => fn ($q) => $q->where('created_at', '>=', $monthStart)])
@@ -69,13 +68,11 @@ class GetAicemUsageStatsHandler implements QueryHandlerInterface
      * status` chỉ dùng để apply/discard (AcceptSuggestionAction/RejectSuggestionAction), không hề
      * tổng hợp thành insight nào — không ai biết ngữ cảnh hiện tại có thực sự giúp ích không. Toàn
      * thời gian (không giới hạn theo tháng như phần còn lại của dashboard) vì mẫu cần đủ lớn mới
-     * có ý nghĩa thống kê — AicemSuggestion không extends TenantAwareModel (xem docblock model),
-     * lọc tay theo organization_id thay vì dựa global scope.
+     * có ý nghĩa thống kê.
      */
-    private function buildSuggestionAcceptance(int $organizationId): array
+    private function buildSuggestionAcceptance(): array
     {
         $rows = DB::table('aicem_suggestions')
-            ->where('organization_id', $organizationId)
             ->selectRaw("COALESCE(field, 'block') as field_key, status, COUNT(*) as cnt")
             ->groupBy('field_key', 'status')
             ->get();

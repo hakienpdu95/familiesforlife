@@ -35,23 +35,17 @@ bản chi tiết hơn của bảng đó.
 | Có worker, chưa có API key | Run chạy xong nhanh và chuyển `failed` với thông báo lỗi rõ ràng (không treo) |
 | Có worker + API key thật | Run `succeeded`, nhận đề xuất mới trên panel |
 
-Nhập API key thật tại trang **Cấu hình AICEM** (`admin@demo.test`) hoặc set
+Nhập API key thật tại trang **Cấu hình AICEM** (`super-admin@vigiadinh.vn`) hoặc set
 `AI_DEFAULT_PROVIDER` / `AI_DEFAULT_MODEL` / `AI_DEFAULT_API_KEY` trong `.env`.
 
 ---
 
 ## 2. Tài khoản demo
 
-Tất cả mật khẩu: **`password`**. Seeder tự gán role Spatie khớp tên email nếu user chưa có role.
-
-| Email | Role | Quyền AICEM (mục 12) | Dùng để xem gì |
-|---|---|---|---|
-| `marketing@demo.test` | Marketing | `aicem.use` | Chạy workflow, accept/reject đề xuất, panel AI trên bài viết/sản phẩm |
-| `ai_op@demo.test` | AI Operator | `aicem.config_prompt` | Sửa Knowledge Base + version/rollback, duyệt ví dụ mẫu |
-| `admin@demo.test` | System Admin | `aicem.config` (+ tất cả) | Cấu hình provider/API key/hạn mức |
-| `ceo@demo.test` | CEO | `aicem.view` | Dashboard tổng quan (read-only) |
-| `ops@demo.test` | Ops | `aicem.view` | Xem read-only |
-| `sales@demo.test`, `hr@demo.test`, `viewer@demo.test` | — | (không có quyền AICEM) | Không thấy menu AICEM — minh hoạ permission gating |
+Dữ liệu demo do tài khoản `platform_content_creator` đầu tiên tạo (cần chạy
+`Modules\Approval\Database\Seeders\ApprovalDatabaseSeeder` trước). Hiện chỉ `super-admin`
+(`super-admin@vigiadinh.vn`) có quyền AICEM — các vai trò `platform_*` chưa được cấp `aicem.*`.
+Mọi bước bên dưới đăng nhập bằng `super-admin@vigiadinh.vn`.
 
 ---
 
@@ -119,7 +113,7 @@ viết logic cập nhật.
 
 ### Kịch bản 1 — Cơ chế scope: cùng loại bài, khác Knowledge Base (mục 6.8)
 
-> Login `marketing@demo.test`. **Không cần chạy AI** — chỉ quan sát dòng bối cảnh.
+> Login `super-admin@vigiadinh.vn`. **Không cần chạy AI** — chỉ quan sát dòng bối cảnh.
 
 1. Mở bài **"Cách chọn nệm an toàn cho trẻ sơ sinh"** (category `an-toan-giac-ngu`, format
    `article`). Cuộn xuống panel **Trợ lý AI (AICEM)** → dòng bối cảnh hiện
@@ -138,7 +132,7 @@ viết logic cập nhật.
 
 ### Kịch bản 2 — Accept / Reject / Stale / Failed (Phase 3 + mục 9.1)
 
-> Login `marketing@demo.test`. Dữ liệu suggestion **đã seed sẵn** — bấm thử ngay, không cần chạy AI.
+> Login `super-admin@vigiadinh.vn`. Dữ liệu suggestion **đã seed sẵn** — bấm thử ngay, không cần chạy AI.
 
 - Bài **"nệm an toàn"** → có 1 đề xuất **PENDING** cho `title`. Bấm **Chấp nhận** → tiêu đề bài
   đổi thật (qua `UpdateArticleAction`); hoặc **Từ chối**. (Bài này cũng đã có sẵn 1 đề xuất
@@ -151,7 +145,7 @@ viết logic cập nhật.
 
 ### Kịch bản 3 — Knowledge Base CRUD + version/rollback (Phase 2)
 
-> Login `ai_op@demo.test` → menu **AICEM → Knowledge Base**.
+> Login `super-admin@vigiadinh.vn` → menu **AICEM → Knowledge Base**.
 
 1. Xem 14 tài liệu (lọc theo type/subject_type). Nhận ra 3 tầng ở mục 3.
 2. Mở 1 tài liệu bất kỳ → sửa nội dung → **Lưu thay đổi**.
@@ -162,7 +156,7 @@ viết logic cập nhật.
 
 ### Kịch bản 4 — Duyệt ví dụ mẫu tự động (Phase 5)
 
-> Login `ai_op@demo.test` → menu **AICEM → Duyệt ví dụ mẫu**.
+> Login `super-admin@vigiadinh.vn` → menu **AICEM → Duyệt ví dụ mẫu**.
 
 - Mỗi khi 1 bài viết `is_featured=true` được publish, listener thật tự sinh 1 **candidate**
   `example_good` ở trạng thái **pending** (không ghi thẳng vào Knowledge Base).
@@ -172,9 +166,9 @@ viết logic cập nhật.
 
 ### Kịch bản 5 — Dashboard + Cấu hình (Phase 4 + 6)
 
-- **CEO** (`ceo@demo.test`) → **AICEM → Tổng quan**: số run tháng này, chi phí, **prompt-cache
+- **Tổng quan** → **AICEM → Tổng quan**: số run tháng này, chi phí, **prompt-cache
   tokens** (token đọc từ cache Anthropic — Phase 6), top workflow, 20 run gần nhất.
-- **System Admin** (`admin@demo.test`) → **AICEM → Cấu hình**:
+- **System Admin** (`super-admin@vigiadinh.vn`) → **AICEM → Cấu hình**:
   - Provider AI **BYOK** (chọn Anthropic/OpenAI + model + API key riêng của tổ chức).
   - **Hạn mức chi phí** $20/tháng (để trống = không giới hạn) — cơ chế reserve/reconcile chống
     race ở mục 13.1.
@@ -182,7 +176,7 @@ viết logic cập nhật.
 
 ### Kịch bản 6 — Panel AI trên Sản phẩm (module chỉ định thứ 2)
 
-> Login `marketing@demo.test` → **Sản phẩm & Dịch vụ → Danh sách → sửa 1 sản phẩm**.
+> Login `super-admin@vigiadinh.vn` → **Sản phẩm & Dịch vụ → Danh sách → sửa 1 sản phẩm**.
 
 - Panel AI dùng chung **cùng 1 component** cũng xuất hiện dưới trang sửa sản phẩm — minh hoạ AICEM
   không viết cứng theo Post: chỉ cần 1 resolver + 1 dòng registry là gắn được module mới.
@@ -192,8 +186,8 @@ viết logic cập nhật.
 ### Kịch bản 7 — Chạy AI thật đầu-cuối (cần queue + API key)
 
 1. Chạy `php artisan queue:listen --tries=1` ở terminal riêng.
-2. Login `admin@demo.test` → **Cấu hình AICEM** → nhập API key thật (Anthropic hoặc OpenAI).
-3. Login `marketing@demo.test` → mở 1 bài viết → panel AI → bấm 1 workflow (VD **Tối ưu tiêu đề**).
+2. Login `super-admin@vigiadinh.vn` → **Cấu hình AICEM** → nhập API key thật (Anthropic hoặc OpenAI).
+3. Login `super-admin@vigiadinh.vn` → mở 1 bài viết → panel AI → bấm 1 workflow (VD **Tối ưu tiêu đề**).
 4. Banner *"Đang xử lý AI..."* → panel tự poll → khi xong hiện đề xuất mới → Chấp nhận/Từ chối.
 5. Quay lại Dashboard xem run mới + chi phí + token cache tăng lên.
 

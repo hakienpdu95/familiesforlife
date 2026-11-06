@@ -3,8 +3,7 @@
 return [
     /*
      * The model used for media records.
-     * Custom model extends Spatie's Media with BelongsToOrganization for tenant isolation.
-     * NOTE: Must NOT extend TenantAwareModel — Spatie does not support SoftDeletes.
+     * NOTE: Must NOT extend BaseModel — Spatie does not support SoftDeletes.
      */
     'media_model' => App\Models\Media::class,
 

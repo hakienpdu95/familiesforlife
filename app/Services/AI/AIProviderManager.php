@@ -3,7 +3,7 @@
 namespace App\Services\AI;
 
 use App\Services\AI\Exceptions\UnsupportedAIProviderException;
-use App\Shared\Tenancy\Models\Organization;
+use App\Models\AiSetting;
 
 final class AIProviderManager
 {
@@ -28,14 +28,14 @@ final class AIProviderManager
         self::$fakeQueue = null;
     }
 
-    public function complete(?Organization $organization, array $messages, AIRequestOptions $options): AIResponse
+    public function complete(array $messages, AIRequestOptions $options): AIResponse
     {
         if (self::$fakeQueue !== null) {
             return array_shift(self::$fakeQueue)
                 ?? throw new \RuntimeException('AIProviderManager::fake() queue rỗng — không còn response giả để trả.');
         }
 
-        $config   = $organization?->ai_provider_config ?? config('ai.default');
+        $config   = AiSetting::providerConfig();
         $provider = $this->makeProvider($config);
 
         $response = $provider->complete($messages, $options);

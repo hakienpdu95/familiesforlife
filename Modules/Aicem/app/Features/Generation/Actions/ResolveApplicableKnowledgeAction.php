@@ -15,10 +15,9 @@ class ResolveApplicableKnowledgeAction
     use AsAction;
 
     /** @return array{content: string[], truncated: bool} */
-    public function handle(int $organizationId, string $type, ?string $subjectType, array $taxonomy): array
+    public function handle(string $type, ?string $subjectType, array $taxonomy): array
     {
         $docs = AicemKnowledgeDocument::query()
-            ->where('organization_id', $organizationId)
             ->where('type', $type)
             ->where(function ($q) use ($subjectType) {
                 $q->whereNull('subject_type')->orWhere('subject_type', $subjectType);

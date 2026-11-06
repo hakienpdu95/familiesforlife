@@ -15,7 +15,7 @@ use Spatie\Permission\PermissionRegistrar;
  * dung (content_head) duyệt cuối trước khi hiển thị ra cổng thông tin"
  * (spec/Workflow_Approval_Technical_Specification.md §18.10).
  *
- * Cả 2 role đều organization_id=null (Platform Approval Gateway, xem ContentModeratorSeeder
+ * Cả 2 role đều là tài khoản Platform (Platform Approval Gateway, xem ContentModeratorSeeder
  * cho quy ước chung) — content_head làm được cả việc của content_editor
  * (PostArticlePolicy::approve cho phép cả 2 role), không áp dụng ngược.
  *
@@ -28,7 +28,6 @@ class ContentReviewHierarchySeeder extends Seeder
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        setPermissionsTeamId(null);
         // Đổi tên platform_content_editor/platform_content_head (từ content_editor/
         // content_head) — spec/Platform_RBAC_Technical_Specification.md §3.2/§3.5. Dùng tên
         // MỚI ở đây để không tạo lại role cũ nếu seeder chạy lại trên môi trường chưa từng có
@@ -51,7 +50,6 @@ class ContentReviewHierarchySeeder extends Seeder
             [
                 'name'              => $name,
                 'password'          => Hash::make('Admin@123!'),
-                'organization_id'   => null,
                 'email_verified_at' => now(),
                 'trust_level'       => 2,
                 'account_type'      => AccountType::Platform,
@@ -62,7 +60,6 @@ class ContentReviewHierarchySeeder extends Seeder
             $user->forceFill(['account_type' => AccountType::Platform])->save();
         }
 
-        setPermissionsTeamId(null);
         $user->syncRoles($role);
     }
 }

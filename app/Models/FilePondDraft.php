@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Foundation\Models\TenantAwareModel;
-use App\Traits\HasTenantMedia;
+use App\Foundation\Models\BaseModel;
+use App\Traits\HasManagedMedia;
 use Spatie\MediaLibrary\HasMedia;
 
 /**
@@ -20,11 +20,11 @@ use Spatie\MediaLibrary\HasMedia;
  * For edit forms (X-Context-Id provided), media is attached directly to the entity
  * on upload — no FilePondDraft is created.
  */
-class FilePondDraft extends TenantAwareModel implements HasMedia
+class FilePondDraft extends BaseModel implements HasMedia
 {
-    use HasTenantMedia;
+    use HasManagedMedia;
 
     protected $table = 'filepond_drafts';
 
-    protected $fillable = ['organization_id', 'user_id', 'context_type', 'context_id'];
+    protected $fillable = ['user_id', 'context_type', 'context_id'];
 }

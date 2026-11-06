@@ -2,8 +2,6 @@
 
 namespace Modules\Aicem\Database\Seeders;
 
-use App\Shared\Tenancy\Models\Organization;
-use App\Shared\Tenancy\TenantContext;
 use Illuminate\Database\Seeder;
 use Modules\Aicem\Models\AicemContextTemplate;
 use Modules\Aicem\Models\AicemWorkflow;
@@ -14,20 +12,16 @@ use Modules\Aicem\Models\AicemWorkflow;
  * (spec/AICEM_Technical_Specification.md mục 15), CHƯA làm CRUD UI cho ContextTemplate/Workflow
  * (AI_Operator tự tạo template/workflow riêng là phần mở rộng sau). full_optimization thêm ở
  * Phase 4 ("workflow đa-block") — duy nhất workflow có section subject_blocks, sinh suggestion
- * trải trên NHIỀU block cùng lúc trong 1 lần chạy. Idempotent theo (organization_id, subject_type,
- * slug) — chạy lại không tạo trùng, an toàn khi seed nhiều Organization.
+ * trải trên NHIỀU block cùng lúc trong 1 lần chạy. Idempotent theo (subject_type, slug) — chạy
+ * lại không tạo trùng.
  */
 class AicemDefaultWorkflowSeeder extends Seeder
 {
     public function run(): void
     {
-        Organization::query()->each(function (Organization $organization) {
-            TenantContext::runForOrganization($organization, function () {
-                $this->seedHeadlineWorkflow();
-                $this->seedSeoAuditWorkflow();
-                $this->seedFullOptimizationWorkflow();
-            });
-        });
+        $this->seedHeadlineWorkflow();
+        $this->seedSeoAuditWorkflow();
+        $this->seedFullOptimizationWorkflow();
 
         $this->command?->info('  ✓ Aicem default workflows (headline, seo_audit, full_optimization) seeded.');
     }

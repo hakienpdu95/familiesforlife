@@ -33,23 +33,12 @@ class AicemGenerationController extends Controller
 
         $subject = $modelClass::withoutGlobalScopes()->findOrFail($validated['subject_id']);
 
-        // Lọc + xác nhận workflow CÙNG Organization với subject (qua resolver — xem
-        // ListRunnableWorkflowsHandler/spec/Platform_RBAC_Phase2_Specification.md §3.4) — không
-        // dựa vào TenantContext ambient (super-admin bypass hoàn toàn OrganizationScope). Đây là
-        // guard cuối cùng chặn đúng bug thật đã xảy ra: panel hiện nhầm workflow của Organization
-        // khác (đã sửa ở ListRunnableWorkflowsHandler), người dùng chọn nhầm → tạo run có
-        // workflow_id khác Organization với subject → RunAicemWorkflowJob throw TypeError, kẹt
-        // vĩnh viễn ở status=running. Chặn ngay tại đây để không phụ thuộc duy nhất vào UI không
-        // hiện nút sai.
-        $resolver = app(config("aicem_subjects.{$validated['subject_type']}.resolver"));
-
-        $workflow = AicemWorkflow::withoutTenant()
-            ->where('organization_id', $resolver->organizationId($subject))
+        $workflow = AicemWorkflow::query()
             ->where('subject_type', $validated['subject_type'])
             ->where('is_active', true)
             ->find($validated['workflow_id']);
 
-        abort_if(! $workflow, 422, 'Workflow không hợp lệ hoặc không thuộc cùng tổ chức với bài viết/sản phẩm này.');
+        abort_if(! $workflow, 422, 'Workflow không hợp lệ cho bài viết/sản phẩm này.');
 
         $action->handle($subject, $validated['subject_type'], $workflow, (int) auth()->id());
 

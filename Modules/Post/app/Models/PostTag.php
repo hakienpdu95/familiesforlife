@@ -7,9 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * Nhãn phẳng, không soft-delete/activity-log riêng (bảng post_tags không có deleted_at) — xoá
- * cứng khi không còn bài dùng. Platform-wide (không organization_id) — spec/PostTag_Management_
- * Technical_Specification.md §3.5: Tag thuộc nền tảng vận hành, không chịu quản lý theo tổ chức,
- * khác với thiết kế ban đầu (đã bỏ BelongsToOrganization).
+ * cứng khi không còn bài dùng. Platform-wide — spec/PostTag_Management_Technical_Specification.md §3.5.
  */
 class PostTag extends Model
 {

@@ -57,7 +57,6 @@ class BuildPromptAction
                 }
 
                 $result = $this->resolveKnowledge->handle(
-                    $subject->organization_id,
                     $section['type'],
                     $section['subject_type'] ?? $subjectType,
                     $taxonomy,
@@ -118,7 +117,7 @@ class BuildPromptAction
 
         $messages = [
             // cacheable=true (Phase 6, mục 8.7/15) — khối DNA/knowledge_document nằm trong message
-            // này lặp lại gần như nguyên văn qua mọi lần chạy AI của cùng 1 Organization+workflow,
+            // này lặp lại gần như nguyên văn qua mọi lần chạy AI của cùng 1 workflow,
             // ứng viên tốt cho prompt caching (AnthropicProvider đọc cờ này để gắn cache_control;
             // OpenAIProvider bỏ qua vì caching của OpenAI tự động, không cần đánh dấu).
             ['role' => 'system', 'content' => implode("\n\n", $systemParts), 'cacheable' => true],

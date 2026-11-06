@@ -10,8 +10,8 @@ use Modules\Post\Models\PostCategory;
 
 /**
  * Cùng nhóm Modules\PromptFrameworkStudio\Models\GeneratedPrompt — chỉ lưu lại NGUYÊN VĂN prompt
- * đã ghép (BuildSeriesArchitecturePromptAction), KHÔNG gọi AI Provider trong app. KHÔNG
- * TenantAwareModel/organization_id — công cụ nội bộ đội content, không phải dữ liệu multi-tenant.
+ * đã ghép (BuildSeriesArchitecturePromptAction), KHÔNG gọi AI Provider trong app — công cụ nội
+ * bộ đội content.
  */
 class VideoSeriesPrompt extends Model
 {

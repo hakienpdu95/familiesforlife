@@ -3,7 +3,6 @@
 namespace Modules\RealEstate\Features\ListingManagement\Http;
 
 use App\Http\Controllers\Controller;
-use App\Shared\Tenancy\TenantContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -29,7 +28,7 @@ use Modules\RealEstate\Features\ListingManagement\Data\RealEstateListingData;
 use Modules\RealEstate\Models\RealEstateListing;
 
 /**
- * spec/RealEstateForSale_Technical_Specification.md §7.1/§8 — CRUD của Organization + workflow
+ * spec/RealEstateForSale_Technical_Specification.md §7.1/§8 — CRUD + workflow
  * duyệt (copy đúng cấu trúc ProductAdminController, KHÔNG viết lại state machine riêng).
  */
 class RealEstateListingAdminController extends Controller
@@ -60,15 +59,9 @@ class RealEstateListingAdminController extends Controller
             ->with('success', "Đã tạo tin \"{$listing->title}\" (bản nháp) — hoàn thiện rồi bấm \"Gửi duyệt\".");
     }
 
-    public function edit(RealEstateListing $listing): string
+    public function edit(RealEstateListing $listing): View
     {
-        // platform_content_moderator (organization_id=null) không có TenantContext trỏ tới tổ
-        // chức của $listing — bọc để approvalSubject/badge duyệt resolve đúng (cùng nguyên nhân
-        // ProductAdminController::edit(), xem docblock đó).
-        return TenantContext::runForOrganization(
-            $listing->organization,
-            fn () => view('realestate::admin.listings.edit', ['listing' => $listing])->render(),
-        );
+        return view('realestate::admin.listings.edit', compact('listing'));
     }
 
     public function update(Request $request, RealEstateListing $listing, UpdateRealEstateListingAction $action): RedirectResponse
@@ -146,7 +139,7 @@ class RealEstateListingAdminController extends Controller
     private function runApprovalTransition(RealEstateListing $listing, \Closure $callback, string $successMessage): RedirectResponse
     {
         try {
-            TenantContext::runForOrganization($listing->organization, $callback);
+            $callback();
         } catch (InvalidTransitionException $e) {
             return back()->with('error', $e->getMessage());
         }

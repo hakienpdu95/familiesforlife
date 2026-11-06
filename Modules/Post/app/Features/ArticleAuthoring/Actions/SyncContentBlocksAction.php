@@ -286,7 +286,7 @@ class SyncContentBlocksAction
             }
 
             foreach ($items as $item) {
-                $product = Product::find($item['product_id'] ?? null); // tenant-scoped qua global scope
+                $product = Product::find($item['product_id'] ?? null);
 
                 if (! $product) {
                     $errors[] = "{$label}: sản phẩm #{$item['product_id']} không tồn tại hoặc không thuộc tổ chức của bạn.";

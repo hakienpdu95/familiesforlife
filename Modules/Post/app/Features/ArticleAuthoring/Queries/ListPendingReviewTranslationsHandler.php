@@ -11,11 +11,7 @@ use Modules\Post\Models\PostArticleTranslation;
 
 /**
  * Hàng chờ duyệt bài viết cho platform_content_editor/platform_content_head (Platform
- * Approval Gateway — spec/Workflow_Approval_Technical_Specification.md §18.10). Từ v3.0
- * (spec/Platform_RBAC_Phase2_Specification.md §3.3 mục 6) đơn giản hoá tận gốc — Post không
- * còn tenant-scoped nên không cần bypass OrganizationScope + fetch/gán quan hệ `article` thủ
- * công như trước (workaround đó tồn tại chỉ vì eager-load mặc định từng bị OrganizationScope
- * của model liên quan làm rỗng kết quả với tài khoản xuyên tổ chức — nguyên nhân đó không còn).
+ * Approval Gateway — spec/Workflow_Approval_Technical_Specification.md §18.10).
  *
  * Lấy cả Submitted (chờ platform_content_editor) VÀ Approved (chờ platform_content_head) — mỗi item lọc lại
  * bằng Gate theo đúng ability tương ứng, để platform_content_editor chỉ thấy việc của mình,

@@ -2,9 +2,9 @@
 
 namespace Modules\Product\Database\Seeders;
 
+use App\Enums\RoleEnum;
 use App\Models\User;
-use App\Shared\Tenancy\Models\Organization;
-use App\Shared\Tenancy\TenantContext;
+use Database\Seeders\Concerns\ResolvesPlatformAccounts;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Auth;
 use Modules\Approval\Actions\ApproveAction;
@@ -23,8 +23,8 @@ use Modules\Product\Models\Product;
  * (spec/Workflow_Approval_Technical_Specification.md).
  *
  * Chạy các Action THẬT (không insert thẳng DB) để ApprovalLog/public_snapshot sinh ra đúng như
- * luồng thật, do 2 user demo khác nhau thực hiện (marketing gửi duyệt, ceo duyệt/publish) —
- * đúng vai trò thật trong hệ thống phân quyền.
+ * luồng thật, do 2 tài khoản Platform khác nhau thực hiện (platform_ops gửi duyệt,
+ * platform_content_moderator duyệt/publish).
  *
  * KHÔNG nằm trong SystemDataSeeder (demo-only) — chạy thủ công:
  *   php artisan db:seed --class="Modules\Product\Database\Seeders\ProductApprovalDemoSeeder"
@@ -34,35 +34,30 @@ use Modules\Product\Models\Product;
  */
 class ProductApprovalDemoSeeder extends Seeder
 {
+    use ResolvesPlatformAccounts;
+
     public function run(): void
     {
-        $org = Organization::where('slug', 'demo')->first();
+        $accounts = $this->platformAccounts([
+            'author'   => RoleEnum::OPS,
+            'reviewer' => RoleEnum::CONTENT_MODERATOR,
+        ]);
 
-        if (! $org) {
-            $this->command->warn('  ⚠ Không tìm thấy Organization slug=demo — chạy OrganizationSeeder trước.');
-
+        if (! $accounts) {
             return;
         }
 
-        $marketing = User::where('email', 'marketing@demo.test')->first();
-        $ceo       = User::where('email', 'ceo@demo.test')->first();
+        ['author' => $author, 'reviewer' => $reviewer] = $accounts;
 
-        if (! $marketing || ! $ceo) {
-            $this->command->warn('  ⚠ Không tìm thấy user demo (marketing@demo.test / ceo@demo.test) — chạy UserSeeder trước.');
-
-            return;
-        }
-
-        TenantContext::set($org);
         $previousUser = Auth::user();
 
-        $this->seedDraft($marketing);
-        $this->seedPending($marketing);
-        $this->seedApproved($marketing, $ceo);
-        $this->seedPublished($marketing, $ceo);
-        $this->seedPublishedThenEdited($marketing, $ceo);
-        $this->seedArchived($marketing, $ceo);
-        $this->seedRejectedOnce($marketing, $ceo);
+        $this->seedDraft($author);
+        $this->seedPending($author);
+        $this->seedApproved($author, $reviewer);
+        $this->seedPublished($author, $reviewer);
+        $this->seedPublishedThenEdited($author, $reviewer);
+        $this->seedArchived($author, $reviewer);
+        $this->seedRejectedOnce($author, $reviewer);
 
         $previousUser ? Auth::login($previousUser) : Auth::logout();
 
@@ -92,49 +87,49 @@ class ProductApprovalDemoSeeder extends Seeder
         return [$product, true];
     }
 
-    private function seedDraft(User $marketing): void
+    private function seedDraft(User $author): void
     {
         // Không transition gì thêm — mặc định đã là Draft ngay sau khi tạo
         // (HasApproval::bootHasApproval tự tạo ApprovalSubject).
-        $this->findOrCreate('demo-approval-ao-thun-basic', 'Áo thun basic cotton (Demo — Draft)', $marketing);
+        $this->findOrCreate('demo-approval-ao-thun-basic', 'Áo thun basic cotton (Demo — Draft)', $author);
     }
 
-    private function seedPending(User $marketing): void
+    private function seedPending(User $author): void
     {
-        [$product, $isNew] = $this->findOrCreate('demo-approval-binh-giu-nhiet', 'Bình giữ nhiệt 500ml (Demo — Pending)', $marketing);
+        [$product, $isNew] = $this->findOrCreate('demo-approval-binh-giu-nhiet', 'Bình giữ nhiệt 500ml (Demo — Pending)', $author);
         if (! $isNew) {
             return;
         }
 
-        Auth::login($marketing);
+        Auth::login($author);
         app(SubmitForApprovalAction::class)->handle($product);
     }
 
-    private function seedApproved(User $marketing, User $ceo): void
+    private function seedApproved(User $author, User $reviewer): void
     {
-        [$product, $isNew] = $this->findOrCreate('demo-approval-tai-nghe-bluetooth', 'Tai nghe bluetooth ABC (Demo — Approved)', $marketing);
+        [$product, $isNew] = $this->findOrCreate('demo-approval-tai-nghe-bluetooth', 'Tai nghe bluetooth ABC (Demo — Approved)', $author);
         if (! $isNew) {
             return;
         }
 
-        Auth::login($marketing);
+        Auth::login($author);
         app(SubmitForApprovalAction::class)->handle($product);
 
-        Auth::login($ceo);
+        Auth::login($reviewer);
         app(ApproveAction::class)->handle($product);
     }
 
-    private function seedPublished(User $marketing, User $ceo): void
+    private function seedPublished(User $author, User $reviewer): void
     {
-        [$product, $isNew] = $this->findOrCreate('demo-approval-balo-laptop', 'Balo laptop chống nước (Demo — Published)', $marketing);
+        [$product, $isNew] = $this->findOrCreate('demo-approval-balo-laptop', 'Balo laptop chống nước (Demo — Published)', $author);
         if (! $isNew) {
             return;
         }
 
-        Auth::login($marketing);
+        Auth::login($author);
         app(SubmitForApprovalAction::class)->handle($product);
 
-        Auth::login($ceo);
+        Auth::login($reviewer);
         app(ApproveAction::class)->handle($product);
         app(PublishAction::class)->handle($product);
     }
@@ -145,53 +140,53 @@ class ProductApprovalDemoSeeder extends Seeder
      * CŨ (cổng thông tin không gián đoạn). So sánh $product->description (bản mới) với
      * $product->publicContent()['description'] (bản cũ, đã đóng băng) để thấy rõ khác biệt.
      */
-    private function seedPublishedThenEdited(User $marketing, User $ceo): void
+    private function seedPublishedThenEdited(User $author, User $reviewer): void
     {
-        [$product, $isNew] = $this->findOrCreate('demo-approval-noi-chien', 'Nồi chiên không dầu XYZ (Demo — Published rồi bị sửa, đang chờ duyệt lại)', $marketing);
+        [$product, $isNew] = $this->findOrCreate('demo-approval-noi-chien', 'Nồi chiên không dầu XYZ (Demo — Published rồi bị sửa, đang chờ duyệt lại)', $author);
         if (! $isNew) {
             return;
         }
 
-        Auth::login($marketing);
+        Auth::login($author);
         app(SubmitForApprovalAction::class)->handle($product);
 
-        Auth::login($ceo);
+        Auth::login($reviewer);
         app(ApproveAction::class)->handle($product);
         app(PublishAction::class)->handle($product);
 
-        Auth::login($marketing);
+        Auth::login($author);
         $product->update([
             'description' => $product->description . ' [BẢN CẬP NHẬT — đang chờ CEO duyệt lại; cổng thông tin vẫn hiển thị mô tả cũ cho tới khi duyệt+publish lại].',
         ]);
     }
 
-    private function seedArchived(User $marketing, User $ceo): void
+    private function seedArchived(User $author, User $reviewer): void
     {
-        [$product, $isNew] = $this->findOrCreate('demo-approval-dong-ho-fit', 'Đồng hồ thông minh Fit (Demo — Archived)', $marketing);
+        [$product, $isNew] = $this->findOrCreate('demo-approval-dong-ho-fit', 'Đồng hồ thông minh Fit (Demo — Archived)', $author);
         if (! $isNew) {
             return;
         }
 
-        Auth::login($marketing);
+        Auth::login($author);
         app(SubmitForApprovalAction::class)->handle($product);
 
-        Auth::login($ceo);
+        Auth::login($reviewer);
         app(ApproveAction::class)->handle($product);
         app(PublishAction::class)->handle($product);
         app(ArchiveAction::class)->handle($product);
     }
 
-    private function seedRejectedOnce(User $marketing, User $ceo): void
+    private function seedRejectedOnce(User $author, User $reviewer): void
     {
-        [$product, $isNew] = $this->findOrCreate('demo-approval-san-pham-tu-choi', 'Sản phẩm demo bị từ chối duyệt (Demo — Draft sau Reject)', $marketing);
+        [$product, $isNew] = $this->findOrCreate('demo-approval-san-pham-tu-choi', 'Sản phẩm demo bị từ chối duyệt (Demo — Draft sau Reject)', $author);
         if (! $isNew) {
             return;
         }
 
-        Auth::login($marketing);
+        Auth::login($author);
         app(SubmitForApprovalAction::class)->handle($product);
 
-        Auth::login($ceo);
+        Auth::login($reviewer);
         app(RejectAction::class)->handle($product, 'Mô tả sản phẩm chưa đủ chi tiết, cần bổ sung thông số kỹ thuật trước khi duyệt lại.');
     }
 }

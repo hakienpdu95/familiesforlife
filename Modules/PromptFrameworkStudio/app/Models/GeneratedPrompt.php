@@ -10,7 +10,7 @@ use Modules\Post\Models\PostCategory;
 
 /**
  * spec/PromptFrameworkStudio_Technical_Specification.md §0/§3.2 — công cụ nội bộ đội content, KHÔNG
- * extends TenantAwareModel/organization_id, KHÔNG soft delete, KHÔNG LogsActivity — cùng nhóm
+ * extends BaseModel/organization_id, KHÔNG soft delete, KHÔNG LogsActivity — cùng nhóm
  * Modules\ContentOutlines\Models\ContentOutline (không phải credential/tài sản nghiệp vụ cần audit).
  */
 class GeneratedPrompt extends Model

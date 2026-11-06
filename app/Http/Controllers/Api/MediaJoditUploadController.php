@@ -7,7 +7,6 @@ use App\Models\JoditDraft;
 use App\Models\Media;
 use App\Services\Media\MediaUploadService;
 use App\Services\Media\MediaUrlService;
-use App\Shared\Tenancy\TenantContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -80,7 +79,7 @@ class MediaJoditUploadController extends Controller
      */
     public function destroy(string $uuid): JsonResponse
     {
-        $media = Media::withoutTenant()
+        $media = Media::query()
             ->where('uuid', $uuid)
             ->where('collection_name', 'jodit_content')
             ->where('model_type', JoditDraft::class)
@@ -105,7 +104,7 @@ class MediaJoditUploadController extends Controller
             return response()->json(['ok' => true]);
         }
 
-        Media::withoutTenant()
+        Media::query()
             ->whereIn('uuid', $uuids)
             ->where('collection_name', 'jodit_content')
             ->where('model_type', JoditDraft::class)
@@ -124,7 +123,7 @@ class MediaJoditUploadController extends Controller
     {
         $request->validate(['uuids' => ['required', 'array']]);
 
-        Media::withoutTenant()
+        Media::query()
             ->whereIn('uuid', $request->uuids)
             ->where('collection_name', 'jodit_content')
             ->update(['last_touched_at' => now()]);
@@ -167,7 +166,6 @@ class MediaJoditUploadController extends Controller
         }
 
         return JoditDraft::create([
-            'organization_id' => TenantContext::getOrganizationId(),
             'user_id'         => auth()->id(),
             'context_type'    => $contextType,
             'context_id'      => $contextId,

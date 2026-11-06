@@ -8,8 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Aicem\Enums\SuggestionStatus;
 
 /**
- * Không extends TenantAwareModel — luôn truy cập qua AicemGenerationRun cha, không cần global
- * scope riêng, nhưng vẫn giữ organization_id để truy vết trực tiếp khi audit (mục 7).
+ * Không extends BaseModel — luôn truy cập qua AicemGenerationRun cha (mục 7).
  */
 class AicemSuggestion extends Model
 {
@@ -17,7 +16,6 @@ class AicemSuggestion extends Model
 
     protected $fillable = [
         'generation_run_id',
-        'organization_id',
         'field',
         'block_id',
         'original_text',

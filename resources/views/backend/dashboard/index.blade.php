@@ -7,9 +7,8 @@
 @php
     /** @var \App\Models\User $authUser */
     $authUser  = auth()->user();
-    $roleName  = $primary_role ?? 'viewer';
-    $roleLabel = \App\Enums\RoleEnum::tryFrom($roleName)?->label()
-        ?? (\App\Models\User::platformRoleLabels()[$roleName] ?? ucfirst($roleName));
+    $roleEnum  = \App\Enums\RoleEnum::tryFrom((string) ($primary_role ?? ''));
+    $roleLabel = $roleEnum?->label() ?? ($authUser->account_type?->label() ?? '—');
     $greeting  = $greeting  ?? (function () { $h = (int) now()->format('H'); return $h < 12 ? 'Chào buổi sáng' : ($h < 18 ? 'Chào buổi chiều' : 'Chào buổi tối'); })();
     $today_str = $today_str ?? \Illuminate\Support\Carbon::now()->isoFormat('dddd, D MMMM YYYY');
 
@@ -33,8 +32,6 @@
         'user'     => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z"/>',
         'log'      => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>',
     ];
-
-    $visibleModules = \App\Enums\RoleEnum::tryFrom($roleName)?->visibleModules() ?? [];
 @endphp
 
 {{-- ── Greeting ──────────────────────────────────────────────────────────── --}}
@@ -47,7 +44,7 @@
         <p class="text-sm text-base-content/50 mt-0.5 capitalize">{{ $today_str }}</p>
     </div>
     <div class="flex items-center gap-2">
-        <span class="badge {{ \App\Enums\RoleEnum::tryFrom($roleName)?->badgeClass() ?? 'badge-ghost' }} badge-sm px-3 py-2">
+        <span class="badge {{ $roleEnum?->badgeClass() ?? 'badge-ghost' }} badge-sm px-3 py-2">
             {{ $roleLabel }}
         </span>
         <span class="text-xs text-base-content/40">{{ $authUser->email }}</span>
@@ -173,7 +170,7 @@
     <div class="flex flex-wrap gap-2">
         @php
         $shortcuts = [];
-        if (in_array('users', $visibleModules))
+        if ($authUser->can('viewAny', \App\Models\User::class))
             $shortcuts[] = ['label' => 'Người dùng', 'route' => route('backend.users.index'), 'icon' => 'user'];
         $shortcuts[] = ['label' => 'Activity Log', 'route' => route('activitylog.index'),             'icon' => 'log'];
         @endphp

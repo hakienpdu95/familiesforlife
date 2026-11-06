@@ -23,10 +23,6 @@ use Modules\Post\Features\VersionHistory\Http\ArticleVersionController;
 
 // ── Quản trị Bài viết + Danh mục (đa ngôn ngữ — Publishing Engine Phase 15,
 // xem spec/PublishingEngine_Technical_Specification.md §9) ─────────────────
-// KHÔNG còn 'tenant' middleware (spec/Platform_RBAC_Phase2_Specification.md §3.5/§4, v3.0) —
-// Post (bài viết + category) không còn organization_id nào cần TenantContext để scope; nhân
-// sự nền tảng (organization_id=null) thao tác mọi route ở đây, đúng pattern đã dùng cho
-// `dashboard/platform-users` (chỉ 'auth', không 'tenant' — xem PlatformUserController).
 Route::middleware(['auth'])
     ->prefix('dashboard/posts')
     ->name('backend.post.')
@@ -124,11 +120,6 @@ Route::middleware(['auth'])->post('auth/profile/author-hub', [AuthorProfileSelfC
 Route::get('posts/cta/{button}', [ProductBlockClickController::class, 'redirect'])->name('post.cta.redirect');
 
 // ── PublicReading — Phase 16 (spec/PublishingEngine_Technical_Specification.md §11) ────
-// KHÔNG còn middleware 'tenant' (spec/Platform_RBAC_Phase2_Specification.md §3.5, v3.0) —
-// Post không còn organization_id (§3.3), nên resolve tổ chức theo subdomain không còn ý
-// nghĩa gì cho các route này: bài viết phục vụ đồng nhất cho mọi domain/subdomain, không cần
-// biết đang "đứng" ở tổ chức nào trước khi trả nội dung. Bỏ 'auth' vẫn giữ (route công khai,
-// không yêu cầu đăng nhập).
 //
 // KHÔNG còn {locale} trong URL (trước là /{locale}/bai-viet, vd /en/bai-viet) — toàn bộ nội
 // dung thực tế chỉ có tiếng Việt nên phần locale trên URL chỉ gây rối, không phục vụ mục đích

@@ -99,12 +99,5 @@
     </div>
     @endif
 
-    <div class="card bg-base-100 border border-base-200 shadow-sm">
-        <div class="card-body">
-            <h2 class="font-semibold mb-2">Liên hệ</h2>
-            <p class="text-sm text-base-content/70">{{ $listing->organization?->name }}</p>
-        </div>
-    </div>
-
 </div>
 @endsection

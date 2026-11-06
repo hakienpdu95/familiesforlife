@@ -5,6 +5,7 @@ namespace Modules\User\Providers;
 use App\Models\User;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Gate;
+use Modules\User\Console\Commands\CreatePlatformUserCommand;
 use Modules\User\Policies\UserPolicy;
 use Nwidart\Modules\Support\ModuleServiceProvider;
 
@@ -25,7 +26,9 @@ class UserServiceProvider extends ModuleServiceProvider
      *
      * @var string[]
      */
-    // protected array $commands = [];
+    protected array $commands = [
+        CreatePlatformUserCommand::class,
+    ];
 
     /**
      * Provider classes to register.

@@ -10,5 +10,8 @@ class UserCreated
 {
     use Dispatchable, SerializesModels;
 
-    public function __construct(public readonly User $user) {}
+    public function __construct(
+        public readonly User $user,
+        public readonly string $via = 'admin_ui',
+    ) {}
 }

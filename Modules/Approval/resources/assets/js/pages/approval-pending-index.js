@@ -26,12 +26,6 @@ const COLUMNS = [
         },
     },
     {
-        title: 'Tổ chức', field: 'organization_name', minWidth: 180, sorter: 'string',
-        formatter(cell) {
-            return esc(cell.getValue()) || EMPTY;
-        },
-    },
-    {
         title: 'Gửi lúc', field: 'submitted_at', width: 170, hozAlign: 'center', sorter: 'string',
         formatter(cell) {
             const d = cell.getRow().getData();
@@ -140,7 +134,7 @@ document.addEventListener('alpine:init', () => {
                 tableInst.setFilter((row) => {
                     if (type && row.subject_type !== type) return false;
                     if (!term) return true;
-                    return [row.entity_label, row.name, row.organization_name, row.type_label]
+                    return [row.entity_label, row.name, row.type_label]
                         .some((v) => v && String(v).toLowerCase().includes(term));
                 });
             },

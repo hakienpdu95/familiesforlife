@@ -3,13 +3,13 @@
 namespace Modules\Aicem\Features\Dashboard\Http;
 
 use App\Http\Controllers\Controller;
-use App\Shared\Tenancy\TenantContext;
+use App\Models\AiSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
-use Modules\Aicem\Features\Dashboard\Actions\UpdateAicemOrganizationSettingsAction;
-use Modules\Aicem\Features\Dashboard\Data\AicemOrganizationSettingsData;
+use Modules\Aicem\Features\Dashboard\Actions\UpdateAiSettingsAction;
+use Modules\Aicem\Features\Dashboard\Data\AiSettingsData;
 use Modules\Aicem\Features\Dashboard\Queries\GetAicemUsageStatsHandler;
 use Modules\Aicem\Features\Dashboard\Queries\GetAicemUsageStatsQuery;
 
@@ -31,10 +31,10 @@ class AicemDashboardController extends Controller
     {
         $this->authorize('aicem.config');
 
-        return view('aicem::admin.dashboard.settings', ['organization' => TenantContext::resolve()]);
+        return view('aicem::admin.dashboard.settings', ['settings' => AiSetting::current()]);
     }
 
-    public function updateSettings(Request $request, UpdateAicemOrganizationSettingsAction $action): RedirectResponse
+    public function updateSettings(Request $request, UpdateAiSettingsAction $action): RedirectResponse
     {
         $this->authorize('aicem.config');
 
@@ -47,7 +47,7 @@ class AicemDashboardController extends Controller
             'rate_limit_per_day'    => ['nullable', 'integer', 'min:1'],
         ]);
 
-        $action->handle(TenantContext::resolve(), AicemOrganizationSettingsData::from($validated));
+        $action->handle(AiSettingsData::from($validated));
 
         return back()->with('success', 'Đã cập nhật cấu hình AICEM.');
     }

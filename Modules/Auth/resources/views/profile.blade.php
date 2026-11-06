@@ -29,11 +29,7 @@
                         @else
                             <span class="badge badge-ghost badge-xs">Chưa xác minh</span>
                         @endif
-                        @if($user->isOrgMember())
-                            <span class="badge badge-primary badge-xs">Đang làm việc</span>
-                        @else
-                            <span class="badge badge-ghost badge-xs">Tự do</span>
-                        @endif
+                        <span class="badge badge-ghost badge-xs">{{ $user->account_type?->label() }}</span>
                     </div>
                 </div>
             </div>

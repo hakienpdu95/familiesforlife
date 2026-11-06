@@ -19,11 +19,9 @@ class ListPublicRealEstateListingsHandler implements QueryHandlerInterface
     public function handle(QueryInterface $query): LengthAwarePaginator
     {
         /** @var ListPublicRealEstateListingsQuery $query */
-        // scopePublicPortalVisible() — xem docblock cùng tên trên RealEstateListing (gộp tin
-        // từ mọi Organization, publiclyVisible() nhưng bỏ OrganizationScope cả 2 phía).
         // with('approvalSubject') — view gọi publicContent() cho từng tin trong vòng lặp, model
         // đọc preventLazyLoading() nên phải eager-load quan hệ này trước.
-        return RealEstateListing::publicPortalVisible()
+        return RealEstateListing::publiclyVisible()
             ->with('approvalSubject')
             ->where('listing_type', $query->listingType)
             ->when($query->propertyType, fn ($q, $v) => $q->where('property_type', $v))

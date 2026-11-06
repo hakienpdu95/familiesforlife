@@ -14,8 +14,6 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'tenant'             => \App\Http\Middleware\IdentifyOrganization::class,
-            'assert.tenant'      => \App\Http\Middleware\AssertTenant::class,
             'role'               => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission'         => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
@@ -24,13 +22,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->prepend(\App\Http\Middleware\RemoveServerHeaders::class);
         $middleware->append(\App\Http\Middleware\RecordRequestMetrics::class);
         $middleware->prepend(\Modules\ActivityLog\Http\Middleware\InjectRequestId::class);
-        // IdentifyOrganization phải chạy SAU StartSession nhưng TRƯỚC SubstituteBindings
-        // để TenantContext được set trước khi route model binding resolve tenant-scoped models.
-        $middleware->web(\App\Http\Middleware\IdentifyOrganization::class);
-        $middleware->prependToPriorityList(
-            \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            \App\Http\Middleware\IdentifyOrganization::class
-        );
         $middleware->appendToGroup('web', \Modules\ActivityLog\Http\Middleware\CaptureHttpContext::class);
         $middleware->appendToGroup('web', \App\Http\Middleware\SecurityHeaders::class);
         $middleware->appendToGroup('web', \App\Http\Middleware\EnsureUserIsActive::class);
