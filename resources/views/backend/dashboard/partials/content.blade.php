@@ -328,6 +328,7 @@
 @endif
 
 @push('scripts')
+@vite(['resources/js/modules/echarts.js'], 'build/backend')
 <script>
 document.addEventListener('alpine:init', () => {
     Alpine.data('contentTrendChart', ({ url }) => ({
