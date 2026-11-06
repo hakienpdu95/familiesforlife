@@ -13,23 +13,6 @@
     $greeting  = $greeting  ?? (function () { $h = (int) now()->format('H'); return $h < 12 ? 'Chào buổi sáng' : ($h < 18 ? 'Chào buổi chiều' : 'Chào buổi tối'); })();
     $today_str = $today_str ?? \Illuminate\Support\Carbon::now()->isoFormat('dddd, D MMMM YYYY');
 
-    // KPI card icon paths (Heroicons outline)
-    $iconPaths = [
-        'approval'    => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>',
-        'task_overdue'=> '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>',
-        'leads'       => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>',
-        'leads_won'   => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>',
-    ];
-
-    $colorMap = [
-        'success'   => ['bg' => 'bg-success/10',   'text' => 'text-success',   'icon' => 'text-success'],
-        'error'     => ['bg' => 'bg-error/10',     'text' => 'text-error',     'icon' => 'text-error'],
-        'warning'   => ['bg' => 'bg-warning/10',   'text' => 'text-warning',   'icon' => 'text-warning'],
-        'info'      => ['bg' => 'bg-info/10',       'text' => 'text-info',      'icon' => 'text-info'],
-        'secondary' => ['bg' => 'bg-secondary/10', 'text' => 'text-secondary', 'icon' => 'text-secondary'],
-        'ghost'     => ['bg' => 'bg-base-200',      'text' => 'text-base-content/60', 'icon' => 'text-base-content/40'],
-    ];
-
     $feedIconMap = [
         'task_overdue'      => ['icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>', 'bg' => 'bg-error/10', 'text' => 'text-error'],
     ];
@@ -42,15 +25,11 @@
     ];
     $defaultActivityIcon = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>';
 
-    // Role-based chart visibility
-    $showLeadFunnel     = in_array($roleName, ['ceo','system_admin','ops','ai_operator','sales','marketing']);
-
     // Shortcuts
     $shortcutIconPaths = [
         'task'     => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>',
         'bolt'     => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>',
         'users'    => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>',
-        'crm'      => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>',
         'user'     => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z"/>',
         'log'      => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>',
     ];
@@ -78,80 +57,6 @@
 @if($content)
     @include('backend.dashboard.partials.content')
 @else
-{{-- ── KPI Cards ─────────────────────────────────────────────────────────── --}}
-<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 mb-6">
-    @foreach($kpi_cards as $card)
-    @php $c = $colorMap[$card['color']] ?? $colorMap['ghost']; @endphp
-    <a href="{{ $card['link'] }}"
-       class="card bg-base-100 border {{ $card['urgent'] ? 'border-' . ($card['color'] === 'error' ? 'error' : 'warning') . '/40' : 'border-base-200' }}
-              shadow-sm hover:shadow-md hover:border-primary/30 transition-all group">
-        <div class="card-body p-3">
-            <div class="flex items-start justify-between mb-3">
-                <div class="w-9 h-9 rounded-xl {{ $c['bg'] }} flex items-center justify-center shrink-0">
-                    <svg class="w-5 h-5 {{ $c['icon'] }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        {!! $iconPaths[$card['icon']] ?? $iconPaths['task_overdue'] !!}
-                    </svg>
-                </div>
-                @if($card['urgent'])
-                <span class="w-2 h-2 rounded-full {{ $card['color'] === 'error' ? 'bg-error' : 'bg-warning' }} animate-pulse mt-1 shrink-0"></span>
-                @endif
-            </div>
-            <p class="text-2xl font-bold {{ $c['text'] }} leading-none tabular-nums">{{ number_format($card['value']) }}</p>
-            <p class="text-xs text-base-content/60 mt-1 leading-snug">{{ $card['label'] }}</p>
-            @if(!empty($card['hint']))
-            <p class="text-xs text-base-content/35 mt-0.5 truncate">{{ $card['hint'] }}</p>
-            @endif
-        </div>
-    </a>
-    @endforeach
-</div>
-
-{{-- ════════════════════════════════════════════════════════════════════════
-     PHASE 2 — Charts
-════════════════════════════════════════════════════════════════════════ --}}
-
-{{-- ── Date range pill (persisted via Alpine) ────────────────────────────── --}}
-<div x-data="dashboardCharts()" x-init="init()" class="space-y-5 mb-6">
-
-    {{-- Date range controls --}}
-    <div class="flex items-center justify-between">
-        <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide">Biểu đồ phân tích</p>
-        <div class="flex items-center gap-1 bg-base-200 rounded-lg p-0.5">
-            <template x-for="opt in rangeOptions" :key="opt.value">
-                <button type="button"
-                        @click="setRange(opt.value)"
-                        :class="days === opt.value ? 'bg-base-100 text-base-content shadow-sm' : 'text-base-content/50 hover:text-base-content'"
-                        class="px-3 py-1 rounded-md text-xs font-medium transition-all"
-                        x-text="opt.label">
-                </button>
-            </template>
-        </div>
-    </div>
-
-    {{-- ── Row 2: Lead Funnel ─────────────────────────────────────────── --}}
-    @if($showLeadFunnel)
-    <div class="grid grid-cols-1 gap-5">
-
-        <div class="card bg-base-100 border border-base-200 shadow-sm">
-            <div class="card-body p-3">
-                <div class="mb-3">
-                    <h3 class="font-semibold text-sm text-base-content">Phễu Sales (Lead đang theo dõi)</h3>
-                    <p class="text-xs text-base-content/40 mt-0.5">Số lead active theo từng giai đoạn pipeline</p>
-                </div>
-                <div id="chart-lead-funnel"
-                     class="w-full"
-                     style="height: 260px;"
-                     data-chart="lead-funnel">
-                    <div class="skeleton w-full h-full rounded-xl" id="skel-lead-funnel"></div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-    @endif
-
-</div>{{-- end x-data dashboardCharts --}}
-
 {{-- ════════════════════════════════════════════════════════════════════════
      Phase 1 — Action Feed + Activity
 ════════════════════════════════════════════════════════════════════════ --}}
@@ -268,8 +173,6 @@
     <div class="flex flex-wrap gap-2">
         @php
         $shortcuts = [];
-        if (in_array('crm', $visibleModules))
-            $shortcuts[] = ['label' => 'CRM / Leads', 'route' => route('lead.index'), 'icon' => 'crm'];
         if (in_array('users', $visibleModules))
             $shortcuts[] = ['label' => 'Người dùng', 'route' => route('backend.users.index'), 'icon' => 'user'];
         $shortcuts[] = ['label' => 'Activity Log', 'route' => route('activitylog.index'),             'icon' => 'log'];
@@ -291,160 +194,6 @@
 
 @endsection
 
-@push('scripts')
-@vite(['resources/js/modules/echarts.js'], 'build/backend')
-
-<script>
-// ── Dashboard charts Alpine component ──────────────────────────────────────
-document.addEventListener('alpine:init', () => {
-    Alpine.data('dashboardCharts', () => ({
-        days:         30,
-        rangeOptions: [
-            { value: 7,  label: '7 ngày'  },
-            { value: 14, label: '14 ngày' },
-            { value: 30, label: '30 ngày' },
-        ],
-
-        // Chart instances for resize + theme re-init
-        _charts: {},
-
-        init() {
-            // Restore saved range
-            const saved = parseInt(sessionStorage.getItem('dash_days') || '30', 10);
-            this.days   = [7, 14, 30].includes(saved) ? saved : 30;
-
-            // Wait for ECharts module to load, then render
-            if (window.ECharts) {
-                this._renderAll();
-            } else {
-                document.addEventListener('echarts:ready', () => this._renderAll(), { once: true });
-            }
-
-            // Re-render charts when theme changes
-            const observer = new MutationObserver(() => this._reTheme());
-            observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-        },
-
-        setRange(val) {
-            this.days = val;
-            sessionStorage.setItem('dash_days', String(val));
-        },
-
-        _isDark() {
-            return document.documentElement.getAttribute('data-theme') === 'dark';
-        },
-
-        _renderAll() {
-            this._renderChart('lead-funnel',      this._leadFunnelOptions.bind(this));
-        },
-
-        _reTheme() {
-            for (const [id, inst] of Object.entries(this._charts)) {
-                inst.dispose();
-            }
-            this._charts = {};
-            this._renderAll();
-        },
-
-        async _renderChart(id, buildFn) {
-            const el   = document.getElementById('chart-' + id);
-            if (!el) return;
-            const skel = document.getElementById('skel-' + id);
-
-            // Build URL with current days param where applicable
-            const needsDays = [].includes(id);
-            const baseUrls  = {
-                'lead-funnel':     '{{ route("backend.dashboard.charts.lead-funnel") }}',
-            };
-            const url = (baseUrls[id] ?? '') + (needsDays ? `?days=${this.days}` : '');
-
-            try {
-                const r = await fetch(url, {
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                    credentials: 'same-origin',
-                });
-                if (!r.ok) throw new Error('HTTP ' + r.status);
-                const data = await r.json();
-
-                skel?.remove();
-                el.style.display = '';
-
-                // Dispose existing instance before re-init
-                if (this._charts[id]) {
-                    this._charts[id].dispose();
-                    delete this._charts[id];
-                }
-
-                const chart = window.ECharts.init(el, this._isDark() ? 'dark' : null, { renderer: 'canvas' });
-                chart.setOption(buildFn(data));
-                this._charts[id] = chart;
-
-                // Responsive
-                new ResizeObserver(() => chart.resize()).observe(el);
-
-            } catch (e) {
-                skel?.remove();
-                el.style.display = '';
-                el.innerHTML = `<div class="h-full flex items-center justify-center text-xs text-error/60">
-                    <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    Không thể tải dữ liệu
-                </div>`;
-            }
-        },
-
-        // ── Chart option builders ─────────────────────────────────────────
-
-        _leadFunnelOptions(d) {
-            const isDark    = this._isDark();
-            const textColor = isDark ? '#94a3b8' : '#64748b';
-            const stages    = d.stages ?? [];
-            const palette   = ['#6366f1','#818cf8','#a5b4fc','#c7d2fe','#ddd6fe','#ede9fe'];
-
-            // Normalize so largest = 100%
-            const max = Math.max(...stages.map(s => s.count), 1);
-
-            return {
-                backgroundColor: 'transparent',
-                tooltip: {
-                    trigger: 'item',
-                    backgroundColor: isDark ? '#1e293b' : '#fff',
-                    borderColor:     isDark ? '#334155' : '#e2e8f0',
-                    textStyle:       { color: isDark ? '#e2e8f0' : '#1e293b', fontSize: 12 },
-                    formatter: ({ name, value }) =>
-                        `<div class="text-xs"><b>${name}</b><br/>${value} lead</div>`,
-                },
-                series: [{
-                    type: 'funnel',
-                    left: '5%', width: '90%',
-                    top: 10, bottom: 10,
-                    min: 0, max: max,
-                    minSize: '10%', maxSize: '100%',
-                    sort: 'none',
-                    gap: 3,
-                    label: {
-                        show: true, position: 'inside',
-                        formatter: ({ name, value }) => `${name}: ${value}`,
-                        color: '#fff', fontSize: 12, fontWeight: 'bold',
-                    },
-                    itemStyle: { borderWidth: 0 },
-                    emphasis: { label: { fontSize: 13 } },
-                    data: stages.map((s, i) => ({
-                        name:      s.label,
-                        value:     s.count,
-                        itemStyle: {
-                            color: s.is_won ? '#22c55e' : (s.is_lost ? '#ef4444' : (s.color || palette[i % palette.length])),
-                        },
-                    })),
-                }],
-            };
-        },
-
-    }));
-});
-</script>
-
 @push('styles')
 <style>
     .wave-emoji { display: inline-block; animation: wave 1.5s ease-in-out 1; }
@@ -456,6 +205,4 @@ document.addEventListener('alpine:init', () => {
         80%      { transform: rotate(-5deg); }
     }
 </style>
-@endpush
-
 @endpush

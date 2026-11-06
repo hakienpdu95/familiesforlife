@@ -8,7 +8,7 @@ use Spatie\LaravelData\Data;
  * spec/ContentOutlines_Technical_Specification.md §3.1 — DTO input dùng chung cho
  * BuildContentOutlinePromptAction, CreateContentOutlineAction, RegenerateContentOutlinePromptAction.
  * Validate thật nằm ở Store/UpdateContentOutlineRequest::rules() (§7.1) — DTO này chỉ hydrate dữ
- * liệu đã qua validate (cùng pattern N8nConnectionData/BannerData).
+ * liệu đã qua validate (cùng pattern BannerData).
  */
 class ContentOutlineInputData extends Data
 {

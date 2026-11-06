@@ -24,7 +24,7 @@ class ListCustomersHandler implements QueryHandlerInterface
             ? Customer::withoutTenant()->select('customers.*')
             : Customer::query()->select('customers.*');
 
-        $q->with(['source:id,label,icon', 'assignee:id,name', 'tags:id,name,color']);
+        $q->with(['assignee:id,name', 'tags:id,name,color']);
 
         if ($query->crossOrgCapable) {
             $q->with('organization:id,name');
@@ -46,7 +46,6 @@ class ListCustomersHandler implements QueryHandlerInterface
 
         if ($query->type !== null)       $q->where('customers.customer_type', $query->type);
         if ($query->stage !== null)      $q->where('customers.lifecycle_stage', $query->stage);
-        if ($query->sourceId !== null)   $q->where('customers.source_id', $query->sourceId);
         if ($query->assignedTo !== null) $q->where('customers.assigned_to', $query->assignedTo);
         if ($query->province !== null && $query->province !== '') {
             $q->where('customers.province_code', $query->province);

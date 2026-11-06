@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Customer\Enums\CompanySize;
 use Modules\Customer\Enums\CustomerLifecycleStage;
 use Modules\Customer\Enums\CustomerType;
-use Modules\LeadSource\Models\LeadSource;
 use Spatie\Activitylog\Support\LogOptions;
 
 class Customer extends TenantAwareModel
@@ -21,12 +20,12 @@ class Customer extends TenantAwareModel
         'display_name', 'primary_email', 'secondary_email', 'primary_phone', 'secondary_phone',
         'province_code', 'province_name', 'ward_code', 'ward_name', 'address_line',
         'full_address', 'website', 'description', 'notes', 'avatar_url',
-        'lifecycle_stage', 'source_id', 'assigned_to',
+        'lifecycle_stage', 'assigned_to',
         'last_activity_at', 'activity_count',
         'first_name', 'last_name', 'gender', 'date_of_birth',
         'company_name', 'tax_code', 'industry', 'company_size',
         'representative_name', 'representative_title',
-        'dedup_hash', 'converted_from_lead_id', 'created_by', 'updated_by',
+        'dedup_hash', 'created_by', 'updated_by',
     ];
 
     protected $casts = [
@@ -49,11 +48,6 @@ class Customer extends TenantAwareModel
     public function getActivityLabel(): string
     {
         return $this->display_name;
-    }
-
-    public function source(): BelongsTo
-    {
-        return $this->belongsTo(LeadSource::class, 'source_id');
     }
 
     public function assignee(): BelongsTo
@@ -79,16 +73,6 @@ class Customer extends TenantAwareModel
     public function fieldDefinitions(): HasMany
     {
         return $this->hasMany(CustomerFieldDefinition::class, 'organization_id', 'organization_id');
-    }
-
-    public function leads(): HasMany
-    {
-        return $this->hasMany(\Modules\Lead\Models\Lead::class, 'customer_id');
-    }
-
-    public function convertedFromLead(): BelongsTo
-    {
-        return $this->belongsTo(\Modules\Lead\Models\Lead::class, 'converted_from_lead_id');
     }
 
     public function activities(): HasMany

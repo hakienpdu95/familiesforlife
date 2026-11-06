@@ -16,9 +16,6 @@ use Modules\Event\Database\Seeders\EventDatabaseSeeder;
 // use Modules\Event\Database\Seeders\EventDemoSeeder;
 use Modules\Heritage\Database\Seeders\HeritageDatabaseSeeder;
 // use Modules\Heritage\Database\Seeders\HeritageDemoSeeder;
-use Modules\Lead\Database\Seeders\LeadDatabaseSeeder;
-use Modules\LeadPipelineStage\Database\Seeders\LeadPipelineStageSeeder;
-use Modules\LeadSource\Database\Seeders\LeadSourceSeeder;
 use Modules\Menu\Database\Seeders\MenuDatabaseSeeder;
 use Modules\Ocop\Database\Seeders\OcopDatabaseSeeder;
 use Modules\Organization\Database\Seeders\OrganizationRolePermissionSeeder;
@@ -32,7 +29,6 @@ use Modules\ProvinceShowcase\Database\Seeders\ProvincePermissionSeeder;
 use Modules\ProvinceShowcase\Database\Seeders\ProvinceFeaturedSeeder;
 use Modules\ProvinceShowcase\Database\Seeders\ProvinceSlugBackfillSeeder;
 // use Modules\RealEstate\Database\Seeders\RealEstateListingDemoSeeder;
-use Modules\Subscription\Database\Seeders\SubscriptionDatabaseSeeder;
 use Modules\Video\Database\Seeders\VideoDatabaseSeeder;
 use Modules\VideoIdeaExtractor\Database\Seeders\VideoIdeaExtractorDatabaseSeeder;
 
@@ -59,7 +55,7 @@ class SystemDataSeeder extends Seeder
 
         // ── 0. Dữ liệu hành chính (regions/provinces/wards) — command riêng (không phải
         // Seeder class) vì đọc trực tiếp datafiles/provinces.json, đã tồn tại từ trước cho
-        // Customer/Lead/Event. PHẢI chạy TRƯỚC mọi seeder demo dùng province_code (Event, Post,
+        // Customer/Event. PHẢI chạy TRƯỚC mọi seeder demo dùng province_code (Event, Post,
         // Ocop, ProvinceShowcase) — trên fresh DB (migrate:fresh xoá sạch bảng), không chạy lại
         // lệnh này thì provinces/wards rỗng, mọi denormalize province_name/ward_name sẽ null im
         // lặng (không lỗi) — xem spec/Province_Showcase_Technical_Specification.md §8 Phase 1.
@@ -92,16 +88,6 @@ class SystemDataSeeder extends Seeder
 
             // ── 7. Test users (1 per role) ────────────────────────────────
             UserSeeder::class,
-
-            // ── 8. Subscription plans + features + gán starter cho orgs ──
-            SubscriptionDatabaseSeeder::class,
-
-            // ── 9. Danh mục dùng chung (global master data) ───────────────
-            LeadPipelineStageSeeder::class,   // global template stages (org_id = null)
-            LeadSourceSeeder::class,           // global template sources (org_id = null)
-
-            // ── 10. Module Lead: stages + sources cho demo org ────────────
-            LeadDatabaseSeeder::class,
 
             // ── 24. Product: permissions (product.*/product_category.*) — catalog cho Post CTA Box ──
             ProductDatabaseSeeder::class,

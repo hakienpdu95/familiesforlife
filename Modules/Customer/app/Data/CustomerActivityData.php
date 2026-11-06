@@ -18,6 +18,5 @@ class CustomerActivityData extends Data
         public ?int    $durationMinutes = null,
         public ?int    $actorId         = null,
         public ?string $actorName       = null,
-        public ?int    $leadId          = null,
     ) {}
 }

@@ -183,32 +183,6 @@
         "output_data///text///__///_NULL///NULL///__///__"
     ],
     [
-        "plans///add///__///",
-        "tag_line///string///120///_NULL///NULL///__///__",
-        "tier///string///32///NOT_NULL///'growth'///__///__",
-        "badge_color///string///64///_NULL///NULL///__///__",
-        "is_public///boolean///__///NOT_NULL///true///__///__",
-        "annual_price///decimal///15,2///_NULL///NULL///__///__",
-        "currency_local///string///10///NOT_NULL///'VND'///__///__",
-        "price_local///decimal///15,2///_NULL///NULL///__///__"
-    ],
-    [
-        "organization_feature_overrides///add///__///",
-        "deleted_at///timestamp///__///_NULL///NULL///__///Thời gian xóa mềm"
-    ],
-    [
-        "subscription_invoices///add///__///",
-        "gateway///string///32///_NULL///NULL///__///__",
-        "invoice_type///string///32///NOT_NULL///'renewal'///__///__",
-        "new_plan_id///unsignedBigInteger///__///_NULL///NULL///__///__",
-        "__index///index///__///__///__///new_plan_id|idx_inv_new_plan///__"
-    ],
-    [
-        "leads///add///__///",
-        "customer_id///unsignedBigInteger///__///_NULL///NULL///__///__",
-        "__index///index///__///__///__///organization_id,customer_id|idx_lead_customer///__"
-    ],
-    [
         "customers///add///__///",
         "secondary_email///string///255///_NULL///NULL///__///__",
         "secondary_phone///string///30///_NULL///NULL///__///__",

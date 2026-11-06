@@ -54,17 +54,10 @@ class RolePermissionSeeder extends Seeder
         return [
 
             // ─────────────────────────────────────────────────────────
-            // CEO / Founder — Full visibility, approve SOP, manage leads
+            // CEO / Founder — Full visibility, approve SOP
             // ─────────────────────────────────────────────────────────
             RoleEnum::CEO->value => [
                 P::CEO_DASH_FULL->value,
-
-                P::LEADS_VIEW_ALL->value,
-                P::LEADS_CREATE->value,
-                P::LEADS_EDIT->value,
-                P::LEADS_DELETE->value,
-                P::LEADS_ASSIGN->value,
-                P::LEADS_EXPORT->value,
 
                 P::CUSTOMERS_VIEW_ALL->value,
                 P::CUSTOMERS_CREATE->value,
@@ -78,22 +71,13 @@ class RolePermissionSeeder extends Seeder
 
                 P::USERS_VIEW->value,
 
-                P::REPORTS_FULL->value,
-
                 P::AUDIT_VIEW->value,
-
-                // Pension Calculator: view only (spec/bhxh/PensionCalculator_Technical_Specification.md §9.3)
-                P::PENSION_CALCULATOR_VIEW->value,
             ],
 
             // ─────────────────────────────────────────────────────────
-            // Sales Team — Assigned leads, own tasks, AI assist
+            // Sales Team — Own tasks, AI assist
             // ─────────────────────────────────────────────────────────
             RoleEnum::SALES->value => [
-                P::LEADS_VIEW_ASSIGNED->value,
-                P::LEADS_CREATE->value,
-                P::LEADS_EDIT->value,
-
                 P::CUSTOMERS_VIEW_ASSIGNED->value,
                 P::CUSTOMERS_CREATE->value,
                 P::CUSTOMERS_EDIT->value,
@@ -101,9 +85,6 @@ class RolePermissionSeeder extends Seeder
                 P::SALES_AI_USE->value,
 
                 P::WORKFLOW_VIEW_LIMITED->value,
-
-                P::REPORTS_PERSONAL->value,
-                P::REPORTS_TEAM->value,
             ],
 
             // ─────────────────────────────────────────────────────────
@@ -112,10 +93,6 @@ class RolePermissionSeeder extends Seeder
             RoleEnum::OPS->value => [
                 P::CEO_DASH_VIEW->value,
 
-                P::LEADS_VIEW_ALL->value,
-                P::LEADS_EXPORT->value,
-                P::LEADS_MANAGE_TAGS->value,
-
                 P::CUSTOMERS_VIEW_ALL->value,
                 P::CUSTOMERS_CREATE->value,
                 P::CUSTOMERS_EDIT->value,
@@ -123,23 +100,17 @@ class RolePermissionSeeder extends Seeder
 
                 P::WORKFLOW_MONITOR->value,
                 P::WORKFLOW_EDIT->value,
-
-                P::REPORTS_OPS->value,
             ],
 
             // ─────────────────────────────────────────────────────────
-            // Marketing — Source-view leads, campaign tracking, limited tasks
+            // Marketing — Campaign tracking, limited tasks
             // ─────────────────────────────────────────────────────────
             RoleEnum::MARKETING->value => [
-                P::LEADS_VIEW_SOURCE->value,
-
                 P::CUSTOMERS_VIEW_ALL->value,
 
                 P::SALES_AI_VIEW->value,
 
                 P::WORKFLOW_VIEW_LIMITED->value,
-
-                P::REPORTS_MARKETING->value,
             ],
 
             // ─────────────────────────────────────────────────────────
@@ -149,8 +120,6 @@ class RolePermissionSeeder extends Seeder
                 P::WORKFLOW_VIEW_LIMITED->value,
 
                 P::USERS_HR->value,
-
-                P::REPORTS_HR->value,
             ],
 
             // ─────────────────────────────────────────────────────────
@@ -158,8 +127,6 @@ class RolePermissionSeeder extends Seeder
             // ─────────────────────────────────────────────────────────
             RoleEnum::AI_OP->value => [
                 P::CEO_DASH_VIEW->value,
-
-                P::LEADS_VIEW_ALL->value,
 
                 P::CUSTOMERS_VIEW_ALL->value,
 
@@ -174,12 +141,6 @@ class RolePermissionSeeder extends Seeder
                 P::CEO_DASH_VIEW->value,
                 P::CEO_DASH_CONFIG->value,
 
-                P::LEADS_CONFIG->value,
-                P::LEADS_VIEW_ALL->value,
-                P::LEADS_MANAGE_PIPELINE->value,
-                P::LEADS_MANAGE_SOURCES->value,
-                P::LEADS_MANAGE_TAGS->value,
-
                 P::CUSTOMERS_CONFIG->value,
                 P::CUSTOMERS_VIEW_ALL->value,
 
@@ -192,25 +153,19 @@ class RolePermissionSeeder extends Seeder
                 P::USERS_MANAGE->value,
                 P::ROLES_MANAGE->value,
 
-                P::REPORTS_FULL->value,
-
                 P::INTEGRATION_MANAGE->value,
                 P::AUDIT_VIEW->value,
                 P::SYSTEM_CONFIG->value,
 
                 // Menu: Full manage (điều hướng header/footer)
                 P::MENU_MANAGE->value,
-
-                // Pension Calculator: full manage (spec/bhxh/PensionCalculator_Technical_Specification.md §5/§9.3)
-                P::PENSION_CALCULATOR_MANAGE->value,
             ],
 
             // ─────────────────────────────────────────────────────────
-            // Viewer / Partner — Read-only, shared reports
+            // Viewer / Partner — Read-only
             // ─────────────────────────────────────────────────────────
             RoleEnum::VIEWER->value => [
                 P::CEO_DASH_VIEW->value,
-                P::REPORTS_SHARED->value,
             ],
         ];
     }

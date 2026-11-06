@@ -118,8 +118,8 @@ Chỉ dùng khi JSON **không thể biểu diễn** được:
 ### Bước 1: Tạo migration trong Module
 
 ```bash
-php artisan make:migration add_computed_score_to_leads \
-  --path=Modules/Lead/database/migrations
+php artisan make:migration add_computed_score_to_customers \
+  --path=Modules/Customer/database/migrations
 ```
 
 ### Bước 2: Viết migration
@@ -127,12 +127,12 @@ php artisan make:migration add_computed_score_to_leads \
 ```php
 public function up(): void
 {
-    Schema::table('leads', function (Blueprint $table) {
-        $table->decimal('computed_score', 5, 2)->nullable()->after('lead_score');
+    Schema::table('customers', function (Blueprint $table) {
+        $table->decimal('computed_score', 5, 2)->nullable()->after('activity_count');
     });
 
     // Data backfill
-    DB::statement('UPDATE leads SET computed_score = lead_score * 1.0 WHERE lead_score IS NOT NULL');
+    DB::statement('UPDATE customers SET computed_score = activity_count * 1.0 WHERE activity_count IS NOT NULL');
 }
 ```
 
@@ -149,7 +149,7 @@ php artisan migration:sync
 
 ```
 === EXTENSIONS MỚI → render_extension_file.json ===
-  + leads (1 cols)
+  + customers (1 cols)
 ```
 
 Kiểm tra entry mới trong `render_extension_file.json` có đúng không trước khi commit.
@@ -157,9 +157,9 @@ Kiểm tra entry mới trong `render_extension_file.json` có đúng không trư
 ### Bước 5: Commit cả hai
 
 ```bash
-git add Modules/Lead/database/migrations/
+git add Modules/Customer/database/migrations/
 git add render_extension_file.json
-git commit -m "add computed_score to leads with backfill"
+git commit -m "add computed_score to customers with backfill"
 ```
 
 ---

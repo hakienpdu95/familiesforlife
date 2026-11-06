@@ -359,7 +359,6 @@ Defined in `UserController::permissionMatrix()`. This is a static reference for 
 | Module | CEO | Sales | Ops | Marketing | HR | AI Op | System Admin | Viewer |
 |--------|-----|-------|-----|-----------|-----|-------|-------------|--------|
 | CEO Dashboard | Full | — | Limited | — | — | Limited | Config | View ltd |
-| CRM Leads | Full | Assigned | Limited | Source view | — | Limited | Config | — |
 | Sales AI | Full | Use | — | Limited | — | Config prompt | Config | — |
 | Tasks | Full | Assigned | Full team | Limited | HR tasks | Limited | Config | View ltd |
 | SOP | Approve/View | View related | Create/Edit | View related | Create HR SOP | AI config | Config | View ltd |
@@ -368,7 +367,6 @@ Defined in `UserController::permissionMatrix()`. This is a static reference for 
 | AI Logs | View summary | — | Limited | — | — | Full | Full | — |
 | Users | View | — | — | — | Limited | — | Full | — |
 | Roles/Perms | — | — | — | — | — | — | Full | — |
-| Reports | Full | Personal/team | Operations | Marketing | HR | AI usage | Full | Shared only |
 
 ---
 

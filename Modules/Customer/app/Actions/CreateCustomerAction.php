@@ -35,7 +35,6 @@ class CreateCustomerAction
                 'primary_email'        => $data->primary_email,
                 'primary_phone'        => $data->primary_phone,
                 'lifecycle_stage'      => $data->lifecycle_stage ?? CustomerLifecycleStage::Active->value,
-                'source_id'            => $data->source_id,
                 'assigned_to'          => $data->assigned_to,
                 'first_name'           => $data->first_name,
                 'last_name'            => $data->last_name,

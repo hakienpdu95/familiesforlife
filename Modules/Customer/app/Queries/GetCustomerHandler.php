@@ -11,13 +11,9 @@ class GetCustomerHandler implements QueryHandlerInterface
     {
         /** @var GetCustomerQuery $query */
         $query->customer->load([
-            'source:id,label,icon',
             'assignee:id,name',
             'tags',
             'meta.definition',
-            'leads'      => fn ($q) => $q->with(['stage:id,label,color', 'assignee:id,name'])
-                                         ->orderByDesc('created_at')
-                                         ->limit(20),
             'activities'    => fn ($q) => $q->orderByDesc('created_at')->limit(50),
             'customerNotes' => fn ($q) => $q->orderByDesc('is_pinned')->orderByDesc('created_at'),
         ]);

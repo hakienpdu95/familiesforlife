@@ -51,7 +51,6 @@ Route::middleware(['auth'])->prefix('dashboard')->name('backend.')->group(functi
 
     // ── Dashboard chart API ───────────────────────────────────────────────
     Route::prefix('api/dashboard/charts')->name('dashboard.charts.')->middleware('tenant')->group(function () {
-        Route::get('lead-funnel',     [DashboardChartController::class, 'leadFunnel'])    ->name('lead-funnel');
         Route::get('workflow-health', [DashboardChartController::class, 'workflowHealth'])->name('workflow-health');
         Route::get('content-trend',   [DashboardChartController::class, 'contentTrend'])  ->name('content-trend');
     });
@@ -64,7 +63,6 @@ Route::middleware(['auth'])->prefix('dashboard')->name('backend.')->group(functi
     Route::get('/categories',       fn () => abort(503, 'Module đang phát triển'))->name('categories.index');
     Route::get('/categories/create',fn () => abort(503, 'Module đang phát triển'))->name('categories.create');
     Route::get('/settings',         fn () => abort(503, 'Module đang phát triển'))->name('settings.index');
-    Route::get('/reports',          fn () => abort(503, 'Module đang phát triển'))->name('reports.index');
 
     // ── Notification Center ───────────────────────────────────────────────
     Route::middleware('tenant')->prefix('notifications')->name('notifications.')->group(function () {

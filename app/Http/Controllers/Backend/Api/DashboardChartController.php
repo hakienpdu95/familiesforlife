@@ -9,7 +9,6 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Modules\Lead\Enums\LeadStatus;
 
 class DashboardChartController extends Controller
 {
@@ -18,46 +17,6 @@ class DashboardChartController extends Controller
         abort_unless($service->isContentAudience($request->user()), 403);
 
         return response()->json($service->trend($request->integer('days', 30)));
-    }
-
-    // ── Lead Funnel — funnel chart by pipeline stage ───────────────────────
-    public function leadFunnel(): JsonResponse
-    {
-        $orgId = TenantContext::getOrganizationId();
-
-        $stages = DB::table('lead_pipeline_stages as lps')
-            ->leftJoin('leads as l', function ($join) use ($orgId) {
-                $join->on('l.stage_id', '=', 'lps.id')
-                     ->where('l.organization_id', $orgId)
-                     ->where('l.status', LeadStatus::Active->value)
-                     ->whereNull('l.deleted_at');
-            })
-            ->where(function ($q) use ($orgId) {
-                $q->where('lps.organization_id', $orgId)
-                  ->orWhere('lps.is_global', true);
-            })
-            ->where('lps.is_active', true)
-            ->select(
-                'lps.label',
-                'lps.color',
-                'lps.sort_order',
-                'lps.is_won',
-                'lps.is_lost',
-                DB::raw('COUNT(l.id) as count')
-            )
-            ->groupBy('lps.id', 'lps.label', 'lps.color', 'lps.sort_order', 'lps.is_won', 'lps.is_lost')
-            ->orderBy('lps.sort_order')
-            ->get();
-
-        return response()->json([
-            'stages' => $stages->map(fn ($s) => [
-                'label'   => $s->label,
-                'count'   => (int) $s->count,
-                'color'   => $s->color,
-                'is_won'  => (bool) $s->is_won,
-                'is_lost' => (bool) $s->is_lost,
-            ]),
-        ]);
     }
 
     // ── Workflow Health — stacked bar, N days ─────────────────────────────

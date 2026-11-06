@@ -41,14 +41,14 @@ const LEVEL_META = Object.freeze({
 });
 
 const SIDEBAR_MODULES = Object.freeze({
-    ceo:          ['CEO Dashboard','CRM','Sales AI','Tasks','SOP','Workflow','Prompt Mgmt','AI Logs','Users','Reports'],
-    sales:        ['CRM','Sales AI','Tasks','SOP','Reports'],
-    ops:          ['CEO Dashboard','CRM','Tasks','SOP','Workflow','AI Logs','Reports'],
-    marketing:    ['CRM','Sales AI','Tasks','SOP','Reports'],
-    hr:           ['Tasks','SOP','Users','Reports'],
-    ai_operator:  ['CEO Dashboard','CRM','Tasks','SOP','Workflow','Prompt Mgmt','AI Logs','Reports'],
-    system_admin: ['CEO Dashboard','CRM','Sales AI','Tasks','SOP','Workflow','Prompt Mgmt','AI Logs','Users','Roles/Perms','Reports'],
-    viewer:       ['CEO Dashboard','Tasks','SOP','Reports'],
+    ceo:          ['CEO Dashboard','CRM','Sales AI','Tasks','SOP','Workflow','Prompt Mgmt','AI Logs','Users'],
+    sales:        ['CRM','Sales AI','Tasks','SOP'],
+    ops:          ['CEO Dashboard','CRM','Tasks','SOP','Workflow','AI Logs'],
+    marketing:    ['CRM','Sales AI','Tasks','SOP'],
+    hr:           ['Tasks','SOP','Users'],
+    ai_operator:  ['CEO Dashboard','CRM','Tasks','SOP','Workflow','Prompt Mgmt','AI Logs'],
+    system_admin: ['CEO Dashboard','CRM','Sales AI','Tasks','SOP','Workflow','Prompt Mgmt','AI Logs','Users','Roles/Perms'],
+    viewer:       ['CEO Dashboard','Tasks','SOP'],
 });
 
 const ALL_PRESETS = Object.freeze([

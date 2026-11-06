@@ -10,16 +10,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
-use Laravelcm\Subscriptions\Traits\HasPlanSubscriptions;
 use Modules\Approval\Concerns\HasApproval;
 
 class Organization extends Model
 {
     use HasFactory;
-    use HasPlanSubscriptions;
     use HasApproval;
 
-    /** Morph alias — ensures consistent subscriber_type regardless of subclass. */
+    /** Morph alias — ensures consistent morph type regardless of subclass. */
     public function getMorphClass(): string
     {
         return 'organization';

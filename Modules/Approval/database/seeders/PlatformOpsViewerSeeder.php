@@ -6,16 +6,13 @@ use App\Enums\AccountType;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
 /**
  * Seed 2 role Platform mới (Lớp A) — spec/Platform_RBAC_Technical_Specification.md §3.3:
  *
- *  - platform_ops: quản lý subscription tổ chức (được gán permission subscription.* có sẵn
- *    của Modules/Subscription — route dashboard/subscription/admin/* đã gate bằng
- *    can:subscription.admin, không cần sửa route/controller). KHÔNG có ability nào trên
+ *  - platform_ops: vận hành platform. KHÔNG có ability nào trên
  *    approve/reject/publishApproval/archiveApproval.
  *  - platform_viewer: chỉ xem (Gate viewDashboard/viewApprovalHistory đã OR thêm
  *    isPlatformViewer() ở ApprovalServiceProvider::boot()) — không được cấp permission ghi nào.
@@ -34,16 +31,6 @@ class PlatformOpsViewerSeeder extends Seeder
         setPermissionsTeamId(null);
         $opsRole    = Role::firstOrCreate(['name' => 'platform_ops', 'guard_name' => 'web']);
         $viewerRole = Role::firstOrCreate(['name' => 'platform_viewer', 'guard_name' => 'web']);
-
-        $subscriptionPermissions = Permission::where('guard_name', 'web')
-            ->where(function ($query) {
-                $query->where('name', 'like', 'subscription.%');
-            })
-            ->get();
-
-        if ($subscriptionPermissions->isNotEmpty()) {
-            $opsRole->syncPermissions($subscriptionPermissions);
-        }
 
         // platform_viewer CỐ Ý không được syncPermissions bất kỳ permission ghi nào — quyền
         // xem dashboard/lịch sử duyệt đến từ Gate OR isPlatformViewer(), không qua permission.

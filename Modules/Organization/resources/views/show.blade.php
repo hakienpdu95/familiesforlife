@@ -170,65 +170,6 @@
     {{-- ── Sidebar ──────────────────────────────────────────────────────── --}}
     <div class="space-y-4">
 
-        {{-- Subscription info --}}
-        @can(\App\Enums\PermissionEnum::SUBSCRIPTION_VIEW->value)
-        @php
-            $orgSub = $organization->planSubscription('main');
-        @endphp
-        <div class="card bg-base-100 shadow-sm border border-base-200">
-            <div class="card-body">
-                <h3 class="font-semibold text-sm mb-3 flex items-center gap-2">
-                    <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-                    </svg>
-                    Subscription
-                </h3>
-                @if ($orgSub)
-                <dl class="space-y-2 text-sm">
-                    <div class="flex items-center justify-between gap-2">
-                        <dt class="text-base-content/50 shrink-0">Plan</dt>
-                        <dd class="font-semibold">{{ $orgSub->plan?->name ?? '—' }}</dd>
-                    </div>
-                    <div class="flex items-center justify-between gap-2">
-                        <dt class="text-base-content/50 shrink-0">Trạng thái</dt>
-                        <dd>
-                            @if ($orgSub->onTrial())
-                                <span class="badge badge-info badge-xs">Trial</span>
-                            @elseif ($orgSub->active())
-                                <span class="badge badge-success badge-xs">Active</span>
-                            @elseif ($orgSub->canceled())
-                                <span class="badge badge-warning badge-xs">Canceled</span>
-                            @else
-                                <span class="badge badge-error badge-xs">Expired</span>
-                            @endif
-                        </dd>
-                    </div>
-                    @if ($orgSub->ends_at)
-                    <div class="flex items-center justify-between gap-2">
-                        <dt class="text-base-content/50 shrink-0">Hết hạn</dt>
-                        <dd class="text-xs">{{ $orgSub->ends_at->format('d/m/Y') }}</dd>
-                    </div>
-                    @endif
-                </dl>
-                @can(\App\Enums\PermissionEnum::SUBSCRIPTION_ADMIN->value)
-                <div class="mt-3">
-                    <a href="{{ route('subscription.admin.subscriptions.index', ['search' => $organization->name]) }}"
-                       class="btn btn-ghost btn-xs w-full">Quản lý</a>
-                </div>
-                @endcan
-                @else
-                <p class="text-xs text-base-content/40">Chưa có subscription.</p>
-                @can(\App\Enums\PermissionEnum::SUBSCRIPTION_ADMIN->value)
-                <div class="mt-2">
-                    <a href="{{ route('subscription.admin.subscriptions.index', ['search' => $organization->name]) }}"
-                       class="btn btn-ghost btn-xs w-full">Gán plan</a>
-                </div>
-                @endcan
-                @endif
-            </div>
-        </div>
-        @endcan
-
         {{-- Thông tin hệ thống --}}
         <div class="card bg-base-100 shadow-sm border border-base-200">
             <div class="card-body">

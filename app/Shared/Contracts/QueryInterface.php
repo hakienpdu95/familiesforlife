@@ -9,8 +9,8 @@ namespace App\Shared\Contracts;
  * Implement this in your Query DTO, then create a corresponding QueryHandler.
  *
  * Convention:
- *   - Query class name:   GetLeadsByStatus
- *   - Handler class name: GetLeadsByStatusHandler
+ *   - Query class name:   GetCustomersByStatus
+ *   - Handler class name: GetCustomersByStatusHandler
  *   - Return type declared on handler's handle() method
  */
 interface QueryInterface {}

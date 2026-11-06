@@ -231,7 +231,7 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Vận hành Platform — quản lý subscription tổ chức, hỗ trợ kỹ thuật, xem log hệ thống.
+     * Vận hành Platform — quản lý tổ chức, hỗ trợ kỹ thuật, xem log hệ thống.
      * KHÔNG có ability nào trên approve/reject/publishApproval/archiveApproval của
      * Organization/Product/Post (spec/Platform_RBAC_Technical_Specification.md §3.3).
      */

@@ -12,7 +12,7 @@ class DeleteTagAction
     /**
      * @throws \RuntimeException Nếu tag còn bài viết gán trực tiếp — theo tiền lệ
      * `DeleteCategoryAction` (spec/PostTag_Management_Technical_Specification.md §5.2), không
-     * theo tiền lệ xoá-thẳng của Lead/CRM — dẫn người dùng tới tính năng gộp thay vì mất liên
+     * xoá thẳng — dẫn người dùng tới tính năng gộp thay vì mất liên
      * kết đột ngột.
      */
     public function handle(PostTag $tag): void

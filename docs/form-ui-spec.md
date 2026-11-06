@@ -360,7 +360,7 @@ return redirect()->back()->with('error', 'Có lỗi xảy ra');
 | User — Đổi mật khẩu | Flat | 2 trường: mật khẩu mới, xác nhận |
 | User — Tạo tài khoản | Tab | 10+ trường: thông tin cá nhân + phân quyền + mật khẩu |
 | Organization — Tạo/Sửa | Tab | 10+ trường: 3 nhóm rõ ràng |
-| Lead/CRM — Tạo cơ hội | Tab | 15+ trường: thông tin + liên hệ + phân loại |
+| Customer/CRM — Tạo khách hàng | Tab | 15+ trường: thông tin + liên hệ + phân loại |
 | HR — Hồ sơ nhân viên | Tab | 20+ trường: cơ bản + công việc + địa chỉ + liên hệ |
 | Assessment — Tạo đánh giá | Wizard | Tuần tự: cấu hình → câu hỏi → phân phối |
 

@@ -334,43 +334,6 @@
             </a>
         </div>
         @endcan
-
-        {{-- spec/Entity_Comparison_Module_Technical_Spec.md §0 mục 9/§10 — entity_comparison.manage
-             cấp cho platform_ops/platform_content_head/platform_content_editor
-             (Modules\EntityComparison\Database\Seeders\EntityComparisonPermissionSeeder), KHÔNG qua
-             config/permissions.php (Lớp B). Dropdown (3 màn quản trị riêng: Loại đối tượng/Tiêu
-             chí/Đối tượng) — cùng nguyên tắc dropdown Lịch biên tập, khác single-link OCOP/Heritage. --}}
-        @can(\App\Enums\PermissionEnum::ENTITY_COMPARISON_MANAGE->value)
-        <details class="nav-group" {{ request()->routeIs('backend.entity_comparison.*') ? 'open' : '' }}>
-            <summary class="nav-summary {{ request()->routeIs('backend.entity_comparison.*') ? 'active' : '' }}">
-                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0H5a2 2 0 01-2-2v-4m6 6h10a2 2 0 002-2v-4m0-6h-6m6 0v6m-6-6v6"/></svg>
-                <span class="nav-label">So sánh đối tượng</span>
-                <svg class="nav-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m9 18 6-6-6-6"/></svg>
-            </summary>
-            <div class="sub-menu">
-                <a href="{{ route('backend.entity_comparison.entity_types.index') }}"
-                   class="sub-link {{ request()->routeIs('backend.entity_comparison.entity_types.*') ? 'active' : '' }}">Loại đối tượng</a>
-                <a href="{{ route('backend.entity_comparison.criteria.index') }}"
-                   class="sub-link {{ request()->routeIs('backend.entity_comparison.criteria.*') ? 'active' : '' }}">Tiêu chí</a>
-                <a href="{{ route('backend.entity_comparison.entities.index') }}"
-                   class="sub-link {{ request()->routeIs('backend.entity_comparison.entities.*') ? 'active' : '' }}">Đối tượng</a>
-            </div>
-        </details>
-        @endcan
-
-        {{-- spec/bhxh/PensionCalculator_Technical_Specification.md §5/§9.3 — Lớp A, qua
-             config/permissions.php + RoleEnum: pension_calculator.manage (System_Admin, sửa
-             được) / pension_calculator.view (CEO, chỉ xem) — cùng nguyên tắc PRODUCT_VIEW/
-             REAL_ESTATE_VIEW ở trên (khác nhóm Lớp B của Banner/OCOP/Page). --}}
-        @if(auth()->user()?->hasAnyPermission(['pension_calculator.manage', 'pension_calculator.view']))
-        <div class="nav-group">
-            <a href="{{ route('backend.pension-calculator.index') }}"
-               class="nav-link {{ request()->routeIs('backend.pension-calculator.*') ? 'active' : '' }}">
-                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 7h6m-6 4h6m-6 4h4M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z"/></svg>
-                <span class="nav-label">Tính lương hưu BHXH</span>
-            </a>
-        </div>
-        @endif
         </x-sidebar-section>
 
         <x-sidebar-section title="AI Studio">
@@ -525,33 +488,8 @@
         </x-sidebar-section>
 
         <x-sidebar-section title="CRM">
-        @if(auth()->user()?->hasAnyPermission(['leads.view_all','leads.view_assigned','leads.view_source']))
+        @if(auth()->user()?->hasAnyPermission(['customers.view_all','customers.view_assigned']))
         <div class="nav-group">
-
-            <details {{ request()->routeIs('lead.*') ? 'open' : '' }}>
-                <summary class="nav-summary {{ request()->routeIs('lead.*') ? 'active' : '' }}">
-                    <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-                    <span class="nav-label">Cơ hội (Lead)</span>
-                    <svg class="nav-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m9 18 6-6-6-6"/></svg>
-                </summary>
-                <div class="sub-menu">
-                    <a href="{{ route('lead.index') }}" class="sub-link {{ request()->routeIs('lead.index') ? 'active' : '' }}">Danh sách cơ hội</a>
-                    @can('leads.create')
-                    <a href="{{ route('lead.create') }}" class="sub-link {{ request()->routeIs('lead.create') ? 'active' : '' }}">Thêm cơ hội</a>
-                    @endcan
-                    @can('leads.manage_pipeline')
-                    <a href="{{ route('lead-pipeline-stage.index') }}" class="sub-link {{ request()->routeIs('lead-pipeline-stage.*') ? 'active' : '' }}">Pipeline stages</a>
-                    @endcan
-                    @can('leads.manage_sources')
-                    <a href="{{ route('lead-source.index') }}" class="sub-link {{ request()->routeIs('lead-source.*') ? 'active' : '' }}">Nguồn cơ hội</a>
-                    @endcan
-                    @can('leads.manage_tags')
-                    <a href="{{ route('lead.tags.index') }}" class="sub-link {{ request()->routeIs('lead.tags.*') ? 'active' : '' }}">Tags</a>
-                    @endcan
-                </div>
-            </details>
-
-            @if(auth()->user()?->hasAnyPermission(['customers.view_all','customers.view_assigned']))
             <details {{ request()->routeIs('customer.*') ? 'open' : '' }}>
                 <summary class="nav-summary {{ request()->routeIs('customer.*') ? 'active' : '' }}">
                     <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -565,8 +503,6 @@
                     @endcan
                 </div>
             </details>
-            @endif
-
         </div>
         @endif
         </x-sidebar-section>
@@ -646,82 +582,6 @@
         </details>
         @endcan
 
-        @can(\App\Enums\PermissionEnum::SUBSCRIPTION_VIEW->value)
-        <details {{ request()->routeIs('subscription.portal.*') ? 'open' : '' }}>
-            <summary class="nav-summary {{ request()->routeIs('subscription.portal.*') ? 'active' : '' }}">
-                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
-                <span class="nav-label">Billing</span>
-                <svg class="nav-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m9 18 6-6-6-6"/></svg>
-            </summary>
-            <div class="sub-menu">
-                <a href="{{ route('subscription.portal.billing') }}"
-                   class="sub-link {{ request()->routeIs('subscription.portal.billing') ? 'active' : '' }}">
-                    Subscription
-                </a>
-                <a href="{{ route('subscription.portal.plans') }}"
-                   class="sub-link {{ request()->routeIs('subscription.portal.plans') ? 'active' : '' }}">
-                    Xem các gói
-                </a>
-                @can(\App\Enums\PermissionEnum::SUBSCRIPTION_BILLING->value)
-                <a href="{{ route('subscription.portal.invoices') }}"
-                   class="sub-link {{ request()->routeIs('subscription.portal.invoices*') ? 'active' : '' }}">
-                    Hóa đơn
-                </a>
-                @endcan
-            </div>
-        </details>
-        @endcan
-
-        @can(\App\Enums\PermissionEnum::SUBSCRIPTION_ADMIN->value)
-        <details {{ request()->routeIs('subscription.admin.*') ? 'open' : '' }}>
-            <summary class="nav-summary {{ request()->routeIs('subscription.admin.*') ? 'active' : '' }}">
-                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-                <span class="nav-label">Subscription</span>
-                <svg class="nav-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m9 18 6-6-6-6"/></svg>
-            </summary>
-            <div class="sub-menu">
-                <a href="{{ route('subscription.admin.plans.index') }}"
-                   class="sub-link {{ request()->routeIs('subscription.admin.plans.*') ? 'active' : '' }}">
-                    Quản lý Plans
-                </a>
-                <a href="{{ route('subscription.admin.subscriptions.index') }}"
-                   class="sub-link {{ request()->routeIs('subscription.admin.subscriptions.*') ? 'active' : '' }}">
-                    Subscriptions
-                </a>
-                <a href="{{ route('subscription.admin.invoices.index') }}"
-                   class="sub-link {{ request()->routeIs('subscription.admin.invoices.*') ? 'active' : '' }}">
-                    Invoices
-                </a>
-            </div>
-        </details>
-        @endcan
-
-        {{-- spec/N8n_Integration_Technical_Specification.md §6 — Platform Roles (Lớp A),
-             KHÔNG PermissionEnum/Organization Roles (N8nConnection không thuộc tổ chức nào).
-             Đặt cùng nhóm với "Quản lý Subscription" — không xuất hiện trong sidebar của
-             bất kỳ tổ chức nào. super-admin tự bypass qua Gate::before nhưng check thẳng
-             hasRole() ở đây (KHÔNG qua Gate) để không phụ thuộc ambient Spatie team context
-             — cùng lý do đã áp dụng cho "Quản lý nhân sự Platform" ở trên. --}}
-        @if(auth()->user()?->isPlatformOps() || auth()->user()?->isPlatformViewer() || auth()->user()?->hasRole('super-admin'))
-        <details {{ request()->routeIs('backend.n8n.*') ? 'open' : '' }}>
-            <summary class="nav-summary {{ request()->routeIs('backend.n8n.*') ? 'active' : '' }}">
-                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                <span class="nav-label">Tích hợp n8n</span>
-                <svg class="nav-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m9 18 6-6-6-6"/></svg>
-            </summary>
-            <div class="sub-menu">
-                <a href="{{ route('backend.n8n.connections.index') }}"
-                   class="sub-link {{ request()->routeIs('backend.n8n.connections.*') ? 'active' : '' }}">
-                    Kết nối
-                </a>
-                <a href="{{ route('backend.n8n.logs.index') }}"
-                   class="sub-link {{ request()->routeIs('backend.n8n.logs.*') ? 'active' : '' }}">
-                    Log
-                </a>
-            </div>
-        </details>
-        @endif
-
         <details {{ request()->routeIs('backend.settings.*') ? 'open' : '' }}>
             <summary class="nav-summary {{ request()->routeIs('backend.settings.*') ? 'active' : '' }}">
                 <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -736,26 +596,6 @@
             </div>
         </details>
         </div>
-        </x-sidebar-section>
-
-        <x-sidebar-section title="Phân tích">
-        @if(auth()->user()?->hasAnyPermission(['reports.full','reports.hr','reports.team','reports.personal','reports.ops','reports.shared']))
-        <div class="nav-group">
-            <details {{ request()->routeIs('report.*') ? 'open' : '' }}>
-                <summary class="nav-summary {{ request()->routeIs('report.*') ? 'active' : '' }}">
-                    <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                    <span class="nav-label">Báo cáo</span>
-                    <svg class="nav-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m9 18 6-6-6-6"/></svg>
-                </summary>
-                <div class="sub-menu">
-                    <a href="{{ route('report.index') }}" class="sub-link {{ request()->routeIs('report.index') ? 'active' : '' }}">Tổng quan</a>
-                    @if(auth()->user()?->hasAnyPermission(['reports.team','reports.personal','reports.full']))
-                    <a href="{{ route('report.sales.pipeline') }}" class="sub-link {{ request()->routeIs('report.sales.*') ? 'active' : '' }}">Sales & CRM</a>
-                    @endif
-                </div>
-            </details>
-        </div>
-        @endif
         </x-sidebar-section>
 
     </nav>

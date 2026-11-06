@@ -8,7 +8,6 @@ use Modules\Customer\Data\Requests\UpdateCustomerData;
 use Modules\Customer\Enums\CustomerType;
 use Modules\Customer\Events\CustomerUpdated;
 use Modules\Customer\Models\Customer;
-use Modules\LeadSource\Models\LeadSource;
 
 class UpdateCustomerAction
 {
@@ -29,18 +28,11 @@ class UpdateCustomerAction
             : $customer->organization_id;
 
         $assignedTo = $data->assigned_to;
-        $sourceId   = $data->source_id;
 
-        // Đổi org → assigned_to/source_id cũ (thuộc org cũ) có thể không còn hợp lệ ở org mới.
+        // Đổi org → assigned_to cũ (thuộc org cũ) có thể không còn hợp lệ ở org mới.
         if ($newOrgId !== $customer->organization_id) {
             if ($assignedTo && ! User::where('id', $assignedTo)->where('organization_id', $newOrgId)->exists()) {
                 $assignedTo = null;
-            }
-            if ($sourceId) {
-                $validSource = LeadSource::where('id', $sourceId)
-                    ->where(fn ($q) => $q->where('organization_id', $newOrgId)->orWhere('is_global', true))
-                    ->exists();
-                if (! $validSource) $sourceId = null;
             }
         }
 
@@ -51,7 +43,6 @@ class UpdateCustomerAction
             'primary_email'        => $data->primary_email,
             'primary_phone'        => $data->primary_phone,
             'lifecycle_stage'      => $data->lifecycle_stage ?? $customer->lifecycle_stage->value,
-            'source_id'            => $sourceId,
             'assigned_to'          => $assignedTo,
             'first_name'           => $data->first_name,
             'last_name'            => $data->last_name,

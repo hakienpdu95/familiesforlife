@@ -15,12 +15,6 @@ return [
         'task_commented' => 'Có comment mới trên task',
     ],
 
-    'Lead' => [
-        'lead_assigned'       => 'Lead được giao',
-        'lead_status_changed' => 'Lead thay đổi trạng thái',
-        'lead_overdue'        => 'Lead quá hạn follow-up',
-    ],
-
     'Nghỉ phép' => [
         'leave_submitted' => 'Đơn xin nghỉ cần duyệt (quản lý)',
         'leave_approved'  => 'Đơn xin nghỉ được duyệt',
@@ -56,11 +50,6 @@ return [
 
     'Employee' => [
         'employee_onboarded' => 'Nhân viên mới được onboard',
-    ],
-
-    'Subscription' => [
-        'subscription_expiring_db' => 'Subscription sắp hết hạn',
-        'subscription_expired_db'  => 'Subscription đã hết hạn',
     ],
 
 ];

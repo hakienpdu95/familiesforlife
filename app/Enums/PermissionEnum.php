@@ -10,21 +10,6 @@ enum PermissionEnum: string
     case CEO_DASH_VIEW = 'ceo_dashboard.view';    // Ops(limited), AI_OP(limited), Viewer
     case CEO_DASH_CONFIG = 'ceo_dashboard.config';  // System Admin
 
-    // ══ CRM LEADS ══════════════════════════════════════════════════
-    // CEO=Full | Sales=Assigned | Ops=Limited | Marketing=Source view | AI_OP=Limited | Admin=Config | Viewer=No
-    case LEADS_VIEW_ALL = 'leads.view_all';      // Ops(limited=view only), AI_OP(limited)
-    case LEADS_VIEW_ASSIGNED = 'leads.view_assigned'; // Sales
-    case LEADS_VIEW_SOURCE = 'leads.view_source';   // Marketing — SOURCE VIEW
-    case LEADS_CREATE = 'leads.create';        // CEO, Sales
-    case LEADS_EDIT = 'leads.edit';          // CEO, Sales(own via Policy)
-    case LEADS_DELETE = 'leads.delete';        // CEO only
-    case LEADS_ASSIGN = 'leads.assign';        // CEO
-    case LEADS_CONFIG = 'leads.config';           // System Admin (độc lập, không kèm view data)
-    case LEADS_EXPORT = 'leads.export';           // CEO, Ops — xuất Excel
-    case LEADS_MANAGE_PIPELINE = 'leads.manage_pipeline';  // System Admin — thêm/sửa/xóa stages
-    case LEADS_MANAGE_SOURCES = 'leads.manage_sources';   // System Admin — thêm/sửa/xóa sources
-    case LEADS_MANAGE_TAGS = 'leads.manage_tags';      // Ops, System Admin — quản lý tags
-
     // ══ CRM CUSTOMERS ═════════════════════════════════════════════
     // CEO=Full | Sales=Assigned | Ops=View+Edit | Marketing=View | Admin=Config
     case CUSTOMERS_VIEW_ALL = 'customers.view_all';      // CEO, Ops, Marketing, AI_OP
@@ -60,21 +45,6 @@ enum PermissionEnum: string
     // ══ ROLES & PERMISSIONS ════════════════════════════════════════
     // Admin=Full only
     case ROLES_MANAGE = 'roles.manage';
-
-    // ══ REPORTS ════════════════════════════════════════════════════
-    case REPORTS_FULL = 'reports.full';      // CEO, Admin
-    case REPORTS_PERSONAL = 'reports.personal';  // Sales (cá nhân)
-    case REPORTS_TEAM = 'reports.team';      // Sales (team)
-    case REPORTS_OPS = 'reports.ops';       // Ops
-    case REPORTS_MARKETING = 'reports.marketing'; // Marketing
-    case REPORTS_HR = 'reports.hr';        // HR
-    case REPORTS_SHARED = 'reports.shared';    // Viewer
-
-    // ══ SUBSCRIPTION ═══════════════════════════════════════════════
-    case SUBSCRIPTION_VIEW = 'subscription.view';
-    case SUBSCRIPTION_MANAGE = 'subscription.manage';
-    case SUBSCRIPTION_BILLING = 'subscription.billing';
-    case SUBSCRIPTION_ADMIN = 'subscription.admin';
 
     // ══ SYSTEM ═════════════════════════════════════════════════════
     case INTEGRATION_MANAGE = 'integration.manage';
@@ -223,15 +193,6 @@ enum PermissionEnum: string
     case CONTENT_CALENDAR_VIEW = 'content_calendar.view';
     case CONTENT_CALENDAR_MANAGE = 'content_calendar.manage';
 
-    // ══ PENSION CALCULATOR (Bảng tính minh hoạ lương hưu BHXH tự nguyện — tham số pháp lý
-    // dùng chung toàn platform, công cụ public không auth) ═══
-    // spec/bhxh/PensionCalculator_Technical_Specification.md §0/§5 — Lớp A, qua
-    // config/permissions.php + RoleEnum (System_Admin: sửa được; CEO: chỉ xem) — đây là dữ
-    // liệu tuân thủ pháp luật ảnh hưởng độ chính xác 1 công cụ công khai toàn platform, đúng
-    // bản chất "cấu hình hệ thống" hơn "nội dung biên tập theo category" (khác Lớp B).
-    case PENSION_CALCULATOR_MANAGE = 'pension_calculator.manage';
-    case PENSION_CALCULATOR_VIEW = 'pension_calculator.view';
-
     // ══ PROMPT FRAMEWORK STUDIO (thư viện 13 framework prompt engineering + form sinh prompt có
     // cấu trúc — không gọi AI Provider trong app, người dùng tự copy-paste sang AI ngoài) ═══
     // spec/PromptFrameworkStudio_Technical_Specification.md §6 — gán cho platform_content_editor/
@@ -246,14 +207,6 @@ enum PermissionEnum: string
     // KHÔNG qua config/permissions.php (Lớp B) — cùng nguyên tắc CONTENT_OUTLINES_USE/
     // PROMPT_FRAMEWORK_STUDIO_USE.
     case AI_VIDEO_STUDIO_TEMPLATE_USE = 'ai_video_studio_template.use';
-
-    // ══ ENTITY COMPARISON (So sánh động các đối tượng theo tiêu chí — trường học, bệnh viện,
-    // khóa học... tài sản nền tảng, catalog dùng lại được nhiều nơi) ═══
-    // spec/Entity_Comparison_Module_Technical_Spec.md §0 mục 9/§10 — gán cho platform_ops +
-    // platform_content_head + platform_content_editor (EntityComparisonPermissionSeeder), KHÔNG
-    // qua config/permissions.php (Lớp B) — cùng nguyên tắc BANNER_MANAGE/OCOP_MANAGE/
-    // HERITAGE_MANAGE/PAGE_MANAGE.
-    case ENTITY_COMPARISON_MANAGE = 'entity_comparison.manage';
 
     // ══ VIDEO SERIES PROMPT STUDIO (thiết kế kiến trúc cho CẢ CHUỖI video nhiều tập — Series
     // Bible: concept, khung 1 tập chuẩn lặp lại, dàn ý 5-10 tập đầu tiên — KHÔNG gọi AI Provider

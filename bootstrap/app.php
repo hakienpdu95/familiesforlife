@@ -13,14 +13,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Exempt payment gateway webhooks from CSRF — they are server-to-server calls
-        $middleware->validateCsrfTokens(except: [
-            'billing/webhook/*',
-        ]);
         $middleware->alias([
             'tenant'             => \App\Http\Middleware\IdentifyOrganization::class,
             'assert.tenant'      => \App\Http\Middleware\AssertTenant::class,
-            'feature'            => \Modules\Subscription\Features\FeatureGate\Http\Middleware\RequireFeature::class,
             'role'               => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission'         => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
@@ -37,7 +32,6 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\IdentifyOrganization::class
         );
         $middleware->appendToGroup('web', \Modules\ActivityLog\Http\Middleware\CaptureHttpContext::class);
-        $middleware->appendToGroup('web', \Modules\Subscription\Features\FeatureGate\Http\Middleware\CheckSubscription::class);
         $middleware->appendToGroup('web', \App\Http\Middleware\SecurityHeaders::class);
         $middleware->appendToGroup('web', \App\Http\Middleware\EnsureUserIsActive::class);
         // EnsureFrontendRequestsAreStateful phải đứng đầu api group để auth:sanctum

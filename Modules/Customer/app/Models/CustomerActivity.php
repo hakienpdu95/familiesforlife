@@ -12,7 +12,7 @@ class CustomerActivity extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'customer_id', 'lead_id', 'organization_id',
+        'customer_id', 'organization_id',
         'type', 'title', 'description', 'outcome',
         'scheduled_at', 'completed_at', 'duration_minutes',
         'actor_id', 'actor_name', 'created_at',

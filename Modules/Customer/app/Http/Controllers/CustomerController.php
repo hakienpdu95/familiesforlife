@@ -21,7 +21,6 @@ use Modules\Customer\Models\CustomerTag;
 use Modules\Customer\Queries\GetCustomerHandler;
 use Modules\Customer\Queries\GetCustomerQuery;
 use App\Models\Province;
-use Modules\LeadSource\Models\LeadSource;
 
 class CustomerController extends Controller
 {
@@ -39,7 +38,6 @@ class CustomerController extends Controller
         $this->authorize('viewAny', Customer::class);
 
         $orgId   = TenantContext::getOrganizationId();
-        $sources = LeadSource::where('is_active', true)->orderBy('sort_order')->get(['id', 'label']);
         $tags    = CustomerTag::where('organization_id', $orgId)->orderBy('name')->get(['id', 'name', 'color']);
         $stages  = collect(CustomerLifecycleStage::cases())->map(fn ($s) => ['value' => $s->value, 'label' => $s->label()]);
         $types   = collect(CustomerType::cases())->map(fn ($t) => ['value' => $t->value, 'label' => $t->label()]);
@@ -73,7 +71,7 @@ class CustomerController extends Controller
         $totalChurned = (int) ($counts->total_churned ?? 0);
 
         return view('customer::index', compact(
-            'sources', 'tags', 'stages', 'types',
+            'tags', 'stages', 'types',
             'totalAll', 'totalActive', 'totalVip', 'totalChurned',
             'organizations', 'orgLocked'
         ));
@@ -84,7 +82,6 @@ class CustomerController extends Controller
         $this->authorize('create', Customer::class);
 
         $orgId     = TenantContext::getOrganizationId();
-        $sources   = LeadSource::where('is_active', true)->orderBy('sort_order')->get(['id', 'label']);
         $tags      = CustomerTag::where('organization_id', $orgId)->orderBy('name')->get(['id', 'name', 'color']);
         $sizes     = collect(CompanySize::cases())->map(fn ($s) => ['value' => $s->value, 'label' => $s->label()]);
         $stages    = collect(CustomerLifecycleStage::cases())->map(fn ($s) => ['value' => $s->value, 'label' => $s->label()]);
@@ -96,7 +93,7 @@ class CustomerController extends Controller
         [$organizations, $defaultOrgId, $orgLocked] = $this->_resolveOrganizations();
 
         return view('customer::_form', compact(
-            'customer', 'sources', 'tags', 'sizes', 'stages', 'provinces', 'fieldDefs',
+            'customer', 'tags', 'sizes', 'stages', 'provinces', 'fieldDefs',
             'organizations', 'defaultOrgId', 'orgLocked'
         ));
     }
@@ -133,7 +130,6 @@ class CustomerController extends Controller
         // quan trọng khi super-admin sửa khách hàng thuộc org khác với org đang active.
         $orgId     = $customer->organization_id;
         $customer->load(['tags', 'meta.definition']);
-        $sources   = LeadSource::where('is_active', true)->orderBy('sort_order')->get(['id', 'label']);
         $tags      = CustomerTag::where('organization_id', $orgId)->orderBy('name')->get(['id', 'name', 'color']);
         $sizes     = collect(CompanySize::cases())->map(fn ($s) => ['value' => $s->value, 'label' => $s->label()]);
         $stages    = collect(CustomerLifecycleStage::cases())->map(fn ($s) => ['value' => $s->value, 'label' => $s->label()]);
@@ -144,7 +140,7 @@ class CustomerController extends Controller
         [$organizations, , $orgLocked] = $this->_resolveOrganizations();
 
         return view('customer::_form', compact(
-            'customer', 'sources', 'tags', 'sizes', 'stages', 'provinces', 'fieldDefs',
+            'customer', 'tags', 'sizes', 'stages', 'provinces', 'fieldDefs',
             'organizations', 'orgLocked'
         ));
     }

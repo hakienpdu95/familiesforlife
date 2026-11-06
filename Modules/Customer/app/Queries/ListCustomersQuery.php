@@ -13,7 +13,6 @@ class ListCustomersQuery implements QueryInterface
         public readonly ?string $search      = null,
         public readonly ?int    $type        = null,
         public readonly ?int    $stage       = null,
-        public readonly ?int    $sourceId    = null,
         public readonly ?int    $assignedTo  = null,
         public readonly ?string $province    = null,
         public readonly ?int    $tagId       = null,

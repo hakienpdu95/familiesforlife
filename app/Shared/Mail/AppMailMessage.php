@@ -20,7 +20,7 @@ use Illuminate\Notifications\Messages\MailMessage;
  *       ->action('Xem ngay', $url);
  *
  *   // Với subject tự động có prefix [AppName]:
- *   return AppMailMessage::prefixed('Subscription sắp hết hạn')
+ *   return AppMailMessage::prefixed('Cảnh báo bảo mật')
  *       ->greeting("Xin chào {$user->name},")
  *       ->line('...');
  */
@@ -38,7 +38,7 @@ class AppMailMessage
 
     /**
      * Tạo MailMessage với subject được prefix bởi [AppName].
-     * Dùng cho email quan trọng cần nổi bật trong hộp thư (billing, security).
+     * Dùng cho email quan trọng cần nổi bật trong hộp thư (security).
      */
     public static function prefixed(string $subject): MailMessage
     {

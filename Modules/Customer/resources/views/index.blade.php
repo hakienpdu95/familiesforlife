@@ -123,12 +123,6 @@
                     <select id="filter-stage" class="select select-sm select-bordered w-full"></select>
                 </div>
 
-                {{-- Source --}}
-                <div class="form-control w-44">
-                    <label class="label py-0.5"><span class="label-text text-xs font-medium">Nguồn</span></label>
-                    <select id="filter-source" class="select select-sm select-bordered w-full"></select>
-                </div>
-
             </div>
 
             <div class="flex flex-wrap gap-3 items-end">
@@ -225,7 +219,6 @@
         'csrf'          => csrf_token(),
         'types'         => $types->values(),
         'stages'        => $stages->values(),
-        'sources'       => $sources->values(),
         'canDelete'     => auth()->user()->can('delete', new \Modules\Customer\Models\Customer),
         'orgLocked'     => $orgLocked,
         'organizations' => $orgLocked ? [] : $organizations->map(fn ($o) => ['value' => $o->id, 'text' => $o->name])->values(),

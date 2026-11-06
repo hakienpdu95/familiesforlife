@@ -58,11 +58,6 @@ return [
         'stats'               => 'Thống kê',
         'results'             => 'Kết quả',
 
-        // ── CRM / Lead ────────────────────────────────────────────────────
-        'leads'               => 'Danh sách Lead',
-        'tags'                => 'Thẻ phân loại',
-        'sources'             => 'Nguồn Lead',
-
         // ── Activity Log ──────────────────────────────────────────────────
         'activity-logs'       => 'Nhật ký hoạt động',
         'alert-rules'         => 'Quy tắc cảnh báo',
@@ -85,15 +80,14 @@ return [
         'my-schedule'         => 'Lịch của tôi',
         'summary'             => 'Tóm tắt',
         'items'               => 'Danh sách',
+        'tags'                => 'Thẻ phân loại',
         'categories'          => 'Danh mục',
         'settings'            => 'Cài đặt',
         'logs'                => 'Nhật ký',
         'history'             => 'Lịch sử',
         'status'              => 'Trạng thái',
-        'reports'             => 'Báo cáo',
         'dashboard'           => 'Bảng điều khiển',
         'charts'              => 'Biểu đồ',
-        'lead-funnel'         => 'Phễu Lead',
         'workflow-health'     => 'Tình trạng luồng tự động',
         'notifications'       => 'Thông báo',
         'preferences'         => 'Tuỳ chọn thông báo',
@@ -135,14 +129,6 @@ return [
         'real-estate'         => 'Bất động sản',
         'heritage'            => 'Di tích/Di sản',
         'sites'               => 'Danh sách',
-        'pension-calculator'  => 'Tính lương hưu BHXH',
-        'periods'             => 'Giai đoạn',
-        'price-index'         => 'Chỉ số giá',
-        'rate-brackets'       => 'Bậc tỷ lệ',
-        'entity_comparison'   => 'So sánh thực thể',
-        'entity_types'        => 'Loại thực thể',
-        'entities'            => 'Thực thể',
-        'criteria'            => 'Tiêu chí',
 
         // ── AI Studio ─────────────────────────────────────────────────────
         'aicem'               => 'AICEM',
@@ -161,10 +147,6 @@ return [
         'videoseriespromptstudio'  => 'Video Series Prompt Studio',
         'aivideostudiotemplate'    => 'AI Video Studio Template',
         'formula-advisor'     => 'Tư vấn công thức',
-
-        // ── Tích hợp ──────────────────────────────────────────────────────
-        'n8n'                 => 'n8n',
-        'connections'         => 'Kết nối',
 
     ],
 

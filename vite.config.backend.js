@@ -11,8 +11,8 @@
  * BLADE:
  *   Core  : @vite(['resources/css/app.css', 'resources/js/app.js'], 'build/backend')
  *   Widget: @vite(['resources/js/modules/tom-select.js'], 'build/backend')
- *   Module: @vite(['Modules/Lead/resources/assets/sass/lead.scss',
- *                  'Modules/Lead/resources/assets/js/lead.js'], 'build/backend')
+ *   Module: @vite(['Modules/Customer/resources/assets/sass/customer.scss',
+ *                  'Modules/Customer/resources/assets/js/customer.js'], 'build/backend')
  */
 
 import { defineConfig } from 'vite';
@@ -37,14 +37,9 @@ const JS_OUTPUT = {
   'swiper':     'assets/swiper.[hash].js',
   'qrcode':     'assets/qrcode.[hash].js',
   // Module JS — named [module] to avoid chunk name collision
-  'lead':                 'assets/modules/lead.[hash].js',
   'user':                 'assets/modules/user.[hash].js',
   'organization':         'assets/modules/organization.[hash].js',
-  'lead-pipeline-stage':  'assets/modules/lead-pipeline-stage.[hash].js',
-  'lead-source':          'assets/modules/lead-source.[hash].js',
   'activity-log':           'assets/modules/activity-log.[hash].js',
-  'subscription':           'assets/modules/subscription.[hash].js',
-  'report':                 'assets/modules/report.[hash].js',
   'post':                   'assets/modules/post.[hash].js',
   'product':                'assets/modules/product.[hash].js',
   'event':                  'assets/modules/event.[hash].js',
@@ -55,7 +50,6 @@ const JS_OUTPUT = {
   'video':                  'assets/modules/video.[hash].js',
   'content-calendar':       'assets/modules/content-calendar.[hash].js',
   'playlist':               'assets/modules/playlist.[hash].js',
-  'entitycomparison':       'assets/modules/entitycomparison.[hash].js',
   'bulk-ideation-prompt-studio': 'assets/modules/bulk-ideation-prompt-studio.[hash].js',
   'approval':               'assets/modules/approval.[hash].js',
 };
@@ -75,15 +69,10 @@ const CSS_OUTPUT = {
   'tom-select.css':                'assets/tom-select.[hash].css',
   'swiper.css':                    'assets/swiper.[hash].css',
   // Module SCSS → CSS
-  'lead.css':                 'assets/modules/lead.[hash].css',
   'user.css':                 'assets/modules/user.[hash].css',
   'organization.css':         'assets/modules/organization.[hash].css',
-  'lead-pipeline-stage.css':  'assets/modules/lead-pipeline-stage.[hash].css',
-  'lead-source.css':          'assets/modules/lead-source.[hash].css',
   'activity-log.css':           'assets/modules/activity-log.[hash].css',
-  'subscription.css':           'assets/modules/subscription.[hash].css',
   'ai-copilot.css':             'assets/modules/ai-copilot.[hash].css',
-  'report.css':                 'assets/modules/report.[hash].css',
   'post.css':                   'assets/modules/post.[hash].css',
   'product.css':                'assets/modules/product.[hash].css',
   'event.css':                  'assets/modules/event.[hash].css',
@@ -110,33 +99,18 @@ const CSS_OUTPUT = {
 // để tránh chunk name collision trong rollup output.
 
 const MODULE_ENTRIES = [
-  // Lead
-  'Modules/Lead/resources/assets/sass/lead.scss',
-  'Modules/Lead/resources/assets/js/lead.js',
   // User
   'Modules/User/resources/assets/sass/user.scss',
   'Modules/User/resources/assets/js/user.js',
   // Organization
   'Modules/Organization/resources/assets/sass/organization.scss',
   'Modules/Organization/resources/assets/js/organization.js',
-  // LeadPipelineStage
-  'Modules/LeadPipelineStage/resources/assets/sass/lead-pipeline-stage.scss',
-  'Modules/LeadPipelineStage/resources/assets/js/lead-pipeline-stage.js',
-  // LeadSource
-  'Modules/LeadSource/resources/assets/sass/lead-source.scss',
-  'Modules/LeadSource/resources/assets/js/lead-source.js',
   // ActivityLog
   'Modules/ActivityLog/resources/assets/sass/activity-log.scss',
   'Modules/ActivityLog/resources/assets/js/activity-log.js',
-  // Subscription
-  'Modules/Subscription/resources/assets/sass/subscription.scss',
-  'Modules/Subscription/resources/assets/js/subscription.js',
   // Customer
   'Modules/Customer/resources/assets/sass/customer.scss',
   'Modules/Customer/resources/assets/js/customer.js',
-  // Report
-  'Modules/Report/resources/assets/sass/report.scss',
-  'Modules/Report/resources/assets/js/report.js',
   // Post
   'Modules/Post/resources/assets/sass/post.scss',
   'Modules/Post/resources/assets/js/post.js',
@@ -183,8 +157,6 @@ const MODULE_ENTRIES = [
   // ContentCalendar
   'Modules/ContentCalendar/resources/assets/sass/content-calendar.scss',
   'Modules/ContentCalendar/resources/assets/js/content-calendar.js',
-  // N8n
-  'Modules/N8n/resources/assets/js/n8n.js',
   // ContentOutlines
   'Modules/ContentOutlines/resources/assets/js/content-outlines.js',
   // PromptFrameworkStudio
@@ -192,8 +164,6 @@ const MODULE_ENTRIES = [
   // AIVideoStudioTemplate
   'Modules/AIVideoStudioTemplate/resources/assets/js/aivideostudiotemplate.js',
   'Modules/AIVideoStudioTemplate/resources/assets/sass/aivideostudiotemplate.scss',
-  // EntityComparison
-  'Modules/EntityComparison/resources/assets/js/entitycomparison.js',
   // BulkIdeationPromptStudio
   'Modules/BulkIdeationPromptStudio/resources/assets/sass/bulk-ideation-prompt-studio.scss',
   'Modules/BulkIdeationPromptStudio/resources/assets/js/bulk-ideation-prompt-studio.js',
@@ -298,7 +268,7 @@ export default defineConfig(({ mode }) => {
            *   @use 'tokens' as t;          → resources/scss/_tokens.scss
            *   @use 'form-patterns';        → resources/scss/_form-patterns.scss
            *   @use 'tom-select';           → resources/scss/_tom-select.scss
-           *   @use 'lead-components' as l; → [module]/sass/_lead-components.scss
+           *   @use 'user-components' as u; → [module]/sass/_user-components.scss
            */
           loadPaths: [
             path.resolve(__dirname, 'resources/scss'),

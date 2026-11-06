@@ -75,7 +75,6 @@
                 ['id'=>'info',     'label'=>'Thông tin'],
                 ['id'=>'activity', 'label'=>'Hoạt động (' . $customer->activities->count() . ')'],
                 ['id'=>'notes',    'label'=>'Ghi chú (' . $customer->customerNotes->count() . ')'],
-                ['id'=>'leads',    'label'=>'Cơ hội liên quan (' . $customer->leads->count() . ')'],
             ]; @endphp
 
             @foreach($tabs as $t)
@@ -242,13 +241,6 @@
                     <div class="flex items-center justify-between">
                         <span class="text-base-content/50">Phụ trách</span>
                         <span class="font-medium">{{ $customer->assignee->name }}</span>
-                    </div>
-                    @endif
-
-                    @if($customer->source)
-                    <div class="flex items-center justify-between">
-                        <span class="text-base-content/50">Nguồn</span>
-                        <span>{{ $customer->source->label }}</span>
                     </div>
                     @endif
 
@@ -466,79 +458,6 @@
             @endforelse
         </div>
 
-    </div>
-
-    {{-- ── Tab: Cơ hội liên quan ───────────────────────────────────── --}}
-    <div x-show="tab === 'leads'">
-        @if($customer->leads->isEmpty())
-        <div class="card bg-base-100 shadow-sm border border-base-200">
-            <div class="card-body py-16 text-center">
-                <p class="text-base-content/30 text-sm">Chưa có cơ hội liên quan.</p>
-            </div>
-        </div>
-        @else
-        <div class="card bg-base-100 shadow-sm border border-base-200 overflow-hidden">
-            <table class="table table-sm">
-                <thead>
-                    <tr class="text-xs text-base-content/50">
-                        <th>Tiêu đề / Khách hàng</th>
-                        <th>Tình trạng</th>
-                        <th>Giá trị</th>
-                        <th>Ngày chốt DK</th>
-                        <th>Phụ trách</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($customer->leads as $lead)
-                    <tr class="hover">
-                        <td class="font-medium text-sm">
-                            {{ $lead->title ?? $lead->contact_name ?? '—' }}
-                            @if($lead->title && $lead->contact_name)
-                            <p class="text-xs text-base-content/40 font-normal">{{ $lead->contact_name }}</p>
-                            @endif
-                        </td>
-                        <td>
-                            @if($lead->stage)
-                            <div class="flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full shrink-0"
-                                      style="background:{{ $lead->stage->color ?? '#94a3b8' }}"></span>
-                                <span class="text-sm">{{ $lead->stage->label }}</span>
-                            </div>
-                            @else
-                            <span class="text-base-content/30 text-xs">—</span>
-                            @endif
-                        </td>
-                        <td class="text-sm">
-                            @if($lead->expected_value)
-                            <span class="font-medium text-success">
-                                {{ number_format($lead->expected_value) }} {{ $lead->currency }}
-                            </span>
-                            @else
-                            <span class="text-base-content/30 text-xs">—</span>
-                            @endif
-                        </td>
-                        <td class="text-sm text-base-content/60">
-                            {{ $lead->expected_close_date?->format('d/m/Y') ?? '—' }}
-                        </td>
-                        <td class="text-sm text-base-content/60">
-                            {{ $lead->assignee?->name ?? '—' }}
-                        </td>
-                        <td>
-                            <a href="{{ route('lead.show', $lead) }}"
-                               class="btn btn-ghost btn-xs gap-1">
-                                Xem
-                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                                </svg>
-                            </a>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-        @endif
     </div>
 
 </div>

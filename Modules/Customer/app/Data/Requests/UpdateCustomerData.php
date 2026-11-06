@@ -41,9 +41,6 @@ class UpdateCustomerData extends Data
         public readonly ?int    $lifecycle_stage = null,
 
         #[Nullable, IntegerType]
-        public readonly ?int    $source_id = null,
-
-        #[Nullable, IntegerType]
         public readonly ?int    $assigned_to = null,
 
         #[Nullable, StringType, Max(100)]
@@ -104,7 +101,6 @@ class UpdateCustomerData extends Data
             'customer_type'   => ['required', 'integer', Rule::in(array_column(CustomerType::cases(), 'value'))],
             'gender'          => ['nullable', 'string', Rule::in(['M', 'F', 'O'])],
             'lifecycle_stage' => ['nullable', 'integer', Rule::in(array_column(CustomerLifecycleStage::cases(), 'value'))],
-            'source_id'       => ['nullable', 'integer', 'exists:lead_sources,id'],
             'assigned_to'     => ['nullable', 'integer', 'exists:users,id'],
             'tag_ids'         => ['nullable', 'array'],
             'tag_ids.*'       => ['integer', 'min:1'],

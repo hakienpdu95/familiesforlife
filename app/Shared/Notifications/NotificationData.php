@@ -18,7 +18,7 @@ class NotificationData
      * @param  string  $url       Route URL to navigate to on click. Use route() — never hardcode domain.
      *                            Pass an empty string when no destination exists.
      * @param  string  $icon      Icon key for the frontend icon/colour map.
-     *                            Allowed: bell | check | warning | error | info | user | task | sop | kc | lead
+     *                            Allowed: bell | check | warning | error | info | user | task | sop | kc
      * @param  string  $severity  Visual severity for colour coding.
      *                            Allowed: info | success | warning | error
      * @param  array   $meta      Arbitrary context (IDs, slugs) for filtering/debugging.

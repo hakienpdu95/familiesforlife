@@ -17,7 +17,6 @@ class LogActivityAction
         $activity = CustomerActivity::create([
             'customer_id'      => $data->customerId,
             'organization_id'  => $data->orgId,
-            'lead_id'          => $data->leadId,
             'type'             => $data->type,
             'title'            => $data->title,
             'description'      => $data->description,

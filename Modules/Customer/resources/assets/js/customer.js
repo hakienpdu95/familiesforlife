@@ -19,7 +19,6 @@ const {
     csrf,
     types         = [],
     stages        = [],
-    sources       = [],
     canDelete     = false,
     orgLocked     = true,
     organizations = [],
@@ -48,7 +47,6 @@ function initListPage() {
 
     const stageLabel  = v => stages.find(s => s.value == v)?.label  ?? '—';
     const stageBadge  = v => stages.find(s => s.value == v)?.badge  ?? 'badge-ghost';
-    const sourceLabel = id => sources.find(s => s.id == id)?.label ?? '—';
 
     // ── Columns ─────────────────────────────────────────────────────────────
 
@@ -92,13 +90,6 @@ function initListPage() {
             formatter(cell) {
                 const d = cell.getRow().getData();
                 return `<span class="badge badge-sm badge-soft ${esc(d.stage_badge)}">${esc(d.stage_label)}</span>`;
-            },
-        },
-        {
-            title: 'Nguồn', field: 'source_label', width: 130, headerSort: false,
-            formatter(cell) {
-                const v = cell.getValue() || sourceLabel(cell.getRow().getData().source_id);
-                return v ? esc(v) : '<span class="text-base-content/25 text-xs">—</span>';
             },
         },
         {
@@ -148,7 +139,7 @@ function initListPage() {
         },
     ];
 
-    const TOGGLEABLE_FIELDS = ['organization_name', 'primary_phone', 'source_label', 'assignee_name', 'last_activity_at', 'created_at'];
+    const TOGGLEABLE_FIELDS = ['organization_name', 'primary_phone', 'assignee_name', 'last_activity_at', 'created_at'];
 
     // ── Alpine component ─────────────────────────────────────────────────────
 
@@ -158,7 +149,6 @@ function initListPage() {
                 search:         '',
                 type:           '',
                 stage:          '',
-                source_id:      '',
                 organization_id: '',
                 date_from:      '',
                 date_to:        '',
@@ -176,7 +166,6 @@ function initListPage() {
                 if (this.filters.organization_id) chips.push({ key: 'organization_id', label: organizations.find(o => o.value == this.filters.organization_id)?.text ?? this.filters.organization_id });
                 if (this.filters.type)           chips.push({ key: 'type',            label: types.find(t => t.value == this.filters.type)?.label ?? this.filters.type });
                 if (this.filters.stage)          chips.push({ key: 'stage',           label: stageLabel(this.filters.stage) });
-                if (this.filters.source_id)      chips.push({ key: 'source_id',       label: sourceLabel(this.filters.source_id) });
                 if (this.filters.date_from)      chips.push({ key: 'date_from',       label: `Từ ${this.filters.date_from}` });
                 return chips;
             },
@@ -189,7 +178,6 @@ function initListPage() {
                 if (this.filters.organization_id) p.organization_id = this.filters.organization_id;
                 if (this.filters.type)            p.type            = this.filters.type;
                 if (this.filters.stage)           p.stage           = this.filters.stage;
-                if (this.filters.source_id)       p.source_id       = this.filters.source_id;
                 if (this.filters.date_from)       p.date_from       = this.filters.date_from;
                 if (this.filters.date_to)         p.date_to         = this.filters.date_to;
                 return p;
@@ -219,7 +207,7 @@ function initListPage() {
             },
             _initTomSelects() {
                 // key: tên trong `filters` — mặc định suy từ id ('filter-xxx' → 'xxx'),
-                // truyền rõ khi khác (vd 'filter-source' → filters.source_id).
+                // truyền rõ khi khác (vd 'filter-organization' → filters.organization_id).
                 const mkSelect = (id, opts, placeholder, key) => {
                     const el = document.getElementById(id);
                     if (!el || !window.TomSelect) return;
@@ -240,7 +228,6 @@ function initListPage() {
                 }
                 mkSelect('filter-type',  [{ value: '', text: 'Tất cả loại' }, ...types.map(t => ({ value: String(t.value), text: t.label }))],  '— Loại —');
                 mkSelect('filter-stage', [{ value: '', text: 'Tất cả tình trạng' }, ...stages.map(s => ({ value: String(s.value), text: s.label }))], '— Tình trạng —');
-                mkSelect('filter-source',[{ value: '', text: 'Tất cả nguồn' }, ...sources.map(s => ({ value: String(s.id), text: s.label }))],  '— Nguồn —', 'source_id');
             },
             _initDatePicker() {
                 const el = document.getElementById('filter-date');

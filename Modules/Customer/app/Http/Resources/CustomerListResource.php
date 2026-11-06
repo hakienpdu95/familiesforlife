@@ -23,7 +23,6 @@ class CustomerListResource extends JsonResource
             'stage_value'      => $stage?->value,
             'stage_label'      => $stage?->label(),
             'stage_badge'      => $stage?->badgeClass(),
-            'source_label'     => $this->source?->label,
             'assignee_name'    => $this->assignee?->name,
             'organization_name' => $this->whenLoaded('organization', fn () => $this->organization?->name),
             'province_code'    => $this->province_code,

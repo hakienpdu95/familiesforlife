@@ -31,7 +31,6 @@ class CustomerApiController extends Controller
             search:          $request->input('search') ?: null,
             type:            $request->filled('type')       ? (int) $request->input('type')        : null,
             stage:           $request->filled('stage')      ? (int) $request->input('stage')       : null,
-            sourceId:        $request->filled('source_id')  ? (int) $request->input('source_id')   : null,
             assignedTo:      $request->filled('assigned_to')? (int) $request->input('assigned_to') : null,
             province:        $request->input('province_code') ?: null,
             tagId:           $request->filled('tag_id')     ? (int) $request->input('tag_id')      : null,

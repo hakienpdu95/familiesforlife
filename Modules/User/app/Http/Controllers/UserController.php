@@ -191,7 +191,6 @@ class UserController extends Controller
     {
         return [
             'CEO Dashboard' => ['ceo' => 'Full',         'ops' => 'Limited',       'ai_operator' => 'Limited',       'system_admin' => 'Config',       'viewer' => 'View ltd'],
-            'CRM Leads'     => ['ceo' => 'Full',         'sales' => 'Assigned',    'ops' => 'Limited',               'marketing' => 'Source view',     'ai_operator' => 'Limited', 'system_admin' => 'Config'],
             'Sales AI'      => ['ceo' => 'Full',         'sales' => 'Use',         'marketing' => 'Limited',         'ai_operator' => 'Config prompt',  'system_admin' => 'Config'],
             'Tasks'         => ['ceo' => 'Full',         'sales' => 'Assigned',    'ops' => 'Full team',             'marketing' => 'Limited',          'hr' => 'HR tasks',         'ai_operator' => 'Limited',  'system_admin' => 'Config', 'viewer' => 'View ltd'],
             'SOP'           => ['ceo' => 'Approve/View', 'sales' => 'View related','ops' => 'Create/Edit',           'marketing' => 'View related',     'hr' => 'Create HR SOP',    'ai_operator' => 'AI config','system_admin' => 'Config', 'viewer' => 'View ltd'],
@@ -200,7 +199,6 @@ class UserController extends Controller
             'AI Logs'       => ['ceo' => 'View summary', 'ops' => 'Limited',       'ai_operator' => 'Full',          'system_admin' => 'Full'],
             'Users'         => ['ceo' => 'View',         'hr' => 'Limited',        'system_admin' => 'Full'],
             'Roles/Perms'   => ['system_admin' => 'Full'],
-            'Reports'       => ['ceo' => 'Full',         'sales' => 'Personal/team','ops' => 'Operations',           'marketing' => 'Marketing',        'hr' => 'HR',               'ai_operator' => 'AI usage', 'system_admin' => 'Full',   'viewer' => 'Shared only'],
         ];
     }
 }

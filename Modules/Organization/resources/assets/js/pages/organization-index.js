@@ -102,20 +102,6 @@ function buildColumns(canDelete) {
             },
         },
         {
-            title: 'Subscription', field: 'plan_name', width: 140, hozAlign: 'center', headerSort: false,
-            formatter(cell) {
-                const d   = cell.getRow().getData();
-                const sub = d.subscription_status;
-                if (!sub || sub === 'none') {
-                    return '<span class="text-base-content/25 text-xs">—</span>';
-                }
-                const badgeMap = { trial: 'badge-info', active: 'badge-success', canceled: 'badge-warning', expired: 'badge-error' };
-                const badge    = badgeMap[sub] || 'badge-ghost';
-                const name     = d.plan_name ? esc(d.plan_name) : esc(sub);
-                return '<span class="badge badge-xs ' + badge + '">' + name + '</span>';
-            },
-        },
-        {
             title: 'Trạng thái', field: 'status_value', width: 140, hozAlign: 'center', sorter: 'string',
             formatter(cell) {
                 const d = cell.getRow().getData();

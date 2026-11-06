@@ -4,7 +4,7 @@
  * Responsibilities:
  *   1. Inline validation    — initFormValidation (data-req, data-val-*)
  *   2. Tab-aware guard      — detect required field empty on hidden tab → Toast + switch tab
- *   3. Widget init          — TomSelect (stage, source, assignee, tags) + Flatpickr (dates)
+ *   3. Widget init          — TomSelect (stage, assignee, tags) + Flatpickr (dates)
  *   4. Province/Ward cascade — TomSelect + async ward fetch + hidden name fields
  *
  * Globals (core bundle):   initFormValidation, window.Alpine, window.Toast
@@ -158,7 +158,7 @@ function _initWidgets(form) {
             placeholder: '— Chọn tags —',
         });
     }
-    // #ts-gender, #ts-company-size, #ts-lifecycle-stage, #ts-source-id, #customer-assigned
+    // #ts-gender, #ts-company-size, #ts-lifecycle-stage, #customer-assigned
     // đã có class ts-init → initAllTomSelects() xử lý, không cần gọi lại ở đây
 }
 

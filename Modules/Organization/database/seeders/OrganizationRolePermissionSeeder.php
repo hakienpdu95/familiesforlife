@@ -18,7 +18,7 @@ use Spatie\Permission\PermissionRegistrar;
  *  owner   — all permissions (org-scoped super-admin)
  *  admin   — most permissions except system config
  *  manager — create/edit most things, view all
- *  member  — view own, create leads/tasks
+ *  member  — view own, create tasks
  */
 class OrganizationRolePermissionSeeder extends Seeder
 {
@@ -74,10 +74,8 @@ class OrganizationRolePermissionSeeder extends Seeder
         ]);
         $manager->syncPermissions($managerPermissionNames);
 
-        // ── member: view own, create leads/tasks ──────────────────────────
+        // ── member: view own, create tasks ────────────────────────────────
         $memberPermissions = [
-            'leads.view_assigned',
-            'leads.create',
             'tasks.view_assigned',
             'tasks.create',
             'sop.view_related',

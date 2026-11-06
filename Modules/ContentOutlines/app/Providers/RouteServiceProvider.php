@@ -22,7 +22,7 @@ class RouteServiceProvider extends ServiceProvider
     /**
      * routes/web.php gồm cả trang quản trị (dashboard/content-outlines) lẫn JSON backend cho
      * Tabulator (backend/api/content-outlines/...) — cùng 1 file, cả 2 dùng session auth (không
-     * cần routes/api.php riêng — module này không có endpoint public/stateless nào, khác N8n).
+     * cần routes/api.php riêng — module này không có endpoint public/stateless nào).
      */
     protected function mapWebRoutes(): void
     {

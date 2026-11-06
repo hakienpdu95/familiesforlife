@@ -551,24 +551,6 @@
                         @error('lifecycle_stage')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                     </div>
 
-                    {{-- Source --}}
-                    <div class="form-control mb-3">
-                        <label class="label py-0 pb-1">
-                            <span class="label-text text-xs font-medium">Nguồn</span>
-                        </label>
-                        <select name="source_id" id="ts-source-id"
-                                class="select select-bordered select-sm w-full ts-init"
-                                data-ts-placeholder="— Chọn nguồn —">
-                            <option value="">— Chọn nguồn —</option>
-                            @foreach($sources as $source)
-                            <option value="{{ $source->id }}"
-                                    {{ old('source_id', $customer->source_id ?? '') == $source->id ? 'selected' : '' }}>
-                                {{ $source->label }}
-                            </option>
-                            @endforeach
-                        </select>
-                    </div>
-
                     {{-- Assigned to --}}
                     <div class="form-control mb-3">
                         <label class="label py-0 pb-1">
