@@ -12,8 +12,7 @@ return [
     'reserved_slugs' => [
         'login', 'logout', 'register', 'home', 'dashboard', 'api', 'up',
         'email', 'profile', 'me', 'auth', 'notifications', 'storage',
-        'forgot-password', 'reset-password', 'confirm-password',
-        'two-factor-challenge', 'user',
+        'forgot-password', 'reset-password', 'confirm-password', 'user',
         // Route gốc của các module khác (rà lại bằng `php artisan route:list --method=GET`
         // mỗi khi PageReservedSlugsTest báo thiếu — xem §4.1.1):
         'dia-phuong', 'ocop', 'su-kien',

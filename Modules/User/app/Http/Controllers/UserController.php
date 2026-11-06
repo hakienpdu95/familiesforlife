@@ -5,6 +5,7 @@ namespace Modules\User\Http\Controllers;
 use App\Enums\RoleEnum;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\Username;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -59,11 +60,28 @@ class UserController extends Controller
         ]);
     }
 
+    public function suggestUsername(Request $request): JsonResponse
+    {
+        $this->authorize('create', User::class);
+
+        $validated = $request->validate([
+            'seed' => ['required', 'string', 'max:255'],
+            'ignore' => ['nullable', 'integer'],
+        ]);
+
+        return response()->json([
+            'username' => Username::suggest($validated['seed'], $validated['ignore'] ?? null),
+        ]);
+    }
+
     public function create(): View
     {
         $this->authorize('create', User::class);
 
-        return view('user::create', ['labels' => RoleEnum::labels(assignableOnly: true)]);
+        return view('user::create', [
+            'labels' => RoleEnum::labels(assignableOnly: true),
+            'departments' => $this->departments(),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -83,6 +101,7 @@ class UserController extends Controller
         return view('user::edit', [
             'account' => $user,
             'labels' => RoleEnum::labels(assignableOnly: true),
+            'departments' => $this->departments(),
         ]);
     }
 
@@ -90,7 +109,7 @@ class UserController extends Controller
     {
         $this->authorize('update', $user);
 
-        UpdateAccountAction::run($user, UpdateAccountData::validateAndCreate($request->all()));
+        UpdateAccountAction::run($user, UpdateAccountData::validateAndCreate([...$request->except('id'), 'id' => $user->id]));
 
         return redirect()->route('backend.users.index')->with('success', 'Đã cập nhật tài khoản.');
     }
@@ -141,5 +160,10 @@ class UserController extends Controller
 
         return redirect()->route('backend.users.index')->with('success',
             "Đã vô hiệu hoá {$deactivated->count()} tài khoản.".($skipped > 0 ? " Bỏ qua {$skipped} tài khoản không đủ điều kiện." : ''));
+    }
+
+    private function departments(): array
+    {
+        return User::query()->whereNotNull('department')->distinct()->orderBy('department')->pluck('department')->all();
     }
 }

@@ -11,7 +11,7 @@
 <form method="POST" action="{{ route('login') }}" class="flex flex-col gap-5">
     @csrf
 
-    <x-auth::field name="email" type="email" label="Email" :value="$rememberedEmail" placeholder="you@example.com" :autofocus="! $rememberedEmail" autocomplete="username" />
+    <x-auth::field name="email" type="text" label="Email hoặc tên đăng nhập" :value="$rememberedEmail" placeholder="you@example.com hoặc ten.dang.nhap" :autofocus="! $rememberedEmail" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="255" />
 
     <x-auth::password-field name="password" label="Mật khẩu" placeholder="••••••••" :autofocus="(bool) $rememberedEmail" autocomplete="current-password" />
 

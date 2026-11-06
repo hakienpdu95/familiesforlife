@@ -13,7 +13,11 @@ class CreatePlatformUserCommand extends Command
     protected $signature = 'platform:user-create
         {email : Email đăng nhập}
         {name : Họ và tên hiển thị}
-        {role : Một vai trò Platform (không gồm super-admin)}';
+        {role : Một vai trò Platform (không gồm super-admin)}
+        {--username= : Tên đăng nhập (mặc định sinh từ email)}
+        {--phone= : Số điện thoại}
+        {--job-title= : Chức danh}
+        {--department= : Phòng ban}';
 
     protected $description = 'Tạo tài khoản Platform và gửi email đặt mật khẩu — không tạo được super-admin';
 
@@ -24,6 +28,10 @@ class CreatePlatformUserCommand extends Command
                 'email' => $this->argument('email'),
                 'name' => $this->argument('name'),
                 'role' => $this->argument('role'),
+                'username' => $this->option('username'),
+                'phone' => $this->option('phone'),
+                'job_title' => $this->option('job-title'),
+                'department' => $this->option('department'),
             ]);
         } catch (ValidationException $e) {
             $this->error('Dữ liệu không hợp lệ:');
@@ -37,7 +45,7 @@ class CreatePlatformUserCommand extends Command
 
         $user = CreateAccountAction::run($data, 'artisan platform:user-create');
 
-        $this->info("✓ Đã tạo tài khoản {$user->email} (".RoleEnum::from($data->role)->label().') và gửi email đặt mật khẩu.');
+        $this->info("✓ Đã tạo tài khoản {$user->email} — tên đăng nhập {$user->username} (".RoleEnum::from($data->role)->label().') và gửi email đặt mật khẩu.');
 
         return self::SUCCESS;
     }

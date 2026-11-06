@@ -1,11 +1,12 @@
 [
     [
         "users///add///email///Thêm các trường bổ sung vào bảng users",
-        "department///string///50///_NULL///NULL///->index()///Phòng ban: hr, sales, ops, marketing",
+        "username///string///30///_NULL///NULL///->unique()///Tên đăng nhập: a-z 0-9 . _ - (lowercase)",
+        "phone///string///20///_NULL///NULL///__///Số điện thoại (0xxxxxxxxx)",
+        "job_title///string///100///_NULL///NULL///__///Chức danh",
+        "department///string///100///_NULL///NULL///->index()///Phòng ban",
         "last_active_at///timestamp///__///_NULL///NULL///__///Lần hoạt động cuối cùng",
         "is_active///boolean///__///NOT_NULL///true///->index()///Trạng thái tài khoản",
-        "branch_id///unsignedBigInteger///__///_NULL///NULL///__///__",
-        "department_id///unsignedBigInteger///__///_NULL///NULL///__///__",
         "account_type///string///20///NOT_NULL///'free'///__///free | platform | suspended",
         "trust_level///unsignedTinyInteger///__///NOT_NULL///0///__///0=unverified, 1=email, 3=cccd, 4=cccd_biometric",
         "national_id_hash///string///64///_NULL///NULL///->unique()///SHA-256(số_CCCD) — check uniqueness, không lưu số thật",

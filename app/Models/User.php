@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\AccountType;
+use App\Support\Username;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -21,8 +22,8 @@ use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable([
-    'name', 'email', 'password',
-    'department', 'is_active', 'last_active_at',
+    'name', 'email', 'username', 'password',
+    'phone', 'job_title', 'department', 'is_active', 'last_active_at',
     // Phase 0 — Identity Foundation
     'account_type', 'trust_level',
 ])]
@@ -31,6 +32,15 @@ class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, HasRoles, LogsActivity;
+
+    protected static function booted(): void
+    {
+        static::saving(function (User $user): void {
+            $user->username = filled($user->username)
+                ? Username::normalize($user->username)
+                : Username::suggest((string) $user->email, $user->getKey());
+        });
+    }
 
     protected function casts(): array
     {
@@ -179,7 +189,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'email', 'department', 'is_active'])
+            ->logOnly(['name', 'email', 'username', 'phone', 'job_title', 'department', 'is_active'])
             ->logOnlyDirty()
             ->dontLogEmptyChanges()
             ->setDescriptionForEvent(fn (string $event) => match ($event) {

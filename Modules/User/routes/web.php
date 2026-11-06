@@ -14,4 +14,5 @@ Route::permanentRedirect('dashboard/platform-users', '/dashboard/users');
 
 Route::middleware(['auth'])->prefix('backend/api')->name('backend.api.')->group(function () {
     Route::get('users', [UserController::class, 'data'])->name('users');
+    Route::get('users/username-suggestion', [UserController::class, 'suggestUsername'])->name('users.username-suggestion');
 });

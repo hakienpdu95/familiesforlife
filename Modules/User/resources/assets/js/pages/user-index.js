@@ -31,15 +31,36 @@ const COLUMNS = [
         width: 44, headerSort: false, frozen: true, download: false,
     },
     {
-        title: 'Tên', field: 'name', minWidth: 200, sorter: 'string', frozen: true,
+        title: 'Tên', field: 'name', minWidth: 210, sorter: 'string', frozen: true,
         formatter(cell) {
-            return '<span class="font-medium text-sm">' + esc(cell.getValue()) + '</span>';
+            const d = cell.getRow().getData();
+            return '<div class="leading-tight"><div class="font-medium text-sm">' + esc(d.name) + '</div>'
+                + (d.username ? '<div class="text-xs text-base-content/50 font-mono">@' + esc(d.username) + '</div>' : '') + '</div>';
         },
+    },
+    {
+        title: 'Tên đăng nhập', field: 'username', visible: false, download: true,
     },
     {
         title: 'Email', field: 'email', minWidth: 220, sorter: 'string',
         formatter(cell) {
             return '<span class="text-sm text-base-content/70">' + esc(cell.getValue()) + '</span>';
+        },
+    },
+    {
+        title: 'Chức danh / Phòng ban', field: 'department', minWidth: 190, sorter: 'string',
+        accessorDownload: (_v, d) => [d.job_title, d.department].filter(Boolean).join(' — '),
+        formatter(cell) {
+            const d = cell.getRow().getData();
+            if (!d.job_title && !d.department) return EMPTY;
+            return '<div class="leading-tight"><div class="text-sm">' + esc(d.job_title || '—') + '</div>'
+                + (d.department ? '<div class="text-xs text-base-content/50">' + esc(d.department) + '</div>' : '') + '</div>';
+        },
+    },
+    {
+        title: 'Điện thoại', field: 'phone', width: 130, headerSort: false,
+        formatter(cell) {
+            return cell.getValue() ? '<span class="text-sm tabular-nums">' + esc(cell.getValue()) + '</span>' : EMPTY;
         },
     },
     {

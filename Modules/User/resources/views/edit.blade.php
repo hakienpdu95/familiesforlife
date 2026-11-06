@@ -24,7 +24,12 @@
                         <span class="badge badge-ghost badge-sm">Đã vô hiệu hoá</span>
                     @endif
                 </div>
-                <p class="text-sm text-base-content/50 mt-0.5 truncate">{{ $account->email }}</p>
+                <p class="text-sm text-base-content/50 mt-0.5 truncate">
+                    <span class="font-mono">{{ '@'.$account->username }}</span> · {{ $account->email }}
+                    @if ($account->job_title || $account->department)
+                        · {{ collect([$account->job_title, $account->department])->filter()->implode(' — ') }}
+                    @endif
+                </p>
             </div>
         </div>
         <a href="{{ route('backend.users.index') }}" class="btn btn-ghost btn-sm gap-1.5">
@@ -53,38 +58,7 @@
             @csrf
             @method('PUT')
 
-            <section class="p-6 border-b border-base-200">
-                <h2 class="font-semibold text-base-content">Thông tin cơ bản</h2>
-                <p class="text-xs text-base-content/50 mt-0.5 mb-4">Tên hiển thị trong hệ thống.</p>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="form-control">
-                        <label class="label py-0 pb-1.5"><span class="label-text font-medium">Họ và tên <span class="text-error">*</span></span></label>
-                        <input type="text" name="name" value="{{ old('name', $account->name) }}"
-                               class="input input-bordered input-sm w-full @error('name') input-error @enderror">
-                    </div>
-
-                    <div class="form-control">
-                        <label class="label py-0 pb-1.5"><span class="label-text font-medium">Email</span></label>
-                        <input type="email" value="{{ $account->email }}" class="input input-bordered input-sm w-full" disabled>
-                        <p class="mt-1 text-xs text-base-content/40">Không đổi được email qua đây.</p>
-                    </div>
-                </div>
-            </section>
-
-            <section class="p-6 border-b border-base-200">
-                <h2 class="font-semibold text-base-content">Phân quyền hệ thống</h2>
-                <p class="text-xs text-base-content/50 mt-0.5 mb-4">Vai trò quyết định tài khoản được làm gì trong hệ thống.</p>
-
-                <div class="form-control md:max-w-sm">
-                    <label class="label py-0 pb-1.5"><span class="label-text font-medium">Vai trò <span class="text-error">*</span></span></label>
-                    <select id="ts-account-form-role" name="role" data-ts-placeholder="— Chọn vai trò —" class="select select-bordered select-sm w-full @error('role') select-error @enderror">
-                        @foreach ($labels as $value => $label)
-                            <option value="{{ $value }}" {{ old('role', $currentRole) === $value ? 'selected' : '' }}>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </section>
+            @include('user::partials.account-fields', ['account' => $account])
 
             <div class="flex justify-end gap-2 px-6 py-4">
                 <a href="{{ route('backend.users.index') }}" class="btn btn-ghost btn-sm">Huỷ</a>
@@ -100,6 +74,10 @@
                         <div class="flex justify-between gap-3 py-2">
                             <dt class="text-base-content/50">Vai trò</dt>
                             <dd><span class="badge badge-soft badge-sm {{ \App\Enums\RoleEnum::tryFrom((string) $currentRole)?->badgeClass() ?? 'badge-ghost' }}">{{ \App\Enums\RoleEnum::tryFrom((string) $currentRole)?->label() ?? $currentRole ?? '—' }}</span></dd>
+                        </div>
+                        <div class="flex justify-between gap-3 py-2">
+                            <dt class="text-base-content/50">Điện thoại</dt>
+                            <dd>{{ $account->phone ?? '—' }}</dd>
                         </div>
                         <div class="flex justify-between gap-3 py-2">
                             <dt class="text-base-content/50">Trạng thái</dt>

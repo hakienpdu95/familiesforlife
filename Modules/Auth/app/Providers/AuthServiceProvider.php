@@ -8,11 +8,9 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Laravel\Fortify\Actions\AttemptToAuthenticate;
 use Laravel\Fortify\Actions\EnsureLoginIsNotThrottled;
 use Laravel\Fortify\Actions\PrepareAuthenticatedSession;
-use Laravel\Fortify\Actions\RedirectIfTwoFactorAuthenticatable;
 use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
 use Laravel\Fortify\Contracts\LogoutResponse as LogoutResponseContract;
 use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
-use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
 use Modules\Auth\Actions\Auth\LoginUserAction;
 use Modules\Auth\Actions\Auth\RegisterUserAction;
@@ -92,16 +90,13 @@ class AuthServiceProvider extends ModuleServiceProvider
     }
 
     // ── Fortify authentication pipeline ───────────────────────────────
-    // Thứ tự: throttle → turnstile → 2FA check → attempt → session
+    // Thứ tự: throttle → turnstile → attempt → session
     private function bootFortifyPipeline(): void
     {
         Fortify::authenticateThrough(function () {
             return array_filter([
                 config('fortify.limiters.login') ? EnsureLoginIsNotThrottled::class : null,
                 ValidateTurnstile::class,
-                Features::enabled(Features::twoFactorAuthentication())
-                    ? RedirectIfTwoFactorAuthenticatable::class
-                    : null,
                 AttemptToAuthenticate::class,
                 PrepareAuthenticatedSession::class,
             ]);

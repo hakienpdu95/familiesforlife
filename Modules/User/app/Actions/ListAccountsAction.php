@@ -4,6 +4,7 @@ namespace Modules\User\Actions;
 
 use App\Enums\AccountType;
 use App\Models\User;
+use App\Support\PhoneNumber;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -11,7 +12,7 @@ class ListAccountsAction
 {
     use AsAction;
 
-    private const SORTABLE = ['name', 'email', 'created_at', 'last_active_at'];
+    private const SORTABLE = ['name', 'username', 'email', 'department', 'created_at', 'last_active_at'];
 
     public function handle(
         ?string $search = null,
@@ -25,7 +26,12 @@ class ListAccountsAction
         return User::query()
             ->where('account_type', AccountType::Platform->value)
             ->with('roles:id,name')
-            ->when($search, fn ($q) => $q->where(fn ($w) => $w->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%")))
+            ->when($search, fn ($q) => $q->where(fn ($w) => $w
+                ->where('name', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%")
+                ->orWhere('username', 'like', "%{$search}%")
+                ->orWhere('phone', 'like', '%'.(PhoneNumber::normalize($search) ?? $search).'%')
+                ->orWhere('department', 'like', "%{$search}%")))
             ->when($role, fn ($q) => $q->whereHas('roles', fn ($r) => $r->where('name', $role)))
             ->when($status === 'active', fn ($q) => $q->where('is_active', true))
             ->when($status === 'inactive', fn ($q) => $q->where('is_active', false))

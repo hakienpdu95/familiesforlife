@@ -23,6 +23,10 @@ class CreateAccountAction
             $user->forceFill([
                 'name' => $data->name,
                 'email' => $data->email,
+                'username' => $data->username,
+                'phone' => $data->phone,
+                'job_title' => $data->job_title,
+                'department' => $data->department,
                 'password' => Hash::make(Str::password(40)),
                 'account_type' => AccountType::Platform,
                 'email_verified_at' => now(),

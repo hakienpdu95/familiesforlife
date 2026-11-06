@@ -17,7 +17,13 @@ class UpdateAccountAction
         $previousRole = $user->getRoleNames()->first();
 
         DB::transaction(function () use ($user, $data): void {
-            $user->update(['name' => $data->name]);
+            $user->update([
+                'name' => $data->name,
+                'username' => $data->username,
+                'phone' => $data->phone,
+                'job_title' => $data->job_title,
+                'department' => $data->department,
+            ]);
             AssignPlatformRoleAction::run($user, $data->role);
         });
 

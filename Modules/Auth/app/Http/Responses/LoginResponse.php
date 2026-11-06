@@ -10,7 +10,7 @@ class LoginResponse implements LoginResponseContract
     public function toResponse($request): mixed
     {
         if ($request->wantsJson()) {
-            return response()->json(['two_factor' => false]);
+            return response()->noContent();
         }
 
         $redirect = redirect()->intended(route('backend.dashboard'));
