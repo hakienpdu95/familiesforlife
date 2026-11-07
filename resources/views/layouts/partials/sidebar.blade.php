@@ -243,6 +243,18 @@
         </x-sidebar-section>
 
         <x-sidebar-section title="Dữ liệu chuyên ngành">
+        @can('manageQrReports')
+        @php($newQrReports = \App\Shared\Traceability\Models\QrReport::where('status', 'new')->count())
+        <div class="nav-group">
+            <a href="{{ route('backend.qr-reports.index') }}"
+               class="nav-link {{ request()->routeIs('backend.qr-reports.*') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 21V4.5A1.5 1.5 0 014.5 3h11.379a1.5 1.5 0 011.06 2.56L15 7.5l1.94 1.94A1.5 1.5 0 0115.879 12H5"/></svg>
+                <span class="nav-label">Phản ánh mã QR</span>
+                @if($newQrReports > 0)<span class="badge badge-error badge-xs ml-auto">{{ $newQrReports }}</span>@endif
+            </a>
+        </div>
+        @endcan
+
         {{-- spec/Province_Showcase_Technical_Specification.md §6.1 — ocop.manage cấp cho
              platform_ops/platform_content_head (Modules\Ocop\Database\Seeders\OcopPermissionSeeder).
              Single nav-link (không dropdown) — quản lý danh mục truy cập từ trong trang sản phẩm. --}}
@@ -492,18 +504,6 @@
                class="nav-link {{ request()->routeIs('backend.users.*') ? 'active' : '' }}">
                 <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 <span class="nav-label">Tài khoản</span>
-            </a>
-        </div>
-        @endcan
-
-        @can('manageQrReports')
-        @php($newQrReports = \App\Shared\Traceability\Models\QrReport::where('status', 'new')->count())
-        <div class="nav-group">
-            <a href="{{ route('backend.qr-reports.index') }}"
-               class="nav-link {{ request()->routeIs('backend.qr-reports.*') ? 'active' : '' }}">
-                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 21V4.5A1.5 1.5 0 014.5 3h11.379a1.5 1.5 0 011.06 2.56L15 7.5l1.94 1.94A1.5 1.5 0 0115.879 12H5"/></svg>
-                <span class="nav-label">Phản ánh mã QR</span>
-                @if($newQrReports > 0)<span class="badge badge-error badge-xs ml-auto">{{ $newQrReports }}</span>@endif
             </a>
         </div>
         @endcan

@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\RoleEnum;
+use App\Models\User;
 use App\Shared\Traceability\Models\QrReport;
 use App\Shared\Traceability\Models\QrScan;
+use App\Shared\Traceability\Notifications\QrReportSubmittedNotification;
 use App\Shared\Traceability\TraceabilityService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -49,14 +53,33 @@ class TraceQrController extends Controller
             'contact.max' => 'Thông tin liên hệ tối đa :max ký tự.',
         ]);
 
-        QrReport::create([
+        $report = QrReport::create([
             ...$data,
             'qr_identity_id' => $identity->id,
             'visitor_hash' => QrReport::visitorHash($request->ip()),
             'status' => 'new',
         ]);
 
+        $this->notifyReviewers($report->setRelation('identity', $identity), $traceability->present($identity)['title'] ?? '');
+
         return redirect()->to(route('traceability.qr', $qrCode).'#phan-anh')->with('report_sent', true);
+    }
+
+    private function notifyReviewers(QrReport $report, string $targetLabel): void
+    {
+        $reviewers = User::query()
+            ->where('is_active', true)
+            ->whereHas('roles', fn ($q) => $q->whereIn('name', [
+                RoleEnum::SUPER_ADMIN->value,
+                RoleEnum::CONTENT_MODERATOR->value,
+                RoleEnum::CONTENT_HEAD->value,
+                RoleEnum::OPS->value,
+            ]))
+            ->get();
+
+        if ($reviewers->isNotEmpty()) {
+            Notification::send($reviewers, new QrReportSubmittedNotification($report, $targetLabel));
+        }
     }
 
     private function recordScan(Request $request, int $identityId): void

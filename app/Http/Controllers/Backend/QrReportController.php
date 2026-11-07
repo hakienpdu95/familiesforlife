@@ -5,38 +5,114 @@ namespace App\Http\Controllers\Backend;
 use App\Http\Controllers\Controller;
 use App\Shared\Traceability\Models\QrReport;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Modules\Post\Models\PostArticle;
 
 class QrReportController extends Controller
 {
-    public function index(Request $request): View
+    private const SORTABLE = ['created_at', 'reason', 'resolved_at'];
+
+    private const KIND_LABELS = [
+        'OcopProduct' => 'Sản phẩm OCOP',
+        'PostArticle' => 'Bài viết',
+        'HeritageSite' => 'Di tích',
+        'OcopSubject' => 'Chủ thể OCOP',
+    ];
+
+    public function index(): View
     {
         $this->authorize('manageQrReports');
 
-        $status = $request->query('status') === 'resolved' ? 'resolved' : 'new';
-
-        $reports = QrReport::query()
-            ->with(['resolvedBy:id,name', 'identity.target' => fn (MorphTo $morph) => $morph->withTrashed()])
-            ->where('status', $status)
-            ->latest('id')
-            ->paginate(20)
-            ->withQueryString();
-
         return view('backend.qr-reports.index', [
-            'reports' => $reports,
-            'status' => $status,
+            'reasons' => QrReport::REASONS,
+        ]);
+    }
+
+    public function data(Request $request): JsonResponse
+    {
+        $this->authorize('manageQrReports');
+
+        $validated = $request->validate([
+            'page' => ['nullable', 'integer', 'min:1'],
+            'size' => ['nullable', 'integer', 'min:5', 'max:100'],
+            'status' => ['nullable', Rule::in(['new', 'resolved'])],
+            'reason' => ['nullable', Rule::in(array_keys(QrReport::REASONS))],
+            'search' => ['nullable', 'string', 'max:200'],
+        ]);
+
+        $sortRaw = $request->input('sort.0');
+        $sortField = is_array($sortRaw) && in_array($sortRaw['field'] ?? null, self::SORTABLE, true) ? $sortRaw['field'] : 'created_at';
+        $sortDir = is_array($sortRaw) && ($sortRaw['dir'] ?? '') === 'asc' ? 'asc' : 'desc';
+        $search = trim((string) ($validated['search'] ?? ''));
+
+        $paginator = QrReport::query()
+            ->with([
+                'resolvedBy:id,name',
+                'identity.target' => fn (MorphTo $morph) => $morph->withTrashed()->morphWith([PostArticle::class => ['translations']]),
+            ])
+            ->when($validated['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
+            ->when($validated['reason'] ?? null, fn ($q, $reason) => $q->where('reason', $reason))
+            ->when($search !== '', fn ($q) => $q->where(fn ($w) => $w
+                ->where('content', 'like', "%{$search}%")
+                ->orWhere('contact', 'like', "%{$search}%")
+                ->orWhereHas('identity', fn ($i) => $i->where('qr_code', $search))))
+            ->orderBy($sortField, $sortDir)
+            ->orderBy('id', $sortDir)
+            ->paginate(min(100, max(5, (int) ($validated['size'] ?? 25))), ['*'], 'page', max(1, (int) ($validated['page'] ?? 1)));
+
+        return response()->json([
+            'data' => collect($paginator->items())->map(fn (QrReport $r) => $this->row($r))->values(),
+            'last_page' => $paginator->lastPage(),
+            'total' => $paginator->total(),
             'counts' => QrReport::query()->selectRaw('status, count(*) as total')->groupBy('status')->pluck('total', 'status'),
         ]);
     }
 
-    public function resolve(QrReport $report): RedirectResponse
+    public function resolve(Request $request, QrReport $report): RedirectResponse|JsonResponse
     {
         $this->authorize('manageQrReports');
 
         $report->update(['status' => 'resolved', 'resolved_by' => auth()->id(), 'resolved_at' => now()]);
 
-        return back()->with('success', 'Đã đánh dấu phản ánh #'.$report->id.' là đã xử lý.');
+        $message = 'Đã đánh dấu phản ánh #'.$report->id.' là đã xử lý.';
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => $message]);
+        }
+
+        return back()->with('success', $message);
+    }
+
+    private function row(QrReport $report): array
+    {
+        $identity = $report->identity;
+        $target = $identity?->target;
+        $class = $identity ? class_basename((string) (Relation::getMorphedModel($identity->target_type) ?? $identity->target_type)) : null;
+        $title = $target instanceof PostArticle
+            ? ($target->translations->firstWhere('locale', $target->main_locale)?->title ?? $target->translations->first()?->title)
+            : $target?->name;
+
+        return [
+            'id' => $report->id,
+            'created_at' => $report->created_at?->format('d/m/Y H:i'),
+            'qr_code' => $identity?->qr_code,
+            'qr_url' => $identity?->publicUrl(),
+            'target_kind' => self::KIND_LABELS[$class] ?? $class,
+            'target_title' => $title ?: '(đã xoá)',
+            'target_trashed' => $target && method_exists($target, 'trashed') && $target->trashed(),
+            'reason' => $report->reason,
+            'reason_label' => $report->reasonLabel(),
+            'content' => $report->content,
+            'contact' => $report->contact,
+            'status' => $report->status,
+            'resolved_by' => $report->resolvedBy?->name,
+            'resolved_at' => $report->resolved_at?->format('d/m/Y H:i'),
+            'resolve_url' => $report->status === 'new' ? route('backend.qr-reports.resolve', $report) : null,
+        ];
     }
 }

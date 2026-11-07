@@ -58,6 +58,7 @@ Route::middleware(['auth'])->prefix('dashboard')->name('backend.')->group(functi
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('qr-reports', [QrReportController::class, 'index'])->name('qr-reports.index');
+    Route::get('qr-reports/data', [QrReportController::class, 'data'])->name('qr-reports.data');
     Route::post('qr-reports/{report}/resolve', [QrReportController::class, 'resolve'])->name('qr-reports.resolve');
 
     Route::get('system-monitor', [SystemMonitorController::class, 'index'])->name('system-monitor');

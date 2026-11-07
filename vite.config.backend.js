@@ -197,6 +197,9 @@ export default defineConfig(({ mode }) => {
           'resources/js/modules/swiper.js',
           'resources/js/modules/qrcode.js',
 
+          /* ── CORE PAGES ───────────────────────────────────────── */
+          'resources/js/pages/qr-report-index.js',
+
           /* ── MODULE ASSETS (lazy per-page) ────────────────────── */
           ...MODULE_ENTRIES,
         ],
