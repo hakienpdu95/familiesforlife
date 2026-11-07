@@ -117,13 +117,6 @@ const COLUMNS = [
         title: 'Mô tả / Chi tiết', field: 'description', minWidth: 200,
         formatter(cell) { return descHtml(cell.getData()); },
     },
-    {
-        title: '', width: 58, hozAlign: 'center', headerSort: false,
-        formatter() { return '<span class="btn btn-xs btn-ghost">Xem</span>'; },
-        cellClick(_e, cell) {
-            window.location = `/dashboard/activity-logs/${cell.getData().id}`;
-        },
-    },
 ];
 
 // ── Alpine component ────────────────────────────────────────────────────────

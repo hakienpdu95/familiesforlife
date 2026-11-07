@@ -90,12 +90,6 @@
                                 @endif
                             </span>
                         @endif
-
-                        {{-- Link to full log --}}
-                        <a href="{{ route('activitylog.show', $log) }}"
-                           class="text-xs text-primary hover:underline ml-auto">
-                            Chi tiết →
-                        </a>
                     </div>
                 </li>
                 @endforeach

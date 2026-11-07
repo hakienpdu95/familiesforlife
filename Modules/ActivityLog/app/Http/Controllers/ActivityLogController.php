@@ -6,38 +6,12 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
-use Modules\ActivityLog\Models\ActivityLog;
-use Modules\ActivityLog\Models\ActivityLogContext;
-use Modules\ActivityLog\Models\ActivityLogHttp;
 
 class ActivityLogController extends Controller
 {
     public function index(): \Illuminate\View\View
     {
         return view('activitylog::logs.index');
-    }
-
-    public function show(ActivityLog $log): \Illuminate\View\View
-    {
-        $contexts = ActivityLogContext::where('log_id', $log->id)->orderBy('key_name')->get();
-        $http     = ActivityLogHttp::where('log_id', $log->id)->first();
-
-        $sameRequest = $log->request_id
-            ? ActivityLog::where('request_id', $log->request_id)->where('id', '!=', $log->id)
-                         ->orderBy('created_at')
-                         ->get(['id', 'module', 'action', 'level', 'created_at'])
-            : collect();
-
-        $subjectHistory = ($log->subject_type && $log->subject_id)
-            ? ActivityLog::where('subject_type', $log->subject_type)
-                         ->where('subject_id', $log->subject_id)
-                         ->where('id', '!=', $log->id)
-                         ->orderByDesc('created_at')->limit(10)
-                         ->get(['id', 'module', 'action', 'level', 'created_at'])
-            : collect();
-
-        return view('activitylog::logs.show',
-            compact('log', 'contexts', 'http', 'sameRequest', 'subjectHistory'));
     }
 
     public function export(Request $request): JsonResponse

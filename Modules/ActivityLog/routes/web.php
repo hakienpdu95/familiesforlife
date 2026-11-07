@@ -7,7 +7,6 @@ Route::prefix('dashboard/activity-logs')
     ->name('activitylog.')
     ->group(function () {
         Route::get('/',                      [ActivityLogController::class, 'index'])          ->name('index');
-        Route::get('/{log}',                 [ActivityLogController::class, 'show'])           ->name('show');
         Route::post('/export',               [ActivityLogController::class, 'export'])         ->name('export');
         Route::get('/export/download/{key}', [ActivityLogController::class, 'downloadExport'])->name('export.download');
     });
