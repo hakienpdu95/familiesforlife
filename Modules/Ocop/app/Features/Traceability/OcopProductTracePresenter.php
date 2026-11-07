@@ -3,17 +3,19 @@
 namespace Modules\Ocop\Features\Traceability;
 
 use App\Shared\Traceability\Concerns\BuildsRelatedCards;
+use App\Shared\Traceability\Contracts\ExposesPublicDocuments;
 use App\Shared\Traceability\Contracts\TracePresenter;
 use App\Shared\Traceability\TraceabilityService as T;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Number;
 use Modules\Heritage\Models\HeritageSite;
 use Modules\Ocop\Enums\OcopProductStatus;
 use Modules\Ocop\Models\OcopProduct;
 use Modules\OcopSubject\Models\OcopSubject;
 
-class OcopProductTracePresenter implements TracePresenter
+class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresenter
 {
     use BuildsRelatedCards;
 
@@ -29,6 +31,11 @@ class OcopProductTracePresenter implements TracePresenter
         'usage_instructions' => ['Hướng dẫn sử dụng', 'fa-utensils'],
         'storage_instructions' => ['Hướng dẫn bảo quản', 'fa-boxes-stacked'],
     ];
+
+    public function publicDocumentCollections(): array
+    {
+        return array_keys(self::QUALITY_DOCS);
+    }
 
     public function view(): string
     {
@@ -57,6 +64,7 @@ class OcopProductTracePresenter implements TracePresenter
 
         return [
             'name' => $target->name,
+            'description' => self::plain($target->description),
             'category' => $target->category?->name,
             'stars' => $target->star_rating,
             'subject' => [
@@ -86,11 +94,14 @@ class OcopProductTracePresenter implements TracePresenter
     {
         $subject = is_array($payload['subject'] ?? null) ? $payload['subject'] : ['name' => $payload['subject'] ?? null];
         $payload['quality_docs'] = array_map(fn ($d) => is_array($d) ? $d : ['label' => $d, 'count' => 1, 'updated_at' => null], $payload['quality_docs'] ?? []);
+        if ($live) {
+            $payload['quality_docs'] = $this->publicDocs($live);
+        }
         $stars = $payload['stars'] ?? null;
         $expiry = ! empty($subject['cert_expiry']) ? Carbon::parse($subject['cert_expiry']) : null;
 
         $sections = [];
-        if ($live && filled($live->story)) {
+        if ($live && T::hasContent($live->story)) {
             $sections[] = ['title' => 'Câu chuyện sản phẩm', 'icon' => 'fa-book-open', 'html' => $live->story];
         }
         foreach (self::SECTIONS as $field => [$title, $icon]) {
@@ -120,6 +131,7 @@ class OcopProductTracePresenter implements TracePresenter
 
         return $this->base([
             'title' => $payload['name'] ?? 'Sản phẩm OCOP',
+            'description' => $payload['description'] ?? null,
             'subtitle' => ! empty($subject['name']) ? 'Chủ thể: '.$subject['name'] : null,
             'images' => $live ? ($this->mediaUrls($live, OcopProduct::IMAGE_COLLECTION) ?: array_filter([$payload['image']['url'] ?? null])) : array_filter([$payload['image']['url'] ?? null]),
             'image_srcsets' => $live ? $this->mediaSrcsets($live, OcopProduct::IMAGE_COLLECTION) : [],
@@ -171,6 +183,7 @@ class OcopProductTracePresenter implements TracePresenter
             'area' => null,
             'channels' => [],
             'quality_docs' => [],
+            'description' => null,
             'cta' => ['url' => route('ocop.public.index'), 'label' => 'Xem sản phẩm OCOP khác', 'icon' => 'fa-arrow-right'],
             ...$page,
         ]);
@@ -189,8 +202,8 @@ class OcopProductTracePresenter implements TracePresenter
     private function buyChannels(OcopProduct $product): array
     {
         $channels = [
-            ['url' => $product->shopee_url, 'name' => 'Shopee', 'mark' => 'S', 'tone' => 'bg-[#ee4d2d]'],
-            ['url' => $product->tiktok_url, 'name' => 'TikTok Shop', 'mark' => '♪', 'tone' => 'bg-[#111]'],
+            ['url' => $product->shopee_url, 'name' => 'Shopee', 'mark' => 'S', 'tone' => 'bg-[#ee4d2d]', 'button' => 'bg-[#ee4d2d] hover:bg-[#d73211]'],
+            ['url' => $product->tiktok_url, 'name' => 'TikTok Shop', 'mark' => '♪', 'tone' => 'bg-[#111]', 'button' => 'bg-[#111] hover:bg-black'],
         ];
 
         return array_values(array_filter(array_map(function (array $c) {
@@ -200,9 +213,29 @@ class OcopProductTracePresenter implements TracePresenter
         }, $channels)));
     }
 
+    private function publicDocs(OcopProduct $product): array
+    {
+        return collect(self::QUALITY_DOCS)->map(function (string $label, string $collection) use ($product) {
+            $media = $product->getMedia($collection);
+
+            return [
+                'label' => $label,
+                'count' => $media->count(),
+                'updated_at' => $media->max('updated_at')?->format('d/m/Y'),
+                'files' => $media->filter(fn ($m) => in_array($m->mime_type, T::DOCUMENT_MIMES, true))
+                    ->map(fn ($m) => [
+                        'uuid' => $m->uuid,
+                        'type' => $m->mime_type === 'application/pdf' ? 'PDF' : 'Ảnh',
+                        'size' => Number::fileSize((int) $m->size, precision: $m->size >= 1048576 ? 1 : 0),
+                    ])->values()->all(),
+            ];
+        })->values()->all();
+    }
+
     private static function plain(?string $html): ?string
     {
-        $text = trim(strip_tags((string) $html));
+        $text = preg_replace('#<br\s*/?>|</(p|li|div|h[1-6])>#i', "\n", (string) $html);
+        $text = trim(preg_replace("/\n{3,}/", "\n\n", html_entity_decode(strip_tags($text))));
 
         return $text !== '' ? $text : null;
     }

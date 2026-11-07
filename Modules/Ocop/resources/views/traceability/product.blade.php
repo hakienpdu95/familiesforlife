@@ -25,47 +25,69 @@
         <div class="px-4 pt-4 pb-5">
             <p class="tx-eyebrow">{{ $group ?: 'Sản phẩm OCOP' }}</p>
             <h1 class="tx-display text-[26px] mt-1.5">{{ $title }}</h1>
+            @if ($description)
+                <p class="mt-2 text-[15px] leading-relaxed text-[#57534e] line-clamp-3">{{ \Illuminate\Support\Str::limit(preg_replace('/\s+/u', ' ', $description), 220) }}</p>
+            @endif
 
             @include('traceability.partials.ocop-cert', [
                 'stars' => $stars,
                 'rows' => ['Chủ thể' => $subject['name'] ?? null, 'Địa bàn' => $area],
+                'docs' => $quality_docs,
+                'docsLabel' => 'Hồ sơ chất lượng',
                 'expiry' => ! empty($subject['cert_expiry_label']) ? ['label' => $subject['cert_expiry_label'], 'valid' => $subject['cert_valid']] : null,
             ])
         </div>
     </div>
 
-    @if ($quality_docs)
-        <section id="ho-so" class="tx-section">
-            <h2 class="tx-section-title">Hồ sơ chất lượng</h2>
-            @include('traceability.partials.checklist', ['items' => $quality_docs])
-        </section>
-    @endif
-
-    @if ($facts)
-        <section id="thong-so" class="tx-section">
-            <h2 class="tx-section-title">Thông số sản phẩm</h2>
-            @include('traceability.partials.spec', ['rows' => $facts])
-        </section>
-    @endif
-
     @if ($channels)
         <section id="mua-hang" class="tx-section">
-            <h2 class="tx-section-title">Nơi mua chính hãng</h2>
-            <ul @class(['grid gap-2', 'grid-cols-2' => count($channels) > 1])>
+            <h2 class="tx-section-title">Mua chính hãng <small>{{ count($channels) }} gian hàng</small></h2>
+            <ul class="tx-card tx-rows">
                 @foreach ($channels as $channel)
                     <li>
-                        <a href="{{ $channel['url'] }}" target="_blank" rel="noopener nofollow sponsored"
-                           class="tx-card flex items-center gap-3 h-full p-3 hover:border-primary/40 transition-colors group">
+                        <a href="{{ $channel['url'] }}" target="_blank" rel="noopener nofollow sponsored" class="tx-row group">
                             <span class="w-10 h-10 rounded-md {{ $channel['tone'] }} text-white text-lg font-bold flex items-center justify-center shrink-0" aria-hidden="true">{{ $channel['mark'] }}</span>
                             <span class="flex-1 min-w-0 leading-tight">
-                                <span class="block text-[15px] font-semibold group-hover:text-primary">{{ $channel['name'] }}</span>
-                                <span class="block mt-0.5 text-[12px] text-[#78716c] font-mono truncate">{{ $channel['host'] }}</span>
+                                <span class="block text-[15px] font-semibold">{{ $channel['name'] }}</span>
+                                <span class="block mt-0.5 text-[12.5px] text-[#78716c] truncate">{{ $channel['host'] }}</span>
                             </span>
-                            <span class="tx-chevron [&>svg]:w-4 [&>svg]:h-4">@include('traceability.partials.icon', ['name' => 'external'])</span>
+                            <span class="shrink-0 inline-flex items-center gap-1 h-9 px-3 rounded-md text-white text-[13.5px] font-semibold {{ $channel['button'] }} [&>svg]:w-3.5 [&>svg]:h-3.5">Mua ngay @include('traceability.partials.icon', ['name' => 'external'])</span>
                         </a>
                     </li>
                 @endforeach
             </ul>
+        </section>
+    @endif
+
+    @php($longDescription = $description && mb_strlen($description) > 220)
+    @php($infoSections = array_values(array_filter([
+        $longDescription ? ['title' => 'Mô tả sản phẩm', 'text' => $description] : null,
+        ...$sections,
+    ])))
+    @if ($facts || $infoSections)
+        <section id="thong-tin" class="tx-section">
+            <h2 class="tx-section-title">Thông tin sản phẩm</h2>
+            <div class="tx-card tx-rows">
+                @foreach ($facts as $row)
+                    <div class="flex items-baseline justify-between gap-4 px-4 py-3 text-[15px]">
+                        <span class="text-[#78716c] shrink-0">{{ $row['label'] }}</span>
+                        <span class="font-medium text-right break-words min-w-0">{{ $row['value'] }}</span>
+                    </div>
+                @endforeach
+                @foreach ($infoSections as $section)
+                    <details class="tx-details group/acc">
+                        <summary class="tx-row-link flex items-center justify-between gap-4 px-4 min-h-[3.25rem] py-3 text-[15px] font-semibold">
+                            {{ $section['title'] }}
+                            <span class="tx-chevron transition-transform group-open/acc:rotate-90">@include('traceability.partials.icon', ['name' => 'chevron'])</span>
+                        </summary>
+                        @if (! empty($section['html']))
+                            <div class="tx-prose px-4 pb-4">{!! $section['html'] !!}</div>
+                        @else
+                            <p class="px-4 pb-4 text-[15px] leading-relaxed text-[#44403c] whitespace-pre-line">{{ $section['text'] }}</p>
+                        @endif
+                    </details>
+                @endforeach
+            </div>
         </section>
     @endif
 
@@ -114,13 +136,6 @@
                     </a>
                 @endif
             </div>
-        </section>
-    @endif
-
-    @if ($sections)
-        <section id="tim-hieu" class="tx-section">
-            <h2 class="tx-section-title">Tìm hiểu thêm</h2>
-            @include('traceability.partials.accordion', ['sections' => $sections])
         </section>
     @endif
 

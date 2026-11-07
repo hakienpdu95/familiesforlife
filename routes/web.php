@@ -19,6 +19,11 @@ Route::get('p/{qr_code}', TraceQrController::class)
     ->middleware('throttle:60,1')
     ->name('traceability.qr');
 
+Route::get('p/{qr_code}/ho-so/{media}', [TraceQrController::class, 'document'])
+    ->where(['qr_code' => '[0-9A-Za-z]{6,15}', 'media' => '[0-9a-f\-]{36}'])
+    ->middleware(['signed', 'throttle:30,1'])
+    ->name('traceability.document');
+
 Route::post('p/{qr_code}/report', [TraceQrController::class, 'report'])
     ->where('qr_code', '[0-9A-Za-z]{6,15}')
     ->middleware('throttle:5,10')

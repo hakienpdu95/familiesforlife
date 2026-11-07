@@ -11,8 +11,11 @@ use App\Shared\Traceability\TraceabilityService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TraceQrController extends Controller
 {
@@ -31,6 +34,23 @@ class TraceQrController extends Controller
             'reportReasons' => QrReport::REASONS,
             ...$page,
         ]);
+    }
+
+    public function document(TraceabilityService $traceability, string $qrCode, string $media): StreamedResponse
+    {
+        $file = $traceability->publicDocument($traceability->resolveQrCode($qrCode), $media);
+
+        abort_if(! $file || ! Storage::disk($file->disk)->exists($file->getPathRelativeToRoot()), 404);
+
+        $extension = pathinfo($file->file_name, PATHINFO_EXTENSION);
+        $name = Str::slug(pathinfo($file->name ?: $file->file_name, PATHINFO_FILENAME)) ?: 'ho-so';
+
+        return Storage::disk($file->disk)->response($file->getPathRelativeToRoot(), $name.($extension ? '.'.$extension : ''), [
+            'Content-Type' => $file->mime_type,
+            'Cache-Control' => 'private, max-age=600',
+            'X-Robots-Tag' => 'noindex, nofollow',
+            'X-Content-Type-Options' => 'nosniff',
+        ], 'inline');
     }
 
     public function report(Request $request, TraceabilityService $traceability, string $qrCode): RedirectResponse

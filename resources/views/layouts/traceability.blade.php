@@ -48,8 +48,17 @@
         @if ($cta_sticky)
             <div class="fixed bottom-0 inset-x-0 z-30 bg-base-100/95 backdrop-blur border-t border-[rgb(28_25_23/.08)] pb-[env(safe-area-inset-bottom)]">
                 <div class="max-w-xl mx-auto flex gap-2 px-4 py-3">
-                    <a href="{{ $cta['url'] }}" @if (! empty($cta['external'])) target="_blank" rel="noopener nofollow sponsored" @endif
-                       class="btn btn-primary flex-1 h-12 min-h-12 rounded-lg text-[15px] font-semibold shadow-none border-0">{{ $cta['label'] }}</a>
+                    @php($buy = $channels ?? [])
+                    @forelse ($buy as $channel)
+                        <a href="{{ $channel['url'] }}" target="_blank" rel="noopener nofollow sponsored"
+                           class="btn flex-1 min-w-0 h-12 min-h-12 px-2 rounded-lg border-0 shadow-none text-white text-[15px] font-semibold gap-2 {{ $channel['button'] }}">
+                            <span class="w-6 h-6 rounded-md bg-white/20 flex items-center justify-center text-[13px] font-bold shrink-0" aria-hidden="true">{{ $channel['mark'] }}</span>
+                            <span class="truncate">{{ count($buy) === 1 ? 'Mua trên '.$channel['name'] : $channel['name'] }}</span>
+                        </a>
+                    @empty
+                        <a href="{{ $cta['url'] }}" @if (! empty($cta['external'])) target="_blank" rel="noopener nofollow sponsored" @endif
+                           class="btn btn-primary flex-1 h-12 min-h-12 rounded-lg text-[15px] font-semibold shadow-none border-0">{{ $cta['label'] }}</a>
+                    @endforelse
                     <a href="#phan-anh" onclick="document.getElementById('phan-anh').open = true"
                        class="btn w-12 h-12 min-h-12 p-0 rounded-lg bg-base-100 border border-[rgb(28_25_23/.14)] shadow-none text-[#57534e] hover:border-primary hover:text-primary [&>svg]:w-5 [&>svg]:h-5" aria-label="Phản ánh thông tin chưa đúng">@include('traceability.partials.icon', ['name' => 'flag'])</a>
                 </div>

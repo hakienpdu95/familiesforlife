@@ -32,4 +32,7 @@
             @endforeach
         </dl>
     @endif
+    @if (! empty($docs))
+        @include('traceability.partials.checklist', ['items' => $docs, 'label' => $docsLabel ?? 'Hồ sơ chất lượng'])
+    @endif
 </section>

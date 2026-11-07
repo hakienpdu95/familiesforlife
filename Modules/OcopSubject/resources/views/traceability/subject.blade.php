@@ -24,6 +24,8 @@
                     'Sản phẩm' => $products_count ? $products_count.' sản phẩm OCOP' : null,
                     'Ngành nghề' => $is_food_business ? 'Sản xuất thực phẩm' : null,
                 ],
+                'docs' => $docs,
+                'docsLabel' => 'Giấy phép, chứng nhận',
                 'expiry' => $cert,
             ])
         </div>
@@ -76,12 +78,6 @@
         </section>
     @endif
 
-    @if ($docs)
-        <section id="giay-phep" class="tx-section">
-            <h2 class="tx-section-title">Giấy phép và chứng nhận</h2>
-            @include('traceability.partials.checklist', ['items' => $docs])
-        </section>
-    @endif
 
     @if ($sections)
         <section id="tim-hieu" class="tx-section">

@@ -73,7 +73,7 @@ class HeritageSiteTracePresenter implements TracePresenter
         if ($intro) {
             $sections[] = ['title' => 'Giới thiệu', 'icon' => 'fa-book-open', 'text' => $intro];
         }
-        if ($live && filled($live->content)) {
+        if ($live && T::hasContent($live->content)) {
             $sections[] = ['title' => 'Lịch sử & giá trị di tích', 'icon' => 'fa-landmark', 'html' => $live->content];
         }
 
@@ -108,7 +108,7 @@ class HeritageSiteTracePresenter implements TracePresenter
             'type' => $payload['type'] ?? null,
             'era' => $payload['era'] ?? null,
             'intro' => $intro,
-            'content_html' => $live && filled($live->content) ? $live->content : null,
+            'content_html' => $live && T::hasContent($live->content) ? $live->content : null,
             'address' => $payload['address'] ?? null,
             'map_url' => $lat && $lng ? 'https://www.google.com/maps/dir/?api=1&destination='.$lat.','.$lng : null,
             'coordinates' => $lat && $lng ? number_format($lat, 5).', '.number_format($lng, 5) : null,

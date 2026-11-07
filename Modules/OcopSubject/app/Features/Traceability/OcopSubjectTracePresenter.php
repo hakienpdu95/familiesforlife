@@ -68,7 +68,7 @@ class OcopSubjectTracePresenter implements TracePresenter
         $stars = $payload['stars'] ?? null;
 
         $sections = [];
-        if ($live && filled($live->story)) {
+        if ($live && T::hasContent($live->story)) {
             $sections[] = ['title' => 'Câu chuyện thương hiệu', 'icon' => 'fa-book-open', 'html' => $live->story];
         } elseif (! empty($payload['story'])) {
             $sections[] = ['title' => 'Câu chuyện thương hiệu', 'icon' => 'fa-book-open', 'text' => $payload['story']];

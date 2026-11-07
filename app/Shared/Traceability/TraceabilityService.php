@@ -4,10 +4,12 @@ namespace App\Shared\Traceability;
 
 use App\Models\Media;
 use App\Services\Media\MediaUrlService;
+use App\Shared\Traceability\Contracts\ExposesPublicDocuments;
 use App\Shared\Traceability\Models\QrIdentity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 
 class TraceabilityService
 {
@@ -72,6 +74,34 @@ class TraceabilityService
             'archived' => $archived,
             'archived_at' => $archived ? $identity->snapshot_at?->format('d/m/Y') : null,
         ];
+    }
+
+    public const DOCUMENT_URL_MINUTES = 30;
+
+    public const DOCUMENT_MIMES = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
+
+    public function publicDocument(QrIdentity $identity, string $uuid): ?Media
+    {
+        $presenter = $this->registry->presenterForMorphType($identity->target_type);
+        $target = $identity->target;
+
+        if (! $identity->isActive() || ! $presenter instanceof ExposesPublicDocuments || ! $target
+            || (method_exists($target, 'trashed') && $target->trashed()) || ! $presenter->isPublic($target)) {
+            return null;
+        }
+
+        return Media::query()
+            ->where('uuid', $uuid)
+            ->whereIn('model_type', array_unique([$target->getMorphClass(), $target::class]))
+            ->where('model_id', $target->getKey())
+            ->whereIn('collection_name', $presenter->publicDocumentCollections())
+            ->whereIn('mime_type', self::DOCUMENT_MIMES)
+            ->first();
+    }
+
+    public static function documentUrl(string $qrCode, string $uuid): string
+    {
+        return URL::temporarySignedRoute('traceability.document', now()->addMinutes(self::DOCUMENT_URL_MINUTES), ['qr_code' => $qrCode, 'media' => $uuid]);
     }
 
     private function responsiveHtml(array $page): array
@@ -193,6 +223,13 @@ class TraceabilityService
     public static function srcset(Media $media): ?string
     {
         return app(MediaUrlService::class)->srcset($media, self::RESPONSIVE_WIDTHS);
+    }
+
+    public static function hasContent(?string $html): bool
+    {
+        $text = strip_tags((string) $html, '<img><iframe><video>');
+
+        return trim(str_replace(["\u{00A0}", '&nbsp;'], ' ', $text)) !== '';
     }
 
     public static function fact(string $icon, string $label, ?string $value): ?array
