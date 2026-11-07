@@ -26,12 +26,12 @@ trait BuildsRelatedCards
     }
 
     /** @param  Collection<int, OcopProduct>  $products */
-    protected function ocopCards(Collection $products): array
+    protected function ocopCards(Collection $products, bool $linkToQr = false): array
     {
         return $products
             ->filter(fn (OcopProduct $p) => $p->status === OcopProductStatus::Published && ! $p->trashed())
             ->map(fn (OcopProduct $p) => [
-                'url' => route('ocop.public.show', ['slug' => $p->slug, 'id' => $p->id]),
+                'url' => ($linkToQr ? $p->qrIdentity?->publicUrl() : null) ?? route('ocop.public.show', ['slug' => $p->slug, 'id' => $p->id]),
                 'title' => $p->name,
                 'subtitle' => $p->star_rating ? str_repeat('★', $p->star_rating).' OCOP '.$p->star_rating.' sao' : 'Sản phẩm OCOP',
                 'image' => $p->imageUrl('thumb') ?: null,

@@ -11,6 +11,7 @@ use Illuminate\Support\Carbon;
 use Modules\Heritage\Models\HeritageSite;
 use Modules\Ocop\Enums\OcopProductStatus;
 use Modules\Ocop\Models\OcopProduct;
+use Modules\OcopSubject\Models\OcopSubject;
 
 class OcopProductTracePresenter implements TracePresenter
 {
@@ -37,7 +38,7 @@ class OcopProductTracePresenter implements TracePresenter
     public function constrain(Builder $query): void
     {
         $query->withTrashed()->with([
-            'ocopSubject' => fn ($q) => $q->withTrashed(),
+            'ocopSubject' => fn ($q) => $q->withTrashed()->with('qrIdentity'),
             'category:id,name',
             'media',
         ]);
@@ -126,27 +127,25 @@ class OcopProductTracePresenter implements TracePresenter
                 ! empty($payload['category']) ? ['label' => $payload['category'], 'icon' => 'fa-layer-group', 'class' => 'badge-outline'] : null,
             ])),
             'stars' => $stars,
+            'category' => $payload['category'] ?? null,
+            'area' => $payload['area'] ?? null,
             'facts' => [
                 T::fact('fa-seedling', 'Xuất xứ', $payload['origin'] ?? null),
-                T::fact('fa-location-dot', 'Địa bàn', $payload['area'] ?? null),
                 T::fact('fa-calendar', 'Ngày sản xuất', $payload['production_date'] ?? null),
                 T::fact('fa-hourglass-half', 'Hạn sử dụng', $payload['shelf_life'] ?? null),
                 T::fact('fa-industry', 'Nhà sản xuất', $payload['producer'] ?? null),
-                T::fact('fa-layer-group', 'Ngành hàng', $payload['category'] ?? null),
             ],
             'subject' => [
                 ...$subject,
                 'cert_expiry_label' => $expiry?->format('d/m/Y'),
                 'cert_valid' => $expiry ? $expiry->endOfDay()->isFuture() : null,
-                'url' => $live?->ocopSubject && $live->ocopSubject->is_active && ! $live->ocopSubject->trashed()
-                    ? route('ocop-subject.public.show', $live->ocopSubject->slug) : null,
+                'url' => $this->subjectUrl($live?->ocopSubject),
             ],
             'quality_docs' => $payload['quality_docs'] ?? [],
             'sections' => $sections,
             'related' => $related,
             'channels' => $channels,
-            'cta' => $channels ? ['url' => '#mua-hang', 'label' => 'Mua chính hãng', 'icon' => 'fa-bag-shopping'] : $detail,
-            'cta_secondary' => $channels ? $detail : null,
+            'cta' => $channels ? ['url' => '#mua-hang', 'label' => 'Mua sản phẩm chính hãng'] : ['url' => $detail['url'], 'label' => $live ? 'Xem trang sản phẩm' : $detail['label']],
         ]);
     }
 
@@ -167,18 +166,30 @@ class OcopProductTracePresenter implements TracePresenter
             'kind' => 'Sản phẩm OCOP',
             'stars' => null,
             'subject' => [],
+            'category' => null,
+            'area' => null,
+            'channels' => [],
             'quality_docs' => [],
-            'archive_text' => 'Thông tin dưới đây là bản lưu trữ. Sản phẩm này hiện đã ngừng kinh doanh hoặc bị gỡ khỏi hệ thống.',
             'cta' => ['url' => route('ocop.public.index'), 'label' => 'Xem sản phẩm OCOP khác', 'icon' => 'fa-arrow-right'],
             ...$page,
         ]);
     }
 
+    private function subjectUrl(?OcopSubject $subject): ?string
+    {
+        if (! $subject || $subject->trashed()) {
+            return null;
+        }
+
+        return $subject->qrIdentity?->publicUrl()
+            ?? ($subject->is_active ? route('ocop-subject.public.show', $subject->slug) : null);
+    }
+
     private function buyChannels(OcopProduct $product): array
     {
         $channels = [
-            ['url' => $product->shopee_url, 'name' => 'Shopee', 'icon' => 'fa-solid fa-bag-shopping', 'tone' => 'bg-[#ee4d2d] text-white'],
-            ['url' => $product->tiktok_url, 'name' => 'TikTok Shop', 'icon' => 'fa-brands fa-tiktok', 'tone' => 'bg-black text-white'],
+            ['url' => $product->shopee_url, 'name' => 'Shopee', 'mark' => 'S', 'tone' => 'bg-[#ee4d2d]'],
+            ['url' => $product->tiktok_url, 'name' => 'TikTok Shop', 'mark' => '♪', 'tone' => 'bg-[#111]'],
         ];
 
         return array_values(array_filter(array_map(function (array $c) {

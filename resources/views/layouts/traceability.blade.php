@@ -4,54 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex">
-    <title>{{ $title }} — {{ $heading }} — {{ $brand }}</title>
-    @include('layouts.partials.font-preload', ['fonts' => ['roboto'], 'build' => 'build/frontend'])
-    @vite(['resources/css/icon.css', 'resources/css/frontend.css'], 'build/frontend')
+    <meta name="theme-color" content="#ffffff">
+    <title>{{ $title }} — {{ $brand }}</title>
+    @php($metaDescription = \Illuminate\Support\Str::limit(strip_tags((string) ($summary ?? $intro ?? $subtitle ?? $kind)), 160))
+    <meta name="description" content="{{ $metaDescription }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ $brand }}">
+    <meta property="og:title" content="{{ $title }}">
+    <meta property="og:description" content="{{ $metaDescription }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    @if (! empty($images[0]))<meta property="og:image" content="{{ $images[0] }}">@endif
+    @include('layouts.partials.font-preload', ['fonts' => ['roboto', 'merriweather'], 'build' => 'build/frontend'])
+    @vite(['resources/css/frontend.css'], 'build/frontend')
 </head>
 <body class="bg-base-200 text-base-content antialiased">
-    <main class="max-w-md mx-auto min-h-screen bg-base-100 pb-32 shadow-sm">
-        <header class="flex items-center justify-between gap-3 px-4 py-3 bg-primary text-primary-content">
-            <a href="{{ route('post.public.home') }}" class="font-bold text-sm truncate">{{ $brand }}</a>
-            <span class="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide shrink-0">
-                <i class="fa-solid fa-shield" aria-hidden="true"></i>
-                Hệ thống truy xuất
-            </span>
+    <div @class(['tx-scope max-w-xl mx-auto min-h-screen bg-base-100 sm:border-x sm:border-base-300 sm:shadow-sm', 'pb-24' => $cta_sticky])>
+        @php($tagline = trim(\Illuminate\Support\Str::before((string) config('app.site_description'), '—')))
+        <header class="sticky top-0 z-20 bg-base-100/95 backdrop-blur border-b border-base-300">
+            <div class="flex items-center gap-3 px-5 h-14">
+                <a href="{{ route('post.public.home') }}" class="flex items-center gap-2.5 min-w-0 flex-1" aria-label="{{ $brand }} — về trang chủ">
+                    <img src="{{ asset('images/logo.png') }}" alt="" width="36" height="36" class="w-9 h-9 shrink-0">
+                    <span class="min-w-0 leading-tight">
+                        <span class="block tx-serif font-bold text-[15px] truncate">{{ $brand }}</span>
+                        @if ($tagline)<span class="block text-[11px] text-base-content/60 truncate">{{ $tagline }}</span>@endif
+                    </span>
+                </a>
+                <a href="{{ route('post.public.home') }}" class="shrink-0 text-[13px] font-medium text-base-content/70 hover:text-primary">Trang chủ ›</a>
+            </div>
         </header>
 
-        @include('traceability.partials.verify-card')
+        @include('traceability.partials.status-banner')
 
         @if ($notice)
-            <div role="status" class="mx-4 mt-3 rounded-lg border border-amber-300 bg-amber-50 text-amber-800 text-sm px-3 py-2.5">
-                <i class="fa-solid fa-circle-info mr-1" aria-hidden="true"></i>
-                {{ $notice }}
-            </div>
+            <p class="px-5 py-3 text-sm text-base-content/70 border-b border-base-300 bg-base-200/50">{{ $notice }}</p>
         @endif
 
         @yield('content')
 
         @include('traceability.partials.report')
-
-        <footer class="px-4 mt-6 pt-4 border-t border-base-200 text-center text-xs text-base-content/50 space-y-1">
-            <p>Thông tin do <strong class="text-base-content/70">{{ $brand }}</strong> phát hành và quản lý.</p>
-            <p>Mã truy xuất <span class="font-mono font-semibold text-base-content/70">{{ $qr_code }}</span> · {{ url()->current() }}</p>
-        </footer>
-    </main>
-
-    <div class="fixed bottom-0 inset-x-0 z-10 bg-base-100/95 backdrop-blur border-t border-base-300 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-        <div class="max-w-md mx-auto flex gap-2">
-            @if ($cta_secondary)
-                <a href="{{ $cta_secondary['url'] }}" @if (! empty($cta_secondary['external'])) target="_blank" rel="noopener nofollow sponsored" @endif
-                   class="btn btn-outline btn-primary flex-1 gap-2">
-                    @if (! empty($cta_secondary['icon']))<i class="fa-solid {{ $cta_secondary['icon'] }}" aria-hidden="true"></i>@endif
-                    {{ $cta_secondary['label'] }}
-                </a>
-            @endif
-            <a href="{{ $cta['url'] }}" @if (! empty($cta['external'])) target="_blank" rel="noopener nofollow sponsored" @endif
-               class="btn btn-primary flex-1 gap-2">
-                @if (! empty($cta['icon']))<i class="fa-solid {{ $cta['icon'] }}" aria-hidden="true"></i>@endif
-                {{ $cta['label'] }}
-            </a>
-        </div>
     </div>
+
+    @if ($cta_sticky)
+        <div class="fixed bottom-0 inset-x-0 z-10 bg-base-100 border-t border-base-300 pb-[env(safe-area-inset-bottom)]">
+            <div class="max-w-xl mx-auto px-5 py-3">
+                <a href="{{ $cta['url'] }}" @if (! empty($cta['external'])) target="_blank" rel="noopener nofollow sponsored" @endif
+                   class="btn btn-primary w-full h-12 rounded-lg text-[15px] font-semibold shadow-sm">{{ $cta['label'] }}</a>
+            </div>
+        </div>
+    @endif
 </body>
 </html>

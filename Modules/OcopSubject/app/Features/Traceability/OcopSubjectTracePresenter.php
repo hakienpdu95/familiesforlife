@@ -56,7 +56,6 @@ class OcopSubjectTracePresenter implements TracePresenter
             'story' => $story !== '' ? Str::limit($story, 600) : null,
             'docs' => $this->docStatus($target, OcopSubject::DOCUMENT_LABELS),
             'products_count' => $target->products()->published()->count(),
-            'created_at' => $target->created_at?->toDateString(),
             'image' => T::imageRef($target, OcopSubject::IMAGE_COLLECTION),
         ];
     }
@@ -76,7 +75,7 @@ class OcopSubjectTracePresenter implements TracePresenter
         }
 
         $products = $live
-            ? OcopProduct::query()->with('media')->published()->where('ocop_subject_id', $live->id)->orderByDesc('star_rating')->latest()->limit(12)->get()
+            ? OcopProduct::query()->with(['media', 'qrIdentity'])->published()->where('ocop_subject_id', $live->id)->orderByDesc('star_rating')->latest()->limit(12)->get()
             : collect();
 
         return $this->base([
@@ -89,6 +88,9 @@ class OcopSubjectTracePresenter implements TracePresenter
                 ! empty($payload['is_food_business']) ? ['label' => 'Cơ sở thực phẩm', 'icon' => 'fa-utensils', 'class' => 'badge-ghost'] : null,
             ])),
             'stars' => $stars,
+            'type' => $payload['type'] ?? null,
+            'products_count' => $payload['products_count'] ?? null,
+            'is_food_business' => ! empty($payload['is_food_business']),
             'cert' => $expiry ? ['label' => $expiry->format('d/m/Y'), 'valid' => $expiry->endOfDay()->isFuture()] : null,
             'facts' => [
                 T::fact('fa-building', 'Loại hình', $payload['type'] ?? null),
@@ -105,20 +107,12 @@ class OcopSubjectTracePresenter implements TracePresenter
             ],
             'docs' => $payload['docs'] ?? [],
             'sections' => $sections,
-            'timeline' => T::timeline([
-                T::event(! empty($payload['created_at']) ? Carbon::parse($payload['created_at']) : null, 'Chủ thể được đăng ký trên hệ thống', null, 'primary'),
-                T::event($live?->updated_at, 'Hồ sơ cập nhật lần cuối', null, 'success'),
-                T::event($expiry, $expiry && $expiry->isPast() ? 'Chứng nhận OCOP đã hết hạn' : 'Chứng nhận OCOP hết hạn', null, $expiry && $expiry->isPast() ? 'error' : 'warning'),
-            ]),
             'related' => [
-                ['title' => 'Sản phẩm OCOP của chủ thể', 'icon' => 'fa-certificate', 'items' => $this->ocopCards($products)],
+                ['title' => 'Sản phẩm OCOP của chủ thể', 'icon' => 'fa-certificate', 'items' => $this->ocopCards($products, linkToQr: true)],
             ],
             'cta' => $live
                 ? ['url' => route('ocop-subject.public.show', $live->slug), 'label' => 'Trang thương hiệu', 'icon' => 'fa-store']
                 : ['url' => route('ocop.public.index'), 'label' => 'Xem sản phẩm OCOP', 'icon' => 'fa-arrow-right'],
-            'cta_secondary' => $live && ! empty($payload['hotline'])
-                ? ['url' => 'tel:'.preg_replace('/[^0-9+]/', '', $payload['hotline']), 'label' => 'Gọi hotline', 'icon' => 'fa-phone']
-                : null,
         ]);
     }
 
@@ -138,10 +132,12 @@ class OcopSubjectTracePresenter implements TracePresenter
             'icon' => 'fa-building',
             'kind' => 'Chủ thể OCOP',
             'stars' => null,
+            'type' => null,
+            'products_count' => null,
+            'is_food_business' => false,
             'cert' => null,
             'contact' => [],
             'docs' => [],
-            'archive_text' => 'Thông tin dưới đây là bản lưu trữ. Chủ thể này hiện đã ngừng hoạt động trên hệ thống.',
             'cta' => ['url' => route('ocop.public.index'), 'label' => 'Xem sản phẩm OCOP', 'icon' => 'fa-arrow-right'],
             ...$page,
         ]);

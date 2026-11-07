@@ -7,7 +7,6 @@ use App\Shared\Traceability\Contracts\TracePresenter;
 use App\Shared\Traceability\TraceabilityService as T;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Modules\Heritage\Enums\HeritageSiteStatus;
 use Modules\Heritage\Enums\HeritageVisitingStatus;
@@ -58,7 +57,6 @@ class HeritageSiteTracePresenter implements TracePresenter
             'latitude' => $target->latitude !== null ? (float) $target->latitude : null,
             'longitude' => $target->longitude !== null ? (float) $target->longitude : null,
             'intro' => $intro !== '' ? Str::limit($intro, self::INTRO_CHARS) : null,
-            'created_at' => $target->created_at?->toDateString(),
             'image' => T::imageRef($target, 'cover'),
         ];
     }
@@ -104,21 +102,24 @@ class HeritageSiteTracePresenter implements TracePresenter
                 T::fact('fa-door-open', 'Tham quan', $visiting['label'] ?? null),
             ],
             'visiting' => $visiting,
+            'rank' => $payload['rank'] ?? null,
+            'is_ranked' => ! empty($payload['rank_value']) && $payload['rank_value'] !== 'unranked',
+            'type' => $payload['type'] ?? null,
+            'era' => $payload['era'] ?? null,
+            'intro' => $intro,
+            'content_html' => $live && filled($live->content) ? $live->content : null,
             'address' => $payload['address'] ?? null,
             'map_url' => $lat && $lng ? 'https://www.google.com/maps/dir/?api=1&destination='.$lat.','.$lng : null,
             'coordinates' => $lat && $lng ? number_format($lat, 5).', '.number_format($lng, 5) : null,
             'sections' => $sections,
-            'timeline' => T::timeline([
-                T::event(! empty($payload['created_at']) ? Carbon::parse($payload['created_at']) : null, 'Di tích được số hoá trên hệ thống', null, 'primary'),
-                T::event($live?->updated_at, 'Thông tin cập nhật lần cuối', null, 'success'),
-            ]),
             'related' => $related,
-            'cta' => $live
-                ? ['url' => route('heritage.public.show', ['slug' => $live->slug, 'id' => $live->id]), 'label' => 'Trang giới thiệu', 'icon' => 'fa-book-open']
-                : ['url' => route('heritage.public.index'), 'label' => 'Khám phá di sản khác', 'icon' => 'fa-arrow-right'],
-            'cta_secondary' => $live && $lat && $lng
-                ? ['url' => 'https://www.google.com/maps/dir/?api=1&destination='.$lat.','.$lng, 'label' => 'Chỉ đường', 'icon' => 'fa-route', 'external' => true]
-                : null,
+            'detail_url' => $live ? route('heritage.public.show', ['slug' => $live->slug, 'id' => $live->id]) : null,
+            'cta' => $live && $lat && $lng
+                ? ['url' => 'https://www.google.com/maps/dir/?api=1&destination='.$lat.','.$lng, 'label' => 'Chỉ đường tới di tích', 'external' => true]
+                : ($live
+                    ? ['url' => route('heritage.public.show', ['slug' => $live->slug, 'id' => $live->id]), 'label' => 'Xem trang giới thiệu']
+                    : ['url' => route('heritage.public.index'), 'label' => 'Khám phá di sản khác']),
+
         ]);
     }
 
@@ -154,10 +155,16 @@ class HeritageSiteTracePresenter implements TracePresenter
             'icon' => 'fa-landmark',
             'kind' => 'Di tích, di sản',
             'visiting' => null,
+            'rank' => null,
+            'is_ranked' => false,
+            'type' => null,
+            'era' => null,
+            'intro' => null,
+            'content_html' => null,
+            'detail_url' => null,
             'address' => null,
             'map_url' => null,
             'coordinates' => null,
-            'archive_text' => 'Thông tin dưới đây là bản lưu trữ. Di tích này hiện đã bị gỡ khỏi hệ thống.',
             'cta' => ['url' => route('heritage.public.index'), 'label' => 'Khám phá di sản khác', 'icon' => 'fa-arrow-right'],
             ...$page,
         ]);

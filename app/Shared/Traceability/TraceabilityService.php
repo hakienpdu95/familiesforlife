@@ -53,7 +53,6 @@ class TraceabilityService
         }
 
         $status = ! $identity->isActive() ? 'revoked' : ($archived ? 'archived' : 'valid');
-        $updatedAt = $archived ? $identity->snapshot_at : ($live ? $target->updated_at : null);
 
         return [
             ...$page,
@@ -64,8 +63,6 @@ class TraceabilityService
             'revoked_at' => $identity->revoked_at?->format('d/m/Y'),
             'archived' => $archived,
             'archived_at' => $archived ? $identity->snapshot_at?->format('d/m/Y') : null,
-            'issued_at' => $identity->created_at?->format('d/m/Y'),
-            'updated_at' => $updatedAt?->format('d/m/Y H:i'),
         ];
     }
 
@@ -158,11 +155,10 @@ class TraceabilityService
             'facts' => [],
             'notice' => null,
             'sections' => [],
-            'timeline' => [],
             'related' => [],
             'cta' => ['url' => route('post.public.home'), 'label' => 'Về trang chủ', 'icon' => 'fa-arrow-right'],
             'cta_secondary' => null,
-            'archive_text' => 'Thông tin dưới đây là bản lưu trữ. Đối tượng này hiện đã bị gỡ khỏi hệ thống.',
+            'cta_sticky' => true,
             ...$page,
         ];
     }
@@ -170,18 +166,5 @@ class TraceabilityService
     public static function fact(string $icon, string $label, ?string $value): ?array
     {
         return filled($value) ? ['icon' => $icon, 'label' => $label, 'value' => $value] : null;
-    }
-
-    public static function event(?\DateTimeInterface $at, string $label, ?string $note = null, string $tone = 'neutral'): ?array
-    {
-        return $at ? ['date' => $at->format('d/m/Y'), 'sort' => $at->getTimestamp(), 'label' => $label, 'note' => $note, 'tone' => $tone] : null;
-    }
-
-    public static function timeline(array $events): array
-    {
-        $events = array_values(array_filter($events));
-        usort($events, fn ($a, $b) => $a['sort'] <=> $b['sort']);
-
-        return $events;
     }
 }

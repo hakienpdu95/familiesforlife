@@ -117,6 +117,10 @@ class PostArticleTracePresenter implements TracePresenter
                 T::fact('fa-circle-info', 'Hỏi đáp', ! empty($payload['faq_count']) ? $payload['faq_count'].' câu hỏi' : null),
                 T::fact('fa-list-check', 'Hướng dẫn', ! empty($payload['howto_count']) ? $payload['howto_count'].' bước' : null),
             ],
+            'category' => $payload['category'] ?? null,
+            'published_label' => $published?->format('d/m/Y'),
+            'updated_label' => $updated && $published && $updated->gt($published) ? $updated->format('d/m/Y') : null,
+            'reading_minutes' => $payload['reading_minutes'] ?? null,
             'summary' => $t ? (filled($t->excerpt) ? trim(strip_tags($t->excerpt)) : (filled($t->direct_answer) ? trim(strip_tags($t->direct_answer)) : null)) : ($payload['summary'] ?? null),
             'content_html' => $t ? $this->renderer->render($t, [ContentBlockType::Citation]) : null,
             'sponsor' => $payload['sponsor'] ?? null,
@@ -124,7 +128,7 @@ class PostArticleTracePresenter implements TracePresenter
             'tags' => $payload['tags'] ?? [],
             'related' => $related,
             'cta' => $t
-                ? ['url' => route('post.public.article', ['slug' => $t->slug, 'id' => $t->id]), 'label' => 'Đọc trên website', 'icon' => 'fa-book-open']
+                ? ['url' => route('post.public.article', ['slug' => $t->slug, 'id' => $t->id]), 'label' => 'Đọc bài trên website']
                 : ['url' => route('post.public.home'), 'label' => 'Xem tin tức khác', 'icon' => 'fa-arrow-right'],
         ]);
     }
@@ -144,12 +148,16 @@ class PostArticleTracePresenter implements TracePresenter
             'heading' => 'Thông tin bài viết',
             'icon' => 'fa-newspaper',
             'kind' => 'Bài viết',
+            'category' => null,
+            'published_label' => null,
+            'updated_label' => null,
+            'reading_minutes' => null,
+            'cta_sticky' => false,
             'summary' => null,
             'content_html' => null,
             'sponsor' => null,
             'citations' => [],
             'tags' => [],
-            'archive_text' => 'Thông tin dưới đây là bản lưu trữ. Bài viết này hiện đã bị gỡ khỏi hệ thống.',
             'cta' => ['url' => route('post.public.home'), 'label' => 'Xem tin tức khác', 'icon' => 'fa-arrow-right'],
             ...$page,
         ]);
