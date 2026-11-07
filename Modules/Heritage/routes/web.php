@@ -9,6 +9,7 @@ use Modules\Heritage\Features\PublicReading\Http\PublicHeritageController;
 // show), cùng convention OcopProductAdminController.
 Route::middleware(['auth'])->prefix('dashboard/heritage')->name('backend.heritage.')->group(function (): void {
     Route::resource('sites', HeritageSiteAdminController::class)->except(['show']);
+    Route::post('sites/{site}/restore', [HeritageSiteAdminController::class, 'restore'])->withTrashed()->name('sites.restore');
 });
 
 // ── Backend JSON API cho Tabulator (session-based auth) ─────────────────────────────────────

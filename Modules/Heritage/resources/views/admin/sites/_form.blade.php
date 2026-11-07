@@ -233,6 +233,13 @@
             {{-- ── Tab 3: Ảnh & hiển thị ───────────────────────────────── --}}
             <div x-show="tab === 'display'" x-cloak data-tab-label="Ảnh & hiển thị" class="space-y-4">
 
+                @if(isset($site) && $site?->qrIdentity)
+                <p class="text-xs text-base-content/50">
+                    Mã QR di tích: <span class="font-mono font-semibold text-base-content">{{ $site->qrIdentity->qr_code }}</span> ·
+                    <a href="{{ $site->qrIdentity->publicUrl() }}" target="_blank" rel="noopener" class="link link-primary break-all">{{ $site->qrIdentity->publicUrl() }}</a>
+                </p>
+                @endif
+
                 <div class="form-control">
                     <label class="label py-0 pb-1.5">
                         <span class="label-text font-medium">Ảnh bìa</span>

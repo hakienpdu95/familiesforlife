@@ -310,7 +310,7 @@
             wireCommonControls(el);
             listEl.appendChild(el);
 
-            const state = existingState || { blockUuid: uid('blk-'), heading: '', items: [] };
+            const state = existingState || { blockUuid: uid('blk-'), heading: '', items: [{ question: '', answer: '' }] };
             el._faqState = state;
             renderFaqForm(el.querySelector('.pbc-block-body'), state);
         }
@@ -418,7 +418,7 @@
             wireCommonControls(el);
             listEl.appendChild(el);
 
-            const state = existingState || { blockUuid: uid('blk-'), name: '', description: '', steps: [] };
+            const state = existingState || { blockUuid: uid('blk-'), name: '', description: '', steps: [{ name: '', text: '' }, { name: '', text: '' }] };
             el._howtoState = state;
             renderHowtoForm(el.querySelector('.pbc-block-body'), state);
         }
@@ -765,7 +765,71 @@
 
         // ── Serialize khi submit ─────────────────────────────────────────
 
-        form.addEventListener('submit', () => {
+        const blank = (v) => String(v ?? '').trim() === '';
+
+        function blockErrors(el) {
+            const errs = [];
+            if (el.dataset.kind === 'faq') {
+                const items = el._faqState.items;
+                if (items.length === 0) errs.push('Cần ít nhất 1 câu hỏi.');
+                items.forEach((it, i) => {
+                    if (blank(it.question)) errs.push(`Câu hỏi #${i + 1}: chưa nhập câu hỏi.`);
+                    if (blank(it.answer)) errs.push(`Câu hỏi #${i + 1}: chưa nhập câu trả lời.`);
+                });
+            } else if (el.dataset.kind === 'howto') {
+                const steps = el._howtoState.steps;
+                if (steps.length < 2) errs.push('Cần ít nhất 2 bước.');
+                steps.forEach((st, i) => {
+                    if (blank(st.name)) errs.push(`Bước #${i + 1}: chưa nhập tên bước.`);
+                    if (blank(st.text)) errs.push(`Bước #${i + 1}: chưa nhập nội dung bước.`);
+                });
+            } else if (el.dataset.kind === 'citation') {
+                const st = el._citationState;
+                if (blank(st.citationText)) errs.push('Chưa nhập nội dung trích dẫn.');
+                if (blank(st.citationSourceName)) errs.push('Chưa ghi tên nguồn trích dẫn.');
+            } else if (el.dataset.kind === 'testimonial') {
+                const st = el._testimonialState;
+                if (blank(st.quote)) errs.push('Chưa nhập nội dung lời chứng thực.');
+                if (blank(st.personName)) errs.push('Chưa nhập tên người chứng thực.');
+            } else if (el.dataset.kind === 'comparison') {
+                const st = el._comparisonState;
+                if (st.columns.length < 2 || st.columns.length > 6) errs.push('Cần 2–6 cột so sánh.');
+                st.columns.forEach((c, i) => { if (blank(c.label)) errs.push(`Cột #${i + 1}: chưa nhập tên cột.`); });
+                if (st.rows.length === 0) errs.push('Cần ít nhất 1 tiêu chí so sánh.');
+                st.rows.forEach((r, i) => { if (blank(r.label)) errs.push(`Tiêu chí #${i + 1}: chưa nhập tên tiêu chí.`); });
+            }
+            return errs;
+        }
+
+        function showBlockErrors(el, errs) {
+            el.querySelector(':scope > .pbc-block-errors')?.remove();
+            el.classList.toggle('pbc-block-invalid', errs.length > 0);
+            if (!errs.length) return;
+            const box = document.createElement('div');
+            box.className = 'pbc-block-errors alert alert-error text-xs py-2 px-3 mt-2';
+            box.innerHTML = '<ul class="list-disc list-inside">' + errs.map((m) => `<li>${esc(m)}</li>`).join('') + '</ul>';
+            el.querySelector('.pbc-block-header').after(box);
+        }
+
+        form.addEventListener('submit', (e) => {
+            let firstInvalid = null;
+            listEl.querySelectorAll(':scope > .pbc-block').forEach((el) => {
+                const errs = blockErrors(el);
+                showBlockErrors(el, errs);
+                if (errs.length && !firstInvalid) firstInvalid = el;
+            });
+
+            if (firstInvalid) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                const wrap = form.closest('[x-data]');
+                const data = wrap && window.Alpine ? window.Alpine.$data(wrap) : null;
+                if (data && 'tab' in data) data.tab = 'noi_dung';
+                setTimeout(() => firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
+                window.Toast?.error?.('Có khối nội dung chưa nhập đủ — xem các khối được đánh dấu đỏ.');
+                return;
+            }
+
             const out = [];
 
             listEl.querySelectorAll(':scope > .pbc-block').forEach((el) => {
@@ -785,6 +849,10 @@
                             price_label_override: it.priceLabelOverride,
                             description_override: it.descriptionOverride,
                             image_url_override: it.imageUrlOverride,
+                            cached_name: it.cachedName,
+                            cached_image: it.cachedImage,
+                            cached_price: it.cachedPrice,
+                            cached_links: it.cachedLinks,
                             buttons: it.buttons.map((b) => ({
                                 button_key: b.btnKey, label: b.label, url_type: b.urlType,
                                 url: b.url, product_link_type: b.productLinkType, target: b.target, style: b.style,

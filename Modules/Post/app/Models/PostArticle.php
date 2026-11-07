@@ -3,6 +3,7 @@
 namespace Modules\Post\Models;
 
 use App\Models\User;
+use App\Shared\Traceability\Traits\HasQrIdentity;
 use App\Traits\HasManagedMedia;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -41,6 +42,7 @@ class PostArticle extends Model implements HasMedia, PlaylistableContract
 {
     use HasFactory;
     use HasManagedMedia;
+    use HasQrIdentity;
     use LogsActivity;
     use SoftDeletes;
 
@@ -115,6 +117,7 @@ class PostArticle extends Model implements HasMedia, PlaylistableContract
     {
         return $this->getFirstMediaUrl('cover', 'medium');
     }
+
 
     // ── Relationships ────────────────────────────────────────────────
 

@@ -15,5 +15,6 @@ class ListArticlesForAdminQuery implements QueryInterface
         public readonly ?string $status = null,
         public readonly string $sortField = 'created_at',
         public readonly string $sortDir = 'desc',
+        public readonly bool $trashed = false,
     ) {}
 }

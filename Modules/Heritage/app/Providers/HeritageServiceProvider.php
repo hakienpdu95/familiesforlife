@@ -22,5 +22,7 @@ class HeritageServiceProvider extends ModuleServiceProvider
         parent::boot();
 
         Gate::policy(HeritageSite::class, HeritageSitePolicy::class);
+
+        $this->app->make(\App\Shared\Traceability\TraceabilityRegistry::class)->register(HeritageSite::class, \Modules\Heritage\Features\Traceability\HeritageSiteTracePresenter::class);
     }
 }

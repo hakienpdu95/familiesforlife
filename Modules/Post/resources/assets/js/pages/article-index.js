@@ -9,6 +9,8 @@
 
 import { createTs } from '@shared/tom-select-factory.js';
 import { renderCategoryTreeOption } from '@shared/ts-tree-option.js';
+import { qrCellHtml } from '@shared/qr-tools.js';
+import { DELETED_AT_COLUMN, bindRestoreModal, restoreButtonHtml, trashState } from '@shared/trash-restore.js';
 
 function esc(v) {
     if (v == null) return '';
@@ -21,9 +23,17 @@ function esc(v) {
 
 const COLUMNS = [
     {
+        title: 'Mã QR', field: 'qr_code', width: 96, hozAlign: 'center', headerSort: false, frozen: true,
+        formatter(cell) {
+            const d = cell.getRow().getData();
+            return qrCellHtml(d.qr_code, d.qr_url, d.title);
+        },
+    },
+    {
         title: 'Tiêu đề', field: 'title', minWidth: 240, sorter: 'string', frozen: true,
         formatter(cell) {
             const d = cell.getRow().getData();
+            if (d.is_trashed) return '<span class="font-medium text-sm text-base-content/60">' + esc(d.title) + '</span>';
             return '<a href="' + esc(d.show_url) + '" class="font-medium text-sm link link-hover">' + esc(d.title) + '</a>';
         },
     },
@@ -58,6 +68,7 @@ const COLUMNS = [
     {
         title: 'Ngày tạo', field: 'created_at', width: 110, hozAlign: 'center', sorter: 'string',
     },
+    DELETED_AT_COLUMN,
     {
         // spec/ga-dashboard-statistics.md §2.2 — đọc từ ga_views_30d đã đồng bộ sẵn
         // (SyncGoogleAnalyticsStatsCommand), null khi bài chưa từng sync/ngoài top 1000 GA —
@@ -79,6 +90,8 @@ const COLUMNS = [
                     + '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>'
                     + '</a>';
             }
+
+            html += restoreButtonHtml(d, d.title);
 
             if (d.can_manage) {
                 html += '<a href="' + esc(d.edit_url) + '" class="btn btn-ghost btn-xs btn-square" title="Sửa">'
@@ -151,6 +164,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+bindRestoreModal(() => window.articleTable);
+
 // ── Alpine component ──────────────────────────────────────────────────────────
 
 document.addEventListener('alpine:init', () => {
@@ -165,7 +180,9 @@ document.addEventListener('alpine:init', () => {
         const optText = (ts, v) => ts?.options?.[v]?.text ?? v;
 
         return {
-            filters: { search: '', category_id: '', format: '', status: '' },
+            filters: { search: '', category_id: '', format: '', status: '', trashed: false },
+            ...trashState(),
+            table() { return tableInst; },
 
             get hasFilters() {
                 const f = this.filters;
@@ -222,9 +239,10 @@ document.addEventListener('alpine:init', () => {
                         if (f.category_id) p.category_id = f.category_id;
                         if (f.format)      p.format      = f.format;
                         if (f.status)      p.status      = f.status;
+                        if (f.trashed)     p.trashed     = 1;
                         return p;
                     },
-                    ajaxResponse: (_u, _p, res) => res,
+                    ajaxResponse: (_u, _p, res) => { self.trashedCount = res.trashed_count ?? 0; return res; },
                     ajaxError: (error) => console.error('[post-article] API error', error),
 
                     pagination:             true,
@@ -233,7 +251,7 @@ document.addEventListener('alpine:init', () => {
                     paginationSizeSelector: [10, 25, 50, 100],
                     paginationCounter:      'rows',
                     sortMode:               'remote',
-                    initialSort:            [{ column: 'created_at', dir: 'desc' }],
+                    initialSort:            [{ column: self.filters.trashed ? 'deleted_at' : 'created_at', dir: 'desc' }],
 
                     layout:           'fitColumns',
                     responsiveLayout: 'collapse',
@@ -260,6 +278,7 @@ document.addEventListener('alpine:init', () => {
                 });
 
                 window.articleTable = tableInst;
+                tableInst.on('tableBuilt', () => this.toggleTrashColumns());
             },
 
             // ── URL state persistence ──────────────────────────────────────
@@ -269,6 +288,7 @@ document.addEventListener('alpine:init', () => {
                 if (p.has('cat')) this.filters.category_id = p.get('cat');
                 if (p.has('fmt')) this.filters.format      = p.get('fmt');
                 if (p.has('st'))  this.filters.status      = p.get('st');
+                if (p.get('trash') === '1') this.filters.trashed = true;
             },
 
             saveState() {
@@ -277,6 +297,7 @@ document.addEventListener('alpine:init', () => {
                 if (f.category_id) p.set('cat', f.category_id);
                 if (f.format)      p.set('fmt', f.format);
                 if (f.status)      p.set('st',  f.status);
+                if (f.trashed)     p.set('trash', '1');
                 const qs = p.toString();
                 history.replaceState(null, '', qs ? '?' + qs : location.pathname);
             },
@@ -295,11 +316,11 @@ document.addEventListener('alpine:init', () => {
             },
 
             reset() {
-                this.filters = { search: '', category_id: '', format: '', status: '' };
+                this.filters = { search: '', category_id: '', format: '', status: '', trashed: this.filters.trashed };
                 tsCategory?.setValue('', true);
                 tsFormat?.setValue('', true);
                 tsStatus?.setValue('', true);
-                history.replaceState(null, '', location.pathname);
+                this.saveState();
                 this.refresh();
             },
         };

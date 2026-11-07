@@ -11,6 +11,7 @@ class OcopProductListResource extends JsonResource
     public function toArray(Request $request): array
     {
         $user = $request->user();
+        $trashed = $this->trashed();
 
         return [
             'id'          => $this->id,
@@ -24,11 +25,18 @@ class OcopProductListResource extends JsonResource
             'status_value' => $this->status->value,
             'status_label' => $this->status->label(),
 
+            'qr_code'     => $this->qrIdentity?->qr_code,
+            'qr_url'      => $this->qrIdentity?->publicUrl(),
             'edit_url'    => route('backend.ocop.products.edit', $this->resource),
             'destroy_url' => route('backend.ocop.products.destroy', $this->resource),
 
-            'can_update' => $user?->can('update', $this->resource) ?? false,
-            'can_delete' => $user?->can('delete', $this->resource) ?? false,
+            'can_update' => ! $trashed && ($user?->can('update', $this->resource) ?? false),
+            'can_delete' => ! $trashed && ($user?->can('delete', $this->resource) ?? false),
+
+            'is_trashed' => $trashed,
+            'is_public' => $this->status === \Modules\Ocop\Enums\OcopProductStatus::Published,
+            'deleted_at' => $this->deleted_at?->format('d/m/Y H:i'),
+            'restore_url' => $trashed && ($user?->can('restore', $this->resource) ?? false) ? route('backend.ocop.products.restore', $this->resource) : null,
         ];
     }
 }

@@ -9,15 +9,17 @@ use Modules\Heritage\Models\HeritageSite;
 
 class ListHeritageSitesForAdminHandler implements QueryHandlerInterface
 {
-    private const SORTABLE = ['name', 'heritage_type', 'rank', 'status', 'sort_order', 'created_at'];
+    private const SORTABLE = ['name', 'heritage_type', 'rank', 'status', 'sort_order', 'created_at', 'deleted_at'];
 
     public function handle(QueryInterface $query): LengthAwarePaginator
     {
         /** @var ListHeritageSitesForAdminQuery $query */
-        $sortField = in_array($query->sortField, self::SORTABLE, true) ? $query->sortField : 'created_at';
+        $sortField = in_array($query->sortField, self::SORTABLE, true) ? $query->sortField : ($query->trashed ? 'deleted_at' : 'created_at');
         $sortDir = $query->sortDir === 'asc' ? 'asc' : 'desc';
 
         return HeritageSite::query()
+            ->when($query->trashed, fn ($q) => $q->onlyTrashed())
+            ->with('qrIdentity')
             ->when($query->search, fn ($q) => $q->where('name', 'like', "%{$query->search}%"))
             ->when($query->heritageType, fn ($q) => $q->where('heritage_type', $query->heritageType))
             ->when($query->status, fn ($q) => $q->where('status', $query->status))

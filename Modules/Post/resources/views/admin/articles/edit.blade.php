@@ -198,9 +198,24 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
                             <span class="pbc-total-word-count font-medium"></span>
                         </span>
                     </div>
-                    @error('blocks')<div class="alert alert-error text-xs mb-2">{{ $message }}</div>@enderror
+                    @php
+                        $oldBlocksJson = old('blocks_json');
+                        $composerBlocks = is_string($oldBlocksJson) && $oldBlocksJson !== ''
+                            ? (json_decode($oldBlocksJson, true) ?: [])
+                            : ($existingBlocks ?? []);
+                    @endphp
+                    @if($errors->has('blocks'))
+                    <div class="alert alert-error text-xs mb-2 items-start">
+                        <div>
+                            <p class="font-semibold">Chưa lưu được — nội dung bạn vừa nhập vẫn được giữ nguyên bên dưới, hãy bổ sung rồi lưu lại:</p>
+                            <ul class="list-disc list-inside mt-1 space-y-0.5">
+                                @foreach($errors->get('blocks') as $message)<li>{{ $message }}</li>@endforeach
+                            </ul>
+                        </div>
+                    </div>
+                    @endif
 
-                    <script>window.PostExistingBlocks = @json($existingBlocks ?? []);</script>
+                    <script>window.PostExistingBlocks = @json($composerBlocks);</script>
 
                     <div class="pbc-composer">
                         <div class="pbc-block-list"></div>
@@ -380,6 +395,13 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
             @method('PUT')
             <div class="card-body p-3">
                 <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">Cài đặt chung</p>
+
+                @if($article->qrIdentity)
+                <p class="text-xs text-base-content/50 mb-3">
+                    Mã QR bài viết: <span class="font-mono font-semibold text-base-content">{{ $article->qrIdentity->qr_code }}</span><br>
+                    <a href="{{ $article->qrIdentity->publicUrl() }}" target="_blank" rel="noopener" class="link link-primary break-all">{{ $article->qrIdentity->publicUrl() }}</a>
+                </p>
+                @endif
 
                 <div class="form-control mb-3">
                     <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Định dạng nội dung</span></label>

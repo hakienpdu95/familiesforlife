@@ -22,6 +22,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(MetricsRecorder::class);
+        $this->app->singleton(\App\Shared\Traceability\TraceabilityRegistry::class);
 
         // Đăng ký 3 thư mục migration con để `php artisan migrate` luôn phát hiện được
         // (Laravel glob chỉ scan 1 cấp — không đệ quy — nên cần đăng ký tường minh).
@@ -35,6 +36,16 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $refreshQrSnapshot = function (\App\Models\Media $media): void {
+            $class = \Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel($media->model_type) ?? $media->model_type;
+
+            if (class_exists($class) && in_array(\App\Shared\Traceability\Traits\HasQrIdentity::class, class_uses_recursive($class), true)) {
+                \App\Shared\Traceability\Jobs\RefreshQrSnapshotJob::queueFor($class, $media->model_id);
+            }
+        };
+        \App\Models\Media::saved($refreshQrSnapshot);
+        \App\Models\Media::deleted($refreshQrSnapshot);
+
         Model::shouldBeStrict(!app()->isProduction());
 
         if (app()->isProduction()) {

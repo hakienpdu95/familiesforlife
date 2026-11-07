@@ -39,6 +39,8 @@
     </div>
 
     <div class="section-page">
+        @include('layouts.partials.trash-tabs', ['activeLabel' => 'Bài viết', 'noun' => 'bài viết'])
+
         <div class="card bg-base-100 mb-4">
             <div class="card-body py-3 px-3">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
@@ -152,6 +154,7 @@
     </div>
     <form method="dialog" class="modal-backdrop"><button>close</button></form>
 </dialog>
+@include('layouts.partials.restore-modal', ['noun' => 'bài viết'])
 @endsection
 
 @push('styles')

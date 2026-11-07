@@ -55,6 +55,8 @@
     </div>
 
     <div class="section-page">
+        @include('layouts.partials.trash-tabs', ['activeLabel' => 'Sản phẩm', 'noun' => 'sản phẩm'])
+
         <div class="card bg-base-100 mb-4">
             <div class="card-body filter-bar py-3 px-3">
                 <div class="filter-grid">
@@ -186,6 +188,7 @@
     </div>
     <form method="dialog" class="modal-backdrop"><button>close</button></form>
 </dialog>
+@include('layouts.partials.restore-modal', ['noun' => 'sản phẩm'])
 @endsection
 
 @push('styles')

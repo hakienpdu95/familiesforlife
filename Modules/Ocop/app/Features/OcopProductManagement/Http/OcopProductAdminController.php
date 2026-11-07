@@ -16,6 +16,7 @@ use Modules\Heritage\Models\HeritageSite;
 use Modules\Ocop\Enums\OcopProductStatus;
 use Modules\Ocop\Features\OcopProductManagement\Actions\CreateOcopProductAction;
 use Modules\Ocop\Features\OcopProductManagement\Actions\DeleteOcopProductAction;
+use Modules\Ocop\Features\OcopProductManagement\Actions\RestoreOcopProductAction;
 use Modules\Ocop\Features\OcopProductManagement\Actions\ImportOcopProductsAction;
 use Modules\Ocop\Features\OcopProductManagement\Actions\StoreOcopProductDocumentsAction;
 use Modules\Ocop\Features\OcopProductManagement\Actions\UpdateOcopProductAction;
@@ -113,6 +114,23 @@ class OcopProductAdminController extends Controller
             ->with('success', 'Cập nhật sản phẩm thành công.');
     }
 
+    public function restore(Request $request, OcopProduct $product, RestoreOcopProductAction $action): RedirectResponse|JsonResponse
+    {
+        $this->authorize('restore', $product);
+
+        abort_unless($product->trashed(), 422, 'Mục này chưa bị xoá.');
+
+        $action->handle($product);
+
+        $message = 'Đã khôi phục sản phẩm "'.$product->name.'".';
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => $message]);
+        }
+
+        return redirect()->route('backend.ocop.products.edit', $product)->with('success', $message);
+    }
+
     public function destroy(Request $request, OcopProduct $product, DeleteOcopProductAction $action): RedirectResponse|JsonResponse
     {
         $action->handle($product);
@@ -156,8 +174,16 @@ class OcopProductAdminController extends Controller
 
     private function validated(Request $request): array
     {
+        $request->request->remove('qr_code');
+
         if (is_string($request->input('media_uuids'))) {
             $request->merge(['media_uuids' => json_decode($request->input('media_uuids'), true) ?: []]);
+        }
+
+        foreach (['media_uuids', 'remove_media_uuids'] as $field) {
+            if (! is_array($request->input($field))) {
+                $request->merge([$field => []]);
+            }
         }
 
         return $request->validate([

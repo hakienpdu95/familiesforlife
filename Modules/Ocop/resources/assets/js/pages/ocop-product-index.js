@@ -8,6 +8,8 @@
 
 import { createTs } from '@shared/tom-select-factory.js';
 import { renderCategoryTreeOption } from '@shared/ts-tree-option.js';
+import { qrCellHtml } from '@shared/qr-tools.js';
+import { DELETED_AT_COLUMN, bindRestoreModal, restoreButtonHtml, trashState } from '@shared/trash-restore.js';
 
 function esc(v) {
     if (v == null) return '';
@@ -17,6 +19,13 @@ function esc(v) {
 }
 
 const COLUMNS = [
+    {
+        title: 'Mã QR', field: 'qr_code', width: 96, hozAlign: 'center', headerSort: false, frozen: true,
+        formatter(cell) {
+            const d = cell.getRow().getData();
+            return qrCellHtml(d.qr_code, d.qr_url, d.name);
+        },
+    },
     {
         title: 'Ảnh', field: 'image_url', width: 70, headerSort: false,
         formatter(cell) {
@@ -58,11 +67,14 @@ const COLUMNS = [
             return '<span class="badge badge-sm ' + (d.status_value === 'published' ? 'badge-success' : 'badge-ghost') + '">' + esc(d.status_label) + '</span>';
         },
     },
+    { title: 'Ngày tạo', field: 'created_at', visible: false },
+    DELETED_AT_COLUMN,
     {
-        title: '', field: 'id', width: 90, hozAlign: 'center', headerSort: false,
+        title: '', field: 'id', width: 110, hozAlign: 'center', headerSort: false,
         formatter(cell) {
             const d = cell.getRow().getData();
             let html = '<div class="flex items-center justify-center gap-1">';
+            html += restoreButtonHtml(d, d.name);
 
             if (d.can_update) {
                 html += '<a href="' + esc(d.edit_url) + '" class="btn btn-ghost btn-xs btn-square" title="Sửa">'
@@ -86,6 +98,8 @@ const COLUMNS = [
 // ── AJAX delete ──────────────────────────────────────────────────────────────
 
 let pendingDeleteUrl = null;
+
+bindRestoreModal(() => window.ocopProductTable);
 
 window.ocopProductDeleteConfirm = function (url, name) {
     pendingDeleteUrl = url;
@@ -154,7 +168,9 @@ document.addEventListener('alpine:init', () => {
         const optText = (ts, v) => ts?.options?.[v]?.text ?? v;
 
         return {
-            filters: { search: '', category_id: '', status: '' },
+            filters: { search: '', category_id: '', status: '', trashed: false },
+            ...trashState(),
+            table() { return tableInst; },
 
             get hasFilters() {
                 const f = this.filters;
@@ -205,9 +221,10 @@ document.addEventListener('alpine:init', () => {
                         if (f.search)      p.search      = f.search;
                         if (f.category_id) p.category_id = f.category_id;
                         if (f.status)      p.status      = f.status;
+                        if (f.trashed) p.trashed = 1;
                         return p;
                     },
-                    ajaxResponse: (_u, _p, res) => res,
+                    ajaxResponse: (_u, _p, res) => { self.trashedCount = res.trashed_count ?? 0; return res; },
                     ajaxError: (error) => console.error('[ocop-product] API error', error),
 
                     pagination:             true,
@@ -216,7 +233,7 @@ document.addEventListener('alpine:init', () => {
                     paginationSizeSelector: [10, 20, 50, 100],
                     paginationCounter:      'rows',
                     sortMode:               'remote',
-                    initialSort:            [{ column: 'created_at', dir: 'desc' }],
+                    initialSort:            [{ column: self.filters.trashed ? 'deleted_at' : 'created_at', dir: 'desc' }],
 
                     layout:           'fitColumns',
                     responsiveLayout: 'collapse',
@@ -242,6 +259,7 @@ document.addEventListener('alpine:init', () => {
                 });
 
                 window.ocopProductTable = tableInst;
+                tableInst.on('tableBuilt', () => this.toggleTrashColumns());
             },
 
             loadState() {
@@ -249,6 +267,7 @@ document.addEventListener('alpine:init', () => {
                 if (p.has('q'))   this.filters.search      = p.get('q');
                 if (p.has('cat')) this.filters.category_id = p.get('cat');
                 if (p.has('st'))  this.filters.status      = p.get('st');
+                if (p.get('trash') === '1') this.filters.trashed = true;
             },
 
             saveState() {
@@ -256,6 +275,7 @@ document.addEventListener('alpine:init', () => {
                 if (f.search)      p.set('q',   f.search);
                 if (f.category_id) p.set('cat', f.category_id);
                 if (f.status)      p.set('st',  f.status);
+                if (f.trashed) p.set('trash', '1');
                 const qs = p.toString();
                 history.replaceState(null, '', qs ? '?' + qs : location.pathname);
             },
@@ -273,10 +293,10 @@ document.addEventListener('alpine:init', () => {
             },
 
             reset() {
-                this.filters = { search: '', category_id: '', status: '' };
+                this.filters = { search: '', category_id: '', status: '', trashed: this.filters.trashed };
                 tsCategory?.setValue('', true);
                 tsStatus?.setValue('', true);
-                history.replaceState(null, '', location.pathname);
+                this.saveState();
                 this.refresh();
             },
         };

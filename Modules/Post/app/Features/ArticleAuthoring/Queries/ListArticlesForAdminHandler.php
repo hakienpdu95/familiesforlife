@@ -12,7 +12,7 @@ use Modules\Post\Models\PostCategory;
 
 class ListArticlesForAdminHandler implements QueryHandlerInterface
 {
-    private const SORTABLE = ['title', 'format', 'created_at', 'ga_views_30d'];
+    private const SORTABLE = ['title', 'format', 'created_at', 'deleted_at', 'ga_views_30d'];
 
     /** Cột sống ở post_article_translations (bản dịch main_locale), cần leftJoin để sort — xem dưới. */
     private const SORTABLE_VIA_TRANSLATION = ['title', 'ga_views_30d'];
@@ -22,8 +22,12 @@ class ListArticlesForAdminHandler implements QueryHandlerInterface
         /** @var ListArticlesForAdminQuery $query */
         $q = PostArticle::query()
             ->select('post_articles.*')
-            ->with(['categories', 'tags', 'createdBy:id,name'])
+            ->with(['categories', 'tags', 'createdBy:id,name', 'qrIdentity'])
             ->withMainTranslation();
+
+        if ($query->trashed) {
+            $q->onlyTrashed();
+        }
 
         if ($query->search) {
             $term = $query->search;
@@ -47,7 +51,7 @@ class ListArticlesForAdminHandler implements QueryHandlerInterface
             $q->whereHas('translations', fn ($sub) => $sub->where('status', $status));
         }
 
-        $sortField = in_array($query->sortField, self::SORTABLE, true) ? $query->sortField : 'created_at';
+        $sortField = in_array($query->sortField, self::SORTABLE, true) ? $query->sortField : ($query->trashed ? 'deleted_at' : 'created_at');
         $sortDir = $query->sortDir === 'asc' ? 'asc' : 'desc';
 
         // 'title'/'ga_views_30d' sống ở post_article_translations (bản dịch main_locale), không

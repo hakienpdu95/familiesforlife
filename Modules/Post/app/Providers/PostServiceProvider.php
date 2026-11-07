@@ -42,6 +42,12 @@ class PostServiceProvider extends ModuleServiceProvider
         // view/update/delete/publish/... đăng ký thêm cho PostArticleTranslation::class bên
         // dưới vì các method đó giờ nhận PostArticleTranslation (spec §8).
         Gate::policy(PostArticle::class, PostArticlePolicy::class);
+        $this->app->make(\App\Shared\Traceability\TraceabilityRegistry::class)->register(PostArticle::class, \Modules\Post\Features\Traceability\PostArticleTracePresenter::class);
+        \Modules\Post\Models\PostArticleTranslation::saved(function (\Modules\Post\Models\PostArticleTranslation $translation): void {
+            if ($translation->locale === config('post.default_locale')) {
+                \App\Shared\Traceability\Jobs\RefreshQrSnapshotJob::queueFor(PostArticle::class, $translation->article_id);
+            }
+        });
         Gate::policy(PostArticleTranslation::class, PostArticlePolicy::class);
         // spec/Breaking_News_Ticker_Technical_Specification.md §6.3 — KHÔNG có job dọn dẹp nào
         // (tin hết hạn tự biến mất qua scopeActive()/isCurrentlyBreaking(), cùng nguyên tắc

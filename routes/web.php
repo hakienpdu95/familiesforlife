@@ -7,10 +7,16 @@ use App\Http\Controllers\Backend\DashboardController;
 use App\Http\Controllers\Backend\SystemMonitorController;
 use App\Http\Controllers\Backend\NotificationCenterController;
 use App\Http\Controllers\Backend\NotificationPreferenceController;
+use App\Http\Controllers\TraceQrController;
 use Illuminate\Support\Facades\Route;
 
 // Trang chủ công khai '/' đăng ký trong Modules/Post/routes/web.php (cùng chỗ với
 // post.public.home) — render thẳng tại '/', không redirect sang /{locale}/bai-viet.
+
+Route::get('p/{qr_code}', TraceQrController::class)
+    ->where('qr_code', '[0-9A-Za-z]{6,15}')
+    ->middleware('throttle:60,1')
+    ->name('traceability.qr');
 
 /*
 |--------------------------------------------------------------------------

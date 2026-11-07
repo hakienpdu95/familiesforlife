@@ -94,3 +94,8 @@
         color: var(--color-primary);
     }
 }
+
+.pbc-block.pbc-block-invalid {
+    border-color: var(--color-error, #ef4444);
+    box-shadow: 0 0 0 1px var(--color-error, #ef4444);
+}

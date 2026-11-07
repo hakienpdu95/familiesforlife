@@ -24,6 +24,7 @@ class OcopProductApiController extends Controller
             'search'      => ['nullable', 'string', 'max:200'],
             'category_id' => ['nullable', 'integer'],
             'status'      => ['nullable', 'string', 'in:' . implode(',', array_column(OcopProductStatus::cases(), 'value'))],
+            'trashed' => ['nullable', 'boolean'],
         ]);
 
         $sortRaw   = $request->input('sort.0');
@@ -38,6 +39,7 @@ class OcopProductApiController extends Controller
             perPage:    min(100, max(5, (int) ($validated['size'] ?? 20))),
             sortField:  $sortField,
             sortDir:    $sortDir,
+            trashed: (bool) ($validated['trashed'] ?? false),
         );
 
         $paginator = $handler->handle($query);
@@ -46,6 +48,7 @@ class OcopProductApiController extends Controller
             'data'      => OcopProductListResource::collection($paginator->items()),
             'last_page' => $paginator->lastPage(),
             'total'     => $paginator->total(),
+            'trashed_count' => OcopProduct::onlyTrashed()->count(),
         ]);
     }
 }

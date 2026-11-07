@@ -16,6 +16,7 @@ Route::middleware(['auth'])->prefix('dashboard/ocop')->name('backend.ocop.')->gr
     Route::get('categories', [OcopCategoryAdminController::class, 'index'])->name('categories.index');
     Route::post('products/import', [OcopProductAdminController::class, 'import'])->name('products.import');
     Route::resource('products', OcopProductAdminController::class)->except(['show']);
+    Route::post('products/{product}/restore', [OcopProductAdminController::class, 'restore'])->withTrashed()->name('products.restore');
 });
 
 // ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị) ─────────

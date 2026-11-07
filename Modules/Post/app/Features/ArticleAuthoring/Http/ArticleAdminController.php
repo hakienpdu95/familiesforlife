@@ -16,6 +16,7 @@ use Modules\Post\Enums\SponsorLabel;
 use Modules\Post\Features\ArticleAuthoring\Actions\CreateArticleAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\CreateTranslationAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\DeleteArticleAction;
+use Modules\Post\Features\ArticleAuthoring\Actions\RestoreArticleAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\PublishAllTranslationsAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\RemoveSponsorshipAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\UpdateArticleAction;
@@ -255,6 +256,24 @@ class ArticleAdminController extends Controller
 
         return redirect()->route('backend.post.articles.index')
             ->with('success', 'Đã xoá bài viết.');
+    }
+
+    public function restore(Request $request, PostArticle $article, RestoreArticleAction $action): RedirectResponse|JsonResponse
+    {
+        $this->authorizeArticle($article, 'post_article.delete');
+
+        abort_unless($article->trashed(), 422, 'Bài viết này chưa bị xoá.');
+
+        $action->handle($article);
+
+        $title = $article->mainTranslation()?->title;
+        $message = 'Đã khôi phục bài viết "'.$title.'".';
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => $message, 'edit_url' => route('backend.post.articles.edit', $article)]);
+        }
+
+        return redirect()->route('backend.post.articles.edit', $article)->with('success', $message);
     }
 
     public function publishAll(PostArticle $article, PublishAllTranslationsAction $action): RedirectResponse

@@ -411,6 +411,13 @@
 
                 <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">Xuất bản</p>
 
+                @if($product?->qrIdentity)
+                <p class="text-xs text-base-content/50 mb-4">
+                    Mã tem QR: <span class="font-mono font-semibold text-base-content">{{ $product->qrIdentity->qr_code }}</span><br>
+                    <a href="{{ $product->qrIdentity->publicUrl() }}" target="_blank" rel="noopener" class="link link-primary break-all">{{ $product->qrIdentity->publicUrl() }}</a>
+                </p>
+                @endif
+
                 <div class="form-control mb-4">
                     <label class="label py-0 pb-1">
                         <span class="label-text text-xs font-medium">Trạng thái <span class="text-error">*</span></span>

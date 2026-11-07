@@ -32,4 +32,9 @@ class OcopProductPolicy
     {
         return $user->can('ocop.manage');
     }
+
+    public function restore(User $user, OcopProduct $product): bool
+    {
+        return $user->can('ocop.manage');
+    }
 }

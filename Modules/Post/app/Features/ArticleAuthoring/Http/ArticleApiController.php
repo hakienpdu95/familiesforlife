@@ -30,6 +30,7 @@ class ArticleApiController extends Controller
             'category_id' => ['nullable', 'integer'],
             'format' => ['nullable', 'string', 'in:'.implode(',', array_column(ArticleFormat::cases(), 'value'))],
             'status' => ['nullable', 'string', 'in:'.implode(',', array_column(TranslationStatus::cases(), 'value'))],
+            'trashed' => ['nullable', 'boolean'],
         ]);
 
         // Tabulator (sortMode: 'remote') gửi mảng sort[{field,dir}].
@@ -46,6 +47,7 @@ class ArticleApiController extends Controller
             status: $validated['status'] ?? null,
             sortField: $sortField,
             sortDir: $sortDir,
+            trashed: (bool) ($validated['trashed'] ?? false),
         );
 
         $paginator = $handler->handle($query);
@@ -54,6 +56,7 @@ class ArticleApiController extends Controller
             'data' => ArticleListResource::collection($paginator->items()),
             'last_page' => $paginator->lastPage(),
             'total' => $paginator->total(),
+            'trashed_count' => PostArticle::onlyTrashed()->count(),
         ]);
     }
 

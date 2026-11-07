@@ -24,6 +24,7 @@ class HeritageSiteApiController extends Controller
             'search' => ['nullable', 'string', 'max:200'],
             'heritage_type' => ['nullable', 'string'],
             'status' => ['nullable', 'string', 'in:'.implode(',', array_column(HeritageSiteStatus::cases(), 'value'))],
+            'trashed' => ['nullable', 'boolean'],
         ]);
 
         $sortRaw = $request->input('sort.0');
@@ -38,6 +39,7 @@ class HeritageSiteApiController extends Controller
             perPage: min(100, max(5, (int) ($validated['size'] ?? 20))),
             sortField: $sortField,
             sortDir: $sortDir,
+            trashed: (bool) ($validated['trashed'] ?? false),
         );
 
         $paginator = $handler->handle($query);
@@ -46,6 +48,7 @@ class HeritageSiteApiController extends Controller
             'data' => HeritageSiteListResource::collection($paginator->items()),
             'last_page' => $paginator->lastPage(),
             'total' => $paginator->total(),
+            'trashed_count' => HeritageSite::onlyTrashed()->count(),
         ]);
     }
 }

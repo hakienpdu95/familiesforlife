@@ -15,5 +15,6 @@ class ListHeritageSitesForAdminQuery implements QueryInterface
         public readonly int $perPage = 20,
         public readonly string $sortField = 'created_at',
         public readonly string $sortDir = 'desc',
+        public readonly bool $trashed = false,
     ) {}
 }

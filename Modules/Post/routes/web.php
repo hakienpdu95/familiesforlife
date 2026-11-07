@@ -59,6 +59,7 @@ Route::middleware(['auth'])
         // PostArticle: chỉ "vỏ" (format/cover/is_featured/categories/tags) — không còn
         // title/status (đã chuyển sang PostArticleTranslation, xem TranslationController).
         Route::resource('articles', ArticleAdminController::class);
+        Route::post('articles/{article}/restore', [ArticleAdminController::class, 'restore'])->withTrashed()->name('articles.restore');
         Route::post('articles/{article}/publish-all', [ArticleAdminController::class, 'publishAll'])->name('articles.publish-all');
         Route::post('articles/{article}/remove-sponsor', [ArticleAdminController::class, 'removeSponsor'])->name('articles.remove-sponsor');
         // format=redirect — thống kê lượt click (xem GetArticleRedirectClickStatsHandler).

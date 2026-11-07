@@ -16,6 +16,11 @@ class ArticleListResource extends JsonResource
         $canManage = $user?->can('post_article.edit')
             && ($this->created_by === $user->id || $user->can('post_article.publish'));
 
+        $canDelete = $user && ($user->isPlatformContentEditor() || $user->isPlatformContentHead()
+            || ($user->can('post_article.delete') && ($this->created_by === $user->id || $user->can('post_article.publish'))));
+
+        $trashed = $this->trashed();
+
         return [
             'id'          => $this->id,
             'title'       => $main?->title ?? "(chưa có bản dịch {$this->main_locale})",
@@ -39,12 +44,20 @@ class ArticleListResource extends JsonResource
 
             'is_redirect' => $this->isRedirect(),
 
+            'qr_code' => $this->qrIdentity?->qr_code,
+            'qr_url'  => $this->qrIdentity?->publicUrl(),
+
             'show_url'   => route('backend.post.articles.show', $this->resource),
             'edit_url'   => route('backend.post.articles.edit', $this->resource),
             'destroy_url' => route('backend.post.articles.destroy', $this->resource),
             'clicks_url' => $this->isRedirect() ? route('backend.post.articles.clicks', $this->resource) : null,
 
-            'can_manage' => (bool) $canManage,
+            'can_manage' => (bool) $canManage && ! $trashed,
+
+            'is_trashed' => $trashed,
+            'deleted_at' => $this->deleted_at?->format('d/m/Y H:i'),
+            'is_public' => $trashed && $main?->status === \Modules\Post\Enums\TranslationStatus::Published,
+            'restore_url' => $trashed && $canDelete ? route('backend.post.articles.restore', $this->resource) : null,
         ];
     }
 }

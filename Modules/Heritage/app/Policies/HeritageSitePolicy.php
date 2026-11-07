@@ -32,4 +32,9 @@ class HeritageSitePolicy
     {
         return $user->can('heritage.manage');
     }
+
+    public function restore(User $user, HeritageSite $site): bool
+    {
+        return $user->can('heritage.manage');
+    }
 }

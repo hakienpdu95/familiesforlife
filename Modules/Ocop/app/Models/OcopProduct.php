@@ -3,6 +3,7 @@
 namespace Modules\Ocop\Models;
 
 use App\Models\User;
+use App\Shared\Traceability\Traits\HasQrIdentity;
 use App\Traits\HasManagedMedia;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -21,6 +22,7 @@ use Spatie\MediaLibrary\HasMedia;
 class OcopProduct extends Model implements HasMedia
 {
     use HasManagedMedia;
+    use HasQrIdentity;
     use LogsActivity;
     use Searchable;
     use SoftDeletes;
@@ -121,6 +123,7 @@ class OcopProduct extends Model implements HasMedia
 
         return array_values(array_unique($matches[1]));
     }
+
 
     // ── Scopes ───────────────────────────────────────────────────────
 

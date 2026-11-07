@@ -14,6 +14,7 @@ use Modules\Heritage\Enums\HeritageType;
 use Modules\Heritage\Enums\HeritageVisitingStatus;
 use Modules\Heritage\Features\HeritageSiteManagement\Actions\CreateHeritageSiteAction;
 use Modules\Heritage\Features\HeritageSiteManagement\Actions\DeleteHeritageSiteAction;
+use Modules\Heritage\Features\HeritageSiteManagement\Actions\RestoreHeritageSiteAction;
 use Modules\Heritage\Features\HeritageSiteManagement\Actions\UpdateHeritageSiteAction;
 use Modules\Heritage\Features\HeritageSiteManagement\Data\HeritageSiteData;
 use Modules\Heritage\Models\HeritageSite;
@@ -78,6 +79,23 @@ class HeritageSiteAdminController extends Controller
         return redirect()->route('backend.heritage.sites.index')->with('success', $message);
     }
 
+    public function restore(Request $request, HeritageSite $site, RestoreHeritageSiteAction $action): RedirectResponse|JsonResponse
+    {
+        $this->authorize('restore', $site);
+
+        abort_unless($site->trashed(), 422, 'Mục này chưa bị xoá.');
+
+        $action->handle($site);
+
+        $message = 'Đã khôi phục di tích "'.$site->name.'".';
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => $message]);
+        }
+
+        return redirect()->route('backend.heritage.sites.edit', $site)->with('success', $message);
+    }
+
     public function destroy(Request $request, HeritageSite $site, DeleteHeritageSiteAction $action): RedirectResponse|JsonResponse
     {
         $action->handle($site);
@@ -92,6 +110,8 @@ class HeritageSiteAdminController extends Controller
 
     private function validated(Request $request, ?HeritageSite $site = null): array
     {
+        $request->request->remove('qr_code');
+
         return $request->validate([
             'name' => ['required', 'string', 'max:200'],
             // §3.5 — rỗng = tự sinh ở CreateHeritageSiteAction; alpha_dash chỉ áp dụng khi biên
