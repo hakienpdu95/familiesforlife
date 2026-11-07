@@ -6,13 +6,17 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Modules\Post\Features\ArticleAuthoring\Actions\ApproveArticleTranslationAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\ArchiveArticleAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\CancelScheduleAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\CreateTranslationAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\DeleteTranslationAction;
+use Modules\Post\Features\ArticleAuthoring\Actions\FastTrackApprovalAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\PublishArticleAction;
+use Modules\Post\Features\ArticleAuthoring\Actions\ReturnArticleToDraftAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\ScheduleArticleAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\SubmitArticleForReviewAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\TakeDownArticleTranslationAction;
@@ -97,28 +101,51 @@ class TranslationController extends Controller
             ->with('success', "Đã xoá bản dịch \"{$locale}\".");
     }
 
-    public function submit(PostArticleTranslation $translation, SubmitArticleForReviewAction $action): RedirectResponse
+    public function submit(Request $request, PostArticleTranslation $translation, SubmitArticleForReviewAction $action): RedirectResponse
     {
         $this->authorize('submitForReview', $translation);
 
-        return $this->runTransition($translation, fn () => $action->handle($translation), 'Đã gửi bản dịch để chờ duyệt.');
+        if (Gate::allows('publish', $translation)) {
+            return back()->with('error', 'Tài khoản của bạn có quyền xuất bản trực tiếp, không cần gửi duyệt.');
+        }
+
+        $user = $request->user();
+        $toHead = Gate::allows('approve', $translation);
+
+        return $this->runTransition(
+            $translation,
+            fn () => $action->handle($translation, $user),
+            $toHead ? 'Đã gửi bản dịch lên Tổng biên tập duyệt xuất bản.' : 'Đã gửi bản dịch tới Biên tập viên duyệt sơ bộ.',
+        );
     }
 
-    public function approve(PostArticleTranslation $translation, ApproveArticleTranslationAction $action): RedirectResponse
+    public function approve(Request $request, PostArticleTranslation $translation, ApproveArticleTranslationAction $action): RedirectResponse
     {
         $this->authorize('approve', $translation);
 
-        return $this->runTransition($translation, fn () => $action->handle($translation), 'Đã duyệt bản dịch.');
+        return $this->runTransition($translation, fn () => $action->handle($translation, $request->user()), 'Đã duyệt sơ bộ, chuyển Tổng biên tập duyệt xuất bản.');
     }
 
-    public function publish(PostArticleTranslation $translation, PublishArticleAction $action): RedirectResponse
+    public function returnToDraft(Request $request, PostArticleTranslation $translation, ReturnArticleToDraftAction $action): RedirectResponse
+    {
+        $this->authorize('returnToDraft', $translation);
+
+        $reason = $request->validate(['reason' => ['required', 'string', 'min:10', 'max:500']])['reason'];
+
+        return $this->runTransition($translation, fn () => $action->handle($translation, $request->user(), $reason), 'Đã trả bài về người viết để chỉnh sửa.');
+    }
+
+    public function publish(Request $request, PostArticleTranslation $translation, PublishArticleAction $action, FastTrackApprovalAction $fastTrack): RedirectResponse
     {
         $this->authorize('publish', $translation);
 
-        return $this->runTransition($translation, fn () => $action->handle($translation), 'Đã xuất bản bản dịch.');
+        return $this->runTransition($translation, fn () => DB::transaction(function () use ($request, $translation, $action, $fastTrack) {
+            $fastTrack->handle($translation, $request->user());
+            $action->handle($translation);
+        }), 'Đã xuất bản bản dịch.');
     }
 
-    public function schedule(Request $request, PostArticleTranslation $translation, ScheduleArticleAction $action): RedirectResponse
+    public function schedule(Request $request, PostArticleTranslation $translation, ScheduleArticleAction $action, FastTrackApprovalAction $fastTrack): RedirectResponse
     {
         $this->authorize('schedule', $translation);
 
@@ -126,7 +153,10 @@ class TranslationController extends Controller
 
         return $this->runTransition(
             $translation,
-            fn () => $action->handle($translation, Carbon::parse($validated['scheduled_at'])),
+            fn () => DB::transaction(function () use ($request, $translation, $action, $fastTrack, $validated) {
+                $fastTrack->handle($translation, $request->user());
+                $action->handle($translation, Carbon::parse($validated['scheduled_at']));
+            }),
             'Đã lên lịch xuất bản bản dịch.',
         );
     }

@@ -72,6 +72,7 @@ Route::middleware(['auth'])
         // đăng ký TRƯỚC 'versions/{version}' (show): cùng lý do 'articles/pending-review' đặt
         // trước Route::resource('articles', ...) ở trên — nếu không, "compare" sẽ bị model-bind
         // nhầm thành {version} (ném ModelNotFoundException) trước khi khớp được route compare.
+        Route::get('translations/{translation}/history', [ArticleVersionController::class, 'page'])->name('translations.history');
         Route::get('translations/{translation}/versions', [ArticleVersionController::class, 'index'])->name('translations.versions.index');
         Route::get('translations/{translation}/versions/compare', [ArticleVersionController::class, 'compare'])->name('translations.versions.compare');
         Route::get('translations/{translation}/versions/{version}', [ArticleVersionController::class, 'show'])->name('translations.versions.show');
@@ -79,6 +80,7 @@ Route::middleware(['auth'])
 
         Route::post('translations/{translation}/submit', [TranslationController::class, 'submit'])->name('translations.submit');
         Route::post('translations/{translation}/approve', [TranslationController::class, 'approve'])->name('translations.approve');
+        Route::post('translations/{translation}/return-to-draft', [TranslationController::class, 'returnToDraft'])->name('translations.return-to-draft');
         Route::post('translations/{translation}/publish', [TranslationController::class, 'publish'])->name('translations.publish');
         Route::post('translations/{translation}/schedule', [TranslationController::class, 'schedule'])->name('translations.schedule');
         Route::post('translations/{translation}/cancel-schedule', [TranslationController::class, 'cancelSchedule'])->name('translations.cancel-schedule');

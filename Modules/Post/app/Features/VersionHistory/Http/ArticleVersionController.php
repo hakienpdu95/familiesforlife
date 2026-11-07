@@ -5,6 +5,7 @@ namespace Modules\Post\Features\VersionHistory\Http;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 use Modules\Post\Features\VersionHistory\Actions\CompareArticleVersionsAction;
 use Modules\Post\Features\VersionHistory\Actions\RestoreArticleVersionAction;
 use Modules\Post\Features\VersionHistory\Exceptions\VersionRestoreException;
@@ -19,6 +20,18 @@ use Modules\Post\Support\ArticleContentRenderer;
  */
 class ArticleVersionController extends Controller
 {
+    public function page(PostArticleTranslation $translation): View
+    {
+        $this->authorize('viewHistory', $translation);
+
+        $translation->loadMissing('article');
+
+        return view('post::admin.articles.history', [
+            'translation' => $translation,
+            'canRestore'  => auth()->user()->can('restoreVersion', $translation),
+        ]);
+    }
+
     public function index(Request $request, PostArticleTranslation $translation): JsonResponse
     {
         $this->authorize('viewHistory', $translation);

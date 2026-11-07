@@ -48,7 +48,7 @@ enum TranslationStatus: string
         return match ($this) {
             self::Draft       => in_array($target, [self::Submitted, self::Scheduled], true),
             self::Submitted   => in_array($target, [self::Approved, self::Draft], true),
-            self::Approved    => in_array($target, [self::Scheduled, self::Published], true),
+            self::Approved    => in_array($target, [self::Scheduled, self::Published, self::Draft], true),
             self::Scheduled   => in_array($target, [self::Published, self::Draft], true),
             self::Published   => in_array($target, [self::Unpublished, self::Archived], true),
             self::Unpublished => in_array($target, [self::Published, self::Archived], true),

@@ -77,7 +77,16 @@ class PostArticlePolicy
 
     public function submitForReview(User $user, PostArticleTranslation $translation): bool
     {
-        return $this->update($user, $translation);
+        return ! $user->isPlatformContentHead() && $this->update($user, $translation);
+    }
+
+    public function returnToDraft(User $user, PostArticleTranslation $translation): bool
+    {
+        return match ($translation->status) {
+            TranslationStatus::Submitted => $this->approve($user, $translation),
+            TranslationStatus::Approved  => $this->publish($user, $translation),
+            default                      => false,
+        };
     }
 
     // ── Approval workflow — Platform Approval Gateway, PHÂN CẤP 2 TẦNG cho bài viết ────

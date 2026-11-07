@@ -259,7 +259,9 @@ class ArticleAdminController extends Controller
 
     public function publishAll(PostArticle $article, PublishAllTranslationsAction $action): RedirectResponse
     {
-        $this->authorizeArticle($article, 'post_article.publish');
+        $translation = $article->mainTranslation() ?? $article->translations()->first();
+        abort_unless($translation, 404);
+        $this->authorize('publish', $translation);
 
         $action->handle($article);
 
