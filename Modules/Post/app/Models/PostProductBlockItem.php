@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use Modules\Ocop\Enums\OcopProductStatus;
 use Modules\Ocop\Models\OcopProduct;
 use Modules\Product\Models\Product;
 
@@ -64,13 +65,13 @@ class PostProductBlockItem extends Model
 
     public function getDisplayTitleAttribute(): ?string
     {
-        return $this->title_override ?? $this->source()?->name;
+        return $this->override('title_override') ?? $this->source()?->name;
     }
 
     public function getDisplayPriceLabelAttribute(): ?string
     {
-        if ($this->price_label_override !== null) {
-            return $this->price_label_override;
+        if (($price = $this->override('price_label_override')) !== null) {
+            return $price;
         }
 
         if ($this->ocop_product_id) {
@@ -84,13 +85,49 @@ class PostProductBlockItem extends Model
 
     public function getDisplayDescriptionAttribute(): ?string
     {
-        return $this->description_override
+        return $this->override('description_override')
             ?? ($this->ocop_product_id ? Str::limit(trim(strip_tags((string) $this->ocopProduct?->description)), 200) ?: null : $this->product?->short_description);
     }
 
     public function getDisplayImageUrlAttribute(): ?string
     {
-        return $this->image_url_override
+        return $this->override('image_url_override')
             ?? ($this->ocop_product_id ? ($this->ocopProduct?->imageUrl('medium') ?: null) : $this->product?->cover_image_url);
+    }
+
+    public function getOcopStarsAttribute(): ?int
+    {
+        return $this->ocop_product_id ? ($this->ocopProduct?->star_rating ?: null) : null;
+    }
+
+    public function getDisplayMetaAttribute(): ?string
+    {
+        if (! $this->ocop_product_id || ! $this->ocopProduct) {
+            return null;
+        }
+
+        return collect([$this->ocopProduct->producer_name, $this->ocopProduct->province_name])->filter()->implode(' · ') ?: null;
+    }
+
+    public function getDisplayUrlAttribute(): ?string
+    {
+        $ocop = $this->ocop_product_id ? $this->ocopProduct : null;
+
+        if ($qr = $ocop?->qrIdentity) {
+            return $qr->publicUrl();
+        }
+
+        if (! $ocop || $ocop->trashed() || $ocop->status !== OcopProductStatus::Published || blank($ocop->slug)) {
+            return null;
+        }
+
+        return route('ocop.public.show', ['slug' => $ocop->slug, 'id' => $ocop->id]);
+    }
+
+    private function override(string $attribute): ?string
+    {
+        $value = $this->getAttribute($attribute);
+
+        return filled($value) ? $value : null;
     }
 }

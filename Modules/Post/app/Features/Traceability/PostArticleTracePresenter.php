@@ -85,7 +85,7 @@ class PostArticleTracePresenter implements TracePresenter
 
         $related = [];
         if ($live) {
-            $live->loadMissing(['ocopProducts.media', 'heritageSites.media']);
+            $live->loadMissing(['ocopProducts.media', 'ocopProducts.qrIdentity', 'heritageSites.media']);
             $categoryId = $live->primaryCategory->first()?->id;
             $sameCategory = $categoryId
                 ? PostArticle::query()->with(['translations', 'media'])->whereKeyNot($live->id)
@@ -93,7 +93,7 @@ class PostArticleTracePresenter implements TracePresenter
                     ->latest()->limit(6)->get()
                 : collect();
             $related = [
-                ['title' => 'Sản phẩm OCOP trong bài', 'icon' => 'fa-certificate', 'items' => $this->ocopCards($live->ocopProducts)],
+                ['title' => 'Sản phẩm OCOP trong bài', 'icon' => 'fa-certificate', 'items' => $this->ocopCards($live->ocopProducts, true)],
                 ['title' => 'Di tích được nhắc tới', 'icon' => 'fa-landmark', 'items' => $this->heritageCards($live->heritageSites)],
                 ['title' => 'Bài viết cùng chuyên mục', 'icon' => 'fa-newspaper', 'items' => $this->articleCards($sameCategory)],
             ];

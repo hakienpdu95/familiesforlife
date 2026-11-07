@@ -1,25 +1,24 @@
 @php($item = $block->items->first())
-<div class="not-prose bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-xl p-5 my-4 flex items-center gap-5 flex-wrap">
-    @if($item?->display_image_url)
-    <img src="{{ $item->display_image_url }}" alt="{{ $item->display_title }}" class="w-28 h-28 object-cover rounded-lg shrink-0">
-    @endif
-    <div class="flex-1 min-w-48">
-        @if($block->heading)<p class="text-xs font-semibold text-primary uppercase tracking-wide">{{ $block->heading }}</p>@endif
-        <h3 class="text-xl font-bold">{{ $item?->display_title }}</h3>
-        @if($item?->display_price_label)<p class="text-2xl font-extrabold text-primary mt-1">{{ $item->display_price_label }}</p>@endif
+@php($price = $item?->ocop_stars && blank($item?->price_label_override) ? null : $item?->display_price_label)
+<aside class="not-prose @container my-7 rounded-lg bg-base-200/70 overflow-hidden" aria-label="{{ $block->heading ?: 'Sản phẩm nổi bật' }}">
+    <div class="flex flex-col @md:flex-row">
+        @include('post::components.product-block.partials.media', ['class' => 'aspect-[4/3] @md:aspect-square @md:w-52 shrink-0', 'size' => 480])
+        <div class="flex flex-1 flex-col justify-center gap-3 p-5">
+            <div>
+                <p class="text-[11px] font-semibold uppercase tracking-[.12em] text-primary">{{ $block->heading ?: ($block->isOcop() ? 'Sản phẩm OCOP nổi bật' : 'Sản phẩm nổi bật') }}</p>
+                <h3 class="mt-1.5 font-serif tx-serif text-xl font-bold leading-snug text-base-content">
+                    @include('post::components.product-block.partials.title')
+                </h3>
+                <div class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+                    @include('post::components.product-block.partials.stars', ['class' => 'text-[13px]'])
+                    @if ($item?->display_meta)<span class="text-[13px] text-base-content/60">{{ $item->display_meta }}</span>@endif
+                </div>
+                @if ($price)<p class="mt-2 text-2xl font-bold text-primary">{{ $price }}</p>@endif
+                @if ($item?->display_description)
+                    <p class="mt-2 text-sm leading-relaxed text-base-content/75 line-clamp-2">{{ $item->display_description }}</p>
+                @endif
+            </div>
+            @include('post::components.product-block.partials.buttons', ['blockButtons' => $block->buttons])
+        </div>
     </div>
-    {{-- rel="sponsored noopener" trên MỌI nút product-block (không điều kiện isCurrentlySponsored()
-         như CTA cuối bài) — đích redirect luôn là link affiliate thật (Shopee/TikTok/NCC qua
-         ProductLinkType), khuyến nghị Google cho link liên kết/affiliate bất kể bài viết có gắn
-         nhãn "Sponsored" hay không; noopener vì target có thể là "_blank" (ButtonTarget::NewTab). --}}
-    <div class="flex flex-wrap gap-2">
-        @foreach($item?->buttons ?? [] as $button)
-        <a href="{{ route('post.cta.redirect', $button) }}" target="{{ $button->target->value }}" rel="sponsored noopener"
-           class="btn {{ $button->style->btnClass() }}">{{ $button->display_label }}</a>
-        @endforeach
-        @foreach($block->buttons as $button)
-        <a href="{{ route('post.cta.redirect', $button) }}" target="{{ $button->target->value }}" rel="sponsored noopener"
-           class="btn {{ $button->style->btnClass() }}">{{ $button->display_label }}</a>
-        @endforeach
-    </div>
-</div>
+</aside>

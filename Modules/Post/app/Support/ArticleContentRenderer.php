@@ -37,7 +37,7 @@ class ArticleContentRenderer
         $blocks = $translation->contentBlocks()
             ->when($exceptTypes, fn ($q) => $q->whereNotIn('type', array_map(fn (ContentBlockType $t) => $t->value, $exceptTypes)))
             ->with([
-                'productBlock.items.product', 'productBlock.items.ocopProduct.media',
+                'productBlock.items.product', 'productBlock.items.ocopProduct.media', 'productBlock.items.ocopProduct.qrIdentity',
                 'productBlock.items.buttons', 'productBlock.buttons', 'faqBlock.items', 'howtoBlock.steps',
                 'comparisonBlock.columns', 'comparisonBlock.rows',
             ])
@@ -126,7 +126,7 @@ class ArticleContentRenderer
             function () use ($translation) {
                 $blocks = $translation->contentBlocks()
                     ->with([
-                        'productBlock.items.product', 'productBlock.items.ocopProduct.media',
+                        'productBlock.items.product', 'productBlock.items.ocopProduct.media', 'productBlock.items.ocopProduct.qrIdentity',
                         'productBlock.items.buttons', 'productBlock.buttons', 'faqBlock.items', 'howtoBlock.steps',
                         'comparisonBlock.columns', 'comparisonBlock.rows',
                     ])
@@ -457,7 +457,7 @@ class ArticleContentRenderer
     {
         $blocks = $translation->contentBlocks()
             ->with([
-                'productBlock.items.product', 'productBlock.items.ocopProduct.media', 'productBlock.items.buttons', 'productBlock.buttons',
+                'productBlock.items.product', 'productBlock.items.ocopProduct.media', 'productBlock.items.ocopProduct.qrIdentity', 'productBlock.items.buttons', 'productBlock.buttons',
                 'faqBlock.items', 'howtoBlock.steps', 'comparisonBlock.columns', 'comparisonBlock.rows',
             ])
             ->get();
@@ -613,7 +613,7 @@ class ArticleContentRenderer
             ->values();
 
         $existingProducts = Product::whereIn('id', $idsFor(false))->get()->keyBy('id');
-        $existingOcop = OcopProduct::withTrashed()->with('media')->whereIn('id', $idsFor(true))->get()->keyBy('id');
+        $existingOcop = OcopProduct::withTrashed()->with(['media', 'qrIdentity'])->whereIn('id', $idsFor(true))->get()->keyBy('id');
 
         // Tính trước TOÀN BỘ danh sách "đã xoá" bằng phép diff thuần (không cần tích luỹ qua
         // tham chiếu khi hydrate — tránh bẫy arrow function `fn() =>` luôn capture BY VALUE dù

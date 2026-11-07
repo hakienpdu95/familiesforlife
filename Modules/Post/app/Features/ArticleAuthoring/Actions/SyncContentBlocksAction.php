@@ -5,6 +5,7 @@ namespace Modules\Post\Features\ArticleAuthoring\Actions;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Lorisleiva\Actions\Concerns\AsAction;
+use Modules\Ocop\Models\OcopProduct;
 use Modules\Post\Enums\ButtonUrlType;
 use Modules\Post\Enums\ContentBlockType;
 use Modules\Post\Enums\ProductBlockTemplate;
@@ -20,7 +21,6 @@ use Modules\Post\Models\PostProductBlockItem;
 use Modules\Post\Support\ArticleContentRenderer;
 use Modules\Product\Contracts\ProductCatalogContract;
 use Modules\Product\Enums\ProductLinkType;
-use Modules\Ocop\Models\OcopProduct;
 use Modules\Product\Models\Product;
 
 /**
@@ -689,10 +689,10 @@ class SyncContentBlocksAction
         $attributes = [
             'product_id' => $isOcop ? null : $itemData['product_id'],
             'ocop_product_id' => $isOcop ? $itemData['product_id'] : null,
-            'title_override' => $itemData['title_override'] ?? null,
-            'price_label_override' => $itemData['price_label_override'] ?? null,
-            'description_override' => $itemData['description_override'] ?? null,
-            'image_url_override' => $itemData['image_url_override'] ?? null,
+            'title_override' => filled($itemData['title_override'] ?? null) ? $itemData['title_override'] : null,
+            'price_label_override' => filled($itemData['price_label_override'] ?? null) ? $itemData['price_label_override'] : null,
+            'description_override' => filled($itemData['description_override'] ?? null) ? $itemData['description_override'] : null,
+            'image_url_override' => filled($itemData['image_url_override'] ?? null) ? $itemData['image_url_override'] : null,
             'sort_order' => $sortOrder,
         ];
 

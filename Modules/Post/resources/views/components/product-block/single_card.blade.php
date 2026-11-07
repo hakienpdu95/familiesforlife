@@ -1,25 +1,26 @@
 @php($item = $block->items->first())
-<div class="not-prose card lg:card-side bg-base-100 border border-base-200 shadow-sm my-4">
-    @if($item?->display_image_url)
-    <figure class="lg:w-64 shrink-0">
-        <img src="{{ $item->display_image_url }}" alt="{{ $item->display_title }}" class="object-cover w-full h-full">
-    </figure>
-    @endif
-    <div class="card-body">
-        @if($block->heading)<p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide">{{ $block->heading }}</p>@endif
-        <h3 class="card-title">{{ $item?->display_title }}</h3>
-        @if($item?->display_price_label)<p class="text-lg font-bold text-primary">{{ $item->display_price_label }}</p>@endif
-        @if($item?->display_description)<p class="text-sm text-base-content/70">{{ $item->display_description }}</p>@endif
-        {{-- rel="sponsored noopener" — xem banner.blade.php. --}}
-        <div class="card-actions mt-2 flex-wrap gap-2">
-            @foreach($item?->buttons ?? [] as $button)
-            <a href="{{ route('post.cta.redirect', $button) }}" target="{{ $button->target->value }}" rel="sponsored noopener"
-               class="btn btn-sm {{ $button->style->btnClass() }}">{{ $button->display_label }}</a>
-            @endforeach
-            @foreach($block->buttons as $button)
-            <a href="{{ route('post.cta.redirect', $button) }}" target="{{ $button->target->value }}" rel="sponsored noopener"
-               class="btn btn-sm {{ $button->style->btnClass() }}">{{ $button->display_label }}</a>
-            @endforeach
+@php($price = $item?->ocop_stars && blank($item?->price_label_override) ? null : $item?->display_price_label)
+<aside class="not-prose @container my-7 rounded-lg border border-base-300 bg-base-100 overflow-hidden" aria-label="{{ $block->heading ?: 'Sản phẩm' }}">
+    <div class="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-base-300 bg-base-200/50">
+        <span class="text-[11px] font-semibold uppercase tracking-[.12em] text-base-content/60 truncate">{{ $block->heading ?: ($block->isOcop() ? 'Sản phẩm OCOP' : 'Sản phẩm') }}</span>
+        @include('post::components.product-block.partials.stars', ['class' => 'text-[12px]'])
+    </div>
+    <div class="flex gap-4 p-4">
+        @include('post::components.product-block.partials.media', ['class' => 'w-24 h-24 @md:w-32 @md:h-32 shrink-0 rounded-md', 'size' => 256])
+        <div class="min-w-0 flex-1">
+            <h3 class="font-serif tx-serif text-[17px] @md:text-lg font-bold leading-snug text-base-content line-clamp-2">
+                @include('post::components.product-block.partials.title')
+            </h3>
+            @if ($item?->display_meta)
+                <p class="mt-1 text-[13px] text-base-content/60 line-clamp-1">{{ $item->display_meta }}</p>
+            @endif
+            @if ($price)
+                <p class="mt-1.5 text-base font-bold text-primary">{{ $price }}</p>
+            @endif
+            @if ($item?->display_description)
+                <p class="mt-2 text-sm leading-relaxed text-base-content/75 line-clamp-3">{{ $item->display_description }}</p>
+            @endif
         </div>
     </div>
-</div>
+    @include('post::components.product-block.partials.buttons', ['blockButtons' => $block->buttons, 'class' => 'px-4 pb-4'])
+</aside>

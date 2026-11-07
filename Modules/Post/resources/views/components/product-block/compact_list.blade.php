@@ -1,30 +1,29 @@
-@if($block->heading)
-<h4 class="not-prose font-semibold text-base-content mt-6 mb-2">{{ $block->heading }}</h4>
-@endif
-<div class="not-prose flex flex-col divide-y divide-base-200 border border-base-200 rounded-xl my-4 overflow-hidden">
-    @foreach($block->items as $item)
-    <div class="flex items-center gap-3 p-3 bg-base-100">
-        @if($item->display_image_url)
-        <img src="{{ $item->display_image_url }}" alt="{{ $item->display_title }}" class="w-12 h-12 object-cover rounded-lg shrink-0">
-        @endif
-        <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium truncate">{{ $item->display_title }}</p>
-            @if($item->display_price_label)<p class="text-xs text-primary font-semibold">{{ $item->display_price_label }}</p>@endif
-        </div>
-        {{-- rel="sponsored noopener" — xem banner.blade.php (đích redirect luôn là link affiliate
-             thật, không điều kiện theo isCurrentlySponsored() của bài viết). --}}
-        @foreach($item->buttons->take(1) as $button)
-        <a href="{{ route('post.cta.redirect', $button) }}" target="{{ $button->target->value }}" rel="sponsored noopener"
-           class="btn btn-xs {{ $button->style->btnClass() }} shrink-0">{{ $button->display_label }}</a>
+<section class="not-prose my-7" aria-label="{{ $block->heading ?: 'Sản phẩm' }}">
+    <h4 class="pb-2 border-b border-base-300 text-[11px] font-semibold uppercase tracking-[.12em] text-base-content/60">{{ $block->heading ?: ($block->isOcop() ? 'Sản phẩm OCOP' : 'Sản phẩm') }}</h4>
+    <ul>
+        @foreach ($block->items as $item)
+            @php($price = $item->ocop_stars && blank($item->price_label_override) ? null : $item->display_price_label)
+            @php($button = $item->buttons->each(fn ($b) => $b->setRelation('blockItem', $item))->first(fn ($b) => filled($b->target_url = $b->resolveTargetUrl())))
+            <li class="flex items-center gap-3 py-3 border-b border-base-300">
+                @include('post::components.product-block.partials.media', ['class' => 'w-14 h-14 shrink-0 rounded', 'size' => 112])
+                <div class="min-w-0 flex-1">
+                    <p class="text-[15px] font-medium leading-snug text-base-content line-clamp-2">
+                        @include('post::components.product-block.partials.title')
+                    </p>
+                    <p class="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-base-content/60">
+                        @include('post::components.product-block.partials.stars', ['class' => 'text-xs'])
+                        @if ($price)<span class="font-semibold text-primary">{{ $price }}</span>@endif
+                        @if ($item->display_meta)<span class="truncate">{{ $item->display_meta }}</span>@endif
+                    </p>
+                </div>
+                @if ($button)
+                    <a href="{{ $button->target_url }}" target="{{ $button->target->value }}" rel="sponsored noopener"
+                       class="btn btn-sm shrink-0 rounded-lg font-medium shadow-none {{ $button->style->btnClass() }}">{{ $button->display_label }}</a>
+                @elseif ($item->display_url)
+                    <a href="{{ $item->display_url }}" class="shrink-0 px-1 text-lg text-base-content/30 hover:text-primary" aria-label="Xem {{ $item->display_title }}">›</a>
+                @endif
+            </li>
         @endforeach
-    </div>
-    @endforeach
-</div>
-@if($block->buttons->isNotEmpty())
-<div class="not-prose flex justify-center gap-2 mb-4">
-    @foreach($block->buttons as $button)
-    <a href="{{ route('post.cta.redirect', $button) }}" target="{{ $button->target->value }}" rel="sponsored noopener"
-       class="btn btn-sm {{ $button->style->btnClass() }}">{{ $button->display_label }}</a>
-    @endforeach
-</div>
-@endif
+    </ul>
+    @include('post::components.product-block.partials.buttons', ['item' => null, 'blockButtons' => $block->buttons, 'class' => 'mt-4'])
+</section>
