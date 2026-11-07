@@ -6,16 +6,17 @@
         tab: 'basic',
         tabFields: {
             basic:    ['ocop_subject_id', 'name', 'category_id', 'star_rating', 'description', 'image'],
-            producer: ['heritage_site_id', 'purchase_url'],
+            producer: ['heritage_site_id'],
             details:  ['story', 'origin', 'production_date', 'shelf_life', 'ingredients', 'usage_instructions', 'storage_instructions'],
             documents: {{ Js::from(collect(\Modules\Ocop\Models\OcopProduct::DOCUMENT_COLLECTIONS)->map(fn ($c) => "documents.$c")->values()) }},
+            affiliate: ['shopee_url', 'tiktok_url'],
         },
         errs: {{ Js::from($errors->keys()) }},
         errCount(t) {
             return this.tabFields[t].filter(f => this.errs.some(e => e === f || e.startsWith(f + '.'))).length;
         },
         init() {
-            const order = ['basic', 'producer', 'details', 'documents'];
+            const order = ['basic', 'producer', 'details', 'documents', 'affiliate'];
             for (const t of order) {
                 if (this.errCount(t) > 0) { this.tab = t; break; }
             }
@@ -64,12 +65,23 @@
 
                 <button type="button" role="tab" :aria-selected="tab === 'documents'"
                         @click="tab = 'documents'"
-                        class="flex items-center gap-1.5 px-1 py-4 text-sm font-medium border-b-2 transition-colors"
+                        class="flex items-center gap-1.5 px-1 py-4 mr-6 text-sm font-medium border-b-2 transition-colors"
                         :class="tab === 'documents'
                             ? 'border-primary text-primary'
                             : 'border-transparent text-base-content/50 hover:text-base-content hover:border-base-content/20'">
                     Hồ sơ &amp; Tiêu chuẩn
                     <span x-show="errCount('documents') > 0" x-text="errCount('documents')"
+                          class="badge badge-error badge-xs"></span>
+                </button>
+
+                <button type="button" role="tab" :aria-selected="tab === 'affiliate'"
+                        @click="tab = 'affiliate'"
+                        class="flex items-center gap-1.5 px-1 py-4 text-sm font-medium border-b-2 transition-colors"
+                        :class="tab === 'affiliate'
+                            ? 'border-primary text-primary'
+                            : 'border-transparent text-base-content/50 hover:text-base-content hover:border-base-content/20'">
+                    Link affiliate
+                    <span x-show="errCount('affiliate') > 0" x-text="errCount('affiliate')"
                           class="badge badge-error badge-xs"></span>
                 </button>
 
@@ -267,21 +279,7 @@
                     @error('heritage_site_id')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                 </div>
 
-                <div class="divider my-1"></div>
-
-                <div class="form-control">
-                    <label class="label py-0 pb-1.5">
-                        <span class="label-text font-medium">Link mua hàng</span>
-                        <span class="label-text-alt text-xs text-base-content/40">Sàn TMĐT/liên hệ mua</span>
-                    </label>
-                    <input type="url" name="purchase_url" value="{{ old('purchase_url', $product?->purchase_url) }}"
-                           data-val-url="URL không hợp lệ — phải bắt đầu bằng https://"
-                           class="input input-bordered input-sm w-full @error('purchase_url') input-error @enderror"
-                           maxlength="500" placeholder="https://...">
-                    @error('purchase_url')<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
-                </div>
-
-                {{-- Tab footer: prev --}}
+{{-- Tab footer: prev --}}
                 <div class="flex items-center justify-between pt-2">
                     <button type="button" @click="tab = 'basic'" class="btn btn-ghost btn-sm gap-1.5">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -395,6 +393,55 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                         </svg>
                         Chi tiết &amp; Câu chuyện
+                    </button>
+                    <button type="button" @click="tab = 'affiliate'" class="btn btn-ghost btn-sm gap-1.5">
+                        Tiếp theo: Link affiliate
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+                </div>
+
+            </div>
+
+            {{-- Panel: Link affiliate --}}
+            @php($affiliateFields = [
+                ['shopee_url',            'Shopee',                    'https://shopee.vn/...',     null],
+                ['tiktok_url',            'TikTok Shop',               'https://vt.tiktok.com/...', null],
+            ])
+            <div x-show="tab === 'affiliate'" x-cloak data-tab-label="Link affiliate" class="space-y-4">
+
+                <p class="text-xs text-base-content/50">
+                    Cấu hình 1 lần ở đây — trang chi tiết sản phẩm OCOP hiển thị các nút mua tương ứng, không cần nhập lại ở nơi khác.
+                </p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    @foreach($affiliateFields as [$field, $label, $placeholder, $hint])
+                    <div class="form-control">
+                        <label class="label py-0 pb-1.5">
+                            <span class="label-text font-medium">{{ $label }}</span>
+                            @if($hint)<span class="label-text-alt text-xs text-base-content/40">{{ $hint }}</span>@endif
+                        </label>
+                        <div class="join w-full">
+                            <input type="url" name="{{ $field }}" value="{{ old($field, $product?->{$field}) }}"
+                                   data-val-url="URL phải bắt đầu bằng https://"
+                                   data-affiliate-input
+                                   class="input input-bordered input-sm join-item flex-1 min-w-0 @error($field) input-error @enderror"
+                                   placeholder="{{ $placeholder }}" maxlength="500">
+                            <a href="#" target="_blank" rel="noopener noreferrer" data-affiliate-open
+                               class="btn btn-sm join-item btn-disabled" aria-disabled="true" title="Mở link để kiểm tra">↗</a>
+                        </div>
+                        @error($field)<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
+                    </div>
+                    @endforeach
+                </div>
+
+                <div class="flex items-center justify-between pt-2">
+                    <button type="button" @click="tab = 'documents'" class="btn btn-ghost btn-sm gap-1.5">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                        Hồ sơ &amp; Tiêu chuẩn
                     </button>
                     <span class="text-xs text-base-content/40">Điền xong? Nhấn <strong>{{ $product ? 'Lưu thay đổi' : 'Tạo mới' }}</strong> ở bên phải</span>
                 </div>

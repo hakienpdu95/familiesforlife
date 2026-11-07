@@ -39,7 +39,8 @@ class OcopProductData extends Data
         /** UUID ảnh hiện có bị editor đánh dấu xoá — CHỈ dùng ở form sửa. */
         public readonly array $remove_media_uuids = [],
 
-        public readonly ?string $purchase_url = null,
+        public readonly ?string $shopee_url = null,
+        public readonly ?string $tiktok_url = null,
         public readonly string $status = 'draft',
         public readonly bool $is_featured = false,
         public readonly int $sort_order = 0,

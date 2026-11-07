@@ -19,8 +19,8 @@
                     @endfor
                 </div>
             </div>
-            @if($product->purchase_url)
-            <a href="{{ $product->purchase_url }}" target="_blank" rel="noopener nofollow" title="Mua sản phẩm"
+            @if($buyUrl = $product->shopee_url ?: $product->tiktok_url)
+            <a href="{{ $buyUrl }}" target="_blank" rel="noopener nofollow sponsored" title="Mua sản phẩm"
                class="btn btn-circle btn-xs border-0 bg-[#117a3a] text-white hover:bg-[#0d6230]">
             @else
             <a href="{{ $productUrl }}" title="Xem sản phẩm"

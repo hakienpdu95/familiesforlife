@@ -2,10 +2,12 @@
 
 namespace Modules\Post\Features\Traceability;
 
+use App\Shared\Traceability\Concerns\BuildsRelatedCards;
 use App\Shared\Traceability\Contracts\TracePresenter;
-use App\Shared\Traceability\TraceabilityService;
+use App\Shared\Traceability\TraceabilityService as T;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Modules\Post\Enums\ContentBlockType;
 use Modules\Post\Enums\TranslationStatus;
@@ -15,7 +17,11 @@ use Modules\Post\Support\ArticleContentRenderer;
 
 class PostArticleTracePresenter implements TracePresenter
 {
+    use BuildsRelatedCards;
+
     private const SUMMARY_WORDS = 200;
+
+    private const WORDS_PER_MINUTE = 200;
 
     public function __construct(
         private readonly ArticleContentRenderer $renderer,
@@ -29,8 +35,9 @@ class PostArticleTracePresenter implements TracePresenter
     public function constrain(Builder $query): void
     {
         $query->withTrashed()->with([
-            'translations' => fn ($q) => $q->select('id', 'article_id', 'locale', 'title', 'slug', 'excerpt', 'direct_answer', 'status', 'published_at'),
+            'translations',
             'primaryCategory:post_categories.id,name',
+            'tags:id,name',
             'media',
         ]);
     }
@@ -44,32 +51,81 @@ class PostArticleTracePresenter implements TracePresenter
     /** @param  PostArticle  $target */
     public function snapshot(Model $target): array
     {
-        $translation = $this->publicTranslation($target);
+        $t = $this->publicTranslation($target);
+        $body = $t ? $this->bodyText($t) : '';
+        $sponsored = $target->isCurrentlySponsored();
 
         return [
-            'title' => $translation?->title,
-            'summary' => $translation ? $this->summary($translation) : null,
+            'title' => $t?->title,
+            'summary' => $t ? $this->summary($t, $body) : null,
             'category' => $target->primaryCategory->first()?->name,
-            'published_at' => $translation?->published_at?->format('d/m/Y'),
-            'image' => TraceabilityService::imageRef($target, 'cover', 'medium'),
+            'tags' => $target->tags->pluck('name')->take(8)->all(),
+            'published_at' => $t?->published_at?->toDateString(),
+            'updated_at' => $t?->updated_at?->toDateString(),
+            'reading_minutes' => $body !== '' ? max(1, (int) ceil(str_word_count(Str::ascii($body)) / self::WORDS_PER_MINUTE)) : null,
+            'faq_count' => $t ? $t->faqBlocks()->withCount('items')->get()->sum('items_count') : 0,
+            'howto_count' => $t ? $t->howtoBlocks()->withCount('steps')->get()->sum('steps_count') : 0,
+            'sponsor' => $sponsored ? [
+                'name' => $target->sponsor_name,
+                'label' => $target->sponsor_label?->label(),
+                'logo' => $target->sponsor_logo_url,
+                'disclosure' => $t?->disclosure_text,
+            ] : null,
+            'citations' => $t ? $t->contentBlocks()->where('type', ContentBlockType::Citation)->get()
+                ->map(fn ($b) => ['text' => $b->citation_text, 'source' => $b->citation_source_name, 'url' => $b->citation_source_url])
+                ->values()->all() : [],
+            'image' => T::imageRef($target, 'cover', 'medium'),
         ];
     }
 
     /** @param  PostArticle|null  $live */
     public function page(array $payload, ?Model $live): array
     {
-        $translation = $live ? $this->publicTranslation($live) : null;
+        $t = $live ? $this->publicTranslation($live) : null;
+
+        $related = [];
+        if ($live) {
+            $live->loadMissing(['ocopProducts.media', 'heritageSites.media']);
+            $categoryId = $live->primaryCategory->first()?->id;
+            $sameCategory = $categoryId
+                ? PostArticle::query()->with(['translations', 'media'])->whereKeyNot($live->id)
+                    ->whereHas('categories', fn ($q) => $q->where('post_categories.id', $categoryId))
+                    ->latest()->limit(6)->get()
+                : collect();
+            $related = [
+                ['title' => 'Sản phẩm OCOP trong bài', 'icon' => 'fa-certificate', 'items' => $this->ocopCards($live->ocopProducts)],
+                ['title' => 'Di tích được nhắc tới', 'icon' => 'fa-landmark', 'items' => $this->heritageCards($live->heritageSites)],
+                ['title' => 'Bài viết cùng chuyên mục', 'icon' => 'fa-newspaper', 'items' => $this->articleCards($sameCategory)],
+            ];
+        }
+
+        $published = ! empty($payload['published_at']) ? Carbon::parse($payload['published_at']) : null;
+        $updated = ! empty($payload['updated_at']) ? Carbon::parse($payload['updated_at']) : null;
 
         return $this->base([
             'title' => $payload['title'] ?? 'Bài viết',
-            'image' => $payload['image']['url'] ?? null,
-            'category' => $payload['category'] ?? null,
-            'published_at' => $payload['published_at'] ?? null,
-            'excerpt' => $translation ? (filled($translation->excerpt) ? trim(strip_tags($translation->excerpt)) : null) : ($payload['summary'] ?? null),
-            'content_html' => $translation ? $this->renderer->render($translation) : null,
-            'cta' => $translation
-                ? ['url' => route('post.public.article', ['slug' => $translation->slug, 'id' => $translation->id]), 'label' => 'Đọc toàn bộ bài viết']
-                : ['url' => route('post.public.home'), 'label' => 'Xem tin tức khác'],
+            'images' => array_filter([$payload['image']['url'] ?? null]),
+            'badges' => array_values(array_filter([
+                ! empty($payload['category']) ? ['label' => $payload['category'], 'icon' => 'fa-layer-group', 'class' => 'badge-primary'] : null,
+                ! empty($payload['sponsor']) ? ['label' => $payload['sponsor']['label'] ?: 'Nội dung tài trợ', 'icon' => 'fa-handshake', 'class' => 'badge-warning'] : null,
+            ])),
+            'facts' => [
+                T::fact('fa-calendar-check', 'Ngày xuất bản', $published?->format('d/m/Y')),
+                T::fact('fa-pen-to-square', 'Cập nhật', $updated?->format('d/m/Y')),
+                T::fact('fa-clock', 'Thời gian đọc', ! empty($payload['reading_minutes']) ? $payload['reading_minutes'].' phút' : null),
+                T::fact('fa-layer-group', 'Chuyên mục', $payload['category'] ?? null),
+                T::fact('fa-circle-info', 'Hỏi đáp', ! empty($payload['faq_count']) ? $payload['faq_count'].' câu hỏi' : null),
+                T::fact('fa-list-check', 'Hướng dẫn', ! empty($payload['howto_count']) ? $payload['howto_count'].' bước' : null),
+            ],
+            'summary' => $t ? (filled($t->excerpt) ? trim(strip_tags($t->excerpt)) : (filled($t->direct_answer) ? trim(strip_tags($t->direct_answer)) : null)) : ($payload['summary'] ?? null),
+            'content_html' => $t ? $this->renderer->render($t, [ContentBlockType::Citation]) : null,
+            'sponsor' => $payload['sponsor'] ?? null,
+            'citations' => array_values(array_filter($payload['citations'] ?? [], fn ($c) => filled($c['text'] ?? null))),
+            'tags' => $payload['tags'] ?? [],
+            'related' => $related,
+            'cta' => $t
+                ? ['url' => route('post.public.article', ['slug' => $t->slug, 'id' => $t->id]), 'label' => 'Đọc trên website', 'icon' => 'fa-book-open']
+                : ['url' => route('post.public.home'), 'label' => 'Xem tin tức khác', 'icon' => 'fa-arrow-right'],
         ]);
     }
 
@@ -84,34 +140,38 @@ class PostArticleTracePresenter implements TracePresenter
 
     private function base(array $page): array
     {
-        return TraceabilityService::page([
+        return T::page([
             'heading' => 'Thông tin bài viết',
             'icon' => 'fa-newspaper',
-            'category' => null,
-            'published_at' => null,
-            'excerpt' => null,
+            'kind' => 'Bài viết',
+            'summary' => null,
             'content_html' => null,
-            'archive_text' => 'Cảnh báo: Thông tin dưới đây là bản lưu trữ. Bài viết này hiện đã bị gỡ khỏi hệ thống.',
-            'cta' => ['url' => route('post.public.home'), 'label' => 'Xem tin tức khác'],
+            'sponsor' => null,
+            'citations' => [],
+            'tags' => [],
+            'archive_text' => 'Thông tin dưới đây là bản lưu trữ. Bài viết này hiện đã bị gỡ khỏi hệ thống.',
+            'cta' => ['url' => route('post.public.home'), 'label' => 'Xem tin tức khác', 'icon' => 'fa-arrow-right'],
             ...$page,
         ]);
     }
 
-    private function summary(PostArticleTranslation $translation): ?string
+    private function bodyText(PostArticleTranslation $t): string
     {
-        foreach ([$translation->excerpt, $translation->direct_answer] as $text) {
-            if (filled($text)) {
-                return trim(strip_tags($text));
-            }
-        }
-
-        $body = $translation->contentBlocks()
+        return $t->contentBlocks()
             ->where('type', ContentBlockType::Text)
-            ->orderBy('sort_order')
             ->pluck('text_html')
             ->map(fn ($html) => trim(preg_replace('/\s+/u', ' ', strip_tags((string) $html))))
             ->filter()
             ->implode(' ');
+    }
+
+    private function summary(PostArticleTranslation $t, string $body): ?string
+    {
+        foreach ([$t->excerpt, $t->direct_answer] as $text) {
+            if (filled($text)) {
+                return trim(strip_tags($text));
+            }
+        }
 
         return $body !== '' ? Str::words($body, self::SUMMARY_WORDS) : null;
     }

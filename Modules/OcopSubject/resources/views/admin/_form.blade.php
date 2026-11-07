@@ -322,6 +322,12 @@
     <div class="xl:sticky xl:top-4 space-y-4">
         <div class="card bg-base-100 shadow-sm border border-base-200">
             <div class="card-body p-3">
+                @if($ocopSubject?->qrIdentity)
+                <p class="text-xs text-base-content/50 mb-3">
+                    Mã QR chủ thể: <span class="font-mono font-semibold text-base-content">{{ $ocopSubject->qrIdentity->qr_code }}</span><br>
+                    <a href="{{ $ocopSubject->qrIdentity->publicUrl() }}" target="_blank" rel="noopener" class="link link-primary break-all">{{ $ocopSubject->qrIdentity->publicUrl() }}</a>
+                </p>
+                @endif
 
                 <label class="flex items-start gap-2.5 cursor-pointer select-none mb-4">
                     <input type="hidden" name="is_active" value="0">

@@ -7,6 +7,7 @@ use App\Http\Controllers\Backend\DashboardController;
 use App\Http\Controllers\Backend\SystemMonitorController;
 use App\Http\Controllers\Backend\NotificationCenterController;
 use App\Http\Controllers\Backend\NotificationPreferenceController;
+use App\Http\Controllers\Backend\QrReportController;
 use App\Http\Controllers\TraceQrController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,6 +18,11 @@ Route::get('p/{qr_code}', TraceQrController::class)
     ->where('qr_code', '[0-9A-Za-z]{6,15}')
     ->middleware('throttle:60,1')
     ->name('traceability.qr');
+
+Route::post('p/{qr_code}/report', [TraceQrController::class, 'report'])
+    ->where('qr_code', '[0-9A-Za-z]{6,15}')
+    ->middleware('throttle:5,10')
+    ->name('traceability.report');
 
 /*
 |--------------------------------------------------------------------------
@@ -50,6 +56,9 @@ Route::middleware(['auth'])
 Route::middleware(['auth'])->prefix('dashboard')->name('backend.')->group(function () {
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('qr-reports', [QrReportController::class, 'index'])->name('qr-reports.index');
+    Route::post('qr-reports/{report}/resolve', [QrReportController::class, 'resolve'])->name('qr-reports.resolve');
 
     Route::get('system-monitor', [SystemMonitorController::class, 'index'])->name('system-monitor');
     Route::get('system-monitor/data', [SystemMonitorController::class, 'data'])->name('system-monitor.data');

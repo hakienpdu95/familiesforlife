@@ -3,6 +3,7 @@
 namespace Modules\OcopSubject\Models;
 
 use App\Models\User;
+use App\Shared\Traceability\Traits\HasQrIdentity;
 use App\Traits\HasManagedMedia;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -19,6 +20,7 @@ use Spatie\MediaLibrary\HasMedia;
 class OcopSubject extends Model implements HasMedia
 {
     use HasManagedMedia;
+    use HasQrIdentity;
     use LogsActivity;
     use SoftDeletes;
 

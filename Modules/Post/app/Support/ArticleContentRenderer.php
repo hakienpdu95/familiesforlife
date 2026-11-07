@@ -31,9 +31,10 @@ use Modules\Product\Models\Product;
 class ArticleContentRenderer
 {
     /** Render HTML cuối cùng để hiển thị (admin preview / trang công khai). */
-    public function render(PostArticleTranslation $translation): string
+    public function render(PostArticleTranslation $translation, array $exceptTypes = []): string
     {
         $blocks = $translation->contentBlocks()
+            ->when($exceptTypes, fn ($q) => $q->whereNotIn('type', array_map(fn (ContentBlockType $t) => $t->value, $exceptTypes)))
             ->with([
                 'productBlock.items.product',
                 'productBlock.items.buttons', 'productBlock.buttons', 'faqBlock.items', 'howtoBlock.steps',

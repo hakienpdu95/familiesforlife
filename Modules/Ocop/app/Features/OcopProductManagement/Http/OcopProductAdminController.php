@@ -186,6 +186,8 @@ class OcopProductAdminController extends Controller
             }
         }
 
+        $urlRule = ['nullable', 'url', 'regex:/^https?:\/\//i', 'max:500'];
+
         return $request->validate([
             'category_id' => ['nullable', 'integer', 'exists:ocop_categories,id'],
             'name' => ['required', 'string', 'max:150'],
@@ -211,7 +213,8 @@ class OcopProductAdminController extends Controller
             'documents.*.*' => ['file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:20480'],
             'remove_media_uuids' => ['nullable', 'array'],
             'remove_media_uuids.*' => ['string', 'uuid'],
-            'purchase_url' => ['nullable', 'url', 'max:500'],
+            'shopee_url' => $urlRule,
+            'tiktok_url' => $urlRule,
             'status' => ['required', Rule::in(array_column(OcopProductStatus::cases(), 'value'))],
             'is_featured' => ['boolean'],
             'sort_order' => ['integer', 'min:0'],
@@ -231,8 +234,12 @@ class OcopProductAdminController extends Controller
             'origin.max' => 'Xuất xứ không được vượt quá :max ký tự.',
             'production_date.max' => 'Ngày sản xuất không được vượt quá :max ký tự.',
             'shelf_life.max' => 'Hạn sử dụng không được vượt quá :max ký tự.',
-            'purchase_url.url' => 'URL không hợp lệ — phải bắt đầu bằng https://',
-            'purchase_url.max' => 'URL không được vượt quá :max ký tự.',
+            'shopee_url.url' => 'Link Shopee không đúng định dạng URL.',
+            'shopee_url.regex' => 'Link Shopee phải bắt đầu bằng http:// hoặc https://.',
+            'shopee_url.max' => 'Link Shopee không được vượt quá :max ký tự.',
+            'tiktok_url.url' => 'Link TikTok Shop không đúng định dạng URL.',
+            'tiktok_url.regex' => 'Link TikTok Shop phải bắt đầu bằng http:// hoặc https://.',
+            'tiktok_url.max' => 'Link TikTok Shop không được vượt quá :max ký tự.',
             'status.required' => 'Vui lòng chọn trạng thái.',
             'status.in' => 'Trạng thái không hợp lệ.',
             'sort_order.integer' => 'Thứ tự hiển thị phải là số nguyên.',

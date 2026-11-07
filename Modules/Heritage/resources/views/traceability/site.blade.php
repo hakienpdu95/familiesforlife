@@ -1,72 +1,39 @@
 @extends('layouts.traceability')
 
 @section('content')
-    @if ($image)
-        <img src="{{ $image }}" alt="{{ $title }}" width="800" height="450" class="w-full aspect-video object-cover">
+    @include('traceability.partials.hero')
+
+    @if ($visiting)
+        <div @class([
+            'mx-4 mt-4 flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-semibold',
+            'bg-green-50 text-green-800' => $visiting['tone'] === 'success',
+            'bg-amber-50 text-amber-800' => $visiting['tone'] === 'warning',
+            'bg-red-50 text-red-800' => $visiting['tone'] === 'error',
+        ])>
+            <span class="relative flex w-2.5 h-2.5">
+                <span @class(['absolute inline-flex h-full w-full rounded-full opacity-60 animate-ping', 'bg-green-400' => $visiting['tone'] === 'success', 'bg-amber-400' => $visiting['tone'] === 'warning', 'bg-red-400' => $visiting['tone'] === 'error'])></span>
+                <span @class(['relative inline-flex w-2.5 h-2.5 rounded-full', 'bg-green-500' => $visiting['tone'] === 'success', 'bg-amber-500' => $visiting['tone'] === 'warning', 'bg-red-500' => $visiting['tone'] === 'error'])></span>
+            </span>
+            Tình trạng tham quan: {{ $visiting['label'] }}
+        </div>
     @endif
 
-    <div class="px-4 pt-5 space-y-5">
-        <div>
-            <div class="flex flex-wrap gap-2 mb-2">
-                @if ($type)
-                    <span class="badge badge-outline badge-sm">{{ $type }}</span>
-                @endif
-                @if ($rank)
-                    <span class="badge badge-primary badge-sm">{{ $rank }}</span>
-                @endif
-            </div>
-            <h1 class="text-2xl font-bold leading-snug">{{ $title }}</h1>
-            @if ($era)
-                <p class="flex items-center gap-1.5 text-sm text-base-content/60 mt-1">
-                    <i class="fa-solid fa-clock" aria-hidden="true"></i>
-                    {{ $era }}
-                </p>
-            @endif
-        </div>
+    @include('traceability.partials.fact-grid', ['facts' => $facts])
 
-        @if ($visiting)
-            <div @class([
-                'flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium',
-                'bg-green-50 text-green-800' => $visiting['tone'] === 'success',
-                'bg-amber-50 text-amber-800' => $visiting['tone'] === 'warning',
-                'bg-red-50 text-red-800' => $visiting['tone'] === 'error',
-            ])>
-                <span @class([
-                    'w-2 h-2 rounded-full',
-                    'bg-green-500' => $visiting['tone'] === 'success',
-                    'bg-amber-500' => $visiting['tone'] === 'warning',
-                    'bg-red-500' => $visiting['tone'] === 'error',
-                ])></span>
-                {{ $visiting['label'] }}
-            </div>
-        @endif
-
-        @if ($address || $map_url)
-        <section class="flex items-start gap-3 rounded-lg bg-base-200 px-3 py-3">
-            <i class="fa-solid fa-location-dot text-primary mt-0.5" aria-hidden="true"></i>
-            <div class="text-sm flex-1">
-                <p class="font-medium">{{ $address ?: 'Xem vị trí trên bản đồ' }}</p>
+    @if ($address || $map_url)
+        <section class="px-4 mt-5">
+            <h2 class="text-sm font-bold mb-2 flex items-center gap-1.5"><i class="fa-solid fa-map-location-dot text-primary" aria-hidden="true"></i> Vị trí</h2>
+            <div class="rounded-xl border border-base-200 p-3">
+                <p class="text-sm font-medium">{{ $address ?: 'Địa chỉ đang cập nhật' }}</p>
+                @if ($coordinates)<p class="text-xs text-base-content/50 mt-0.5 font-mono">GPS: {{ $coordinates }}</p>@endif
                 @if ($map_url)
-                    <a href="{{ $map_url }}" target="_blank" rel="noopener" class="link link-primary text-xs mt-1 inline-flex items-center gap-1">
-                        <i class="fa-solid fa-map" aria-hidden="true"></i>
-                        Chỉ đường trên bản đồ
-                    </a>
+                    <a href="{{ $map_url }}" target="_blank" rel="noopener" class="btn btn-outline btn-primary btn-sm mt-2 gap-1.5"><i class="fa-solid fa-route" aria-hidden="true"></i>Chỉ đường trên Google Maps</a>
                 @endif
             </div>
         </section>
-        @endif
+    @endif
 
-        @if ($intro)
-            <section>
-                <h2 class="text-sm font-bold mb-2">Giới thiệu</h2>
-                <p class="text-sm leading-relaxed text-base-content/80 whitespace-pre-line">{{ $intro }}</p>
-            </section>
-        @endif
-
-        @if (filled($content_html))
-            <section class="prose prose-sm max-w-none prose-img:rounded-lg prose-img:mx-auto prose-a:text-primary [&_table]:block [&_table]:overflow-x-auto [&_iframe]:w-full [&_iframe]:aspect-video">
-                {!! $content_html !!}
-            </section>
-        @endif
-    </div>
+    @include('traceability.partials.sections')
+    @include('traceability.partials.timeline', ['heading' => 'Hành trình số hoá'])
+    @include('traceability.partials.related')
 @endsection

@@ -17,6 +17,7 @@ class ListOcopSubjectsForAdminHandler implements QueryHandlerInterface
         $sortDir = $query->sortDir === 'asc' ? 'asc' : 'desc';
 
         return OcopSubject::query()
+            ->with('qrIdentity')
             ->withCount('products')
             ->when($query->search, fn ($q) => $q->where(fn ($w) => $w
                 ->where('name', 'like', "%{$query->search}%")

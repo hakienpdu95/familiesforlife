@@ -22,5 +22,7 @@ class OcopSubjectServiceProvider extends ModuleServiceProvider
         parent::boot();
 
         Gate::policy(OcopSubject::class, OcopSubjectPolicy::class);
+
+        $this->app->make(\App\Shared\Traceability\TraceabilityRegistry::class)->register(OcopSubject::class, \Modules\OcopSubject\Features\Traceability\OcopSubjectTracePresenter::class);
     }
 }

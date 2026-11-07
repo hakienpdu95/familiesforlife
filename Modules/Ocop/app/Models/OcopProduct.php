@@ -48,7 +48,7 @@ class OcopProduct extends Model implements HasMedia
         'ingredients', 'usage_instructions', 'storage_instructions',
         'province_code', 'province_name', 'ward_code', 'ward_name',
         'producer_name', 'producer_address', 'heritage_site_id',
-        'purchase_url', 'status', 'is_featured', 'sort_order',
+        'shopee_url', 'tiktok_url', 'status', 'is_featured', 'sort_order',
         'created_by', 'updated_by',
     ];
 

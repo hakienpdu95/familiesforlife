@@ -63,6 +63,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         // super-admin bypass toàn bộ Gate checks
+        Gate::define('manageQrReports', fn (User $user) => $user->hasGlobalRole('super-admin') || $user->isPlatformContentModerator() || $user->isPlatformContentHead() || $user->isPlatformOps());
         Gate::define('viewSystemMonitor', fn (User $user) => $user->hasGlobalRole('super-admin') || $user->isPlatformOps());
 
         if (config('monitoring.enabled') && ! $this->app->runningInConsole()) {

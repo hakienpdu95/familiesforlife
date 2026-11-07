@@ -30,8 +30,27 @@ document.addEventListener('DOMContentLoaded', () => {
     initFormValidation(FORM_SEL);
     _setupTabGuard(form);
     _initCategorySelect(form);
+    _setupAffiliateLinks(form);
     initAllTomSelects(form);
 });
+
+function _setupAffiliateLinks(form) {
+    for (const input of form.querySelectorAll('[data-affiliate-input]')) {
+        const btn = input.parentElement.querySelector('[data-affiliate-open]');
+        if (!btn) continue;
+
+        const sync = () => {
+            const ok = /^https?:\/\/\S+\.\S+/i.test(input.value.trim());
+            btn.classList.toggle('btn-disabled', !ok);
+            btn.setAttribute('aria-disabled', String(!ok));
+            btn.href = ok ? input.value.trim() : '#';
+        };
+
+        btn.addEventListener('click', (e) => { if (btn.classList.contains('btn-disabled')) e.preventDefault(); });
+        input.addEventListener('input', sync, { passive: true });
+        sync();
+    }
+}
 
 function _initCategorySelect(form) {
     const el = form.querySelector('#ts-category_id');

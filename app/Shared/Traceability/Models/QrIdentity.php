@@ -3,6 +3,7 @@
 namespace App\Shared\Traceability\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use LogicException;
 
@@ -79,6 +80,16 @@ class QrIdentity extends Model
     public function target(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    public function scans(): HasMany
+    {
+        return $this->hasMany(QrScan::class, 'qr_identity_id');
+    }
+
+    public function reports(): HasMany
+    {
+        return $this->hasMany(QrReport::class, 'qr_identity_id');
     }
 
     public function isActive(): bool

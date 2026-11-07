@@ -22,6 +22,8 @@ class OcopSubjectListResource extends JsonResource
             'products_count' => (int) $this->products_count,
             'is_active' => (bool) $this->is_active,
 
+            'qr_code' => $this->qrIdentity?->qr_code,
+            'qr_url' => $this->qrIdentity?->publicUrl(),
             'edit_url' => route('backend.ocop-subjects.edit', $this->resource),
             'destroy_url' => route('backend.ocop-subjects.destroy', $this->resource),
             'create_product_url' => route('backend.ocop.products.create', ['subject_id' => $this->id]),
