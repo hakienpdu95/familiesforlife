@@ -2,6 +2,8 @@
 
 namespace App\Shared\Traceability;
 
+use App\Models\Media;
+use App\Services\Media\MediaUrlService;
 use App\Shared\Traceability\Models\QrIdentity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -10,6 +12,10 @@ use Illuminate\Support\Facades\Storage;
 class TraceabilityService
 {
     public const ARCHIVE_DIR = 'archived_snapshots';
+
+    public const RESPONSIVE_WIDTHS = ['small' => 480, 'medium' => 800];
+
+    public const RESPONSIVE_SIZES = '(min-width: 576px) 576px, 100vw';
 
     public function __construct(
         private readonly TraceabilityRegistry $registry,
@@ -54,6 +60,8 @@ class TraceabilityService
 
         $status = ! $identity->isActive() ? 'revoked' : ($archived ? 'archived' : 'valid');
 
+        $page = $this->responsiveHtml($page);
+
         return [
             ...$page,
             'view' => $presenter?->view() ?? 'traceability.show',
@@ -64,6 +72,24 @@ class TraceabilityService
             'archived' => $archived,
             'archived_at' => $archived ? $identity->snapshot_at?->format('d/m/Y') : null,
         ];
+    }
+
+    private function responsiveHtml(array $page): array
+    {
+        $urls = app(MediaUrlService::class);
+        $apply = fn (?string $html) => $urls->responsiveEmbeddedImages($html, self::RESPONSIVE_WIDTHS, self::RESPONSIVE_SIZES);
+
+        if (filled($page['content_html'] ?? null)) {
+            $page['content_html'] = $apply($page['content_html']);
+        }
+
+        foreach ($page['sections'] ?? [] as $i => $section) {
+            if (filled($section['html'] ?? null)) {
+                $page['sections'][$i]['html'] = $apply($section['html']);
+            }
+        }
+
+        return $page;
     }
 
     public function captureSnapshot(Model $model): void
@@ -151,6 +177,7 @@ class TraceabilityService
             'title' => 'Không xác định',
             'subtitle' => null,
             'images' => [],
+            'image_srcsets' => [],
             'badges' => [],
             'facts' => [],
             'notice' => null,
@@ -161,6 +188,11 @@ class TraceabilityService
             'cta_sticky' => true,
             ...$page,
         ];
+    }
+
+    public static function srcset(Media $media): ?string
+    {
+        return app(MediaUrlService::class)->srcset($media, self::RESPONSIVE_WIDTHS);
     }
 
     public static function fact(string $icon, string $label, ?string $value): ?array

@@ -1,10 +1,11 @@
 @php($rows = array_values(array_filter($rows)))
 @if ($rows)
-    <dl class="border-t border-base-300 text-[15px]">
+    <dl class="tx-card tx-rows text-[15px]">
         @foreach ($rows as $row)
-            <div class="flex items-baseline justify-between gap-6 py-2.5 border-b border-base-300">
-                <dt class="text-base-content/60 shrink-0">{{ $row['label'] }}</dt>
-                <dd class="text-right font-medium break-words min-w-0">{{ $row['value'] }}</dd>
+            @php($long = mb_strlen((string) $row['value']) > 34)
+            <div @class(['px-4 py-3', 'flex items-baseline justify-between gap-4' => ! $long])>
+                <dt @class(['text-base-content/55 shrink-0', 'text-[13px] mb-0.5' => $long])>{{ $row['label'] }}</dt>
+                <dd @class(['font-medium break-words min-w-0', 'text-right' => ! $long])>{{ $row['value'] }}</dd>
             </div>
         @endforeach
     </dl>

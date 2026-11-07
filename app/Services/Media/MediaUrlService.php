@@ -33,7 +33,7 @@ class MediaUrlService
 
         $cdnUrl = config('media.cdn_url');
         if ($cdnUrl) {
-            return rtrim($cdnUrl, '/') . '/' . $key;
+            return rtrim($cdnUrl, '/').'/'.$key;
         }
 
         return Storage::disk($media->disk)->url($key);
@@ -63,7 +63,8 @@ class MediaUrlService
 
         // Conversions live in the same directory as the original
         $dir = rtrim(dirname($media->getPathRelativeToRoot()), '/');
-        return $dir . '/' . $conversion . '.webp';
+
+        return $dir.'/'.$conversion.'.webp';
     }
 
     /**
@@ -98,6 +99,57 @@ class MediaUrlService
                 : '';
 
             return str_replace($src[0], ' src="'.e($this->url($media, $conversion)).'"', $img);
+        }, $html);
+    }
+
+    /** @param  array<string, int>  $widths  conversion => chiều rộng */
+    public function srcset(Media $media, array $widths): ?string
+    {
+        $generated = $media->generated_conversions ?? [];
+
+        $parts = collect($widths)
+            ->filter(fn (int $width, string $conversion) => ! empty($generated[$conversion]))
+            ->map(fn (int $width, string $conversion) => $this->url($media, $conversion).' '.$width.'w');
+
+        return $parts->count() > 1 ? $parts->implode(', ') : null;
+    }
+
+    /**
+     * Ảnh nhúng `<img data-media-uuid>` → src bản lớn nhất trong $widths đã có, thêm srcset/sizes
+     * và loading="lazy" để trình duyệt di động chỉ tải bản vừa khung hình.
+     *
+     * @param  array<string, int>  $widths
+     */
+    public function responsiveEmbeddedImages(?string $html, array $widths, string $sizes): ?string
+    {
+        if (blank($html) || ! preg_match_all('/data-media-uuid="([^"]+)"/', $html, $found)) {
+            return $html;
+        }
+
+        $media = Media::query()->whereIn('uuid', array_unique($found[1]))->get()->keyBy('uuid');
+
+        return preg_replace_callback('/<img\b[^>]*>/i', function (array $tag) use ($media, $widths, $sizes) {
+            $img = $tag[0];
+
+            if (! preg_match('/data-media-uuid="([^"]+)"/', $img, $uuid) || ! ($item = $media->get($uuid[1])) || $item->mime_type === 'image/gif') {
+                return $img;
+            }
+
+            $extra = '';
+
+            if (! preg_match('/\ssrcset=/i', $img) && ($srcset = $this->srcset($item, $widths))) {
+                $largest = collect($widths)->keys()->reverse()->first(fn ($c) => ! empty(($item->generated_conversions ?? [])[$c]));
+                $img = preg_replace('/\ssrc="[^"]*"/', ' src="'.e($this->url($item, $largest)).'"', $img, 1);
+                $extra .= ' srcset="'.e($srcset).'" sizes="'.e($sizes).'"';
+            }
+            if (! preg_match('/\sloading=/i', $img)) {
+                $extra .= ' loading="lazy"';
+            }
+            if (! preg_match('/\sdecoding=/i', $img)) {
+                $extra .= ' decoding="async"';
+            }
+
+            return $extra === '' ? $img : preg_replace('/^<img\b/i', '<img'.$extra, $img);
         }, $html);
     }
 

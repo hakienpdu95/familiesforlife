@@ -255,6 +255,12 @@ class MediaUploadService
         $this->pruneEmptyAncestors($disk, $oldBasePath);
     }
 
+    /** @param  string[]  $conversions */
+    public function generateConversions(Media $media, array $conversions): void
+    {
+        $this->runConversions($media, $conversions);
+    }
+
     /**
      * Run image conversions synchronously using Intervention Image v4.
      *
@@ -327,7 +333,7 @@ class MediaUploadService
             }
         }
 
-        $media->generated_conversions = $generatedConversions;
+        $media->generated_conversions = array_merge($media->generated_conversions ?? [], $generatedConversions);
         $media->save();
     }
 

@@ -58,7 +58,7 @@ return [
             'max_size_kb'  => 10240,
             'allowed_mime' => ['image/jpeg', 'image/png', 'image/webp'],
             'is_public'    => true,
-            'conversions'  => ['thumb', 'medium', 'preview'],
+            'conversions'  => ['thumb', 'small', 'medium', 'preview'],
         ],
         // spec/RealEstateForSale_Technical_Specification.md §4.4 — gallery đa ảnh (max 6, kéo
         // thả sắp thứ tự qua order_column có sẵn của Spatie) — KHÔNG thêm vào
@@ -73,7 +73,7 @@ return [
             'max_size_kb'  => 10240,
             'allowed_mime' => ['image/jpeg', 'image/png', 'image/webp'],
             'is_public'    => true,
-            'conversions'  => ['thumb', 'medium', 'preview'],
+            'conversions'  => ['thumb', 'small', 'medium', 'preview'],
         ],
         'ocop_label_docs' => [
             'max_size_kb'  => 20480,
@@ -107,7 +107,7 @@ return [
             'max_size_kb'  => 10240,
             'allowed_mime' => ['image/jpeg', 'image/png', 'image/webp'],
             'is_public'    => true,
-            'conversions'  => ['thumb', 'medium'],
+            'conversions'  => ['thumb', 'small', 'medium'],
         ],
         'ocop_subject_business_licenses' => [
             'max_size_kb'  => 20480,
@@ -194,7 +194,7 @@ return [
             'max_size_kb'  => 10240,
             'allowed_mime' => ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
             'is_public'    => true,
-            'conversions'  => ['medium'],
+            'conversions'  => ['small', 'medium'],
         ],
     ],
 
@@ -203,6 +203,12 @@ return [
      * method: 'crop' (cover, fills dimensions) | 'scale' (resize preserving ratio)
      */
     'conversion_settings' => [
+        'small' => [
+            'width'   => 480,
+            'height'  => null,
+            'method'  => 'scale',
+            'quality' => 72,
+        ],
         'thumb' => [
             'width'   => 150,
             'height'  => 150,

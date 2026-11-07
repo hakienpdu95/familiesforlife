@@ -77,7 +77,7 @@ class OcopProductTracePresenter implements TracePresenter
             'usage_instructions' => self::plain($target->usage_instructions),
             'storage_instructions' => self::plain($target->storage_instructions),
             'quality_docs' => $this->docStatus($target, self::QUALITY_DOCS),
-            'image' => T::imageRef($target, OcopProduct::IMAGE_COLLECTION),
+            'image' => T::imageRef($target, OcopProduct::IMAGE_COLLECTION, 'medium'),
         ];
     }
 
@@ -122,6 +122,7 @@ class OcopProductTracePresenter implements TracePresenter
             'title' => $payload['name'] ?? 'Sản phẩm OCOP',
             'subtitle' => ! empty($subject['name']) ? 'Chủ thể: '.$subject['name'] : null,
             'images' => $live ? ($this->mediaUrls($live, OcopProduct::IMAGE_COLLECTION) ?: array_filter([$payload['image']['url'] ?? null])) : array_filter([$payload['image']['url'] ?? null]),
+            'image_srcsets' => $live ? $this->mediaSrcsets($live, OcopProduct::IMAGE_COLLECTION) : [],
             'badges' => array_values(array_filter([
                 ['label' => $stars ? 'OCOP '.$stars.' sao' : 'Chưa xếp hạng OCOP', 'icon' => 'fa-star', 'class' => $stars ? 'badge-warning' : 'badge-ghost'],
                 ! empty($payload['category']) ? ['label' => $payload['category'], 'icon' => 'fa-layer-group', 'class' => 'badge-outline'] : null,

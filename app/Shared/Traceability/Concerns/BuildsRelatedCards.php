@@ -3,6 +3,7 @@
 namespace App\Shared\Traceability\Concerns;
 
 use App\Services\Media\MediaUrlService;
+use App\Shared\Traceability\TraceabilityService as T;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Modules\Heritage\Enums\HeritageSiteStatus;
@@ -23,6 +24,20 @@ trait BuildsRelatedCards
         $urls = app(MediaUrlService::class);
 
         return $model->getMedia($collection)->map(fn ($media) => $urls->url($media, $conversion))->filter()->values()->all();
+    }
+
+    protected function mediaSrcsets(Model $model, string $collection, string $conversion = 'medium'): array
+    {
+        if (! method_exists($model, 'getMedia')) {
+            return [];
+        }
+
+        $urls = app(MediaUrlService::class);
+
+        return $model->getMedia($collection)
+            ->filter(fn ($media) => filled($urls->url($media, $conversion)))
+            ->map(fn ($media) => T::srcset($media))
+            ->values()->all();
     }
 
     /** @param  Collection<int, OcopProduct>  $products */
@@ -49,7 +64,7 @@ trait BuildsRelatedCards
                     'url' => route('post.public.article', ['slug' => $t->slug, 'id' => $t->id]),
                     'title' => $t->title,
                     'subtitle' => $t->published_at?->format('d/m/Y'),
-                    'image' => $a->cover_image_url ?: null,
+                    'image' => $a->getFirstMediaUrl('cover', 'thumb') ?: null,
                 ] : null;
             })->filter()->values()->all();
     }

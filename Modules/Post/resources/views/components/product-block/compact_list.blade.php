@@ -5,7 +5,7 @@
             @php($price = $item->ocop_stars && blank($item->price_label_override) ? null : $item->display_price_label)
             @php($button = $item->buttons->each(fn ($b) => $b->setRelation('blockItem', $item))->first(fn ($b) => filled($b->target_url = $b->resolveTargetUrl())))
             <li class="flex items-center gap-3 py-3 border-b border-base-300">
-                @include('post::components.product-block.partials.media', ['class' => 'w-14 h-14 shrink-0 rounded', 'size' => 112])
+                @include('post::components.product-block.partials.media', ['class' => 'w-14 h-14 shrink-0 rounded-md', 'size' => 112])
                 <div class="min-w-0 flex-1">
                     <p class="text-[15px] font-medium leading-snug text-base-content line-clamp-2">
                         @include('post::components.product-block.partials.title')

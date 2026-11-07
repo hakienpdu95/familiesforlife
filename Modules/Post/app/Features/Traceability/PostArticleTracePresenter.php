@@ -105,6 +105,7 @@ class PostArticleTracePresenter implements TracePresenter
         return $this->base([
             'title' => $payload['title'] ?? 'Bài viết',
             'images' => array_filter([$payload['image']['url'] ?? null]),
+            'image_srcsets' => $live ? array_slice($this->mediaSrcsets($live, 'cover'), 0, 1) : [],
             'badges' => array_values(array_filter([
                 ! empty($payload['category']) ? ['label' => $payload['category'], 'icon' => 'fa-layer-group', 'class' => 'badge-primary'] : null,
                 ! empty($payload['sponsor']) ? ['label' => $payload['sponsor']['label'] ?: 'Nội dung tài trợ', 'icon' => 'fa-handshake', 'class' => 'badge-warning'] : null,

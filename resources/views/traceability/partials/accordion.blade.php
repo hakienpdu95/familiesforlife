@@ -1,15 +1,15 @@
 @if ($sections)
-    <div class="border-t border-base-300">
+    <div class="tx-card tx-rows">
         @foreach ($sections as $section)
-            <details class="tx-details border-b border-base-300" @if ($loop->first && ($openFirst ?? false)) open @endif>
-                <summary class="flex items-center justify-between gap-4 py-3.5 text-[15px] font-medium">
+            <details class="tx-details group/acc" @if ($loop->first && ($openFirst ?? false)) open @endif>
+                <summary class="tx-row-link flex items-center justify-between gap-4 px-4 min-h-[3.25rem] py-3 text-[15px] font-semibold">
                     {{ $section['title'] }}
-                    <span class="tx-plus font-mono text-lg text-base-content/40 leading-none"></span>
+                    <span class="tx-chevron transition-transform group-open/acc:rotate-90">@include('traceability.partials.icon', ['name' => 'chevron'])</span>
                 </summary>
                 @if (! empty($section['html']))
-                    <div class="tx-prose pb-4">{!! $section['html'] !!}</div>
+                    <div class="tx-prose px-4 pb-4">{!! $section['html'] !!}</div>
                 @else
-                    <p class="pb-4 text-[15px] leading-relaxed text-base-content/80 whitespace-pre-line">{{ $section['text'] }}</p>
+                    <p class="px-4 pb-4 text-[15px] leading-relaxed text-base-content/80 whitespace-pre-line">{{ $section['text'] }}</p>
                 @endif
             </details>
         @endforeach

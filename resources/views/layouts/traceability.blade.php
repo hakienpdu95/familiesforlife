@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="vi" data-theme="portal" class="scroll-smooth">
+<html lang="vi" data-theme="portal" class="scroll-smooth scroll-pt-20">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="robots" content="noindex">
     <meta name="theme-color" content="#ffffff">
     <title>{{ $title }} — {{ $brand }}</title>
@@ -14,43 +14,48 @@
     <meta property="og:description" content="{{ $metaDescription }}">
     <meta property="og:url" content="{{ url()->current() }}">
     @if (! empty($images[0]))<meta property="og:image" content="{{ $images[0] }}">@endif
-    @include('layouts.partials.font-preload', ['fonts' => ['roboto', 'merriweather'], 'build' => 'build/frontend'])
+    @include('layouts.partials.font-preload', ['fonts' => ['inter'], 'build' => 'build/frontend'])
     @vite(['resources/css/frontend.css'], 'build/frontend')
 </head>
-<body class="bg-base-200 text-base-content antialiased">
-    <div @class(['tx-scope max-w-xl mx-auto min-h-screen bg-base-100 sm:border-x sm:border-base-300 sm:shadow-sm', 'pb-24' => $cta_sticky])>
+<body class="bg-[#ebebe8] antialiased">
+    <div @class(['tx-scope tx-canvas max-w-xl mx-auto min-h-screen flex flex-col sm:border-x sm:border-[rgb(28_25_23/.08)]', 'pb-24' => $cta_sticky])>
         @php($tagline = trim(\Illuminate\Support\Str::before((string) config('app.site_description'), '—')))
-        <header class="sticky top-0 z-20 bg-base-100/95 backdrop-blur border-b border-base-300">
-            <div class="flex items-center gap-3 px-5 h-14">
+        <header class="sticky top-0 z-20 bg-base-100/95 backdrop-blur border-b border-[var(--tx-line)]">
+            <div class="flex items-center gap-3 px-4 h-14">
                 <a href="{{ route('post.public.home') }}" class="flex items-center gap-2.5 min-w-0 flex-1" aria-label="{{ $brand }} — về trang chủ">
                     <img src="{{ asset('images/logo.png') }}" alt="" width="36" height="36" class="w-9 h-9 shrink-0">
                     <span class="min-w-0 leading-tight">
-                        <span class="block tx-serif font-bold text-[15px] truncate">{{ $brand }}</span>
-                        @if ($tagline)<span class="block text-[11px] text-base-content/60 truncate">{{ $tagline }}</span>@endif
+                        <span class="block text-[15px] font-bold tracking-[-0.01em] truncate">{{ $brand }}</span>
+                        @if ($tagline)<span class="block text-[12px] text-[#78716c] truncate">{{ $tagline }}</span>@endif
                     </span>
                 </a>
-                <a href="{{ route('post.public.home') }}" class="shrink-0 text-[13px] font-medium text-base-content/70 hover:text-primary">Trang chủ ›</a>
+                <a href="{{ route('post.public.home') }}" class="shrink-0 inline-flex items-center h-9 px-3 rounded-lg border border-[rgb(28_25_23/.12)] text-[13px] font-semibold hover:border-primary hover:text-primary transition-colors">Trang chủ</a>
             </div>
         </header>
 
         @include('traceability.partials.status-banner')
 
         @if ($notice)
-            <p class="px-5 py-3 text-sm text-base-content/70 border-b border-base-300 bg-base-200/50">{{ $notice }}</p>
+            <p class="px-4 py-3 text-[14px] text-[#57534e] bg-base-100 border-b border-[var(--tx-line)]">{{ $notice }}</p>
         @endif
 
-        @yield('content')
+        <main class="flex-1 pb-2">
+            @yield('content')
+        </main>
 
         @include('traceability.partials.report')
+
+        @if ($cta_sticky)
+            <div class="fixed bottom-0 inset-x-0 z-30 bg-base-100/95 backdrop-blur border-t border-[rgb(28_25_23/.08)] pb-[env(safe-area-inset-bottom)]">
+                <div class="max-w-xl mx-auto flex gap-2 px-4 py-3">
+                    <a href="{{ $cta['url'] }}" @if (! empty($cta['external'])) target="_blank" rel="noopener nofollow sponsored" @endif
+                       class="btn btn-primary flex-1 h-12 min-h-12 rounded-lg text-[15px] font-semibold shadow-none border-0">{{ $cta['label'] }}</a>
+                    <a href="#phan-anh" onclick="document.getElementById('phan-anh').open = true"
+                       class="btn w-12 h-12 min-h-12 p-0 rounded-lg bg-base-100 border border-[rgb(28_25_23/.14)] shadow-none text-[#57534e] hover:border-primary hover:text-primary [&>svg]:w-5 [&>svg]:h-5" aria-label="Phản ánh thông tin chưa đúng">@include('traceability.partials.icon', ['name' => 'flag'])</a>
+                </div>
+            </div>
+        @endif
     </div>
 
-    @if ($cta_sticky)
-        <div class="fixed bottom-0 inset-x-0 z-10 bg-base-100 border-t border-base-300 pb-[env(safe-area-inset-bottom)]">
-            <div class="max-w-xl mx-auto px-5 py-3">
-                <a href="{{ $cta['url'] }}" @if (! empty($cta['external'])) target="_blank" rel="noopener nofollow sponsored" @endif
-                   class="btn btn-primary w-full h-12 rounded-lg text-[15px] font-semibold shadow-sm">{{ $cta['label'] }}</a>
-            </div>
-        </div>
-    @endif
 </body>
 </html>

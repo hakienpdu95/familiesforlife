@@ -56,7 +56,7 @@ class OcopSubjectTracePresenter implements TracePresenter
             'story' => $story !== '' ? Str::limit($story, 600) : null,
             'docs' => $this->docStatus($target, OcopSubject::DOCUMENT_LABELS),
             'products_count' => $target->products()->published()->count(),
-            'image' => T::imageRef($target, OcopSubject::IMAGE_COLLECTION),
+            'image' => T::imageRef($target, OcopSubject::IMAGE_COLLECTION, 'medium'),
         ];
     }
 
@@ -82,6 +82,7 @@ class OcopSubjectTracePresenter implements TracePresenter
             'title' => $payload['name'] ?? 'Chủ thể OCOP',
             'subtitle' => $payload['name_en'] ?? null,
             'images' => $live ? ($this->mediaUrls($live, OcopSubject::IMAGE_COLLECTION) ?: array_filter([$payload['image']['url'] ?? null])) : array_filter([$payload['image']['url'] ?? null]),
+            'image_srcsets' => $live ? $this->mediaSrcsets($live, OcopSubject::IMAGE_COLLECTION) : [],
             'badges' => array_values(array_filter([
                 ! empty($payload['type']) ? ['label' => $payload['type'], 'icon' => 'fa-building', 'class' => 'badge-outline'] : null,
                 $stars ? ['label' => 'OCOP '.$stars.' sao', 'icon' => 'fa-star', 'class' => 'badge-warning'] : null,

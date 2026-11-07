@@ -92,7 +92,7 @@ class PostProductBlockItem extends Model
     public function getDisplayImageUrlAttribute(): ?string
     {
         return $this->override('image_url_override')
-            ?? ($this->ocop_product_id ? ($this->ocopProduct?->imageUrl('medium') ?: null) : $this->product?->cover_image_url);
+            ?? ($this->ocop_product_id ? ($this->ocopProduct?->imageUrl('small') ?: null) : $this->product?->cover_image_url);
     }
 
     public function getOcopStarsAttribute(): ?int

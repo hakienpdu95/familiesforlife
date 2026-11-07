@@ -57,7 +57,7 @@ class HeritageSiteTracePresenter implements TracePresenter
             'latitude' => $target->latitude !== null ? (float) $target->latitude : null,
             'longitude' => $target->longitude !== null ? (float) $target->longitude : null,
             'intro' => $intro !== '' ? Str::limit($intro, self::INTRO_CHARS) : null,
-            'image' => T::imageRef($target, 'cover'),
+            'image' => T::imageRef($target, 'cover', 'medium'),
         ];
     }
 
@@ -90,7 +90,8 @@ class HeritageSiteTracePresenter implements TracePresenter
         return $this->base([
             'title' => $payload['name'] ?? 'Di tích',
             'subtitle' => $payload['era'] ?? null,
-            'images' => array_filter([$payload['image']['url'] ?? null]),
+            'images' => $live ? (array_slice($this->mediaUrls($live, 'cover'), 0, 1) ?: array_filter([$payload['image']['url'] ?? null])) : array_filter([$payload['image']['url'] ?? null]),
+            'image_srcsets' => $live ? array_slice($this->mediaSrcsets($live, 'cover'), 0, 1) : [],
             'badges' => array_values(array_filter([
                 ! empty($payload['rank']) ? ['label' => $payload['rank'], 'icon' => 'fa-award', 'class' => self::RANK_CLASS[$payload['rank_value'] ?? ''] ?? 'badge-primary'] : null,
                 ! empty($payload['type']) ? ['label' => $payload['type'], 'icon' => 'fa-landmark', 'class' => 'badge-outline'] : null,
