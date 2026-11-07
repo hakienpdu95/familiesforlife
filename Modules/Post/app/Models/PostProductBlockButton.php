@@ -70,7 +70,7 @@ class PostProductBlockButton extends Model
     {
         if ($this->url_type === ButtonUrlType::UseProductLink) {
             $linkType = ProductLinkType::tryFrom((string) $this->product_link_type);
-            $product  = $this->blockItem?->product;
+            $product  = $this->blockItem?->source();
 
             if (! $linkType || ! $product) {
                 return null;

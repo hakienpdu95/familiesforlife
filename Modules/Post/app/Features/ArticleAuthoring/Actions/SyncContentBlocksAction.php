@@ -20,6 +20,7 @@ use Modules\Post\Models\PostProductBlockItem;
 use Modules\Post\Support\ArticleContentRenderer;
 use Modules\Product\Contracts\ProductCatalogContract;
 use Modules\Product\Enums\ProductLinkType;
+use Modules\Ocop\Models\OcopProduct;
 use Modules\Product\Models\Product;
 
 /**
@@ -247,7 +248,7 @@ class SyncContentBlocksAction
     private function currentProductIds(PostArticleTranslation $translation): Collection
     {
         return $translation->productBlocks()->with('items')->get()
-            ->pluck('items')->flatten()->pluck('product_id')->unique();
+            ->pluck('items')->flatten()->pluck('product_id')->filter()->unique();
     }
 
     /** @param array<int, array> $blocksData @throws ProductBlockValidationException */
@@ -260,7 +261,14 @@ class SyncContentBlocksAction
         }
 
         foreach ($blocksData as $i => $block) {
-            $label = 'Khối sản phẩm #'.($i + 1);
+            $isOcop = ($block['source'] ?? PostProductBlock::SOURCE_PRODUCT) === PostProductBlock::SOURCE_OCOP;
+            $label = ($isOcop ? 'Khối sản phẩm OCOP #' : 'Khối sản phẩm #').($i + 1);
+
+            if (! in_array($block['source'] ?? PostProductBlock::SOURCE_PRODUCT, [PostProductBlock::SOURCE_PRODUCT, PostProductBlock::SOURCE_OCOP], true)) {
+                $errors[] = "{$label}: nguồn sản phẩm không hợp lệ.";
+
+                continue;
+            }
 
             // Chặn hijack: 1 block_uuid hợp lệ nhưng đang thuộc bản dịch KHÁC (vd tự chỉnh
             // request) — không cho reassign, vì `uuid` có unique constraint toàn cục.
@@ -286,10 +294,12 @@ class SyncContentBlocksAction
             }
 
             foreach ($items as $item) {
-                $product = Product::find($item['product_id'] ?? null);
+                $product = $isOcop
+                    ? OcopProduct::find($item['product_id'] ?? null)
+                    : Product::find($item['product_id'] ?? null);
 
                 if (! $product) {
-                    $errors[] = "{$label}: sản phẩm #{$item['product_id']} không tồn tại hoặc không thuộc tổ chức của bạn.";
+                    $errors[] = "{$label}: sản phẩm #{$item['product_id']} không tồn tại hoặc đã bị xoá.";
                 }
 
                 $buttons = $item['buttons'] ?? [];
@@ -650,6 +660,7 @@ class SyncContentBlocksAction
         $block = $translation->productBlocks()->firstOrNew(['uuid' => $blockData['block_uuid']]);
         $block->fill([
             'template' => $blockData['template'],
+            'source' => $blockData['source'] ?? PostProductBlock::SOURCE_PRODUCT,
             'heading' => $blockData['heading'] ?? null,
             'sort_order' => $sortOrder,
         ]);
@@ -658,7 +669,7 @@ class SyncContentBlocksAction
         $seenItemKeys = [];
         foreach (($blockData['items'] ?? []) as $itemSort => $itemData) {
             $seenItemKeys[] = $itemData['item_key'];
-            $item = $this->upsertItem($block, $itemData, $itemSort);
+            $item = $this->upsertItem($block, $itemData, $itemSort, $block->isOcop());
             $this->upsertButtons($block, $itemData['buttons'] ?? [], $item->id);
         }
         $block->items()->whereNotIn('item_key', $seenItemKeys)->get()->each->delete();
@@ -670,13 +681,14 @@ class SyncContentBlocksAction
         return $block;
     }
 
-    private function upsertItem(PostProductBlock $block, array $itemData, int $sortOrder): PostProductBlockItem
+    private function upsertItem(PostProductBlock $block, array $itemData, int $sortOrder, bool $isOcop = false): PostProductBlockItem
     {
         /** @var PostProductBlockItem $item */
         $item = $block->items()->firstOrNew(['item_key' => $itemData['item_key']]);
 
         $attributes = [
-            'product_id' => $itemData['product_id'],
+            'product_id' => $isOcop ? null : $itemData['product_id'],
+            'ocop_product_id' => $isOcop ? $itemData['product_id'] : null,
             'title_override' => $itemData['title_override'] ?? null,
             'price_label_override' => $itemData['price_label_override'] ?? null,
             'description_override' => $itemData['description_override'] ?? null,

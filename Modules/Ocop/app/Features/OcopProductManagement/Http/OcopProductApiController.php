@@ -10,6 +10,7 @@ use Modules\Ocop\Features\OcopProductManagement\Http\Resources\OcopProductListRe
 use Modules\Ocop\Features\OcopProductManagement\Queries\ListOcopProductsForAdminHandler;
 use Modules\Ocop\Features\OcopProductManagement\Queries\ListOcopProductsForAdminQuery;
 use Modules\Ocop\Models\OcopProduct;
+use Modules\Product\Enums\ProductLinkType;
 
 /** JSON backend cho Tabulator ở dashboard/ocop/products — cùng pattern ArticleApiController. */
 class OcopProductApiController extends Controller
@@ -49,6 +50,41 @@ class OcopProductApiController extends Controller
             'last_page' => $paginator->lastPage(),
             'total'     => $paginator->total(),
             'trashed_count' => OcopProduct::onlyTrashed()->count(),
+        ]);
+    }
+
+    /** Ô tìm sản phẩm trong khối "Sản phẩm OCOP" của bài viết — cùng shape ProductPickerResource. */
+    public function blockPicker(Request $request): JsonResponse
+    {
+        $this->authorize('viewAny', OcopProduct::class);
+
+        $keyword = trim((string) $request->string('q'));
+
+        $paginator = OcopProduct::query()
+            ->with('media')
+            ->when($keyword !== '', fn ($q) => $q->where('name', 'like', "%{$keyword}%"))
+            ->orderByRaw("status = 'published' desc")
+            ->orderByDesc('star_rating')
+            ->orderBy('name')
+            ->paginate(min(50, max(5, $request->integer('per_page', 20))));
+
+        $links = [ProductLinkType::Shopee, ProductLinkType::TikTok];
+
+        return response()->json([
+            'data' => collect($paginator->items())->map(fn (OcopProduct $p) => [
+                'id' => $p->id,
+                'name' => $p->name,
+                'short_description' => \Illuminate\Support\Str::limit(trim(strip_tags((string) $p->description)), 160),
+                'price_label' => $p->star_rating ? 'OCOP '.$p->star_rating.' sao' : null,
+                'cover_image_url' => $p->imageUrl('thumb') ?: null,
+                'status' => $p->status->value,
+                'available_links' => collect($links)
+                    ->filter(fn (ProductLinkType $t) => filled($p->{$t->urlColumn()}))
+                    ->map(fn (ProductLinkType $t) => ['type' => $t->value, 'label' => $t->label()])
+                    ->values(),
+            ]),
+            'last_page' => $paginator->lastPage(),
+            'total' => $paginator->total(),
         ]);
     }
 }

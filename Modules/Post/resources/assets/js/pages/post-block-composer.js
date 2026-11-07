@@ -12,6 +12,7 @@
  */
 (function () {
     const API_SEARCH = '/api/v1/products/search';
+    const API_SEARCH_OCOP = '/backend/api/ocop/products/block-picker';
     const MAX_ITEMS = 7;
     const MAX_BUTTONS_PER_ITEM = 5;
 
@@ -121,16 +122,18 @@
 
         // ── Block: Khối sản phẩm ─────────────────────────────────────────
 
-        function addProductBlock(existingState) {
+        function addProductBlock(existingState, source = 'product') {
+            const src = existingState?.source || source;
             const el = document.createElement('div');
             el.className = 'pbc-block';
             el.dataset.kind = 'product';
-            el.innerHTML = blockHeaderHtml('Khối sản phẩm', 'pbc-badge-product')
+            el.innerHTML = blockHeaderHtml(src === 'ocop' ? 'Khối sản phẩm OCOP' : 'Khối sản phẩm', src === 'ocop' ? 'pbc-badge-ocop' : 'pbc-badge-product')
                 + '<div class="pbc-block-body"></div>';
             wireCommonControls(el);
             listEl.appendChild(el);
 
-            const state = existingState || { blockUuid: uid('blk-'), template: 'single_card', heading: '', items: [], blockButtons: [] };
+            const state = existingState || { blockUuid: uid('blk-'), source: src, template: 'single_card', heading: '', items: [], blockButtons: [] };
+            state.source = src;
             el._productState = state;
             renderProductForm(el.querySelector('.pbc-block-body'), state);
         }
@@ -154,8 +157,8 @@
                     </div>
                 </div>
                 <div style="margin-bottom:10px;">
-                    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Tìm sản phẩm</label>
-                    <input type="text" class="input input-bordered input-sm w-full pbc-search" placeholder="Nhập tên sản phẩm...">
+                    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">${state.source === 'ocop' ? 'Tìm sản phẩm OCOP' : 'Tìm sản phẩm'}</label>
+                    <input type="text" class="input input-bordered input-sm w-full pbc-search" placeholder="${state.source === 'ocop' ? 'Nhập tên sản phẩm OCOP...' : 'Nhập tên sản phẩm...'}">
                     <div class="pbc-product-search-results" style="margin-top:6px;display:none;"></div>
                 </div>
                 <div>
@@ -224,7 +227,7 @@
 
             async function runSearch(keyword) {
                 try {
-                    const json = await fetchJson(API_SEARCH + '?q=' + encodeURIComponent(keyword) + '&per_page=15');
+                    const json = await fetchJson((state.source === 'ocop' ? API_SEARCH_OCOP : API_SEARCH) + '?q=' + encodeURIComponent(keyword) + '&per_page=15');
                     resultsBox.style.display = json.data.length ? 'block' : 'none';
                     resultsBox.innerHTML = json.data.map((p) => resultRowHtml(p)).join('');
                     resultsBox.querySelectorAll('[data-pick-id]').forEach((row) => {
@@ -680,6 +683,7 @@
 
         composerEl.querySelector('.pbc-add-text').addEventListener('click', () => addTextBlock(''));
         composerEl.querySelector('.pbc-add-product').addEventListener('click', () => addProductBlock(null));
+        composerEl.querySelector('.pbc-add-ocop-product')?.addEventListener('click', () => addProductBlock(null, 'ocop'));
         composerEl.querySelector('.pbc-add-faq')?.addEventListener('click', () => addFaqBlock(null));
         composerEl.querySelector('.pbc-add-citation')?.addEventListener('click', () => addCitationBlock(null));
         composerEl.querySelector('.pbc-add-howto')?.addEventListener('click', () => addHowtoBlock(null));
@@ -693,6 +697,7 @@
                 addTextBlock(b.html);
             } else if (b.type === 'product') {
                 addProductBlock({
+                    source: b.source || 'product',
                     blockUuid: b.block_uuid,
                     template: b.template,
                     heading: b.heading || '',
@@ -839,6 +844,7 @@
                     const st = el._productState;
                     out.push({
                         type: 'product',
+                        source: st.source || 'product',
                         block_uuid: st.blockUuid,
                         template: st.template,
                         heading: st.heading,

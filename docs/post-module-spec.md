@@ -294,6 +294,8 @@ Schema::create('post_product_block_items', function (Blueprint $table) {
 
 Mọi cột `*_override` để **null** trong đa số trường hợp — chỉ set khi Marketing muốn 1 câu mô tả/giá đặc biệt riêng cho vị trí chèn đó (vd khuyến mãi chỉ áp dụng trong bài này). Cột `title`/`price_label`/`description`/`image_url` (không override) của bản v1.0 **không còn tồn tại** — dữ liệu hiển thị mặc định luôn lấy từ `products` qua `product_id`.
 
+**Nguồn sản phẩm (2026-11-07):** khối sản phẩm có cột `post_product_blocks.source` = `product` (Modules/Product, item dùng `product_id`) hoặc `ocop` (Modules/Ocop, item dùng `ocop_product_id`, `product_id` để null). Composer gửi chung khoá `product_id` kèm `source` của khối; `SyncContentBlocksAction` tự map sang cột đúng. Khối OCOP ("+ Thêm khối sản phẩm OCOP" trên trang sửa bài) dùng chung template/nút/lịch sử phiên bản với khối thường; tìm sản phẩm qua `GET backend/api/ocop/products/block-picker`; nhãn giá hiển thị "OCOP n sao"; nút `use_product_link` chỉ có Shopee/TikTok (cột `shopee_url`/`tiktok_url` của `ocop_products`). Giới hạn 3 khối/bài tính chung cả 2 nguồn; khối OCOP không cập nhật `article_usage_count` của Modules/Product.
+
 **Giới hạn số lượng (bắt buộc validate ở `SyncProductBlocksAction`, xem §9.8.2)**: `single_card`/`banner` = đúng 1 item; `multi_grid`/`compact_list` = tối thiểu 2, **tối đa 7** item/khối.
 
 ### 7.7 `post_product_block_buttons` — Nút CTA tuỳ biến (1-nhiều nút/item hoặc 1-nhiều nút/khối)

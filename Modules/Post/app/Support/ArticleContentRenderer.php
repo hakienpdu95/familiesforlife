@@ -20,6 +20,7 @@ use Modules\Post\Models\PostProductBlock;
 use Modules\Post\Models\PostProductBlockButton;
 use Modules\Post\Models\PostProductBlockItem;
 use Modules\Product\Enums\ProductLinkType;
+use Modules\Ocop\Models\OcopProduct;
 use Modules\Product\Models\Product;
 
 /**
@@ -36,7 +37,7 @@ class ArticleContentRenderer
         $blocks = $translation->contentBlocks()
             ->when($exceptTypes, fn ($q) => $q->whereNotIn('type', array_map(fn (ContentBlockType $t) => $t->value, $exceptTypes)))
             ->with([
-                'productBlock.items.product',
+                'productBlock.items.product', 'productBlock.items.ocopProduct.media',
                 'productBlock.items.buttons', 'productBlock.buttons', 'faqBlock.items', 'howtoBlock.steps',
                 'comparisonBlock.columns', 'comparisonBlock.rows',
             ])
@@ -125,7 +126,7 @@ class ArticleContentRenderer
             function () use ($translation) {
                 $blocks = $translation->contentBlocks()
                     ->with([
-                        'productBlock.items.product',
+                        'productBlock.items.product', 'productBlock.items.ocopProduct.media',
                         'productBlock.items.buttons', 'productBlock.buttons', 'faqBlock.items', 'howtoBlock.steps',
                         'comparisonBlock.columns', 'comparisonBlock.rows',
                     ])
@@ -456,7 +457,7 @@ class ArticleContentRenderer
     {
         $blocks = $translation->contentBlocks()
             ->with([
-                'productBlock.items.product', 'productBlock.items.buttons', 'productBlock.buttons',
+                'productBlock.items.product', 'productBlock.items.ocopProduct.media', 'productBlock.items.buttons', 'productBlock.buttons',
                 'faqBlock.items', 'howtoBlock.steps', 'comparisonBlock.columns', 'comparisonBlock.rows',
             ])
             ->get();
@@ -548,21 +549,22 @@ class ArticleContentRenderer
 
             return [
                 'type' => 'product',
+                'source' => $pb->source,
                 'block_uuid' => $pb->uuid,
                 'template' => $pb->template->value,
                 'heading' => $pb->heading,
                 'items' => $pb->items->map(fn ($item) => [
                     'item_key' => $item->item_key,
-                    'product_id' => $item->product_id,
+                    'product_id' => $item->referenceId(),
                     'title_override' => $item->title_override,
                     'price_label_override' => $item->price_label_override,
                     'description_override' => $item->description_override,
                     'image_url_override' => $item->image_url_override,
-                    'cached_name' => $item->product?->name,
-                    'cached_image' => $item->product?->cover_image_url,
-                    'cached_price' => $item->product?->display_price,
+                    'cached_name' => $item->source()?->name,
+                    'cached_image' => $pb->isOcop() ? ($item->ocopProduct?->imageUrl('thumb') ?: null) : $item->product?->cover_image_url,
+                    'cached_price' => $pb->isOcop() ? ($item->ocopProduct?->star_rating ? 'OCOP '.$item->ocopProduct->star_rating.' sao' : null) : $item->product?->display_price,
                     'cached_links' => collect(ProductLinkType::cases())
-                        ->filter(fn ($type) => filled($item->product?->{$type->urlColumn()}))
+                        ->filter(fn ($type) => filled($item->source()?->{$type->urlColumn()}))
                         ->map(fn ($type) => ['type' => $type->value, 'label' => $type->label()])
                         ->values(),
                     'buttons' => $item->buttons->map(fn ($btn) => [
@@ -601,14 +603,17 @@ class ArticleContentRenderer
      */
     public function renderSnapshot(array $blocks): array
     {
-        $productIds = collect($blocks)
+        $isOcop = fn (array $b) => ($b['source'] ?? PostProductBlock::SOURCE_PRODUCT) === PostProductBlock::SOURCE_OCOP;
+        $idsFor = fn (bool $ocop) => collect($blocks)
             ->where('type', 'product')
+            ->filter(fn ($b) => $isOcop($b) === $ocop)
             ->flatMap(fn ($b) => collect($b['items'] ?? [])->pluck('product_id'))
             ->filter()
             ->unique()
             ->values();
 
-        $existingProducts = Product::whereIn('id', $productIds)->get()->keyBy('id');
+        $existingProducts = Product::whereIn('id', $idsFor(false))->get()->keyBy('id');
+        $existingOcop = OcopProduct::withTrashed()->with('media')->whereIn('id', $idsFor(true))->get()->keyBy('id');
 
         // Tính trước TOÀN BỘ danh sách "đã xoá" bằng phép diff thuần (không cần tích luỹ qua
         // tham chiếu khi hydrate — tránh bẫy arrow function `fn() =>` luôn capture BY VALUE dù
@@ -618,14 +623,14 @@ class ArticleContentRenderer
             ->flatMap(fn ($b) => collect($b['items'] ?? [])
                 ->pluck('product_id')
                 ->filter()
-                ->reject(fn ($id) => $existingProducts->has($id))
-                ->map(fn ($id) => ['product_id' => $id, 'referenced_in_block' => $b['block_uuid'] ?? null]))
+                ->reject(fn ($id) => ($isOcop($b) ? $existingOcop : $existingProducts)->has($id))
+                ->map(fn ($id) => ['product_id' => $id, 'source' => $isOcop($b) ? PostProductBlock::SOURCE_OCOP : PostProductBlock::SOURCE_PRODUCT, 'referenced_in_block' => $b['block_uuid'] ?? null]))
             ->values()
             ->all();
 
-        $missingProductIds = collect($missingProducts)->pluck('product_id')->unique();
+        $missingProductIds = collect($missingProducts)->map(fn ($m) => $m['source'].':'.$m['product_id'])->unique();
 
-        $html = collect($blocks)->map(function ($blockData) use ($existingProducts, $missingProductIds) {
+        $html = collect($blocks)->map(function ($blockData) use ($existingProducts, $existingOcop, $missingProductIds, $isOcop) {
             if (($blockData['type'] ?? null) === 'text') {
                 return (string) ($blockData['text_html'] ?? '');
             }
@@ -676,7 +681,7 @@ class ArticleContentRenderer
                 ])->render();
             }
 
-            $block = $this->hydrateProductBlockSnapshot($blockData, $existingProducts, $missingProductIds);
+            $block = $this->hydrateProductBlockSnapshot($blockData, $isOcop($blockData) ? $existingOcop : $existingProducts, $missingProductIds);
 
             return view(
                 "post::components.product-block.{$block->template->value}",
@@ -786,11 +791,12 @@ class ArticleContentRenderer
             'id' => 0,
             'uuid' => $blockData['block_uuid'] ?? null,
             'template' => $blockData['template'],
+            'source' => $blockData['source'] ?? PostProductBlock::SOURCE_PRODUCT,
             'heading' => $blockData['heading'] ?? null,
         ]);
 
         $items = collect($blockData['items'] ?? [])->map(
-            fn ($itemData) => $this->hydrateItemSnapshot($itemData, $existingProducts, $missingProductIds)
+            fn ($itemData) => $this->hydrateItemSnapshot($itemData, $existingProducts, $missingProductIds, $block->isOcop())
         );
 
         $block->setRelation('items', $items);
@@ -799,17 +805,18 @@ class ArticleContentRenderer
         return $block;
     }
 
-    private function hydrateItemSnapshot(array $itemData, Collection $existingProducts, Collection $missingProductIds): PostProductBlockItem
+    private function hydrateItemSnapshot(array $itemData, Collection $existingProducts, Collection $missingProductIds, bool $isOcop = false): PostProductBlockItem
     {
         $productId = $itemData['product_id'] ?? null;
-        $isMissing = $productId && $missingProductIds->contains($productId);
+        $isMissing = $productId && $missingProductIds->contains(($isOcop ? PostProductBlock::SOURCE_OCOP : PostProductBlock::SOURCE_PRODUCT).':'.$productId);
 
         $item = new PostProductBlockItem;
         $item->exists = false;
         $item->forceFill([
             'id' => 0,
             'item_key' => $itemData['item_key'] ?? null,
-            'product_id' => $productId,
+            'product_id' => $isOcop ? null : $productId,
+            'ocop_product_id' => $isOcop ? $productId : null,
             'title_override' => $itemData['title_override'] ?? null,
             'price_label_override' => $itemData['price_label_override'] ?? null,
             'description_override' => $itemData['description_override'] ?? null,
@@ -820,10 +827,12 @@ class ArticleContentRenderer
             // Không được lazy-load Product cho id đã biết chắc không còn tồn tại (§13.3) —
             // set relation = null NGAY để accessor display_* không bao giờ kích hoạt query.
             $item->setRelation('product', null);
+            $item->setRelation('ocopProduct', null);
             $item->title_override = $item->title_override ?? 'Sản phẩm không còn tồn tại';
             $item->image_url_override = $item->image_url_override ?? self::MISSING_PRODUCT_PLACEHOLDER_IMAGE;
         } else {
-            $item->setRelation('product', $productId ? $existingProducts->get($productId) : null);
+            $item->setRelation('product', $isOcop || ! $productId ? null : $existingProducts->get($productId));
+            $item->setRelation('ocopProduct', $isOcop && $productId ? $existingProducts->get($productId) : null);
         }
 
         $item->setRelation('buttons', collect($itemData['buttons'] ?? [])->map(fn ($b) => $this->hydrateButtonSnapshot($b)));

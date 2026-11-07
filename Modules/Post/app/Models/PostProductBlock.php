@@ -5,8 +5,8 @@ namespace Modules\Post\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Modules\Post\Enums\ProductBlockTemplate;
 use Illuminate\Support\Str;
+use Modules\Post\Enums\ProductBlockTemplate;
 
 /**
  * Không soft-delete — vòng đời gắn chặt bản dịch bài viết, xoá cứng theo cascade khi bản dịch/khối bị xoá.
@@ -20,12 +20,19 @@ class PostProductBlock extends Model
         'uuid',
         'translation_id',
         'template',
+        'source',
         'heading',
         'sort_order',
     ];
 
+    public const SOURCE_PRODUCT = 'product';
+
+    public const SOURCE_OCOP = 'ocop';
+
+    protected $attributes = ['source' => self::SOURCE_PRODUCT];
+
     protected $casts = [
-        'template'   => ProductBlockTemplate::class,
+        'template' => ProductBlockTemplate::class,
         'sort_order' => 'integer',
     ];
 
@@ -52,5 +59,10 @@ class PostProductBlock extends Model
     public function buttons(): HasMany
     {
         return $this->hasMany(PostProductBlockButton::class, 'block_id')->whereNull('block_item_id')->orderBy('sort_order');
+    }
+
+    public function isOcop(): bool
+    {
+        return $this->source === self::SOURCE_OCOP;
     }
 }

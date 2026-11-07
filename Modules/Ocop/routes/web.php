@@ -22,6 +22,7 @@ Route::middleware(['auth'])->prefix('dashboard/ocop')->name('backend.ocop.')->gr
 // ── Backend JSON API cho Tabulator (session-based auth, cùng guard trang quản trị) ─────────
 Route::middleware(['auth'])->prefix('backend/api/ocop')->name('backend.api.ocop.')->group(function () {
     Route::get('products', [OcopProductApiController::class, 'index'])->name('products');
+    Route::get('products/block-picker', [OcopProductApiController::class, 'blockPicker'])->name('products.block-picker');
 });
 
 // ── Cổng thông tin công khai (spec §8 DoD #5 — trang chi tiết sản phẩm OCOP) ────────────────

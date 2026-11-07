@@ -190,6 +190,7 @@ class CreateTranslationAction
             'uuid'            => (string) Str::uuid(),
             'translation_id'  => $target->id,
             'template'        => $source->template,
+            'source'          => $source->source,
             'heading'         => $source->heading,
             'sort_order'      => $source->sort_order,
         ]);
@@ -200,6 +201,7 @@ class CreateTranslationAction
             $newItem = $new->items()->create([
                 'item_key'             => Str::random(16),
                 'product_id'           => $item->product_id,
+                'ocop_product_id'      => $item->ocop_product_id,
                 'title_override'       => $item->title_override,
                 'price_label_override' => $item->price_label_override,
                 'description_override' => $item->description_override,

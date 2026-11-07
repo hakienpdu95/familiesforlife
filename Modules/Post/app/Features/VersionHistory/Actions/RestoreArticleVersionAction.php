@@ -68,12 +68,17 @@ class RestoreArticleVersionAction
 
     private function assertProductsStillExist(array $blocks): void
     {
-        $productIds = collect($blocks)
+        $idsFor = fn (bool $ocop) => collect($blocks)
             ->where('type', 'product')
+            ->filter(fn ($b) => (($b['source'] ?? 'product') === 'ocop') === $ocop)
             ->flatMap(fn ($b) => collect($b['items'])->pluck('product_id'))
             ->unique();
 
-        $missing = $productIds->diff(Product::whereIn('id', $productIds)->pluck('id'));
+        $productIds = $idsFor(false);
+        $ocopIds = $idsFor(true);
+
+        $missing = $productIds->diff(Product::whereIn('id', $productIds)->pluck('id'))
+            ->merge($ocopIds->diff(\Modules\Ocop\Models\OcopProduct::whereIn('id', $ocopIds)->pluck('id'))->map(fn ($id) => 'OCOP '.$id));
 
         if ($missing->isNotEmpty()) {
             throw new VersionRestoreException(

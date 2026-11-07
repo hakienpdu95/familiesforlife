@@ -49,7 +49,7 @@ class PublicArticleController extends Controller
             ->where('slug', $slug)
             ->with([
                 'article.categories', 'article.tags', 'article.createdBy.authorProfile',
-                'contentBlocks.productBlock.items.product',
+                'contentBlocks.productBlock.items.product', 'contentBlocks.productBlock.items.ocopProduct.media',
                 'contentBlocks.productBlock.items.buttons', 'contentBlocks.productBlock.buttons',
                 'contentBlocks.faqBlock.items', 'faqBlocks.items',
                 'contentBlocks.howtoBlock.steps', 'howtoBlocks.steps',

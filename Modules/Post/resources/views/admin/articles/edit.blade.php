@@ -222,6 +222,7 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
                         <div class="pbc-add-row">
                             <button type="button" class="btn btn-sm btn-outline pbc-add-text">+ Thêm đoạn văn bản</button>
                             <button type="button" class="btn btn-sm btn-outline btn-primary pbc-add-product">+ Thêm khối sản phẩm</button>
+                            <button type="button" class="btn btn-sm btn-outline btn-warning pbc-add-ocop-product">+ Thêm khối sản phẩm OCOP</button>
                             <button type="button" class="btn btn-sm btn-outline btn-secondary pbc-add-faq">+ Thêm câu hỏi thường gặp</button>
                             <button type="button" class="btn btn-sm btn-outline btn-accent pbc-add-citation">+ Thêm trích dẫn có nguồn</button>
                             <button type="button" class="btn btn-sm btn-outline pbc-add-howto">+ Thêm hướng dẫn từng bước</button>

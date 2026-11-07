@@ -100,7 +100,8 @@
     [
         "post_product_blocks///add///__///",
         "translation_id///unsignedBigInteger///__///_NULL///NULL///__///__",
-        "__index///index///__///__///__///translation_id|idx_post_pb_translation///__"
+        "__index///index///__///__///__///translation_id|idx_post_pb_translation///__",
+        "source///string///20///NOT_NULL///'product'///__///product|ocop"
     ],
     [
         "post_product_blocks///drop///__///Publishing Engine Phase 13 — article_id thay bằng translation_id",
@@ -227,7 +228,9 @@
         "ingredients///text///__///_NULL///NULL///__///Thành phần",
         "usage_instructions///text///__///_NULL///NULL///__///Hướng dẫn sử dụng",
         "storage_instructions///text///__///_NULL///NULL///__///Hướng dẫn bảo quản",
-        "ocop_subject_id///unsignedBigInteger///__///_NULL///NULL///->constrained('ocop_subjects')->onDelete('restrict')///__"
+        "ocop_subject_id///unsignedBigInteger///__///_NULL///NULL///->constrained('ocop_subjects')->onDelete('restrict')///__",
+        "shopee_url///string///500///_NULL///NULL///__///Link affiliate Shopee",
+        "tiktok_url///string///500///_NULL///NULL///__///Link affiliate TikTok Shop"
     ],
     [
         "content_foundations///add///__///",
@@ -261,5 +264,13 @@
     [
         "products///add///__///",
         "content///longText///__///_NULL///NULL///__///__"
+    ],
+    [
+        "post_product_block_items///add///__///",
+        "ocop_product_id///unsignedBigInteger///__///_NULL///NULL///->constrained('ocop_products')->onDelete('restrict')///__"
+    ],
+    [
+        "qr_identities///add///__///",
+        "snapshot_at///timestamp///__///_NULL///NULL///__///Thời điểm chụp snapshot gần nhất (bản công khai cuối cùng)"
     ]
 ]

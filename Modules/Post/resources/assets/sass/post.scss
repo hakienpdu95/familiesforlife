@@ -11,6 +11,14 @@
     gap: 0.75rem;
 }
 
+.pbc-block-list {
+    display: flex;
+    flex-direction: column;
+
+    > .pbc-block { margin-bottom: 20px; }
+    > .pbc-block:last-child { margin-bottom: 0.25rem; }
+}
+
 .pbc-block {
     border: 1px solid var(--color-base-300);
     border-radius: 0.75rem;
@@ -34,6 +42,7 @@
 
 .pbc-block-header .pbc-badge-text { color: var(--color-info); }
 .pbc-block-header .pbc-badge-product { color: var(--color-primary); }
+.pbc-block-header .pbc-badge-ocop { color: #b45309; }
 .pbc-block-header .pbc-badge-faq { color: var(--color-secondary); }
 .pbc-block-header .pbc-badge-citation { color: var(--color-accent); }
 .pbc-block-header .pbc-badge-howto { color: var(--color-warning); }
@@ -44,11 +53,24 @@
 
 .pbc-add-row {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.5rem;
     justify-content: center;
+    max-width: 100%;
     padding: 0.5rem;
     border: 1px dashed var(--color-base-300);
     border-radius: 0.75rem;
+
+    > .btn {
+        flex: 0 1 auto;
+        max-width: 100%;
+        white-space: normal;
+        height: auto;
+        min-height: 2rem;
+        line-height: 1.25;
+        padding-top: 0.35rem;
+        padding-bottom: 0.35rem;
+    }
 }
 
 .pbc-product-search-results {

@@ -99,12 +99,13 @@ class CreateArticleVersionAction
 
                 return [
                     'type'          => 'product',
+                    'source'        => $pb->source,
                     'block_uuid'    => $pb->uuid,
                     'template'      => $pb->template->value,
                     'heading'       => $pb->heading,
                     'items'         => $pb->items->map(fn ($item) => [
                         'item_key'              => $item->item_key,
-                        'product_id'            => $item->product_id,
+                        'product_id'            => $item->referenceId(),
                         'title_override'        => $item->title_override,
                         'price_label_override'  => $item->price_label_override,
                         'description_override'  => $item->description_override,
