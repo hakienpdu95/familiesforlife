@@ -10,8 +10,8 @@
 @php($remain = $daysLeft !== null && $daysLeft >= 0 ? ($daysLeft >= 60 ? 'còn '.intdiv($daysLeft, 30).' tháng' : 'còn '.max(1, $daysLeft).' ngày') : null)
 @php($star = 'M10 1.6l2.47 5.01 5.53.8-4 3.9.94 5.5L10 14.2l-4.94 2.6.94-5.5-4-3.9 5.53-.8L10 1.6z')
 <section class="mt-4 rounded-xl border border-[#ead9a8] overflow-hidden" aria-label="Thông tin chứng nhận OCOP">
-    <div class="relative flex items-center gap-3.5 px-4 py-3.5 bg-[radial-gradient(120%_140%_at_0%_0%,#fffaf0_0%,#fbf0d2_70%,#f7e7bd_100%)]">
-        <svg viewBox="0 0 48 56" @class(['shrink-0 w-11 h-[52px] drop-shadow-[0_1px_1.5px_rgb(120_80_0/.25)]', 'grayscale opacity-60' => ! $stars || $state === 'expired']) aria-hidden="true">
+    <div class="relative flex items-center gap-3 px-3.5 py-3 bg-[radial-gradient(120%_140%_at_0%_0%,#fffaf0_0%,#fbf0d2_70%,#f7e7bd_100%)]">
+        <svg viewBox="0 0 48 56" @class(['shrink-0 w-9 h-[42px] sm:w-10 sm:h-12 drop-shadow-[0_1px_1.5px_rgb(120_80_0/.25)]', 'grayscale opacity-60' => ! $stars || $state === 'expired']) aria-hidden="true">
             <path d="M14 32 8 54l8-4 5 6 5-20z" fill="#b45309"/>
             <path d="M34 32l6 22-8-4-5 6-5-20z" fill="#c2410c"/>
             <circle cx="24" cy="22" r="20" fill="#e9b949"/>
@@ -21,27 +21,27 @@
         </svg>
         <div class="flex-1 min-w-0">
             @if ($stars)
-                <p class="text-[clamp(15.5px,4.4vw,17px)] font-bold leading-tight tracking-[-0.015em] text-[#422006] [text-wrap:balance]">@php($certText = $certTitle ?? 'Sản phẩm đạt chuẩn OCOP'){{ \Illuminate\Support\Str::beforeLast($certText, ' ') }} <span class="whitespace-nowrap">{{ \Illuminate\Support\Str::afterLast($certText, ' ') }} {{ $stars }} sao</span></p>
-                <div class="mt-1.5 flex items-center gap-2">
-                    <span class="flex gap-[3px]" role="img" aria-label="Hạng {{ $stars }} trên 5 sao">
+                <p class="text-[clamp(14.5px,4vw,16px)] font-semibold leading-snug tracking-[-0.01em] text-[#422006] [text-wrap:balance]">@php($certText = $certTitle ?? 'Sản phẩm đạt chuẩn OCOP'){{ \Illuminate\Support\Str::beforeLast($certText, ' ') }} <span class="whitespace-nowrap">{{ \Illuminate\Support\Str::afterLast($certText, ' ') }} {{ $stars }} sao</span></p>
+                <div class="mt-1 flex items-center gap-1.5">
+                    <span class="flex gap-0.5" role="img" aria-label="Hạng {{ $stars }} trên 5 sao">
                         @for ($i = 1; $i <= 5; $i++)
                             @if ($i <= $stars)
-                                <svg viewBox="0 0 20 20" @class(['w-[18px] h-[18px]', 'text-[#e0a100]' => $state !== 'expired', 'text-[#a8a29e]' => $state === 'expired']) fill="currentColor" aria-hidden="true"><path d="{{ $star }}"/></svg>
+                                <svg viewBox="0 0 20 20" @class(['w-4 h-4', 'text-[#e0a100]' => $state !== 'expired', 'text-[#a8a29e]' => $state === 'expired']) fill="currentColor" aria-hidden="true"><path d="{{ $star }}"/></svg>
                             @else
-                                <svg viewBox="0 0 20 20" class="w-[18px] h-[18px] text-[#d9c58f]" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="{{ $star }}"/></svg>
+                                <svg viewBox="0 0 20 20" class="w-4 h-4 text-[#d9c58f]" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="{{ $star }}"/></svg>
                             @endif
                         @endfor
                     </span>
-                    <span class="text-[12px] font-semibold text-[#a16207] tabular-nums">{{ $stars }}/5</span>
+                    <span class="text-[11.5px] font-semibold text-[#a16207] tabular-nums">{{ $stars }}/5</span>
                 </div>
             @else
-                <p class="text-[16px] font-bold leading-tight text-[#57534e]">Chưa xếp hạng OCOP</p>
+                <p class="text-[clamp(14.5px,4vw,16px)] font-semibold leading-snug text-[#57534e]">Chưa xếp hạng OCOP</p>
             @endif
         </div>
     </div>
     @if ($stars && $state !== 'unknown')
         <div @class([
-            'flex items-center gap-2 px-4 py-2 border-t text-[13px] leading-snug',
+            'flex items-center gap-2 px-3.5 py-1.5 border-t text-[12.5px] leading-snug',
             'border-[#cfe9d8] bg-[#f0faf3] text-[#166534]' => $state === 'valid',
             'border-[#fde68a] bg-[#fffbeb] text-[#92400e]' => $state === 'soon',
             'border-[#fecaca] bg-[#fef2f2] text-[#b91c1c]' => $state === 'expired',
@@ -64,9 +64,9 @@
     @if ($rows)
         <dl class="grid grid-cols-2 border-t border-[#ead9a8] bg-base-100">
             @foreach ($rows as $label => $value)
-                <div @class(['px-3.5 py-2.5 min-w-0', 'col-span-2' => $loop->last && $loop->count % 2 === 1, 'border-l border-[var(--tx-line)]' => $loop->iteration % 2 === 0, 'border-t border-[var(--tx-line)]' => $loop->iteration > 2])>
-                    <dt class="text-[12px] text-[#78716c]">{{ $label }}</dt>
-                    <dd class="mt-0.5 text-[14px] font-semibold leading-snug break-words">{{ $value }}</dd>
+                <div @class(['px-3.5 py-2 min-w-0', 'col-span-2' => $loop->last && $loop->count % 2 === 1, 'border-l border-[var(--tx-line)]' => $loop->iteration % 2 === 0, 'border-t border-[var(--tx-line)]' => $loop->iteration > 2])>
+                    <dt class="text-[11.5px] text-[#78716c]">{{ $label }}</dt>
+                    <dd class="mt-0.5 text-[13.5px] font-semibold leading-snug [overflow-wrap:anywhere]">{{ $value }}</dd>
                 </div>
             @endforeach
         </dl>

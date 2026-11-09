@@ -6,6 +6,7 @@ use App\Models\Media;
 use App\Services\Media\MediaUploadService;
 use App\Services\Media\MediaUrlService;
 use Lorisleiva\Actions\Concerns\AsAction;
+use Modules\Approval\Actions\ReviseContentAction;
 use Modules\Product\Features\CatalogManagement\Data\ProductData;
 use Modules\Product\Models\Product;
 use Modules\Post\Support\ArticleContentRenderer;
@@ -22,14 +23,17 @@ class UpdateProductAction
 
     public function handle(Product $product, ProductData $data): Product
     {
+        $gallery = $this->syncGallery($product, $data);
+        $coverBefore = $product->cover_image_url;
+
         $product->update([
-            ...$this->resolveCover($product, $data),
+            'cover_image_url'        => $gallery['cover'],
             'category_id'            => $data->category_id,
             'name'                   => $data->name,
             'sku'                    => $data->sku,
             'type'                   => $data->type,
             'short_description'      => $data->short_description,
-            'description'            => $data->description,
+            'description'            => $this->renderer->sanitizeTextHtml($data->description) ?: null,
             'content'                => $this->renderer->sanitizeTextHtml($data->content) ?: null,
             'price'                  => $data->price,
             'price_label'            => $data->price_label,
@@ -54,49 +58,44 @@ class UpdateProductAction
             $product->forceFill(['content' => $content])->saveQuietly();
         }
 
+        if ($gallery['changed'] && $coverBefore === $product->cover_image_url) {
+            app(ReviseContentAction::class)->handle($product);
+        }
+
         return $product;
     }
 
-    /**
-     * cover_image_url sau khi lưu — ảnh FilePond mới > "Xóa ảnh hiện tại" > giá trị DTO. Ghi qua
-     * $product->update() (KHÔNG saveQuietly) để HasApproval thấy cover_image_url đổi → duyệt lại.
-     * Ảnh chỉ gắn/xoá khi bấm Lưu (luồng draft) — bấm Hủy thì ảnh cũ còn nguyên.
-     *
-     * @return array{cover_image_url: ?string}
-     */
-    private function resolveCover(Product $product, ProductData $data): array
+    /** @return array{cover: ?string, changed: bool} */
+    private function syncGallery(Product $product, ProductData $data): array
     {
-        // Archived: nội dung read-only (HasApproval chặn) — không gắn/xoá media trước khi update()
-        // ném InvalidTransitionException, tránh xoá mất file ảnh cũ mà URL vẫn trỏ tới.
         if ($product->isApprovalArchived()) {
-            return ['cover_image_url' => $product->cover_image_url];
+            return ['cover' => $product->cover_image_url, 'changed' => false];
         }
 
-        if ($data->cover_media_uuid) {
-            $this->mediaUpload->reassociateFilePondDrafts($product, [$data->cover_media_uuid], 'cover');
-            $media = Media::query()
-                ->where('model_type', $product::class)
-                ->where('model_id', $product->getKey())
-                ->where('collection_name', 'cover')
-                ->latest('id')
-                ->first();
+        $changed = false;
 
-            if ($media) {
-                return ['cover_image_url' => $this->mediaUrl->url($media)];
-            }
+        if ($data->remove_media_uuids) {
+            $product->getMedia(Product::GALLERY)
+                ->whereIn('uuid', $data->remove_media_uuids)
+                ->each(function (Media $media) use (&$changed) {
+                    $this->mediaUpload->delete($media);
+                    $changed = true;
+                });
         }
 
-        if ($data->remove_cover) {
-            Media::query()
-                ->where('model_type', $product::class)
-                ->where('model_id', $product->getKey())
-                ->where('collection_name', 'cover')
-                ->get()
-                ->each(fn (Media $media) => $this->mediaUpload->delete($media));
-
-            return ['cover_image_url' => null];
+        if ($data->media_uuids && $this->mediaUpload->attachFilePondDrafts($product, $data->media_uuids, Product::GALLERY, (int) auth()->id()) > 0) {
+            $changed = true;
         }
 
-        return ['cover_image_url' => $data->cover_image_url];
+        $first = $product->load('media')->getFirstMedia(Product::GALLERY);
+
+        return [
+            'cover' => match (true) {
+                $first !== null => $this->mediaUrl->url($first),
+                $changed, $data->remove_cover => null,
+                default => $product->cover_image_url,
+            },
+            'changed' => $changed,
+        ];
     }
 }

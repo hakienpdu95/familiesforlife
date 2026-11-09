@@ -12,9 +12,15 @@
             {{ $product->name }}
             <span class="badge badge-sm {{ $product->status->badgeClass() }}">{{ $product->status->label() }}</span>
             @if ($product->approvalStatus())
-                <span class="badge badge-sm {{ $product->approvalStatus()->badgeClass() }}">
-                    Duyệt: {{ $product->approvalStatus()->label() }}
-                </span>
+                @can('publishApproval', $product)
+                    @unless ($product->isApprovalPublished() || $product->isApprovalArchived())
+                        <span class="badge badge-sm badge-ghost">Chưa xuất bản</span>
+                    @endunless
+                @else
+                    <span class="badge badge-sm {{ $product->approvalStatus()->badgeClass() }}">
+                        Duyệt: {{ $product->approvalStatus()->label() }}
+                    </span>
+                @endcan
             @endif
         </p>
     </div>
@@ -41,6 +47,35 @@
 </div>
 @endif
 
+@if ($qr = $product->qrIdentity)
+@php
+    $qrState = match (true) {
+        ! $product->isPubliclyVisible() => ['badge-ghost', 'Chưa công khai', 'Quét mã sẽ thấy thông báo "đang cập nhật" cho tới khi sản phẩm được xuất bản.'],
+        $product->status === \Modules\Product\Enums\ProductStatus::Inactive => ['badge-warning', 'Đang tạm ẩn', 'Sản phẩm đang tạm ẩn nên trang truy xuất chưa hiển thị thông tin.'],
+        default => ['badge-success', 'Đang hiển thị', 'Người mua quét mã sẽ thấy bản nội dung đã xuất bản, giá và nơi mua hiện tại.'],
+    };
+@endphp
+<div class="card bg-base-100 shadow-sm border border-base-200 mb-4">
+    <div class="card-body p-3 flex-row items-start gap-4">
+        <a href="{{ $qr->publicUrl() }}" target="_blank" rel="noopener" data-qr-preview data-url="{{ $qr->publicUrl() }}"
+           class="block w-24 h-24 shrink-0 p-1 bg-white rounded-lg border border-base-200 hover:border-primary" title="Mở trang truy xuất"></a>
+        <div class="flex-1 min-w-0">
+            <div class="flex flex-wrap items-center gap-2">
+                <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide">Tem QR truy xuất</p>
+                <span class="badge badge-sm {{ $qrState[0] }}">{{ $qrState[1] }}</span>
+            </div>
+            <p class="mt-1 font-mono text-lg font-semibold tracking-wider">{{ $qr->qr_code }}</p>
+            <a href="{{ $qr->publicUrl() }}" target="_blank" rel="noopener" class="link link-primary text-xs break-all">{{ $qr->publicUrl() }}</a>
+            <p class="mt-1 text-xs text-base-content/50">{{ $qrState[2] }}</p>
+            <div class="mt-2 flex flex-wrap gap-2">
+                <button type="button" class="btn btn-xs btn-outline gap-1" data-qr-download data-url="{{ $qr->publicUrl() }}" data-code="{{ $qr->qr_code }}" data-label="{{ $product->name }}">Tải PNG 2048px</button>
+                <button type="button" class="btn btn-xs btn-ghost" data-qr-copy="{{ $qr->publicUrl() }}">Sao chép link</button>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
 {{-- ── Duyệt nội dung — spec/Workflow_Approval_Technical_Specification.md §9.5 ────────
      Đặt NGOÀI <form> chính (phía trên form) (mỗi nút là 1 form POST riêng, không lồng được vào form
      update sản phẩm). Trục "Duyệt nội dung" độc lập với trục "Trạng thái" (kinh doanh/tồn
@@ -50,15 +85,28 @@
     <div class="card-body p-3">
         <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">Duyệt nội dung</p>
 
+        @php
+            $canPublishProduct = auth()->user()->can('publishApproval', $product);
+            $inReview = $product->isApprovalDraft() || $product->isApprovalPending() || $product->isApproved();
+        @endphp
+
+        @if (! $canPublishProduct && $product->isApprovalPending())
+            <p class="text-xs text-base-content/60 mb-2">Đang chờ bộ phận kiểm duyệt duyệt nội dung.</p>
+        @elseif (! $canPublishProduct && $product->isApproved())
+            <p class="text-xs text-base-content/60 mb-2">Đã duyệt, đang chờ xuất bản.</p>
+        @elseif ($canPublishProduct && $inReview)
+            <p class="text-xs text-base-content/60 mb-2">Nội dung chưa xuất bản. Bấm <strong>Lưu lại</strong> để cập nhật và xuất bản ngay — không cần duyệt.</p>
+        @endif
+
         <div class="flex flex-wrap items-center gap-2">
-            @if ($product->isApprovalDraft() && auth()->user()->can('submitForApproval', $product))
+            @if (! $canPublishProduct && $product->isApprovalDraft() && auth()->user()->can('submitForApproval', $product))
                 <form method="POST" action="{{ route('backend.products.submit-approval', $product) }}">
                     @csrf
                     <button class="btn btn-sm btn-warning">Gửi duyệt</button>
                 </form>
             @endif
 
-            @if ($product->isApprovalPending() && auth()->user()->can('approve', $product))
+            @if (! $canPublishProduct && $product->isApprovalPending() && auth()->user()->can('approve', $product))
                 <form method="POST" action="{{ route('backend.products.approve-content', $product) }}">
                     @csrf
                     <button class="btn btn-sm btn-info">Duyệt</button>
@@ -86,13 +134,6 @@
                         </form>
                     </div>
                 </dialog>
-            @endif
-
-            @if ($product->isApproved() && auth()->user()->can('publishApproval', $product))
-                <form method="POST" action="{{ route('backend.products.publish-content', $product) }}">
-                    @csrf
-                    <button class="btn btn-sm btn-success">Xuất bản</button>
-                </form>
             @endif
 
             @if ($product->isApprovalPublished() && auth()->user()->can('archiveApproval', $product))

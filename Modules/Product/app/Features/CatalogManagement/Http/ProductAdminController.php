@@ -6,18 +6,20 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 use Modules\Approval\Actions\ApproveAction;
 use Modules\Approval\Actions\ArchiveAction;
-use Modules\Approval\Actions\PublishAction;
 use Modules\Approval\Actions\RejectAction;
 use Modules\Approval\Actions\SubmitForApprovalAction;
+use Modules\Approval\Enums\ApprovalStatus;
 use Modules\Approval\Exceptions\InvalidTransitionException;
 use Modules\Product\Enums\ProductStatus;
 use Modules\Product\Enums\ProductType;
 use Modules\Product\Features\CatalogManagement\Actions\ChangeProductStatusAction;
 use Modules\Product\Features\CatalogManagement\Actions\CreateProductAction;
 use Modules\Product\Features\CatalogManagement\Actions\DeleteProductAction;
+use Modules\Product\Features\CatalogManagement\Actions\FastTrackPublishProductAction;
 use Modules\Product\Features\CatalogManagement\Actions\UpdateProductAction;
 use Modules\Product\Features\CatalogManagement\Data\ProductData;
 use Modules\Product\Features\CatalogManagement\Exceptions\ProductStillReferencedException;
@@ -51,12 +53,15 @@ class ProductAdminController extends Controller
     {
         $data    = ProductData::from($this->validated($request));
         $product = $action->handle($data);
+        $published = $this->fastTrackIfFinalApprover($request, $product);
 
         // "Tạo & thêm tiếp" — nhập nhiều sản phẩm liên tục, quay lại form trống thay vì danh sách.
         $route = $request->input('after_save') === 'new' ? 'backend.products.create' : 'backend.products.index';
 
         return redirect()->route($route)
-            ->with('success', "Sản phẩm \"{$product->name}\" đã được tạo và gửi duyệt.");
+            ->with('success', $published
+                ? "Sản phẩm \"{$product->name}\" đã được tạo và xuất bản."
+                : "Sản phẩm \"{$product->name}\" đã được tạo và gửi duyệt.");
     }
 
     public function edit(Product $product, ListCategoriesForAdminHandler $categoryHandler): View
@@ -75,8 +80,12 @@ class ProductAdminController extends Controller
         // (đổi route convention hiện có, tốn công hơn cần thiết cho 1 role).
         abort_if($request->user()?->isPlatformViewer(), 403);
 
-        // Form không còn ô nhập URL ảnh — giữ ảnh hiện tại trừ khi có ảnh FilePond mới / remove_cover.
-        $data = ProductData::from([...$this->validated($request, $product->id), 'cover_image_url' => $product->cover_image_url]);
+        $validated = $this->validated($request, $product->id);
+        $kept = $product->getMedia(Product::GALLERY)->whereNotIn('uuid', $validated['remove_media_uuids'] ?? [])->count();
+        if ($kept + count($validated['media_uuids'] ?? []) > Product::MAX_IMAGES) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['media_uuids' => 'Tối đa '.Product::MAX_IMAGES." ảnh cho mỗi sản phẩm (hiện còn {$kept} ảnh)."]);
+        }
+        $data = ProductData::from([...$validated, 'cover_image_url' => $product->cover_image_url]);
 
         try {
             $action->handle($product, $data);
@@ -91,8 +100,10 @@ class ProductAdminController extends Controller
             return back()->withInput()->with('error', 'Không thể sửa nội dung sản phẩm đã lưu trữ. Các trường khác (giá, trạng thái kinh doanh…) đã được lưu — chỉ phần nội dung bị bỏ qua.');
         }
 
+        $published = $this->fastTrackIfFinalApprover($request, $product->refresh());
+
         return redirect()->route('backend.products.index')
-            ->with('success', 'Cập nhật sản phẩm thành công.');
+            ->with('success', $published ? 'Đã cập nhật và xuất bản sản phẩm.' : 'Cập nhật sản phẩm thành công.');
     }
 
     public function destroy(Request $request, Product $product, DeleteProductAction $action): RedirectResponse|JsonResponse
@@ -137,6 +148,10 @@ class ProductAdminController extends Controller
     {
         $this->authorize('submitForApproval', $product);
 
+        if (Gate::allows('publishApproval', $product)) {
+            return back()->with('error', 'Tài khoản của bạn có quyền xuất bản trực tiếp, không cần gửi duyệt.');
+        }
+
         return $this->runApprovalTransition($product, fn () => $action->handle($product), 'Đã gửi sản phẩm để chờ duyệt.');
     }
 
@@ -156,11 +171,24 @@ class ProductAdminController extends Controller
         return $this->runApprovalTransition($product, fn () => $action->handle($product, $reason), 'Đã từ chối duyệt.');
     }
 
-    public function publishContent(Product $product, PublishAction $action): RedirectResponse
+    public function publishContent(Product $product, FastTrackPublishProductAction $action): RedirectResponse
     {
         $this->authorize('publishApproval', $product);
 
-        return $this->runApprovalTransition($product, fn () => $action->handle($product), 'Đã xuất bản nội dung sản phẩm.');
+        return $this->runApprovalTransition($product, fn () => $action->handle($product), 'Đã duyệt và xuất bản nội dung sản phẩm.');
+    }
+
+    private function fastTrackIfFinalApprover(Request $request, Product $product): bool
+    {
+        $product->load('approvalSubject');
+
+        if (! $request->user()->can('publishApproval', $product) || ! in_array($product->approvalStatus(), [ApprovalStatus::Draft, ApprovalStatus::Pending, ApprovalStatus::Approved], true)) {
+            return false;
+        }
+
+        app(FastTrackPublishProductAction::class)->handle($product);
+
+        return true;
     }
 
     public function archiveContent(Product $product, ArchiveAction $action): RedirectResponse
@@ -185,6 +213,16 @@ class ProductAdminController extends Controller
     {
         $urlRule = ['nullable', 'url', 'regex:/^https?:\/\//i', 'max:500'];
 
+        if (is_string($request->input('media_uuids'))) {
+            $request->merge(['media_uuids' => json_decode($request->input('media_uuids'), true) ?: []]);
+        }
+
+        foreach (['media_uuids', 'remove_media_uuids'] as $field) {
+            if (! is_array($request->input($field))) {
+                $request->merge([$field => []]);
+            }
+        }
+
         return $request->validate([
             'category_id'            => ['nullable', 'integer', 'exists:product_categories,id'],
             'name'                   => ['required', 'string', 'max:250'],
@@ -192,12 +230,15 @@ class ProductAdminController extends Controller
             'status'                 => ['required', 'in:' . implode(',', array_column(ProductStatus::cases(), 'value'))],
             'sku'                    => ['nullable', 'string', 'max:60'],
             'short_description'      => ['nullable', 'string', 'max:300'],
-            'description'            => ['nullable', 'string'],
+            'description'            => ['nullable', 'string', 'max:20000'],
             'content'                => ['nullable', 'string', 'max:65000'],
             'price'                  => ['nullable', 'numeric', 'min:0'],
             'price_label'            => ['nullable', 'string', 'max:100'],
             'currency'               => ['nullable', 'string', 'size:3'],
-            'cover_media_uuid'       => ['nullable', 'uuid'],
+            'media_uuids'            => ['nullable', 'array', 'max:'.Product::MAX_IMAGES],
+            'media_uuids.*'          => ['string', 'uuid'],
+            'remove_media_uuids'     => ['nullable', 'array'],
+            'remove_media_uuids.*'   => ['string', 'uuid'],
             'remove_cover'           => ['boolean'],
             'shopee_url'             => $urlRule,
             'tiktok_url'             => $urlRule,
@@ -221,7 +262,8 @@ class ProductAdminController extends Controller
             'price.min'                    => 'Giá không được âm.',
             'price_label.max'              => 'Nhãn giá không được vượt quá :max ký tự.',
             'currency.size'                => 'Tiền tệ phải là mã 3 ký tự (VD: VND, USD).',
-            'cover_media_uuid.uuid'        => 'Ảnh đại diện tải lên không hợp lệ — vui lòng tải lại.',
+            'media_uuids.max'              => 'Tối đa :max ảnh cho mỗi sản phẩm.',
+            'media_uuids.*.uuid'           => 'Ảnh tải lên không hợp lệ — vui lòng tải lại.',
             'remove_cover.boolean'         => 'Giá trị "Xóa ảnh hiện tại" không hợp lệ.',
             'shopee_url.url'               => 'Link Shopee không đúng định dạng URL.',
             'shopee_url.regex'             => 'Link Shopee phải bắt đầu bằng http:// hoặc https://.',

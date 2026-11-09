@@ -69,6 +69,12 @@ return [
             'is_public'    => true,
             'conversions'  => ['thumb', 'medium'],
         ],
+        'product_gallery' => [
+            'max_size_kb'  => 10240,
+            'allowed_mime' => ['image/jpeg', 'image/png', 'image/webp'],
+            'is_public'    => true,
+            'conversions'  => ['thumb', 'small', 'medium', 'preview'],
+        ],
         'ocop_gallery' => [
             'max_size_kb'  => 10240,
             'allowed_mime' => ['image/jpeg', 'image/png', 'image/webp'],

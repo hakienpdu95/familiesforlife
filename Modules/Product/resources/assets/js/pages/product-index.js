@@ -7,6 +7,7 @@
  */
 
 import { createTs } from '@shared/tom-select-factory.js';
+import { qrCellHtml } from '@shared/qr-tools.js';
 
 function esc(v) {
     if (v == null) return '';
@@ -16,6 +17,15 @@ function esc(v) {
 }
 
 const COLUMNS = [
+    {
+        title: 'Mã QR', field: 'qr_code', width: 96, hozAlign: 'center', headerSort: false, frozen: true,
+        formatter(cell) {
+            const d = cell.getRow().getData();
+            const html = qrCellHtml(d.qr_code, d.qr_url, d.name);
+            if (!d.qr_code || d.qr_public) return html;
+            return '<div class="opacity-50" title="Chưa công khai — quét mã sẽ thấy thông báo đang cập nhật">' + html + '</div>';
+        },
+    },
     {
         title: 'Sản phẩm', field: 'name', minWidth: 220, sorter: 'string', frozen: true,
         formatter(cell) {

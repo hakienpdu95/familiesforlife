@@ -147,7 +147,7 @@ class MediaUploadService
                 ->get()
                 ->each(function (Media $media) use ($model) {
                     $oldBasePath = rtrim(dirname($media->getPathRelativeToRoot()), '/');
-                    $media->model_type = get_class($model);
+                    $media->model_type = $model->getMorphClass();
                     $media->model_id   = $model->getKey();
                     $media->save();
                     $this->moveMediaFiles($media, $oldBasePath);
@@ -158,7 +158,7 @@ class MediaUploadService
         // whereNotIn() với $uuids rỗng tự động khớp TẤT CẢ (đúng ý muốn: không còn UUID nào cần
         // giữ lại thì mọi media cũ của entity này đều là rác).
         Media::query()
-            ->where('model_type', get_class($model))
+            ->whereIn('model_type', array_unique([$model->getMorphClass(), $model::class]))
             ->where('model_id', $model->getKey())
             ->where('collection_name', 'jodit_content')
             ->whereNotIn('uuid', $uuids)
@@ -191,7 +191,7 @@ class MediaUploadService
             ->get()
             ->each(function (Media $media) use ($model) {
                 $oldBasePath = rtrim(dirname($media->getPathRelativeToRoot()), '/');
-                $media->model_type = get_class($model);
+                $media->model_type = $model->getMorphClass();
                 $media->model_id   = $model->getKey();
                 $media->save();
                 $this->moveMediaFiles($media, $oldBasePath);
@@ -211,7 +211,7 @@ class MediaUploadService
             ->get()
             ->each(function (Media $media) use ($model) {
                 $oldBasePath = rtrim(dirname($media->getPathRelativeToRoot()), '/');
-                $media->model_type = get_class($model);
+                $media->model_type = $model->getMorphClass();
                 $media->model_id   = $model->getKey();
                 $media->save();
                 $this->moveMediaFiles($media, $oldBasePath);
@@ -219,7 +219,7 @@ class MediaUploadService
 
         // Delete stale media for this entity in the same collection not in the new UUID list
         Media::query()
-            ->where('model_type', get_class($model))
+            ->whereIn('model_type', array_unique([$model->getMorphClass(), $model::class]))
             ->where('model_id', $model->getKey())
             ->where('collection_name', $collection)
             ->whereNotIn('uuid', $uuids)

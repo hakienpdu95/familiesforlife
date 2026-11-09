@@ -18,7 +18,7 @@ class ListProductsForAdminHandler implements QueryHandlerInterface
         // dung cho từng dòng (spec/Workflow_Approval_Technical_Specification.md §9); thiếu
         // dòng này sẽ ném LazyLoadingViolationException (strict mode) khi danh sách có ≥ 2
         // sản phẩm và Blade gọi $p->approvalStatus() cho từng dòng.
-        $q = Product::query()->with(['category:id,name', 'approvalSubject']);
+        $q = Product::query()->with(['category:id,name', 'approvalSubject', 'qrIdentity']);
 
         if ($query->search) {
             $term = '%' . $query->search . '%';

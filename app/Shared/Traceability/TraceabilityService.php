@@ -225,6 +225,23 @@ class TraceabilityService
         return app(MediaUrlService::class)->srcset($media, self::RESPONSIVE_WIDTHS);
     }
 
+    public static function tidyHtml(?string $html): ?string
+    {
+        if (blank($html)) {
+            return null;
+        }
+
+        $block = '(?:p|ul|ol|h[1-6]|blockquote|div|table|figure)';
+
+        return trim(preg_replace([
+            '#<p\b[^>]*>(?:\s|&nbsp;|<br\s*/?>)*</p>#iu',
+            '#(</'.$block.'>)(?:\s|<br\s*/?>)+#iu',
+            '#(?:<br\s*/?>\s*)+(<'.$block.'\b)#iu',
+            '#(<p\b[^>]*>)\s*(?:<br\s*/?>\s*)+#iu',
+            '#(?:\s*<br\s*/?>)+\s*(</p>)#iu',
+        ], ['', '$1', '$1', '$1', '$1'], $html));
+    }
+
     public static function hasContent(?string $html): bool
     {
         $text = strip_tags((string) $html, '<img><iframe><video>');

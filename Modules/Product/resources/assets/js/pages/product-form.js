@@ -18,6 +18,7 @@
  *                                  initFilePondUpload (filepond.js)
  */
 
+import { qrSvg } from '@shared/qr-tools.js';
 import { createTs, initAllTomSelects } from '@shared/tom-select-factory.js';
 
 // ── Constants & lookup tables ──────────────────────────────────────────────
@@ -30,6 +31,16 @@ const RE_TAB_XSHOW = /tab\s*===\s*['"](\w+)['"]/;
 // ── Entry point ────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-qr-preview]').forEach((el) => { el.innerHTML = qrSvg(el.dataset.url); });
+    document.querySelectorAll('[data-qr-copy]').forEach((btn) => btn.addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(btn.dataset.qrCopy);
+            window.Toast ? Toast.success('Đã sao chép link truy xuất') : (btn.textContent = 'Đã sao chép');
+        } catch {
+            window.prompt('Sao chép link truy xuất:', btn.dataset.qrCopy);
+        }
+    }));
+
     const form = document.querySelector(FORM_SEL);
     if (!form) return;
 
@@ -38,11 +49,12 @@ document.addEventListener('DOMContentLoaded', () => {
     initAllTomSelects(form);
     _initStatusSelect(form);
     const contentEditor = _initContentEditor(form);
-    _initCoverUpload(form);
+    const descriptionEditor = _initDescriptionEditor(form);
+    _initGalleryUpload(form);
     _setupPricePreview(form);
     _setupAffiliateLinks(form);
     _setupSubmitLock(form);
-    _setupDirtyGuard(form, [contentEditor]);
+    _setupDirtyGuard(form, [contentEditor, descriptionEditor].filter(Boolean));
 });
 
 // ── Trạng thái trong Sticky Submit Bar (§11.3) ──────────────────────────────
@@ -53,14 +65,15 @@ function _initStatusSelect(form) {
     createTs(el, { dropdownParent: null, placeholder: 'Chọn trạng thái' });
 }
 
-// ── Ảnh đại diện — FilePond, luồng draft cho CẢ create lẫn edit ─────────────
-// Không gửi X-Context-Type/Id: ảnh chỉ gắn vào sản phẩm khi bấm Lưu (UpdateProductAction ghi
-// cover_image_url qua update() → HasApproval duyệt lại), bấm Hủy thì ảnh cũ còn nguyên.
-
-function _initCoverUpload(form) {
-    const el = form.querySelector('#cover-filepond');
+function _initGalleryUpload(form) {
+    const el = form.querySelector('#gallery-filepond');
     if (!el || !window.initFilePondUpload) return;
-    initFilePondUpload(el, { collection: 'cover', bindTo: '#cover-media-uuid' });
+    initFilePondUpload(el, {
+        collection: 'product_gallery',
+        bindTo: '#gallery-media-uuids',
+        maxFiles: Number(el.dataset.maxFiles) || 10,
+        labelIdle: 'Kéo thả ảnh vào đây hoặc <span class="filepond--label-action">Chọn ảnh</span>',
+    });
 }
 
 // ── Xem trước giá hiển thị — khớp Product::getDisplayPriceAttribute() ──────
@@ -144,6 +157,17 @@ function _initContentEditor(form) {
     });
 
     return editor;
+}
+
+function _initDescriptionEditor(form) {
+    const el = form.querySelector('#product-description');
+    if (!el || !window.initJodit) return null;
+
+    return initJodit(el, {
+        showWordsCounter: true,
+        showCharsCounter: true,
+        removeButtons: ['about', 'classSpan', 'image', 'video', 'file'],
+    });
 }
 
 // ── Dirty Form Guard (§17.7) ───────────────────────────────────────────────

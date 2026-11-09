@@ -53,7 +53,7 @@ class ProductPolicy
 
     public function submitForApproval(User $user, Product $product): bool
     {
-        return $user->can('product.edit');
+        return ! $user->isPlatformContentModerator() && $user->can('product.edit');
     }
 
     public function approve(User $user, Product $product): bool
@@ -66,7 +66,7 @@ class ProductPolicy
         return $user->isPlatformContentModerator();
     }
 
-    public function publishApproval(User $user, Product $product): bool
+    public function publishApproval(User $user, ?Product $product = null): bool
     {
         return $user->isPlatformContentModerator();
     }

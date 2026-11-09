@@ -3,7 +3,6 @@
 namespace Modules\Product\Features\CatalogManagement\Actions;
 
 use Illuminate\Support\Str;
-use App\Models\Media;
 use App\Services\Media\MediaUploadService;
 use App\Services\Media\MediaUrlService;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -37,12 +36,12 @@ class CreateProductAction
             'sku'                    => $data->sku,
             'type'                   => $data->type,
             'short_description'      => $data->short_description,
-            'description'            => $data->description,
+            'description'            => $this->renderer->sanitizeTextHtml($data->description) ?: null,
             'content'                => $this->renderer->sanitizeTextHtml($data->content) ?: null,
             'price'                  => $data->price,
             'price_label'            => $data->price_label,
             'currency'               => $data->currency,
-            'cover_image_url'        => $data->cover_media_uuid ? null : $data->cover_image_url,
+            'cover_image_url'        => null,
             'status'                 => $data->status,
             'shopee_url'             => $data->shopee_url,
             'tiktok_url'             => $data->tiktok_url,
@@ -53,11 +52,11 @@ class CreateProductAction
             'created_by'             => auth()->id(),
         ]);
 
-        // Ảnh đại diện upload qua FilePond (FilePondDraft) — "nhận" vào sản phẩm rồi ghi URL vào
-        // cover_image_url (cột mọi nơi khác đang đọc: CTA box, picker…). saveQuietly — trước
-        // SubmitForApprovalAction bên dưới nên snapshot gửi duyệt đã có ảnh.
-        if ($data->cover_media_uuid && ($coverUrl = $this->attachCover($product, $data->cover_media_uuid))) {
-            $product->forceFill(['cover_image_url' => $coverUrl])->saveQuietly();
+        if ($data->media_uuids) {
+            $this->mediaUpload->attachFilePondDrafts($product, $data->media_uuids, Product::GALLERY, (int) auth()->id());
+            if ($first = $product->load('media')->getFirstMedia(Product::GALLERY)) {
+                $product->forceFill(['cover_image_url' => $this->mediaUrl->url($first)])->saveQuietly();
+            }
         }
 
         // Cùng UpdateOcopProductAction — ảnh chèn qua Jodit sống tạm ở JoditDraft cho tới khi lưu,
@@ -73,21 +72,6 @@ class CreateProductAction
         app(SubmitForApprovalAction::class)->handle($product);
 
         return $product;
-    }
-
-    private function attachCover(Product $product, string $uuid): ?string
-    {
-        $this->mediaUpload->reassociateFilePondDrafts($product, [$uuid], 'cover');
-        // Query trực tiếp cùng điều kiện reassociateFilePondDrafts — không qua $product->getMedia()
-        // (relation media có thể đã nạp trước khi reassociate, trả rỗng).
-        $media = Media::query()
-            ->where('model_type', $product::class)
-            ->where('model_id', $product->getKey())
-            ->where('collection_name', 'cover')
-            ->latest('id')
-            ->first();
-
-        return $media ? $this->mediaUrl->url($media) : null;
     }
 
     private function uniqueSlug(string $name): string

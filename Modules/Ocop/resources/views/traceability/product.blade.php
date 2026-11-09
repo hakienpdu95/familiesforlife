@@ -35,7 +35,7 @@
             <h1 class="tx-display tx-h1 mt-1.5">{{ $title }}</h1>
             @if ($description)
                 @php($longDescription = collect($info['panels'] ?? [])->flatMap(fn ($p) => $p['items'])->contains('key', 'mo-ta'))
-                <p class="mt-2 text-[15px] leading-relaxed text-[#57534e] [overflow-wrap:anywhere]">{{ \Illuminate\Support\Str::limit(preg_replace('/\s+/u', ' ', $description), 220) }}@if ($longDescription) <a href="#mo-ta" onclick="document.getElementById('mo-ta').open=true" class="font-semibold text-primary whitespace-nowrap">Đọc thêm</a>@endif</p>
+                <p class="mt-1.5 text-[14px] leading-[1.6] text-[#78716c] [overflow-wrap:anywhere]">{{ \Illuminate\Support\Str::limit(preg_replace('/\s+/u', ' ', $description), 220) }}@if ($longDescription) <a href="#mo-ta" onclick="document.getElementById('mo-ta').open=true" class="font-semibold text-primary whitespace-nowrap">Đọc thêm</a>@endif</p>
             @endif
 
             @include('traceability.partials.ocop-cert', [

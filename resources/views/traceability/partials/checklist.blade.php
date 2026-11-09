@@ -10,10 +10,10 @@
 
 @if ($done > 0)
     <details class="tx-details group/doc border-t border-[#ead9a8] bg-base-100">
-        <summary class="tx-row-link flex items-center gap-3 px-3.5 py-3 min-h-[3.25rem]">
+        <summary class="tx-row-link flex items-center gap-3 px-3.5 py-2.5 min-h-11">
             <span class="flex-1 min-w-0 leading-snug">
                 <span class="flex items-center gap-2">
-                    <span class="text-[15px] font-semibold">{{ $label }}</span>
+                    <span class="text-[14px] font-semibold">{{ $label }}</span>
                     <span class="flex w-12 gap-0.5" aria-hidden="true">
                         @foreach ($items as $item)
                             <span @class(['h-1 flex-1 rounded-full', 'bg-[#16a34a]' => $item['count'] > 0, 'bg-[#e7e5e4]' => $item['count'] === 0])></span>
@@ -37,7 +37,7 @@
             @foreach ($items as $item)
                 @php($files = $item['files'] ?? [])
                 @php($has = $item['count'] > 0)
-                <li class="flex gap-2.5 px-3.5 py-3">
+                <li class="flex gap-2.5 px-3.5 py-2.5">
                     @if ($has)
                         <span class="mt-0.5 w-4 h-4 rounded-full bg-[#16a34a] text-white flex items-center justify-center shrink-0" aria-hidden="true"><svg viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-7.5 7.5a1 1 0 0 1-1.4 0l-3.5-3.5a1 1 0 1 1 1.4-1.4l2.8 2.8 6.8-6.8a1 1 0 0 1 1.4 0Z" clip-rule="evenodd"/></svg></span>
                     @elseif (! empty($item['required']))
@@ -47,7 +47,7 @@
                     @endif
                     <div class="flex-1 min-w-0">
                         <div class="flex items-baseline justify-between gap-3">
-                            <span @class(['text-[14px] font-semibold leading-snug', 'text-[#78716c]' => ! $has])>{{ $item['label'] }}</span>
+                            <span @class(['text-[13.5px] font-semibold leading-snug', 'text-[#78716c]' => ! $has])>{{ $item['label'] }}</span>
                             <span @class(['text-[12px] shrink-0', 'text-[#78716c]' => $has, 'text-[#a8a29e]' => ! $has && empty($item['required']), 'text-[#b45309] font-semibold' => ! $has && ! empty($item['required'])])>
                                 @unless ($has)
                                     Chưa công bố
@@ -55,7 +55,7 @@
                             </span>
                         </div>
                         @if (! empty($item['hint']))
-                            <p class="mt-0.5 text-[12.5px] leading-snug text-[#a8a29e]">{{ $item['hint'] }}</p>
+                            <p class="mt-0.5 text-[12px] leading-snug text-[#a8a29e]">{{ $item['hint'] }}</p>
                         @endif
                         @if (! empty($item['required']))
                             <span @class(['mt-1 inline-flex h-5 px-1.5 items-center rounded text-[11px] font-semibold', 'bg-[#e8f6ed] text-[#15803d]' => $has, 'bg-[#fef3c7] text-[#b45309]' => ! $has])>{{ $item['required'] }}</span>
@@ -71,17 +71,13 @@
                                            data-doc data-doc-type="{{ $file['type'] }}" data-doc-title="{{ $item['label'] }}{{ count($files) > 1 ? ' · tệp '.$loop->iteration : '' }}"
                                            data-doc-meta="{{ implode(' · ', array_filter([$file['type'], $file['size'], ! empty($file['uploaded_at']) ? 'đăng '.$file['uploaded_at'] : null, ! empty($file['ref']) ? 'mã '.$file['ref'] : null])) }}"
                                            aria-label="Xem {{ $item['label'] }}{{ count($files) > 1 ? ', tệp '.$loop->iteration.' trên '.count($files) : '' }} ({{ $file['type'] }}, {{ $file['size'] }}, mã {{ $file['ref'] ?? '' }})"
-                                           class="group/file flex flex-1 min-w-0 items-center gap-2 pl-2.5 py-2 min-h-11 hover:text-primary transition-colors">
+                                           class="group/file flex flex-1 min-w-0 items-center gap-2 pl-2.5 py-1.5 min-h-10 hover:text-primary transition-colors">
                                             <span @class(['inline-flex items-center justify-center h-[18px] px-1 rounded-[4px] text-[10px] font-bold text-white shrink-0', 'bg-[#dc2626]' => $file['type'] === 'PDF', 'bg-[#2563eb]' => $file['type'] !== 'PDF'])>{{ $file['type'] }}</span>
                                             <span class="min-w-0 leading-tight">
-                                                <span class="block text-[12.5px] font-semibold group-hover/file:underline">Xem{{ count($files) > 1 ? ' tệp '.$loop->iteration : '' }}@if ($loop->first && count($files) > 1)<span class="ml-1 font-normal text-[#15803d]">mới nhất</span>@endif</span>
-                                                <span class="flex flex-wrap gap-x-1 text-[12px] leading-snug text-[#a8a29e]">@foreach (array_values(array_filter([$file['size'], ! empty($file['uploaded_at']) ? 'đăng '.$file['uploaded_at'] : null, ! empty($file['ref']) ? 'mã '.$file['ref'] : null])) as $part)<span class="whitespace-nowrap">{{ $loop->first ? '' : '· ' }}{{ $part }}</span>@endforeach</span>
+                                                <span class="block text-[12.5px] font-semibold leading-tight group-hover/file:underline">Xem{{ count($files) > 1 ? ' tệp '.$loop->iteration : '' }}@if ($loop->first && count($files) > 1)<span class="ml-1 font-normal text-[#15803d]">mới nhất</span>@endif</span>
+                                                <span class="flex flex-wrap gap-x-1 text-[11.5px] leading-snug text-[#a8a29e]">@foreach (array_values(array_filter([$file['size'], ! empty($file['uploaded_at']) ? 'đăng '.$file['uploaded_at'] : null, ! empty($file['ref']) ? 'mã '.$file['ref'] : null])) as $part)<span class="whitespace-nowrap">{{ $loop->first ? '' : '· ' }}{{ $part }}</span>@endforeach</span>
                                             </span>
                                         </a>
-                                        @if (! empty($file['ref']))
-                                            <a href="#phan-anh" onclick="{{ $prefill('wrong_info', 'Hồ sơ "'.$item['label'].'" (mã '.$file['ref'].') có dấu hiệu chưa đúng: ') }}"
-                                               class="shrink-0 inline-flex items-center min-h-11 px-2.5 text-[12px] text-[#a8a29e] hover:text-[#b91c1c] hover:underline">Báo sai</a>
-                                        @endif
                                     </li>
                                 @endforeach
                             </ul>
@@ -92,7 +88,7 @@
                 </li>
             @endforeach
         </ul>
-        <div class="flex items-start gap-3 px-3.5 py-2.5 border-t border-[var(--tx-line)] bg-[#fafaf9]">
+        <div class="flex items-start gap-3 px-3.5 py-2 border-t border-[var(--tx-line)] bg-[#fafaf9]">
             <p class="flex-1 text-[12px] leading-snug text-[#78716c]">Hồ sơ do chủ thể cung cấp.</p>
             @if ($missing->isNotEmpty())
                 <a href="#phan-anh" onclick="{{ $ask }}" class="shrink-0 text-[12.5px] font-semibold text-primary hover:underline">Đề nghị bổ sung</a>
@@ -103,7 +99,7 @@
     <div class="flex items-center gap-3 px-3.5 py-2.5 border-t border-[#ead9a8] bg-base-100">
         <span class="flex-1 min-w-0 leading-snug">
             <span class="block text-[12px] text-[#78716c]">{{ $label }}</span>
-            <span class="block text-[14px] font-semibold text-[#57534e]">Chưa công bố hồ sơ nào</span>
+            <span class="block text-[13.5px] font-semibold text-[#57534e]">Chưa công bố hồ sơ nào</span>
             @if ($requiredMissing->isNotEmpty())
                 <span class="block text-[12.5px] font-medium text-[#b45309] line-clamp-2">Thiếu hồ sơ bắt buộc: {{ $requiredMissing->implode(', ') }}</span>
             @endif

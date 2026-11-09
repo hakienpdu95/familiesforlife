@@ -15,7 +15,7 @@
 <div x-data="{
     tab: 'basic',
     tabFields: {
-        basic:     ['name', 'category_id', 'type', 'sku', 'short_description', 'description', 'content', 'cover_media_uuid', 'remove_cover'],
+        basic:     ['name', 'category_id', 'type', 'sku', 'short_description', 'description', 'content', 'media_uuids', 'remove_media_uuids', 'remove_cover'],
         pricing:   ['price', 'currency', 'price_label', 'is_featured', 'sort_order'],
         affiliate: ['shopee_url', 'tiktok_url', 'supplier_url', 'supplier_homepage_url'],
     },
@@ -146,11 +146,11 @@
                 <div class="form-control">
                     <label class="label py-0 pb-1.5">
                         <span class="label-text font-medium">Mô tả đầy đủ</span>
-                        <span class="label-text-alt text-xs text-base-content/40">Văn bản thường</span>
+                        <span class="label-text-alt text-xs text-base-content/40">Đặc điểm, chất liệu, kích thước, đối tượng phù hợp</span>
                     </label>
-                    <textarea name="description" rows="4"
-                              class="textarea textarea-bordered textarea-sm w-full @error('description') textarea-error @enderror"
-                              placeholder="Đặc điểm, chất liệu, kích thước, đối tượng phù hợp...">{{ old('description', $product?->description) }}</textarea>
+                    <textarea id="product-description" name="description"
+                              class="jodit-editor textarea textarea-bordered textarea-sm w-full @error('description') textarea-error @enderror"
+                              data-jodit-preset="standard" data-jodit-height="220">{{ old('description', \Modules\Product\Models\Product::richText($product?->description)) }}</textarea>
                     @error('description')<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
                 </div>
 
@@ -165,38 +165,59 @@
                     @error('content')<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
                 </div>
 
-                {{-- Ảnh đại diện — docs/form-ui-spec.md §15 File & Image Upload --}}
-                <div class="form-control"
-                     x-data="{ remove: {{ Js::from((bool) old('remove_cover')) }}, hasCurrent: {{ Js::from((bool) $product?->cover_image_url) }} }">
+                @php
+                    $galleryImages = $product?->getMedia(\Modules\Product\Models\Product::GALLERY) ?? collect();
+                    $legacyCover = $galleryImages->isEmpty() ? $product?->cover_image_url : null;
+                    $slotsLeft = max(0, \Modules\Product\Models\Product::MAX_IMAGES - $galleryImages->count());
+                @endphp
+                <div class="form-control" x-data="{ removeLegacy: {{ Js::from((bool) old('remove_cover')) }} }">
                     <label class="label py-0 pb-1.5">
-                        <span class="label-text font-medium">Ảnh đại diện</span>
-                        <span class="label-text-alt text-xs text-base-content/40">JPG, PNG, WEBP · tối đa 10MB</span>
+                        <span class="label-text font-medium">Ảnh sản phẩm</span>
+                        <span class="label-text-alt text-xs text-base-content/40">{{ $galleryImages->count() }}/{{ \Modules\Product\Models\Product::MAX_IMAGES }} ảnh · JPG, PNG, WEBP · tối đa 10MB/ảnh</span>
                     </label>
 
-                    @if($product?->cover_image_url)
-                    <div x-show="hasCurrent && !remove" class="relative w-32 h-32 mb-2">
-                        <img src="{{ $product->cover_image_url }}" alt="Ảnh đại diện hiện tại"
-                             class="w-full h-full object-cover rounded-lg border border-base-200">
+                    @if($galleryImages->isNotEmpty())
+                    <div class="grid grid-cols-[repeat(auto-fill,minmax(5.5rem,1fr))] gap-2 mb-2">
+                        @foreach($galleryImages as $image)
+                        <label class="relative block aspect-square cursor-pointer group" title="Bấm để đánh dấu xoá khi lưu">
+                            <input type="checkbox" name="remove_media_uuids[]" value="{{ $image->uuid }}" class="peer sr-only"
+                                   @checked(in_array($image->uuid, old('remove_media_uuids', []), true)) @disabled($contentLocked)>
+                            <img src="{{ app(\App\Services\Media\MediaUrlService::class)->url($image, 'thumb') }}" alt="" loading="lazy"
+                                 class="w-full h-full rounded-lg border border-base-300 object-cover transition peer-checked:opacity-30 peer-checked:border-error">
+                            @if($loop->first)
+                            <span class="badge badge-primary badge-xs absolute top-1 left-1">Ảnh đại diện</span>
+                            @endif
+                            <span class="absolute inset-0 hidden peer-checked:flex items-center justify-center text-[11px] font-semibold text-error">Sẽ xoá</span>
+                            @unless($contentLocked)
+                            <span class="absolute top-1 right-1 w-5 h-5 rounded-full bg-base-100/90 border border-base-300 text-[11px] leading-none flex items-center justify-center opacity-0 group-hover:opacity-100 peer-checked:opacity-100 peer-checked:bg-error peer-checked:text-white">✕</span>
+                            @endunless
+                        </label>
+                        @endforeach
+                    </div>
+                    <p class="text-xs text-base-content/40 mb-2">Ảnh đầu tiên dùng làm ảnh đại diện (box sản phẩm trong bài viết, trang truy xuất QR). Bấm vào ảnh để đánh dấu xoá.</p>
+                    @elseif($legacyCover)
+                    <div x-show="!removeLegacy" class="relative w-24 h-24 mb-2">
+                        <img src="{{ $legacyCover }}" alt="Ảnh đại diện hiện tại" class="w-full h-full object-cover rounded-lg border border-base-200">
+                        <span class="badge badge-primary badge-xs absolute top-1 left-1">Ảnh đại diện</span>
                         @unless($contentLocked)
-                        <button type="button" @click="remove = true" title="Xóa ảnh hiện tại"
-                                class="btn btn-circle btn-xs btn-error absolute -top-2 -right-2">✕</button>
+                        <button type="button" @click="removeLegacy = true" title="Xóa ảnh hiện tại" class="btn btn-circle btn-xs btn-error absolute -top-2 -right-2">✕</button>
                         @endunless
                     </div>
-                    <div x-show="remove" x-cloak class="flex items-center gap-2 mb-2 text-xs text-warning">
+                    <div x-show="removeLegacy" x-cloak class="flex items-center gap-2 mb-2 text-xs text-warning">
                         Ảnh hiện tại sẽ bị xóa khi lưu.
-                        <button type="button" @click="remove = false" class="link link-primary">Hoàn tác</button>
+                        <button type="button" @click="removeLegacy = false" class="link link-primary">Hoàn tác</button>
                     </div>
-                    <input type="hidden" name="remove_cover" value="1" :disabled="!remove">
+                    <input type="hidden" name="remove_cover" value="1" :disabled="!removeLegacy">
+                    <p class="text-xs text-base-content/40 mb-2">Tải ảnh mới lên, ảnh đầu tiên sẽ thay ảnh đại diện hiện tại khi bấm Lưu.</p>
                     @endif
 
                     @unless($contentLocked)
-                    <div id="cover-filepond"></div>
-                    <input type="hidden" name="cover_media_uuid" id="cover-media-uuid" value="{{ old('cover_media_uuid') }}">
-                    @if($product?->cover_image_url)
-                    <p class="mt-1 text-xs text-base-content/40">Tải ảnh mới sẽ thay ảnh hiện tại khi bấm Lưu.</p>
-                    @endif
+                    <div id="gallery-filepond" data-max-files="{{ max(1, $slotsLeft) }}"></div>
+                    <input type="hidden" name="media_uuids" id="gallery-media-uuids" value="">
+                    <p class="mt-1 text-xs text-base-content/40">Có thể chọn nhiều ảnh cùng lúc. Ảnh chỉ được thêm vào sản phẩm khi bấm Lưu.</p>
                     @endunless
-                    @error('cover_media_uuid')<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
+                    @error('media_uuids')<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
+                    @error('media_uuids.*')<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
                 </div>
 
                 <div class="flex justify-end pt-2">
@@ -358,14 +379,22 @@
                 Tạo {{ $product->created_at?->format('d/m/Y') }} · Sửa {{ $product->updated_at?->diffForHumans() }}
             </span>
             @if($product->isApproved() || $product->isApprovalPublished())
+            @can('publishApproval', $product)
+            <span class="text-xs text-base-content/40">Lưu lại sẽ cập nhật và xuất bản ngay</span>
+            @else
             <span class="text-xs text-warning" title="Sửa tên, mô tả, nội dung hoặc ảnh sẽ đưa sản phẩm về Chờ duyệt và tạm ẩn khỏi cổng thông tin">
                 Sửa nội dung sẽ cần duyệt lại
             </span>
+            @endcan
             @endif
+            @else
+            @can('publishApproval', \Modules\Product\Models\Product::class)
+            <span class="text-xs text-base-content/40">Sản phẩm mới được duyệt và xuất bản ngay khi lưu</span>
             @else
             <span class="text-xs text-base-content/40" title="Sản phẩm chỉ hiển thị công khai sau khi đội kiểm duyệt duyệt và xuất bản">
                 Sản phẩm mới tự động gửi duyệt nội dung
             </span>
+            @endcan
             @endif
             @error('status')<p class="w-full text-xs text-error">{{ $message }}</p>@enderror
         </div>

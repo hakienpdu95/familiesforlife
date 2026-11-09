@@ -2,6 +2,8 @@
 
 namespace Modules\Product\Providers;
 
+use App\Shared\Traceability\TraceabilityRegistry;
+use Modules\Product\Features\Traceability\ProductTracePresenter;
 use Illuminate\Support\Facades\Gate;
 use Modules\Product\Contracts\ProductCatalogContract;
 use Modules\Product\Models\Product;
@@ -34,5 +36,7 @@ class ProductServiceProvider extends ModuleServiceProvider
 
         Gate::policy(ProductCategory::class, ProductCategoryPolicy::class);
         Gate::policy(Product::class, ProductPolicy::class);
+
+        $this->app->make(TraceabilityRegistry::class)->register(Product::class, ProductTracePresenter::class);
     }
 }

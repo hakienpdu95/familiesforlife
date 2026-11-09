@@ -225,6 +225,8 @@
         "origin///string///255///_NULL///NULL///__///Xuất xứ",
         "production_date///string///100///_NULL///NULL///__///Ngày sản xuất",
         "shelf_life///string///100///_NULL///NULL///__///Hạn sử dụng",
+        "shelf_life_value///unsignedSmallInteger///__///_NULL///NULL///__///Hạn sử dụng — giá trị số (1–9999)",
+        "shelf_life_unit///string///10///_NULL///NULL///__///Đơn vị hạn sử dụng: hour | day | week | month | year",
         "ingredients///text///__///_NULL///NULL///__///Thành phần",
         "usage_instructions///text///__///_NULL///NULL///__///Hướng dẫn sử dụng",
         "storage_instructions///text///__///_NULL///NULL///__///Hướng dẫn bảo quản",

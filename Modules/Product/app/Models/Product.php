@@ -3,6 +3,7 @@
 namespace Modules\Product\Models;
 
 use App\Foundation\Models\BaseModel;
+use App\Shared\Traceability\Traits\HasQrIdentity;
 use App\Traits\HasManagedMedia;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Approval\Concerns\HasApproval;
@@ -15,6 +16,11 @@ class Product extends BaseModel implements HasMedia
 {
     use HasApproval;
     use HasManagedMedia;
+    use HasQrIdentity;
+
+    public const GALLERY = 'product_gallery';
+
+    public const MAX_IMAGES = 10;
 
     protected $table = 'products';
 
@@ -112,10 +118,27 @@ class Product extends BaseModel implements HasMedia
      */
     public function approvalWatchedAttributes(): array
     {
-        return ['name', 'short_description', 'description', 'content', 'cover_image_url'];
+        return ['name', 'short_description', 'description', 'content', 'cover_image_url', 'gallery_urls'];
     }
 
     // ── Helpers ──────────────────────────────────────────────────────
+
+    public static function richText(?string $value): ?string
+    {
+        if (blank($value)) {
+            return null;
+        }
+
+        return $value === strip_tags($value) ? nl2br(e($value)) : $value;
+    }
+
+    /** @return list<string> */
+    public function getGalleryUrlsAttribute(): array
+    {
+        $urls = app(\App\Services\Media\MediaUrlService::class);
+
+        return $this->getMedia(self::GALLERY)->map(fn ($media) => $urls->url($media))->filter()->values()->all();
+    }
 
     /** Nhãn giá hiển thị — ưu tiên price_label tuỳ chỉnh, fallback định dạng price. */
     public function getDisplayPriceAttribute(): ?string

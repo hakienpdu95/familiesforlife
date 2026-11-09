@@ -31,6 +31,10 @@ class ProductListResource extends JsonResource
 
             'used_in_articles_count' => (int) $this->used_in_articles_count,
 
+            'qr_code' => $this->qrIdentity?->qr_code,
+            'qr_url' => $this->qrIdentity?->publicUrl(),
+            'qr_public' => $this->isPubliclyVisible() && $this->status !== \Modules\Product\Enums\ProductStatus::Inactive,
+
             'edit_url'    => route('backend.products.edit', $this->resource),
             'destroy_url' => route('backend.products.destroy', $this->resource),
 
