@@ -2,6 +2,8 @@
 
 namespace Modules\Product\Features\Traceability;
 
+use App\Models\Media;
+use App\Services\Media\MediaUrlService;
 use App\Shared\Traceability\Contracts\TracePresenter;
 use App\Shared\Traceability\TraceabilityService as T;
 use Illuminate\Database\Eloquent\Builder;
@@ -69,7 +71,7 @@ class ProductTracePresenter implements TracePresenter
             'kind' => $type === ProductType::Service ? 'Dịch vụ' : 'Sản phẩm',
             'summary' => $payload['short_description'] ?? null,
             'category' => $payload['category'] ?? null,
-            'images' => ($payload['gallery'] ?? []) ?: array_values(array_filter([$payload['image']['url'] ?? null])),
+            'gallery' => $this->gallery(($payload['gallery'] ?? []) ?: array_values(array_filter([$payload['image']['url'] ?? null]))),
             'price' => $payload['price'] ?? null,
             'availability' => $availability,
             'specs' => array_values(array_filter([
@@ -104,7 +106,7 @@ class ProductTracePresenter implements TracePresenter
             'kind' => 'Sản phẩm',
             'summary' => null,
             'category' => null,
-            'images' => [],
+            'gallery' => [],
             'price' => null,
             'availability' => null,
             'specs' => [],
@@ -153,6 +155,23 @@ class ProductTracePresenter implements TracePresenter
                 'subtitle' => $t->published_at?->format('d/m/Y'),
                 'image' => $t->article?->getFirstMediaUrl('cover', 'thumb') ?: null,
             ])->all();
+    }
+
+    private function gallery(array $urls): array
+    {
+        $byUuid = collect($urls)->mapWithKeys(fn (string $url) => [
+            (preg_match('#/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/[^/]+$#i', $url, $m) ? $m[1] : $url) => $url,
+        ]);
+        $media = Media::query()->whereIn('uuid', $byUuid->keys())->get()->keyBy('uuid');
+        $service = app(MediaUrlService::class);
+
+        return $byUuid->map(function (string $url, string $uuid) use ($media, $service) {
+            $item = $media->get($uuid);
+
+            return $item
+                ? ['src' => $service->url($item, 'medium'), 'srcset' => T::srcset($item), 'thumb' => $service->url($item, 'thumb')]
+                : ['src' => $url, 'srcset' => null, 'thumb' => $url];
+        })->values()->all();
     }
 
     private static function host(?string $url): ?string

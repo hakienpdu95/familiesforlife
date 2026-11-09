@@ -16,6 +16,7 @@
     @if (! empty($images[0]))<meta property="og:image" content="{{ $images[0] }}">@endif
     @include('layouts.partials.font-preload', ['fonts' => ['inter'], 'build' => 'build/frontend'])
     @vite(['resources/css/frontend.css'], 'build/frontend')
+    @stack('head')
 </head>
 <body class="bg-[#ebebe8] antialiased">
     <div @class(['tx-scope tx-canvas max-w-xl mx-auto min-h-dvh flex flex-col sm:border-x sm:border-[rgb(28_25_23/.08)]', 'pb-[calc(6rem+env(safe-area-inset-bottom))]' => $cta_sticky])>

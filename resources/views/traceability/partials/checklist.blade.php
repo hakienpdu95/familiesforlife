@@ -88,12 +88,11 @@
                 </li>
             @endforeach
         </ul>
-        <div class="flex items-start gap-3 px-3.5 py-2 border-t border-[var(--tx-line)] bg-[#fafaf9]">
-            <p class="flex-1 text-[12px] leading-snug text-[#78716c]">Hồ sơ do chủ thể cung cấp.</p>
-            @if ($missing->isNotEmpty())
-                <a href="#phan-anh" onclick="{{ $ask }}" class="shrink-0 text-[12.5px] font-semibold text-primary hover:underline">Đề nghị bổ sung</a>
-            @endif
-        </div>
+        @if ($missing->isNotEmpty())
+            <div class="flex justify-end px-3.5 py-2 border-t border-[var(--tx-line)] bg-[#fafaf9]">
+                <a href="#phan-anh" onclick="{{ $ask }}" class="text-[12.5px] font-semibold text-primary hover:underline">Đề nghị bổ sung</a>
+            </div>
+        @endif
     </details>
 @else
     <div class="flex items-center gap-3 px-3.5 py-2.5 border-t border-[#ead9a8] bg-base-100">

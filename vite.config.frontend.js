@@ -47,6 +47,7 @@ export default defineConfig(({ mode }) => {
           // views/components/frontend/breaking-news-ticker.blade.php), KHÔNG load site-wide
           // (component tự @push khi $items rỗng thì không render gì, không load JS thừa).
           'resources/js/modules/swiper.js',
+          'resources/js/pages/trace-gallery.js',
 
           // Event public submission form
           'Modules/Event/resources/assets/js/event-public.js',

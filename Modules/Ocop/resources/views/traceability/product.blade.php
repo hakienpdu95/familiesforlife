@@ -8,27 +8,7 @@
     <div class="tx-hero">
         @php($gallery = $gallery ?: array_map(fn ($u) => ['src' => $u, 'srcset' => null], $images))
         @php($shots = count($gallery))
-        @if ($shots)
-            <figure class="relative bg-[#f6f5f2]" data-gallery aria-roledescription="carousel" aria-label="Ảnh sản phẩm {{ $title }}">
-                <div data-track class="flex snap-x snap-mandatory overflow-x-auto scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                    @foreach ($gallery as $i => $shot)
-                        <img src="{{ $shot['src'] }}" alt="{{ $title }}{{ $shots > 1 ? ' — ảnh '.($i + 1) : '' }}" width="800" height="600" @if (! empty($shot['srcset'])) srcset="{{ $shot['srcset'] }}" sizes="{{ \App\Shared\Traceability\TraceabilityService::RESPONSIVE_SIZES }}" @endif
-                             class="snap-center shrink-0 w-full aspect-[4/3] max-h-[40svh] object-contain p-4 sm:p-5 mix-blend-multiply"
-                             @if ($i === 0) fetchpriority="high" @else loading="lazy" @endif decoding="async">
-                    @endforeach
-                </div>
-                @if ($shots > 1)
-                    <button type="button" data-step="-1" aria-label="Ảnh trước" class="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow flex items-center justify-center text-[#44403c] hover:text-primary [&>svg]:w-4 [&>svg]:h-4 [&>svg]:rotate-180">@include('traceability.partials.icon', ['name' => 'chevron'])</button>
-                    <button type="button" data-step="1" aria-label="Ảnh sau" class="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow flex items-center justify-center text-[#44403c] hover:text-primary [&>svg]:w-4 [&>svg]:h-4">@include('traceability.partials.icon', ['name' => 'chevron'])</button>
-                    <div class="absolute bottom-1 inset-x-0 flex justify-center">
-                        @foreach ($gallery as $i => $shot)
-                            <button type="button" data-go="{{ $i }}" @if ($i === 0) data-active @endif aria-label="Ảnh {{ $i + 1 }}/{{ $shots }}"
-                                    class="group/dot p-1.5"><span class="block h-1.5 w-1.5 rounded-full bg-black/25 transition-all group-data-[active]/dot:w-4 group-data-[active]/dot:bg-primary"></span></button>
-                        @endforeach
-                    </div>
-                @endif
-            </figure>
-        @endif
+        @include('traceability.partials.gallery', ['gallery' => $gallery, 'title' => $title])
 
         <div class="px-4 pt-4 pb-5">
             <p class="tx-eyebrow">{{ $group ?: 'Sản phẩm OCOP' }}@if ($category_code) <span class="font-mono font-medium text-[#a8a29e]" title="Mã phân nhóm OCOP">· {{ $category_code }}</span>@endif</p>
@@ -139,20 +119,4 @@
 
     @include('traceability.partials.related')
 
-    @if ($shots > 1)
-        <script>
-            document.querySelectorAll('[data-gallery]').forEach(function (g) {
-                var t = g.querySelector('[data-track]'), dots = g.querySelectorAll('[data-go]'), cur = 0;
-                function go(i) { t.scrollTo({ left: ((i + dots.length) % dots.length) * t.clientWidth }); }
-                t.addEventListener('scroll', function () {
-                    var i = Math.round(t.scrollLeft / t.clientWidth);
-                    if (i === cur) return;
-                    cur = i;
-                    dots.forEach(function (b, k) { b.toggleAttribute('data-active', k === i); });
-                }, { passive: true });
-                dots.forEach(function (b) { b.addEventListener('click', function () { go(+b.dataset.go); }); });
-                g.querySelectorAll('[data-step]').forEach(function (b) { b.addEventListener('click', function () { go(cur + +b.dataset.step); }); });
-            });
-        </script>
-    @endif
 @endsection

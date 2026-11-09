@@ -2,23 +2,7 @@
 
 @section('content')
     <div class="tx-hero">
-        @php($shots = count($images))
-        @if ($shots)
-            <figure class="relative bg-[#f6f5f2]" data-gallery aria-roledescription="carousel" aria-label="Ảnh {{ $title }}">
-                <div data-track class="flex snap-x snap-mandatory overflow-x-auto scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                    @foreach ($images as $i => $src)
-                        <img src="{{ $src }}" alt="{{ $title }}{{ $shots > 1 ? ' — ảnh '.($i + 1) : '' }}" width="800" height="600"
-                             onerror="this.remove()" @if ($i === 0) fetchpriority="high" @else loading="lazy" @endif decoding="async"
-                             class="snap-center shrink-0 w-full aspect-[4/3] max-h-[40svh] object-contain p-4 sm:p-5 mix-blend-multiply">
-                    @endforeach
-                </div>
-                @if ($shots > 1)
-                    <span data-counter class="absolute top-2.5 right-2.5 h-6 px-2 rounded-full bg-black/55 text-white text-[12px] font-medium tabular-nums flex items-center">1/{{ $shots }}</span>
-                    <button type="button" data-step="-1" aria-label="Ảnh trước" class="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow flex items-center justify-center text-[#44403c] hover:text-primary [&>svg]:w-4 [&>svg]:h-4 [&>svg]:rotate-180">@include('traceability.partials.icon', ['name' => 'chevron'])</button>
-                    <button type="button" data-step="1" aria-label="Ảnh sau" class="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow flex items-center justify-center text-[#44403c] hover:text-primary [&>svg]:w-4 [&>svg]:h-4">@include('traceability.partials.icon', ['name' => 'chevron'])</button>
-                @endif
-            </figure>
-        @endif
+        @include('traceability.partials.gallery', ['gallery' => $gallery, 'title' => $title])
 
         <div class="px-4 pt-4 pb-5">
             <p class="tx-eyebrow">{{ $kind }}@if ($category)<span class="font-medium text-[#a8a29e]"> · {{ $category }}</span>@endif</p>
@@ -126,19 +110,4 @@
 
     @include('traceability.partials.related')
 
-    @if ($shots > 1)
-        <script>
-            document.querySelectorAll('[data-gallery]').forEach(function (g) {
-                var t = g.querySelector('[data-track]'), n = g.querySelector('[data-counter]'), total = t.children.length, cur = 0;
-                function go(i) { t.scrollTo({ left: ((i + total) % total) * t.clientWidth }); }
-                t.addEventListener('scroll', function () {
-                    var i = Math.round(t.scrollLeft / t.clientWidth);
-                    if (i === cur) return;
-                    cur = i;
-                    if (n) n.textContent = (i + 1) + '/' + total;
-                }, { passive: true });
-                g.querySelectorAll('[data-step]').forEach(function (b) { b.addEventListener('click', function () { go(cur + +b.dataset.step); }); });
-            });
-        </script>
-    @endif
 @endsection

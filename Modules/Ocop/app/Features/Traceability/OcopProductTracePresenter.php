@@ -312,7 +312,7 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
         $urls = app(MediaUrlService::class);
 
         return $product->getMedia(OcopProduct::IMAGE_COLLECTION)
-            ->map(fn ($m) => ['src' => $urls->url($m, 'medium'), 'srcset' => T::srcset($m), 'zoom' => $urls->url($m) ?: $urls->url($m, 'medium')])
+            ->map(fn ($m) => ['src' => $urls->url($m, 'medium'), 'srcset' => T::srcset($m), 'thumb' => $urls->url($m, 'thumb') ?: null, 'zoom' => $urls->url($m) ?: $urls->url($m, 'medium')])
             ->filter(fn ($g) => filled($g['src']))
             ->values()->all();
     }
