@@ -18,9 +18,9 @@
     @vite(['resources/css/frontend.css'], 'build/frontend')
 </head>
 <body class="bg-[#ebebe8] antialiased">
-    <div @class(['tx-scope tx-canvas max-w-xl mx-auto min-h-screen flex flex-col sm:border-x sm:border-[rgb(28_25_23/.08)]', 'pb-24' => $cta_sticky])>
+    <div @class(['tx-scope tx-canvas max-w-xl mx-auto min-h-dvh flex flex-col sm:border-x sm:border-[rgb(28_25_23/.08)]', 'pb-[calc(6rem+env(safe-area-inset-bottom))]' => $cta_sticky])>
         @php($tagline = trim(\Illuminate\Support\Str::before((string) config('app.site_description'), '—')))
-        <header class="sticky top-0 z-20 bg-base-100/95 backdrop-blur border-b border-[var(--tx-line)]">
+        <header class="sticky top-0 z-20 bg-base-100/95 backdrop-blur border-b border-[var(--tx-line)] pt-[env(safe-area-inset-top)]">
             <div class="flex items-center gap-3 px-4 h-14">
                 <a href="{{ route('post.public.home') }}" class="flex items-center gap-2.5 min-w-0 flex-1" aria-label="{{ $brand }} — về trang chủ">
                     <img src="{{ asset('images/logo.png') }}" alt="" width="36" height="36" class="w-9 h-9 shrink-0">
@@ -29,7 +29,7 @@
                         @if ($tagline)<span class="block text-[12px] text-[#78716c] truncate">{{ $tagline }}</span>@endif
                     </span>
                 </a>
-                <a href="{{ route('post.public.home') }}" class="shrink-0 inline-flex items-center h-9 px-3 rounded-lg border border-[rgb(28_25_23/.12)] text-[13px] font-semibold hover:border-primary hover:text-primary transition-colors">Trang chủ</a>
+                <a href="{{ route('post.public.home') }}" class="shrink-0 inline-flex items-center h-10 px-3 rounded-lg border border-[rgb(28_25_23/.12)] text-[13px] font-semibold hover:border-primary hover:text-primary transition-colors">Trang chủ</a>
             </div>
         </header>
 
@@ -51,9 +51,9 @@
                     @php($buy = $channels ?? [])
                     @forelse ($buy as $channel)
                         <a href="{{ $channel['url'] }}" target="_blank" rel="noopener nofollow sponsored"
-                           class="btn flex-1 min-w-0 h-12 min-h-12 px-2 rounded-lg border-0 shadow-none text-white text-[15px] font-semibold gap-2 {{ $channel['button'] }}">
+                           class="btn flex-1 min-w-0 h-12 min-h-12 px-2 rounded-lg border-0 shadow-none text-white text-[15px] max-[359.98px]:text-[14px] font-semibold gap-2 {{ $channel['button'] }}">
                             <span class="w-7 h-7 rounded-md bg-white flex items-center justify-center shrink-0" aria-hidden="true"><img src="{{ $channel['logo'] }}" alt="" width="22" height="22" class="w-[22px] h-[22px] object-contain"></span>
-                            <span class="truncate">{{ count($buy) === 1 ? 'Mua trên '.$channel['name'] : $channel['name'] }}</span>
+                            <span class="truncate">{{ count($buy) === 1 ? 'Mua trên '.$channel['name'] : ($channel['short'] ?? $channel['name']) }}</span>
                         </a>
                     @empty
                         <a href="{{ $cta['url'] }}" @if (! empty($cta['external'])) target="_blank" rel="noopener nofollow sponsored" @endif

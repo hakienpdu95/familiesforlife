@@ -227,8 +227,8 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
     private function buyChannels(OcopProduct $product): array
     {
         $channels = [
-            ['url' => $product->shopee_url, 'name' => 'Shopee', 'logo' => 'images/shopee.png', 'domains' => ['shopee.vn', 'shp.ee'], 'button' => 'bg-[#ee4d2d] hover:bg-[#d73211]'],
-            ['url' => $product->tiktok_url, 'name' => 'TikTok Shop', 'logo' => 'images/tiktok.png', 'domains' => ['tiktok.com'], 'button' => 'bg-[#161823] hover:bg-black'],
+            ['url' => $product->shopee_url, 'name' => 'Shopee', 'short' => 'Shopee', 'logo' => 'images/shopee.png', 'domains' => ['shopee.vn', 'shp.ee'], 'button' => 'bg-[#ee4d2d] hover:bg-[#d73211]'],
+            ['url' => $product->tiktok_url, 'name' => 'TikTok Shop', 'short' => 'TikTok', 'logo' => 'images/tiktok.png', 'domains' => ['tiktok.com'], 'button' => 'bg-[#161823] hover:bg-black'],
         ];
 
         return array_values(array_filter(array_map(function (array $c) {

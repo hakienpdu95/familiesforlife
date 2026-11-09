@@ -47,7 +47,7 @@
                     @foreach ($reportReasons as $value => $label)
                         <label class="flex items-start gap-3 rounded-lg border border-[rgb(28_25_23/.12)] px-3 py-2.5 cursor-pointer transition-colors has-[:checked]:border-primary has-[:checked]:bg-[color-mix(in_oklab,var(--color-primary)_6%,transparent)]">
                             <input type="radio" name="reason" value="{{ $value }}" required @checked($oldReason === $value)
-                                   data-placeholder="{{ $hints[$value][1] ?? '' }}" class="radio radio-primary radio-sm mt-0.5 shrink-0">
+                                   data-placeholder="{{ $hints[$value][1] ?? '' }}" class="radio radio-sm mt-0.5 shrink-0 border-[#cfcac4] text-primary checked:border-primary">
                             <span class="min-w-0 leading-snug">
                                 <span @class(['block text-[14px] font-semibold', 'text-[#b91c1c]' => $value === 'suspected_fake'])>{{ $label }}</span>
                                 @if (! empty($hints[$value][0]))
@@ -61,12 +61,13 @@
             </fieldset>
 
             <label class="block">
-                <span class="flex items-baseline justify-between gap-3 mb-1.5">
+                <span class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 mb-1.5">
                     <span class="text-[13px] font-semibold text-[#44403c]">2. Mô tả cụ thể</span>
-                    <span class="text-[11.5px] text-[#a8a29e] tabular-nums"><span data-count>{{ mb_strlen(trim((string) old('content'))) }}</span>/1000 · tối thiểu 10 ký tự</span>
+                    <span class="text-[12px] text-[#a8a29e] tabular-nums shrink-0"><span data-count>{{ mb_strlen(trim((string) old('content'))) }}</span>/1000</span>
                 </span>
-                <textarea name="content" rows="4" minlength="10" maxlength="1000" required class="textarea tx-field w-full"
+                <textarea name="content" rows="4" minlength="10" aria-describedby="rp-min" maxlength="1000" required class="textarea tx-field w-full"
                           placeholder="{{ $hints[$oldReason][1] ?? 'Nơi mua, thời điểm, điều bạn thấy chưa đúng…' }}">{{ old('content') }}</textarea>
+                <span id="rp-min" class="block mt-1 text-[12px] text-[#a8a29e]">Tối thiểu 10 ký tự.</span>
                 @error('content')<span class="block mt-1 text-xs text-error">{{ $message }}</span>@enderror
             </label>
 
@@ -86,7 +87,6 @@
                     <li class="flex gap-2"><span class="w-4 h-4 rounded-full bg-[#e7e5e4] text-[10px] font-bold text-[#57534e] flex items-center justify-center shrink-0">2</span>Ban quản lý nhận thông báo ngay, kiểm tra và đối chiếu với chủ thể.</li>
                     <li class="flex gap-2"><span class="w-4 h-4 rounded-full bg-[#e7e5e4] text-[10px] font-bold text-[#57534e] flex items-center justify-center shrink-0">3</span>Nếu phản ánh đúng, thông tin trên trang được điều chỉnh; bạn được liên hệ lại nếu có để lại liên hệ.</li>
                 </ol>
-                <p class="mt-2 text-[11.5px] leading-snug text-[#a8a29e]">Không cần tên hay tài khoản. Địa chỉ IP chỉ lưu dạng mã hoá một chiều để chống gửi trùng.</p>
             </div>
         </form>
     </details>

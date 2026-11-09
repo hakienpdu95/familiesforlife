@@ -13,17 +13,17 @@
                 <div data-track class="flex snap-x snap-mandatory overflow-x-auto scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                     @foreach ($gallery as $i => $shot)
                         <img src="{{ $shot['src'] }}" alt="{{ $title }}{{ $shots > 1 ? ' — ảnh '.($i + 1) : '' }}" width="800" height="600" @if (! empty($shot['srcset'])) srcset="{{ $shot['srcset'] }}" sizes="{{ \App\Shared\Traceability\TraceabilityService::RESPONSIVE_SIZES }}" @endif
-                             class="snap-center shrink-0 w-full aspect-[4/3] max-h-[44vh] object-contain p-5 mix-blend-multiply"
+                             class="snap-center shrink-0 w-full aspect-[4/3] max-h-[40svh] object-contain p-4 sm:p-5 mix-blend-multiply"
                              @if ($i === 0) fetchpriority="high" @else loading="lazy" @endif decoding="async">
                     @endforeach
                 </div>
                 @if ($shots > 1)
-                    <button type="button" data-step="-1" aria-label="Ảnh trước" class="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center text-[#44403c] hover:text-primary [&>svg]:w-4 [&>svg]:h-4 [&>svg]:rotate-180">@include('traceability.partials.icon', ['name' => 'chevron'])</button>
-                    <button type="button" data-step="1" aria-label="Ảnh sau" class="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center text-[#44403c] hover:text-primary [&>svg]:w-4 [&>svg]:h-4">@include('traceability.partials.icon', ['name' => 'chevron'])</button>
-                    <div class="absolute bottom-2.5 inset-x-0 flex justify-center gap-1.5">
+                    <button type="button" data-step="-1" aria-label="Ảnh trước" class="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow flex items-center justify-center text-[#44403c] hover:text-primary [&>svg]:w-4 [&>svg]:h-4 [&>svg]:rotate-180">@include('traceability.partials.icon', ['name' => 'chevron'])</button>
+                    <button type="button" data-step="1" aria-label="Ảnh sau" class="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow flex items-center justify-center text-[#44403c] hover:text-primary [&>svg]:w-4 [&>svg]:h-4">@include('traceability.partials.icon', ['name' => 'chevron'])</button>
+                    <div class="absolute bottom-1 inset-x-0 flex justify-center">
                         @foreach ($gallery as $i => $shot)
                             <button type="button" data-go="{{ $i }}" @if ($i === 0) data-active @endif aria-label="Ảnh {{ $i + 1 }}/{{ $shots }}"
-                                    class="h-1.5 w-1.5 rounded-full bg-black/25 transition-all data-[active]:w-4 data-[active]:bg-primary"></button>
+                                    class="group/dot p-1.5"><span class="block h-1.5 w-1.5 rounded-full bg-black/25 transition-all group-data-[active]/dot:w-4 group-data-[active]/dot:bg-primary"></span></button>
                         @endforeach
                     </div>
                 @endif
@@ -32,10 +32,10 @@
 
         <div class="px-4 pt-4 pb-5">
             <p class="tx-eyebrow">{{ $group ?: 'Sản phẩm OCOP' }}@if ($category_code) <span class="font-mono font-medium text-[#a8a29e]" title="Mã phân nhóm OCOP">· {{ $category_code }}</span>@endif</p>
-            <h1 class="tx-display text-[26px] mt-1.5">{{ $title }}</h1>
+            <h1 class="tx-display tx-h1 mt-1.5">{{ $title }}</h1>
             @if ($description)
                 @php($longDescription = collect($info['panels'] ?? [])->flatMap(fn ($p) => $p['items'])->contains('key', 'mo-ta'))
-                <p class="mt-2 text-[15px] leading-relaxed text-[#57534e]">{{ \Illuminate\Support\Str::limit(preg_replace('/\s+/u', ' ', $description), 220) }}@if ($longDescription) <a href="#mo-ta" onclick="document.getElementById('mo-ta').open=true" class="font-semibold text-primary whitespace-nowrap">Đọc thêm</a>@endif</p>
+                <p class="mt-2 text-[15px] leading-relaxed text-[#57534e] [overflow-wrap:anywhere]">{{ \Illuminate\Support\Str::limit(preg_replace('/\s+/u', ' ', $description), 220) }}@if ($longDescription) <a href="#mo-ta" onclick="document.getElementById('mo-ta').open=true" class="font-semibold text-primary whitespace-nowrap">Đọc thêm</a>@endif</p>
             @endif
 
             @include('traceability.partials.ocop-cert', [
@@ -68,7 +68,7 @@
                                     <span class="truncate">{{ $channel['host'] }}</span>
                                 </span>
                             </span>
-                            <span class="shrink-0 inline-flex items-center gap-1.5 h-9 pl-3.5 pr-3 rounded-lg text-white text-[13.5px] font-semibold transition-colors {{ $channel['button'] }} [&>svg]:w-3.5 [&>svg]:h-3.5 [&>svg]:opacity-80">Mua ngay @include('traceability.partials.icon', ['name' => 'external'])</span>
+                            <span class="shrink-0 inline-flex items-center gap-1.5 h-10 pl-3.5 pr-3 max-[359.98px]:pl-3 max-[359.98px]:pr-2.5 rounded-lg text-white text-[13.5px] font-semibold transition-colors {{ $channel['button'] }} [&>svg]:w-3.5 [&>svg]:h-3.5 [&>svg]:opacity-80 max-[389.98px]:[&>svg]:hidden">Mua ngay @include('traceability.partials.icon', ['name' => 'external'])</span>
                         </a>
                     </li>
                 @endforeach
@@ -82,12 +82,12 @@
             <div class="tx-card">
                 @foreach ($info['groups'] as $group)
                     @if ($group['rows'])
-                        <h3 @class(['px-4 pt-3 pb-1 text-[11.5px] font-semibold uppercase tracking-[0.06em] text-[#a8a29e]', 'border-t border-[var(--tx-line)]' => ! $loop->first])>{{ $group['title'] }}</h3>
+                        <h3 @class(['px-4 pt-3 pb-1 text-[12px] font-semibold uppercase tracking-[0.06em] text-[#a8a29e]', 'border-t border-[var(--tx-line)]' => ! $loop->first])>{{ $group['title'] }}</h3>
                         <dl class="tx-rows">
                             @foreach ($group['rows'] as $row)
-                                <div class="flex items-baseline gap-4 px-4 py-2.5 text-[14.5px]">
-                                    <dt class="w-[38%] shrink-0 text-[#78716c]">{{ $row['label'] }}</dt>
-                                    <dd class="flex-1 min-w-0 leading-snug break-words">
+                                <div class="flex items-baseline gap-3 px-4 py-2.5 text-[14.5px] max-[359.98px]:px-3.5">
+                                    <dt class="w-[clamp(6.5rem,36%,9.5rem)] shrink-0 text-[#78716c] leading-snug">{{ $row['label'] }}</dt>
+                                    <dd class="flex-1 min-w-0 leading-snug [overflow-wrap:anywhere]">
                                         @if (filled($row['value']))
                                             <span @class(['font-medium', 'font-mono tracking-wide' => ! empty($row['mono'])])>{{ $row['value'] }}</span>
                                             @if (! empty($row['note']))<span class="block mt-0.5 text-[12.5px] text-[#78716c]">{{ $row['note'] }}</span>@endif
@@ -102,7 +102,7 @@
                 @endforeach
 
                 @foreach ($info['panels'] as $panel)
-                    <h3 class="px-4 pt-3 pb-1 border-t border-[var(--tx-line)] text-[11.5px] font-semibold uppercase tracking-[0.06em] text-[#a8a29e]">{{ $panel['title'] }}</h3>
+                    <h3 class="px-4 pt-3 pb-1 border-t border-[var(--tx-line)] text-[12px] font-semibold uppercase tracking-[0.06em] text-[#a8a29e]">{{ $panel['title'] }}</h3>
                     <div class="tx-rows">
                         @foreach ($panel['items'] as $section)
                             @php($has = filled($section['html'] ?? null) || filled($section['text'] ?? null))

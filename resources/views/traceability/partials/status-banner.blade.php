@@ -9,6 +9,6 @@
     @else
         <svg viewBox="0 0 20 20" fill="currentColor" class="w-[18px] h-[18px] shrink-0 text-[#16a34a]" aria-hidden="true"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.86-9.81a.75.75 0 0 0-1.22-.88l-3.24 4.5-1.6-1.6a.75.75 0 1 0-1.06 1.06l2.22 2.22a.75.75 0 0 0 1.14-.09l3.76-5.21Z" clip-rule="evenodd"/></svg>
     @endif
-    <p class="flex-1 min-w-0 truncate text-[13.5px]"><strong class="font-semibold">{{ $banner['title'] }}</strong> <span class="opacity-80">· {{ $banner['text'] }}</span></p>
+    <p class="flex-1 min-w-0 text-[13.5px] leading-snug"><strong class="font-semibold">{{ $banner['title'] }}</strong> <span class="opacity-80">· {{ $banner['text'] }}</span></p>
     <span class="shrink-0 font-mono text-[12px] font-semibold tracking-wider opacity-75">{{ $qr_code }}</span>
 </div>

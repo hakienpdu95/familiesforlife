@@ -21,7 +21,7 @@
         </svg>
         <div class="flex-1 min-w-0">
             @if ($stars)
-                <p class="text-[17px] font-bold leading-tight tracking-[-0.015em] text-[#422006]">{{ $certTitle ?? 'Sản phẩm đạt chuẩn OCOP' }} {{ $stars }} sao</p>
+                <p class="text-[clamp(15.5px,4.4vw,17px)] font-bold leading-tight tracking-[-0.015em] text-[#422006] [text-wrap:balance]">@php($certText = $certTitle ?? 'Sản phẩm đạt chuẩn OCOP'){{ \Illuminate\Support\Str::beforeLast($certText, ' ') }} <span class="whitespace-nowrap">{{ \Illuminate\Support\Str::afterLast($certText, ' ') }} {{ $stars }} sao</span></p>
                 <div class="mt-1.5 flex items-center gap-2">
                     <span class="flex gap-[3px]" role="img" aria-label="Hạng {{ $stars }} trên 5 sao">
                         @for ($i = 1; $i <= 5; $i++)

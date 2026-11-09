@@ -143,7 +143,19 @@ class OcopProduct extends Model implements HasMedia
             return null;
         }
 
-        return $value === strip_tags($value) ? nl2br(e($value)) : $value;
+        if ($value === strip_tags($value)) {
+            return nl2br(e($value));
+        }
+
+        $block = '(?:p|ul|ol|h[1-6]|blockquote|div|table|figure)';
+
+        return trim(preg_replace([
+            '#<p\b[^>]*>(?:\s|&nbsp;|<br\s*/?>)*</p>#iu',
+            '#(</'.$block.'>)(?:\s|<br\s*/?>)+#iu',
+            '#(?:<br\s*/?>\s*)+(<'.$block.'\b)#iu',
+            '#(<p\b[^>]*>)\s*(?:<br\s*/?>\s*)+#iu',
+            '#(?:\s*<br\s*/?>)+\s*(</p>)#iu',
+        ], ['', '$1', '$1', '$1', '$1'], $value));
     }
 
     public static function plainText(?string $value): string

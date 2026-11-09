@@ -15,7 +15,7 @@
 
         <div class="px-4 pt-4 pb-5">
             <p class="tx-eyebrow">{{ $type ?: 'Chủ thể OCOP' }}</p>
-            <h1 class="tx-display text-[26px] mt-1.5">{{ $title }}</h1>
+            <h1 class="tx-display tx-h1 mt-1.5">{{ $title }}</h1>
             @if ($subtitle)<p class="mt-1 text-[15px] text-[#78716c]">{{ $subtitle }}</p>@endif
 
             @include('traceability.partials.ocop-cert', [
