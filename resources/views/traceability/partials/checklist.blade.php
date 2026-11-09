@@ -1,7 +1,6 @@
 @php($items = collect($items))
 @php($total = $items->count())
 @php($done = $items->filter(fn ($i) => $i['count'] > 0)->count())
-@php($latest = $items->pluck('updated_at')->filter()->sortBy(fn ($d) => \Illuminate\Support\Carbon::createFromFormat('d/m/Y', $d))->last())
 @php($missing = $items->filter(fn ($i) => $i['count'] === 0)->pluck('label'))
 @php($requiredMissing = $items->filter(fn ($i) => $i['count'] === 0 && ! empty($i['required']))->pluck('label'))
 @php($hasFiles = $items->contains(fn ($i) => ! empty($i['files'])))
@@ -23,7 +22,7 @@
                     </span>
                 </span>
                 <span class="block text-[14px] font-semibold">
-                    <span @class(['text-[#15803d]' => $done === $total])>Đã công bố {{ $done }}/{{ $total }} loại</span>@if ($latest)<span class="font-normal text-[#78716c]"> · đăng gần nhất {{ $latest }}</span>@endif
+                    <span @class(['text-[#15803d]' => $done === $total])>Đã công bố {{ $done }}/{{ $total }} loại</span>
                 </span>
                 @if ($requiredMissing->isNotEmpty())
                     <span class="block text-[12.5px] font-medium text-[#b45309] truncate">Thiếu hồ sơ bắt buộc: {{ $requiredMissing->implode(', ') }}</span>
@@ -55,7 +54,7 @@
                             <span @class(['text-[14px] font-semibold leading-snug', 'text-[#78716c]' => ! $has])>{{ $item['label'] }}</span>
                             <span @class(['text-[12px] shrink-0', 'text-[#78716c]' => $has, 'text-[#a8a29e]' => ! $has && empty($item['required']), 'text-[#b45309] font-semibold' => ! $has && ! empty($item['required'])])>
                                 @if ($has)
-                                    {{ $item['updated_at'] ? 'Đăng '.(! empty($item['ago']) ? $item['ago'] : $item['updated_at']) : 'Đã công bố' }}
+                                    Đã công bố
                                 @else
                                     Chưa công bố
                                 @endif

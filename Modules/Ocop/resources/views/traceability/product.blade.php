@@ -4,7 +4,6 @@
     @php($group = $category ? trim(\Illuminate\Support\Str::after($category, ':')) : null)
     @php($facts = array_values(array_filter($facts)))
 
-    @php($hasSubject = ! empty($subject['name']))
 
     <div class="tx-hero">
         @php($gallery = $gallery ?: array_map(fn ($u) => ['src' => $u, 'srcset' => null], $images))
@@ -55,13 +54,21 @@
             <ul class="tx-card tx-rows">
                 @foreach ($channels as $channel)
                     <li>
-                        <a href="{{ $channel['url'] }}" target="_blank" rel="noopener nofollow sponsored" class="tx-row group">
-                            <span class="w-10 h-10 rounded-md {{ $channel['tone'] }} text-white text-lg font-bold flex items-center justify-center shrink-0" aria-hidden="true">{{ $channel['mark'] }}</span>
-                            <span class="flex-1 min-w-0 leading-tight">
-                                <span class="block text-[15px] font-semibold">{{ $channel['name'] }}</span>
-                                <span class="block mt-0.5 text-[12.5px] text-[#78716c] truncate">{{ $channel['host'] }}</span>
+                        <a href="{{ $channel['url'] }}" target="_blank" rel="noopener nofollow sponsored" class="tx-row gap-3.5 py-3.5"
+                           aria-label="Mua {{ $title }} trên {{ $channel['name'] }} (mở trang mới)">
+                            <span class="w-11 h-11 rounded-[10px] bg-white ring-1 ring-[rgb(28_25_23/.08)] flex items-center justify-center shrink-0">
+                                <img src="{{ $channel['logo'] }}" alt="" width="32" height="32" loading="lazy" decoding="async" class="w-8 h-8 object-contain">
                             </span>
-                            <span class="shrink-0 inline-flex items-center gap-1 h-9 px-3 rounded-md text-white text-[13.5px] font-semibold {{ $channel['button'] }} [&>svg]:w-3.5 [&>svg]:h-3.5">Mua ngay @include('traceability.partials.icon', ['name' => 'external'])</span>
+                            <span class="flex-1 min-w-0">
+                                <span class="block text-[15px] font-semibold leading-5 text-[#1c1917]">{{ $channel['name'] }}</span>
+                                <span class="mt-0.5 flex items-center gap-1 text-[12.5px] leading-4 text-[#78716c] min-w-0">
+                                    @if ($channel['official'])
+                                        <svg class="w-3.5 h-3.5 shrink-0 text-[#15803d]" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.86-9.7a.75.75 0 0 0-1.22-.88l-3.24 4.5-1.6-1.6a.75.75 0 1 0-1.06 1.06l2.22 2.22a.75.75 0 0 0 1.14-.09l3.76-5.2Z" clip-rule="evenodd"/></svg>
+                                    @endif
+                                    <span class="truncate">{{ $channel['host'] }}</span>
+                                </span>
+                            </span>
+                            <span class="shrink-0 inline-flex items-center gap-1.5 h-9 pl-3.5 pr-3 rounded-lg text-white text-[13.5px] font-semibold transition-colors {{ $channel['button'] }} [&>svg]:w-3.5 [&>svg]:h-3.5 [&>svg]:opacity-80">Mua ngay @include('traceability.partials.icon', ['name' => 'external'])</span>
                         </a>
                     </li>
                 @endforeach
@@ -126,54 +133,6 @@
                     </div>
                 @endforeach
 
-            </div>
-        </section>
-    @endif
-
-    @if ($hasSubject)
-        @php($subjectMeta = collect([$subject['type'] ?? null, ! empty($subject['stars']) ? 'Hạng OCOP '.$subject['stars'].' sao' : null])->filter()->implode(' · '))
-        @php($hotline = ! empty($subject['hotline']) ? preg_replace('/[^0-9+]/', '', $subject['hotline']) : null)
-        <section id="chu-the" class="tx-section">
-            <h2 class="tx-section-title">Chủ thể sản xuất</h2>
-            <div class="tx-card tx-rows">
-                @if (! empty($subject['url']))
-                    <a href="{{ $subject['url'] }}" class="tx-row group">
-                        <span class="tx-ico">@include('traceability.partials.icon', ['name' => 'store'])</span>
-                        <span class="flex-1 min-w-0 leading-snug">
-                            <span class="block text-[15px] font-semibold group-hover:text-primary">{{ $subject['name'] }}</span>
-                            <span class="block text-[13px] text-[#78716c]">{{ $subjectMeta ?: 'Xem hồ sơ chủ thể' }}</span>
-                        </span>
-                        <span class="tx-chevron">@include('traceability.partials.icon', ['name' => 'chevron'])</span>
-                    </a>
-                @else
-                    <div class="tx-row">
-                        <span class="tx-ico">@include('traceability.partials.icon', ['name' => 'store'])</span>
-                        <span class="flex-1 min-w-0 leading-snug">
-                            <span class="block text-[15px] font-semibold">{{ $subject['name'] }}</span>
-                            @if ($subjectMeta)<span class="block text-[13px] text-[#78716c]">{{ $subjectMeta }}</span>@endif
-                        </span>
-                    </div>
-                @endif
-                @if (! empty($subject['address']))
-                    <div class="tx-row">
-                        <span class="tx-ico">@include('traceability.partials.icon', ['name' => 'map'])</span>
-                        <span class="flex-1 min-w-0 text-[14.5px] leading-snug">{{ $subject['address'] }}</span>
-                    </div>
-                @endif
-                @if ($hotline)
-                    <a href="tel:{{ $hotline }}" class="tx-row group">
-                        <span class="tx-ico">@include('traceability.partials.icon', ['name' => 'phone'])</span>
-                        <span class="flex-1 text-[15px] font-medium group-hover:text-primary">{{ $subject['hotline'] }}</span>
-                        <span class="tx-pill">Gọi</span>
-                    </a>
-                @endif
-                @if (! empty($subject['website']))
-                    <a href="{{ $subject['website'] }}" target="_blank" rel="noopener nofollow" class="tx-row group">
-                        <span class="tx-ico">@include('traceability.partials.icon', ['name' => 'globe'])</span>
-                        <span class="flex-1 min-w-0 truncate text-[15px] font-medium group-hover:text-primary">{{ preg_replace('#^https?://(www\.)?#', '', rtrim($subject['website'], '/')) }}</span>
-                        <span class="tx-chevron">@include('traceability.partials.icon', ['name' => 'external'])</span>
-                    </a>
-                @endif
             </div>
         </section>
     @endif

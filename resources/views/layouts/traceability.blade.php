@@ -52,7 +52,7 @@
                     @forelse ($buy as $channel)
                         <a href="{{ $channel['url'] }}" target="_blank" rel="noopener nofollow sponsored"
                            class="btn flex-1 min-w-0 h-12 min-h-12 px-2 rounded-lg border-0 shadow-none text-white text-[15px] font-semibold gap-2 {{ $channel['button'] }}">
-                            <span class="w-6 h-6 rounded-md bg-white/20 flex items-center justify-center text-[13px] font-bold shrink-0" aria-hidden="true">{{ $channel['mark'] }}</span>
+                            <span class="w-7 h-7 rounded-md bg-white flex items-center justify-center shrink-0" aria-hidden="true"><img src="{{ $channel['logo'] }}" alt="" width="22" height="22" class="w-[22px] h-[22px] object-contain"></span>
                             <span class="truncate">{{ count($buy) === 1 ? 'Mua trên '.$channel['name'] : $channel['name'] }}</span>
                         </a>
                     @empty

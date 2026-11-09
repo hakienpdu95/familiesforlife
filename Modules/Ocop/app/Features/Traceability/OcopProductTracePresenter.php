@@ -7,7 +7,6 @@ use App\Shared\Traceability\Concerns\BuildsRelatedCards;
 use App\Shared\Traceability\Contracts\ExposesPublicDocuments;
 use App\Shared\Traceability\Contracts\TracePresenter;
 use App\Shared\Traceability\TraceabilityService as T;
-use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -228,14 +227,20 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
     private function buyChannels(OcopProduct $product): array
     {
         $channels = [
-            ['url' => $product->shopee_url, 'name' => 'Shopee', 'mark' => 'S', 'tone' => 'bg-[#ee4d2d]', 'button' => 'bg-[#ee4d2d] hover:bg-[#d73211]'],
-            ['url' => $product->tiktok_url, 'name' => 'TikTok Shop', 'mark' => '♪', 'tone' => 'bg-[#111]', 'button' => 'bg-[#111] hover:bg-black'],
+            ['url' => $product->shopee_url, 'name' => 'Shopee', 'logo' => 'images/shopee.png', 'domains' => ['shopee.vn', 'shp.ee'], 'button' => 'bg-[#ee4d2d] hover:bg-[#d73211]'],
+            ['url' => $product->tiktok_url, 'name' => 'TikTok Shop', 'logo' => 'images/tiktok.png', 'domains' => ['tiktok.com'], 'button' => 'bg-[#161823] hover:bg-black'],
         ];
 
         return array_values(array_filter(array_map(function (array $c) {
-            $host = $c['url'] ? parse_url($c['url'], PHP_URL_HOST) : null;
+            $host = $c['url'] ? strtolower((string) parse_url($c['url'], PHP_URL_HOST)) : '';
 
-            return $host ? [...$c, 'host' => preg_replace('/^www\./', '', $host)] : null;
+            if ($host === '') {
+                return null;
+            }
+
+            $official = collect($c['domains'])->contains(fn (string $d) => $host === $d || str_ends_with($host, '.'.$d));
+
+            return [...$c, 'host' => preg_replace('/^www\./', '', $host), 'official' => $official, 'logo' => asset($c['logo'])];
         }, $channels)));
     }
 
@@ -326,7 +331,6 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
                 'required' => $minStars && (int) $product->star_rating >= $minStars ? 'Bắt buộc với OCOP '.$minStars.'–5 sao' : null,
                 'count' => $media->count(),
                 'updated_at' => $latest?->format('d/m/Y'),
-                'ago' => $latest ? self::ago($latest) : null,
                 'stale' => $refresh && $latest && $latest->lt(now()->subMonths($refresh)) ? 'Tệp mới nhất đăng hơn '.$refresh.' tháng trước — hồ sơ định kỳ có thể đã hết hạn' : null,
                 'files' => $media->filter(fn ($m) => in_array($m->mime_type, T::DOCUMENT_MIMES, true))
                     ->map(fn ($m) => [
@@ -338,18 +342,6 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
                     ])->values()->all(),
             ];
         })->values()->all();
-    }
-
-    private static function ago(CarbonInterface $date): string
-    {
-        $days = (int) $date->copy()->startOfDay()->diffInDays(now()->startOfDay());
-
-        return match (true) {
-            $days === 0 => 'hôm nay',
-            $days < 31 => $days.' ngày trước',
-            $days < 365 => intdiv($days, 30).' tháng trước',
-            default => intdiv($days, 365).' năm trước',
-        };
     }
 
     private static function plain(?string $html): ?string
