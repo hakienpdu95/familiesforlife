@@ -85,17 +85,9 @@ class PostArticleTracePresenter implements TracePresenter
 
         $related = [];
         if ($live) {
-            $live->loadMissing(['ocopProducts.media', 'ocopProducts.qrIdentity', 'heritageSites.media']);
-            $categoryId = $live->primaryCategory->first()?->id;
-            $sameCategory = $categoryId
-                ? PostArticle::query()->with(['translations', 'media'])->whereKeyNot($live->id)
-                    ->whereHas('categories', fn ($q) => $q->where('post_categories.id', $categoryId))
-                    ->latest()->limit(6)->get()
-                : collect();
+            $live->loadMissing(['ocopProducts.media', 'ocopProducts.qrIdentity']);
             $related = [
                 ['title' => 'Sản phẩm OCOP trong bài', 'icon' => 'fa-certificate', 'items' => $this->ocopCards($live->ocopProducts, true)],
-                ['title' => 'Di tích được nhắc tới', 'icon' => 'fa-landmark', 'items' => $this->heritageCards($live->heritageSites)],
-                ['title' => 'Bài viết cùng chuyên mục', 'icon' => 'fa-newspaper', 'items' => $this->articleCards($sameCategory)],
             ];
         }
 
