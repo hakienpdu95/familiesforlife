@@ -68,26 +68,6 @@
         </section>
     @endif
 
-    @if ($specs)
-        <section id="thong-tin" class="tx-section">
-            <h2 class="tx-section-title">Thông tin sản phẩm</h2>
-            <dl class="tx-card tx-rows">
-                @foreach ($specs as $row)
-                    <div class="flex items-baseline gap-3 px-4 py-2.5 text-[14.5px] max-[359.98px]:px-3.5">
-                        <dt class="w-[clamp(6.5rem,36%,9.5rem)] shrink-0 text-[#78716c] leading-snug">{{ $row['label'] }}</dt>
-                        <dd class="flex-1 min-w-0 leading-snug [overflow-wrap:anywhere]">
-                            @if (! empty($row['url']))
-                                <a href="{{ $row['url'] }}" target="_blank" rel="noopener nofollow" class="font-medium text-primary hover:underline">{{ $row['value'] }}</a>
-                            @else
-                                <span @class(['font-medium', 'font-mono tracking-wide' => ! empty($row['mono'])])>{{ $row['value'] }}</span>
-                            @endif
-                        </dd>
-                    </div>
-                @endforeach
-            </dl>
-        </section>
-    @endif
-
     @if ($description || $content_html)
         <section id="gioi-thieu" class="tx-section">
             <h2 class="tx-section-title">Giới thiệu</h2>
@@ -108,6 +88,5 @@
         </section>
     @endif
 
-    @include('traceability.partials.related')
 
 @endsection

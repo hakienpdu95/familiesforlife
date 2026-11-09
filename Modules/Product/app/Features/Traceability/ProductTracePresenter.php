@@ -8,8 +8,6 @@ use App\Shared\Traceability\Contracts\TracePresenter;
 use App\Shared\Traceability\TraceabilityService as T;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Modules\Post\Enums\TranslationStatus;
-use Modules\Post\Models\PostArticleTranslation;
 use Modules\Product\Enums\ProductStatus;
 use Modules\Product\Enums\ProductType;
 use Modules\Product\Models\Product;
@@ -74,18 +72,9 @@ class ProductTracePresenter implements TracePresenter
             'gallery' => $this->gallery(($payload['gallery'] ?? []) ?: array_values(array_filter([$payload['image']['url'] ?? null]))),
             'price' => $payload['price'] ?? null,
             'availability' => $availability,
-            'specs' => array_values(array_filter([
-                ['label' => 'Mã sản phẩm', 'value' => $live ? 'SP'.$live->id : null, 'mono' => true],
-                ['label' => 'Mã SKU', 'value' => $payload['sku'] ?? null, 'mono' => true],
-                ['label' => 'Phân loại', 'value' => $type->label()],
-                ['label' => 'Danh mục', 'value' => $payload['category'] ?? null],
-                ['label' => 'Giá tham khảo', 'value' => $payload['price'] ?? null],
-                ['label' => 'Nhà cung cấp', 'value' => $live ? self::host($live->supplier_homepage_url) : null, 'url' => $live?->supplier_homepage_url],
-            ], fn ($row) => filled($row['value']))),
             'description' => ($html = T::tidyHtml(Product::richText($payload['description'] ?? null))) && T::hasContent($html) ? $html : null,
             'content_html' => $content && T::hasContent($content) ? $content : null,
             'channels' => $sellable ? $this->channels($live) : [],
-            'related' => $live ? [['title' => 'Bài viết giới thiệu sản phẩm', 'icon' => 'fa-newspaper', 'items' => $this->articleCards($live)]] : [],
         ]);
     }
 
@@ -109,7 +98,6 @@ class ProductTracePresenter implements TracePresenter
             'gallery' => [],
             'price' => null,
             'availability' => null,
-            'specs' => [],
             'description' => null,
             'content_html' => null,
             'channels' => [],
@@ -137,24 +125,6 @@ class ProductTracePresenter implements TracePresenter
 
             return [...$c, 'host' => $host, 'official' => $official, 'mismatch' => $mismatch, 'logo' => $c['logo'] ? asset($c['logo']) : null];
         }, $channels)));
-    }
-
-    private function articleCards(Product $product): array
-    {
-        return PostArticleTranslation::query()
-            ->with('article.media')
-            ->where('status', TranslationStatus::Published)
-            ->where('locale', config('post.default_locale'))
-            ->whereHas('productBlocks.items', fn ($q) => $q->where('product_id', $product->id))
-            ->latest('published_at')
-            ->limit(6)
-            ->get()
-            ->map(fn (PostArticleTranslation $t) => [
-                'url' => route('post.public.article', ['slug' => $t->slug, 'id' => $t->id]),
-                'title' => $t->title,
-                'subtitle' => $t->published_at?->format('d/m/Y'),
-                'image' => $t->article?->getFirstMediaUrl('cover', 'thumb') ?: null,
-            ])->all();
     }
 
     private function gallery(array $urls): array
