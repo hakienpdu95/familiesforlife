@@ -20,6 +20,8 @@ class OcopProductData extends Data
         public readonly ?string $origin = null,
         public readonly ?string $production_date = null,
         public readonly ?string $shelf_life = null,
+        public readonly ?int $shelf_life_value = null,
+        public readonly ?string $shelf_life_unit = null,
         public readonly ?string $ingredients = null,
         public readonly ?string $usage_instructions = null,
         public readonly ?string $storage_instructions = null,

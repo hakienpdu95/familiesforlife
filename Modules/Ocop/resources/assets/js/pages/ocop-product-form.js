@@ -31,8 +31,54 @@ document.addEventListener('DOMContentLoaded', () => {
     _setupTabGuard(form);
     _initCategorySelect(form);
     _setupAffiliateLinks(form);
+    _setupDocumentUploads(form);
     initAllTomSelects(form);
 });
+
+function _setupDocumentUploads(form) {
+    const boxes = form.querySelectorAll('[data-doc-uploads]');
+    if (!boxes.length || !window.initFilePondUpload) return;
+
+    for (const box of boxes) {
+        const collection = box.dataset.collection;
+        const inputs = new Map();
+
+        initFilePondUpload(box.querySelector('[data-doc-pond]'), {
+            collection,
+            maxFiles: Number(box.dataset.maxFiles) || 10,
+            credits: false,
+            labelIdle: 'Kéo thả tệp hồ sơ vào đây hoặc <span class="filepond--label-action">Chọn tệp</span>',
+            onUploaded(uuid) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = `document_uuids[${collection}][]`;
+                input.value = uuid;
+                box.appendChild(input);
+                inputs.set(uuid, input);
+            },
+            onReverted(uuid) {
+                inputs.get(uuid)?.remove();
+                inputs.delete(uuid);
+            },
+        });
+    }
+
+    form.addEventListener('submit', (e) => {
+        const busy = [...(window.FilePondInstances?.values() ?? [])].some((pond) =>
+            pond.getFiles().some((f) => [
+                window.FilePond.FileStatus.PROCESSING,
+                window.FilePond.FileStatus.PROCESSING_QUEUED,
+                window.FilePond.FileStatus.IDLE,
+            ].includes(f.status)),
+        );
+        if (!busy) return;
+
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        const msg = 'Tệp đang được tải lên, vui lòng chờ hoàn tất rồi bấm Lưu.';
+        window.Toast ? Toast.warning(msg, { duration: 5000 }) : alert(msg);
+    }, true);
+}
 
 function _setupAffiliateLinks(form) {
     for (const input of form.querySelectorAll('[data-affiliate-input]')) {

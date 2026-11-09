@@ -2,6 +2,7 @@
 
 namespace Modules\Ocop\Features\Traceability;
 
+use App\Services\Media\MediaUrlService;
 use App\Shared\Traceability\Concerns\BuildsRelatedCards;
 use App\Shared\Traceability\Contracts\ExposesPublicDocuments;
 use App\Shared\Traceability\Contracts\TracePresenter;
@@ -11,6 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Number;
+use Illuminate\Support\Str;
 use Modules\Heritage\Models\HeritageSite;
 use Modules\Ocop\Enums\OcopProductStatus;
 use Modules\Ocop\Models\OcopProduct;
@@ -51,7 +53,7 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
     {
         $query->withTrashed()->with([
             'ocopSubject' => fn ($q) => $q->withTrashed()->with('qrIdentity'),
-            'category:id,name',
+            'category:id,name,code,parent_id',
             'media',
         ]);
     }
@@ -107,13 +109,22 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
 
         $sections = [];
         if ($live && T::hasContent($live->story)) {
-            $sections[] = ['title' => 'Câu chuyện sản phẩm', 'icon' => 'fa-book-open', 'html' => $live->story];
+            $sections[] = ['key' => 'story', 'title' => 'Câu chuyện sản phẩm', 'icon' => 'fa-book-open', 'html' => $live->story, 'preview' => Str::limit(OcopProduct::plainText($live->story), 90) ?: null];
         }
         foreach (self::SECTIONS as $field => [$title, $icon]) {
-            if (filled($payload[$field] ?? null)) {
-                $sections[] = ['title' => $title, 'icon' => $icon, 'text' => $payload[$field]];
-            }
+            $html = $live ? OcopProduct::richText($live->{$field}) : null;
+            $text = $payload[$field] ?? null;
+            $sections[] = [
+                'key' => $field,
+                'title' => $title,
+                'icon' => $icon,
+                'html' => $html && T::hasContent($html) ? $html : null,
+                'text' => $html ? null : $text,
+                'preview' => Str::limit(OcopProduct::plainText($html ?? $text), 90) ?: null,
+                'open' => $field === 'ingredients',
+            ];
         }
+        $description = $live ? OcopProduct::richText($live->description) : null;
 
         $related = [];
         if ($live) {
@@ -140,17 +151,21 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
             'subtitle' => ! empty($subject['name']) ? 'Chủ thể: '.$subject['name'] : null,
             'images' => $live ? ($this->mediaUrls($live, OcopProduct::IMAGE_COLLECTION) ?: array_filter([$payload['image']['url'] ?? null])) : array_filter([$payload['image']['url'] ?? null]),
             'image_srcsets' => $live ? $this->mediaSrcsets($live, OcopProduct::IMAGE_COLLECTION) : [],
+            'gallery' => $live ? $this->gallery($live) : array_map(fn ($url) => ['src' => $url, 'srcset' => null, 'zoom' => $url], array_values(array_filter([$payload['image']['url'] ?? null]))),
+            'description_html' => $description && T::hasContent($description) ? $description : null,
+            'product_code' => $live ? 'OP'.$live->id : null,
+            'updated_label' => $live?->updated_at?->format('d/m/Y'),
+            'info' => $this->info($payload, $live, $sections, $description),
             'badges' => array_values(array_filter([
                 ['label' => $stars ? 'OCOP '.$stars.' sao' : 'Chưa xếp hạng OCOP', 'icon' => 'fa-star', 'class' => $stars ? 'badge-warning' : 'badge-ghost'],
                 ! empty($payload['category']) ? ['label' => $payload['category'], 'icon' => 'fa-layer-group', 'class' => 'badge-outline'] : null,
             ])),
             'stars' => $stars,
             'category' => $payload['category'] ?? null,
+            'category_code' => $live?->category?->fullCode(),
             'area' => $payload['area'] ?? null,
             'facts' => [
-                T::fact('fa-seedling', 'Xuất xứ', $payload['origin'] ?? null),
-                T::fact('fa-calendar', 'Ngày sản xuất', $payload['production_date'] ?? null),
-                T::fact('fa-hourglass-half', 'Hạn sử dụng', $payload['shelf_life'] ?? null),
+                ['icon' => 'fa-hourglass-half', 'label' => 'Hạn sử dụng', 'value' => self::shelfLife($payload['shelf_life'] ?? null)],
                 T::fact('fa-industry', 'Nhà sản xuất', $payload['producer'] ?? null),
             ],
             'subject' => [
@@ -185,10 +200,16 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
             'stars' => null,
             'subject' => [],
             'category' => null,
+            'category_code' => null,
             'area' => null,
             'channels' => [],
             'quality_docs' => [],
             'description' => null,
+            'description_html' => null,
+            'gallery' => [],
+            'product_code' => null,
+            'updated_label' => null,
+            'info' => null,
             'cta' => ['url' => route('ocop.public.index'), 'label' => 'Xem sản phẩm OCOP khác', 'icon' => 'fa-arrow-right'],
             ...$page,
         ]);
@@ -216,6 +237,79 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
 
             return $host ? [...$c, 'host' => preg_replace('/^www\./', '', $host)] : null;
         }, $channels)));
+    }
+
+    private function info(array $payload, ?OcopProduct $live, array $sections, ?string $description): array
+    {
+        $producer = $live ? $live->producer_name : ($payload['producer'] ?? null);
+        $producerAddress = $live?->producer_address;
+
+        $evidence = function (string $collection) use ($live): ?array {
+            $file = $live?->getMedia($collection)
+                ->filter(fn ($m) => in_array($m->mime_type, T::DOCUMENT_MIMES, true))
+                ->sortByDesc(fn ($m) => $m->created_at)->first();
+
+            return $file ? ['type' => 'doc', 'label' => 'Đối chiếu '.mb_strtolower(self::QUALITY_DOCS[$collection][0]), 'uuid' => $file->uuid] : null;
+        };
+        $label = $evidence('ocop_label_docs');
+        $selfDeclared = ['type' => 'self', 'label' => 'Tự khai báo'];
+        $subject = $live?->ocopSubject;
+        $subjectLinked = $subject && ! $subject->trashed() && $producer && Str::lower(trim($producer)) === Str::lower(trim((string) $subject->name));
+
+        $row = fn (string $label, ?string $value, array $extra = []) => ['label' => $label, 'value' => filled($value) ? $value : null, ...$extra];
+
+        $groups = [
+            ['key' => 'nguon-goc', 'title' => 'Định danh & nguồn gốc', 'rows' => array_values(array_filter([
+                $live ? $row('Mã sản phẩm', 'OP'.$live->id, ['mono' => true, 'required' => true, 'verified' => true]) : null,
+                $row('Cơ sở sản xuất', $producer, ['note' => $producerAddress, 'required' => true, 'verified' => $subjectLinked, 'source' => $subjectLinked ? null : $selfDeclared]),
+                $row('Hạn sử dụng', self::shelfLife($payload['shelf_life'] ?? null), ['required' => true, 'source' => $label ?? $selfDeclared]),
+            ]))],
+        ];
+
+        $sources = [
+            'ingredients' => $label ?? $selfDeclared,
+            'usage_instructions' => $label ?? $selfDeclared,
+            'storage_instructions' => $label ?? $selfDeclared,
+        ];
+        $byKey = collect($sections)->keyBy('key')->map(fn ($s, $k) => isset($sources[$k]) ? [...$s, 'source' => $sources[$k]] : $s);
+        $panels = [
+            ['key' => 'su-dung', 'title' => 'Thành phần & sử dụng', 'items' => array_values(array_filter([
+                $byKey->get('ingredients'), $byKey->get('usage_instructions'), $byKey->get('storage_instructions'),
+            ]))],
+            ['key' => 'gioi-thieu', 'title' => 'Giới thiệu', 'items' => array_values(array_filter([
+                $description && T::hasContent($description) && mb_strlen(OcopProduct::plainText($description)) > 220
+                    ? ['key' => 'mo-ta', 'title' => 'Mô tả sản phẩm', 'html' => $description, 'text' => null, 'preview' => null, 'open' => false]
+                    : null,
+                $byKey->get('story'),
+            ]))],
+        ];
+
+        $checked = collect($groups)->flatMap(fn ($g) => $g['rows'])->filter(fn ($r) => ! empty($r['required']))
+            ->map(fn ($r) => ['label' => $r['label'], 'ok' => filled($r['value']), 'verified' => filled($r['value']) && (! empty($r['verified']) || ($r['source']['type'] ?? null) === 'doc')])
+            ->concat(collect(['ingredients', 'usage_instructions', 'storage_instructions'])->map(function ($k) use ($byKey) {
+                $ok = filled($byKey->get($k)['html'] ?? null) || filled($byKey->get($k)['text'] ?? null);
+
+                return ['label' => self::SECTIONS[$k][0], 'ok' => $ok, 'verified' => $ok && ($byKey->get($k)['source']['type'] ?? null) === 'doc'];
+            }));
+
+        return [
+            'groups' => $groups,
+            'panels' => array_values(array_filter($panels, fn ($p) => $p['items'])),
+            'filled' => $checked->where('ok', true)->count(),
+            'verified' => $checked->where('verified', true)->count(),
+            'total' => $checked->count(),
+            'missing' => $checked->where('ok', false)->pluck('label')->values()->all(),
+        ];
+    }
+
+    private function gallery(OcopProduct $product): array
+    {
+        $urls = app(MediaUrlService::class);
+
+        return $product->getMedia(OcopProduct::IMAGE_COLLECTION)
+            ->map(fn ($m) => ['src' => $urls->url($m, 'medium'), 'srcset' => T::srcset($m), 'zoom' => $urls->url($m) ?: $urls->url($m, 'medium')])
+            ->filter(fn ($g) => filled($g['src']))
+            ->values()->all();
     }
 
     private function publicDocs(OcopProduct $product): array
@@ -264,5 +358,16 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
         $text = trim(preg_replace("/\n{3,}/", "\n\n", html_entity_decode(strip_tags($text))));
 
         return $text !== '' ? $text : null;
+    }
+
+    private static function shelfLife(?string $value): ?string
+    {
+        $value = trim((string) $value);
+
+        if ($value === '') {
+            return null;
+        }
+
+        return preg_match('/sản xuất|nsx/iu', $value) ? $value : $value.' kể từ ngày sản xuất';
     }
 }

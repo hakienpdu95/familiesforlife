@@ -64,6 +64,12 @@
         if (window.initJodit && storyEl) {
             initJodit(storyEl, { showWordsCounter: true, showCharsCounter: true });
         }
+        if (window.initJodit) {
+            ['ocop-description', 'ocop-ingredients', 'ocop-usage-instructions', 'ocop-storage-instructions'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) initJodit(el, { showWordsCounter: true, showCharsCounter: true, removeButtons: ['about', 'classSpan', 'image', 'video', 'file'] });
+            });
+        }
     });
     </script>
 @endpush

@@ -29,10 +29,11 @@ class SecurityHeaders
         $h = $response->headers;
 
         $h->set('X-Content-Type-Options', 'nosniff');
-        $h->set('X-Frame-Options',        'DENY');
-        $h->set('Referrer-Policy',        'strict-origin-when-cross-origin');
-        $h->set('Permissions-Policy',     'camera=(), microphone=(), geolocation=(), payment=(), usb=(), autoplay=()');
-        $h->set('Content-Security-Policy', $this->buildCsp());
+        $embeddable = $request->routeIs('traceability.document');
+        $h->set('X-Frame-Options', $embeddable ? 'SAMEORIGIN' : 'DENY');
+        $h->set('Referrer-Policy', 'strict-origin-when-cross-origin');
+        $h->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), autoplay=()');
+        $h->set('Content-Security-Policy', $this->buildCsp($embeddable));
 
         // HSTS chỉ có nghĩa trên HTTPS — không gắn trên HTTP để tránh lock out local dev
         if ($request->isSecure()) {
@@ -42,7 +43,7 @@ class SecurityHeaders
         return $response;
     }
 
-    private function buildCsp(): string
+    private function buildCsp(bool $embeddable = false): string
     {
         $dev = app()->isLocal() || app()->environment('testing');
 
@@ -91,8 +92,8 @@ class SecurityHeaders
             "font-src 'self' https://fonts.bunny.net https://fonts.gstatic.com data:",
             "img-src {$imgSrc}",
             "connect-src {$connectSrc}",
-            "frame-src https://challenges.cloudflare.com https://www.youtube-nocookie.com", // youtube-nocookie.com — lightbox video công khai (Modules/Video, xem config/video.php embed_domain)
-            "frame-ancestors 'none'",
+            "frame-src 'self' https://challenges.cloudflare.com https://www.youtube-nocookie.com", // youtube-nocookie.com — lightbox video công khai (Modules/Video, xem config/video.php embed_domain)
+            $embeddable ? "frame-ancestors 'self'" : "frame-ancestors 'none'",
             "worker-src 'self' blob:",
             "object-src 'none'",
             "base-uri 'self'",

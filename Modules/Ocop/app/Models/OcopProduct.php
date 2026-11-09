@@ -40,11 +40,30 @@ class OcopProduct extends Model implements HasMedia
 
     public const MAX_DOCUMENTS = 10;
 
+    public const MAX_DOCUMENT_KB = 153600;
+
+    public const SHELF_LIFE_UNITS = [
+        'hour' => 'Giờ',
+        'day' => 'Ngày',
+        'week' => 'Tuần',
+        'month' => 'Tháng',
+        'year' => 'Năm',
+    ];
+
+    public static function composeShelfLife(?int $value, ?string $unit): ?string
+    {
+        if (! $value || ! isset(self::SHELF_LIFE_UNITS[$unit])) {
+            return null;
+        }
+
+        return $value.' '.mb_strtolower(self::SHELF_LIFE_UNITS[$unit]);
+    }
+
     protected $table = 'ocop_products';
 
     protected $fillable = [
         'uuid', 'category_id', 'ocop_subject_id', 'name', 'slug', 'star_rating', 'description',
-        'story', 'origin', 'production_date', 'shelf_life',
+        'story', 'origin', 'production_date', 'shelf_life', 'shelf_life_value', 'shelf_life_unit',
         'ingredients', 'usage_instructions', 'storage_instructions',
         'province_code', 'province_name', 'ward_code', 'ward_name',
         'producer_name', 'producer_address', 'heritage_site_id',
@@ -54,6 +73,7 @@ class OcopProduct extends Model implements HasMedia
 
     protected $casts = [
         'star_rating' => 'integer',
+        'shelf_life_value' => 'integer',
         'status' => OcopProductStatus::class,
         'is_featured' => 'boolean',
         'sort_order' => 'integer',
@@ -117,13 +137,26 @@ class OcopProduct extends Model implements HasMedia
     }
 
     /** UUID ảnh Jodit (`data-media-uuid`) đang được nhắc tới trong câu chuyện sản phẩm. */
+    public static function richText(?string $value): ?string
+    {
+        if (blank($value)) {
+            return null;
+        }
+
+        return $value === strip_tags($value) ? nl2br(e($value)) : $value;
+    }
+
+    public static function plainText(?string $value): string
+    {
+        return trim(preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags(preg_replace('#<br\s*/?>|</(p|li|div|h[1-6])>#i', ' ', (string) $value)))));
+    }
+
     public function storyMediaUuids(): array
     {
         preg_match_all('/data-media-uuid="([^"]+)"/', (string) $this->story, $matches);
 
         return array_values(array_unique($matches[1]));
     }
-
 
     // ── Scopes ───────────────────────────────────────────────────────
 
@@ -179,7 +212,7 @@ class OcopProduct extends Model implements HasMedia
             'id' => $this->id,
             'uuid' => $this->uuid,
             'name' => $this->name,
-            'description' => (string) $this->description,
+            'description' => self::plainText($this->description),
             'producer_name' => (string) $this->producer_name,
             'slug' => $this->slug,
             'status' => $this->status->value,

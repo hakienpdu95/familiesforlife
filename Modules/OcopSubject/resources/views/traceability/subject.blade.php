@@ -19,6 +19,7 @@
             @if ($subtitle)<p class="mt-1 text-[15px] text-[#78716c]">{{ $subtitle }}</p>@endif
 
             @include('traceability.partials.ocop-cert', [
+                'certTitle' => 'Chủ thể có sản phẩm OCOP',
                 'stars' => $stars,
                 'rows' => [
                     'Sản phẩm' => $products_count ? $products_count.' sản phẩm OCOP' : null,

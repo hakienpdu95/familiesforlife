@@ -5,9 +5,9 @@
      x-data="{
         tab: 'basic',
         tabFields: {
-            basic:    ['ocop_subject_id', 'name', 'category_id', 'star_rating', 'description', 'image'],
+            basic:    ['ocop_subject_id', 'name', 'category_id', 'star_rating', 'shelf_life_value', 'shelf_life_unit', 'description', 'image'],
             producer: ['heritage_site_id'],
-            details:  ['story', 'origin', 'production_date', 'shelf_life', 'ingredients', 'usage_instructions', 'storage_instructions'],
+            details:  ['story', 'origin', 'production_date', 'ingredients', 'usage_instructions', 'storage_instructions'],
             documents: {{ Js::from(collect(\Modules\Ocop\Models\OcopProduct::DOCUMENT_COLLECTIONS)->map(fn ($c) => "documents.$c")->values()) }},
             affiliate: ['shopee_url', 'tiktok_url'],
         },
@@ -156,7 +156,7 @@
                     @error('name')<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
                             <span class="label-text font-medium">Danh mục</span>
@@ -199,6 +199,29 @@
                         </select>
                         @error('star_rating')<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
                     </div>
+
+                    @php($shelfUnit = old('shelf_life_unit', $product?->shelf_life_unit))
+                    <div class="form-control">
+                        <label class="label py-0 pb-1.5" for="shelf_life_value">
+                            <span class="label-text font-medium">Hạn sử dụng</span>
+                            <span class="label-text-alt text-xs text-base-content/40">kể từ ngày sản xuất</span>
+                        </label>
+                        <div class="grid grid-cols-[minmax(0,1fr)_7.5rem] gap-2">
+                            <input type="number" id="shelf_life_value" name="shelf_life_value" inputmode="numeric" min="1" max="9999" step="1"
+                                   value="{{ old('shelf_life_value', $product?->shelf_life_value) }}" placeholder="VD: 12"
+                                   class="input input-bordered input-sm w-full @error('shelf_life_value') input-error @enderror">
+                            <select id="ts-shelf_life_unit" name="shelf_life_unit" aria-label="Đơn vị hạn sử dụng"
+                                    class="select select-bordered select-sm w-full ts-init @error('shelf_life_unit') select-error @enderror"
+                                    data-ts-placeholder="Đơn vị">
+                                <option value="">Đơn vị</option>
+                                @foreach(\Modules\Ocop\Models\OcopProduct::SHELF_LIFE_UNITS as $unit => $unitLabel)
+                                <option value="{{ $unit }}" @selected($shelfUnit === $unit)>{{ $unitLabel }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        @error('shelf_life_value')<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
+                        @error('shelf_life_unit')<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
+                    </div>
                 </div>
 
                 <div class="form-control">
@@ -206,8 +229,7 @@
                         <span class="label-text font-medium">Mô tả</span>
                         <span class="label-text-alt text-xs text-base-content/40">Không bắt buộc</span>
                     </label>
-                    <textarea name="description" rows="4"
-                              class="textarea textarea-bordered textarea-sm w-full @error('description') textarea-error @enderror">{{ old('description', $product?->description) }}</textarea>
+                    <textarea id="ocop-description" name="description" class="jodit-editor" data-jodit-preset="standard" data-jodit-height="220">{{ old('description', \Modules\Ocop\Models\OcopProduct::richText($product?->description)) }}</textarea>
                     @error('description')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                 </div>
 
@@ -311,8 +333,8 @@
 
                 <div class="divider my-1 text-xs text-base-content/40">Thông số kỹ thuật</div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    @foreach(['origin' => ['Xuất xứ', 255, 'VD: Phú Vang, Thừa Thiên Huế'], 'production_date' => ['Ngày sản xuất', 100, 'VD: Xem trên bao bì'], 'shelf_life' => ['Hạn sử dụng', 100, 'VD: 12 tháng kể từ NSX']] as $field => [$label, $max, $placeholder])
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    @foreach(['origin' => ['Xuất xứ', 255, 'VD: Phú Vang, Thừa Thiên Huế'], 'production_date' => ['Ngày sản xuất', 100, 'VD: Xem trên bao bì']] as $field => [$label, $max, $placeholder])
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
                             <span class="label-text font-medium">{{ $label }}</span>
@@ -330,8 +352,7 @@
                     <label class="label py-0 pb-1.5">
                         <span class="label-text font-medium">{{ $label }}</span>
                     </label>
-                    <textarea name="{{ $field }}" rows="3" maxlength="5000" placeholder="{{ $placeholder }}"
-                              class="textarea textarea-bordered textarea-sm w-full @error($field) textarea-error @enderror">{{ old($field, $product?->{$field}) }}</textarea>
+                    <textarea id="ocop-{{ str_replace('_', '-', $field) }}" name="{{ $field }}" class="jodit-editor" data-jodit-preset="standard" data-jodit-height="200" placeholder="{{ $placeholder }}">{{ old($field, \Modules\Ocop\Models\OcopProduct::richText($product?->{$field})) }}</textarea>
                     @error($field)<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                 </div>
                 @endforeach

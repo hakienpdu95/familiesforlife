@@ -1,7 +1,7 @@
 @extends('layouts.frontend')
 
 @section('title', $product->name)
-@section('meta_description', $product->description ?: $product->name)
+@section('meta_description', \Illuminate\Support\Str::limit(\Modules\Ocop\Models\OcopProduct::plainText($product->description), 160) ?: $product->name)
 
 @section('content')
 @php
@@ -107,7 +107,7 @@
             </div>
 
             @if($product->description)
-            <p class="mt-4 text-base-content/80 leading-relaxed">{{ $product->description }}</p>
+            <div class="mt-4 prose prose-sm max-w-none text-base-content/80 leading-relaxed">{!! \Modules\Ocop\Models\OcopProduct::richText($product->description) !!}</div>
             @endif
 
             @if($heritageSite)
@@ -177,7 +177,7 @@
                     </div>
                     @elseif($product->description)
                     <div class="prose prose-sm sm:prose-base max-w-none">
-                        <p>{{ $product->description }}</p>
+                        {!! \Modules\Ocop\Models\OcopProduct::richText($product->description) !!}
                     </div>
                     @else
                     <p class="text-sm text-base-content/50">Câu chuyện sản phẩm đang được cập nhật.</p>
@@ -248,7 +248,7 @@
                                         <th scope="row" class="w-[38%] px-4 py-3 text-left font-semibold">{{ $label }}:</th>
                                         <td class="px-4 py-3 font-normal break-words">
                                             @if(filled($value))
-                                            {!! nl2br(e($value)) !!}
+                                            <div class="[&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_p+p]:mt-2">{!! in_array($label, ['Thành phần', 'Hướng dẫn sử dụng', 'Hướng dẫn bảo quản'], true) ? \Modules\Ocop\Models\OcopProduct::richText($value) : nl2br(e($value)) !!}</div>
                                             @else
                                             <span class="text-[#999]">Đang cập nhật</span>
                                             @endif

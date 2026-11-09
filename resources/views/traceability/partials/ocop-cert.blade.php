@@ -1,27 +1,66 @@
 @php($rows = array_filter($rows ?? []))
-<section class="mt-4 rounded-lg border border-[#ead9a8] overflow-hidden" aria-label="Thông tin chứng nhận OCOP">
-    <div class="flex items-center gap-3 px-3.5 py-3 bg-[#fdf8ea]">
-        @if ($stars)
-            <span class="flex flex-col gap-0.5 min-w-0 flex-1">
-                <span class="text-[15px] leading-none tracking-[0.06em]" aria-hidden="true"><span class="text-[#d4a017]">{{ str_repeat('★', $stars) }}</span><span class="text-[#e8dbb5]">{{ str_repeat('★', max(0, 5 - $stars)) }}</span></span>
-                <span class="text-[16px] font-bold tracking-[-0.01em] text-[#422006]">Đạt chuẩn OCOP {{ $stars }} sao</span>
-            </span>
-        @else
-            <span class="flex-1 text-[15px] font-semibold text-[#57534e]">Chưa có hạng OCOP</span>
-        @endif
-        <span @class([
-            'shrink-0 inline-flex items-center gap-1.5 h-7 px-2 rounded-md text-[12.5px] font-semibold',
-            'bg-[#e8f6ed] text-[#15803d]' => $expiry && $expiry['valid'],
-            'bg-[#fdeaea] text-[#b91c1c]' => $expiry && ! $expiry['valid'],
-            'bg-white/70 text-[#78716c]' => ! $expiry,
-        ])>
-            @if ($expiry)
-                {{ $expiry['valid'] ? 'Hiệu lực đến '.$expiry['label'] : 'Hết hạn '.$expiry['label'] }}
+@php($until = $expiry ? \Illuminate\Support\Carbon::createFromFormat('d/m/Y', $expiry['label'])->endOfDay() : null)
+@php($daysLeft = $until ? (int) floor(now()->diffInDays($until, false)) : null)
+@php($state = match (true) {
+    ! $until => 'unknown',
+    $daysLeft < 0 => 'expired',
+    $daysLeft <= 90 => 'soon',
+    default => 'valid',
+})
+@php($remain = $daysLeft !== null && $daysLeft >= 0 ? ($daysLeft >= 60 ? 'còn '.intdiv($daysLeft, 30).' tháng' : 'còn '.max(1, $daysLeft).' ngày') : null)
+@php($star = 'M10 1.6l2.47 5.01 5.53.8-4 3.9.94 5.5L10 14.2l-4.94 2.6.94-5.5-4-3.9 5.53-.8L10 1.6z')
+<section class="mt-4 rounded-xl border border-[#ead9a8] overflow-hidden" aria-label="Thông tin chứng nhận OCOP">
+    <div class="relative flex items-center gap-3.5 px-4 py-3.5 bg-[radial-gradient(120%_140%_at_0%_0%,#fffaf0_0%,#fbf0d2_70%,#f7e7bd_100%)]">
+        <svg viewBox="0 0 48 56" @class(['shrink-0 w-11 h-[52px] drop-shadow-[0_1px_1.5px_rgb(120_80_0/.25)]', 'grayscale opacity-60' => ! $stars || $state === 'expired']) aria-hidden="true">
+            <path d="M14 32 8 54l8-4 5 6 5-20z" fill="#b45309"/>
+            <path d="M34 32l6 22-8-4-5 6-5-20z" fill="#c2410c"/>
+            <circle cx="24" cy="22" r="20" fill="#e9b949"/>
+            <circle cx="24" cy="22" r="16.5" fill="#fdf3d0" stroke="#d4a017" stroke-width="1.2"/>
+            <text x="24" y="20.5" text-anchor="middle" font-size="7" font-weight="800" letter-spacing=".6" fill="#a16207" font-family="Inter Variable, Inter, system-ui, sans-serif">OCOP</text>
+            <text x="24" y="31.5" text-anchor="middle" font-size="11" font-weight="800" fill="#422006" font-family="Inter Variable, Inter, system-ui, sans-serif">{{ $stars ?: '–' }}★</text>
+        </svg>
+        <div class="flex-1 min-w-0">
+            @if ($stars)
+                <p class="text-[17px] font-bold leading-tight tracking-[-0.015em] text-[#422006]">{{ $certTitle ?? 'Sản phẩm đạt chuẩn OCOP' }} {{ $stars }} sao</p>
+                <div class="mt-1.5 flex items-center gap-2">
+                    <span class="flex gap-[3px]" role="img" aria-label="Hạng {{ $stars }} trên 5 sao">
+                        @for ($i = 1; $i <= 5; $i++)
+                            @if ($i <= $stars)
+                                <svg viewBox="0 0 20 20" @class(['w-[18px] h-[18px]', 'text-[#e0a100]' => $state !== 'expired', 'text-[#a8a29e]' => $state === 'expired']) fill="currentColor" aria-hidden="true"><path d="{{ $star }}"/></svg>
+                            @else
+                                <svg viewBox="0 0 20 20" class="w-[18px] h-[18px] text-[#d9c58f]" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="{{ $star }}"/></svg>
+                            @endif
+                        @endfor
+                    </span>
+                    <span class="text-[12px] font-semibold text-[#a16207] tabular-nums">{{ $stars }}/5</span>
+                </div>
             @else
-                Hiệu lực: chưa cập nhật
+                <p class="text-[16px] font-bold leading-tight text-[#57534e]">Chưa xếp hạng OCOP</p>
             @endif
-        </span>
+        </div>
     </div>
+    @if ($stars && $state !== 'unknown')
+        <div @class([
+            'flex items-center gap-2 px-4 py-2 border-t text-[13px] leading-snug',
+            'border-[#cfe9d8] bg-[#f0faf3] text-[#166534]' => $state === 'valid',
+            'border-[#fde68a] bg-[#fffbeb] text-[#92400e]' => $state === 'soon',
+            'border-[#fecaca] bg-[#fef2f2] text-[#b91c1c]' => $state === 'expired',
+        ])>
+            <span @class(['w-2 h-2 rounded-full shrink-0', 'bg-[#16a34a]' => $state === 'valid', 'bg-[#f59e0b]' => $state === 'soon', 'bg-[#dc2626]' => $state === 'expired']) aria-hidden="true"></span>
+            <span class="flex-1 min-w-0">
+                @switch($state)
+                    @case('valid')
+                        Còn hiệu lực đến <strong class="font-semibold tabular-nums">{{ $expiry['label'] }}</strong><span class="opacity-75"> · {{ $remain }}</span>
+                        @break
+                    @case('soon')
+                        Sắp hết hiệu lực: <strong class="font-semibold tabular-nums">{{ $expiry['label'] }}</strong> · {{ $remain }}
+                        @break
+                    @default
+                        Chứng nhận đã hết hiệu lực từ <strong class="font-semibold tabular-nums">{{ $expiry['label'] }}</strong>
+                @endswitch
+            </span>
+        </div>
+    @endif
     @if ($rows)
         <dl class="grid grid-cols-2 border-t border-[#ead9a8] bg-base-100">
             @foreach ($rows as $label => $value)

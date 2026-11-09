@@ -16,8 +16,8 @@ use Modules\Heritage\Models\HeritageSite;
 use Modules\Ocop\Enums\OcopProductStatus;
 use Modules\Ocop\Features\OcopProductManagement\Actions\CreateOcopProductAction;
 use Modules\Ocop\Features\OcopProductManagement\Actions\DeleteOcopProductAction;
-use Modules\Ocop\Features\OcopProductManagement\Actions\RestoreOcopProductAction;
 use Modules\Ocop\Features\OcopProductManagement\Actions\ImportOcopProductsAction;
+use Modules\Ocop\Features\OcopProductManagement\Actions\RestoreOcopProductAction;
 use Modules\Ocop\Features\OcopProductManagement\Actions\StoreOcopProductDocumentsAction;
 use Modules\Ocop\Features\OcopProductManagement\Actions\UpdateOcopProductAction;
 use Modules\Ocop\Features\OcopProductManagement\Data\OcopProductData;
@@ -83,9 +83,9 @@ class OcopProductAdminController extends Controller
     public function store(Request $request, CreateOcopProductAction $action, StoreOcopProductDocumentsAction $storeDocuments): RedirectResponse
     {
         $validated = $this->validated($request);
-        $data = OcopProductData::from(Arr::except($validated, 'documents'));
+        $data = OcopProductData::from(Arr::except($validated, 'document_uuids'));
         $product = $action->handle($data);
-        $storeDocuments->handle($product, $validated['documents'] ?? []);
+        $storeDocuments->handle($product, $validated['document_uuids'] ?? [], (int) $request->user()->id);
 
         return redirect()->route('backend.ocop.products.index')
             ->with('success', "Đã tạo sản phẩm OCOP \"{$product->name}\".");
@@ -106,9 +106,9 @@ class OcopProductAdminController extends Controller
     {
         $validated = $this->validated($request);
         $this->ensureDocumentLimit($product, $validated);
-        $data = OcopProductData::from(Arr::except($validated, 'documents'));
+        $data = OcopProductData::from(Arr::except($validated, 'document_uuids'));
         $action->handle($product, $data);
-        $storeDocuments->handle($product, $validated['documents'] ?? []);
+        $storeDocuments->handle($product, $validated['document_uuids'] ?? [], (int) $request->user()->id);
 
         return redirect()->route('backend.ocop.products.index')
             ->with('success', 'Cập nhật sản phẩm thành công.');
@@ -161,12 +161,12 @@ class OcopProductAdminController extends Controller
     {
         $removed = $validated['remove_media_uuids'] ?? [];
 
-        foreach ($validated['documents'] ?? [] as $collection => $files) {
+        foreach ($validated['document_uuids'] ?? [] as $collection => $files) {
             $kept = $product->getMedia($collection)->whereNotIn('uuid', $removed)->count();
 
             if ($kept + count($files) > OcopProduct::MAX_DOCUMENTS) {
                 throw ValidationException::withMessages([
-                    "documents.$collection" => 'Tối đa '.OcopProduct::MAX_DOCUMENTS." tệp cho mỗi loại hồ sơ (hiện có {$kept} tệp).",
+                    "document_uuids.$collection" => 'Tối đa '.OcopProduct::MAX_DOCUMENTS." tệp cho mỗi loại hồ sơ (hiện có {$kept} tệp).",
                 ]);
             }
         }
@@ -180,6 +180,15 @@ class OcopProductAdminController extends Controller
             $request->merge(['media_uuids' => json_decode($request->input('media_uuids'), true) ?: []]);
         }
 
+        $documentUuids = [];
+        foreach ((array) $request->input('document_uuids', []) as $collection => $value) {
+            $value = is_string($value) ? (json_decode($value, true) ?: []) : $value;
+            if (is_array($value) && $value !== []) {
+                $documentUuids[$collection] = array_values($value);
+            }
+        }
+        $request->merge(['document_uuids' => $documentUuids]);
+
         foreach (['media_uuids', 'remove_media_uuids'] as $field) {
             if (! is_array($request->input($field))) {
                 $request->merge([$field => []]);
@@ -188,7 +197,7 @@ class OcopProductAdminController extends Controller
 
         $urlRule = ['nullable', 'url', 'regex:/^https?:\/\//i', 'max:500'];
 
-        return $request->validate([
+        $validated = $request->validate([
             'category_id' => ['nullable', 'integer', 'exists:ocop_categories,id'],
             'name' => ['required', 'string', 'max:150'],
             // §4.2 — chương trình OCOP quốc gia chỉ chấm từ 3 sao trở lên mới được công nhận.
@@ -197,10 +206,11 @@ class OcopProductAdminController extends Controller
             'story' => ['nullable', 'string', 'max:65000'],
             'origin' => ['nullable', 'string', 'max:255'],
             'production_date' => ['nullable', 'string', 'max:100'],
-            'shelf_life' => ['nullable', 'string', 'max:100'],
-            'ingredients' => ['nullable', 'string', 'max:5000'],
-            'usage_instructions' => ['nullable', 'string', 'max:5000'],
-            'storage_instructions' => ['nullable', 'string', 'max:5000'],
+            'shelf_life_value' => ['nullable', 'integer', 'min:1', 'max:9999', 'required_with:shelf_life_unit'],
+            'shelf_life_unit' => ['nullable', Rule::in(array_keys(OcopProduct::SHELF_LIFE_UNITS)), 'required_with:shelf_life_value'],
+            'ingredients' => ['nullable', 'string', 'max:20000'],
+            'usage_instructions' => ['nullable', 'string', 'max:20000'],
+            'storage_instructions' => ['nullable', 'string', 'max:20000'],
             'ocop_subject_id' => ['required', 'integer', Rule::exists('ocop_subjects', 'id')->whereNull('deleted_at')],
             // spec/Heritage_Technical_Specification.md §8.2 — tuỳ chọn.
             'heritage_site_id' => ['nullable', 'integer', 'exists:heritage_sites,id'],
@@ -208,9 +218,9 @@ class OcopProductAdminController extends Controller
             // form, remove_media_uuids chỉ dùng ở edit form.
             'media_uuids' => ['nullable', 'array', 'max:'.OcopProduct::MAX_IMAGES],
             'media_uuids.*' => ['string', 'uuid'],
-            'documents' => ['nullable', 'array:'.implode(',', OcopProduct::DOCUMENT_COLLECTIONS)],
-            'documents.*' => ['array', 'max:'.OcopProduct::MAX_DOCUMENTS],
-            'documents.*.*' => ['file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:20480'],
+            'document_uuids' => ['array:'.implode(',', OcopProduct::DOCUMENT_COLLECTIONS)],
+            'document_uuids.*' => ['array', 'max:'.OcopProduct::MAX_DOCUMENTS],
+            'document_uuids.*.*' => ['string', 'uuid'],
             'remove_media_uuids' => ['nullable', 'array'],
             'remove_media_uuids.*' => ['string', 'uuid'],
             'shopee_url' => $urlRule,
@@ -227,13 +237,16 @@ class OcopProductAdminController extends Controller
             'ocop_subject_id.required' => 'Vui lòng chọn chủ thể sản xuất.',
             'ocop_subject_id.exists' => 'Chủ thể được chọn không hợp lệ.',
             'media_uuids.max' => 'Tối đa :max ảnh cho mỗi sản phẩm.',
-            'documents.*.max' => 'Tối đa :max tệp cho mỗi loại hồ sơ.',
-            'documents.*.*.file' => 'Tệp tải lên không hợp lệ.',
-            'documents.*.*.mimes' => 'Chỉ chấp nhận tệp PDF, JPG, PNG hoặc WEBP.',
-            'documents.*.*.max' => 'Mỗi tệp tối đa 20MB.',
+            'document_uuids.*.max' => 'Tối đa :max tệp cho mỗi loại hồ sơ.',
+            'document_uuids.*.*.uuid' => 'Tệp hồ sơ tải lên không hợp lệ, vui lòng tải lại.',
             'origin.max' => 'Xuất xứ không được vượt quá :max ký tự.',
             'production_date.max' => 'Ngày sản xuất không được vượt quá :max ký tự.',
-            'shelf_life.max' => 'Hạn sử dụng không được vượt quá :max ký tự.',
+            'shelf_life_value.integer' => 'Hạn sử dụng phải là số nguyên.',
+            'shelf_life_value.min' => 'Hạn sử dụng phải lớn hơn 0.',
+            'shelf_life_value.max' => 'Hạn sử dụng tối đa :max.',
+            'shelf_life_value.required_with' => 'Vui lòng nhập số cho hạn sử dụng.',
+            'shelf_life_unit.in' => 'Đơn vị hạn sử dụng không hợp lệ.',
+            'shelf_life_unit.required_with' => 'Vui lòng chọn đơn vị cho hạn sử dụng.',
             'shopee_url.url' => 'Link Shopee không đúng định dạng URL.',
             'shopee_url.regex' => 'Link Shopee phải bắt đầu bằng http:// hoặc https://.',
             'shopee_url.max' => 'Link Shopee không được vượt quá :max ký tự.',
@@ -245,5 +258,9 @@ class OcopProductAdminController extends Controller
             'sort_order.integer' => 'Thứ tự hiển thị phải là số nguyên.',
             'sort_order.min' => 'Thứ tự hiển thị không được âm.',
         ]);
+
+        $validated['shelf_life'] = OcopProduct::composeShelfLife($validated['shelf_life_value'] ?? null, $validated['shelf_life_unit'] ?? null);
+
+        return $validated;
     }
 }
