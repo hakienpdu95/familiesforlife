@@ -16,6 +16,7 @@
         <li class="flex items-center gap-3 px-3 py-2 text-sm">
             <svg class="w-4 h-4 shrink-0 text-base-content/50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
             <a href="{{ $urlService->url($file) }}" target="_blank" rel="noopener" class="link link-hover truncate flex-1">{{ $file->file_name }}</a>
+            <span class="text-xs font-mono text-base-content/50 shrink-0" title="Mã tệp hiển thị trên trang truy xuất QR">{{ strtoupper(substr(str_replace('-', '', $file->uuid), 0, 8)) }}</span>
             <span class="text-xs text-base-content/40 shrink-0">{{ $file->human_readable_size }}</span>
             <label class="flex items-center gap-1 text-xs text-error cursor-pointer shrink-0">
                 <input type="checkbox" name="remove_media_uuids[]" value="{{ $file->uuid }}" class="checkbox checkbox-error checkbox-xs"

@@ -60,7 +60,8 @@ class QrReportController extends Controller
             ->when($search !== '', fn ($q) => $q->where(fn ($w) => $w
                 ->where('content', 'like', "%{$search}%")
                 ->orWhere('contact', 'like', "%{$search}%")
-                ->orWhereHas('identity', fn ($i) => $i->where('qr_code', $search))))
+                ->orWhereHas('identity', fn ($i) => $i->where('qr_code', $search))
+                ->when(QrReport::idFromRef($search), fn ($r, $id) => $r->orWhere('id', $id))))
             ->orderBy($sortField, $sortDir)
             ->orderBy('id', $sortDir)
             ->paginate(min(100, max(5, (int) ($validated['size'] ?? 25))), ['*'], 'page', max(1, (int) ($validated['page'] ?? 1)));
@@ -99,6 +100,7 @@ class QrReportController extends Controller
 
         return [
             'id' => $report->id,
+            'ref' => $report->ref(),
             'created_at' => $report->created_at?->format('d/m/Y H:i'),
             'qr_code' => $identity?->qr_code,
             'qr_url' => $identity?->publicUrl(),

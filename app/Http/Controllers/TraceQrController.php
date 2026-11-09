@@ -32,6 +32,7 @@ class TraceQrController extends Controller
         return view($page['view'], [
             'brand' => config('app.site_name'),
             'reportReasons' => QrReport::REASONS,
+            'reportHints' => QrReport::REASON_HINTS,
             ...$page,
         ]);
     }
@@ -58,7 +59,7 @@ class TraceQrController extends Controller
         $identity = $traceability->resolveQrCode($qrCode);
 
         if (filled($request->input('website'))) {
-            return redirect()->route('traceability.qr', $qrCode)->with('report_sent', true);
+            return redirect()->to(route('traceability.qr', $qrCode).'#phan-anh')->with('report_sent', ['ref' => null, 'reason' => null, 'contact' => false]);
         }
 
         $data = $request->validate([
@@ -82,7 +83,11 @@ class TraceQrController extends Controller
 
         $this->notifyReviewers($report->setRelation('identity', $identity), $traceability->present($identity)['title'] ?? '');
 
-        return redirect()->to(route('traceability.qr', $qrCode).'#phan-anh')->with('report_sent', true);
+        return redirect()->to(route('traceability.qr', $qrCode).'#phan-anh')->with('report_sent', [
+            'ref' => $report->ref(),
+            'reason' => $report->reasonLabel(),
+            'contact' => filled($report->contact),
+        ]);
     }
 
     private function notifyReviewers(QrReport $report, string $targetLabel): void

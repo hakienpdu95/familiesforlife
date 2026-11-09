@@ -25,7 +25,7 @@ const REASON_BADGE = {
 const COLUMNS = [
     {
         title: 'Thời gian', field: 'created_at', width: 140, sorter: 'string',
-        formatter: (cell) => '<span class="text-xs whitespace-nowrap">' + esc(cell.getValue()) + '</span>',
+        formatter: (cell) => '<div class="text-xs whitespace-nowrap leading-tight"><span class="font-mono font-semibold">' + esc(cell.getRow().getData().ref) + '</span><br><span class="text-base-content/50">' + esc(cell.getValue()) + '</span></div>',
     },
     {
         title: 'Mã QR', field: 'qr_code', width: 110, headerSort: false,
@@ -65,7 +65,7 @@ const COLUMNS = [
             const d = cell.getRow().getData();
             if (d.resolve_url) {
                 return '<button type="button" class="btn btn-success btn-xs"'
-                    + ' data-resolve-url="' + esc(d.resolve_url) + '" data-resolve-title="#' + esc(d.id) + '">Đã xử lý</button>';
+                    + ' data-resolve-url="' + esc(d.resolve_url) + '" data-resolve-title="' + esc(d.ref) + '">Đã xử lý</button>';
             }
             return '<div class="text-xs leading-tight"><span class="badge badge-success badge-xs mb-0.5">Đã xử lý</span><br>'
                 + esc(d.resolved_by || '—') + '<br><span class="text-base-content/50">' + esc(d.resolved_at || '') + '</span></div>';

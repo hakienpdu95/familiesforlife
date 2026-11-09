@@ -6,6 +6,7 @@ use App\Shared\Traceability\Concerns\BuildsRelatedCards;
 use App\Shared\Traceability\Contracts\ExposesPublicDocuments;
 use App\Shared\Traceability\Contracts\TracePresenter;
 use App\Shared\Traceability\TraceabilityService as T;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -20,11 +21,15 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
     use BuildsRelatedCards;
 
     private const QUALITY_DOCS = [
-        'ocop_label_docs' => 'Nhãn mác, bao bì',
-        'ocop_quality_declaration' => 'Hồ sơ công bố chất lượng',
-        'ocop_test_reports' => 'Phiếu kiểm nghiệm định kỳ',
-        'ocop_quality_certs' => 'Chứng nhận quản lý chất lượng',
+        'ocop_label_docs' => ['Nhãn mác, bao bì', 'Mẫu nhãn và quy cách bao bì đang lưu hành'],
+        'ocop_quality_declaration' => ['Hồ sơ công bố chất lượng', 'Bản tự công bố, tiêu chuẩn áp dụng (TCCS, TCVN, QCVN)'],
+        'ocop_test_reports' => ['Phiếu kiểm nghiệm định kỳ', 'Kết quả kiểm nghiệm chỉ tiêu an toàn thực phẩm'],
+        'ocop_quality_certs' => ['Chứng nhận quản lý chất lượng', 'Cơ sở đủ điều kiện ATTP, ISO, HACCP, GMP…'],
     ];
+
+    private const REQUIRED_FROM_STARS = ['ocop_quality_certs' => 4];
+
+    private const REFRESH_MONTHS = ['ocop_test_reports' => 12];
 
     private const SECTIONS = [
         'ingredients' => ['Thành phần', 'fa-list-check'],
@@ -84,7 +89,7 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
             'ingredients' => self::plain($target->ingredients),
             'usage_instructions' => self::plain($target->usage_instructions),
             'storage_instructions' => self::plain($target->storage_instructions),
-            'quality_docs' => $this->docStatus($target, self::QUALITY_DOCS),
+            'quality_docs' => $this->docStatus($target, array_map(fn (array $d) => $d[0], self::QUALITY_DOCS)),
             'image' => T::imageRef($target, OcopProduct::IMAGE_COLLECTION, 'medium'),
         ];
     }
@@ -215,21 +220,42 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
 
     private function publicDocs(OcopProduct $product): array
     {
-        return collect(self::QUALITY_DOCS)->map(function (string $label, string $collection) use ($product) {
-            $media = $product->getMedia($collection);
+        return collect(self::QUALITY_DOCS)->map(function (array $doc, string $collection) use ($product) {
+            $media = $product->getMedia($collection)->sortByDesc(fn ($m) => $m->created_at)->values();
+            $latest = $media->first()?->created_at;
+            $minStars = self::REQUIRED_FROM_STARS[$collection] ?? null;
+            $refresh = self::REFRESH_MONTHS[$collection] ?? null;
 
             return [
-                'label' => $label,
+                'label' => $doc[0],
+                'hint' => $doc[1],
+                'required' => $minStars && (int) $product->star_rating >= $minStars ? 'Bắt buộc với OCOP '.$minStars.'–5 sao' : null,
                 'count' => $media->count(),
-                'updated_at' => $media->max('updated_at')?->format('d/m/Y'),
+                'updated_at' => $latest?->format('d/m/Y'),
+                'ago' => $latest ? self::ago($latest) : null,
+                'stale' => $refresh && $latest && $latest->lt(now()->subMonths($refresh)) ? 'Tệp mới nhất đăng hơn '.$refresh.' tháng trước — hồ sơ định kỳ có thể đã hết hạn' : null,
                 'files' => $media->filter(fn ($m) => in_array($m->mime_type, T::DOCUMENT_MIMES, true))
                     ->map(fn ($m) => [
                         'uuid' => $m->uuid,
+                        'ref' => strtoupper(substr(str_replace('-', '', $m->uuid), 0, 8)),
                         'type' => $m->mime_type === 'application/pdf' ? 'PDF' : 'Ảnh',
                         'size' => Number::fileSize((int) $m->size, precision: $m->size >= 1048576 ? 1 : 0),
+                        'uploaded_at' => $m->created_at?->format('d/m/Y'),
                     ])->values()->all(),
             ];
         })->values()->all();
+    }
+
+    private static function ago(CarbonInterface $date): string
+    {
+        $days = (int) $date->copy()->startOfDay()->diffInDays(now()->startOfDay());
+
+        return match (true) {
+            $days === 0 => 'hôm nay',
+            $days < 31 => $days.' ngày trước',
+            $days < 365 => intdiv($days, 30).' tháng trước',
+            default => intdiv($days, 365).' năm trước',
+        };
     }
 
     private static function plain(?string $html): ?string
