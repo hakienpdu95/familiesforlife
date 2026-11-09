@@ -564,7 +564,7 @@ class ArticleContentRenderer
                     'cached_image' => $pb->isOcop() ? ($item->ocopProduct?->imageUrl('thumb') ?: null) : $item->product?->cover_image_url,
                     'cached_price' => $pb->isOcop() ? ($item->ocopProduct?->star_rating ? 'OCOP '.$item->ocopProduct->star_rating.' sao' : null) : $item->product?->display_price,
                     'cached_links' => collect(ProductLinkType::cases())
-                        ->filter(fn ($type) => filled($item->source()?->{$type->urlColumn()}))
+                        ->filter(fn ($type) => filled($item->linkUrl($type)))
                         ->map(fn ($type) => ['type' => $type->value, 'label' => $type->label()])
                         ->values(),
                     'buttons' => $item->buttons->map(fn ($btn) => [

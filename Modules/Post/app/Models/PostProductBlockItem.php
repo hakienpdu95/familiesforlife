@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use Modules\Ocop\Enums\OcopProductStatus;
 use Modules\Ocop\Models\OcopProduct;
+use Modules\Product\Enums\ProductLinkType;
 use Modules\Product\Models\Product;
 
 class PostProductBlockItem extends Model
@@ -49,6 +50,14 @@ class PostProductBlockItem extends Model
     public function source(): Product|OcopProduct|null
     {
         return $this->ocop_product_id ? $this->ocopProduct : $this->product;
+    }
+
+    public function linkUrl(ProductLinkType $type): ?string
+    {
+        $source = $this->source();
+        $column = $type->urlColumn();
+
+        return $source && array_key_exists($column, $source->getAttributes()) ? $source->getAttribute($column) : null;
     }
 
     public function referenceId(): ?int
