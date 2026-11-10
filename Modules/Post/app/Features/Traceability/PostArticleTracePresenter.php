@@ -122,7 +122,7 @@ class PostArticleTracePresenter implements TracePresenter
             'related' => $related,
             'cta' => $t
                 ? ['url' => route('post.public.article', ['slug' => $t->slug, 'id' => $t->id]), 'label' => 'Đọc bài trên website']
-                : ['url' => route('post.public.home'), 'label' => 'Xem tin tức khác', 'icon' => 'fa-arrow-right'],
+                : null,
         ]);
     }
 
@@ -151,7 +151,7 @@ class PostArticleTracePresenter implements TracePresenter
             'sponsor' => null,
             'citations' => [],
             'tags' => [],
-            'cta' => ['url' => route('post.public.home'), 'label' => 'Xem tin tức khác', 'icon' => 'fa-arrow-right'],
+            'cta' => null,
             ...$page,
         ]);
     }

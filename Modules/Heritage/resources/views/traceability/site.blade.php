@@ -15,7 +15,7 @@
                 </figcaption>
             </figure>
         @else
-            <div class="px-4 pt-5">
+            <div class="px-3 pt-5">
                 @if ($kicker)<p class="tx-eyebrow">{{ implode(' · ', $kicker) }}</p>@endif
                 <h1 class="tx-display text-[26px] mt-1.5">{{ $title }}</h1>
                 @if ($era)<p class="mt-1.5 text-[15px] text-[#78716c]">{{ $era }}</p>@endif

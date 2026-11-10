@@ -17,7 +17,7 @@
                 @if ($button)
                     <div class="mt-auto pt-3">
                         <a href="{{ $button->target_url }}" target="{{ $button->target->value }}" rel="sponsored noopener"
-                           class="btn btn-sm w-full rounded-lg font-medium shadow-none {{ $button->style->btnClass() }}">{{ $button->display_label }}</a>
+                           class="btn btn-sm w-full rounded-lg font-medium shadow-none gap-1.5 {{ $button->btn_class }}">@if ($button->channel_logo)<span class="w-5 h-5 rounded bg-white flex items-center justify-center shrink-0" aria-hidden="true"><img src="{{ $button->channel_logo }}" alt="" width="16" height="16" loading="lazy" decoding="async" class="w-4 h-4 object-contain"></span>@endif<span class="truncate">{{ $button->display_label }}</span></a>
                     </div>
                 @endif
             </li>

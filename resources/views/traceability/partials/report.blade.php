@@ -90,5 +90,4 @@
             </div>
         </form>
     </details>
-    <p class="tx-note text-center">Mã {{ $qr_code }} · Hệ thống truy xuất {{ $brand }}</p>
 </footer>

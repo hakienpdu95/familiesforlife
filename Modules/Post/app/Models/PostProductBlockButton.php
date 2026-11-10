@@ -62,6 +62,27 @@ class PostProductBlockButton extends Model
         return null;
     }
 
+    public function getChannelAttribute(): ?ProductLinkType
+    {
+        if ($this->url_type === ButtonUrlType::UseProductLink) {
+            return ProductLinkType::tryFrom((string) $this->product_link_type);
+        }
+
+        return ProductLinkType::fromUrl($this->url);
+    }
+
+    public function getChannelLogoAttribute(): ?string
+    {
+        $logo = $this->channel?->logo();
+
+        return $logo ? asset($logo) : null;
+    }
+
+    public function getBtnClassAttribute(): string
+    {
+        return $this->channel?->brandClass() ?? $this->style->btnClass();
+    }
+
     /**
      * URL đích thật — resolve động từ `Product` khi use_product_link, không bao giờ đọc
      * cột `url` (luôn null cho case này — docs/post-module-spec.md §9.8.1).

@@ -4,7 +4,7 @@
     <div class="tx-hero">
         @include('traceability.partials.gallery', ['gallery' => $gallery, 'title' => $title])
 
-        <div class="px-4 pt-4 pb-5">
+        <div class="px-3 pt-4 pb-5">
             <p class="tx-eyebrow">{{ $kind }}@if ($category)<span class="font-medium text-[#a8a29e]"> · {{ $category }}</span>@endif</p>
             <h1 class="tx-display tx-h1 mt-1.5">{{ $title }}</h1>
             @if ($summary)

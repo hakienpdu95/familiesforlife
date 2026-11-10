@@ -73,6 +73,9 @@ class TraceabilityService
             'revoked_at' => $identity->revoked_at?->format('d/m/Y'),
             'archived' => $archived,
             'archived_at' => $archived ? $identity->snapshot_at?->format('d/m/Y') : null,
+            'issued_at' => $identity->created_at?->format('d/m/Y'),
+            'data_updated_at' => ($archived ? $identity->snapshot_at : ($live ? $target->updated_at : null))?->format('d/m/Y'),
+            'official_host' => parse_url((string) config('app.url'), PHP_URL_HOST) ?: request()->getHost(),
         ];
     }
 
@@ -213,7 +216,7 @@ class TraceabilityService
             'notice' => null,
             'sections' => [],
             'related' => [],
-            'cta' => ['url' => route('post.public.home'), 'label' => 'Về trang chủ', 'icon' => 'fa-arrow-right'],
+            'cta' => null,
             'cta_secondary' => null,
             'cta_sticky' => true,
             ...$page,

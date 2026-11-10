@@ -23,14 +23,13 @@
         @php($tagline = trim(\Illuminate\Support\Str::before((string) config('app.site_description'), '—')))
         <header class="sticky top-0 z-20 bg-base-100/95 backdrop-blur border-b border-[var(--tx-line)] pt-[env(safe-area-inset-top)]">
             <div class="flex items-center gap-3 px-4 h-14">
-                <a href="{{ route('post.public.home') }}" class="flex items-center gap-2.5 min-w-0 flex-1" aria-label="{{ $brand }} — về trang chủ">
+                <div class="flex items-center gap-2.5 min-w-0 flex-1">
                     <img src="{{ asset('images/logo.png') }}" alt="" width="36" height="36" class="w-9 h-9 shrink-0">
                     <span class="min-w-0 leading-tight">
                         <span class="block text-[15px] font-bold tracking-[-0.01em] truncate">{{ $brand }}</span>
                         @if ($tagline)<span class="block text-[12px] text-[#78716c] truncate">{{ $tagline }}</span>@endif
                     </span>
-                </a>
-                <a href="{{ route('post.public.home') }}" class="shrink-0 inline-flex items-center h-10 px-3 rounded-lg border border-[rgb(28_25_23/.12)] text-[13px] font-semibold hover:border-primary hover:text-primary transition-colors">Trang chủ</a>
+                </div>
             </div>
         </header>
 
@@ -57,8 +56,10 @@
                             <span class="truncate">{{ count($buy) === 1 ? 'Mua trên '.$channel['name'] : ($channel['short'] ?? $channel['name']) }}</span>
                         </a>
                     @empty
+                        @if ($cta)
                         <a href="{{ $cta['url'] }}" @if (! empty($cta['external'])) target="_blank" rel="noopener nofollow sponsored" @endif
                            class="btn btn-primary flex-1 h-12 min-h-12 rounded-lg text-[15px] font-semibold shadow-none border-0">{{ $cta['label'] }}</a>
+                        @endif
                     @endforelse
                     <a href="#phan-anh" onclick="document.getElementById('phan-anh').open = true"
                        class="btn w-12 h-12 min-h-12 p-0 rounded-lg bg-base-100 border border-[rgb(28_25_23/.14)] shadow-none text-[#57534e] hover:border-primary hover:text-primary [&>svg]:w-5 [&>svg]:h-5" aria-label="Phản ánh thông tin chưa đúng">@include('traceability.partials.icon', ['name' => 'flag'])</a>

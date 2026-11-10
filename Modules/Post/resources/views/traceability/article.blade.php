@@ -2,7 +2,7 @@
 
 @section('content')
     <article class="tx-hero">
-        <header class="px-4 pt-5">
+        <header class="px-3 pt-5">
             @if ($category)<p class="tx-eyebrow">{{ $category }}</p>@endif
             <h1 class="tx-display text-[26px] leading-[1.25] mt-1.5">{{ $title }}</h1>
             @php($meta = array_filter([$published_label ? 'Đăng '.$published_label : null, $updated_label ? 'Cập nhật '.$updated_label : null, $reading_minutes ? $reading_minutes.' phút đọc' : null]))
@@ -37,12 +37,14 @@
         @endif
 
         @if (filled($content_html))
-            <div class="tx-prose tx-prose-lg px-4 pt-6 pb-2">{!! $content_html !!}</div>
+            <div class="tx-prose tx-prose-lg px-3 pt-6 pb-2">{!! $content_html !!}</div>
         @endif
 
+        @if ($cta)
         <div class="px-4 pt-4 pb-6">
             <a href="{{ $cta['url'] }}" class="btn btn-outline w-full h-12 rounded-lg text-[15px] font-semibold shadow-none border-[rgb(28_25_23/.16)] hover:border-primary hover:bg-transparent hover:text-primary">{{ $cta['label'] }} →</a>
         </div>
+        @endif
     </article>
 
     @if ($citations)

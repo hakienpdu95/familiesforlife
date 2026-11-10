@@ -1,7 +1,7 @@
 @extends('layouts.traceability')
 
 @section('content')
-    <div class="tx-hero px-4 pt-5 pb-5">
+    <div class="tx-hero px-3 pt-5 pb-5">
         <p class="tx-eyebrow">{{ $kind }}</p>
         <h1 class="tx-display tx-h1 mt-1.5">{{ $title }}</h1>
     </div>

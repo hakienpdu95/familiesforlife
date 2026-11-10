@@ -10,7 +10,7 @@
         @php($shots = count($gallery))
         @include('traceability.partials.gallery', ['gallery' => $gallery, 'title' => $title])
 
-        <div class="px-4 pt-4 pb-5">
+        <div class="px-3 pt-4 pb-5">
             <p class="tx-eyebrow">{{ $group ?: 'Sản phẩm OCOP' }}@if ($category_code) <span class="font-mono font-medium text-[#a8a29e]" title="Mã phân nhóm OCOP">· {{ $category_code }}</span>@endif</p>
             <h1 class="tx-display tx-h1 mt-1.5">{{ $title }}</h1>
             @if ($description)
@@ -30,7 +30,7 @@
 
     @if ($channels)
         <section id="mua-hang" class="tx-section">
-            <h2 class="tx-section-title">Mua chính hãng <small>{{ count($channels) }} gian hàng</small></h2>
+            <h2 class="tx-section-title">Mua hàng chính hãng <small>{{ count($channels) }} gian hàng</small></h2>
             <ul class="tx-card tx-rows">
                 @foreach ($channels as $channel)
                     <li>

@@ -24,6 +24,36 @@ enum ProductLinkType: string
         };
     }
 
+    public function logo(): ?string
+    {
+        return match ($this) {
+            self::Shopee => 'images/shopee.png',
+            self::TikTok => 'images/tiktok.png',
+            default      => null,
+        };
+    }
+
+    public function brandClass(): ?string
+    {
+        return match ($this) {
+            self::Shopee => 'border-0 bg-[#ee4d2d] text-white hover:bg-[#d73211]',
+            self::TikTok => 'border-0 bg-[#161823] text-white hover:bg-black',
+            default      => null,
+        };
+    }
+
+    public static function fromUrl(?string $url): ?self
+    {
+        $host = strtolower((string) parse_url((string) $url, PHP_URL_HOST));
+
+        return match (true) {
+            $host === '' => null,
+            (bool) preg_match('/(^|\.)(shopee\.vn|shp\.ee)$/', $host) => self::Shopee,
+            (bool) preg_match('/(^|\.)tiktok\.com$/', $host) => self::TikTok,
+            default => null,
+        };
+    }
+
     /** Cột tương ứng trên bảng `products`. */
     public function urlColumn(): string
     {

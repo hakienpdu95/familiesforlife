@@ -18,7 +18,7 @@
                 </div>
                 @if ($button)
                     <a href="{{ $button->target_url }}" target="{{ $button->target->value }}" rel="sponsored noopener"
-                       class="btn btn-sm shrink-0 rounded-lg font-medium shadow-none {{ $button->style->btnClass() }}">{{ $button->display_label }}</a>
+                       class="btn btn-sm shrink-0 rounded-lg font-medium shadow-none gap-1.5 {{ $button->btn_class }}">@if ($button->channel_logo)<span class="w-5 h-5 rounded bg-white flex items-center justify-center shrink-0" aria-hidden="true"><img src="{{ $button->channel_logo }}" alt="" width="16" height="16" loading="lazy" decoding="async" class="w-4 h-4 object-contain"></span>@endif<span class="truncate">{{ $button->display_label }}</span></a>
                 @elseif ($item->display_url)
                     <a href="{{ $item->display_url }}" class="shrink-0 px-1 text-lg text-base-content/30 hover:text-primary" aria-label="Xem {{ $item->display_title }}">›</a>
                 @endif
