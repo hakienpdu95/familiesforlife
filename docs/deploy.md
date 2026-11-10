@@ -1128,7 +1128,7 @@ sudo crontab -e
 
 ## 11. Sự cố thực tế khi thêm site mới trên VPS (case study)
 
-Đúc kết từ quá trình deploy thực tế 1 site mới (`familiesforlife`, domain `vigiadinh.vn`) lên cùng VPS đang chạy `thuchocvn`/`minhan`. Thư mục lấy tên theo đúng tên repo Git (`familiesforlife`) thay vì theo mẫu `devminhan`/`minhan` trong tài liệu — nên rất nhiều chỗ phải đổi tên thủ công thay vì copy nguyên xi, và phát sinh hàng loạt lỗi liên hoàn. Ghi lại đây để lần sau tra thẳng thay vì debug lại từ đầu.
+Đúc kết từ quá trình deploy thực tế 1 site mới (`familiesforlife`, domain ban đầu `vigiadinh.vn`, từ 11/2026 đổi sang `vigiadinh.com.vn` — xem 11.11) lên cùng VPS đang chạy `thuchocvn`/`minhan`. Thư mục lấy tên theo đúng tên repo Git (`familiesforlife`) thay vì theo mẫu `devminhan`/`minhan` trong tài liệu — nên rất nhiều chỗ phải đổi tên thủ công thay vì copy nguyên xi, và phát sinh hàng loạt lỗi liên hoàn. Ghi lại đây để lần sau tra thẳng thay vì debug lại từ đầu.
 
 ### 11.1 Checklist: những chỗ PHẢI đổi tên khi copy `deploy.sh`/Supervisor từ site mẫu
 
@@ -1147,7 +1147,7 @@ sudo crontab -e
 | 8080 | devminhan (thuchocvn.vn) — Reverb |
 | 8081 | minhan (quantri.thuchocvn.vn) — Reverb |
 | 8082 | phpMyAdmin (mục 9) — **không phải Reverb**, đừng gán trùng |
-| 8083 | familiesforlife (vigiadinh.vn) — Reverb |
+| 8083 | familiesforlife (vigiadinh.com.vn) — Reverb |
 
 ### 11.2 Supervisor báo `CANT_REREAD: Source contains parsing errors`
 
@@ -1307,10 +1307,10 @@ Nếu ra > 1, chắc chắn có block dư cần dọn.
 - Vì `--ref` có thể là tag (không tồn tại dưới dạng `origin/<tag>` sau khi fetch), script tự kiểm tra: nếu `origin/$REF` tồn tại (trường hợp branch như `main`) thì dùng nó, không thì dùng `$REF` trực tiếp (trường hợp tag/commit) — `git fetch origin --tags --force` đảm bảo tag mới luôn có sẵn cục bộ trước khi reset.
 - Nhờ vậy, **rollback thủ công cũng dùng đúng 1 lệnh nhất quán** thay vì checkout tay + chạy lại từng bước artisan như mục 8 mô tả:
   ```bash
-  ssh deploy@vigiadinh.vn "cd /var/www/familiesforlife && bash deploy.sh --ref=v1.1.0"
+  ssh deploy@vigiadinh.com.vn "cd /var/www/familiesforlife && bash deploy.sh --ref=v1.1.0"
   ```
 
-**Setup secrets/deploy key:** làm đúng các bước 7.0–7.5 (PAT cho git push từ local, SSH key riêng cho GitHub Actions, thêm public key vào `authorized_keys` của user `deploy`, 3 secrets `VPS_HOST`/`VPS_USER`/`VPS_SSH_KEY`, tạo GitHub Environment `production`) — chỉ đổi tên repo/domain thành `familiesforlife`/`vigiadinh.vn`. Workflow file: `.github/workflows/deploy.yml` trong repo này.
+**Setup secrets/deploy key:** làm đúng các bước 7.0–7.5 (PAT cho git push từ local, SSH key riêng cho GitHub Actions, thêm public key vào `authorized_keys` của user `deploy`, 3 secrets `VPS_HOST`/`VPS_USER`/`VPS_SSH_KEY`, tạo GitHub Environment `production`) — chỉ đổi tên repo/domain thành `familiesforlife`/`vigiadinh.com.vn`. Workflow file: `.github/workflows/deploy.yml` trong repo này.
 
 ### 11.9b Checklist thực tế — kích hoạt lần đầu CI/CD tag-push (đúc kết từ lần bật cho familiesforlife)
 
@@ -1377,6 +1377,57 @@ server {
     }
 ```
 rồi thêm các `location` khác cần dùng bên cạnh nó — lúc đó Nginx mới chọn location theo URI thay vì chặn hết ngay từ pha rewrite.
+
+### 11.11 Đổi domain cho site đang chạy (`vigiadinh.vn` → `vigiadinh.com.vn`, 11/2026)
+
+Domain cũ hết hạn, giữ nguyên thư mục `/var/www/familiesforlife`, vhost `/etc/nginx/sites-available/familiesforlife`, DB, Supervisor — chỉ đổi domain.
+
+1. **DNS**: bản ghi A `@` và `www` của domain mới → IP VPS. Không tạo AAAA nếu VPS không có IPv6 thật (Let's Encrypt sẽ validate qua IPv6 và fail).
+   ```bash
+   dig +short vigiadinh.com.vn && dig +short AAAA vigiadinh.com.vn
+   ```
+
+2. **Vhost** — đổi `server_name`/`return` nhưng giữ path cert cũ để `nginx -t` vẫn pass (tránh chicken-and-egg 11.7):
+   ```bash
+   sudo cp /etc/nginx/sites-available/familiesforlife ~/familiesforlife.nginx.bak
+   sudo sed -i '/letsencrypt/!s/vigiadinh\.vn/vigiadinh.com.vn/g' /etc/nginx/sites-available/familiesforlife
+   sudo nginx -t && sudo systemctl reload nginx
+   ```
+   Không để file backup trong `sites-available`/`sites-enabled` — dễ bị nạp trùng `server_name`.
+
+3. **SSL**:
+   ```bash
+   sudo certbot --nginx -d vigiadinh.com.vn -d www.vigiadinh.com.vn --email hotro@thuchocvn.vn --agree-tos --no-eff-email
+   sudo grep -c "listen 443" /etc/nginx/sites-available/familiesforlife   # phải = 1 (11.8)
+   sudo certbot delete --cert-name vigiadinh.vn                            # cert domain hết hạn → renew sẽ fail mãi nếu giữ
+   sudo nginx -t && sudo systemctl reload nginx
+   sudo certbot renew --dry-run
+   ```
+
+4. **`.env` + rebuild** (`VITE_REVERB_HOST` được nhúng lúc build nên bắt buộc build lại):
+   ```bash
+   cd /var/www/familiesforlife
+   sed -i 's/vigiadinh\.vn/vigiadinh.com.vn/g' .env
+   php artisan optimize:clear && php artisan optimize
+   npm run build:backend && npm run build:frontend
+   sudo supervisorctl restart familiesforlife-horizon familiesforlife-reverb
+   sudo systemctl reload php8.5-fpm
+   ```
+
+5. **Ngoài VPS**: GitHub secret `VPS_HOST` (nếu đang là domain cũ → đổi sang IP/domain mới), `url` trong `.github/workflows/deploy.yml`, callback OAuth Google/Facebook/LinkedIn (`https://<domain>/auth/social/<provider>/callback`), URL tuyệt đối domain cũ lưu trong DB:
+   ```bash
+   mysqldump -u <user> -p --no-create-info <db> | grep -o "vigiadinh\.vn[^\"' ]*" | sort | uniq -c | head
+   ```
+
+**Sự cố gặp phải — Certbot `Read timed out` / `Network is unreachable`** tới `acme-v02.api.letsencrypt.org` dù domain/Nginx đúng. Nguyên nhân: VPS có IPv6 trên interface nhưng không route ra ngoài được, Certbot (Python) ưu tiên IPv6. Chẩn đoán:
+```bash
+curl -4 -m 20 -sS -o /dev/null -w "IPv4: %{http_code}\n" https://acme-v02.api.letsencrypt.org/directory   # 200
+curl -6 -m 20 -sS -o /dev/null -w "IPv6: %{http_code}\n" https://acme-v02.api.letsencrypt.org/directory   # 000 → IPv6 hỏng
+```
+Fix — ưu tiên IPv4 cho toàn hệ thống (bền vững, áp dụng cả cho `certbot renew` tự động):
+```bash
+grep -q '^precedence ::ffff:0:0/96' /etc/gai.conf || echo 'precedence ::ffff:0:0/96  100' | sudo tee -a /etc/gai.conf
+```
 
 ---
 
