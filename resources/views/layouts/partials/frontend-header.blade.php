@@ -43,7 +43,7 @@
                                     <strong class="brand-name relative">
                                         <span class="br-1">Vì</span>
                                         <span class="br-2">Gia đình</span>
-                                        <span class="br-3 absolute">.vn</span>
+                                        <span class="br-3 absolute">.com.vn</span>
                                     </strong>
                                 </p>
                                 <p class="logo second relative">
