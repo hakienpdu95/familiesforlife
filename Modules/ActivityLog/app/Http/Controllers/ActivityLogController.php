@@ -36,7 +36,7 @@ class ActivityLogController extends Controller
     public function downloadExport(string $key): \Symfony\Component\HttpFoundation\BinaryFileResponse
     {
         $path = \Cache::get("actlog:export:{$key}");
-        abort_unless($path && file_exists($path), 404, 'File không tồn tại hoặc đã hết hạn.');
+        abort_unless($path && file_exists($path), 404, __('File không tồn tại hoặc đã hết hạn.'));
 
         return response()->download($path)->deleteFileAfterSend();
     }

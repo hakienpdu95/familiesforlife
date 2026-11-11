@@ -9,6 +9,7 @@
 
 import { createTs } from '@shared/tom-select-factory.js';
 
+import { t } from '../../../../../../resources/js/shared/i18n.js';
 function esc(v) {
     if (v == null) return '';
     return String(v)
@@ -20,7 +21,7 @@ const COLUMNS = [
     {
         // src ban đầu LUÔN là thumbnail_url (hqdefault, đảm bảo tồn tại) — window.videoUpgradeThumbnails()
         // (gọi ở hook renderComplete bên dưới, video.js) tự dò và nâng lên thumbnail_hd_url nếu video có bản Full HD thật.
-        title: 'Ảnh', field: 'thumbnail_url', width: 110, headerSort: false,
+        title: t('Ảnh'), field: 'thumbnail_url', width: 110, headerSort: false,
         formatter(cell) {
             const d = cell.getRow().getData();
             if (!d.thumbnail_url) return '';
@@ -28,7 +29,7 @@ const COLUMNS = [
         },
     },
     {
-        title: 'Tên', field: 'name', minWidth: 220, sorter: 'string',
+        title: t('Tên'), field: 'name', minWidth: 220, sorter: 'string',
         formatter(cell) {
             const d = cell.getRow().getData();
             let html = '<span class="text-sm font-medium">' + esc(d.name) + '</span>';
@@ -39,10 +40,10 @@ const COLUMNS = [
         },
     },
     {
-        title: 'Thứ tự', field: 'sort_order', width: 90, hozAlign: 'center', sorter: 'number',
+        title: t('Thứ tự'), field: 'sort_order', width: 90, hozAlign: 'center', sorter: 'number',
     },
     {
-        title: 'Trạng thái', field: 'is_active', width: 110, hozAlign: 'center', headerSort: false,
+        title: t('Trạng thái'), field: 'is_active', width: 110, hozAlign: 'center', headerSort: false,
         formatter(cell) {
             const d = cell.getRow().getData();
             const checked = d.is_active ? 'checked' : '';
@@ -52,7 +53,7 @@ const COLUMNS = [
         },
     },
     {
-        title: 'Ngày tạo', field: 'created_at', width: 140, sorter: 'string',
+        title: t('Ngày tạo'), field: 'created_at', width: 140, sorter: 'string',
     },
     {
         title: '', field: 'id', width: 110, hozAlign: 'center', headerSort: false,
@@ -61,12 +62,12 @@ const COLUMNS = [
             let html = '<div class="flex items-center justify-center gap-1">';
 
             if (d.can_update) {
-                html += '<a href="' + esc(d.edit_url) + '" class="btn btn-ghost btn-xs" title="Sửa">Sửa</a>';
+                html += '<a href="' + esc(d.edit_url) + ('" class="btn btn-ghost btn-xs" title="' + t('Sửa') + '">' + t('Sửa') + '</a>');
             }
             if (d.can_delete) {
-                html += '<button class="btn btn-ghost btn-xs text-error" title="Xoá"'
+                html += ('<button class="btn btn-ghost btn-xs text-error" title="' + t('Xoá') + '"')
                     + ' data-url="' + esc(d.delete_url) + '"'
-                    + ' onclick="window.videoDeleteConfirm(this.dataset.url)">Xoá</button>';
+                    + (' onclick="window.videoDeleteConfirm(this.dataset.url)">' + t('Xoá') + '</button>');
             }
 
             html += '</div>';
@@ -99,12 +100,12 @@ window.videoToggleActive = async function (el) {
 
         if (!res.ok) {
             el.checked = !wasChecked;
-            alert(data.message || 'Cập nhật trạng thái thất bại. Vui lòng thử lại.');
+            alert(data.message || t('Cập nhật trạng thái thất bại. Vui lòng thử lại.'));
         }
     } catch (e) {
         console.error('[video] toggle-active failed', e);
         el.checked = !wasChecked;
-        alert('Lỗi kết nối. Vui lòng thử lại.');
+        alert(t('Lỗi kết nối. Vui lòng thử lại.'));
     } finally {
         el.disabled = false;
     }
@@ -128,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const csrf = document.querySelector('meta[name=csrf-token]')?.content ?? '';
         this.disabled    = true;
-        this.textContent = 'Đang xoá...';
+        this.textContent = t('Đang xoá...');
 
         try {
             const res = await fetch(pendingDeleteUrl, {
@@ -148,14 +149,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('videoDeleteModal')?.close();
                 window.videoTable?.replaceData();
             } else {
-                alert(data.message || 'Xoá thất bại. Vui lòng thử lại.');
+                alert(data.message || t('Xoá thất bại. Vui lòng thử lại.'));
             }
         } catch (e) {
             console.error('[video] delete failed', e);
-            alert('Lỗi kết nối. Vui lòng thử lại.');
+            alert(t('Lỗi kết nối. Vui lòng thử lại.'));
         } finally {
             this.disabled    = false;
-            this.textContent = 'Xoá';
+            this.textContent = t('Xoá');
             pendingDeleteUrl = null;
         }
     });
@@ -197,7 +198,7 @@ document.addEventListener('alpine:init', () => {
 
             get activeChips() {
                 const chips = [], f = this.filters;
-                if (f.search)           chips.push({ key: 'search',    label: 'Tìm: ' + f.search });
+                if (f.search)           chips.push({ key: 'search',    label: (t('Tìm:') + ' ') + f.search });
                 if (f.is_active !== '') chips.push({ key: 'is_active', label: optText(tsActive, f.is_active) });
                 return chips;
             },
@@ -229,7 +230,7 @@ document.addEventListener('alpine:init', () => {
                 if (!activeEl) return;
 
                 tsActive = createTs(activeEl, {
-                    placeholder: 'Tất cả trạng thái',
+                    placeholder: t('Tất cả trạng thái'),
                     onChange() { activeEl.dispatchEvent(new Event('change', { bubbles: true })); },
                 });
             },
@@ -265,11 +266,11 @@ document.addEventListener('alpine:init', () => {
                     langs: {
                         'vi-VN': {
                             pagination: {
-                                page_size: 'Dòng/trang', page_title: 'Trang',
+                                page_size: t('Dòng/trang'), page_title: t('Trang'),
                                 first: '«', last: '»', prev: '‹', next: '›',
-                                first_title: 'Trang đầu', last_title: 'Trang cuối',
-                                prev_title: 'Trang trước', next_title: 'Trang sau',
-                                counter: { showing: '', of: 'trong', rows: 'dòng', pages: 'trang' },
+                                first_title: t('Trang đầu'), last_title: t('Trang cuối'),
+                                prev_title: t('Trang trước'), next_title: t('Trang sau'),
+                                counter: { showing: '', of: t('trong'), rows: t('dòng'), pages: t('trang') },
                             },
                         },
                     },
@@ -277,7 +278,7 @@ document.addEventListener('alpine:init', () => {
                     columns: COLUMNS,
                     placeholder: '<div class="py-16 text-center opacity-40">'
                         + '<svg class="w-12 h-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>'
-                        + '<p class="text-sm">Chưa có video nào</p></div>',
+                        + ('<p class="text-sm">' + t('Chưa có video nào') + '</p></div>'),
                 });
 
                 // Mỗi lần Tabulator render xong 1 trang dữ liệu (load lần đầu, đổi trang, đổi

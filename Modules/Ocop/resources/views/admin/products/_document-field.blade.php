@@ -27,12 +27,12 @@
         <li class="flex items-center gap-3 px-3 py-2 text-sm">
             <svg class="w-4 h-4 shrink-0 text-base-content/50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
             <a href="{{ $urlService->url($file) }}" target="_blank" rel="noopener" class="link link-hover truncate flex-1">{{ $file->file_name }}</a>
-            <span class="text-xs font-mono text-base-content/50 shrink-0" title="Mã tệp hiển thị trên trang truy xuất QR">{{ strtoupper(substr(str_replace('-', '', $file->uuid), 0, 8)) }}</span>
+            <span class="text-xs font-mono text-base-content/50 shrink-0" title="{{ __('Mã tệp hiển thị trên trang truy xuất QR') }}">{{ strtoupper(substr(str_replace('-', '', $file->uuid), 0, 8)) }}</span>
             <span class="text-xs text-base-content/40 shrink-0">{{ $file->human_readable_size }}</span>
             <label class="flex items-center gap-1 text-xs text-error cursor-pointer shrink-0">
                 <input type="checkbox" name="remove_media_uuids[]" value="{{ $file->uuid }}" class="checkbox checkbox-error checkbox-xs"
                        @checked(in_array($file->uuid, old('remove_media_uuids', []), true))>
-                Xoá
+                {{ __('Xoá') }}
             </label>
         </li>
         @endforeach
@@ -43,17 +43,17 @@
         @foreach($pending as $file)
         <div data-doc-pending class="mb-2 flex items-center gap-3 rounded-lg border border-dashed border-base-300 px-3 py-2 text-sm">
             <input type="hidden" name="document_uuids[{{ $collection }}][]" value="{{ $file->uuid }}">
-            <span class="badge badge-ghost badge-sm shrink-0">Chờ lưu</span>
+            <span class="badge badge-ghost badge-sm shrink-0">{{ __('Chờ lưu') }}</span>
             <span class="truncate flex-1">{{ $file->file_name }}</span>
             <span class="text-xs text-base-content/40 shrink-0">{{ $file->human_readable_size }}</span>
-            <button type="button" class="btn btn-ghost btn-xs text-error" onclick="this.closest('[data-doc-pending]').remove()">Bỏ</button>
+            <button type="button" class="btn btn-ghost btn-xs text-error" onclick="this.closest('[data-doc-pending]').remove()">{{ __('Bỏ') }}</button>
         </div>
         @endforeach
         <div data-doc-pond></div>
     </div>
 
     <small class="mt-1.5 block text-xs text-base-content/50 leading-relaxed">{{ $hint }}</small>
-    <small class="block text-xs text-base-content/40">PDF, JPG, PNG, WEBP — tối đa {{ $maxMb }}MB/tệp, {{ \Modules\Ocop\Models\OcopProduct::MAX_DOCUMENTS }} tệp mỗi loại. Tệp lớn được chia nhỏ khi tải lên và chỉ được thêm vào hồ sơ khi bấm Lưu.</small>
+    <small class="block text-xs text-base-content/40">{{ __('PDF, JPG, PNG, WEBP — tối đa :max_mbMB/tệp, :m_a_x__d_o_c_u_m_e_n_t_s tệp mỗi loại. Tệp lớn được chia nhỏ khi tải lên và chỉ được thêm vào hồ sơ khi bấm Lưu.', ['max_mb' => $maxMb, 'm_a_x__d_o_c_u_m_e_n_t_s' => \Modules\Ocop\Models\OcopProduct::MAX_DOCUMENTS]) }}</small>
     @foreach(collect($errors->get($errorKeys[0]))->merge($errors->get($errorKeys[1]))->flatten()->unique() as $message)
     <p class="mt-1 text-xs text-error">{{ $message }}</p>
     @endforeach

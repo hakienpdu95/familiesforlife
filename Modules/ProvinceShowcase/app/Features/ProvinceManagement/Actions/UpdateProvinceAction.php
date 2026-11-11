@@ -37,7 +37,7 @@ class UpdateProvinceAction
 
                 if ($featuredCount >= $max) {
                     throw ValidationException::withMessages([
-                        'is_featured' => "Chỉ được phép chọn tối đa {$max} tỉnh/thành hiển thị nổi bật.",
+                        'is_featured' => __('Chỉ được phép chọn tối đa :max tỉnh/thành hiển thị nổi bật.', ['max' => $max]),
                     ]);
                 }
             }

@@ -16,9 +16,9 @@ enum UsageStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Living    => 'Đang ở',
-            self::RentedOut => 'Đang cho thuê',
-            self::Vacant    => 'Nhà trống',
+            self::Living    => __('Đang ở'),
+            self::RentedOut => __('Đang cho thuê'),
+            self::Vacant    => __('Nhà trống'),
         };
     }
 

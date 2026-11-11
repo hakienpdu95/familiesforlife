@@ -43,6 +43,6 @@ class ApprovalLog extends Model
     /** Nhãn tiếng Việt cho cột `action` — dùng ở trang Lịch sử duyệt (§12 mở rộng). */
     public function actionLabel(): string
     {
-        return self::ACTION_LABELS[$this->action] ?? $this->action;
+        return isset(self::ACTION_LABELS[$this->action]) ? __(self::ACTION_LABELS[$this->action]) : $this->action;
     }
 }

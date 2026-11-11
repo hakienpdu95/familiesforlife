@@ -1,13 +1,13 @@
 @extends('layouts.backend')
 
-@section('title', 'Hồ sơ cá nhân')
+@section('title', __('Hồ sơ cá nhân'))
 
 @section('content')
 
 <div class="flex items-center gap-2 text-sm text-base-content/50 mb-6">
     <a href="{{ route('backend.dashboard') }}" class="hover:text-primary">Dashboard</a>
     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-    <span>Hồ sơ cá nhân</span>
+    <span>{{ __('Hồ sơ cá nhân') }}</span>
 </div>
 
 <div class="max-w-2xl space-y-5">
@@ -27,18 +27,18 @@
                         @elseif($user->trust_level >= 1)
                             <span class="badge badge-outline badge-xs">✉ Email verified</span>
                         @else
-                            <span class="badge badge-ghost badge-xs">Chưa xác minh</span>
+                            <span class="badge badge-ghost badge-xs">{{ __('Chưa xác minh') }}</span>
                         @endif
                         <span class="badge badge-ghost badge-xs">{{ $user->account_type?->label() }}</span>
                     </div>
                 </div>
             </div>
 
-            <h3 class="font-semibold text-sm mb-3">Cập nhật thông tin</h3>
+            <h3 class="font-semibold text-sm mb-3">{{ __('Cập nhật thông tin') }}</h3>
 
             @if (session('status') === 'profile-information-updated')
                 <div class="alert alert-success text-sm mb-3 py-2">
-                    <span>Thông tin đã được cập nhật.</span>
+                    <span>{{ __('Thông tin đã được cập nhật.') }}</span>
                 </div>
             @endif
 
@@ -46,7 +46,7 @@
                 @csrf
                 @method('PUT')
                 <div class="form-control">
-                    <label class="label py-1"><span class="label-text font-medium text-sm">Họ và tên <span class="text-error">*</span></span></label>
+                    <label class="label py-1"><span class="label-text font-medium text-sm">{{ __('Họ và tên') }} <span class="text-error">*</span></span></label>
                     <input type="text" name="name" value="{{ old('name', $user->name) }}"
                            class="input input-bordered @error('name', 'updateProfileInformation') input-error @enderror" required/>
                     @error('name', 'updateProfileInformation')
@@ -61,7 +61,7 @@
                     <label class="label py-0"><span class="label-text-alt text-error">{{ $message }}</span></label>
                     @enderror
                 </div>
-                <button type="submit" class="btn btn-primary btn-sm">Lưu thay đổi</button>
+                <button type="submit" class="btn btn-primary btn-sm">{{ __('Lưu thay đổi') }}</button>
             </form>
         </div>
     </div>
@@ -69,11 +69,11 @@
     {{-- ── Change password ────────────────────────────────────────────────── --}}
     <div class="card bg-base-100 border border-base-200 shadow-sm">
         <div class="card-body">
-            <h3 class="font-semibold text-sm mb-3">Đổi mật khẩu</h3>
+            <h3 class="font-semibold text-sm mb-3">{{ __('Đổi mật khẩu') }}</h3>
 
             @if (session('status') === 'password-updated')
                 <div class="alert alert-success text-sm mb-3 py-2">
-                    <span>Mật khẩu đã được cập nhật.</span>
+                    <span>{{ __('Mật khẩu đã được cập nhật.') }}</span>
                 </div>
             @endif
 
@@ -81,7 +81,7 @@
                 @csrf
                 @method('PUT')
                 <div class="form-control">
-                    <label class="label py-1"><span class="label-text font-medium text-sm">Mật khẩu hiện tại</span></label>
+                    <label class="label py-1"><span class="label-text font-medium text-sm">{{ __('Mật khẩu hiện tại') }}</span></label>
                     <input type="password" name="current_password"
                            class="input input-bordered @error('current_password', 'updatePassword') input-error @enderror"/>
                     @error('current_password', 'updatePassword')
@@ -89,7 +89,7 @@
                     @enderror
                 </div>
                 <div class="form-control">
-                    <label class="label py-1"><span class="label-text font-medium text-sm">Mật khẩu mới</span></label>
+                    <label class="label py-1"><span class="label-text font-medium text-sm">{{ __('Mật khẩu mới') }}</span></label>
                     <input type="password" name="password"
                            class="input input-bordered @error('password', 'updatePassword') input-error @enderror"/>
                     @error('password', 'updatePassword')
@@ -97,10 +97,10 @@
                     @enderror
                 </div>
                 <div class="form-control">
-                    <label class="label py-1"><span class="label-text font-medium text-sm">Xác nhận mật khẩu mới</span></label>
+                    <label class="label py-1"><span class="label-text font-medium text-sm">{{ __('Xác nhận mật khẩu mới') }}</span></label>
                     <input type="password" name="password_confirmation" class="input input-bordered"/>
                 </div>
-                <button type="submit" class="btn btn-outline btn-primary btn-sm">Đổi mật khẩu</button>
+                <button type="submit" class="btn btn-outline btn-primary btn-sm">{{ __('Đổi mật khẩu') }}</button>
             </form>
         </div>
     </div>
@@ -108,7 +108,7 @@
     {{-- ── Linked Social Accounts ────────────────────────────────────────── --}}
     <div class="card bg-base-100 border border-base-200 shadow-sm">
         <div class="card-body">
-            <h3 class="font-semibold text-sm mb-3">Tài khoản liên kết</h3>
+            <h3 class="font-semibold text-sm mb-3">{{ __('Tài khoản liên kết') }}</h3>
 
             @if ($errors->has('social'))
                 <div class="alert alert-error text-sm mb-3 py-2">
@@ -136,13 +136,13 @@
                                   onsubmit="return confirm('Bỏ liên kết {{ $label }}?')">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-xs btn-ghost text-error">Bỏ liên kết</button>
+                                <button type="submit" class="btn btn-xs btn-ghost text-error">{{ __('Bỏ liên kết') }}</button>
                             </form>
                         </div>
                     @else
                         <a href="{{ route('auth.social.redirect', $provider) }}"
                            class="btn btn-xs btn-outline">
-                            Kết nối
+                            {{ __('Kết nối') }}
                         </a>
                     @endif
                 </div>
@@ -157,14 +157,13 @@
     @php $authorProfile = $user->authorProfile; @endphp
     <div class="card bg-base-100 border border-base-200 shadow-sm">
         <div class="card-body">
-            <h3 class="font-semibold text-sm mb-1">Hồ sơ tác giả công khai</h3>
+            <h3 class="font-semibold text-sm mb-1">{{ __('Hồ sơ tác giả công khai') }}</h3>
             <p class="text-xs text-base-content/50 mb-3">
-                Hiển thị tại trang <code>/tac-gia</code> nếu bạn bật công khai — độc giả xem được
-                tiểu sử và danh sách bài bạn đã xuất bản.
+                {{ __('Hiển thị tại trang') }} <code>/tac-gia</code> {{ __('nếu bạn bật công khai — độc giả xem được tiểu sử và danh sách bài bạn đã xuất bản.') }}
             </p>
 
             @if(session('status') === 'author-profile-updated')
-            <div class="alert alert-success text-sm mb-3 py-2"><span>Đã lưu hồ sơ tác giả.</span></div>
+            <div class="alert alert-success text-sm mb-3 py-2"><span>{{ __('Đã lưu hồ sơ tác giả.') }}</span></div>
             @endif
 
             <form method="POST" action="{{ route('post.author-hub.profile.update') }}" class="space-y-3">
@@ -173,7 +172,7 @@
                 <div class="flex items-center gap-4">
                     <img id="author-avatar-preview"
                          src="{{ $authorProfile?->avatarUrl() ?? 'https://api.dicebear.com/9.x/initials/svg?seed=' . urlencode($user->name) . '&backgroundColor=6366f1&fontFamily=Arial&fontSize=40&fontWeight=700' }}"
-                         alt="Avatar tác giả" class="w-16 h-16 rounded-full shrink-0 object-cover">
+                         alt="{{ __('Avatar tác giả') }}" class="w-16 h-16 rounded-full shrink-0 object-cover">
                     <div class="flex-1">
                         <div id="author-avatar-filepond"
                              @if($authorProfile) data-context-type="post_author_profile" data-context-id="{{ $authorProfile->id }}" @endif></div>
@@ -183,7 +182,7 @@
                 </div>
 
                 <div class="form-control">
-                    <label class="label py-1"><span class="label-text font-medium text-sm">Bút danh</span></label>
+                    <label class="label py-1"><span class="label-text font-medium text-sm">{{ __('Bút danh') }}</span></label>
                     <input type="text" name="pen_name" value="{{ old('pen_name', $authorProfile?->pen_name) }}"
                            placeholder="{{ $user->name }}"
                            class="input input-bordered input-sm @error('pen_name', 'authorProfile') input-error @enderror"/>
@@ -191,7 +190,7 @@
                 </div>
 
                 <div class="form-control">
-                    <label class="label py-1"><span class="label-text font-medium text-sm">Tiểu sử</span></label>
+                    <label class="label py-1"><span class="label-text font-medium text-sm">{{ __('Tiểu sử') }}</span></label>
                     <textarea name="bio" rows="3" maxlength="500"
                               class="textarea textarea-bordered text-sm @error('bio', 'authorProfile') textarea-error @enderror">{{ old('bio', $authorProfile?->bio) }}</textarea>
                     @error('bio', 'authorProfile')<label class="label py-0"><span class="label-text-alt text-error">{{ $message }}</span></label>@enderror
@@ -199,16 +198,16 @@
 
                 <div class="grid sm:grid-cols-2 gap-3">
                     <div class="form-control">
-                        <label class="label py-1"><span class="label-text text-xs">Chức danh chuyên môn</span></label>
+                        <label class="label py-1"><span class="label-text text-xs">{{ __('Chức danh chuyên môn') }}</span></label>
                         <input type="text" name="job_title" value="{{ old('job_title', $authorProfile?->job_title) }}"
-                               placeholder="VD: Bác sĩ Nhi khoa"
+                               placeholder="{{ __('VD: Bác sĩ Nhi khoa') }}"
                                class="input input-bordered input-sm @error('job_title', 'authorProfile') input-error @enderror"/>
                         @error('job_title', 'authorProfile')<label class="label py-0"><span class="label-text-alt text-error">{{ $message }}</span></label>@enderror
                     </div>
                     <div class="form-control">
-                        <label class="label py-1"><span class="label-text text-xs">Bằng cấp/chứng chỉ</span></label>
+                        <label class="label py-1"><span class="label-text text-xs">{{ __('Bằng cấp/chứng chỉ') }}</span></label>
                         <input type="text" name="credentials" value="{{ old('credentials', $authorProfile?->credentials) }}"
-                               placeholder="VD: Thạc sĩ Dinh dưỡng, 10 năm kinh nghiệm"
+                               placeholder="{{ __('VD: Thạc sĩ Dinh dưỡng, 10 năm kinh nghiệm') }}"
                                class="input input-bordered input-sm @error('credentials', 'authorProfile') input-error @enderror"/>
                         @error('credentials', 'authorProfile')<label class="label py-0"><span class="label-text-alt text-error">{{ $message }}</span></label>@enderror
                     </div>
@@ -230,11 +229,11 @@
                 <label class="label cursor-pointer justify-start gap-2 py-1">
                     <input type="checkbox" name="is_public" value="1" class="toggle toggle-sm toggle-primary"
                            {{ old('is_public', $authorProfile?->is_public ?? true) ? 'checked' : '' }}>
-                    <span class="label-text text-sm">Hiển thị trang tác giả công khai</span>
+                    <span class="label-text text-sm">{{ __('Hiển thị trang tác giả công khai') }}</span>
                 </label>
 
                 <div class="pt-1">
-                    <button type="submit" class="btn btn-primary btn-sm">Lưu hồ sơ tác giả</button>
+                    <button type="submit" class="btn btn-primary btn-sm">{{ __('Lưu hồ sơ tác giả') }}</button>
                 </div>
             </form>
         </div>

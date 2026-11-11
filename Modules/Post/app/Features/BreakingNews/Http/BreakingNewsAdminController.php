@@ -82,8 +82,8 @@ class BreakingNewsAdminController extends Controller
         });
 
         $message = $created === 1
-            ? 'Đã đánh dấu tin nóng.'
-            : "Đã đánh dấu tin nóng cho {$created} bài viết.";
+            ? __('Đã đánh dấu tin nóng.')
+            : __('Đã đánh dấu tin nóng cho :created bài viết.', ['created' => $created]);
 
         return redirect()->route('backend.post.breaking-news.items.index')->with('success', $message);
     }
@@ -108,7 +108,7 @@ class BreakingNewsAdminController extends Controller
         $action->handle($breakingNews, $data);
 
         return redirect()->route('backend.post.breaking-news.items.index')
-            ->with('success', 'Cập nhật tin nóng thành công.');
+            ->with('success', __('Cập nhật tin nóng thành công.'));
     }
 
     public function destroy(Request $request, PostBreakingNews $breakingNews, DeleteBreakingNewsAction $action): RedirectResponse|JsonResponse
@@ -116,11 +116,11 @@ class BreakingNewsAdminController extends Controller
         $action->handle($breakingNews);
 
         if ($request->expectsJson()) {
-            return response()->json(['message' => 'Đã gỡ tin nóng.']);
+            return response()->json(['message' => __('Đã gỡ tin nóng.')]);
         }
 
         return redirect()->route('backend.post.breaking-news.items.index')
-            ->with('success', 'Đã gỡ tin nóng.');
+            ->with('success', __('Đã gỡ tin nóng.'));
     }
 
     /** Sửa — vẫn đúng 1 bài/1 bản ghi, giữ nguyên `article_id` số đơn (khác store(), xem validatedForStore()). */
@@ -163,7 +163,7 @@ class BreakingNewsAdminController extends Controller
                 ->exists();
 
             if (! $hasPublishedTranslation) {
-                $fail('Bài viết phải có bản dịch đã xuất bản (đúng ngôn ngữ công khai) mới đánh dấu được là tin nóng.');
+                $fail(__('Bài viết phải có bản dịch đã xuất bản (đúng ngôn ngữ công khai) mới đánh dấu được là tin nóng.'));
             }
         };
     }

@@ -13,7 +13,7 @@ class RejectExampleCandidateAction
     public function handle(AicemExampleCandidate $candidate, int $userId): AicemExampleCandidate
     {
         if ($candidate->status !== ExampleCandidateStatus::Pending) {
-            throw new \RuntimeException("Candidate đã được xử lý trước đó ({$candidate->status->value}).");
+            throw new \RuntimeException(__('Candidate đã được xử lý trước đó (:status).', ['status' => $candidate->status->value]));
         }
 
         $candidate->update([

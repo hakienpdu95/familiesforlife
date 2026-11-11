@@ -1,6 +1,7 @@
 import { createTs } from '@shared/tom-select-factory.js';
 import { qrCellHtml } from '@shared/qr-tools.js';
 
+import { t } from '../../../../../../resources/js/shared/i18n.js';
 function esc(v) {
     if (v == null) return '';
     return String(v)
@@ -16,39 +17,39 @@ const ICON_DELETE = '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke
 
 const COLUMNS = [
     {
-        title: 'Mã QR', field: 'qr_code', width: 96, hozAlign: 'center', headerSort: false, frozen: true,
+        title: t('Mã QR'), field: 'qr_code', width: 96, hozAlign: 'center', headerSort: false, frozen: true,
         formatter(cell) {
             const d = cell.getRow().getData();
             return qrCellHtml(d.qr_code, d.qr_url, d.name);
         },
     },
     {
-        title: 'Chủ thể', field: 'name', minWidth: 240, sorter: 'string',
+        title: t('Chủ thể'), field: 'name', minWidth: 240, sorter: 'string',
         formatter(cell) {
             const d = cell.getRow().getData();
             let html = '<span class="font-medium text-sm">' + esc(d.name) + '</span>';
-            if (!d.is_active) html += ' <span class="badge badge-ghost badge-xs">Ngừng hoạt động</span>';
+            if (!d.is_active) html += (' <span class="badge badge-ghost badge-xs">' + t('Ngừng hoạt động') + '</span>');
             return html;
         },
     },
-    { title: 'Mã số định danh', field: 'tax_code', width: 160, sorter: 'string', formatter: (c) => '<span class="font-mono text-sm">' + esc(c.getValue()) + '</span>' },
-    { title: 'Loại hình', field: 'organization_type', width: 140, sorter: 'string', formatter: (c) => esc(c.getValue()) },
-    { title: 'Tỉnh/thành', field: 'province_name', minWidth: 140, headerSort: false, formatter: (c) => esc(c.getValue()) || EMPTY },
-    { title: 'Hạng sao', field: 'ocop_star', width: 100, hozAlign: 'center', sorter: 'number', formatter: (c) => c.getValue() ? c.getValue() + ' ★' : EMPTY },
-    { title: 'Sản phẩm', field: 'products_count', width: 100, hozAlign: 'center', sorter: 'number' },
+    { title: t('Mã số định danh'), field: 'tax_code', width: 160, sorter: 'string', formatter: (c) => '<span class="font-mono text-sm">' + esc(c.getValue()) + '</span>' },
+    { title: t('Loại hình'), field: 'organization_type', width: 140, sorter: 'string', formatter: (c) => esc(c.getValue()) },
+    { title: t('Tỉnh/thành'), field: 'province_name', minWidth: 140, headerSort: false, formatter: (c) => esc(c.getValue()) || EMPTY },
+    { title: t('Hạng sao'), field: 'ocop_star', width: 100, hozAlign: 'center', sorter: 'number', formatter: (c) => c.getValue() ? c.getValue() + ' ★' : EMPTY },
+    { title: t('Sản phẩm'), field: 'products_count', width: 100, hozAlign: 'center', sorter: 'number' },
     {
         title: '', field: 'id', width: 120, hozAlign: 'center', headerSort: false,
         formatter(cell) {
             const d = cell.getRow().getData();
             let html = '<div class="flex items-center justify-center gap-1">';
             if (d.can_create_product) {
-                html += '<a href="' + esc(d.create_product_url) + '" class="btn btn-ghost btn-xs btn-square text-primary" title="Thêm sản phẩm cho chủ thể này">' + ICON_ADD + '</a>';
+                html += '<a href="' + esc(d.create_product_url) + ('" class="btn btn-ghost btn-xs btn-square text-primary" title="' + t('Thêm sản phẩm cho chủ thể này') + '">') + ICON_ADD + '</a>';
             }
             if (d.can_update) {
-                html += '<a href="' + esc(d.edit_url) + '" class="btn btn-ghost btn-xs btn-square" title="Sửa">' + ICON_EDIT + '</a>';
+                html += '<a href="' + esc(d.edit_url) + ('" class="btn btn-ghost btn-xs btn-square" title="' + t('Sửa') + '">') + ICON_EDIT + '</a>';
             }
             if (d.can_delete) {
-                html += '<button class="btn btn-ghost btn-xs btn-square text-error" title="Xoá"'
+                html += ('<button class="btn btn-ghost btn-xs btn-square text-error" title="' + t('Xoá') + '"')
                     + ' data-url="' + esc(d.destroy_url) + '" data-name="' + esc(d.name) + '"'
                     + ' onclick="window.ocopSubjectDeleteConfirm(this.dataset.url, this.dataset.name)">' + ICON_DELETE + '</button>';
             }
@@ -80,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const csrf = document.querySelector('meta[name=csrf-token]')?.content ?? '';
         this.disabled = true;
-        this.textContent = 'Đang xoá...';
+        this.textContent = t('Đang xoá...');
 
         try {
             const res = await fetch(pendingDeleteUrl, {
@@ -99,14 +100,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('ocopSubjectDeleteModal')?.close();
                 window.ocopSubjectTable?.replaceData();
             } else {
-                alert(data.message || 'Xoá thất bại. Vui lòng thử lại.');
+                alert(data.message || t('Xoá thất bại. Vui lòng thử lại.'));
             }
         } catch (e) {
             console.error('[ocop-subject] delete failed', e);
-            alert('Lỗi kết nối. Vui lòng thử lại.');
+            alert(t('Lỗi kết nối. Vui lòng thử lại.'));
         } finally {
             this.disabled = false;
-            this.textContent = 'Xoá';
+            this.textContent = t('Xoá');
             pendingDeleteUrl = null;
         }
     });
@@ -128,7 +129,7 @@ document.addEventListener('alpine:init', () => {
 
             get activeChips() {
                 const chips = [], f = this.filters;
-                if (f.search)            chips.push({ key: 'search',            label: 'Tìm: ' + f.search });
+                if (f.search)            chips.push({ key: 'search',            label: (t('Tìm:') + ' ') + f.search });
                 if (f.organization_type) chips.push({ key: 'organization_type', label: optText(tsType, f.organization_type) });
                 return chips;
             },
@@ -145,7 +146,7 @@ document.addEventListener('alpine:init', () => {
                 if (!typeEl) return;
 
                 tsType = createTs(typeEl, {
-                    placeholder: 'Tất cả loại hình',
+                    placeholder: t('Tất cả loại hình'),
                     onChange() { typeEl.dispatchEvent(new Event('change', { bubbles: true })); },
                 });
             },
@@ -180,17 +181,17 @@ document.addEventListener('alpine:init', () => {
                     langs: {
                         'vi-VN': {
                             pagination: {
-                                page_size: 'Dòng/trang', page_title: 'Trang',
+                                page_size: t('Dòng/trang'), page_title: t('Trang'),
                                 first: '«', last: '»', prev: '‹', next: '›',
-                                first_title: 'Trang đầu', last_title: 'Trang cuối',
-                                prev_title: 'Trang trước', next_title: 'Trang sau',
-                                counter: { showing: '', of: 'trong', rows: 'dòng', pages: 'trang' },
+                                first_title: t('Trang đầu'), last_title: t('Trang cuối'),
+                                prev_title: t('Trang trước'), next_title: t('Trang sau'),
+                                counter: { showing: '', of: t('trong'), rows: t('dòng'), pages: t('trang') },
                             },
                         },
                     },
 
                     columns: COLUMNS,
-                    placeholder: '<div class="py-16 text-center opacity-40"><p class="text-sm">Chưa có chủ thể nào</p></div>',
+                    placeholder: ('<div class="py-16 text-center opacity-40"><p class="text-sm">' + t('Chưa có chủ thể nào') + '</p></div>'),
                 });
 
                 window.ocopSubjectTable = tableInst;

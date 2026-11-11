@@ -12,6 +12,7 @@
     <title>@yield('title', 'Dashboard') — {{ config('app.name', 'AdminPanel') }}</title>
 
     @include('layouts.partials.font-preload', ['fonts' => ['open-sans'], 'build' => 'build/backend'])
+    @include('layouts.partials.i18n-script')
     @vite(['resources/css/vendor-widgets.css', 'resources/css/app.css', 'resources/js/app.js'], 'build/backend')
 
     @stack('styles')

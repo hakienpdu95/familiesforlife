@@ -7,6 +7,7 @@
  */
 import { syncEntryDialogWidgets } from '../shared/entry-dialog-select.js';
 
+import { t } from '../../../../../../resources/js/shared/i18n.js';
 document.addEventListener('alpine:init', () => {
     Alpine.data('contentCalendarBoard', (serverData = {}) => ({
         ...serverData,
@@ -97,7 +98,7 @@ document.addEventListener('alpine:init', () => {
 
             if (!res.ok) {
                 const json = await res.json().catch(() => ({}));
-                window.Toast?.error(json.message ?? 'Không chuyển được trạng thái.');
+                window.Toast?.error(json.message ?? t('Không chuyển được trạng thái.'));
                 return;
             }
 
@@ -107,7 +108,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         async promptLinkArticle(entry) {
-            const uuid = prompt('Dán UUID bài viết (Post) muốn gắn với kế hoạch này:');
+            const uuid = prompt(t('Dán UUID bài viết (Post) muốn gắn với kế hoạch này:'));
             if (!uuid) return;
 
             const res = await fetch(this.linkArticleUrlTemplate.replace('__UUID__', entry.uuid), {
@@ -118,16 +119,16 @@ document.addEventListener('alpine:init', () => {
 
             const json = await res.json().catch(() => ({}));
             if (!res.ok) {
-                window.Toast?.error(json.message ?? 'Không gắn được bài viết.');
+                window.Toast?.error(json.message ?? t('Không gắn được bài viết.'));
                 return;
             }
 
-            window.Toast?.success('Đã gắn kế hoạch với bài viết.');
+            window.Toast?.success(t('Đã gắn kế hoạch với bài viết.'));
             await this.loadEntries();
         },
 
         async deleteEntry(entry) {
-            if (!confirm(`Xoá kế hoạch "${entry.title}"?`)) return;
+            if (!confirm(`${t('Xoá kế hoạch ":title"?', { title: (entry.title) })}`)) return;
 
             const res = await fetch(this.destroyUrlTemplate.replace('__UUID__', entry.uuid), {
                 method: 'DELETE',
@@ -135,7 +136,7 @@ document.addEventListener('alpine:init', () => {
             });
 
             if (!res.ok) {
-                window.Toast?.error('Không xoá được kế hoạch.');
+                window.Toast?.error(t('Không xoá được kế hoạch.'));
                 return;
             }
 
@@ -198,8 +199,8 @@ document.addEventListener('alpine:init', () => {
                     // hậu tố tiếng Anh của Laravel. Khi ĐÃ có fieldErrors (từng field tự hiện lỗi
                     // riêng rồi), banner chỉ cần câu chung tiếng Việt, không dùng json.message.
                     this.errorMessage = Object.keys(this.fieldErrors).length
-                        ? 'Vui lòng kiểm tra lại các trường bên dưới.'
-                        : (json.message ?? 'Vui lòng kiểm tra lại các trường bên dưới.');
+                        ? t('Vui lòng kiểm tra lại các trường bên dưới.')
+                        : (json.message ?? t('Vui lòng kiểm tra lại các trường bên dưới.'));
                     return;
                 }
 
@@ -266,7 +267,7 @@ document.addEventListener('alpine:init', () => {
             if (!this.funnelGap.prompt) return;
 
             await navigator.clipboard.writeText(this.funnelGap.prompt);
-            window.Toast?.success('Đã sao chép prompt.');
+            window.Toast?.success(t('Đã sao chép prompt.'));
         },
 
         /** Hint hiện dưới select "Giai đoạn hành trình" — tra theo value đang chọn trong form. */

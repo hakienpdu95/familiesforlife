@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', 'Trích xuất nội dung bài viết')
+@section('title', __('Trích xuất nội dung bài viết'))
 
 @section('content')
 <div x-data="coreIdeaExtractorPage({{ Js::from([
@@ -21,132 +21,129 @@
 
     <div class="mb-5 flex items-start justify-between flex-wrap gap-2">
         <div>
-            <h1 class="text-2xl font-bold text-base-content">Trích xuất nội dung bài viết</h1>
+            <h1 class="text-2xl font-bold text-base-content">{{ __('Trích xuất nội dung bài viết') }}</h1>
             <p class="text-sm text-base-content/50 mt-0.5">
-                Nhập tối đa <span x-text="maxUrls"></span> URL (mỗi dòng 1 URL) để lấy dữ liệu thô (tiêu đề, heading, nội dung
-                chính...) của từng nguồn dưới dạng 1 JSON — công cụ nghiên cứu ý tưởng viết bài, copy JSON này dán thẳng vào
-                chat AI (VD claude.ai) để nghiên cứu sâu hơn. Module này chỉ trích xuất, không tự sinh ý chính bằng AI.
+                {{ __('Nhập tối đa') }} <span x-text="maxUrls"></span> {{ __('URL (mỗi dòng 1 URL) để lấy dữ liệu thô (tiêu đề, heading, nội dung chính...) của từng nguồn dưới dạng 1 JSON — công cụ nghiên cứu ý tưởng viết bài, copy JSON này dán thẳng vào chat AI (VD claude.ai) để nghiên cứu sâu hơn. Module này chỉ trích xuất, không tự sinh ý chính bằng AI.') }}
             </p>
         </div>
-        <a :href="categoryFoundationsUrl" class="btn btn-ghost btn-xs">Quản lý Content Foundation theo chuyên mục</a>
+        <a :href="categoryFoundationsUrl" class="btn btn-ghost btn-xs">{{ __('Quản lý Content Foundation theo chuyên mục') }}</a>
     </div>
 
     <div class="card bg-base-100 shadow-sm border border-base-200 mb-4">
         <div class="card-body py-3 px-3">
             <div class="tabs tabs-boxed tabs-xs w-fit mb-3">
-                <button type="button" class="tab" :class="{ 'tab-active': mode === 'url' }" @click="mode = 'url'">Nhập URL</button>
-                <button type="button" class="tab" :class="{ 'tab-active': mode === 'html' }" @click="mode = 'html'">Dán mã HTML</button>
+                <button type="button" class="tab" :class="{ 'tab-active': mode === 'url' }" @click="mode = 'url'">{{ __('Nhập URL') }}</button>
+                <button type="button" class="tab" :class="{ 'tab-active': mode === 'html' }" @click="mode = 'html'">{{ __('Dán mã HTML') }}</button>
             </div>
 
             <form @submit.prevent="submit()" class="flex flex-col gap-3">
                 <div class="form-control" x-show="mode === 'url'">
                     <label class="label py-0.5">
-                        <span class="label-text text-xs font-medium">URL bài viết (mỗi dòng 1 URL, tối đa <span x-text="maxUrls"></span>)</span>
+                        <span class="label-text text-xs font-medium">{{ __('URL bài viết (mỗi dòng 1 URL, tối đa') }} <span x-text="maxUrls"></span>)</span>
                     </label>
                     <textarea x-model="urlsText" :required="mode === 'url'" rows="6"
                               placeholder="https://vidu.com/bai-1&#10;https://vidu.com/bai-2&#10;..."
                               class="textarea textarea-bordered textarea-sm w-full font-mono text-xs"></textarea>
                     <p class="text-xs text-base-content/40 mt-1" x-show="parsedUrlCount() > 0">
-                        <span x-text="parsedUrlCount()"></span> URL hợp lệ (đã bỏ dòng trống/trùng).
+                        <span x-text="parsedUrlCount()"></span> {{ __('URL hợp lệ (đã bỏ dòng trống/trùng).') }}
                         <span class="text-warning" x-show="parsedUrlCount() > maxUrls" x-cloak>
-                            Chỉ <span x-text="maxUrls"></span> URL đầu tiên sẽ được xử lý.
+                            {{ __('Chỉ') }} <span x-text="maxUrls"></span> {{ __('URL đầu tiên sẽ được xử lý.') }}
                         </span>
                     </p>
                 </div>
 
                 <div class="form-control" x-show="mode === 'url' && parsedUrlCount() > 0" x-cloak>
                     <label class="label py-0.5">
-                        <span class="label-text text-xs font-medium">Selector riêng cho từng URL (tùy chọn)</span>
+                        <span class="label-text text-xs font-medium">{{ __('Selector riêng cho từng URL (tùy chọn)') }}</span>
                     </label>
                     <div class="flex flex-col gap-1 max-h-40 overflow-y-auto border border-base-200 rounded-lg p-2">
                         <template x-for="src in parsedSources().slice(0, maxUrls)" :key="src.url">
                             <div class="flex items-center gap-2">
                                 <span class="text-xs text-base-content/60 truncate flex-1" x-text="src.url" :title="src.url"></span>
-                                <input type="text" x-model="selectorOverrides[src.url]" placeholder="mặc định / tự động"
+                                <input type="text" x-model="selectorOverrides[src.url]" placeholder="{{ __('mặc định / tự động') }}"
                                        class="input input-xs input-bordered w-44 font-mono">
                             </div>
                         </template>
                     </div>
                     <p class="text-xs text-base-content/40 mt-1">
-                        Để trống 1 dòng = dùng selector mặc định bên dưới (hoặc tự động nếu selector mặc định cũng bỏ trống). Mỗi
-                        nguồn thường thuộc domain/bố cục khác nhau nên selector hiếm khi giống nhau giữa các URL.
+                        {{ __('Để trống 1 dòng = dùng selector mặc định bên dưới (hoặc tự động nếu selector mặc định cũng bỏ trống). Mỗi nguồn thường thuộc domain/bố cục khác nhau nên selector hiếm khi giống nhau giữa các URL.') }}
                     </p>
                 </div>
 
                 <div class="flex flex-wrap gap-3 items-end">
                     <div class="form-control flex-1 min-w-72" x-show="mode === 'url'">
-                        <label class="label py-0.5"><span class="label-text text-xs font-medium">Từ khóa nghiên cứu (tùy chọn)</span></label>
-                        <input type="text" x-model="topic" placeholder="VD: ăn dặm cho bé"
+                        <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Từ khóa nghiên cứu (tùy chọn)') }}</span></label>
+                        <input type="text" x-model="topic" placeholder="{{ __('VD: ăn dặm cho bé') }}"
                                class="input input-sm input-bordered w-full">
                     </div>
                     <div class="form-control flex-1 min-w-72">
                         <label class="label py-0.5">
-                            <span class="label-text text-xs font-medium" x-text="mode === 'url' ? 'Selector mặc định (tùy chọn)' : 'Selector vùng nội dung chính (tùy chọn)'"></span>
+                            <span class="label-text text-xs font-medium" x-text="mode === 'url' ? @js(__('Selector mặc định (tùy chọn)')) : @js(__('Selector vùng nội dung chính (tùy chọn)'))"></span>
                         </label>
                         <input type="text" x-model="contentSelector" placeholder=".detail-content, #main-content..."
                                class="input input-sm input-bordered w-full">
                     </div>
                     <div class="form-control min-w-40">
                         <label class="label py-0.5">
-                            <span class="label-text text-xs font-medium">Ngôn ngữ nguồn</span>
+                            <span class="label-text text-xs font-medium">{{ __('Ngôn ngữ nguồn') }}</span>
                         </label>
                         <select x-model="sourceLanguage" class="select select-sm select-bordered w-full">
-                            <option value="vi">Tiếng Việt</option>
-                            <option value="en">Tiếng Anh</option>
-                            <option value="th">Tiếng Thái</option>
-                            <option value="id">Tiếng Indonesia</option>
+                            <option value="vi">{{ __('Tiếng Việt') }}</option>
+                            <option value="en">{{ __('Tiếng Anh') }}</option>
+                            <option value="th">{{ __('Tiếng Thái') }}</option>
+                            <option value="id">{{ __('Tiếng Indonesia') }}</option>
                         </select>
                     </div>
                 </div>
                 <p class="text-xs text-base-content/40 -mt-2">
-                    Chọn tay ngôn ngữ thật của nguồn thay vì để hệ thống tự nhận diện qua <code>&lt;html lang&gt;</code>/ký tự nội dung — cách tự động nhiều khi không chính xác (site khai sai, hoặc không đủ tín hiệu để đối chiếu).
+                    {{ __('Chọn tay ngôn ngữ thật của nguồn thay vì để hệ thống tự nhận diện qua') }} <code>&lt;html lang&gt;</code>{{ __('/ký tự nội dung — cách tự động nhiều khi không chính xác (site khai sai, hoặc không đủ tín hiệu để đối chiếu).') }}
                 </p>
 
                 <details class="rounded-lg border border-base-200 px-3 py-2" x-show="mode === 'url'" open>
                     <summary class="cursor-pointer text-xs font-medium text-base-content/60">
-                        Ngữ cảnh cho người viết (tùy chọn) — giúp AI không trả lời chung chung khi bạn dán JSON vào chat
+                        {{ __('Ngữ cảnh cho người viết (tùy chọn) — giúp AI không trả lời chung chung khi bạn dán JSON vào chat') }}
                     </summary>
 
                     <div class="form-control mt-2">
                         <label class="label py-0.5">
-                            <span class="label-text text-xs font-medium">Chuyên mục (tự nạp Content Foundation đã lưu, nếu có)</span>
+                            <span class="label-text text-xs font-medium">{{ __('Chuyên mục (tự nạp Content Foundation đã lưu, nếu có)') }}</span>
                         </label>
                         <select x-model="selectedCategoryUuid" @change="applyCategoryFoundation()" class="select select-sm select-bordered w-full">
-                            <option value="">— Không chọn —</option>
+                            <option value="">{{ __('— Không chọn —') }}</option>
                             <template x-for="cat in categories" :key="cat.uuid">
                                 <option :value="cat.uuid" x-text="'—'.repeat(cat.depth) + ' ' + cat.name"></option>
                             </template>
                         </select>
-                        <p x-show="selectedCategoryUuid && loadingFoundation" x-cloak class="text-xs text-base-content/40 mt-1">Đang tải ngữ cảnh chuyên mục...</p>
+                        <p x-show="selectedCategoryUuid && loadingFoundation" x-cloak class="text-xs text-base-content/40 mt-1">{{ __('Đang tải ngữ cảnh chuyên mục...') }}</p>
                         <p x-show="!loadingFoundation && selectedFoundationSummary()" x-cloak class="text-xs text-base-content/40 mt-1" x-text="selectedFoundationSummary()"></p>
-                        <p x-show="selectedCategoryUuid && loadingExistingArticles" x-cloak class="text-xs text-base-content/40 mt-1">Đang tải danh sách bài đã có trong chuyên mục...</p>
+                        <p x-show="selectedCategoryUuid && loadingExistingArticles" x-cloak class="text-xs text-base-content/40 mt-1">{{ __('Đang tải danh sách bài đã có trong chuyên mục...') }}</p>
                         <p x-show="selectedCategoryUuid && !loadingExistingArticles && existingArticleTitles.length" x-cloak class="text-xs text-base-content/40 mt-1">
-                            <span x-text="existingArticleTitles.length"></span> bài đã publish trong chuyên mục này sẽ được đưa vào prompt để AI tránh gợi ý trùng.
+                            <span x-text="existingArticleTitles.length"></span> {{ __('bài đã publish trong chuyên mục này sẽ được đưa vào prompt để AI tránh gợi ý trùng.') }}
                         </p>
                     </div>
 
                     <div class="flex flex-wrap gap-3 mt-2">
                         <div class="form-control flex-1 min-w-64">
-                            <label class="label py-0.5"><span class="label-text text-xs font-medium">Đối tượng độc giả</span></label>
-                            <input type="text" x-model="audience" placeholder="VD: mẹ mới sinh con đầu lòng, chưa có kinh nghiệm"
+                            <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Đối tượng độc giả') }}</span></label>
+                            <input type="text" x-model="audience" placeholder="{{ __('VD: mẹ mới sinh con đầu lòng, chưa có kinh nghiệm') }}"
                                    class="input input-sm input-bordered w-full">
                         </div>
                         <div class="form-control flex-1 min-w-64">
-                            <label class="label py-0.5"><span class="label-text text-xs font-medium">Mục tiêu bài viết</span></label>
-                            <input type="text" x-model="goal" placeholder="VD: bài blog 1500 từ, cần góc nhìn khác các nguồn tham khảo"
+                            <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Mục tiêu bài viết') }}</span></label>
+                            <input type="text" x-model="goal" placeholder="{{ __('VD: bài blog 1500 từ, cần góc nhìn khác các nguồn tham khảo') }}"
                                    class="input input-sm input-bordered w-full">
                         </div>
                         <div class="form-control flex-1 min-w-64">
-                            <label class="label py-0.5"><span class="label-text text-xs font-medium">Ràng buộc / không muốn</span></label>
-                            <input type="text" x-model="constraints" placeholder="VD: không viết giọng hàn lâm, không quảng cáo sản phẩm"
+                            <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Ràng buộc / không muốn') }}</span></label>
+                            <input type="text" x-model="constraints" placeholder="{{ __('VD: không viết giọng hàn lâm, không quảng cáo sản phẩm') }}"
                                    class="input input-sm input-bordered w-full">
                         </div>
                     </div>
                     <div class="form-control mt-2">
                         <label class="label py-0.5">
-                            <span class="label-text text-xs font-medium">Đoạn văn mẫu (giọng văn của bạn — ví dụ thật hiệu quả hơn mô tả)</span>
+                            <span class="label-text text-xs font-medium">{{ __('Đoạn văn mẫu (giọng văn của bạn — ví dụ thật hiệu quả hơn mô tả)') }}</span>
                         </label>
-                        <textarea x-model="styleSample" rows="3" placeholder="Dán 1 đoạn bạn từng viết để AI học theo giọng văn thật, thay vì chỉ mô tả bằng lời..."
+                        <textarea x-model="styleSample" rows="3" placeholder="{{ __('Dán 1 đoạn bạn từng viết để AI học theo giọng văn thật, thay vì chỉ mô tả bằng lời...') }}"
                                   class="textarea textarea-bordered textarea-sm w-full text-xs"></textarea>
                     </div>
                 </details>
@@ -154,38 +151,32 @@
                 <label class="label cursor-pointer justify-start gap-2 py-0" x-show="mode === 'url'">
                     <input type="checkbox" x-model="forceRefresh" class="checkbox checkbox-xs">
                     <span class="label-text text-xs text-base-content/60">
-                        Bỏ qua cache, fetch lại từ đầu (HTML mỗi URL được cache {{ (int) (config('core_idea_extractor.cache.fetch_ttl_seconds', 3600) / 60) }} phút — tick nếu nghi ngờ nội dung trang đã đổi hoặc site đã hết bị chặn)
+                        {{ __('Bỏ qua cache, fetch lại từ đầu (HTML mỗi URL được cache :value phút — tick nếu nghi ngờ nội dung trang đã đổi hoặc site đã hết bị chặn)', ['value' => (int) (config('core_idea_extractor.cache.fetch_ttl_seconds', 3600) / 60)]) }}
                     </span>
                 </label>
 
                 <div class="form-control" x-show="mode === 'html'" x-cloak>
-                    <label class="label py-0.5"><span class="label-text text-xs font-medium">Mã HTML</span></label>
+                    <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Mã HTML') }}</span></label>
                     <textarea x-model="html" :required="mode === 'html'" rows="8"
-                              placeholder="Dán mã nguồn trang (View Source / Ctrl+U), hoặc chỉ đoạn HTML trong khối nội dung chính (VD &lt;div class=&quot;post__content&quot;&gt;...&lt;/div&gt;)..."
+                              placeholder="{{ __('Dán mã nguồn trang (View Source / Ctrl+U), hoặc chỉ đoạn HTML trong khối nội dung chính (VD <div class="post__content">...</div>)...') }}"
                               class="textarea textarea-bordered textarea-sm w-full font-mono text-xs"></textarea>
                     <p class="text-xs text-base-content/40 mt-1">
-                        Dùng khi trang chặn crawl tự động (lỗi HTTP 403 — bot protection/WAF). Dán CẢ trang (View Source) để lấy đủ
-                        title/meta/ngôn ngữ; nếu chỉ dán riêng 1 khối nội dung (VD <code>div.post__content</code>) thì vẫn lấy được
-                        <code>main_content</code>/<code>headings</code> bình thường, nhưng title/meta_description/author sẽ trống vì
-                        không có <code>&lt;head&gt;</code> trong đoạn dán.
+                        {{ __('Dùng khi trang chặn crawl tự động (lỗi HTTP 403 — bot protection/WAF). Dán CẢ trang (View Source) để lấy đủ title/meta/ngôn ngữ; nếu chỉ dán riêng 1 khối nội dung (VD') }} <code>div.post__content</code>{{ __(') thì vẫn lấy được') }}
+                        <code>main_content</code>/<code>headings</code> {{ __('bình thường, nhưng title/meta_description/author sẽ trống vì không có') }} <code>&lt;head&gt;</code> {{ __('trong đoạn dán.') }}
                     </p>
                 </div>
 
                 <div>
                     <button type="submit" class="btn btn-primary btn-sm gap-1.5" :disabled="loading">
-                        <span x-show="!loading">Trích xuất</span>
-                        <span x-show="loading" x-cloak>Đang xử lý...</span>
+                        <span x-show="!loading">{{ __('Trích xuất') }}</span>
+                        <span x-show="loading" x-cloak>{{ __('Đang xử lý...') }}</span>
                     </button>
                 </div>
             </form>
             <p class="text-xs text-base-content/40 mt-2" x-show="mode === 'url'">
-                Chỉ định id hoặc class của khối chứa nội dung chính (VD <code>.detail-content</code>, <code>#main-content</code>,
-                <code>div.article-body</code>) để lấy <code>main_content</code> chính xác hơn thuật toán tự động. Có thể ghép
-                nhiều class/id liền nhau (không dấu cách) để khớp ĐÚNG 1 khối có ĐỦ tất cả class đó — VD
-                <code>.col-md-12.content-full</code> cho <code>&lt;div class="col-md-12 content-full"&gt;</code>, hữu ích khi 1
-                class riêng lẻ (VD chỉ <code>.content-full</code>) khớp nhầm cả khối khác trên trang (VD sidebar cũng gắn class
-                đó). Có thể liệt kê nhiều selector khác nhau, phân tách bởi dấu phẩy — hệ thống thử lần lượt, dùng selector đầu
-                tiên khớp. Bỏ trống để dùng thuật toán tự động nhận diện.
+                {{ __('Chỉ định id hoặc class của khối chứa nội dung chính (VD') }} <code>.detail-content</code>, <code>#main-content</code>,
+                <code>div.article-body</code>{{ __(') để lấy') }} <code>main_content</code> {{ __('chính xác hơn thuật toán tự động. Có thể ghép nhiều class/id liền nhau (không dấu cách) để khớp ĐÚNG 1 khối có ĐỦ tất cả class đó — VD') }}
+                <code>.col-md-12.content-full</code> cho <code>&lt;div class="col-md-12 content-full"&gt;</code>{{ __(', hữu ích khi 1 class riêng lẻ (VD chỉ') }} <code>.content-full</code>{{ __(') khớp nhầm cả khối khác trên trang (VD sidebar cũng gắn class đó). Có thể liệt kê nhiều selector khác nhau, phân tách bởi dấu phẩy — hệ thống thử lần lượt, dùng selector đầu tiên khớp. Bỏ trống để dùng thuật toán tự động nhận diện.') }}
             </p>
             <p x-show="errorMessage" x-cloak class="text-error text-sm mt-2" x-text="errorMessage"></p>
         </div>
@@ -196,7 +187,7 @@
             <div class="flex items-center justify-between gap-3 mb-3 flex-wrap">
                 <template x-if="!isBatchResult()">
                     <div class="flex items-center gap-2">
-                        <span class="text-sm font-medium">Độ tin cậy:</span>
+                        <span class="text-sm font-medium">{{ __('Độ tin cậy:') }}</span>
                         <span class="badge badge-sm" :class="confidenceBadgeClass()" x-text="confidenceLabel()"></span>
                     </div>
                 </template>
@@ -213,34 +204,34 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-6l-4 4v-4z"/>
                         </svg>
-                        <span x-text="copiedPrompt ? 'Đã copy!' : 'Copy prompt cho AI'"></span>
+                        <span x-text="copiedPrompt ? @js(__('Đã copy!')) : 'Copy prompt cho AI'"></span>
                     </button>
                     <button type="button" class="btn btn-ghost btn-xs gap-1.5" @click="copyJson()">
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                         </svg>
-                        <span x-text="copied ? 'Đã copy!' : 'Copy JSON'"></span>
+                        <span x-text="copied ? @js(__('Đã copy!')) : 'Copy JSON'"></span>
                     </button>
                     <button type="button" class="btn btn-primary btn-xs gap-1.5"
                             :disabled="layer2Loading || (!isBatchResult() && result?.extraction_confidence === 'low')"
-                            :title="(!isBatchResult() && result?.extraction_confidence === 'low') ? 'Độ tin cậy trích xuất thấp — Layer 2 không chạy (xem spec §4)' : ''"
+                            :title="(!isBatchResult() && result?.extraction_confidence === 'low') ? @js(__('Độ tin cậy trích xuất thấp — Layer 2 không chạy (xem spec §4)')) : ''"
                             @click="runLayer2()">
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M13 10V3L4 14h7v7l9-11h-7z"/>
                         </svg>
-                        <span x-show="!layer2Loading">Chạy Layer 2 bằng AI</span>
-                        <span x-show="layer2Loading" x-cloak>Đang gọi AI (có thể mất tới 30 giây)...</span>
+                        <span x-show="!layer2Loading">{{ __('Chạy Layer 2 bằng AI') }}</span>
+                        <span x-show="layer2Loading" x-cloak>{{ __('Đang gọi AI (có thể mất tới 30 giây)...') }}</span>
                     </button>
 
                     <template x-if="singleSourceContext() !== null">
-                        <button type="button" class="btn btn-ghost btn-xs" title="Copy prompt tóm tắt cho AI" @click="copySummarizePrompt()">
+                        <button type="button" class="btn btn-ghost btn-xs" title="{{ __('Copy prompt tóm tắt cho AI') }}" @click="copySummarizePrompt()">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                             </svg>
-                            <span x-show="copiedSummarizePrompt" x-cloak>Đã copy!</span>
+                            <span x-show="copiedSummarizePrompt" x-cloak>{{ __('Đã copy!') }}</span>
                         </button>
                     </template>
 
@@ -250,18 +241,18 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M4 6h16M4 12h10M4 18h6"/>
                             </svg>
-                            <span x-show="!summarizeLoading">Chạy tóm tắt bằng AI</span>
-                            <span x-show="summarizeLoading" x-cloak>Đang gọi AI...</span>
+                            <span x-show="!summarizeLoading">{{ __('Chạy tóm tắt bằng AI') }}</span>
+                            <span x-show="summarizeLoading" x-cloak>{{ __('Đang gọi AI...') }}</span>
                         </button>
                     </template>
 
                     <template x-if="singleSourceContext() !== null">
-                        <button type="button" class="btn btn-ghost btn-xs" title="Copy prompt tái cấu trúc cho AI" @click="copyRewritePrompt()">
+                        <button type="button" class="btn btn-ghost btn-xs" title="{{ __('Copy prompt tái cấu trúc cho AI') }}" @click="copyRewritePrompt()">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                             </svg>
-                            <span x-show="copiedRewritePrompt" x-cloak>Đã copy!</span>
+                            <span x-show="copiedRewritePrompt" x-cloak>{{ __('Đã copy!') }}</span>
                         </button>
                     </template>
 
@@ -271,8 +262,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                             </svg>
-                            <span x-show="!rewriteLoading">Chạy tái cấu trúc bằng AI</span>
-                            <span x-show="rewriteLoading" x-cloak>Đang gọi AI...</span>
+                            <span x-show="!rewriteLoading">{{ __('Chạy tái cấu trúc bằng AI') }}</span>
+                            <span x-show="rewriteLoading" x-cloak>{{ __('Đang gọi AI...') }}</span>
                         </button>
                     </template>
                 </div>
@@ -282,9 +273,9 @@
 
             <div x-show="layer2Result" x-cloak class="mb-4">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-medium">Kết quả Layer 2 (AI)</span>
+                    <span class="text-sm font-medium">{{ __('Kết quả Layer 2 (AI)') }}</span>
                     <span class="text-xs text-base-content/40" x-show="layer2Result">
-                        Model: <span x-text="layer2Result?.model_used"></span> — Chi phí: $<span x-text="layer2Result?.cost_usd?.toFixed(4)"></span>
+                        Model: <span x-text="layer2Result?.model_used"></span> {{ __('— Chi phí: $') }}<span x-text="layer2Result?.cost_usd?.toFixed(4)"></span>
                     </span>
                 </div>
                 <div class="bg-base-200 rounded-lg p-4 max-h-[70vh] overflow-y-auto" x-html="renderMarkdown(layer2Result?.markdown_output)"></div>
@@ -294,9 +285,9 @@
 
             <div x-show="summarizeResult" x-cloak class="mb-4">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-medium">Kết quả tóm tắt (AI)</span>
+                    <span class="text-sm font-medium">{{ __('Kết quả tóm tắt (AI)') }}</span>
                     <span class="text-xs text-base-content/40" x-show="summarizeResult">
-                        Model: <span x-text="summarizeResult?.model_used"></span> — Chi phí: $<span x-text="summarizeResult?.cost_usd?.toFixed(4)"></span>
+                        Model: <span x-text="summarizeResult?.model_used"></span> {{ __('— Chi phí: $') }}<span x-text="summarizeResult?.cost_usd?.toFixed(4)"></span>
                     </span>
                 </div>
                 <div class="bg-base-200 rounded-lg p-4 max-h-[50vh] overflow-y-auto" x-html="renderMarkdown(summarizeResult?.markdown_output)"></div>
@@ -306,9 +297,9 @@
 
             <div x-show="rewriteResult" x-cloak class="mb-4">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-medium">Kết quả tái cấu trúc (AI)</span>
+                    <span class="text-sm font-medium">{{ __('Kết quả tái cấu trúc (AI)') }}</span>
                     <span class="text-xs text-base-content/40" x-show="rewriteResult">
-                        Model: <span x-text="rewriteResult?.model_used"></span> — Chi phí: $<span x-text="rewriteResult?.cost_usd?.toFixed(4)"></span>
+                        Model: <span x-text="rewriteResult?.model_used"></span> {{ __('— Chi phí: $') }}<span x-text="rewriteResult?.cost_usd?.toFixed(4)"></span>
                     </span>
                 </div>
                 <div class="bg-base-200 rounded-lg p-4 max-h-[50vh] overflow-y-auto" x-html="renderMarkdown(rewriteResult?.markdown_output)"></div>
@@ -321,7 +312,7 @@
                               :title="source.duplicate_of ? `Trùng nội dung với: ${source.duplicate_of}` : source.url">
                             <span x-text="source.domain"></span>
                             <span x-show="source.status !== 'success'" x-text="`(${source.failure_type ?? source.status})`"></span>
-                            <span x-show="source.duplicate_of" x-cloak class="opacity-70">(trùng)</span>
+                            <span x-show="source.duplicate_of" x-cloak class="opacity-70">{{ __('(trùng)') }}</span>
                         </span>
                     </template>
                 </div>

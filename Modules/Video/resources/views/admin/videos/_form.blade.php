@@ -13,7 +13,7 @@
                     <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                     </svg>
-                    Thông tin video
+                    {{ __('Thông tin video') }}
                 </h2>
 
                 <div class="space-y-4">
@@ -21,8 +21,8 @@
                     @if($video)
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Ảnh đại diện hiện tại</span>
-                            <span class="label-text-alt text-xs text-base-content/40">Tự lấy từ YouTube</span>
+                            <span class="label-text font-medium">{{ __('Ảnh đại diện hiện tại') }}</span>
+                            <span class="label-text-alt text-xs text-base-content/40">{{ __('Tự lấy từ YouTube') }}</span>
                         </label>
                         {{-- Bắt đầu bằng bản an toàn (hqdefault), JS tự nâng lên Full HD nếu video có bản HD thật — xem window.videoUpgradeThumbnails trong video.js. --}}
                         <img src="{{ $video->thumbnail_url }}" data-thumb-hd="{{ $video->thumbnail_hd_url }}"
@@ -34,7 +34,7 @@
 
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Tên <span class="text-error">*</span></span>
+                            <span class="label-text font-medium">{{ __('Tên') }} <span class="text-error">*</span></span>
                         </label>
                         <input type="text" name="name" value="{{ old('name', $video?->name) }}"
                                class="input input-bordered input-sm w-full @error('name') input-error @enderror"
@@ -44,7 +44,7 @@
 
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Mô tả</span>
+                            <span class="label-text font-medium">{{ __('Mô tả') }}</span>
                         </label>
                         <textarea name="description" rows="3" maxlength="2000"
                                   class="textarea textarea-bordered textarea-sm w-full @error('description') textarea-error @enderror"
@@ -57,7 +57,7 @@
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
                             <span class="label-text font-medium">Link URL Video</span>
-                            <span class="label-text-alt text-xs text-base-content/40">Chỉ cần điền 1 trong 2 ô bên dưới</span>
+                            <span class="label-text-alt text-xs text-base-content/40">{{ __('Chỉ cần điền 1 trong 2 ô bên dưới') }}</span>
                         </label>
                         <input type="text" name="video_url" value="{{ old('video_url', $video?->video_url) }}"
                                class="input input-bordered input-sm w-full @error('video_url') input-error @enderror"
@@ -67,15 +67,15 @@
 
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Mã Embed video YouTube</span>
+                            <span class="label-text font-medium">{{ __('Mã Embed video YouTube') }}</span>
                         </label>
                         <textarea name="embed_code" rows="3" maxlength="2000"
                                   class="textarea textarea-bordered textarea-sm w-full font-mono text-xs @error('embed_code') textarea-error @enderror"
-                                  placeholder="Dán URL video hoặc mã nhúng (Share &rarr; Embed) từ YouTube"
+                                  placeholder="{{ __('Dán URL video hoặc mã nhúng (Share → Embed) từ YouTube') }}"
                         >{{ old('embed_code', $video?->embed_code) }}</textarea>
                         @error('embed_code')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                         <p class="text-xs text-base-content/40 mt-1.5">
-                            Hệ thống tự nhận diện video từ URL hoặc mã nhúng — không cần tự cắt lấy ID.
+                            {{ __('Hệ thống tự nhận diện video từ URL hoặc mã nhúng — không cần tự cắt lấy ID.') }}
                         </p>
                     </div>
 
@@ -83,7 +83,7 @@
 
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Thứ tự hiển thị</span>
+                            <span class="label-text font-medium">{{ __('Thứ tự hiển thị') }}</span>
                         </label>
                         <input type="number" name="sort_order" min="0"
                                value="{{ old('sort_order', $video?->sort_order ?? 0) }}"
@@ -97,8 +97,8 @@
                                class="checkbox checkbox-sm checkbox-primary mt-0.5 shrink-0"
                                {{ old('is_active', $video?->is_active ?? true) ? 'checked' : '' }}>
                         <div>
-                            <span class="text-sm font-medium group-hover:text-primary transition-colors">Hiển thị video</span>
-                            <p class="text-xs text-base-content/50 mt-0.5">Tắt để tạm ẩn khỏi trang công khai, không cần xoá</p>
+                            <span class="text-sm font-medium group-hover:text-primary transition-colors">{{ __('Hiển thị video') }}</span>
+                            <p class="text-xs text-base-content/50 mt-0.5">{{ __('Tắt để tạm ẩn khỏi trang công khai, không cần xoá') }}</p>
                         </div>
                     </label>
 
@@ -113,21 +113,21 @@
             <div class="card-body p-3">
 
                 <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">
-                    Xuất bản
+                    {{ __('Xuất bản') }}
                 </p>
 
                 <div class="flex gap-2">
-                    <a href="{{ route('backend.video.items.index') }}" class="btn btn-ghost btn-sm flex-1">Hủy</a>
+                    <a href="{{ route('backend.video.items.index') }}" class="btn btn-ghost btn-sm flex-1">{{ __('Hủy') }}</a>
                     <button type="submit" class="btn btn-primary btn-sm flex-1 gap-1.5">
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
-                        {{ $video ? 'Lưu thay đổi' : 'Tạo mới' }}
+                        {{ $video ? __('Lưu thay đổi') : __('Tạo mới') }}
                     </button>
                 </div>
 
                 <p class="text-center text-xs text-base-content/30 mt-2.5">
-                    <span class="text-error">*</span> là trường bắt buộc
+                    <span class="text-error">*</span> {{ __('là trường bắt buộc') }}
                 </p>
 
             </div>

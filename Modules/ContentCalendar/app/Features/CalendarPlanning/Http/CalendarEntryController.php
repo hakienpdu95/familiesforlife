@@ -98,7 +98,7 @@ class CalendarEntryController extends Controller
         $validated = $request->validate([
             'status' => ['required', 'string'],
         ], [
-            'status.required' => 'Vui lòng chọn trạng thái cần chuyển sang.',
+            'status.required' => __('Vui lòng chọn trạng thái cần chuyển sang.'),
         ]);
 
         $target = CalendarEntryStatus::from($validated['status']);
@@ -115,9 +115,9 @@ class CalendarEntryController extends Controller
         $validated = $request->validate([
             'article_uuid' => ['required', 'string', 'uuid', 'exists:post_articles,uuid'],
         ], [
-            'article_uuid.required' => 'Vui lòng dán UUID bài viết cần gắn.',
-            'article_uuid.uuid' => 'UUID không đúng định dạng.',
-            'article_uuid.exists' => 'Không tìm thấy bài viết với UUID này.',
+            'article_uuid.required' => __('Vui lòng dán UUID bài viết cần gắn.'),
+            'article_uuid.uuid' => __('UUID không đúng định dạng.'),
+            'article_uuid.exists' => __('Không tìm thấy bài viết với UUID này.'),
         ]);
 
         $article = PostArticle::where('uuid', $validated['article_uuid'])->firstOrFail();
@@ -185,18 +185,18 @@ class CalendarEntryController extends Controller
             'assigned_to' => ['nullable', 'integer', 'exists:users,id'],
             'funnel_stage' => ['nullable', 'string', 'in:'.implode(',', array_column(FunnelStage::cases(), 'value'))],
         ], [
-            'post_category_id.required' => 'Vui lòng chọn category.',
-            'post_category_id.exists' => 'Category được chọn không hợp lệ.',
-            'title.required' => 'Vui lòng nhập tiêu đề.',
-            'title.max' => 'Tiêu đề không được vượt quá :max ký tự.',
-            'brief.max' => 'Tóm tắt không được vượt quá :max ký tự.',
-            'origin.required' => 'Vui lòng chọn nguồn gốc ý tưởng.',
-            'origin.in' => 'Nguồn gốc ý tưởng không hợp lệ.',
-            'origin_note.required_unless' => 'Vui lòng ghi chú ý tưởng gốc khi nguồn gốc khác "Thủ công".',
-            'origin_note.max' => 'Ghi chú không được vượt quá :max ký tự.',
-            'target_publish_date.date' => 'Ngày dự kiến đăng không đúng định dạng.',
-            'assigned_to.exists' => 'Người phụ trách được chọn không hợp lệ.',
-            'funnel_stage.in' => 'Giai đoạn hành trình không hợp lệ.',
+            'post_category_id.required' => __('Vui lòng chọn category.'),
+            'post_category_id.exists' => __('Category được chọn không hợp lệ.'),
+            'title.required' => __('Vui lòng nhập tiêu đề.'),
+            'title.max' => __('Tiêu đề không được vượt quá :max ký tự.'),
+            'brief.max' => __('Tóm tắt không được vượt quá :max ký tự.'),
+            'origin.required' => __('Vui lòng chọn nguồn gốc ý tưởng.'),
+            'origin.in' => __('Nguồn gốc ý tưởng không hợp lệ.'),
+            'origin_note.required_unless' => __('Vui lòng ghi chú ý tưởng gốc khi nguồn gốc khác "Thủ công".'),
+            'origin_note.max' => __('Ghi chú không được vượt quá :max ký tự.'),
+            'target_publish_date.date' => __('Ngày dự kiến đăng không đúng định dạng.'),
+            'assigned_to.exists' => __('Người phụ trách được chọn không hợp lệ.'),
+            'funnel_stage.in' => __('Giai đoạn hành trình không hợp lệ.'),
         ]);
     }
 

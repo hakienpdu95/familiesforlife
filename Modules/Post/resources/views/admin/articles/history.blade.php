@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', 'Lịch sử phiên bản')
+@section('title', __('Lịch sử phiên bản'))
 
 @section('content')
 @php
@@ -35,7 +35,7 @@ function postVersionHistoryPage(indexUrl, translationStatus, canRestore, editUrl
             this.error = null;
             try {
                 const res = await fetch(this.indexUrl);
-                if (! res.ok) throw new Error('Không tải được lịch sử phiên bản.');
+                if (! res.ok) throw new Error(@js(__('Không tải được lịch sử phiên bản.')));
                 const json = await res.json();
                 this.versions = json.data;
                 this.meta = json.meta;
@@ -69,7 +69,7 @@ function postVersionHistoryPage(indexUrl, translationStatus, canRestore, editUrl
             this.error = null;
             try {
                 const res = await fetch(`${this.indexUrl}/${id}`);
-                if (! res.ok) throw new Error('Không tải được bản xem trước.');
+                if (! res.ok) throw new Error(@js(__('Không tải được bản xem trước.')));
                 this.previewData = await res.json();
             } catch (e) {
                 this.error = e.message;
@@ -109,7 +109,7 @@ function postVersionHistoryPage(indexUrl, translationStatus, canRestore, editUrl
             this.error = null;
             try {
                 const res = await fetch(`${this.indexUrl}/compare?from=${from.id}&to=${to.id}`);
-                if (! res.ok) throw new Error('Không so sánh được 2 phiên bản này.');
+                if (! res.ok) throw new Error(@js(__('Không so sánh được 2 phiên bản này.')));
                 this.compareData = await res.json();
             } catch (e) {
                 this.error = e.message;
@@ -145,7 +145,7 @@ function postVersionHistoryPage(indexUrl, translationStatus, canRestore, editUrl
                 });
                 const json = await res.json();
                 if (! res.ok) {
-                    this.error = json.message ?? 'Khôi phục thất bại.';
+                    this.error = json.message ?? @js(__('Khôi phục thất bại.'));
                     return;
                 }
                 this.showRestoreConfirm = false;
@@ -164,7 +164,7 @@ function postVersionHistoryPage(indexUrl, translationStatus, canRestore, editUrl
 <div class="flex items-center justify-between mb-4">
     <div>
         <h1 class="text-2xl font-bold text-base-content"
-            x-text="view === 'list' ? 'Lịch sử phiên bản' : (view === 'preview' ? 'Xem phiên bản' : 'So sánh phiên bản')">Lịch sử phiên bản</h1>
+            x-text="view === 'list' ? @js(__('Lịch sử phiên bản')) : (view === 'preview' ? @js(__('Xem phiên bản')) : @js(__('So sánh phiên bản')))">{{ __('Lịch sử phiên bản') }}</h1>
         <p class="text-sm text-base-content/50 mt-0.5">
             {{ $translation->title }} · {{ config('post.locales')[$translation->locale] ?? $translation->locale }}
             <span class="badge badge-sm {{ $translation->status->badgeClass() }} ml-1">{{ $translation->status->label() }}</span>
@@ -174,7 +174,7 @@ function postVersionHistoryPage(indexUrl, translationStatus, canRestore, editUrl
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
         </svg>
-        Quay lại bài viết
+        {{ __('Quay lại bài viết') }}
     </a>
 </div>
 
@@ -186,9 +186,9 @@ function postVersionHistoryPage(indexUrl, translationStatus, canRestore, editUrl
         {{-- List --}}
         <div x-show="view === 'list' && !loading" x-cloak>
             <div class="flex items-center justify-between mb-2">
-                <p class="text-xs text-base-content/50">Tick chọn đúng 2 phiên bản để so sánh.</p>
+                <p class="text-xs text-base-content/50">{{ __('Tick chọn đúng 2 phiên bản để so sánh.') }}</p>
                 <button type="button" class="btn btn-primary btn-xs" :disabled="selected.length !== 2" @click="compareSelected()">
-                    So sánh (<span x-text="selected.length"></span>/2)
+                    {{ __('So sánh (') }}<span x-text="selected.length"></span>/2)
                 </button>
             </div>
             <div class="overflow-x-auto">
@@ -197,11 +197,11 @@ function postVersionHistoryPage(indexUrl, translationStatus, canRestore, editUrl
                         <tr>
                             <th class="w-8"></th>
                             <th>#</th>
-                            <th>Trạng thái</th>
-                            <th>Người sửa</th>
-                            <th>Thời gian</th>
+                            <th>{{ __('Trạng thái') }}</th>
+                            <th>{{ __('Người sửa') }}</th>
+                            <th>{{ __('Thời gian') }}</th>
                             <th>+/-</th>
-                            <th class="text-right">Hành động</th>
+                            <th class="text-right">{{ __('Hành động') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -222,7 +222,7 @@ function postVersionHistoryPage(indexUrl, translationStatus, canRestore, editUrl
                                         <span class="badge badge-ghost badge-xs ml-1">← #<span x-text="version.restored_from_version_number"></span></span>
                                     </template>
                                 </td>
-                                <td class="text-xs" x-text="version.created_by?.name ?? 'Hệ thống'"></td>
+                                <td class="text-xs" x-text="version.created_by?.name ?? @js(__('Hệ thống'))"></td>
                                 <td class="text-xs text-base-content/50" x-text="version.created_at_human"></td>
                                 <td class="text-xs">
                                     <span :class="version.char_delta > 0 ? 'text-success' : (version.char_delta < 0 ? 'text-error' : 'text-base-content/40')"
@@ -230,15 +230,15 @@ function postVersionHistoryPage(indexUrl, translationStatus, canRestore, editUrl
                                 </td>
                                 <td class="text-right whitespace-nowrap">
                                     <button type="button" class="btn btn-ghost btn-xs" @click="viewVersion(version)">Xem</button>
-                                    <button type="button" class="btn btn-ghost btn-xs" @click="viewPreview(version.id)" title="Xem nguyên văn phiên bản này, không so sánh">Nội dung gốc</button>
+                                    <button type="button" class="btn btn-ghost btn-xs" @click="viewPreview(version.id)" title="{{ __('Xem nguyên văn phiên bản này, không so sánh') }}">{{ __('Nội dung gốc') }}</button>
                                     <template x-if="!isLatest(version) && canRestore">
-                                        <button type="button" class="btn btn-warning btn-xs" @click="confirmRestore(version)">Khôi phục</button>
+                                        <button type="button" class="btn btn-warning btn-xs" @click="confirmRestore(version)">{{ __('Khôi phục') }}</button>
                                     </template>
                                 </td>
                             </tr>
                         </template>
                         <tr x-show="versions.length === 0">
-                            <td colspan="7" class="text-center text-xs text-base-content/40 py-4">Chưa có lịch sử phiên bản nào.</td>
+                            <td colspan="7" class="text-center text-xs text-base-content/40 py-4">{{ __('Chưa có lịch sử phiên bản nào.') }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -247,22 +247,22 @@ function postVersionHistoryPage(indexUrl, translationStatus, canRestore, editUrl
 
         {{-- Preview --}}
         <div x-show="view === 'preview' && !loading" x-cloak>
-            <button type="button" class="btn btn-ghost btn-xs mb-3" @click="backToList()">← Quay lại danh sách</button>
+            <button type="button" class="btn btn-ghost btn-xs mb-3" @click="backToList()">{{ __('← Quay lại danh sách') }}</button>
             <template x-if="previewData">
                 <div>
                     <div class="mb-2 text-xs text-base-content/50">
-                        Phiên bản #<span x-text="previewData.version.version_number"></span> —
-                        <span x-text="previewData.version.created_by?.name ?? 'Hệ thống'"></span>
+                        {{ __('Phiên bản #') }}<span x-text="previewData.version.version_number"></span> —
+                        <span x-text="previewData.version.created_by?.name ?? @js(__('Hệ thống'))"></span>
                     </div>
                     <template x-if="previewData.missing_products.length > 0">
                         <div class="alert alert-warning text-xs py-2 px-3 mb-3">
-                            <span x-text="previewData.missing_products.length + ' sản phẩm trong bản này đã bị xoá khỏi hệ thống, hiển thị tạm bằng dữ liệu đã lưu tại thời điểm đó.'"></span>
+                            <span x-text="previewData.missing_products.length + (' ' + @js(__('sản phẩm trong bản này đã bị xoá khỏi hệ thống, hiển thị tạm bằng dữ liệu đã lưu tại thời điểm đó.')))"></span>
                         </div>
                     </template>
                     <h4 class="font-semibold mb-2" x-text="previewData.translation_snapshot.title"></h4>
                     <div class="prose prose-sm max-w-none border border-base-200 rounded-lg p-4 " x-html="previewData.rendered_html"></div>
                     <div class="flex justify-end mt-3" x-show="canRestore">
-                        <button type="button" class="btn btn-warning btn-sm" @click="confirmRestore(previewData.version)">Khôi phục phiên bản này</button>
+                        <button type="button" class="btn btn-warning btn-sm" @click="confirmRestore(previewData.version)">{{ __('Khôi phục phiên bản này') }}</button>
                     </div>
                 </div>
             </template>
@@ -270,28 +270,28 @@ function postVersionHistoryPage(indexUrl, translationStatus, canRestore, editUrl
 
         {{-- Compare --}}
         <div x-show="view === 'compare' && !loading" x-cloak>
-            <button type="button" class="btn btn-ghost btn-xs mb-3" @click="backToList()">← Quay lại danh sách</button>
+            <button type="button" class="btn btn-ghost btn-xs mb-3" @click="backToList()">{{ __('← Quay lại danh sách') }}</button>
             <template x-if="compareData">
                 <div>
                     <p class="text-xs text-base-content/50 mb-2">
-                        So sánh #<span x-text="compareData.from.version_number"></span> → #<span x-text="compareData.to.version_number"></span>
+                        {{ __('So sánh #') }}<span x-text="compareData.from.version_number"></span> → #<span x-text="compareData.to.version_number"></span>
                     </p>
 
                     <template x-if="compareData.field_changes.length > 0">
                         <table class="table table-sm mb-4">
-                            <thead><tr><th>Trường</th><th>Trước</th><th>Sau</th></tr></thead>
+                            <thead><tr><th>{{ __('Trường') }}</th><th>{{ __('Trước') }}</th><th>Sau</th></tr></thead>
                             <tbody>
                                 <template x-for="fc in compareData.field_changes" :key="fc.field">
                                     <tr>
                                         <td class="font-medium text-xs" x-text="fc.field"></td>
-                                        <td class="text-xs text-error/80" x-text="fc.before || '(trống)'"></td>
-                                        <td class="text-xs text-success/80" x-text="fc.after || '(trống)'"></td>
+                                        <td class="text-xs text-error/80" x-text="fc.before || @js(__('(trống)'))"></td>
+                                        <td class="text-xs text-success/80" x-text="fc.after || @js(__('(trống)'))"></td>
                                     </tr>
                                 </template>
                             </tbody>
                         </table>
                     </template>
-                    <p x-show="compareData.field_changes.length === 0" class="text-xs text-base-content/40 mb-4">Không có trường nào thay đổi.</p>
+                    <p x-show="compareData.field_changes.length === 0" class="text-xs text-base-content/40 mb-4">{{ __('Không có trường nào thay đổi.') }}</p>
 
                     <div class="space-y-2">
                         <template x-for="bc in compareData.block_changes" :key="bc.index">
@@ -304,7 +304,7 @@ function postVersionHistoryPage(indexUrl, translationStatus, canRestore, editUrl
                                  }">
                                 <div class="flex items-center gap-2 mb-1">
                                     <span class="badge badge-xs" x-text="bc.status"></span>
-                                    <span class="text-base-content/50">Khối #<span x-text="bc.index + 1"></span> (<span x-text="bc.type"></span>)</span>
+                                    <span class="text-base-content/50">{{ __('Khối #') }}<span x-text="bc.index + 1"></span> (<span x-text="bc.type"></span>)</span>
                                 </div>
                                 <template x-if="bc.type === 'text' && bc.status === 'changed' && bc.diff_html">
                                     <div x-html="bc.diff_html"></div>
@@ -327,10 +327,10 @@ function postVersionHistoryPage(indexUrl, translationStatus, canRestore, editUrl
                                 <template x-if="bc.type === 'product'">
                                     <div>
                                         <span x-show="bc.product_ids_added && bc.product_ids_added.length" class="text-success">
-                                            + thêm sản phẩm #<span x-text="(bc.product_ids_added || []).join(', #')"></span>
+                                            {{ __('+ thêm sản phẩm #') }}<span x-text="(bc.product_ids_added || []).join(', #')"></span>
                                         </span>
                                         <span x-show="bc.product_ids_removed && bc.product_ids_removed.length" class="text-error ml-2">
-                                            - bớt sản phẩm #<span x-text="(bc.product_ids_removed || []).join(', #')"></span>
+                                            {{ __('- bớt sản phẩm #') }}<span x-text="(bc.product_ids_removed || []).join(', #')"></span>
                                         </span>
                                     </div>
                                 </template>
@@ -346,17 +346,17 @@ function postVersionHistoryPage(indexUrl, translationStatus, canRestore, editUrl
 {{-- ── Modal: Xác nhận khôi phục ───────────────────────────────────────── --}}
 <div class="modal" :class="showRestoreConfirm ? 'modal-open' : ''">
     <div class="modal-box max-w-md">
-        <h3 class="font-bold text-lg text-warning">Xác nhận khôi phục</h3>
+        <h3 class="font-bold text-lg text-warning">{{ __('Xác nhận khôi phục') }}</h3>
         <div class="py-3 text-sm" x-show="restoreTarget">
-            <p>Khôi phục nội dung từ phiên bản #<span x-text="restoreTarget?.version_number"></span>?</p>
+            <p>{{ __('Khôi phục nội dung từ phiên bản #') }}<span x-text="restoreTarget?.version_number"></span>?</p>
             <template x-if="translationStatus === 'published'">
-                <p class="mt-2 text-error font-medium">Bài viết đang XUẤT BẢN — nội dung công khai sẽ thay đổi NGAY LẬP TỨC.</p>
+                <p class="mt-2 text-error font-medium">{{ __('Bài viết đang XUẤT BẢN — nội dung công khai sẽ thay đổi NGAY LẬP TỨC.') }}</p>
             </template>
-            <p class="mt-2 text-base-content/60 text-xs">Nội dung hiện tại vẫn được giữ lại trong lịch sử (không mất dữ liệu), và trạng thái xuất bản không bị thay đổi.</p>
+            <p class="mt-2 text-base-content/60 text-xs">{{ __('Nội dung hiện tại vẫn được giữ lại trong lịch sử (không mất dữ liệu), và trạng thái xuất bản không bị thay đổi.') }}</p>
         </div>
         <div class="modal-action">
-            <button type="button" class="btn btn-ghost btn-sm" @click="showRestoreConfirm = false">Huỷ</button>
-            <button type="button" class="btn btn-warning btn-sm" @click="doRestore()">Xác nhận khôi phục</button>
+            <button type="button" class="btn btn-ghost btn-sm" @click="showRestoreConfirm = false">{{ __('Huỷ') }}</button>
+            <button type="button" class="btn btn-warning btn-sm" @click="doRestore()">{{ __('Xác nhận khôi phục') }}</button>
         </div>
     </div>
 </div>

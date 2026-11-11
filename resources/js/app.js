@@ -199,7 +199,7 @@ document.addEventListener('alpine:init', () => {
                             title:    n.title    ?? '',
                             url:      n.url      ?? '',
                             icon:     n.icon     ?? 'bell',
-                            time_ago: 'Vừa xong',
+                            time_ago: t('Vừa xong'),
                         });
                     }
                 });
@@ -220,7 +220,7 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('confirmDelete', (options = {}) => ({
         open: false,
         targetUrl: '',
-        message: options.message ?? 'Bạn có chắc muốn xoá mục này?',
+        message: options.message ?? t('Bạn có chắc muốn xoá mục này?'),
         show(url) { this.targetUrl = url; this.open = true; },
         hide() { this.open = false; this.targetUrl = ''; },
         confirm() {
@@ -284,6 +284,7 @@ import './modules/form-validation.js';
  *   x-data="{ ...aiTask({...}), extraMethod() { ... } }"
  */
 import { aiTask } from './components/aiTask.js';
+import { t } from './shared/i18n.js';
 window.aiTask = aiTask;
 
 document.addEventListener('DOMContentLoaded', () => {

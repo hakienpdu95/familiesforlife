@@ -29,12 +29,12 @@
             @endif
         </div>
         <div class="flex items-center gap-2">
-            <a href="{{ route('backend.aivideostudiotemplate.edit', $project) }}" class="btn btn-ghost btn-sm">Sửa project</a>
+            <a href="{{ route('backend.aivideostudiotemplate.edit', $project) }}" class="btn btn-ghost btn-sm">{{ __('Sửa project') }}</a>
             <a href="{{ route('backend.aivideostudiotemplate.index') }}" class="btn btn-ghost btn-sm gap-1.5">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
-                Quay lại
+                {{ __('Quay lại') }}
             </a>
         </div>
     </div>
@@ -49,44 +49,44 @@
     @if($project->objective || $project->target_audience || $project->video_type || $project->video_formula || $project->core_message || $project->aspect_ratio || $project->resolution)
     <div id="step-1" class="card bg-base-100 shadow-sm border border-base-200 mb-5 scroll-mt-4">
         <div class="card-body">
-            <h2 class="card-title text-base"><span class="badge badge-primary badge-sm">1</span> Mục tiêu &amp; Định dạng</h2>
+            <h2 class="card-title text-base"><span class="badge badge-primary badge-sm">1</span> {{ __('Mục tiêu') }} &amp; {{ __('Định dạng') }}</h2>
             {{-- v1.7 — phân biệt rõ với Anchoring bên dưới: nhóm này được ghi vào prompt và LAN
                  xuống mọi Shot khi sửa; anchoring thì chỉ prefill lúc tạo Shot mới. --}}
             <p class="text-xs text-base-content/50 -mt-1 mb-2">
-                Tỷ lệ khung hình · Độ phân giải · Loại video · Công thức kịch bản · Khán giả · Thông điệp cốt lõi được ghi vào prompt của mọi Shot; sửa sẽ tự động build lại prompt.
+                {{ __('Tỷ lệ khung hình · Độ phân giải · Loại video · Công thức kịch bản · Khán giả · Thông điệp cốt lõi được ghi vào prompt của mọi Shot; sửa sẽ tự động build lại prompt.') }}
             </p>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                 <div>
-                    <p class="text-xs font-medium text-base-content/50 mb-1">Mục tiêu</p>
+                    <p class="text-xs font-medium text-base-content/50 mb-1">{{ __('Mục tiêu') }}</p>
                     <p class="whitespace-pre-wrap">{{ $project->objective ?: '—' }}</p>
                 </div>
                 <div>
-                    <p class="text-xs font-medium text-base-content/50 mb-1">Đối tượng khán giả</p>
+                    <p class="text-xs font-medium text-base-content/50 mb-1">{{ __('Đối tượng khán giả') }}</p>
                     <p class="whitespace-pre-wrap">{{ $project->target_audience ?: '—' }}</p>
                 </div>
                 {{-- v1.6 (LinkedIn "step-by-step guide creating AI marketing videos prompts").
                      v1.7 — hiển thị nhãn thay vì slug thô (`testimonial`) qua hằng số Model. --}}
                 <div>
-                    <p class="text-xs font-medium text-base-content/50 mb-1">Loại video</p>
+                    <p class="text-xs font-medium text-base-content/50 mb-1">{{ __('Loại video') }}</p>
                     <p>{{ $project->videoTypeLabel() ?: '—' }}</p>
                 </div>
                 {{-- v1.16 (tulsainternetmarketingservice.com) — công thức kịch bản, trục khác với
                      Loại video ở trên (cấu trúc kể chuyện, không phải loại nội dung). --}}
                 <div>
-                    <p class="text-xs font-medium text-base-content/50 mb-1">Công thức kịch bản</p>
+                    <p class="text-xs font-medium text-base-content/50 mb-1">{{ __('Công thức kịch bản') }}</p>
                     <p>{{ $project->videoFormulaLabel() ?: '—' }}</p>
                 </div>
                 <div>
-                    <p class="text-xs font-medium text-base-content/50 mb-1">Thông điệp cốt lõi</p>
+                    <p class="text-xs font-medium text-base-content/50 mb-1">{{ __('Thông điệp cốt lõi') }}</p>
                     <p class="whitespace-pre-wrap">{{ $project->core_message ?: '—' }}</p>
                 </div>
                 <div>
-                    <p class="text-xs font-medium text-base-content/50 mb-1">Tỷ lệ khung hình</p>
+                    <p class="text-xs font-medium text-base-content/50 mb-1">{{ __('Tỷ lệ khung hình') }}</p>
                     <p>{{ $project->aspect_ratio ?: '—' }}</p>
                 </div>
                 {{-- v1.5 (pyxeljam.com) — "Set Video Length, Quality, and File Format Requirements". --}}
                 <div>
-                    <p class="text-xs font-medium text-base-content/50 mb-1">Độ phân giải</p>
+                    <p class="text-xs font-medium text-base-content/50 mb-1">{{ __('Độ phân giải') }}</p>
                     <p>{{ $project->resolution ?: '—' }}</p>
                 </div>
             </div>
@@ -98,23 +98,23 @@
     <div id="step-2" class="card bg-base-100 shadow-sm border border-base-200 mb-5 scroll-mt-4">
         <div class="card-body">
             <h2 class="card-title text-base">
-                <span class="badge badge-primary badge-sm">2</span> Ảnh tham chiếu
-                <span class="badge badge-ghost badge-sm font-normal">Không bắt buộc</span>
+                <span class="badge badge-primary badge-sm">2</span> {{ __('Ảnh tham chiếu') }}
+                <span class="badge badge-ghost badge-sm font-normal">{{ __('Không bắt buộc') }}</span>
             </h2>
             <div class="alert alert-info py-2 px-3 text-xs mb-3">
-                <span>Áp dụng khi tạo Shot MỚI — sửa ở đây KHÔNG tự động cập nhật các Shot đã tạo trước đó (vì giá trị đã được sao chép vào từng Shot và bạn có thể đã sửa riêng). Khác với Creative Brief phía trên.</span>
+                <span>{{ __('Áp dụng khi tạo Shot MỚI — sửa ở đây KHÔNG tự động cập nhật các Shot đã tạo trước đó (vì giá trị đã được sao chép vào từng Shot và bạn có thể đã sửa riêng). Khác với Creative Brief phía trên.') }}</span>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                 <div>
-                    <p class="text-xs font-medium text-base-content/50 mb-1">Subject mặc định</p>
+                    <p class="text-xs font-medium text-base-content/50 mb-1">{{ __('Subject mặc định') }}</p>
                     <p class="whitespace-pre-wrap">{{ $project->default_subject ?: '—' }}</p>
                 </div>
                 <div>
-                    <p class="text-xs font-medium text-base-content/50 mb-1">Style mặc định</p>
+                    <p class="text-xs font-medium text-base-content/50 mb-1">{{ __('Style mặc định') }}</p>
                     <p class="whitespace-pre-wrap">{{ $project->default_style ?: '—' }}</p>
                 </div>
                 <div>
-                    <p class="text-xs font-medium text-base-content/50 mb-1">Constraints mặc định</p>
+                    <p class="text-xs font-medium text-base-content/50 mb-1">{{ __('Constraints mặc định') }}</p>
                     <p class="whitespace-pre-wrap">{{ $project->default_constraints ?: '—' }}</p>
                 </div>
             </div>
@@ -124,7 +124,7 @@
                  lại ngữ cảnh, KHÔNG tự sinh gì cả. --}}
             @if($project->reference_context_prompt)
             <div class="mt-3 pt-3 border-t border-base-200">
-                <p class="text-xs font-medium text-base-content/50 mb-1">Mô tả ngữ cảnh ảnh tham chiếu</p>
+                <p class="text-xs font-medium text-base-content/50 mb-1">{{ __('Mô tả ngữ cảnh ảnh tham chiếu') }}</p>
                 <p class="text-sm whitespace-pre-wrap">{{ $project->reference_context_prompt }}</p>
             </div>
             @endif
@@ -132,8 +132,8 @@
     </div>
 
     <div id="step-3" class="mb-3 scroll-mt-4">
-        <h2 class="text-lg font-semibold flex items-center gap-2"><span class="badge badge-primary badge-sm">3</span> Kịch bản &amp; Timeline</h2>
-        <p class="text-xs text-base-content/50 mt-0.5">Mỗi Shot là 1 cảnh (scene) trong video — điền theo thứ tự xuất hiện, Timeline bên dưới sẽ tự cập nhật.</p>
+        <h2 class="text-lg font-semibold flex items-center gap-2"><span class="badge badge-primary badge-sm">3</span> {{ __('Kịch bản') }} &amp; Timeline</h2>
+        <p class="text-xs text-base-content/50 mt-0.5">{{ __('Mỗi Shot là 1 cảnh (scene) trong video — điền theo thứ tự xuất hiện, Timeline bên dưới sẽ tự cập nhật.') }}</p>
     </div>
 
     {{-- v1.17 (phản hồi người dùng — "chọn Loại video + Công thức kịch bản thì bên dưới khối Kịch
@@ -154,7 +154,7 @@
     @endphp
     @if($aivsFormulaBeats || $aivsTypeTip)
     <details {{ $project->shots->isEmpty() ? 'open' : '' }} class="collapse collapse-arrow bg-base-100 border border-primary/30 mb-4">
-        <summary class="collapse-title text-sm font-medium py-3">🎯 Gợi ý mô tả theo Loại video &amp; Công thức kịch bản đã chọn</summary>
+        <summary class="collapse-title text-sm font-medium py-3">{{ __('🎯 Gợi ý mô tả theo Loại video') }} &amp; {{ __('Công thức kịch bản đã chọn') }}</summary>
         <div class="collapse-content text-xs">
             @if($aivsTypeTip)
             <p class="text-base-content/70 mb-3"><b>{{ $project->videoTypeLabel() }}:</b> {{ $aivsTypeTip }}</p>
@@ -164,9 +164,9 @@
                 <table class="table table-xs">
                     <thead>
                         <tr class="text-xs">
-                            <th>Nhịp</th>
-                            <th>Thời lượng gợi ý</th>
-                            <th>Cách viết mô tả (Subject/Action/Script...)</th>
+                            <th>{{ __('Nhịp') }}</th>
+                            <th>{{ __('Thời lượng gợi ý') }}</th>
+                            <th>{{ __('Cách viết mô tả (Subject/Action/Script...)') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -180,9 +180,9 @@
                     </tbody>
                 </table>
             </div>
-            <p class="text-base-content/50 mt-2">Chia N cảnh của bạn thành 3 cụm tương ứng 3 nhịp trên theo đúng thứ tự — không cần 1 shot = 1 nhịp, 1 nhịp có thể gồm nhiều shot liên tiếp.</p>
+            <p class="text-base-content/50 mt-2">{{ __('Chia N cảnh của bạn thành 3 cụm tương ứng 3 nhịp trên theo đúng thứ tự — không cần 1 shot = 1 nhịp, 1 nhịp có thể gồm nhiều shot liên tiếp.') }}</p>
             @else
-            <p class="text-base-content/50 mt-2">Chưa chọn Công thức kịch bản — chọn ở "Sửa project" để xem thêm gợi ý chia nhịp theo cấu trúc PSA/BAB/Hook-Value-CTA.</p>
+            <p class="text-base-content/50 mt-2">{{ __('Chưa chọn Công thức kịch bản — chọn ở "Sửa project" để xem thêm gợi ý chia nhịp theo cấu trúc PSA/BAB/Hook-Value-CTA.') }}</p>
             @endif
         </div>
     </details>
@@ -193,33 +193,33 @@
          đầu thay vì nhìn trang trắng. Mở sẵn khi project chưa có shot nào (lúc cần nhất), đóng khi đã
          có nội dung (tránh chiếm chỗ). Nội dung tĩnh — không phụ thuộc dữ liệu. --}}
     <details {{ $project->shots->isEmpty() ? 'open' : '' }} class="collapse collapse-arrow bg-base-100 border border-base-200 mb-4">
-        <summary class="collapse-title text-sm font-medium py-3">📐 Khung thời gian mẫu (30-60 giây) — dùng làm khuôn tham khảo</summary>
+        <summary class="collapse-title text-sm font-medium py-3">{{ __('📐 Khung thời gian mẫu (30-60 giây) — dùng làm khuôn tham khảo') }}</summary>
         <div class="collapse-content text-xs">
             <div class="overflow-x-auto">
                 <table class="table table-xs">
                     <thead>
                         <tr class="text-xs">
-                            <th>Phần</th>
-                            <th>Thời lượng</th>
-                            <th>Nội dung</th>
+                            <th>{{ __('Phần') }}</th>
+                            <th>{{ __('Thời lượng') }}</th>
+                            <th>{{ __('Nội dung') }}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr><td class="font-medium">Hook</td><td class="whitespace-nowrap">0–3s</td><td>Gây chú ý ngay — pattern interrupt hoặc 1 câu tuyên bố táo bạo</td></tr>
-                        <tr><td class="font-medium">Vấn đề</td><td class="whitespace-nowrap">3–10s</td><td>1 câu khiến khán giả thấy "đúng là mình"</td></tr>
-                        <tr><td class="font-medium">Giải pháp</td><td class="whitespace-nowrap">10–25s</td><td>Sản phẩm hoặc kết quả xuất hiện trực quan</td></tr>
-                        <tr><td class="font-medium">Bằng chứng</td><td class="whitespace-nowrap">25–40s</td><td>Số liệu, testimonial, hình trước/sau</td></tr>
-                        <tr><td class="font-medium">CTA</td><td class="whitespace-nowrap">40–60s</td><td>1 hành động duy nhất — nói VÀ hiển thị chữ trên màn hình</td></tr>
+                        <tr><td class="font-medium">Hook</td><td class="whitespace-nowrap">0–3s</td><td>{{ __('Gây chú ý ngay — pattern interrupt hoặc 1 câu tuyên bố táo bạo') }}</td></tr>
+                        <tr><td class="font-medium">{{ __('Vấn đề') }}</td><td class="whitespace-nowrap">3–10s</td><td>{{ __('1 câu khiến khán giả thấy "đúng là mình"') }}</td></tr>
+                        <tr><td class="font-medium">{{ __('Giải pháp') }}</td><td class="whitespace-nowrap">10–25s</td><td>{{ __('Sản phẩm hoặc kết quả xuất hiện trực quan') }}</td></tr>
+                        <tr><td class="font-medium">{{ __('Bằng chứng') }}</td><td class="whitespace-nowrap">25–40s</td><td>{{ __('Số liệu, testimonial, hình trước/sau') }}</td></tr>
+                        <tr><td class="font-medium">CTA</td><td class="whitespace-nowrap">40–60s</td><td>{{ __('1 hành động duy nhất — nói VÀ hiển thị chữ trên màn hình') }}</td></tr>
                     </tbody>
                 </table>
             </div>
             {{-- v1.14 (imagine.art "make-ai-marketing-videos") — khung 20s ngắn hơn cho video UGC/quảng
                  cáo nhanh (khác khung 60s ở trên dành cho video có "Vấn đề" rõ ràng cần build-up dài hơi). --}}
             <p class="text-base-content/60 mt-2">
-                <b>Video ngắn (UGC/quảng cáo nhanh, ~20s):</b> Hook 0–3s → Sản phẩm 3–8s → Lợi ích 8–12s → Bằng chứng 12–18s → CTA 18–20s.
+                <b>{{ __('Video ngắn (UGC/quảng cáo nhanh, ~20s):') }}</b> {{ __('Hook 0–3s → Sản phẩm 3–8s → Lợi ích 8–12s → Bằng chứng 12–18s → CTA 18–20s.') }}
             </p>
             <p class="text-base-content/60 mt-2">
-                <b>Lỗi thường gặp làm giảm engagement:</b> mở đầu bằng logo thay vì hook, ẩn sản phẩm quá lâu (nên xuất hiện rõ trong 5 giây đầu), nhồi 3 thông điệp vào 1 clip 20 giây, bỏ qua phụ đề (80% video mạng xã hội được xem không tiếng).
+                <b>{{ __('Lỗi thường gặp làm giảm engagement:') }}</b> {{ __('mở đầu bằng logo thay vì hook, ẩn sản phẩm quá lâu (nên xuất hiện rõ trong 5 giây đầu), nhồi 3 thông điệp vào 1 clip 20 giây, bỏ qua phụ đề (80% video mạng xã hội được xem không tiếng).') }}
             </p>
             {{-- v1.14 (mindstudio.ai "multi-agent-workflow") — bảng định dạng/thời lượng tối đa theo
                  nền tảng, giúp chọn Tỷ lệ khung hình + ước lượng Tổng thời lượng phù hợp TRƯỚC khi soạn
@@ -228,22 +228,22 @@
                 <table class="table table-xs">
                     <thead>
                         <tr class="text-xs">
-                            <th>Nền tảng</th>
-                            <th>Tỷ lệ khung hình</th>
-                            <th>Thời lượng tối đa thường dùng</th>
+                            <th>{{ __('Nền tảng') }}</th>
+                            <th>{{ __('Tỷ lệ khung hình') }}</th>
+                            <th>{{ __('Thời lượng tối đa thường dùng') }}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr><td>TikTok/Reels</td><td>9:16</td><td>~3 phút</td></tr>
-                        <tr><td>YouTube Shorts</td><td>9:16</td><td>60 giây</td></tr>
-                        <tr><td>YouTube (thường)</td><td>16:9</td><td>Không giới hạn</td></tr>
-                        <tr><td>LinkedIn</td><td>16:9</td><td>~10 phút</td></tr>
-                        <tr><td>Instagram Feed</td><td>1:1</td><td>60 giây</td></tr>
+                        <tr><td>TikTok/Reels</td><td>9:16</td><td>{{ __('~3 phút') }}</td></tr>
+                        <tr><td>YouTube Shorts</td><td>9:16</td><td>{{ __('60 giây') }}</td></tr>
+                        <tr><td>{{ __('YouTube (thường)') }}</td><td>16:9</td><td>{{ __('Không giới hạn') }}</td></tr>
+                        <tr><td>LinkedIn</td><td>16:9</td><td>{{ __('~10 phút') }}</td></tr>
+                        <tr><td>Instagram Feed</td><td>1:1</td><td>{{ __('60 giây') }}</td></tr>
                     </tbody>
                 </table>
             </div>
             @if($project->shots->isEmpty())
-            <p class="text-base-content/60 mt-2">Muốn dùng luôn khung 60s? Bấm <b>"Chèn 5 cảnh mẫu"</b> ở khối bên dưới — hệ thống tự tạo 5 Shot theo đúng 5 phần trên.</p>
+            <p class="text-base-content/60 mt-2">{{ __('Muốn dùng luôn khung 60s? Bấm') }} <b>{{ __('"Chèn 5 cảnh mẫu"') }}</b> {{ __('ở khối bên dưới — hệ thống tự tạo 5 Shot theo đúng 5 phần trên.') }}</p>
             @endif
         </div>
     </details>
@@ -262,62 +262,62 @@
          Duration/pacing; (4) Lặp lại & xử lý sự cố — lúc đã có compiled_prompt/kết quả AI, cần tinh
          chỉnh. Nội dung từng mẹo GIỮ NGUYÊN — chỉ đổi cách trình bày, không đổi/bớt kỹ thuật nào. --}}
     <details class="collapse collapse-arrow bg-base-100 border border-base-200 mb-4">
-        <summary class="collapse-title text-sm font-medium py-3">💡 Mẹo viết prompt (bấm để xem)</summary>
+        <summary class="collapse-title text-sm font-medium py-3">{{ __('💡 Mẹo viết prompt (bấm để xem)') }}</summary>
         <div class="collapse-content text-xs text-base-content/70">
             <div class="space-y-3">
                 <div>
-                    <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/40 mb-1.5">Phạm vi 1 Shot</p>
+                    <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/40 mb-1.5">{{ __('Phạm vi 1 Shot') }}</p>
                     <ul class="list-disc list-inside space-y-1">
-                        <li>Mỗi Shot chỉ nên tả 1 cảnh/khoảnh khắc duy nhất — KHÔNG dồn nhiều hành động khác nhau (VD chạy + nhảy + mở cửa + nói) vào 1 shot ngắn.</li>
+                        <li>{{ __('Mỗi Shot chỉ nên tả 1 cảnh/khoảnh khắc duy nhất — KHÔNG dồn nhiều hành động khác nhau (VD chạy + nhảy + mở cửa + nói) vào 1 shot ngắn.') }}</li>
                         {{-- v1.8 (sentx.ai "Single hero focus") — khác nguyên tắc "1 hành động" ở trên: đây là giới hạn SỐ chủ thể trong khung hình. --}}
-                        <li>Chỉ nên có 1 chủ thể chính + tối đa 1 yếu tố phụ trong khung hình — đừng dồn nhiều người/vật cùng lúc.</li>
-                        <li>Tránh yêu cầu đối lập trong cùng 1 shot (VD "vừa dữ dội vừa yên bình").</li>
+                        <li>{{ __('Chỉ nên có 1 chủ thể chính + tối đa 1 yếu tố phụ trong khung hình — đừng dồn nhiều người/vật cùng lúc.') }}</li>
+                        <li>{{ __('Tránh yêu cầu đối lập trong cùng 1 shot (VD "vừa dữ dội vừa yên bình").') }}</li>
                     </ul>
                 </div>
 
                 <div>
-                    <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/40 mb-1.5">Cách mô tả từng field</p>
+                    <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/40 mb-1.5">{{ __('Cách mô tả từng field') }}</p>
                     <ul class="list-disc list-inside space-y-1">
-                        <li>Thay tính từ chung chung ("đẹp", "tốt") bằng mô tả cụ thể ("ánh sáng khuếch tán mềm").</li>
-                        <li>Luôn điền Camera (loại cảnh + chuyển động máy) — ảnh hưởng lớn tới chất lượng điện ảnh; Style nên gọi tên phong cách rõ ràng ("phong cách phim tài liệu", "ánh sáng chụp sản phẩm").</li>
-                        <li>Đừng bỏ qua Audio (âm thanh môi trường + nhạc nền) — thiếu phần này dễ ra video tĩnh, thiếu sức sống dù hình đẹp.</li>
-                        <li>Subject/Action/Style nên NÊU RÕ ĐIỀU MUỐN THẤY (khẳng định); loại trừ CỤ THỂ ("không motion blur, nét mặt nhân vật") thay vì mơ hồ ("không mờ") thì dồn hết vào Constraints — tránh trộn 2 kiểu diễn đạt trong cùng 1 field.</li>
+                        <li>{{ __('Thay tính từ chung chung ("đẹp", "tốt") bằng mô tả cụ thể ("ánh sáng khuếch tán mềm").') }}</li>
+                        <li>{{ __('Luôn điền Camera (loại cảnh + chuyển động máy) — ảnh hưởng lớn tới chất lượng điện ảnh; Style nên gọi tên phong cách rõ ràng ("phong cách phim tài liệu", "ánh sáng chụp sản phẩm").') }}</li>
+                        <li>{{ __('Đừng bỏ qua Audio (âm thanh môi trường + nhạc nền) — thiếu phần này dễ ra video tĩnh, thiếu sức sống dù hình đẹp.') }}</li>
+                        <li>{{ __('Subject/Action/Style nên NÊU RÕ ĐIỀU MUỐN THẤY (khẳng định); loại trừ CỤ THỂ ("không motion blur, nét mặt nhân vật") thay vì mơ hồ ("không mờ") thì dồn hết vào Constraints — tránh trộn 2 kiểu diễn đạt trong cùng 1 field.') }}</li>
                         {{-- v1.18 (ngram.com/blog/demo-video-script-template "Lead with Outcomes, Not
                              Features") — VD nguồn: yếu "platform có tích hợp 50+ tool" · mạnh "gộp mọi
                              công cụ vào 1 nơi, hết cảnh gạt qua lại giữa các cửa sổ". --}}
-                        <li>Action/CTA nên mô tả KẾT QUẢ khán giả nhận được ("gộp mọi công cụ vào 1 nơi"), không liệt kê tính năng/thông số ("tích hợp 50+ công cụ") — kết quả dễ hình dung và thuyết phục hơn danh sách tính năng.</li>
+                        <li>{{ __('Action/CTA nên mô tả KẾT QUẢ khán giả nhận được ("gộp mọi công cụ vào 1 nơi"), không liệt kê tính năng/thông số ("tích hợp 50+ công cụ") — kết quả dễ hình dung và thuyết phục hơn danh sách tính năng.') }}</li>
                         {{-- v1.18 (ngram.com "Include Specific Numbers") — cùng tinh thần VD "Tăng
                              năng suất 40%" đã có ở core_message. --}}
-                        <li>Script/CTA có số liệu thật thì nêu CỤ THỂ ("giảm 47% thời gian", "nhanh gấp 5 lần") thay vì chung chung ("nhanh hơn", "hiệu quả hơn") — số cụ thể dễ nhớ và đáng tin hơn.</li>
-                        <li>Mỗi prompt nên trong khoảng 50-150 từ, đặt thông tin quan trọng nhất ở 20-30 từ đầu (AI đọc trái→phải, ưu tiên phần đầu).</li>
+                        <li>{{ __('Script/CTA có số liệu thật thì nêu CỤ THỂ ("giảm 47% thời gian", "nhanh gấp 5 lần") thay vì chung chung ("nhanh hơn", "hiệu quả hơn") — số cụ thể dễ nhớ và đáng tin hơn.') }}</li>
+                        <li>{{ __('Mỗi prompt nên trong khoảng 50-150 từ, đặt thông tin quan trọng nhất ở 20-30 từ đầu (AI đọc trái→phải, ưu tiên phần đầu).') }}</li>
                         {{-- v1.9 (veed.io "Platform-Specific Strategies") — câu chung trước đây giờ trỏ tới 2 dòng gợi ý CỤ THỂ trong Creative Brief. --}}
-                        <li>Điều chỉnh giọng văn/độ chi tiết theo nền tảng và đối tượng khán giả đã khai ở Creative Brief — xem 2 dòng "Gợi ý theo nền tảng"/"Gợi ý theo loại video" tự hiện ở đó.</li>
+                        <li>{{ __('Điều chỉnh giọng văn/độ chi tiết theo nền tảng và đối tượng khán giả đã khai ở Creative Brief — xem 2 dòng "Gợi ý theo nền tảng"/"Gợi ý theo loại video" tự hiện ở đó.') }}</li>
                     </ul>
                 </div>
 
                 <div>
-                    <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/40 mb-1.5">Nhịp độ &amp; thời lượng</p>
+                    <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/40 mb-1.5">{{ __('Nhịp độ') }} &amp; {{ __('thời lượng') }}</p>
                     <ul class="list-disc list-inside space-y-1">
                         {{-- v1.8 (sentx.ai "Take approach") — nhịp lấy cảnh (pacing) là 1 lựa chọn riêng, khác Duration (độ dài). --}}
-                        <li>1 cú máy chậm, liên tục tạo cảm giác khác hẳn chuyển động nhanh, dồn dập — chọn nhịp (pacing) phù hợp tâm trạng của shot, không chỉ chọn số giây.</li>
+                        <li>{{ __('1 cú máy chậm, liên tục tạo cảm giác khác hẳn chuyển động nhanh, dồn dập — chọn nhịp (pacing) phù hợp tâm trạng của shot, không chỉ chọn số giây.') }}</li>
                         {{-- v1.18 (ngram.com/blog/how-to-make-demo-video "Slow down — what feels slow
                              to you probably feels normal to them") — thiên kiến người viết prompt đã
                              quen ý tưởng, khác góc độ pacing-theo-tâm-trạng ở trên. --}}
-                        <li>Khi phân vân giữa 2 mức Duration/pacing, nên nghiêng về phía CHẬM hơn cảm giác của chính bạn — bạn đã quen thuộc ý tưởng nên thấy nhanh là bình thường, khán giả lần đầu xem cần nhiều thời gian xử lý hơn bạn nghĩ.</li>
+                        <li>{{ __('Khi phân vân giữa 2 mức Duration/pacing, nên nghiêng về phía CHẬM hơn cảm giác của chính bạn — bạn đã quen thuộc ý tưởng nên thấy nhanh là bình thường, khán giả lần đầu xem cần nhiều thời gian xử lý hơn bạn nghĩ.') }}</li>
                         {{-- v1.14 (mindstudio.ai "multi-agent-workflow" — Agent 1 "Script + Shot List"). --}}
-                        <li>Lời thoại (script_line): ước lượng ~125-150 từ cho mỗi 1 phút video khi viết — giúp khớp độ dài lời đọc với Thời lượng (giây) đã điền, tránh lời thoại quá dài so với shot ngắn.</li>
+                        <li>{{ __('Lời thoại (script_line): ước lượng ~125-150 từ cho mỗi 1 phút video khi viết — giúp khớp độ dài lời đọc với Thời lượng (giây) đã điền, tránh lời thoại quá dài so với shot ngắn.') }}</li>
                     </ul>
                 </div>
 
                 <div>
-                    <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/40 mb-1.5">Lặp lại &amp; xử lý sự cố</p>
+                    <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/40 mb-1.5">{{ __('Lặp lại') }} &amp; {{ __('xử lý sự cố') }}</p>
                     <ul class="list-disc list-inside space-y-1">
-                        <li>Đừng kỳ vọng ra kết quả hoàn hảo ngay lần đầu — nên bắt đầu đơn giản (Subject+Action) rồi thêm dần Style/Camera/Audio, tạo vài biến thể song song thay vì cầu toàn 1 bản, lặp lại 3-4 lần/shot, mỗi lần chỉ sửa 1 vấn đề cụ thể (ghi vào QC bên dưới).</li>
+                        <li>{{ __('Đừng kỳ vọng ra kết quả hoàn hảo ngay lần đầu — nên bắt đầu đơn giản (Subject+Action) rồi thêm dần Style/Camera/Audio, tạo vài biến thể song song thay vì cầu toàn 1 bản, lặp lại 3-4 lần/shot, mỗi lần chỉ sửa 1 vấn đề cụ thể (ghi vào QC bên dưới).') }}</li>
                         {{-- v1.14 (mindstudio.ai — Agent 2 "Voiceover") — bước tạo giọng đọc TRƯỚC khi
                              tạo video, dùng timestamp cấp từ để canh khớp lời thoại với từng shot. --}}
-                        <li>Có lời thoại dài/nhiều shot? Cân nhắc tạo giọng đọc (voiceover) bằng TTS chất lượng cao (ElevenLabs/PlayHT/OpenAI TTS/Kokoro) TRƯỚC khi tạo video từng shot — dùng timestamp cấp từ do TTS trả về để canh đúng lời thoại lúc dựng/ghép, thay vì đoán thời lượng.</li>
+                        <li>{{ __('Có lời thoại dài/nhiều shot? Cân nhắc tạo giọng đọc (voiceover) bằng TTS chất lượng cao (ElevenLabs/PlayHT/OpenAI TTS/Kokoro) TRƯỚC khi tạo video từng shot — dùng timestamp cấp từ do TTS trả về để canh đúng lời thoại lúc dựng/ghép, thay vì đoán thời lượng.') }}</li>
                         {{-- v1.8 (sentx.ai "Troubleshooting by Slot") — trỏ tới khối mới trong tài liệu xuất. --}}
-                        <li>Output ra sai ý? Xem khối "Xử lý sự cố theo triệu chứng" trong tài liệu xuất (nút "Xuất Director Prompt Template" bên dưới) để biết đúng field cần sửa.</li>
+                        <li>{{ __('Output ra sai ý? Xem khối "Xử lý sự cố theo triệu chứng" trong tài liệu xuất (nút "Xuất Director Prompt Template" bên dưới) để biết đúng field cần sửa.') }}</li>
                     </ul>
                 </div>
             </div>
@@ -340,12 +340,12 @@
         {{-- Chưa có shot nào — chưa có gì để vẽ, khối empty-state bên dưới đã đủ hướng dẫn. --}}
         @elseif(!$timelineHasAny)
         <div class="alert py-2 px-3 text-xs bg-base-200/60 border border-base-200">
-            <span>Điền <b>Thời lượng (giây)</b> cho từng cảnh bên dưới để xem timeline trực quan tại đây.</span>
+            <span>{{ __('Điền') }} <b>{{ __('Thời lượng (giây)') }}</b> {{ __('cho từng cảnh bên dưới để xem timeline trực quan tại đây.') }}</span>
         </div>
         @else
         <div class="flex items-center justify-between mb-1.5">
             <span class="text-xs font-medium text-base-content/60">Timeline video</span>
-            <span class="badge badge-neutral badge-sm">Tổng: {{ $timelineTotal }} giây</span>
+            <span class="badge badge-neutral badge-sm">{{ __('Tổng: :timeline_total giây', ['timeline_total' => $timelineTotal]) }}</span>
         </div>
         <div class="flex w-full rounded-lg overflow-hidden border border-base-200 divide-x divide-base-200">
             @foreach($project->shots as $shot)
@@ -356,8 +356,8 @@
                 $segColor = $timelinePalette[$loop->index % count($timelinePalette)];
             @endphp
             <a href="#shot-{{ $shot->uuid }}" style="flex: {{ $segDuration }} 1 0" class="{{ $segColor }} border-t-0 border-b-0 px-2 py-2 text-[11px] leading-tight hover:brightness-95 transition-[filter] min-w-[64px]">
-                <div class="font-medium truncate">{{ $loop->iteration }}. {{ $shot->label ?: 'Chưa đặt tên' }}</div>
-                <div class="text-base-content/50">{{ $shot->duration_seconds ? "{$segStart}–" . ($segStart + $shot->duration_seconds) . 's' : 'chưa có thời lượng' }}</div>
+                <div class="font-medium truncate">{{ $loop->iteration }}. {{ $shot->label ?: __('Chưa đặt tên') }}</div>
+                <div class="text-base-content/50">{{ $shot->duration_seconds ? "{$segStart}–" . ($segStart + $shot->duration_seconds) . 's' : __('chưa có thời lượng') }}</div>
             </a>
             @endforeach
         </div>
@@ -365,12 +365,12 @@
     </div>
 
     <div class="flex items-center justify-between mb-3">
-        <h3 id="aivsShotCountHeading" class="text-sm font-medium text-base-content/60">Danh sách cảnh ({{ $project->shots->count() }})</h3>
+        <h3 id="aivsShotCountHeading" class="text-sm font-medium text-base-content/60">{{ __('Danh sách cảnh (:count)', ['count' => $project->shots->count()]) }}</h3>
         <button type="button" id="aivsAddShotBtn" class="btn btn-primary btn-sm gap-1.5">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
-            Thêm cảnh
+            {{ __('Thêm cảnh') }}
         </button>
     </div>
 
@@ -380,11 +380,11 @@
          Action/route mới ở backend. --}}
     <div id="aivsEmptyState" class="card bg-base-100 border border-dashed border-base-300 mb-8" style="{{ $project->shots->isNotEmpty() ? 'display:none' : '' }}">
         <div class="card-body items-center text-center py-8">
-            <p class="font-medium text-base-content">Chưa có cảnh nào trong kịch bản</p>
-            <p class="text-xs text-base-content/50 max-w-md">Bắt đầu bằng 1 cảnh trống, hoặc chèn sẵn 5 cảnh theo khung thời gian mẫu (Hook → Vấn đề → Giải pháp → Bằng chứng → CTA) ở trên rồi sửa lại nội dung cho phù hợp.</p>
+            <p class="font-medium text-base-content">{{ __('Chưa có cảnh nào trong kịch bản') }}</p>
+            <p class="text-xs text-base-content/50 max-w-md">{{ __('Bắt đầu bằng 1 cảnh trống, hoặc chèn sẵn 5 cảnh theo khung thời gian mẫu (Hook → Vấn đề → Giải pháp → Bằng chứng → CTA) ở trên rồi sửa lại nội dung cho phù hợp.') }}</p>
             <div class="flex flex-wrap gap-2 justify-center mt-2">
-                <button type="button" id="aivsQuickStartBtn" class="btn btn-primary btn-sm gap-1.5">⚡ Chèn 5 cảnh mẫu</button>
-                <button type="button" id="aivsAddFirstShotBtn" class="btn btn-ghost btn-sm">+ Thêm 1 cảnh trống</button>
+                <button type="button" id="aivsQuickStartBtn" class="btn btn-primary btn-sm gap-1.5">{{ __('⚡ Chèn 5 cảnh mẫu') }}</button>
+                <button type="button" id="aivsAddFirstShotBtn" class="btn btn-ghost btn-sm">{{ __('+ Thêm 1 cảnh trống') }}</button>
             </div>
         </div>
     </div>
@@ -396,23 +396,23 @@
             <div class="card-body space-y-3">
                 <div class="flex items-center justify-between gap-2 flex-wrap">
                     <div class="flex items-center gap-2">
-                        <span class="badge badge-neutral badge-sm shrink-0 aivs-shot-number">Cảnh {{ $loop->iteration }}</span>
+                        <span class="badge badge-neutral badge-sm shrink-0 aivs-shot-number">{{ __('Cảnh :iteration', ['iteration' => $loop->iteration]) }}</span>
                         <input type="text" class="aivs-field input input-bordered input-sm font-medium w-56" data-field="label"
                                value="{{ $shot->label }}" placeholder="VD: Shot 1 — Hook">
                         {{-- v1.3 (deepreel.com/blog/ai-video-prompts) — Duration là 1 thành phần công thức nguồn
                              ("Subject + Style + Camera + Mood + Duration"), tách riêng số vì cộng dồn được tổng
                              thời lượng project (xem CompileProjectDirectorPromptAction) và vẽ timeline (UI/UX v2). --}}
                         <input type="number" min="1" max="36000" class="aivs-field input input-bordered input-sm w-24" data-field="duration_seconds"
-                               value="{{ $shot->duration_seconds }}" placeholder="Giây" title="Thời lượng ước tính (giây)">
+                               value="{{ $shot->duration_seconds }}" placeholder="{{ __('Giây') }}" title="{{ __('Thời lượng ước tính (giây)') }}">
                     </div>
                     {{-- v1.13 (phản hồi người dùng) — bỏ autosave debounce PUT mỗi lần gõ (giảm số lượng
                          request AJAX); thay bằng nút "Lưu" bấm tay, gõ xong cả shot rồi lưu 1 lần. --}}
                     <div class="flex items-center gap-1">
-                        <button type="button" class="btn btn-primary btn-xs aivs-save-shot">Lưu</button>
+                        <button type="button" class="btn btn-primary btn-xs aivs-save-shot">{{ __('Lưu') }}</button>
                         <span class="aivs-save-status text-xs text-base-content/40"></span>
-                        <button type="button" class="btn btn-ghost btn-xs aivs-move-up" title="Lên">↑</button>
-                        <button type="button" class="btn btn-ghost btn-xs aivs-move-down" title="Xuống">↓</button>
-                        <button type="button" class="btn btn-ghost btn-xs text-error aivs-delete-shot">Xoá</button>
+                        <button type="button" class="btn btn-ghost btn-xs aivs-move-up" title="{{ __('Lên') }}">↑</button>
+                        <button type="button" class="btn btn-ghost btn-xs aivs-move-down" title="{{ __('Xuống') }}">↓</button>
+                        <button type="button" class="btn btn-ghost btn-xs text-error aivs-delete-shot">{{ __('Xoá') }}</button>
                     </div>
                 </div>
 
@@ -421,7 +421,7 @@
                      không phân biệt. Constraints đứng riêng cuối cùng (catch-all, không thuộc nhóm nào). --}}
                 <div class="space-y-4">
                     <div>
-                        <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/40 mb-1.5">Nội dung cảnh — đang diễn ra chuyện gì</p>
+                        <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/40 mb-1.5">{{ __('Nội dung cảnh — đang diễn ra chuyện gì') }}</p>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                             @foreach([
                                 'subject' => ['Subject (Chủ thể)', null],
@@ -441,7 +441,7 @@
                     </div>
 
                     <div>
-                        <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/40 mb-1.5">Hình ảnh &amp; Âm thanh — trông và nghe thế nào</p>
+                        <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/40 mb-1.5">{{ __('Hình ảnh') }} &amp; {{ __('Âm thanh — trông và nghe thế nào') }}</p>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             @foreach([
                                 {{-- v1.8 (sentx.ai) — 2 field quan trọng nhất theo callout "Mẹo viết prompt" phía trên
@@ -465,37 +465,37 @@
                     </div>
 
                     <div>
-                        <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/40 mb-1.5">Timeline &amp; Lời thoại — nói gì, khi nào</p>
+                        <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/40 mb-1.5">Timeline &amp; {{ __('Lời thoại — nói gì, khi nào') }}</p>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {{-- v1.10 (bài LinkedIn, ví dụ Synthesia "kịch bản theo timeline") — breakdown của
                                  Duration (số giây, nhập ở header card) theo mốc thời gian, cho shot dài/nhiều nhịp. --}}
                             <div class="form-control md:col-span-2">
-                                <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Timeline nội dung (theo giây)</span></label>
+                                <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">{{ __('Timeline nội dung (theo giây)') }}</span></label>
                                 <textarea rows="2" class="aivs-field textarea textarea-bordered textarea-sm w-full" data-field="timeline_breakdown"
-                                          placeholder="VD: 0-5s: hook mở đầu gây chú ý&#10;5-15s: nội dung chính&#10;15-20s: kết + CTA">{{ $shot->timeline_breakdown }}</textarea>
+                                          placeholder="{{ __('VD: 0-5s: hook mở đầu gây chú ý 5-15s: nội dung chính 15-20s: kết + CTA') }}">{{ $shot->timeline_breakdown }}</textarea>
                             </div>
                             <div class="form-control">
-                                <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Lời thoại (Script line)</span></label>
+                                <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">{{ __('Lời thoại (Script line)') }}</span></label>
                                 <textarea rows="2" class="aivs-field textarea textarea-bordered textarea-sm w-full" data-field="script_line">{{ $shot->script_line }}</textarea>
                             </div>
                             <div class="form-control">
                                 <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Call-to-action (CTA)</span></label>
                                 <textarea rows="2" class="aivs-field textarea textarea-bordered textarea-sm w-full" data-field="cta_text"
-                                          placeholder="VD: &quot;Mua ngay - Giảm 20% hôm nay&quot; hoặc text nút/đếm ngược hiển thị trên màn hình">{{ $shot->cta_text }}</textarea>
+                                          placeholder="{{ __('VD: "Mua ngay - Giảm 20% hôm nay" hoặc text nút/đếm ngược hiển thị trên màn hình') }}">{{ $shot->cta_text }}</textarea>
                             </div>
                         </div>
                     </div>
 
                     <div class="form-control">
-                        <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Constraints (Ràng buộc)</span></label>
+                        <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">{{ __('Constraints (Ràng buộc)') }}</span></label>
                         <textarea rows="2" class="aivs-field textarea textarea-bordered textarea-sm w-full" data-field="constraints"
-                                  placeholder="VD cụ thể (negative prompt): &quot;không motion blur, nét mặt nhân vật, không lens flare&quot; — tránh mô tả chung chung như &quot;không mờ&quot;">{{ $shot->constraints }}</textarea>
+                                  placeholder="{{ __('VD cụ thể (negative prompt): "không motion blur, nét mặt nhân vật, không lens flare" — tránh mô tả chung chung như "không mờ"') }}">{{ $shot->constraints }}</textarea>
                     </div>
                 </div>
 
                 <div class="form-control">
                     <label class="label py-0 pb-1 flex items-center justify-between">
-                        <span class="label-text text-xs font-medium">Prompt hoàn chỉnh (tự sinh)</span>
+                        <span class="label-text text-xs font-medium">{{ __('Prompt hoàn chỉnh (tự sinh)') }}</span>
                         {{-- v1.3 — deepreel.com khuyến nghị 50-150 từ/prompt; cảnh báo nhẹ nếu lệch khoảng này. --}}
                         <span class="aivs-word-count text-xs text-base-content/40"></span>
                     </label>
@@ -512,21 +512,21 @@
                      gõ được; đổi thành NHẬP TAY tự do (`.aivs-field`, autosave debounce như mọi field
                      khác) — KHÔNG còn tự sinh/ghi đè. Đóng mặc định vì vẫn là workflow nâng cao. --}}
                 <details class="collapse collapse-arrow bg-base-200/40 border border-base-200">
-                    <summary class="collapse-title text-xs font-medium py-2 min-h-0">Prompt 2 bước — Ảnh + Motion (Image-to-Video)</summary>
+                    <summary class="collapse-title text-xs font-medium py-2 min-h-0">{{ __('Prompt 2 bước — Ảnh + Motion (Image-to-Video)') }}</summary>
                     <div class="collapse-content space-y-3">
                         <div class="form-control">
-                            <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Prompt Ảnh (tạo keyframe)</span></label>
+                            <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">{{ __('Prompt Ảnh (tạo keyframe)') }}</span></label>
                             <div class="flex gap-2 items-start">
                                 <textarea rows="3" class="aivs-field aivs-image-prompt textarea textarea-bordered textarea-xs w-full font-mono" data-field="image_prompt"
-                                          placeholder="VD: Midjourney/DALL-E prompt cho khung hình tĩnh — chủ thể, bối cảnh, góc máy, phong cách... --ar 9:16">{{ $shot->image_prompt }}</textarea>
+                                          placeholder="{{ __('VD: Midjourney/DALL-E prompt cho khung hình tĩnh — chủ thể, bối cảnh, góc máy, phong cách... --ar 9:16') }}">{{ $shot->image_prompt }}</textarea>
                                 <button type="button" class="btn btn-outline btn-xs shrink-0 aivs-copy-image-prompt">Copy</button>
                             </div>
                         </div>
                         <div class="form-control">
-                            <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Prompt Motion (hoạt hình hoá ảnh)</span></label>
+                            <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">{{ __('Prompt Motion (hoạt hình hoá ảnh)') }}</span></label>
                             <div class="flex gap-2 items-start">
                                 <textarea rows="3" class="aivs-field aivs-motion-prompt textarea textarea-bordered textarea-xs w-full font-mono" data-field="motion_prompt"
-                                          placeholder="VD: RunwayML/Kling prompt cho chuyển động — hành động, chuyển động máy, thời lượng...">{{ $shot->motion_prompt }}</textarea>
+                                          placeholder="{{ __('VD: RunwayML/Kling prompt cho chuyển động — hành động, chuyển động máy, thời lượng...') }}">{{ $shot->motion_prompt }}</textarea>
                                 <button type="button" class="btn btn-outline btn-xs shrink-0 aivs-copy-motion-prompt">Copy</button>
                             </div>
                         </div>
@@ -542,13 +542,13 @@
     <div id="step-4" class="card bg-base-100 shadow-sm border border-base-200 scroll-mt-4">
         <div class="card-body">
             <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
-                <h2 class="card-title text-base"><span class="badge badge-primary badge-sm">4</span> Xuất &amp; Dùng</h2>
+                <h2 class="card-title text-base"><span class="badge badge-primary badge-sm">4</span> {{ __('Xuất') }} &amp; {{ __('Dùng') }}</h2>
                 <div class="flex gap-2">
-                    <button type="button" class="btn btn-outline btn-sm" id="aivsCopyAllBtn" onclick="aivsCopy('aivsCompiledAll', this)">Copy toàn bộ</button>
-                    <a href="{{ route('backend.aivideostudiotemplate.export', $project) }}" class="btn btn-primary btn-sm">Xuất file .md</a>
+                    <button type="button" class="btn btn-outline btn-sm" id="aivsCopyAllBtn" onclick="aivsCopy('aivsCompiledAll', this)">{{ __('Copy toàn bộ') }}</button>
+                    <a href="{{ route('backend.aivideostudiotemplate.export', $project) }}" class="btn btn-primary btn-sm">{{ __('Xuất file .md') }}</a>
                 </div>
             </div>
-            <p class="text-xs text-base-content/50 mb-2">Dán vào ChatGPT/Claude hoặc tool tạo video AI theo đúng thứ tự cảnh — hoặc tải file .md để lưu/chia sẻ cho team.</p>
+            <p class="text-xs text-base-content/50 mb-2">{{ __('Dán vào ChatGPT/Claude hoặc tool tạo video AI theo đúng thứ tự cảnh — hoặc tải file .md để lưu/chia sẻ cho team.') }}</p>
             <textarea readonly rows="10" id="aivsCompiledAll" class="textarea textarea-bordered textarea-xs w-full font-mono">{{ $compiledDocument }}</textarea>
         </div>
     </div>

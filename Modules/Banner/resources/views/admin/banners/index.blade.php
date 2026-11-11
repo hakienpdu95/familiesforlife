@@ -20,7 +20,7 @@
     <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div>
             <h1 class="text-2xl font-bold text-base-content">Banner</h1>
-            <p class="text-sm text-base-content/50 mt-0.5">Banner quảng cáo/thông báo hiển thị ở nhiều vị trí trên cổng thông tin</p>
+            <p class="text-sm text-base-content/50 mt-0.5">{{ __('Banner quảng cáo/thông báo hiển thị ở nhiều vị trí trên cổng thông tin') }}</p>
         </div>
         <div class="flex items-center gap-2">
             @can('create', \Modules\Banner\Models\Banner::class)
@@ -28,7 +28,7 @@
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Thêm banner
+                {{ __('Thêm banner') }}
             </a>
             @endcan
         </div>
@@ -40,11 +40,11 @@
                 <div class="filter-grid">
 
                     <div class="form-control">
-                        <label class="label py-0.5"><span class="label-text text-xs font-medium">Vị trí</span></label>
+                        <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Vị trí') }}</span></label>
                         <select id="ts-placement" x-model="filters.placement" @change="onFilterChange()"
-                                data-ts-placeholder="Tất cả vị trí"
+                                data-ts-placeholder="{{ __('Tất cả vị trí') }}"
                                 class="select select-sm select-bordered w-full">
-                            <option value="">Tất cả</option>
+                            <option value="">{{ __('Tất cả') }}</option>
                             @foreach($placements as $key => $p)
                             <option value="{{ $key }}">{{ $p['label'] }}</option>
                             @endforeach
@@ -54,9 +54,9 @@
                     <div class="form-control">
                         <label class="label py-0.5"><span class="label-text text-xs font-medium">Target</span></label>
                         <select id="ts-target_type" x-model="filters.target_type" @change="onFilterChange()"
-                                data-ts-placeholder="Tất cả target"
+                                data-ts-placeholder="{{ __('Tất cả target') }}"
                                 class="select select-sm select-bordered w-full">
-                            <option value="">Tất cả</option>
+                            <option value="">{{ __('Tất cả') }}</option>
                             @foreach($targetTypes as $key => $label)
                             <option value="{{ $key }}">{{ $label }}</option>
                             @endforeach
@@ -72,13 +72,13 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                         </svg>
-                        Đặt lại
+                        {{ __('Đặt lại') }}
                     </button>
                 </div>
 
                 <div x-show="activeChips.length > 0" x-cloak x-transition
                      class="flex flex-wrap gap-2 pt-3 mt-3 border-t border-base-200">
-                    <span class="text-xs text-base-content/40 self-center">Đang lọc:</span>
+                    <span class="text-xs text-base-content/40 self-center">{{ __('Đang lọc:') }}</span>
                     <template x-for="chip in activeChips" :key="chip.key">
                         <span class="badge badge-sm gap-1 cursor-pointer hover:badge-error transition-colors"
                               @click="removeChip(chip.key)">
@@ -104,11 +104,11 @@
 {{-- ── Delete confirm modal ─────────────────────────────────────────────── --}}
 <dialog id="bannerDeleteModal" class="modal">
     <div class="modal-box max-w-sm">
-        <h3 class="font-bold text-lg text-error">Xác nhận xoá</h3>
-        <p class="py-3 text-sm text-base-content/70">Bạn có chắc muốn xoá banner này?</p>
+        <h3 class="font-bold text-lg text-error">{{ __('Xác nhận xoá') }}</h3>
+        <p class="py-3 text-sm text-base-content/70">{{ __('Bạn có chắc muốn xoá banner này?') }}</p>
         <div class="modal-action mt-4">
-            <button id="bannerConfirmDeleteBtn" class="btn btn-error btn-sm">Xoá</button>
-            <button class="btn btn-ghost btn-sm" onclick="bannerDeleteModal.close()">Hủy</button>
+            <button id="bannerConfirmDeleteBtn" class="btn btn-error btn-sm">{{ __('Xoá') }}</button>
+            <button class="btn btn-ghost btn-sm" onclick="bannerDeleteModal.close()">{{ __('Hủy') }}</button>
         </div>
     </div>
     <form method="dialog" class="modal-backdrop"><button>close</button></form>

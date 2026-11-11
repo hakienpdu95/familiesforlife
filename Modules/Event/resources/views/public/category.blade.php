@@ -1,7 +1,7 @@
 @extends('layouts.frontend')
 
-@section('title', $category->name.' — Sự Kiện')
-@section('meta_description', $category->name.' — sự kiện và hoạt động cho gia đình.')
+@section('title', __(':name — Sự Kiện', ['name' => $category->name]))
+@section('meta_description', __(':name — sự kiện và hoạt động cho gia đình.', ['name' => $category->name]))
 
 @push('meta')
 <link rel="canonical" href="{{ route('event.public.category', ['category' => $category->slug]) }}">
@@ -47,14 +47,14 @@
             @forelse($collection as $event)
             <x-frontend.event-card :event="$event" size="sm" />
             @empty
-            <p class="col-span-full text-center text-base-content/40 py-10">Chưa có sự kiện nào sắp diễn ra.</p>
+            <p class="col-span-full text-center text-base-content/40 py-10">{{ __('Chưa có sự kiện nào sắp diễn ra.') }}</p>
             @endforelse
         </section>
 
         <div class="pt-10 flex justify-center" x-show="hasMore" x-cloak>
             <button type="button" class="btn btn-primary vgd-load-more-button" @click="loadMore()" :disabled="loading">
-                <span x-show="!loading">Xem thêm sự kiện</span>
-                <span x-show="loading" x-cloak>Đang tải...</span>
+                <span x-show="!loading">{{ __('Xem thêm sự kiện') }}</span>
+                <span x-show="loading" x-cloak>{{ __('Đang tải...') }}</span>
             </button>
         </div>
     </div>

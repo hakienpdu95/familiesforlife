@@ -23,8 +23,8 @@
     </label>
     <button type="button" data-cat-star="{{ $item->id }}"
             class="shrink-0 {{ $starSize }} leading-none transition-colors {{ $isPrimary ? 'text-warning' : 'text-base-content/20 hover:text-base-content/40' }}"
-            title="Đặt &quot;{{ $item->name }}&quot; làm danh mục chính"
-            aria-label="Đặt {{ $item->name }} làm danh mục chính" aria-pressed="{{ $isPrimary ? 'true' : 'false' }}">★</button>
+            title="{{ __('Đặt ":name" làm danh mục chính', ['name' => $item->name]) }}"
+            aria-label="{{ __('Đặt :name làm danh mục chính', ['name' => $item->name]) }}" aria-pressed="{{ $isPrimary ? 'true' : 'false' }}">★</button>
 </div>
 @foreach($item->children as $child)
     @include('post::admin.articles._category-picker-row', [

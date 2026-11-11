@@ -21,6 +21,7 @@
 import { qrSvg } from '@shared/qr-tools.js';
 import { createTs, initAllTomSelects } from '@shared/tom-select-factory.js';
 
+import { t } from '../../../../../../resources/js/shared/i18n.js';
 // ── Constants & lookup tables ──────────────────────────────────────────────
 
 const FORM_SEL = '[data-product-form]';
@@ -35,9 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('[data-qr-copy]').forEach((btn) => btn.addEventListener('click', async () => {
         try {
             await navigator.clipboard.writeText(btn.dataset.qrCopy);
-            window.Toast ? Toast.success('Đã sao chép link truy xuất') : (btn.textContent = 'Đã sao chép');
+            window.Toast ? Toast.success(t('Đã sao chép link truy xuất')) : (btn.textContent = t('Đã sao chép'));
         } catch {
-            window.prompt('Sao chép link truy xuất:', btn.dataset.qrCopy);
+            window.prompt(t('Sao chép link truy xuất:'), btn.dataset.qrCopy);
         }
     }));
 
@@ -62,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function _initStatusSelect(form) {
     const el = form.querySelector('#ts-status');
     if (!el || el.tomselect) return; // edit: đã auto-init qua ts-init ở sidebar
-    createTs(el, { dropdownParent: null, placeholder: 'Chọn trạng thái' });
+    createTs(el, { dropdownParent: null, placeholder: t('Chọn trạng thái') });
 }
 
 function _initGalleryUpload(form) {
@@ -72,7 +73,7 @@ function _initGalleryUpload(form) {
         collection: 'product_gallery',
         bindTo: '#gallery-media-uuids',
         maxFiles: Number(el.dataset.maxFiles) || 10,
-        labelIdle: 'Kéo thả ảnh vào đây hoặc <span class="filepond--label-action">Chọn ảnh</span>',
+        labelIdle: (t('Kéo thả ảnh vào đây hoặc') + ' <span class="filepond--label-action">' + t('Chọn ảnh') + '</span>'),
     });
 }
 
@@ -251,7 +252,7 @@ function _resolveFieldLabel(field) {
     const labelText = field.closest('.form-control')
         ?.querySelector('.label-text')
         ?.textContent.replace(/\s*\*\s*$/, '').trim();
-    return labelText || field.placeholder || field.name || 'Trường bắt buộc';
+    return labelText || field.placeholder || field.name || t('Trường bắt buộc');
 }
 
 function _switchAlpineTab(wrapper, tabKey) {
@@ -269,7 +270,7 @@ function _toastHiddenErrors(errors) {
         `${label}: ${fields.join(', ')}`
     );
 
-    Toast.warning(`Còn thiếu thông tin bắt buộc:\n${lines.join('\n')}`, {
+    Toast.warning(`${t('Còn thiếu thông tin bắt buộc:\\n:n', { n: (lines.join('\n')) })}`, {
         duration: 5000,
     });
 }

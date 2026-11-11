@@ -63,7 +63,7 @@
 
     <h1 class="text-2xl font-bold text-base-content mb-6">
         @if($search)
-            Kết quả tìm kiếm trong “<a href="{{ route('post.public.category', ['category' => $category->slug]) }}" class="link link-hover">{{ $category->name }}</a>”: {{ $search }}
+            {{ __('Kết quả tìm kiếm trong “') }}<a href="{{ route('post.public.category', ['category' => $category->slug]) }}" class="link link-hover">{{ $category->name }}</a>”: {{ $search }}
         @else
             <a href="{{ route('post.public.category', ['category' => $category->slug]) }}" class="link link-hover">{{ $category->name }}</a>
         @endif
@@ -95,14 +95,14 @@
             @forelse($collection as $t)
             <x-frontend.article-card :translation="$t" size="sm" />
             @empty
-            <p class="col-span-full text-center text-base-content/40 py-10">Chưa có bài viết nào.</p>
+            <p class="col-span-full text-center text-base-content/40 py-10">{{ __('Chưa có bài viết nào.') }}</p>
             @endforelse
         </section>
 
         <div class="pt-10 flex justify-center" x-show="hasMore" x-cloak>
             <button type="button" class="btn btn-primary vgd-load-more-button" @click="loadMore()" :disabled="loading">
-                <span x-show="!loading">Xem thêm bài viết</span>
-                <span x-show="loading" x-cloak>Đang tải...</span>
+                <span x-show="!loading">{{ __('Xem thêm bài viết') }}</span>
+                <span x-show="loading" x-cloak>{{ __('Đang tải...') }}</span>
             </button>
         </div>
     </div>

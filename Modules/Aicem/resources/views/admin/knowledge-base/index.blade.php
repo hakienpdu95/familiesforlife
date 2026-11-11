@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', 'AICEM — Kho tri thức')
+@section('title', __('AICEM — Kho tri thức'))
 
 @section('content')
 <div x-data="knowledgeDocumentListPage({{ Js::from([
@@ -28,9 +28,9 @@
 
     <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div>
-            <h1 class="text-2xl font-bold text-base-content">Kho tri thức</h1>
+            <h1 class="text-2xl font-bold text-base-content">{{ __('Kho tri thức') }}</h1>
             <p class="text-sm text-base-content/50 mt-0.5">
-                Bộ DNA nội dung (giọng văn, đối tượng đọc, quy chuẩn SEO...) dùng làm ngữ cảnh cho AICEM khi soạn bài/sản phẩm
+                {{ __('Bộ DNA nội dung (giọng văn, đối tượng đọc, quy chuẩn SEO...) dùng làm ngữ cảnh cho AICEM khi soạn bài/sản phẩm') }}
             </p>
         </div>
         @can('create', \Modules\Aicem\Models\AicemKnowledgeDocument::class)
@@ -38,7 +38,7 @@
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
-            Thêm tri thức
+            {{ __('Thêm tri thức') }}
         </a>
         @endcan
     </div>
@@ -49,13 +49,13 @@
             <div class="flex flex-wrap gap-3 items-end">
 
                 <div class="form-control flex-1 min-w-52">
-                    <label class="label py-0.5"><span class="label-text text-xs font-medium">Tìm kiếm</span></label>
+                    <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Tìm kiếm') }}</span></label>
                     <div class="input input-sm input-bordered flex items-center gap-2 bg-base-100">
                         <svg class="w-3.5 h-3.5 text-base-content/40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
                         <input type="text" x-model="filters.search" @input.debounce.350ms="onFilterChange()"
-                               placeholder="Nhập tiêu đề..." class="grow bg-transparent outline-none text-sm">
+                               placeholder="{{ __('Nhập tiêu đề...') }}" class="grow bg-transparent outline-none text-sm">
                         <button x-show="filters.search" @click="clearSearch()"
                                 class="text-base-content/30 hover:text-base-content transition-colors">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -66,9 +66,9 @@
                 </div>
 
                 <div class="form-control w-52">
-                    <label class="label py-0.5"><span class="label-text text-xs font-medium">Loại</span></label>
+                    <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Loại') }}</span></label>
                     <select x-model="filters.type" @change="onFilterChange()" class="select select-sm select-bordered w-full">
-                        <option value="">— Mọi loại —</option>
+                        <option value="">{{ __('— Mọi loại —') }}</option>
                         @foreach(array_keys(config('aicem_subjects.knowledge_slot_definitions', [])) as $type)
                         <option value="{{ $type }}">{{ $type }}</option>
                         @endforeach
@@ -76,9 +76,9 @@
                 </div>
 
                 <div class="form-control w-56">
-                    <label class="label py-0.5"><span class="label-text text-xs font-medium">Đối tượng</span></label>
+                    <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Đối tượng') }}</span></label>
                     <select x-model="filters.subject_type" @change="onFilterChange()" class="select select-sm select-bordered w-full">
-                        <option value="">— Mọi đối tượng —</option>
+                        <option value="">{{ __('— Mọi đối tượng —') }}</option>
                         @foreach($subjectTypes as $st)
                         <option value="{{ $st['key'] }}">{{ $st['label'] }}</option>
                         @endforeach
@@ -92,7 +92,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                         </svg>
-                        Đặt lại
+                        {{ __('Đặt lại') }}
                     </button>
                 </div>
 
@@ -112,14 +112,14 @@
 {{-- ── Delete confirm modal ─────────────────────────────────────────────── --}}
 <dialog id="knowledgeDocumentDeleteModal" class="modal">
     <div class="modal-box max-w-sm">
-        <h3 class="font-bold text-lg text-error">Xác nhận xoá</h3>
+        <h3 class="font-bold text-lg text-error">{{ __('Xác nhận xoá') }}</h3>
         <p class="py-3 text-sm text-base-content/70">
-            Bạn có chắc muốn xoá tri thức
+            {{ __('Bạn có chắc muốn xoá tri thức') }}
             <strong id="knowledgeDocumentDeleteItemTitle" class="text-base-content"></strong>?
         </p>
         <div class="modal-action mt-4">
-            <button id="knowledgeDocumentConfirmDeleteBtn" class="btn btn-error btn-sm">Xoá</button>
-            <button class="btn btn-ghost btn-sm" onclick="knowledgeDocumentDeleteModal.close()">Hủy</button>
+            <button id="knowledgeDocumentConfirmDeleteBtn" class="btn btn-error btn-sm">{{ __('Xoá') }}</button>
+            <button class="btn btn-ghost btn-sm" onclick="knowledgeDocumentDeleteModal.close()">{{ __('Hủy') }}</button>
         </div>
     </div>
     <form method="dialog" class="modal-backdrop"><button>close</button></form>

@@ -1,7 +1,7 @@
 @extends('layouts.frontend')
 
-@section('title', 'Tác giả')
-@section('meta_description', 'Danh sách tác giả — phóng viên và cộng tác viên viết bài')
+@section('title', __('Tác giả'))
+@section('meta_description', __('Danh sách tác giả — phóng viên và cộng tác viên viết bài'))
 
 {{-- Technical SEO (2026-07-28) — trang này trước đó KHÔNG có canonical (agent kiểm tra
      cometweb.io/blog/technical-seo phát hiện). Có phân trang (onEachSide) nên cần cùng cách
@@ -24,7 +24,7 @@
 @section('content')
 <div class="container">
 
-    <h1 class="text-2xl font-bold text-base-content mb-6">Tác giả</h1>
+    <h1 class="text-2xl font-bold text-base-content mb-6">{{ __('Tác giả') }}</h1>
 
     <section class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
         @forelse($authors as $author)
@@ -35,11 +35,11 @@
                 <img src="{{ $profile->avatarUrl() }}" alt="{{ $profile->displayName() }}" loading="lazy"
                      class="w-20 h-20 rounded-full object-cover mb-2">
                 <p class="font-semibold text-base-content">{{ $profile->displayName() }}</p>
-                <p class="text-xs text-base-content/50">{{ $author->published_articles_count }} bài đã xuất bản</p>
+                <p class="text-xs text-base-content/50">{{ __(':published_articles_count bài đã xuất bản', ['published_articles_count' => $author->published_articles_count]) }}</p>
             </div>
         </a>
         @empty
-        <p class="col-span-full text-center text-base-content/40 py-10">Chưa có tác giả nào công khai hồ sơ.</p>
+        <p class="col-span-full text-center text-base-content/40 py-10">{{ __('Chưa có tác giả nào công khai hồ sơ.') }}</p>
         @endforelse
     </section>
 

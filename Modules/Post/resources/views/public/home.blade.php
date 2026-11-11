@@ -1,7 +1,7 @@
 @extends('layouts.frontend')
 
-@section('title', $search ? "Tìm kiếm: {$search}" : 'Trang Chủ')
-@section('meta_description', 'Cẩm nang gia đình — hoạt động, trường học, nuôi dạy con và trải nghiệm cho cả nhà.')
+@section('title', $search ? "Tìm kiếm: {$search}" : __('Trang Chủ'))
+@section('meta_description', __('Cẩm nang gia đình — hoạt động, trường học, nuôi dạy con và trải nghiệm cho cả nhà.'))
 
 @php
     $homeCurrentPage = $articles->currentPage();
@@ -39,7 +39,7 @@
 
 @section('content')
 
-<h1 class="sr-only">{{ $search ? "Kết quả tìm kiếm: {$search}" : 'Trang Chủ — ' . config('app.site_name') }}</h1>
+<h1 class="sr-only">{{ $search ? __('Kết quả tìm kiếm: :search', ['search' => $search]) : __('Trang Chủ — :site', ['site' => config('app.site_name')]) }}</h1>
 
 <x-frontend.breaking-news-ticker :items="$breakingNews" />
 
@@ -86,15 +86,15 @@
             @forelse($remaining as $t)
             <x-frontend.article-card :translation="$t" size="sm" />
             @empty
-            <p class="col-span-full text-center text-base-content/40 py-10">Chưa có bài viết nào.</p>
+            <p class="col-span-full text-center text-base-content/40 py-10">{{ __('Chưa có bài viết nào.') }}</p>
             @endforelse
         </section>
 
         @if($isMagazineLayout)
         <div class="pt-10 flex justify-center" x-show="hasMore" x-cloak>
             <button type="button" class="btn btn-primary vgd-load-more-button" @click="loadMore()" :disabled="loading">
-                <span x-show="!loading" x-cloak>Xem thêm bài viết</span>
-                <span x-show="loading" x-cloak>Đang tải...</span>
+                <span x-show="!loading" x-cloak>{{ __('Xem thêm bài viết') }}</span>
+                <span x-show="loading" x-cloak>{{ __('Đang tải...') }}</span>
             </button>
         </div>
         @elseif($articles->hasPages())

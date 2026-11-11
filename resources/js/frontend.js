@@ -13,6 +13,7 @@
  */
 import Alpine from 'alpinejs';
 
+import { t } from './shared/i18n.js';
 window.Alpine = Alpine;
 
 /**
@@ -304,13 +305,13 @@ document.addEventListener('alpine:init', () => {
             }
 
             if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email)) {
-                this.setError('email', 'Vui lòng nhập địa chỉ email hợp lệ.');
+                this.setError('email', t('Vui lòng nhập địa chỉ email hợp lệ.'));
                 this.$refs.email?.focus();
                 return;
             }
 
             if (!this.agreed) {
-                this.setError('agreed', 'Vui lòng đồng ý với chính sách bảo mật để đăng ký.');
+                this.setError('agreed', t('Vui lòng đồng ý với chính sách bảo mật để đăng ký.'));
                 return;
             }
 
@@ -339,14 +340,14 @@ document.addEventListener('alpine:init', () => {
                 }
 
                 if (response.status === 422 && data.errors) {
-                    this.setError('email', Object.values(data.errors).flat()[0] ?? 'Vui lòng kiểm tra lại thông tin đã nhập.');
+                    this.setError('email', Object.values(data.errors).flat()[0] ?? t('Vui lòng kiểm tra lại thông tin đã nhập.'));
                 } else if (response.status === 429) {
-                    this.errorMessage = 'Bạn thao tác quá nhanh, vui lòng thử lại sau ít phút.';
+                    this.errorMessage = t('Bạn thao tác quá nhanh, vui lòng thử lại sau ít phút.');
                 } else {
-                    this.errorMessage = 'Có lỗi xảy ra, vui lòng thử lại sau.';
+                    this.errorMessage = t('Có lỗi xảy ra, vui lòng thử lại sau.');
                 }
             } catch (error) {
-                this.errorMessage = 'Lỗi kết nối. Vui lòng thử lại.';
+                this.errorMessage = t('Lỗi kết nối. Vui lòng thử lại.');
             } finally {
                 this.loading = false;
             }

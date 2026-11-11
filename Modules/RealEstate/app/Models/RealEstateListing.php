@@ -138,7 +138,7 @@ class RealEstateListing extends BaseModel implements HasMedia
     public function getDisplayPriceAttribute(): string
     {
         if ($this->is_price_negotiable) {
-            return 'Thoả thuận';
+            return __('Thoả thuận');
         }
 
         if ($this->isSale()) {

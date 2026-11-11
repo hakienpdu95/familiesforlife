@@ -14,6 +14,7 @@
 
 import { createTs } from '@shared/tom-select-factory.js';
 
+import { t } from '../../../../../resources/js/shared/i18n.js';
 const NBSP_PREFIX = /^ +/;
 
 function esc(v) {
@@ -29,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     createTs(el, {
         allowEmptyOption: true,
         maxOptions:       null,
-        placeholder:      el.dataset.tsPlaceholder ?? 'Tất cả danh mục',
+        placeholder:      el.dataset.tsPlaceholder ?? t('Tất cả danh mục'),
         searchField:      ['text'],
         // Giữ thứ tự cây (pre-order); khi gõ tìm thì ưu tiên độ khớp trước.
         sortField:        [{ field: '$score' }, { field: '$order' }],
@@ -53,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             item(data) {
                 return `<div class="item" title="${esc(label(data))}">${esc(label(data))}</div>`;
             },
-            no_results: () => '<div class="no-results">Không tìm thấy danh mục</div>',
+            no_results: () => ('<div class="no-results">' + t('Không tìm thấy danh mục') + '</div>'),
         },
     });
 });

@@ -4,7 +4,7 @@
 
 @if($articles->isNotEmpty())
 <section class="mt-10 mb-10">
-    <h2 class="text-lg font-bold text-base-content mb-4">Bài viết liên quan</h2>
+    <h2 class="text-lg font-bold text-base-content mb-4">{{ __('Bài viết liên quan') }}</h2>
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
         @foreach($articles as $translation)
         <x-frontend.article-card :translation="$translation" size="sm" />

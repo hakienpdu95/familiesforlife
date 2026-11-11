@@ -66,6 +66,7 @@
         window.addEventListener('load', () => requestAnimationFrame(() => document.documentElement.classList.remove('is-loading')));
     </script>
     @include('layouts.partials.font-preload', ['fonts' => ['roboto', 'merriweather'], 'build' => 'build/frontend'])
+    @include('layouts.partials.i18n-script')
     @vite(['resources/css/icon.css', 'resources/css/frontend.css', 'resources/js/frontend.js'], 'build/frontend')
     @stack('styles')
 </head>

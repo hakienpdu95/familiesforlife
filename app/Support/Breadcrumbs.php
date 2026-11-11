@@ -34,7 +34,7 @@ class Breadcrumbs
         $routeName = $route->getName() ?? '';
 
         $homeCrumb = [
-            'label'  => 'Trang chủ',
+            'label'  => __('Trang chủ'),
             'url'    => route('backend.dashboard'),
             'active' => false,
         ];

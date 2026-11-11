@@ -6,7 +6,7 @@
     @forelse($events as $event)
     <x-frontend.event-card :event="$event" size="sm" />
     @empty
-    <p class="col-span-full text-center text-base-content/40 py-10">Chưa có sự kiện nào sắp diễn ra.</p>
+    <p class="col-span-full text-center text-base-content/40 py-10">{{ __('Chưa có sự kiện nào sắp diễn ra.') }}</p>
     @endforelse
 </section>
 

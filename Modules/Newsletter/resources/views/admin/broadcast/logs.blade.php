@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', 'Lịch sử gửi bản tin')
+@section('title', __('Lịch sử gửi bản tin'))
 
 @section('content')
 <div x-data="broadcastLogListPage({{ Js::from([
@@ -18,12 +18,12 @@
 
 <div class="flex items-center justify-between mb-4">
     <div>
-        <h1 class="text-2xl font-bold text-base-content">Lịch sử gửi bản tin</h1>
-        <p class="text-sm text-base-content/50 mt-0.5">Số liệu mở/click chi tiết xem trực tiếp trên Resend Dashboard.</p>
+        <h1 class="text-2xl font-bold text-base-content">{{ __('Lịch sử gửi bản tin') }}</h1>
+        <p class="text-sm text-base-content/50 mt-0.5">{{ __('Số liệu mở/click chi tiết xem trực tiếp trên Resend Dashboard.') }}</p>
     </div>
     @can('sendBroadcast', \Modules\Newsletter\Models\NewsletterBroadcastLog::class)
     <a href="{{ route('backend.newsletter.broadcast.create') }}" class="btn btn-primary btn-sm gap-1.5">
-        + Soạn bản tin mới
+        {{ __('+ Soạn bản tin mới') }}
     </a>
     @endcan
 </div>
@@ -34,13 +34,13 @@
                 <div class="filter-grid">
 
                     <div class="form-control filter-grid-wide">
-                        <label class="label py-0.5"><span class="label-text text-xs font-medium">Tìm kiếm</span></label>
+                        <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Tìm kiếm') }}</span></label>
                         <div class="input input-sm input-bordered flex items-center gap-2 bg-base-100">
                             <svg class="w-3.5 h-3.5 text-base-content/40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                             </svg>
                             <input type="text" x-model="filters.search" @input.debounce.350ms="onFilterChange()"
-                                   placeholder="Nhập chủ đề bản tin..." class="grow bg-transparent outline-none text-sm">
+                                   placeholder="{{ __('Nhập chủ đề bản tin...') }}" class="grow bg-transparent outline-none text-sm">
                             <button x-show="filters.search" @click="clearSearch()"
                                     class="text-base-content/30 hover:text-base-content transition-colors">
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -59,13 +59,13 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                         </svg>
-                        Đặt lại
+                        {{ __('Đặt lại') }}
                     </button>
                 </div>
 
                 <div x-show="activeChips.length > 0" x-cloak x-transition
                      class="flex flex-wrap gap-2 pt-3 mt-3 border-t border-base-200">
-                    <span class="text-xs text-base-content/40 self-center">Đang lọc:</span>
+                    <span class="text-xs text-base-content/40 self-center">{{ __('Đang lọc:') }}</span>
                     <template x-for="chip in activeChips" :key="chip.key">
                         <span class="badge badge-sm gap-1 cursor-pointer hover:badge-error transition-colors"
                               @click="removeChip(chip.key)">

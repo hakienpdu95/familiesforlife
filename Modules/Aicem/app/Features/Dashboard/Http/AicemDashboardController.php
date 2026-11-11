@@ -49,6 +49,6 @@ class AicemDashboardController extends Controller
 
         $action->handle(AiSettingsData::from($validated));
 
-        return back()->with('success', 'Đã cập nhật cấu hình AICEM.');
+        return back()->with('success', __('Đã cập nhật cấu hình AICEM.'));
     }
 }

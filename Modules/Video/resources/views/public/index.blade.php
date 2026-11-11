@@ -4,16 +4,16 @@
      HTML không kiểm soát ra trang công khai (§0/§5.2). --}}
 @extends('layouts.frontend')
 
-@section('title', 'Thư viện Video')
+@section('title', __('Thư viện Video'))
 
 @section('content')
 <div class="container mx-auto py-10 px-4">
-    <h1 class="text-2xl font-bold mb-6">Thư viện Video</h1>
+    <h1 class="text-2xl font-bold mb-6">{{ __('Thư viện Video') }}</h1>
 
     @if($videos->isEmpty())
         {{-- Empty state — tránh để trắng trang khi chưa có video active nào, dễ gây hiểu nhầm là trang lỗi. --}}
         <div class="text-center py-16 text-base-content/60">
-            <p>Chưa có video nào được đăng.</p>
+            <p>{{ __('Chưa có video nào được đăng.') }}</p>
         </div>
     @else
     <div x-data="{ open: false, activeUrl: null, activeTitle: '' }">
@@ -49,7 +49,7 @@
              @keydown.escape.window="open = false">
             <div class="absolute inset-0" @click="open = false"></div>
             <div class="relative w-full max-w-3xl aspect-video mx-4">
-                <button type="button" @click="open = false" aria-label="Đóng video"
+                <button type="button" @click="open = false" aria-label="{{ __('Đóng video') }}"
                         class="absolute -top-10 right-0 text-white text-2xl leading-none">&times;</button>
                 <template x-if="open">
                     <iframe :src="activeUrl + '?autoplay=1'" :title="activeTitle"

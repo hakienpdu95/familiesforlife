@@ -48,19 +48,19 @@ class BannerListResource extends JsonResource
     private function targetLabel(): ?string
     {
         if ($this->target_type === null) {
-            return 'Toàn site';
+            return __('Toàn site');
         }
 
         if ($this->target_type->value === 'category') {
             $name = $this->target_value ? PostCategory::where('slug', $this->target_value)->value('name') : null;
 
-            return $name ? "Danh mục: {$name}" : 'Danh mục: (đã xoá)';
+            return $name ? __('Danh mục: :name', ['name' => $name]) : __('Danh mục: (đã xoá)');
         }
 
         if ($this->target_type->value === 'province') {
             $name = $this->target_value ? Province::where('province_code', $this->target_value)->value('name') : null;
 
-            return $name ? "Tỉnh/thành: {$name}" : 'Tỉnh/thành: (không rõ)';
+            return $name ? __('Tỉnh/thành: :name', ['name' => $name]) : __('Tỉnh/thành: (không rõ)');
         }
 
         return null;

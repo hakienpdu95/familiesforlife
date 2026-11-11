@@ -10,6 +10,7 @@
 
 import { createTs } from '@shared/tom-select-factory.js';
 
+import { t } from '../../../../../../resources/js/shared/i18n.js';
 function esc(v) {
     if (v == null) return '';
     return String(v)
@@ -23,41 +24,41 @@ function csrf() {
 
 const COLUMNS = [
     {
-        title: 'Tiêu đề', field: 'title', minWidth: 220, sorter: 'string', frozen: true,
+        title: t('Tiêu đề'), field: 'title', minWidth: 220, sorter: 'string', frozen: true,
         formatter(cell) {
             const d = cell.getRow().getData();
             let html = '<span class="font-medium text-sm">' + esc(d.title) + '</span>';
-            if (d.is_system) html += ' <span class="badge badge-ghost badge-xs" title="Trang hệ thống — không thể xoá">Hệ thống</span>';
+            if (d.is_system) html += (' <span class="badge badge-ghost badge-xs" title="' + t('Trang hệ thống — không thể xoá') + '">' + t('Hệ thống') + '</span>');
             return html;
         },
     },
     {
-        title: 'Đường dẫn', field: 'slug', minWidth: 180, sorter: 'string',
+        title: t('Đường dẫn'), field: 'slug', minWidth: 180, sorter: 'string',
         formatter(cell) { return '<span class="text-xs text-base-content/50">/' + esc(cell.getValue()) + '</span>'; },
     },
     {
-        title: 'Trạng thái', field: 'status_value', width: 130, hozAlign: 'center', sorter: 'string',
+        title: t('Trạng thái'), field: 'status_value', width: 130, hozAlign: 'center', sorter: 'string',
         formatter(cell) {
             const d = cell.getRow().getData();
             return '<span class="badge badge-sm ' + (d.is_published ? 'badge-success' : 'badge-ghost') + '">' + esc(d.status_label) + '</span>';
         },
     },
     {
-        title: 'Hiển thị ở', field: 'menu_placements', minWidth: 200, headerSort: false,
+        title: t('Hiển thị ở'), field: 'menu_placements', minWidth: 200, headerSort: false,
         formatter(cell) {
             const d = cell.getRow().getData();
             const items = d.menu_placements || [];
-            if (!items.length) return '<span class="text-xs text-base-content/30">Chưa gắn menu</span>';
-            const hiddenNote = d.is_published ? '' : ' · ẩn vì trang chưa xuất bản';
+            if (!items.length) return ('<span class="text-xs text-base-content/30">' + t('Chưa gắn menu') + '</span>');
+            const hiddenNote = d.is_published ? '' : (' ' + t('· ẩn vì trang chưa xuất bản'));
             return items.map(p => '<a href="' + esc(p.edit_url) + '" class="block text-xs hover:text-primary'
                 + (p.is_active && d.is_published ? '' : ' text-base-content/40') + '"'
-                + ' title="Mục menu: ' + esc(p.label) + (p.is_active ? '' : ' (đang tắt)') + hiddenNote + '">'
-                + esc(p.path) + (p.is_active ? '' : ' <span class="badge badge-ghost badge-xs">Tắt</span>')
+                + ' title="' + t('Mục menu:') + ' ' + esc(p.label) + (p.is_active ? '' : (' ' + t('(đang tắt)'))) + hiddenNote + '">'
+                + esc(p.path) + (p.is_active ? '' : (' <span class="badge badge-ghost badge-xs">' + t('Tắt') + '</span>'))
                 + '</a>').join('');
         },
     },
     {
-        title: 'Cập nhật', field: 'updated_at', width: 140, hozAlign: 'center', sorter: 'string',
+        title: t('Cập nhật'), field: 'updated_at', width: 140, hozAlign: 'center', sorter: 'string',
     },
     {
         title: '', field: 'id', width: 210, hozAlign: 'right', headerSort: false, frozen: true,
@@ -67,14 +68,14 @@ const COLUMNS = [
 
             if (d.can_update) {
                 html += d.is_published
-                    ? '<button class="btn btn-ghost btn-xs" title="Chuyển về Nháp" data-url="' + esc(d.unpublish_url) + '" onclick="window.pageTogglePublish(this.dataset.url)">Gỡ xuất bản</button>'
-                    : '<button class="btn btn-ghost btn-xs text-success" title="Xuất bản" data-url="' + esc(d.publish_url) + '" onclick="window.pageTogglePublish(this.dataset.url)">Xuất bản</button>';
-                html += '<a href="' + esc(d.edit_url) + '" class="btn btn-ghost btn-xs">Sửa</a>';
+                    ? ('<button class="btn btn-ghost btn-xs" title="' + t('Chuyển về Nháp') + '" data-url="') + esc(d.unpublish_url) + ('" onclick="window.pageTogglePublish(this.dataset.url)">' + t('Gỡ xuất bản') + '</button>')
+                    : ('<button class="btn btn-ghost btn-xs text-success" title="' + t('Xuất bản') + '" data-url="') + esc(d.publish_url) + ('" onclick="window.pageTogglePublish(this.dataset.url)">' + t('Xuất bản') + '</button>');
+                html += '<a href="' + esc(d.edit_url) + ('" class="btn btn-ghost btn-xs">' + t('Sửa') + '</a>');
             }
             if (d.can_delete) {
-                html += '<button class="btn btn-ghost btn-xs text-error" title="Xoá"'
+                html += ('<button class="btn btn-ghost btn-xs text-error" title="' + t('Xoá') + '"')
                     + ' data-url="' + esc(d.destroy_url) + '" data-title="' + esc(d.title) + '"'
-                    + ' onclick="window.pageDeleteConfirm(this.dataset.url, this.dataset.title)">Xoá</button>';
+                    + (' onclick="window.pageDeleteConfirm(this.dataset.url, this.dataset.title)">' + t('Xoá') + '</button>');
             }
 
             html += '</div>';
@@ -101,11 +102,11 @@ window.pageTogglePublish = async function (url) {
         if (res.ok) {
             window.pageTable?.replaceData();
         } else {
-            alert(data.message || 'Cập nhật trạng thái thất bại. Vui lòng thử lại.');
+            alert(data.message || t('Cập nhật trạng thái thất bại. Vui lòng thử lại.'));
         }
     } catch (e) {
         console.error('[page] publish toggle failed', e);
-        alert('Lỗi kết nối. Vui lòng thử lại.');
+        alert(t('Lỗi kết nối. Vui lòng thử lại.'));
     }
 };
 
@@ -128,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!pendingDeleteUrl) return;
 
         this.disabled    = true;
-        this.textContent = 'Đang xoá...';
+        this.textContent = t('Đang xoá...');
 
         try {
             const res = await fetch(pendingDeleteUrl, {
@@ -146,14 +147,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('pageDeleteModal')?.close();
                 window.pageTable?.replaceData();
             } else {
-                alert(data.message || 'Xoá thất bại. Vui lòng thử lại.');
+                alert(data.message || t('Xoá thất bại. Vui lòng thử lại.'));
             }
         } catch (e) {
             console.error('[page] delete failed', e);
-            alert('Lỗi kết nối. Vui lòng thử lại.');
+            alert(t('Lỗi kết nối. Vui lòng thử lại.'));
         } finally {
             this.disabled    = false;
-            this.textContent = 'Xoá';
+            this.textContent = t('Xoá');
             pendingDeleteUrl = null;
         }
     });
@@ -179,7 +180,7 @@ document.addEventListener('alpine:init', () => {
 
             get activeChips() {
                 const chips = [], f = this.filters;
-                if (f.search) chips.push({ key: 'search', label: 'Tìm: ' + f.search });
+                if (f.search) chips.push({ key: 'search', label: (t('Tìm:') + ' ') + f.search });
                 if (f.status) chips.push({ key: 'status', label: optText(tsStatus, f.status) });
                 return chips;
             },
@@ -196,7 +197,7 @@ document.addEventListener('alpine:init', () => {
                 if (!statusEl) return;
 
                 tsStatus = createTs(statusEl, {
-                    placeholder: 'Tất cả trạng thái',
+                    placeholder: t('Tất cả trạng thái'),
                     onChange() { statusEl.dispatchEvent(new Event('change', { bubbles: true })); },
                 });
             },
@@ -232,11 +233,11 @@ document.addEventListener('alpine:init', () => {
                     langs: {
                         'vi-VN': {
                             pagination: {
-                                page_size: 'Dòng/trang', page_title: 'Trang',
+                                page_size: t('Dòng/trang'), page_title: t('Trang'),
                                 first: '«', last: '»', prev: '‹', next: '›',
-                                first_title: 'Trang đầu', last_title: 'Trang cuối',
-                                prev_title: 'Trang trước', next_title: 'Trang sau',
-                                counter: { showing: '', of: 'trong', rows: 'dòng', pages: 'trang' },
+                                first_title: t('Trang đầu'), last_title: t('Trang cuối'),
+                                prev_title: t('Trang trước'), next_title: t('Trang sau'),
+                                counter: { showing: '', of: t('trong'), rows: t('dòng'), pages: t('trang') },
                             },
                         },
                     },
@@ -244,7 +245,7 @@ document.addEventListener('alpine:init', () => {
                     columns: COLUMNS,
                     placeholder: '<div class="py-16 text-center opacity-40">'
                         + '<svg class="w-12 h-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'
-                        + '<p class="text-sm">Chưa có trang tĩnh nào</p></div>',
+                        + ('<p class="text-sm">' + t('Chưa có trang tĩnh nào') + '</p></div>'),
                 });
 
                 window.pageTable = tableInst;

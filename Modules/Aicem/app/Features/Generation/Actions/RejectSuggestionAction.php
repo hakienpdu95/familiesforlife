@@ -24,7 +24,7 @@ class RejectSuggestionAction
 
             if (! in_array($suggestion->status, [SuggestionStatus::Pending, SuggestionStatus::Stale], true)) {
                 throw new SuggestionAlreadyDecidedException(
-                    "Đề xuất đã được quyết định trước đó ({$suggestion->status->label()})."
+                    __('Đề xuất đã được quyết định trước đó (:status).', ['status' => $suggestion->status->label()])
                 );
             }
 

@@ -33,6 +33,7 @@
  */
 import { createTs } from '@shared/tom-select-factory.js';
 
+import { t } from '../../../../../../resources/js/shared/i18n.js';
 function _positionWithinDialog(popupEl, anchorEl, dialogEl, { offsetTop = 0, matchWidth = true } = {}) {
     const anchorRect = anchorEl.getBoundingClientRect();
     const dialogRect = dialogEl.getBoundingClientRect();
@@ -55,10 +56,10 @@ function _positionWithinDialog(popupEl, anchorEl, dialogEl, { offsetTop = 0, mat
 }
 
 const SELECT_FIELDS = [
-    { id: 'ts-entry-category', placeholder: '— Chọn category —' },
-    { id: 'ts-entry-origin', placeholder: '— Chọn nguồn gốc —' },
-    { id: 'ts-entry-funnel-stage', placeholder: '— Chưa phân loại —' },
-    { id: 'ts-entry-assignee', placeholder: '— Chưa gán —' },
+    { id: 'ts-entry-category', placeholder: t('— Chọn category —') },
+    { id: 'ts-entry-origin', placeholder: t('— Chọn nguồn gốc —') },
+    { id: 'ts-entry-funnel-stage', placeholder: t('— Chưa phân loại —') },
+    { id: 'ts-entry-assignee', placeholder: t('— Chưa gán —') },
 ];
 
 const DATE_FIELD_ID = 'fp-entry-target-publish-date';

@@ -14,7 +14,7 @@ enum ApartmentSubtype: string
     public function label(): string
     {
         return match ($this) {
-            self::Apartment => 'Căn hộ',
+            self::Apartment => __('Căn hộ'),
             self::Officetel => 'Officetel',
             self::Duplex    => 'Duplex',
             self::Penthouse => 'Penthouse',

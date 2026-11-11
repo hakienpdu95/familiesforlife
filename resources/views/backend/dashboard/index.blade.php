@@ -9,7 +9,7 @@
     $authUser  = auth()->user();
     $roleEnum  = \App\Enums\RoleEnum::tryFrom((string) ($primary_role ?? ''));
     $roleLabel = $roleEnum?->label() ?? ($authUser->account_type?->label() ?? '—');
-    $greeting  = $greeting  ?? (function () { $h = (int) now()->format('H'); return $h < 12 ? 'Chào buổi sáng' : ($h < 18 ? 'Chào buổi chiều' : 'Chào buổi tối'); })();
+    $greeting  = $greeting  ?? (function () { $h = (int) now()->format('H'); return $h < 12 ? __('Chào buổi sáng') : ($h < 18 ? __('Chào buổi chiều') : __('Chào buổi tối')); })();
     $today_str = $today_str ?? \Illuminate\Support\Carbon::now()->isoFormat('dddd, D MMMM YYYY');
 
     $feedIconMap = [
@@ -68,7 +68,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                     </svg>
-                    <h2 class="font-semibold text-sm text-base-content">Cần xử lý</h2>
+                    <h2 class="font-semibold text-sm text-base-content">{{ __('Cần xử lý') }}</h2>
                     @if(count($action_feed) > 0)
                     <span class="badge badge-error badge-xs">{{ count($action_feed) }}</span>
                     @endif
@@ -80,8 +80,8 @@
                 <svg class="w-12 h-12 text-base-content/15 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                <p class="text-sm font-medium text-base-content/40">Không có gì cần xử lý</p>
-                <p class="text-xs text-base-content/25 mt-0.5">Mọi thứ đang ổn 🎉</p>
+                <p class="text-sm font-medium text-base-content/40">{{ __('Không có gì cần xử lý') }}</p>
+                <p class="text-xs text-base-content/25 mt-0.5">{{ __('Mọi thứ đang ổn 🎉') }}</p>
             </div>
             @else
             <ul class="divide-y divide-base-200">
@@ -115,9 +115,9 @@
                     <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    <h2 class="font-semibold text-sm text-base-content">Hoạt động gần đây</h2>
+                    <h2 class="font-semibold text-sm text-base-content">{{ __('Hoạt động gần đây') }}</h2>
                 </div>
-                <a href="{{ route('activitylog.index') }}" class="text-xs text-primary hover:underline">Xem log đầy đủ</a>
+                <a href="{{ route('activitylog.index') }}" class="text-xs text-primary hover:underline">{{ __('Xem log đầy đủ') }}</a>
             </div>
 
             @if($recent_activity->isEmpty())
@@ -125,7 +125,7 @@
                 <svg class="w-12 h-12 text-base-content/15 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                 </svg>
-                <p class="text-sm font-medium text-base-content/40">Chưa có hoạt động nào</p>
+                <p class="text-sm font-medium text-base-content/40">{{ __('Chưa có hoạt động nào') }}</p>
             </div>
             @else
             <ul class="divide-y divide-base-200">
@@ -146,7 +146,7 @@
                             @if($log->causer)
                             <span class="font-medium">{{ $log->causer->name }}</span>
                             @else
-                            <span class="text-base-content/40">Hệ thống</span>
+                            <span class="text-base-content/40">{{ __('Hệ thống') }}</span>
                             @endif
                             <span class="text-base-content/60"> {{ $log->description }}</span>
                             @if($subjectLabel)
@@ -166,12 +166,12 @@
 
 {{-- ── Quick Links ───────────────────────────────────────────────────────── --}}
 <div>
-    <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">Truy cập nhanh</p>
+    <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">{{ __('Truy cập nhanh') }}</p>
     <div class="flex flex-wrap gap-2">
         @php
         $shortcuts = [];
         if ($authUser->can('viewAny', \App\Models\User::class))
-            $shortcuts[] = ['label' => 'Người dùng', 'route' => route('backend.users.index'), 'icon' => 'user'];
+            $shortcuts[] = ['label' => __('Người dùng'), 'route' => route('backend.users.index'), 'icon' => 'user'];
         $shortcuts[] = ['label' => 'Activity Log', 'route' => route('activitylog.index'),             'icon' => 'log'];
         @endphp
         @foreach($shortcuts as $s)

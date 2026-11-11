@@ -36,13 +36,13 @@ class LoginUserAction
         // mà không cần biết mật khẩu.
         if (! $user->is_active) {
             throw ValidationException::withMessages([
-                'email' => 'Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.',
+                'email' => __('Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.'),
             ]);
         }
 
         if (! $user->account_type->canLogin()) {
             throw ValidationException::withMessages([
-                'email' => 'Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên.',
+                'email' => __('Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên.'),
             ]);
         }
 

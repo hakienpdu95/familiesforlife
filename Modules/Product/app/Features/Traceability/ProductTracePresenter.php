@@ -59,8 +59,8 @@ class ProductTracePresenter implements TracePresenter
 
         $availability = match (true) {
             ! $live => null,
-            $status === ProductStatus::Discontinued => ['tone' => 'muted', 'label' => 'Ngừng kinh doanh', 'text' => 'Sản phẩm không còn được bán. Thông tin dưới đây để tham khảo.'],
-            $status === ProductStatus::OutOfStock => ['tone' => 'warn', 'label' => 'Tạm hết hàng', 'text' => 'Gian hàng có thể chưa nhận đơn, vui lòng kiểm tra lại trước khi đặt.'],
+            $status === ProductStatus::Discontinued => ['tone' => 'muted', 'label' => __('Ngừng kinh doanh'), 'text' => __('Sản phẩm không còn được bán. Thông tin dưới đây để tham khảo.')],
+            $status === ProductStatus::OutOfStock => ['tone' => 'warn', 'label' => __('Tạm hết hàng'), 'text' => __('Gian hàng có thể chưa nhận đơn, vui lòng kiểm tra lại trước khi đặt.')],
             default => null,
         };
 
@@ -90,7 +90,7 @@ class ProductTracePresenter implements TracePresenter
     private function base(array $page): array
     {
         return T::page([
-            'heading' => 'Truy xuất sản phẩm',
+            'heading' => __('Truy xuất sản phẩm'),
             'icon' => 'fa-box',
             'kind' => 'Sản phẩm',
             'summary' => null,
@@ -110,7 +110,7 @@ class ProductTracePresenter implements TracePresenter
         $channels = [
             ['url' => $product->shopee_url, 'name' => 'Shopee', 'short' => 'Shopee', 'logo' => 'images/shopee.png', 'domains' => ['shopee.vn', 'shp.ee'], 'button' => 'bg-[#ee4d2d] hover:bg-[#d73211]'],
             ['url' => $product->tiktok_url, 'name' => 'TikTok Shop', 'short' => 'TikTok', 'logo' => 'images/tiktok.png', 'domains' => ['tiktok.com'], 'button' => 'bg-[#161823] hover:bg-black'],
-            ['url' => $product->supplier_url, 'name' => 'Nhà cung cấp', 'short' => 'Nhà cung cấp', 'logo' => null, 'domains' => [], 'button' => 'bg-[#44403c] hover:bg-[#292524]'],
+            ['url' => $product->supplier_url, 'name' => 'Nhà cung cấp', 'short' => __('Nhà cung cấp'), 'logo' => null, 'domains' => [], 'button' => 'bg-[#44403c] hover:bg-[#292524]'],
         ];
 
         return array_values(array_filter(array_map(function (array $c) {

@@ -10,6 +10,7 @@
 
 import { createTs } from '@shared/tom-select-factory.js';
 
+import { t } from '../../../../../../resources/js/shared/i18n.js';
 function esc(v) {
     if (v == null) return '';
     return String(v)
@@ -19,7 +20,7 @@ function esc(v) {
 
 const COLUMNS = [
     {
-        title: 'Nhãn', field: 'label', minWidth: 220,
+        title: t('Nhãn'), field: 'label', minWidth: 220,
         formatter(cell) {
             const d = cell.getRow().getData();
             const icon = d.icon ? '<i class="' + esc(d.icon) + ' mr-1.5 text-base-content/50"></i>' : '';
@@ -27,32 +28,32 @@ const COLUMNS = [
         },
     },
     {
-        title: 'Vị trí', field: 'location_label', width: 150, hozAlign: 'center', headerSort: false,
+        title: t('Vị trí'), field: 'location_label', width: 150, hozAlign: 'center', headerSort: false,
         formatter(cell) { return '<span class="badge badge-sm badge-ghost">' + esc(cell.getValue()) + '</span>'; },
     },
     {
-        title: 'Đích liên kết', field: 'link_target', minWidth: 200, headerSort: false,
+        title: t('Đích liên kết'), field: 'link_target', minWidth: 200, headerSort: false,
         formatter(cell) {
             const d = cell.getRow().getData();
             if (d.link_type === 'category' || d.link_type === 'page') return '<span class="text-sm">' + esc(d.link_target) + '</span>';
             if (d.link_type === 'url') {
                 let html = '<span class="font-mono text-xs">' + esc((d.link_target || '').slice(0, 40)) + '</span>';
-                if (d.open_in_new_tab) html += ' <span class="badge badge-xs badge-ghost">tab mới</span>';
+                if (d.open_in_new_tab) html += (' <span class="badge badge-xs badge-ghost">' + t('tab mới') + '</span>');
                 return html;
             }
-            return '<span class="text-base-content/30 text-sm">— chỉ mở submenu —</span>';
+            return ('<span class="text-base-content/30 text-sm">' + t('— chỉ mở submenu —') + '</span>');
         },
     },
     {
-        title: 'Thứ tự', field: 'sort_order', width: 100, hozAlign: 'center', headerSort: false,
+        title: t('Thứ tự'), field: 'sort_order', width: 100, hozAlign: 'center', headerSort: false,
         formatter(cell) {
             const d = cell.getRow().getData();
             let html = '<div class="flex items-center justify-center gap-0.5">';
-            html += '<button class="btn btn-ghost btn-xs btn-square" title="Lên" ' + (d.prev_id ? '' : 'disabled')
+            html += ('<button class="btn btn-ghost btn-xs btn-square" title="' + t('Lên') + '" ') + (d.prev_id ? '' : 'disabled')
                 + ' onclick="window.menuItemReorder(' + d.id + ',' + d.sort_order + ',' + (d.prev_id ?? 'null') + ',' + d.prev_sort_order + ')">'
                 + '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>'
                 + '</button>';
-            html += '<button class="btn btn-ghost btn-xs btn-square" title="Xuống" ' + (d.next_id ? '' : 'disabled')
+            html += ('<button class="btn btn-ghost btn-xs btn-square" title="' + t('Xuống') + '" ') + (d.next_id ? '' : 'disabled')
                 + ' onclick="window.menuItemReorder(' + d.id + ',' + d.sort_order + ',' + (d.next_id ?? 'null') + ',' + d.next_sort_order + ')">'
                 + '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>'
                 + '</button>';
@@ -61,10 +62,10 @@ const COLUMNS = [
         },
     },
     {
-        title: 'Trạng thái', field: 'is_active', width: 100, hozAlign: 'center', headerSort: false,
+        title: t('Trạng thái'), field: 'is_active', width: 100, hozAlign: 'center', headerSort: false,
         formatter(cell) {
             const active = cell.getValue();
-            return '<span class="badge badge-sm ' + (active ? 'badge-success' : 'badge-ghost') + '">' + (active ? 'Hiện' : 'Ẩn') + '</span>';
+            return '<span class="badge badge-sm ' + (active ? 'badge-success' : 'badge-ghost') + '">' + (active ? t('Hiện') : t('Ẩn')) + '</span>';
         },
     },
     {
@@ -74,12 +75,12 @@ const COLUMNS = [
             let html = '<div class="flex items-center justify-center gap-1">';
 
             if (d.can_update) {
-                html += '<a href="' + esc(d.edit_url) + '" class="btn btn-ghost btn-xs btn-square" title="Sửa">'
+                html += '<a href="' + esc(d.edit_url) + ('" class="btn btn-ghost btn-xs btn-square" title="' + t('Sửa') + '">')
                     + '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>'
                     + '</a>';
             }
             if (d.can_delete) {
-                html += '<button class="btn btn-ghost btn-xs btn-square text-error" title="Xoá"'
+                html += ('<button class="btn btn-ghost btn-xs btn-square text-error" title="' + t('Xoá') + '"')
                     + ' data-url="' + esc(d.destroy_url) + '" data-label="' + esc(d.label) + '"'
                     + ' onclick="window.menuItemDeleteConfirm(this.dataset.url, this.dataset.label)">'
                     + '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>'
@@ -115,11 +116,11 @@ window.menuItemReorder = async function (itemId, itemSortOrder, otherId, otherSo
             window.menuItemTable?.replaceData();
         } else {
             const data = await res.json().catch(() => ({}));
-            alert(data.message || 'Cập nhật thứ tự thất bại. Vui lòng thử lại.');
+            alert(data.message || t('Cập nhật thứ tự thất bại. Vui lòng thử lại.'));
         }
     } catch (e) {
         console.error('[menu-item] reorder failed', e);
-        alert('Lỗi kết nối. Vui lòng thử lại.');
+        alert(t('Lỗi kết nối. Vui lòng thử lại.'));
     }
 };
 
@@ -142,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!pendingDeleteUrl) return;
 
         this.disabled    = true;
-        this.textContent = 'Đang xoá...';
+        this.textContent = t('Đang xoá...');
 
         try {
             const res = await fetch(pendingDeleteUrl, {
@@ -160,14 +161,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('menuItemDeleteModal')?.close();
                 window.menuItemTable?.replaceData();
             } else {
-                alert(data.message || 'Xoá thất bại. Vui lòng thử lại.');
+                alert(data.message || t('Xoá thất bại. Vui lòng thử lại.'));
             }
         } catch (e) {
             console.error('[menu-item] delete failed', e);
-            alert('Lỗi kết nối. Vui lòng thử lại.');
+            alert(t('Lỗi kết nối. Vui lòng thử lại.'));
         } finally {
             this.disabled    = false;
-            this.textContent = 'Xoá';
+            this.textContent = t('Xoá');
             pendingDeleteUrl = null;
         }
     });
@@ -194,7 +195,7 @@ document.addEventListener('alpine:init', () => {
 
             get activeChips() {
                 const chips = [], f = this.filters;
-                if (f.search)   chips.push({ key: 'search',   label: 'Tìm: ' + f.search });
+                if (f.search)   chips.push({ key: 'search',   label: (t('Tìm:') + ' ') + f.search });
                 if (f.location) chips.push({ key: 'location', label: optText(tsLocation, f.location) });
                 return chips;
             },
@@ -211,7 +212,7 @@ document.addEventListener('alpine:init', () => {
                 if (!locationEl) return;
 
                 tsLocation = createTs(locationEl, {
-                    placeholder: 'Tất cả vị trí',
+                    placeholder: t('Tất cả vị trí'),
                     onChange() { locationEl.dispatchEvent(new Event('change', { bubbles: true })); },
                 });
             },
@@ -247,11 +248,11 @@ document.addEventListener('alpine:init', () => {
                     langs: {
                         'vi-VN': {
                             pagination: {
-                                page_size: 'Dòng/trang', page_title: 'Trang',
+                                page_size: t('Dòng/trang'), page_title: t('Trang'),
                                 first: '«', last: '»', prev: '‹', next: '›',
-                                first_title: 'Trang đầu', last_title: 'Trang cuối',
-                                prev_title: 'Trang trước', next_title: 'Trang sau',
-                                counter: { showing: '', of: 'trong', rows: 'dòng', pages: 'trang' },
+                                first_title: t('Trang đầu'), last_title: t('Trang cuối'),
+                                prev_title: t('Trang trước'), next_title: t('Trang sau'),
+                                counter: { showing: '', of: t('trong'), rows: t('dòng'), pages: t('trang') },
                             },
                         },
                     },
@@ -262,7 +263,7 @@ document.addEventListener('alpine:init', () => {
                     columns: COLUMNS,
                     placeholder: '<div class="py-16 text-center opacity-40">'
                         + '<svg class="w-12 h-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h7"/></svg>'
-                        + '<p class="text-sm">Chưa có mục menu nào</p></div>',
+                        + ('<p class="text-sm">' + t('Chưa có mục menu nào') + '</p></div>'),
                 });
 
                 window.menuItemTable = tableInst;

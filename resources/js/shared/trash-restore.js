@@ -1,3 +1,5 @@
+import { t } from './i18n.js';
+
 function esc(v) {
     if (v == null) return '';
     return String(v)
@@ -6,16 +8,16 @@ function esc(v) {
 }
 
 export const DELETED_AT_COLUMN = {
-    title: 'Ngày xoá', field: 'deleted_at', width: 140, hozAlign: 'center', sorter: 'string', visible: false,
+    title: t('Ngày xoá'), field: 'deleted_at', width: 140, hozAlign: 'center', sorter: 'string', visible: false,
 };
 
 export function restoreButtonHtml(row, label) {
     if (!row.restore_url) return '';
-    return '<button type="button" class="btn btn-success btn-xs gap-1" title="Khôi phục"'
+    return ('<button type="button" class="btn btn-success btn-xs gap-1" title="' + t('Khôi phục') + '"')
         + ' data-restore-url="' + esc(row.restore_url) + '" data-restore-label="' + esc(label) + '"'
         + ' data-restore-is-public="' + (row.is_public ? '1' : '0') + '">'
         + '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a5 5 0 015 5v2M3 10l4-4m-4 4l4 4"/></svg>'
-        + 'Khôi phục</button>';
+        + (t('Khôi phục') + '</button>');
 }
 
 export function bindRestoreModal(getTable) {
@@ -40,7 +42,7 @@ export function bindRestoreModal(getTable) {
 
         const csrf = document.querySelector('meta[name=csrf-token]')?.content ?? '';
         confirmBtn.disabled = true;
-        confirmBtn.textContent = 'Đang khôi phục...';
+        confirmBtn.textContent = t('Đang khôi phục...');
 
         try {
             const res = await fetch(pendingUrl, {
@@ -52,16 +54,16 @@ export function bindRestoreModal(getTable) {
             if (res.ok) {
                 document.getElementById('restoreModal')?.close();
                 getTable()?.replaceData();
-                window.Toast?.success?.(data.message || 'Đã khôi phục.');
+                window.Toast?.success?.(data.message || t('Đã khôi phục.'));
             } else {
-                alert(data.message || 'Khôi phục thất bại. Vui lòng thử lại.');
+                alert(data.message || t('Khôi phục thất bại. Vui lòng thử lại.'));
             }
         } catch (err) {
             console.error('[restore] failed', err);
-            alert('Lỗi kết nối. Vui lòng thử lại.');
+            alert(t('Lỗi kết nối. Vui lòng thử lại.'));
         } finally {
             confirmBtn.disabled = false;
-            confirmBtn.textContent = 'Khôi phục';
+            confirmBtn.textContent = t('Khôi phục');
             pendingUrl = null;
         }
     });

@@ -21,6 +21,7 @@
 
 import { createTs, initAllTomSelects } from '@shared/tom-select-factory.js';
 
+import { t } from '../../../../../../resources/js/shared/i18n.js';
 // ── Constants ──────────────────────────────────────────────────────────────
 
 const FORM_SEL = '[data-article-form]';
@@ -86,7 +87,7 @@ function _resolveFieldLabel(field) {
     const labelText = field.closest('.form-control')
         ?.querySelector('.label-text')
         ?.textContent.replace(/\s*\*\s*$/, '').trim();
-    return labelText || field.placeholder || field.name || 'Trường bắt buộc';
+    return labelText || field.placeholder || field.name || t('Trường bắt buộc');
 }
 
 function _switchAlpineTab(wrapper, tabKey) {
@@ -104,7 +105,7 @@ function _toastHiddenErrors(errors) {
         `${label}: ${fields.join(', ')}`
     );
 
-    Toast.warning(`Còn thiếu thông tin bắt buộc:\n${lines.join('\n')}`, {
+    Toast.warning(`${t('Còn thiếu thông tin bắt buộc:\\n:n', { n: (lines.join('\n')) })}`, {
         duration: 5000,
     });
 }
@@ -128,7 +129,7 @@ function _setupTagsInput(form) {
         delimiter:       ',',
         hidePlaceholder: true,
         plugins:         ['remove_button'],
-        placeholder:     'Gõ tag rồi Enter — VD: ngủ, sơ sinh, mẹo hay',
+        placeholder:     t('Gõ tag rồi Enter — VD: ngủ, sơ sinh, mẹo hay'),
     });
 }
 
@@ -228,7 +229,7 @@ function _setupOcopProductPicker() {
             return;
         }
 
-        list.innerHTML = '<p class="text-xs text-base-content/30 py-1">Đang tải...</p>';
+        list.innerHTML = ('<p class="text-xs text-base-content/30 py-1">' + t('Đang tải...') + '</p>');
 
         const params = new URLSearchParams();
         if (wardCode) params.set('ward_code', wardCode);
@@ -239,8 +240,8 @@ function _setupOcopProductPicker() {
             if (!res.ok) throw new Error('HTTP ' + res.status);
             _render(await res.json());
         } catch (err) {
-            console.error('[ocopPicker] Lỗi tải sản phẩm OCOP:', err);
-            list.innerHTML = '<p class="text-xs text-error py-1">Lỗi tải danh sách sản phẩm OCOP.</p>';
+            console.error(t('[ocopPicker] Lỗi tải sản phẩm OCOP:'), err);
+            list.innerHTML = ('<p class="text-xs text-error py-1">' + t('Lỗi tải danh sách sản phẩm OCOP.') + '</p>');
         }
     }
 
@@ -262,7 +263,7 @@ function _setupOcopProductPicker() {
 
         list.innerHTML = rows.length
             ? rows.join('')
-            : '<p class="text-xs text-base-content/30 py-1">Không có sản phẩm OCOP nào khớp tỉnh/phường đã chọn.</p>';
+            : ('<p class="text-xs text-base-content/30 py-1">' + t('Không có sản phẩm OCOP nào khớp tỉnh/phường đã chọn.') + '</p>');
     }
 
     function _row(id, name, place, isChecked) {
@@ -323,7 +324,7 @@ function _setupHeritageSitePicker() {
             return;
         }
 
-        list.innerHTML = '<p class="text-xs text-base-content/30 py-1">Đang tải...</p>';
+        list.innerHTML = ('<p class="text-xs text-base-content/30 py-1">' + t('Đang tải...') + '</p>');
 
         const params = new URLSearchParams();
         if (wardCode) params.set('ward_code', wardCode);
@@ -334,8 +335,8 @@ function _setupHeritageSitePicker() {
             if (!res.ok) throw new Error('HTTP ' + res.status);
             _render(await res.json());
         } catch (err) {
-            console.error('[heritagePicker] Lỗi tải di tích:', err);
-            list.innerHTML = '<p class="text-xs text-error py-1">Lỗi tải danh sách di tích.</p>';
+            console.error(t('[heritagePicker] Lỗi tải di tích:'), err);
+            list.innerHTML = ('<p class="text-xs text-error py-1">' + t('Lỗi tải danh sách di tích.') + '</p>');
         }
     }
 
@@ -356,7 +357,7 @@ function _setupHeritageSitePicker() {
 
         list.innerHTML = rows.length
             ? rows.join('')
-            : '<p class="text-xs text-base-content/30 py-1">Không có di tích nào khớp tỉnh/phường đã chọn.</p>';
+            : ('<p class="text-xs text-base-content/30 py-1">' + t('Không có di tích nào khớp tỉnh/phường đã chọn.') + '</p>');
     }
 
     function _row(id, name, place, isChecked) {

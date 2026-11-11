@@ -17,10 +17,10 @@ enum ProductLinkType: string
     public function label(): string
     {
         return match ($this) {
-            self::Shopee           => 'Mua trên Shopee',
-            self::TikTok           => 'Mua trên TikTok',
-            self::SupplierProduct  => 'Xem tại nhà cung cấp',
-            self::SupplierHomepage => 'Website nhà cung cấp',
+            self::Shopee           => __('Mua trên Shopee'),
+            self::TikTok           => __('Mua trên TikTok'),
+            self::SupplierProduct  => __('Xem tại nhà cung cấp'),
+            self::SupplierHomepage => __('Website nhà cung cấp'),
         };
     }
 

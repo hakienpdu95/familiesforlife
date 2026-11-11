@@ -28,14 +28,12 @@ table { border-collapse:collapse; }
 
     <tr>
       <td class="email-body" style="padding:36px 40px 28px;">
-        <p style="font-size:15px;line-height:1.6;margin:0 0 12px;">Xin chào {{ $fullName }},</p>
+        <p style="font-size:15px;line-height:1.6;margin:0 0 12px;">{{ __('Xin chào :full_name,', ['full_name' => $fullName]) }}</p>
         <p style="font-size:15px;line-height:1.6;margin:0 0 16px;color:#374151;">
-            Cảm ơn bạn đã đăng ký nhận bản tin từ {{ config('app.name') }}. Từ nay bạn sẽ nhận được những
-            thông tin, bài viết mới nhất trực tiếp qua email này.
+            {{ __('Cảm ơn bạn đã đăng ký nhận bản tin từ :value. Từ nay bạn sẽ nhận được những thông tin, bài viết mới nhất trực tiếp qua email này.', ['value' => config('app.name')]) }}
         </p>
         <p style="font-size:13px;line-height:1.6;margin:16px 0 0;color:#94a3b8;">
-            Nếu bạn không phải là người đăng ký, có thể bỏ qua email này — chúng tôi sẽ không gửi thêm gì khác
-            ngoài các bản tin bạn đã đăng ký nhận.
+            {{ __('Nếu bạn không phải là người đăng ký, có thể bỏ qua email này — chúng tôi sẽ không gửi thêm gì khác ngoài các bản tin bạn đã đăng ký nhận.') }}
         </p>
       </td>
     </tr>
@@ -43,8 +41,7 @@ table { border-collapse:collapse; }
     <tr>
       <td style="border-top:1px solid #e0e7ff;padding:16px 40px 24px;text-align:center;">
         <p style="font-size:12px;color:#94a3b8;margin:0;line-height:1.6;">
-          © {{ date('Y') }} <strong>{{ config('app.name') }}</strong> —
-          Email được gửi tự động, vui lòng không trả lời trực tiếp.
+          © {{ date('Y') }} <strong>{{ config('app.name') }}</strong> {{ __('— Email được gửi tự động, vui lòng không trả lời trực tiếp.') }}
         </p>
       </td>
     </tr>

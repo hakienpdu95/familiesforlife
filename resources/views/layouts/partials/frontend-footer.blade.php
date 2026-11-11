@@ -20,9 +20,9 @@
                 <img src="{{ asset('images/logo.png') }}" alt="" width="44" height="44" loading="lazy" decoding="async">
                 <span class="footer-brand__name">{{ $brand }}</span>
             </a>
-            <p class="footer-brand__tagline">Chúng tôi tin vào một thế giới nơi mọi gia đình đều được yêu thương và phát triển trọn vẹn.</p>
+            <p class="footer-brand__tagline">{{ __('Chúng tôi tin vào một thế giới nơi mọi gia đình đều được yêu thương và phát triển trọn vẹn.') }}</p>
 
-            <ul class="social-icons-list" aria-label="Mạng xã hội">
+            <ul class="social-icons-list" aria-label="{{ __('Mạng xã hội') }}">
                 @foreach($socials as $key => $label)
                 <li>
                     <a class="social-icons-list__link" href="#" target="_blank" rel="noopener" aria-label="{{ $label }}" title="{{ $label }}">
@@ -34,7 +34,7 @@
         </div>
 
         @if($footerColumns->isNotEmpty())
-        <nav class="footer-nav" aria-label="Liên kết chân trang">
+        <nav class="footer-nav" aria-label="{{ __('Liên kết chân trang') }}">
             @foreach($footerColumns as $group)
             <div class="nav-footer__content">
                 <h4 class="nav-footer__title">{{ $group->label }}</h4>
@@ -57,7 +57,7 @@
     </div>
 
     <div class="container footer-bottom">
-        <p class="copyright">© {{ now()->year }} {{ $brand }}. Bảo lưu mọi quyền.</p>
+        <p class="copyright">{{ __('© :year :brand. Bảo lưu mọi quyền.', ['year' => now()->year, 'brand' => $brand]) }}</p>
 
         <div class="footer-bottom__end">
             @if($legalGroup)
@@ -76,7 +76,7 @@
             @endif
 
             <button type="button" class="footer-totop" x-data @click="window.scrollTo({ top: 0, behavior: 'smooth' })">
-                Lên đầu trang
+                {{ __('Lên đầu trang') }}
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
             </button>
         </div>

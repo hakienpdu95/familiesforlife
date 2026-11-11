@@ -11,9 +11,9 @@ enum EventPriceType: string
     public function label(): string
     {
         return match ($this) {
-            self::Free   => 'Miễn phí',
-            self::Single => 'Giá cố định',
-            self::Range  => 'Khoảng giá',
+            self::Free   => __('Miễn phí'),
+            self::Single => __('Giá cố định'),
+            self::Range  => __('Khoảng giá'),
         };
     }
 }

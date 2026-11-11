@@ -19,6 +19,7 @@
 
 import { initAllTomSelects } from '@shared/tom-select-factory.js';
 
+import { t } from '../../../../../../resources/js/shared/i18n.js';
 const FORM_SEL = '[data-heritage-site-form]';
 const RE_TAB_XSHOW = /tab\s*===\s*['"](\w+)['"]/;
 const RE_COORD_PAIR = /^\s*(-?\d+(?:\.\d+)?)\s*[,;\s]\s*(-?\d+(?:\.\d+)?)\s*$/;
@@ -88,7 +89,7 @@ function _collectHiddenErrors(form) {
 function _resolveFieldLabel(field) {
     return field.closest('.form-control')?.querySelector('.label-text')
         ?.textContent.replace(/\s*\*\s*$/, '').trim()
-        ?? field.placeholder ?? field.name ?? 'Trường bắt buộc';
+        ?? field.placeholder ?? field.name ?? t('Trường bắt buộc');
 }
 
 function _switchAlpineTab(wrapper, tabKey) {
@@ -102,7 +103,7 @@ function _switchAlpineTab(wrapper, tabKey) {
 function _toastHiddenErrors(errors) {
     if (!window.Toast) return;
     const lines = Array.from(errors.values(), ({ label, fields }) => `${label}: ${fields.join(', ')}`);
-    Toast.warning(`Còn thiếu thông tin bắt buộc:\n${lines.join('\n')}`, { duration: 5000 });
+    Toast.warning(`${t('Còn thiếu thông tin bắt buộc:\\n:n', { n: (lines.join('\n')) })}`, { duration: 5000 });
 }
 
 // ── Nút trạng thái trong sticky bar ───────────────────────────────────────────

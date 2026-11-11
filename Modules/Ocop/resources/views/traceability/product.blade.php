@@ -11,18 +11,18 @@
         @include('traceability.partials.gallery', ['gallery' => $gallery, 'title' => $title])
 
         <div class="px-3 pt-4 pb-5">
-            <p class="tx-eyebrow">{{ $group ?: 'Sản phẩm OCOP' }}@if ($category_code) <span class="font-mono font-medium text-[#a8a29e]" title="Mã phân nhóm OCOP">· {{ $category_code }}</span>@endif</p>
+            <p class="tx-eyebrow">{{ $group ?: __('Sản phẩm OCOP') }}@if ($category_code) <span class="font-mono font-medium text-[#a8a29e]" title="{{ __('Mã phân nhóm OCOP') }}">· {{ $category_code }}</span>@endif</p>
             <h1 class="tx-display tx-h1 mt-1.5">{{ $title }}</h1>
             @if ($description)
                 @php($longDescription = collect($info['panels'] ?? [])->flatMap(fn ($p) => $p['items'])->contains('key', 'mo-ta'))
-                <p class="mt-1.5 text-[14px] leading-[1.6] text-[#78716c] [overflow-wrap:anywhere]">{{ \Illuminate\Support\Str::limit(preg_replace('/\s+/u', ' ', $description), 220) }}@if ($longDescription) <a href="#mo-ta" onclick="document.getElementById('mo-ta').open=true" class="font-semibold text-primary whitespace-nowrap">Đọc thêm</a>@endif</p>
+                <p class="mt-1.5 text-[14px] leading-[1.6] text-[#78716c] [overflow-wrap:anywhere]">{{ \Illuminate\Support\Str::limit(preg_replace('/\s+/u', ' ', $description), 220) }}@if ($longDescription) <a href="#mo-ta" onclick="document.getElementById('mo-ta').open=true" class="font-semibold text-primary whitespace-nowrap">{{ __('Đọc thêm') }}</a>@endif</p>
             @endif
 
             @include('traceability.partials.ocop-cert', [
                 'stars' => $stars,
-                'rows' => ['Chủ thể' => $subject['name'] ?? null, 'Địa bàn' => $area],
+                'rows' => [__('Chủ thể') => $subject['name'] ?? null, __('Địa bàn') => $area],
                 'docs' => $quality_docs,
-                'docsLabel' => 'Hồ sơ chất lượng',
+                'docsLabel' => __('Hồ sơ chất lượng'),
                 'expiry' => ! empty($subject['cert_expiry_label']) ? ['label' => $subject['cert_expiry_label'], 'valid' => $subject['cert_valid']] : null,
             ])
         </div>
@@ -30,12 +30,12 @@
 
     @if ($channels)
         <section id="mua-hang" class="tx-section">
-            <h2 class="tx-section-title">Mua hàng chính hãng <small>{{ count($channels) }} gian hàng</small></h2>
+            <h2 class="tx-section-title">{{ __('Mua hàng chính hãng') }} <small>{{ __(':channels gian hàng', ['channels' => count($channels)]) }}</small></h2>
             <ul class="tx-card tx-rows">
                 @foreach ($channels as $channel)
                     <li>
                         <a href="{{ $channel['url'] }}" target="_blank" rel="noopener nofollow sponsored" class="tx-row gap-3.5 py-3.5"
-                           aria-label="Mua {{ $title }} trên {{ $channel['name'] }} (mở trang mới)">
+                           aria-label="{{ __('Mua :title trên :channel (mở trang mới)', ['title' => $title, 'channel' => $channel['name']]) }}">
                             <span class="w-11 h-11 rounded-[10px] bg-white ring-1 ring-[rgb(28_25_23/.08)] flex items-center justify-center shrink-0">
                                 <img src="{{ $channel['logo'] }}" alt="" width="32" height="32" loading="lazy" decoding="async" class="w-8 h-8 object-contain">
                             </span>
@@ -58,7 +58,7 @@
 
     @if ($info)
         <section id="thong-tin" class="tx-section">
-            <h2 class="tx-section-title">Thông tin sản phẩm </h2>
+            <h2 class="tx-section-title">{{ __('Thông tin sản phẩm') }} </h2>
             <div class="tx-card">
                 @foreach ($info['groups'] as $group)
                     @if ($group['rows'])
@@ -72,7 +72,7 @@
                                             <span @class(['font-medium', 'font-mono tracking-wide' => ! empty($row['mono'])])>{{ $row['value'] }}</span>
                                             @if (! empty($row['note']))<span class="block mt-0.5 text-[12.5px] text-[#78716c]">{{ $row['note'] }}</span>@endif
                                         @else
-                                            <span class="text-[#a8a29e]">Chưa khai báo</span>
+                                            <span class="text-[#a8a29e]">{{ __('Chưa khai báo') }}</span>
                                         @endif
                                     </dd>
                                 </div>
@@ -106,7 +106,7 @@
                             @else
                                 <div class="flex items-center justify-between gap-4 px-4 min-h-[3rem] py-2.5">
                                     <span class="text-[15px] font-semibold text-[#78716c]">{{ $section['title'] }}</span>
-                                    <span class="text-[13px] text-[#a8a29e]">Chưa khai báo</span>
+                                    <span class="text-[13px] text-[#a8a29e]">{{ __('Chưa khai báo') }}</span>
                                 </div>
                             @endif
                         @endforeach

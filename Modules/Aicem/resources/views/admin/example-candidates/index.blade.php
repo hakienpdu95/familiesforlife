@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', 'AICEM — Duyệt ví dụ mẫu')
+@section('title', __('AICEM — Duyệt ví dụ mẫu'))
 
 @section('content')
 <div>
@@ -17,20 +17,20 @@
 
     <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div>
-            <h1 class="text-2xl font-bold text-base-content">Duyệt ví dụ mẫu (example_good)</h1>
+            <h1 class="text-2xl font-bold text-base-content">{{ __('Duyệt ví dụ mẫu (example_good)') }}</h1>
             <p class="text-sm text-base-content/50 mt-0.5">
-                Đề xuất tự động từ bài viết đã xuất bản và đánh dấu "Nổi bật" — bạn duyệt trước khi lưu vào Kho tri thức
+                {{ __('Đề xuất tự động từ bài viết đã xuất bản và đánh dấu "Nổi bật" — bạn duyệt trước khi lưu vào Kho tri thức') }}
             </p>
         </div>
-        <a href="{{ route('backend.aicem.knowledge-documents.index') }}" class="btn btn-ghost btn-sm">← Kho tri thức</a>
+        <a href="{{ route('backend.aicem.knowledge-documents.index') }}" class="btn btn-ghost btn-sm">{{ __('← Kho tri thức') }}</a>
     </div>
 
     <form method="GET" class="flex flex-wrap gap-2 mb-5">
         <select name="status" class="select select-bordered select-sm" onchange="this.form.submit()">
-            <option value="pending" {{ request('status', 'pending') === 'pending' ? 'selected' : '' }}>Chờ duyệt</option>
-            <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Đã duyệt</option>
-            <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Đã từ chối</option>
-            <option value="all" {{ request('status') === 'all' ? 'selected' : '' }}>Tất cả</option>
+            <option value="pending" {{ request('status', 'pending') === 'pending' ? 'selected' : '' }}>{{ __('Chờ duyệt') }}</option>
+            <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>{{ __('Đã duyệt') }}</option>
+            <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>{{ __('Đã từ chối') }}</option>
+            <option value="all" {{ request('status') === 'all' ? 'selected' : '' }}>{{ __('Tất cả') }}</option>
         </select>
     </form>
 
@@ -49,15 +49,14 @@
                             } }}">{{ $candidate->status->label() }}</span>
                         </div>
                         <p class="text-xs text-base-content/40">
-                            {{ $candidate->subject_type }}#{{ $candidate->subject_id }} ·
-                            tạo lúc {{ format_datetime($candidate->created_at) }}
+                            {{ __(':subject_type#:subject_id · tạo lúc :created_at', ['subject_type' => $candidate->subject_type, 'subject_id' => $candidate->subject_id, 'created_at' => format_datetime($candidate->created_at)]) }}
                             @if($candidate->reviewer)
-                                · duyệt bởi {{ $candidate->reviewer->name }} lúc {{ format_datetime($candidate->reviewed_at) }}
+                                {{ __('· duyệt bởi :name lúc :reviewed_at', ['name' => $candidate->reviewer->name, 'reviewed_at' => format_datetime($candidate->reviewed_at)]) }}
                             @endif
                         </p>
                         @if($candidate->suggested_scope)
                         <p class="text-xs text-base-content/40 mt-1">
-                            Scope dự kiến:
+                            {{ __('Scope dự kiến:') }}
                             @foreach($candidate->suggested_scope as $key => $values)
                                 <span class="mr-2">{{ $key }}: {{ implode(', ', (array) $values) }}</span>
                             @endforeach
@@ -69,25 +68,25 @@
                     <div class="flex gap-2 shrink-0">
                         <form method="POST" action="{{ route('backend.aicem.example-candidates.approve', $candidate) }}">
                             @csrf
-                            <button class="btn btn-success btn-xs">Duyệt</button>
+                            <button class="btn btn-success btn-xs">{{ __('Duyệt') }}</button>
                         </form>
                         <form method="POST" action="{{ route('backend.aicem.example-candidates.reject', $candidate) }}"
-                              onsubmit="return confirm('Từ chối đề xuất này?')">
+                              onsubmit="return confirm(@js(__('Từ chối đề xuất này?')))">
                             @csrf
-                            <button class="btn btn-ghost btn-xs">Từ chối</button>
+                            <button class="btn btn-ghost btn-xs">{{ __('Từ chối') }}</button>
                         </form>
                     </div>
                     @endif
                 </div>
 
                 <details class="mt-3">
-                    <summary class="text-xs text-base-content/50 cursor-pointer select-none">Xem nội dung đề xuất</summary>
+                    <summary class="text-xs text-base-content/50 cursor-pointer select-none">{{ __('Xem nội dung đề xuất') }}</summary>
                     <pre class="text-xs bg-base-200/50 rounded p-3 mt-2 whitespace-pre-wrap font-sans">{{ $candidate->suggested_content }}</pre>
                 </details>
             </div>
         </div>
         @empty
-        <div class="text-center py-12 text-base-content/40 text-sm">Không có đề xuất nào.</div>
+        <div class="text-center py-12 text-base-content/40 text-sm">{{ __('Không có đề xuất nào.') }}</div>
         @endforelse
     </div>
 

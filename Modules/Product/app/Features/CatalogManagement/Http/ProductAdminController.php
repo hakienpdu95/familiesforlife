@@ -60,8 +60,8 @@ class ProductAdminController extends Controller
 
         return redirect()->route($route)
             ->with('success', $published
-                ? "Sản phẩm \"{$product->name}\" đã được tạo và xuất bản."
-                : "Sản phẩm \"{$product->name}\" đã được tạo và gửi duyệt.");
+                ? __('Sản phẩm ":name" đã được tạo và xuất bản.', ['name' => $product->name])
+                : __('Sản phẩm ":name" đã được tạo và gửi duyệt.', ['name' => $product->name]));
     }
 
     public function edit(Product $product, ListCategoriesForAdminHandler $categoryHandler): View
@@ -83,7 +83,7 @@ class ProductAdminController extends Controller
         $validated = $this->validated($request, $product->id);
         $kept = $product->getMedia(Product::GALLERY)->whereNotIn('uuid', $validated['remove_media_uuids'] ?? [])->count();
         if ($kept + count($validated['media_uuids'] ?? []) > Product::MAX_IMAGES) {
-            throw \Illuminate\Validation\ValidationException::withMessages(['media_uuids' => 'Tối đa '.Product::MAX_IMAGES." ảnh cho mỗi sản phẩm (hiện còn {$kept} ảnh)."]);
+            throw \Illuminate\Validation\ValidationException::withMessages(['media_uuids' => __('Tối đa :max ảnh cho mỗi sản phẩm (hiện còn :kept ảnh).', ['max' => Product::MAX_IMAGES, 'kept' => $kept])]);
         }
         $data = ProductData::from([...$validated, 'cover_image_url' => $product->cover_image_url]);
 
@@ -97,13 +97,13 @@ class ProductAdminController extends Controller
             // CỐ Ý không chặn toàn bộ form vì các trường vận hành (giá, trạng thái kinh
             // doanh…) vẫn sửa được bình thường dù nội dung đã lưu trữ (§2.3) — lỗi chỉ xảy ra
             // đúng lúc đụng vào trường nội dung, nên xử lý ở đây thay vì chặn cả form.
-            return back()->withInput()->with('error', 'Không thể sửa nội dung sản phẩm đã lưu trữ. Các trường khác (giá, trạng thái kinh doanh…) đã được lưu — chỉ phần nội dung bị bỏ qua.');
+            return back()->withInput()->with('error', __('Không thể sửa nội dung sản phẩm đã lưu trữ. Các trường khác (giá, trạng thái kinh doanh…) đã được lưu — chỉ phần nội dung bị bỏ qua.'));
         }
 
         $published = $this->fastTrackIfFinalApprover($request, $product->refresh());
 
         return redirect()->route('backend.products.index')
-            ->with('success', $published ? 'Đã cập nhật và xuất bản sản phẩm.' : 'Cập nhật sản phẩm thành công.');
+            ->with('success', $published ? __('Đã cập nhật và xuất bản sản phẩm.') : __('Cập nhật sản phẩm thành công.'));
     }
 
     public function destroy(Request $request, Product $product, DeleteProductAction $action): RedirectResponse|JsonResponse
@@ -121,11 +121,11 @@ class ProductAdminController extends Controller
         }
 
         if ($request->expectsJson()) {
-            return response()->json(['message' => "Đã xoá sản phẩm \"{$name}\"."]);
+            return response()->json(['message' => __('Đã xoá sản phẩm ":name".', ['name' => $name])]);
         }
 
         return redirect()->route('backend.products.index')
-            ->with('success', "Đã xoá sản phẩm \"{$name}\".");
+            ->with('success', __('Đã xoá sản phẩm ":name".', ['name' => $name]));
     }
 
     public function changeStatus(Request $request, Product $product, ChangeProductStatusAction $action): RedirectResponse
@@ -136,7 +136,7 @@ class ProductAdminController extends Controller
 
         $action->handle($product, ProductStatus::from($request->string('status')->value()));
 
-        return back()->with('success', 'Đã cập nhật trạng thái sản phẩm.');
+        return back()->with('success', __('Đã cập nhật trạng thái sản phẩm.'));
     }
 
     // ── Approval workflow — Platform Approval Gateway (Hà Kiên nội bộ) ─────────────────
@@ -149,17 +149,17 @@ class ProductAdminController extends Controller
         $this->authorize('submitForApproval', $product);
 
         if (Gate::allows('publishApproval', $product)) {
-            return back()->with('error', 'Tài khoản của bạn có quyền xuất bản trực tiếp, không cần gửi duyệt.');
+            return back()->with('error', __('Tài khoản của bạn có quyền xuất bản trực tiếp, không cần gửi duyệt.'));
         }
 
-        return $this->runApprovalTransition($product, fn () => $action->handle($product), 'Đã gửi sản phẩm để chờ duyệt.');
+        return $this->runApprovalTransition($product, fn () => $action->handle($product), __('Đã gửi sản phẩm để chờ duyệt.'));
     }
 
     public function approveContent(Product $product, ApproveAction $action): RedirectResponse
     {
         $this->authorize('approve', $product);
 
-        return $this->runApprovalTransition($product, fn () => $action->handle($product), 'Đã duyệt nội dung sản phẩm.');
+        return $this->runApprovalTransition($product, fn () => $action->handle($product), __('Đã duyệt nội dung sản phẩm.'));
     }
 
     public function rejectContent(Request $request, Product $product, RejectAction $action): RedirectResponse
@@ -168,14 +168,14 @@ class ProductAdminController extends Controller
 
         $reason = $request->validate(['reason' => ['required', 'string', 'min:10']])['reason'];
 
-        return $this->runApprovalTransition($product, fn () => $action->handle($product, $reason), 'Đã từ chối duyệt.');
+        return $this->runApprovalTransition($product, fn () => $action->handle($product, $reason), __('Đã từ chối duyệt.'));
     }
 
     public function publishContent(Product $product, FastTrackPublishProductAction $action): RedirectResponse
     {
         $this->authorize('publishApproval', $product);
 
-        return $this->runApprovalTransition($product, fn () => $action->handle($product), 'Đã duyệt và xuất bản nội dung sản phẩm.');
+        return $this->runApprovalTransition($product, fn () => $action->handle($product), __('Đã duyệt và xuất bản nội dung sản phẩm.'));
     }
 
     private function fastTrackIfFinalApprover(Request $request, Product $product): bool
@@ -195,7 +195,7 @@ class ProductAdminController extends Controller
     {
         $this->authorize('archiveApproval', $product);
 
-        return $this->runApprovalTransition($product, fn () => $action->handle($product), 'Đã lưu trữ sản phẩm.');
+        return $this->runApprovalTransition($product, fn () => $action->handle($product), __('Đã lưu trữ sản phẩm.'));
     }
 
     private function runApprovalTransition(Product $product, \Closure $callback, string $successMessage): RedirectResponse
@@ -247,39 +247,39 @@ class ProductAdminController extends Controller
             'is_featured'            => ['boolean'],
             'sort_order'             => ['integer', 'min:0'],
         ], [
-            'category_id.exists'           => 'Danh mục được chọn không hợp lệ.',
-            'name.required'                => 'Vui lòng nhập tên sản phẩm.',
-            'name.max'                     => 'Tên sản phẩm không được vượt quá :max ký tự.',
-            'type.required'                => 'Vui lòng chọn loại sản phẩm.',
-            'type.in'                      => 'Loại sản phẩm không hợp lệ.',
-            'status.required'              => 'Vui lòng chọn trạng thái.',
-            'status.in'                    => 'Trạng thái không hợp lệ.',
-            'sku.max'                      => 'SKU không được vượt quá :max ký tự.',
-            'short_description.max'        => 'Mô tả ngắn không được vượt quá :max ký tự.',
-            'content.string'               => 'Nội dung không hợp lệ.',
-            'content.max'                  => 'Nội dung quá dài (tối đa :max ký tự, tính cả mã HTML).',
-            'price.numeric'                => 'Giá phải là số.',
-            'price.min'                    => 'Giá không được âm.',
-            'price_label.max'              => 'Nhãn giá không được vượt quá :max ký tự.',
-            'currency.size'                => 'Tiền tệ phải là mã 3 ký tự (VD: VND, USD).',
-            'media_uuids.max'              => 'Tối đa :max ảnh cho mỗi sản phẩm.',
-            'media_uuids.*.uuid'           => 'Ảnh tải lên không hợp lệ — vui lòng tải lại.',
-            'remove_cover.boolean'         => 'Giá trị "Xóa ảnh hiện tại" không hợp lệ.',
-            'shopee_url.url'               => 'Link Shopee không đúng định dạng URL.',
-            'shopee_url.regex'             => 'Link Shopee phải bắt đầu bằng http:// hoặc https://.',
-            'shopee_url.max'               => 'Link Shopee không được vượt quá :max ký tự.',
-            'tiktok_url.url'               => 'Link TikTok Shop không đúng định dạng URL.',
-            'tiktok_url.regex'             => 'Link TikTok Shop phải bắt đầu bằng http:// hoặc https://.',
-            'tiktok_url.max'               => 'Link TikTok Shop không được vượt quá :max ký tự.',
-            'supplier_url.url'             => 'Link sản phẩm tại NCC không đúng định dạng URL.',
-            'supplier_url.regex'           => 'Link sản phẩm tại NCC phải bắt đầu bằng http:// hoặc https://.',
-            'supplier_url.max'             => 'Link sản phẩm tại NCC không được vượt quá :max ký tự.',
-            'supplier_homepage_url.url'    => 'Website nhà cung cấp không đúng định dạng URL.',
-            'supplier_homepage_url.regex'  => 'Website nhà cung cấp phải bắt đầu bằng http:// hoặc https://.',
-            'supplier_homepage_url.max'    => 'Website nhà cung cấp không được vượt quá :max ký tự.',
-            'is_featured.boolean'          => 'Giá trị "Sản phẩm nổi bật" không hợp lệ.',
-            'sort_order.integer'           => 'Thứ tự hiển thị phải là số nguyên.',
-            'sort_order.min'               => 'Thứ tự hiển thị không được âm.',
+            'category_id.exists'           => __('Danh mục được chọn không hợp lệ.'),
+            'name.required'                => __('Vui lòng nhập tên sản phẩm.'),
+            'name.max'                     => __('Tên sản phẩm không được vượt quá :max ký tự.'),
+            'type.required'                => __('Vui lòng chọn loại sản phẩm.'),
+            'type.in'                      => __('Loại sản phẩm không hợp lệ.'),
+            'status.required'              => __('Vui lòng chọn trạng thái.'),
+            'status.in'                    => __('Trạng thái không hợp lệ.'),
+            'sku.max'                      => __('SKU không được vượt quá :max ký tự.'),
+            'short_description.max'        => __('Mô tả ngắn không được vượt quá :max ký tự.'),
+            'content.string'               => __('Nội dung không hợp lệ.'),
+            'content.max'                  => __('Nội dung quá dài (tối đa :max ký tự, tính cả mã HTML).'),
+            'price.numeric'                => __('Giá phải là số.'),
+            'price.min'                    => __('Giá không được âm.'),
+            'price_label.max'              => __('Nhãn giá không được vượt quá :max ký tự.'),
+            'currency.size'                => __('Tiền tệ phải là mã 3 ký tự (VD: VND, USD).'),
+            'media_uuids.max'              => __('Tối đa :max ảnh cho mỗi sản phẩm.'),
+            'media_uuids.*.uuid'           => __('Ảnh tải lên không hợp lệ — vui lòng tải lại.'),
+            'remove_cover.boolean'         => __('Giá trị "Xóa ảnh hiện tại" không hợp lệ.'),
+            'shopee_url.url'               => __('Link Shopee không đúng định dạng URL.'),
+            'shopee_url.regex'             => __('Link Shopee phải bắt đầu bằng http:// hoặc https://.'),
+            'shopee_url.max'               => __('Link Shopee không được vượt quá :max ký tự.'),
+            'tiktok_url.url'               => __('Link TikTok Shop không đúng định dạng URL.'),
+            'tiktok_url.regex'             => __('Link TikTok Shop phải bắt đầu bằng http:// hoặc https://.'),
+            'tiktok_url.max'               => __('Link TikTok Shop không được vượt quá :max ký tự.'),
+            'supplier_url.url'             => __('Link sản phẩm tại NCC không đúng định dạng URL.'),
+            'supplier_url.regex'           => __('Link sản phẩm tại NCC phải bắt đầu bằng http:// hoặc https://.'),
+            'supplier_url.max'             => __('Link sản phẩm tại NCC không được vượt quá :max ký tự.'),
+            'supplier_homepage_url.url'    => __('Website nhà cung cấp không đúng định dạng URL.'),
+            'supplier_homepage_url.regex'  => __('Website nhà cung cấp phải bắt đầu bằng http:// hoặc https://.'),
+            'supplier_homepage_url.max'    => __('Website nhà cung cấp không được vượt quá :max ký tự.'),
+            'is_featured.boolean'          => __('Giá trị "Sản phẩm nổi bật" không hợp lệ.'),
+            'sort_order.integer'           => __('Thứ tự hiển thị phải là số nguyên.'),
+            'sort_order.min'               => __('Thứ tự hiển thị không được âm.'),
         ]);
     }
 }

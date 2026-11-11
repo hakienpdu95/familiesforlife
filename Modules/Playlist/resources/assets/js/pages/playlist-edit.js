@@ -1,3 +1,5 @@
+import { t } from '../../../../../../resources/js/shared/i18n.js';
+
 /**
  * pages/playlist-edit.js
  * Alpine component cho phần "Nội dung trong playlist" ở dashboard/playlists/items/{playlist}/edit
@@ -105,7 +107,7 @@ document.addEventListener('alpine:init', () => {
                     const data = await res.json().catch(() => ({}));
 
                     if (!res.ok) {
-                        alert(data.message || 'Thêm nội dung thất bại. Vui lòng thử lại.');
+                        alert(data.message || t('Thêm nội dung thất bại. Vui lòng thử lại.'));
                         return;
                     }
 
@@ -122,14 +124,14 @@ document.addEventListener('alpine:init', () => {
                     this.results = this.results.filter((r) => !(r.type === candidate.type && r.id === candidate.id));
                 } catch (e) {
                     console.error('[playlist] add item failed', e);
-                    alert('Lỗi kết nối. Vui lòng thử lại.');
+                    alert(t('Lỗi kết nối. Vui lòng thử lại.'));
                 } finally {
                     this.addingKey = null;
                 }
             },
 
             async removeItem(itemId) {
-                if (!confirm('Gỡ nội dung này khỏi playlist?')) return;
+                if (!confirm(t('Gỡ nội dung này khỏi playlist?'))) return;
 
                 const url = detachUrlTemplate.replace('__ID__', itemId);
 
@@ -147,14 +149,14 @@ document.addEventListener('alpine:init', () => {
 
                     if (!res.ok) {
                         const data = await res.json().catch(() => ({}));
-                        alert(data.message || 'Gỡ nội dung thất bại. Vui lòng thử lại.');
+                        alert(data.message || t('Gỡ nội dung thất bại. Vui lòng thử lại.'));
                         return;
                     }
 
                     this.items = this.items.filter((i) => i.id !== itemId);
                 } catch (e) {
                     console.error('[playlist] remove item failed', e);
-                    alert('Lỗi kết nối. Vui lòng thử lại.');
+                    alert(t('Lỗi kết nối. Vui lòng thử lại.'));
                 }
             },
 
@@ -186,7 +188,7 @@ document.addEventListener('alpine:init', () => {
                     const data = await res.json().catch(() => ({}));
 
                     if (!res.ok) {
-                        alert(data.message || 'Lưu thứ tự thất bại. Vui lòng thử lại.');
+                        alert(data.message || t('Lưu thứ tự thất bại. Vui lòng thử lại.'));
                         return;
                     }
 
@@ -197,7 +199,7 @@ document.addEventListener('alpine:init', () => {
                     });
                 } catch (e) {
                     console.error('[playlist] save order failed', e);
-                    alert('Lỗi kết nối. Vui lòng thử lại.');
+                    alert(t('Lỗi kết nối. Vui lòng thử lại.'));
                 } finally {
                     this.savingOrder = false;
                 }

@@ -17,10 +17,10 @@ enum SuggestionStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Pending  => 'Đang chờ',
-            self::Accepted => 'Đã chấp nhận',
-            self::Rejected => 'Đã từ chối',
-            self::Stale    => 'Đã cũ',
+            self::Pending  => __('Đang chờ'),
+            self::Accepted => __('Đã chấp nhận'),
+            self::Rejected => __('Đã từ chối'),
+            self::Stale    => __('Đã cũ'),
         };
     }
 }

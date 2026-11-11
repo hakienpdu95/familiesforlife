@@ -228,7 +228,7 @@ class VideoIdeaExtractorController extends Controller
 
         $percentKept = (int) round(mb_strlen($truncatedTranscript) / $originalLength * 100);
         $truncationNote = sprintf(
-            'Transcript gốc dài %s ký tự, đã CẮT BỚT còn ~%d%% (trần %s ký tự/video) trước khi đưa vào AI — mọi Tiêu đề/Hook/Ý tưởng/Kịch bản bên dưới chỉ dựa trên phần ĐẦU video, CHƯA phản ánh nội dung phần sau. Cân nhắc tách video này thành nhiều lượt trích xuất theo từng đoạn nếu cần khai thác trọn vẹn.',
+            __('Transcript gốc dài %s ký tự, đã CẮT BỚT còn ~%d%% (trần %s ký tự/video) trước khi đưa vào AI — mọi Tiêu đề/Hook/Ý tưởng/Kịch bản bên dưới chỉ dựa trên phần ĐẦU video, CHƯA phản ánh nội dung phần sau. Cân nhắc tách video này thành nhiều lượt trích xuất theo từng đoạn nếu cần khai thác trọn vẹn.'),
             number_format($originalLength),
             $percentKept,
             number_format($maxChars),

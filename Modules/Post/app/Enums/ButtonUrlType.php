@@ -13,9 +13,9 @@ enum ButtonUrlType: string
     public function label(): string
     {
         return match ($this) {
-            self::UseProductLink => 'Link sản phẩm',
-            self::CustomUrl      => 'Link tuỳ ý',
-            self::Phone          => 'Số điện thoại',
+            self::UseProductLink => __('Link sản phẩm'),
+            self::CustomUrl      => __('Link tuỳ ý'),
+            self::Phone          => __('Số điện thoại'),
             self::Zalo           => 'Zalo',
             self::Email          => 'Email',
         };

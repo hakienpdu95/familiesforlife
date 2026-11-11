@@ -20,7 +20,7 @@ class AddItemToPlaylistAction
         $modelClass = config("playlist.itemables.{$itemableType}.model");
 
         if (! $modelClass) {
-            throw ValidationException::withMessages(['itemable_type' => 'Loại nội dung không hợp lệ.']);
+            throw ValidationException::withMessages(['itemable_type' => __('Loại nội dung không hợp lệ.')]);
         }
 
         /** @var PlaylistableContract|null $itemable */
@@ -31,7 +31,7 @@ class AddItemToPlaylistAction
         // này tới server, §8 "race search→attach").
         if (! $itemable instanceof PlaylistableContract || ! $itemable->isPlaylistCardVisible()) {
             throw ValidationException::withMessages([
-                'itemable_id' => 'Nội dung này hiện đang ẩn hoặc chưa xuất bản, không thể thêm vào playlist.',
+                'itemable_id' => __('Nội dung này hiện đang ẩn hoặc chưa xuất bản, không thể thêm vào playlist.'),
             ]);
         }
 

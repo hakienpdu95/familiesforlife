@@ -4,7 +4,7 @@
     Optional: $title (string), $limit (int), $showEmpty (bool)
 --}}
 @php
-    $title     = $title     ?? 'Lịch sử hoạt động';
+    $title     = $title     ?? __('Lịch sử hoạt động');
     $showEmpty = $showEmpty ?? true;
 @endphp
 
@@ -14,7 +14,7 @@
         <div class="flex items-center justify-between mb-4">
             <h3 class="font-semibold text-base text-base-content">{{ $title }}</h3>
             @if($logs->isNotEmpty())
-                <span class="badge badge-ghost badge-sm">{{ $logs->count() }} gần nhất</span>
+                <span class="badge badge-ghost badge-sm">{{ __(':count gần nhất', ['count' => $logs->count()]) }}</span>
             @endif
         </div>
 
@@ -25,7 +25,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                           d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                 </svg>
-                <p class="text-sm">Chưa có hoạt động nào trong 30 ngày qua</p>
+                <p class="text-sm">{{ __('Chưa có hoạt động nào trong 30 ngày qua') }}</p>
             </div>
             @endif
         @else

@@ -3,12 +3,12 @@
     <div class="form-control">
         <label class="label py-0 pb-1.5">
             <span class="label-text font-medium">
-                Tỉnh / Thành phố@if($required) <span class="text-error">*</span>@endif
+                {{ __('Tỉnh / Thành phố') }}@if($required) <span class="text-error">*</span>@endif
             </span>
         </label>
         <select id="ts-prov-{{ $instanceId }}" name="{{ $nameProvince }}"
                 class="select select-bordered select-sm w-full @error($nameProvince) select-error @enderror"
-                @if($required) data-req="Vui lòng chọn tỉnh / thành phố" @endif>
+                @if($required) data-req="{{ __('Vui lòng chọn tỉnh / thành phố') }}" @endif>
             <option value=""></option>
             @foreach ($provinces as $p)
             <option value="{{ $p->province_code }}"
@@ -22,12 +22,12 @@
     <div class="form-control">
         <label class="label py-0 pb-1.5">
             <span class="label-text font-medium">
-                Phường / Xã@if($required) <span class="text-error">*</span>@endif
+                {{ __('Phường / Xã') }}@if($required) <span class="text-error">*</span>@endif
             </span>
         </label>
         <select id="ts-ward-{{ $instanceId }}" name="{{ $nameWard }}"
                 class="select select-bordered select-sm w-full @error($nameWard) select-error @enderror"
-                @if($required) data-req="Vui lòng chọn phường / xã" @endif
+                @if($required) data-req="{{ __('Vui lòng chọn phường / xã') }}" @endif
                 {{ !$provinceValue ? 'disabled' : '' }}>
             <option value=""></option>
         </select>

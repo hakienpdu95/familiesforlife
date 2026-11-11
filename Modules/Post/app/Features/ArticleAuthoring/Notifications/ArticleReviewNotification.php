@@ -43,7 +43,7 @@ class ArticleReviewNotification extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject($this->title())
             ->line($this->body())
-            ->action('Xem bài viết', $this->url());
+            ->action(__('Xem bài viết'), $this->url());
     }
 
     private function title(): string
@@ -51,20 +51,20 @@ class ArticleReviewNotification extends Notification implements ShouldQueue
         $label = "\"{$this->translation->title}\" ({$this->translation->locale})";
 
         return match ($this->event) {
-            'submitted' => "Bài viết {$label} đang chờ bạn duyệt",
-            'approved' => "Bài viết {$label} đã qua sơ duyệt, chờ duyệt xuất bản",
-            'returned' => "Bài viết {$label} bị trả lại để chỉnh sửa",
+            'submitted' => __('Bài viết :label đang chờ bạn duyệt', ['label' => $label]),
+            'approved' => __('Bài viết :label đã qua sơ duyệt, chờ duyệt xuất bản', ['label' => $label]),
+            'returned' => __('Bài viết :label bị trả lại để chỉnh sửa', ['label' => $label]),
         };
     }
 
     private function body(): string
     {
-        $actor = $this->actorName ?? 'Hệ thống';
+        $actor = $this->actorName ?? __('Hệ thống');
 
         return match ($this->event) {
-            'submitted' => "{$actor} vừa gửi duyệt bài viết.",
-            'approved' => "{$actor} đã duyệt sơ bộ, cần Tổng biên tập duyệt cuối và xuất bản.",
-            'returned' => "{$actor} trả lại bài viết: {$this->reason}",
+            'submitted' => __(':actor vừa gửi duyệt bài viết.', ['actor' => $actor]),
+            'approved' => __(':actor đã duyệt sơ bộ, cần Tổng biên tập duyệt cuối và xuất bản.', ['actor' => $actor]),
+            'returned' => __(':actor trả lại bài viết: :reason', ['actor' => $actor, 'reason' => $this->reason]),
         };
     }
 

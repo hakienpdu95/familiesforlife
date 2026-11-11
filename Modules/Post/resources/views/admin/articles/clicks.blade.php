@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', 'Thống kê click — ' . $title)
+@section('title', __('Thống kê click — :title', ['title' => $title]))
 
 @section('content')
 @php
@@ -14,7 +14,7 @@
     {{-- ── Header ─────────────────────────────────────────────────────── --}}
     <div class="flex flex-wrap items-start justify-between gap-4">
         <div class="min-w-0">
-            <h1 class="text-2xl font-bold text-base-content">Thống kê click</h1>
+            <h1 class="text-2xl font-bold text-base-content">{{ __('Thống kê click') }}</h1>
             <p class="text-sm text-base-content/50 mt-0.5 truncate max-w-lg">{{ $title }}</p>
             <a href="{{ $article->redirect_url }}" target="_blank" rel="noopener"
                class="text-xs text-primary hover:underline break-all">{{ $article->redirect_url }} ↗</a>
@@ -23,7 +23,7 @@
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"/>
             </svg>
-            Quay lại
+            {{ __('Quay lại') }}
         </a>
     </div>
 
@@ -37,7 +37,7 @@
             </div>
             <div class="min-w-0">
                 <p class="text-2xl font-bold text-base-content leading-none">{{ number_format($stats['total']) }}</p>
-                <p class="text-xs text-base-content/50 mt-0.5">Tổng số click</p>
+                <p class="text-xs text-base-content/50 mt-0.5">{{ __('Tổng số click') }}</p>
             </div>
         </div>
 
@@ -49,7 +49,7 @@
             </div>
             <div class="min-w-0">
                 <p class="text-2xl font-bold text-base-content leading-none">{{ number_format($last30Sum) }}</p>
-                <p class="text-xs text-base-content/50 mt-0.5">30 ngày gần nhất</p>
+                <p class="text-xs text-base-content/50 mt-0.5">{{ __('30 ngày gần nhất') }}</p>
             </div>
         </div>
 
@@ -61,7 +61,7 @@
             </div>
             <div class="min-w-0">
                 <p class="text-2xl font-bold text-base-content leading-none">{{ $avgPerDay }}</p>
-                <p class="text-xs text-base-content/50 mt-0.5">Trung bình/ngày</p>
+                <p class="text-xs text-base-content/50 mt-0.5">{{ __('Trung bình/ngày') }}</p>
             </div>
         </div>
 
@@ -75,9 +75,9 @@
                 <p class="text-2xl font-bold text-base-content leading-none">{{ $peakDay ? $peakDay['count'] : 0 }}</p>
                 <p class="text-xs text-base-content/50 mt-0.5">
                     @if($peakDay && $peakDay['count'] > 0)
-                        Cao nhất {{ \Carbon\Carbon::parse($peakDay['day'])->format('d/m') }}
+                        {{ __('Cao nhất :forma', ['forma' => \Carbon\Carbon::parse($peakDay['day'])->format('d/m')]) }}
                     @else
-                        Cao nhất (30 ngày)
+                        {{ __('Cao nhất (30 ngày)') }}
                     @endif
                 </p>
             </div>
@@ -87,7 +87,7 @@
     {{-- ── Daily chart ─────────────────────────────────────────────────── --}}
     <div class="card bg-base-100 border border-base-200 shadow-sm">
         <div class="card-body p-4 pb-3">
-            <h2 class="font-semibold text-base-content mb-3">Lượt click theo ngày (30 ngày gần nhất)</h2>
+            <h2 class="font-semibold text-base-content mb-3">{{ __('Lượt click theo ngày (30 ngày gần nhất)') }}</h2>
             <div id="clicksDailyChart" class="w-full" style="height:260px"></div>
         </div>
     </div>
@@ -95,18 +95,18 @@
     {{-- ── Top referrers ───────────────────────────────────────────────── --}}
     <div class="card bg-base-100 border border-base-200 shadow-sm">
         <div class="card-body p-3">
-            <h2 class="font-semibold text-base-content mb-1">Top nguồn dẫn tới click (30 ngày gần nhất)</h2>
-            <p class="text-xs text-base-content/40 mb-3">Đường dẫn (vd "/", "/bai-viet/danh-muc/...") = trang trên chính site này; tên domain = nguồn ngoài (Facebook, Google...).</p>
+            <h2 class="font-semibold text-base-content mb-1">{{ __('Top nguồn dẫn tới click (30 ngày gần nhất)') }}</h2>
+            <p class="text-xs text-base-content/40 mb-3">{{ __('Đường dẫn (vd "/", "/bai-viet/danh-muc/...") = trang trên chính site này; tên domain = nguồn ngoài (Facebook, Google...).') }}</p>
             @if($stats['topReferrers']->isEmpty())
-            <p class="text-sm text-base-content/40 italic py-4 text-center">Chưa có dữ liệu referrer (người dùng vào trực tiếp hoặc trình duyệt không gửi Referer).</p>
+            <p class="text-sm text-base-content/40 italic py-4 text-center">{{ __('Chưa có dữ liệu referrer (người dùng vào trực tiếp hoặc trình duyệt không gửi Referer).') }}</p>
             @else
             @php $maxRefCount = $stats['topReferrers']->max('count') ?: 1; @endphp
             <div class="space-y-2.5">
                 @foreach($stats['topReferrers'] as $ref)
                 @php $isInternal = str_starts_with($ref['referrer'], '/'); @endphp
                 <div class="flex items-center gap-3">
-                    <span class="badge badge-xs {{ $isInternal ? 'badge-ghost' : 'badge-info' }} shrink-0" title="{{ $isInternal ? 'Trang trên site này' : 'Nguồn ngoài' }}">
-                        {{ $isInternal ? 'Nội bộ' : 'Ngoài' }}
+                    <span class="badge badge-xs {{ $isInternal ? 'badge-ghost' : 'badge-info' }} shrink-0" title="{{ $isInternal ? __('Trang trên site này') : __('Nguồn ngoài') }}">
+                        {{ $isInternal ? __('Nội bộ') : __('Ngoài') }}
                     </span>
                     <span class="text-sm text-base-content/80 w-40 truncate shrink-0 font-mono" title="{{ $ref['referrer'] }}">{{ $ref['referrer'] }}</span>
                     <div class="flex-1 h-2 bg-base-200 rounded-full overflow-hidden">

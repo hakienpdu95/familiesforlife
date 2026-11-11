@@ -1,3 +1,5 @@
+import { t } from '../../../../../../resources/js/shared/i18n.js';
+
 /**
  * pages/knowledge-document-index.js
  * Alpine component + Tabulator cho dashboard/aicem/knowledge-documents —
@@ -32,12 +34,12 @@ function ageDays(updatedAt) {
 function formatAge(updatedAt) {
     const days = ageDays(updatedAt);
     if (days === null) return '<span class="text-base-content/25 text-xs">—</span>';
-    if (days < 1) return 'Hôm nay';
-    if (days === 1) return '1 ngày trước';
-    if (days < 30) return `${days} ngày trước`;
+    if (days < 1) return t('Hôm nay');
+    if (days === 1) return t('1 ngày trước');
+    if (days < 30) return `${t(':days ngày trước', { days: (days) })}`;
     const months = Math.floor(days / 30);
-    if (months < 12) return `${months} tháng trước`;
-    return `${Math.floor(months / 12)} năm trước`;
+    if (months < 12) return `${t(':months tháng trước', { months: (months) })}`;
+    return `${t(':months năm trước', { months: (Math.floor(months / 12)) })}`;
 }
 
 function isStale(updatedAt) {
@@ -47,45 +49,45 @@ function isStale(updatedAt) {
 
 const COLUMNS = [
     {
-        title: 'Tiêu đề', field: 'title', minWidth: 220, sorter: 'string', frozen: true,
+        title: t('Tiêu đề'), field: 'title', minWidth: 220, sorter: 'string', frozen: true,
         formatter(cell) { return '<span class="font-medium text-sm">' + esc(cell.getValue()) + '</span>'; },
     },
     {
-        title: 'Loại', field: 'type', width: 130, sorter: 'string',
+        title: t('Loại'), field: 'type', width: 130, sorter: 'string',
         formatter(cell) { return '<span class="badge badge-sm badge-ghost font-mono">' + esc(cell.getValue()) + '</span>'; },
     },
     {
-        title: 'Đối tượng', field: 'subject_type', minWidth: 140, headerSort: false,
+        title: t('Đối tượng'), field: 'subject_type', minWidth: 140, headerSort: false,
         formatter(cell) { return esc(cell.getValue()) || 'DNA chung'; },
     },
     {
-        title: 'Phạm vi', field: 'scope_count', minWidth: 170, headerSort: false,
+        title: t('Phạm vi'), field: 'scope_count', minWidth: 170, headerSort: false,
         formatter(cell) {
             const d = cell.getRow().getData();
-            if (d.scope_count == null) return '<span class="text-base-content/30">Mọi bài/sản phẩm</span>';
-            const matchLabel = { any: 'khớp 1', all: 'khớp mọi' }[d.scope_match] ?? esc(d.scope_match);
-            return '<span class="badge badge-sm badge-info">' + d.scope_count + ' điều kiện (' + matchLabel + ')</span>';
+            if (d.scope_count == null) return ('<span class="text-base-content/30">' + t('Mọi bài/sản phẩm') + '</span>');
+            const matchLabel = { any: t('khớp 1'), all: t('khớp mọi') }[d.scope_match] ?? esc(d.scope_match);
+            return '<span class="badge badge-sm badge-info">' + d.scope_count + (' ' + t('điều kiện (')) + matchLabel + ')</span>';
         },
     },
     {
-        title: 'Độ ưu tiên', field: 'priority', width: 100, hozAlign: 'center', sorter: 'number',
+        title: t('Độ ưu tiên'), field: 'priority', width: 100, hozAlign: 'center', sorter: 'number',
     },
     {
-        title: 'Phiên bản', field: 'current_version', width: 100, hozAlign: 'center', sorter: 'number',
+        title: t('Phiên bản'), field: 'current_version', width: 100, hozAlign: 'center', sorter: 'number',
         formatter(cell) { return 'v' + cell.getValue(); },
     },
     {
-        title: 'Cập nhật', field: 'updated_at', minWidth: 150, headerSort: false,
+        title: t('Cập nhật'), field: 'updated_at', minWidth: 150, headerSort: false,
         formatter(cell) {
             const updatedAt = cell.getValue();
             const stale = isStale(updatedAt);
             const badgeClass = stale ? 'badge-warning' : 'badge-ghost';
-            const tooltip = stale ? `title="Đã hơn ${staleAfterDays} ngày chưa cập nhật — cân nhắc ôn lại tri thức này"` : '';
+            const tooltip = stale ? `${t('title="Đã hơn :stale_after_days ngày chưa cập nhật — cân nhắc ôn lại tri thức này"', { stale_after_days: (staleAfterDays) })}` : '';
             return `<span class="badge badge-xs ${badgeClass}" ${tooltip}>${formatAge(updatedAt)}</span>`;
         },
     },
     {
-        title: 'Người tạo', field: 'creator_name', minWidth: 140, headerSort: false,
+        title: t('Người tạo'), field: 'creator_name', minWidth: 140, headerSort: false,
         formatter(cell) {
             return esc(cell.getValue()) || '<span class="text-base-content/25 text-xs">—</span>';
         },
@@ -97,12 +99,12 @@ const COLUMNS = [
             let html = '<div class="flex items-center justify-center gap-1">';
 
             if (d.can_update) {
-                html += '<a href="' + esc(d.edit_url) + '" class="btn btn-ghost btn-xs btn-square" title="Sửa">'
+                html += '<a href="' + esc(d.edit_url) + ('" class="btn btn-ghost btn-xs btn-square" title="' + t('Sửa') + '">')
                     + '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>'
                     + '</a>';
             }
             if (d.can_delete) {
-                html += '<button class="btn btn-ghost btn-xs btn-square text-error" title="Xoá"'
+                html += ('<button class="btn btn-ghost btn-xs btn-square text-error" title="' + t('Xoá') + '"')
                     + ' data-url="' + esc(d.destroy_url) + '" data-title="' + esc(d.title) + '"'
                     + ' onclick="window.knowledgeDocumentDeleteConfirm(this.dataset.url, this.dataset.title)">'
                     + '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>'
@@ -135,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const csrf = document.querySelector('meta[name=csrf-token]')?.content ?? '';
         this.disabled    = true;
-        this.textContent = 'Đang xoá...';
+        this.textContent = t('Đang xoá...');
 
         try {
             const res = await fetch(pendingDeleteUrl, {
@@ -155,14 +157,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('knowledgeDocumentDeleteModal')?.close();
                 window.knowledgeDocumentTable?.replaceData();
             } else {
-                alert(data.message || 'Xoá thất bại. Vui lòng thử lại.');
+                alert(data.message || t('Xoá thất bại. Vui lòng thử lại.'));
             }
         } catch (e) {
             console.error('[aicem-knowledge-document] delete failed', e);
-            alert('Lỗi kết nối. Vui lòng thử lại.');
+            alert(t('Lỗi kết nối. Vui lòng thử lại.'));
         } finally {
             this.disabled    = false;
-            this.textContent = 'Xoá';
+            this.textContent = t('Xoá');
             pendingDeleteUrl = null;
         }
     });
@@ -225,11 +227,11 @@ document.addEventListener('alpine:init', () => {
                     langs: {
                         'vi-VN': {
                             pagination: {
-                                page_size: 'Dòng/trang', page_title: 'Trang',
+                                page_size: t('Dòng/trang'), page_title: t('Trang'),
                                 first: '«', last: '»', prev: '‹', next: '›',
-                                first_title: 'Trang đầu', last_title: 'Trang cuối',
-                                prev_title: 'Trang trước', next_title: 'Trang sau',
-                                counter: { showing: '', of: 'trong', rows: 'dòng', pages: 'trang' },
+                                first_title: t('Trang đầu'), last_title: t('Trang cuối'),
+                                prev_title: t('Trang trước'), next_title: t('Trang sau'),
+                                counter: { showing: '', of: t('trong'), rows: t('dòng'), pages: t('trang') },
                             },
                         },
                     },
@@ -237,7 +239,7 @@ document.addEventListener('alpine:init', () => {
                     columns: COLUMNS,
                     placeholder: '<div class="py-16 text-center opacity-40">'
                         + '<svg class="w-12 h-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>'
-                        + '<p class="text-sm">Chưa có tri thức nào trong Knowledge Base</p></div>',
+                        + ('<p class="text-sm">' + t('Chưa có tri thức nào trong Knowledge Base') + '</p></div>'),
                 });
 
                 window.knowledgeDocumentTable = tableInst;

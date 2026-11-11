@@ -91,7 +91,7 @@ class UserController extends Controller
         $user = CreateAccountAction::run(CreateAccountData::validateAndCreate($request->all()));
 
         return redirect()->route('backend.users.index')
-            ->with('success', "Đã tạo tài khoản {$user->email} và gửi email đặt mật khẩu.");
+            ->with('success', __('Đã tạo tài khoản :email và gửi email đặt mật khẩu.', ['email' => $user->email]));
     }
 
     public function edit(User $user): View
@@ -111,7 +111,7 @@ class UserController extends Controller
 
         UpdateAccountAction::run($user, UpdateAccountData::validateAndCreate([...$request->except('id'), 'id' => $user->id]));
 
-        return redirect()->route('backend.users.index')->with('success', 'Đã cập nhật tài khoản.');
+        return redirect()->route('backend.users.index')->with('success', __('Đã cập nhật tài khoản.'));
     }
 
     public function destroy(User $user): RedirectResponse
@@ -120,7 +120,7 @@ class UserController extends Controller
 
         DeactivateAccountAction::run($user);
 
-        return redirect()->route('backend.users.index')->with('success', 'Đã vô hiệu hoá tài khoản.');
+        return redirect()->route('backend.users.index')->with('success', __('Đã vô hiệu hoá tài khoản.'));
     }
 
     public function activate(User $user): RedirectResponse
@@ -129,7 +129,7 @@ class UserController extends Controller
 
         ActivateAccountAction::run($user);
 
-        return redirect()->route('backend.users.index')->with('success', 'Đã kích hoạt lại tài khoản.');
+        return redirect()->route('backend.users.index')->with('success', __('Đã kích hoạt lại tài khoản.'));
     }
 
     public function sendPasswordResetLink(User $user): RedirectResponse
@@ -138,7 +138,7 @@ class UserController extends Controller
 
         SendPasswordSetupLinkAction::run($user);
 
-        return back()->with('success', "Đã gửi link đặt lại mật khẩu tới {$user->email}.");
+        return back()->with('success', __('Đã gửi link đặt lại mật khẩu tới :email.', ['email' => $user->email]));
     }
 
     public function bulkDeactivate(Request $request): RedirectResponse
@@ -159,7 +159,7 @@ class UserController extends Controller
         $skipped = count($ids) - $deactivated->count();
 
         return redirect()->route('backend.users.index')->with('success',
-            "Đã vô hiệu hoá {$deactivated->count()} tài khoản.".($skipped > 0 ? " Bỏ qua {$skipped} tài khoản không đủ điều kiện." : ''));
+            __('Đã vô hiệu hoá :count tài khoản.', ['count' => $deactivated->count()]).($skipped > 0 ? ' '.__('Bỏ qua :skipped tài khoản không đủ điều kiện.', ['skipped' => $skipped]) : ''));
     }
 
     private function departments(): array

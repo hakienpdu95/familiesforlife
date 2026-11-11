@@ -37,22 +37,22 @@ class EventApprovalResultNotification extends Notification implements ShouldQueu
     private function approvedMail(): MailMessage
     {
         return (new MailMessage)
-            ->subject("Sự kiện \"{$this->event->title}\" đã được duyệt")
-            ->line("Sự kiện \"{$this->event->title}\" bạn nộp đã được duyệt.")
-            ->line('Sự kiện sẽ hiển thị công khai trên cổng thông tin sau khi được xuất bản.')
-            ->line('Cảm ơn bạn đã đóng góp cho cộng đồng!');
+            ->subject(__('Sự kiện ":title" đã được duyệt', ['title' => $this->event->title]))
+            ->line(__('Sự kiện ":title" bạn nộp đã được duyệt.', ['title' => $this->event->title]))
+            ->line(__('Sự kiện sẽ hiển thị công khai trên cổng thông tin sau khi được xuất bản.'))
+            ->line(__('Cảm ơn bạn đã đóng góp cho cộng đồng!'));
     }
 
     private function rejectedMail(): MailMessage
     {
         $message = (new MailMessage)
-            ->subject("Sự kiện \"{$this->event->title}\" chưa được duyệt")
-            ->line("Rất tiếc, sự kiện \"{$this->event->title}\" bạn nộp chưa được duyệt.");
+            ->subject(__('Sự kiện ":title" chưa được duyệt', ['title' => $this->event->title]))
+            ->line(__('Rất tiếc, sự kiện ":title" bạn nộp chưa được duyệt.', ['title' => $this->event->title]));
 
         if ($this->event->rejected_reason) {
-            $message->line("Lý do: {$this->event->rejected_reason}");
+            $message->line(__('Lý do: :rejected_reason', ['rejected_reason' => $this->event->rejected_reason]));
         }
 
-        return $message->line('Bạn có thể nộp lại sự kiện với thông tin đầy đủ/chính xác hơn.');
+        return $message->line(__('Bạn có thể nộp lại sự kiện với thông tin đầy đủ/chính xác hơn.'));
     }
 }

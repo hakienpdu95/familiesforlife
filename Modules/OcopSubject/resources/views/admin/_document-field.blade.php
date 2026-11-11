@@ -6,7 +6,7 @@
     <label class="label py-0 pb-1.5">
         <span class="label-text font-medium">{{ $label }}</span>
         @isset($requiredWhen)
-        <span x-show="{{ $requiredWhen }}" x-cloak class="label-text-alt text-xs text-error font-medium">Bắt buộc</span>
+        <span x-show="{{ $requiredWhen }}" x-cloak class="label-text-alt text-xs text-error font-medium">{{ __('Bắt buộc') }}</span>
         @endisset
     </label>
 
@@ -20,7 +20,7 @@
             <label class="flex items-center gap-1 text-xs text-error cursor-pointer shrink-0">
                 <input type="checkbox" name="remove_media_uuids[]" value="{{ $file->uuid }}" class="checkbox checkbox-error checkbox-xs"
                        @checked(in_array($file->uuid, old('remove_media_uuids', []), true))>
-                Xoá
+                {{ __('Xoá') }}
             </label>
         </li>
         @endforeach
@@ -34,7 +34,7 @@
     @isset($hint)
     <small class="mt-1.5 block text-xs text-base-content/50 leading-relaxed">{{ $hint }}</small>
     @endisset
-    <small class="block text-xs text-base-content/40">Có thể chọn nhiều tệp. PDF, JPG, PNG, WEBP — tối đa 20MB/tệp, {{ \Modules\OcopSubject\Models\OcopSubject::MAX_DOCUMENTS }} tệp mỗi loại.</small>
+    <small class="block text-xs text-base-content/40">{{ __('Có thể chọn nhiều tệp. PDF, JPG, PNG, WEBP — tối đa 20MB/tệp, :m_a_x__d_o_c_u_m_e_n_t_s tệp mỗi loại.', ['m_a_x__d_o_c_u_m_e_n_t_s' => \Modules\OcopSubject\Models\OcopSubject::MAX_DOCUMENTS]) }}</small>
     @foreach(collect($errors->get("documents.$collection"))->merge($errors->get("documents.$collection.*"))->flatten()->unique() as $message)
     <p class="mt-1 text-xs text-error">{{ $message }}</p>
     @endforeach

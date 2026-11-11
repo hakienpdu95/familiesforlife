@@ -45,8 +45,8 @@ class TopicClusterResultController extends Controller
 
         return redirect()->route('backend.promptstudio.prompts.topic-cluster-result.show', $prompt)
             ->with($result->structured['pillar'] === null
-                ? ['error' => 'Không tìm thấy khối "PILLAR: ... | ..." trong nội dung đã dán — kiểm tra bạn đã dán ĐỦ phần AI trả về (kể cả khối mã ở cuối), hoặc yêu cầu AI trả lời lại đúng định dạng.']
-                : ['success' => 'Đã phân tích kết quả — duyệt từng mục bên dưới trước khi đẩy sang Content Outlines.']);
+                ? ['error' => __('Không tìm thấy khối "PILLAR: ... | ..." trong nội dung đã dán — kiểm tra bạn đã dán ĐỦ phần AI trả về (kể cả khối mã ở cuối), hoặc yêu cầu AI trả lời lại đúng định dạng.')]
+                : ['success' => __('Đã phân tích kết quả — duyệt từng mục bên dưới trước khi đẩy sang Content Outlines.')]);
     }
 
     public function push(Request $request, GeneratedPrompt $prompt, PushTopicClusterItemsToContentOutlinesAction $push): RedirectResponse
@@ -63,7 +63,7 @@ class TopicClusterResultController extends Controller
         $push->handle($result, $validated['selected'], $request->user()->id);
 
         return redirect()->route('backend.promptstudio.prompts.topic-cluster-result.show', $prompt)
-            ->with('success', 'Đã đẩy các mục đã chọn sang Content Outlines.');
+            ->with('success', __('Đã đẩy các mục đã chọn sang Content Outlines.'));
     }
 
     private function abortUnlessTopicCluster(GeneratedPrompt $prompt): void

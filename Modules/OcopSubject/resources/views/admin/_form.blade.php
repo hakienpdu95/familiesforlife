@@ -1,11 +1,11 @@
 @php
     $P = \Modules\OcopSubject\Models\OcopSubject::class;
     $tabs = [
-        'basic' => 'Thông tin cơ bản',
-        'location' => 'Địa chỉ & Định vị',
-        'certs' => 'Chứng nhận & Hồ sơ',
-        'story' => 'Câu chuyện',
-        'contact' => 'Liên hệ',
+        'basic' => __('Thông tin cơ bản'),
+        'location' => __('Địa chỉ & Định vị'),
+        'certs' => __('Chứng nhận & Hồ sơ'),
+        'story' => __('Câu chuyện'),
+        'contact' => __('Liên hệ'),
     ];
     $tabKeys = array_keys($tabs);
 @endphp
@@ -53,23 +53,23 @@
 
         <div class="p-3">
 
-            <div x-show="tab === 'basic'" data-tab-label="Thông tin cơ bản" class="space-y-4">
+            <div x-show="tab === 'basic'" data-tab-label="{{ __('Thông tin cơ bản') }}" class="space-y-4">
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Tên chủ thể <span class="text-error">*</span></span>
+                            <span class="label-text font-medium">{{ __('Tên chủ thể') }} <span class="text-error">*</span></span>
                         </label>
                         <input type="text" name="name" value="{{ old('name', $ocopSubject?->name) }}"
-                               data-req="Vui lòng nhập tên chủ thể" maxlength="255" autofocus
-                               placeholder="VD: HTX Nông nghiệp Thủy Thanh"
+                               data-req="{{ __('Vui lòng nhập tên chủ thể') }}" maxlength="255" autofocus
+                               placeholder="{{ __('VD: HTX Nông nghiệp Thủy Thanh') }}"
                                class="input input-bordered input-sm w-full @error('name') input-error @enderror">
                         @error('name')<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
                     </div>
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Tên tiếng Anh</span>
-                            <span class="label-text-alt text-xs text-base-content/40">Không bắt buộc</span>
+                            <span class="label-text font-medium">{{ __('Tên tiếng Anh') }}</span>
+                            <span class="label-text-alt text-xs text-base-content/40">{{ __('Không bắt buộc') }}</span>
                         </label>
                         <input type="text" name="name_en" value="{{ old('name_en', $ocopSubject?->name_en) }}" maxlength="255"
                                class="input input-bordered input-sm w-full @error('name_en') input-error @enderror">
@@ -80,12 +80,12 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Loại hình tổ chức</span>
+                            <span class="label-text font-medium">{{ __('Loại hình tổ chức') }}</span>
                         </label>
                         <select id="ts-organization_type" name="organization_type"
                                 @change="orgType = $event.target.value"
                                 class="select select-bordered select-sm w-full ts-init @error('organization_type') select-error @enderror"
-                                data-ts-placeholder="— Chọn loại hình —">
+                                data-ts-placeholder="{{ __('— Chọn loại hình —') }}">
                             <option value=""></option>
                             @foreach($types as $type)
                             <option value="{{ $type->value }}" @selected(old('organization_type', $ocopSubject?->organization_type?->value) === $type->value)>{{ $type->label() }}</option>
@@ -95,8 +95,8 @@
                     </div>
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Mã số định danh</span>
-                            <span class="label-text-alt text-xs text-base-content/40">MST hoặc CCCD (hộ kinh doanh)</span>
+                            <span class="label-text font-medium">{{ __('Mã số định danh') }}</span>
+                            <span class="label-text-alt text-xs text-base-content/40">{{ __('MST hoặc CCCD (hộ kinh doanh)') }}</span>
                         </label>
                         <input type="text" name="tax_code" value="{{ old('tax_code', $ocopSubject?->tax_code) }}"
                                maxlength="20" inputmode="numeric"
@@ -109,7 +109,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Người đại diện pháp luật</span>
+                            <span class="label-text font-medium">{{ __('Người đại diện pháp luật') }}</span>
                         </label>
                         <input type="text" name="legal_representative" value="{{ old('legal_representative', $ocopSubject?->legal_representative) }}"
                                maxlength="150"
@@ -118,10 +118,10 @@
                     </div>
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Chức vụ</span>
+                            <span class="label-text font-medium">{{ __('Chức vụ') }}</span>
                         </label>
                         <input type="text" name="position" value="{{ old('position', $ocopSubject?->position) }}" maxlength="100"
-                               placeholder="VD: Giám đốc, Chủ nhiệm HTX, Chủ hộ"
+                               placeholder="{{ __('VD: Giám đốc, Chủ nhiệm HTX, Chủ hộ') }}"
                                class="input input-bordered input-sm w-full @error('position') input-error @enderror">
                         @error('position')<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
                     </div>
@@ -129,13 +129,13 @@
 
                 <div class="form-control">
                     <label class="label py-0 pb-1.5">
-                        <span class="label-text font-medium">Ảnh cơ sở sản xuất</span>
+                        <span class="label-text font-medium">{{ __('Ảnh cơ sở sản xuất') }}</span>
                     </label>
                     @php($images = $ocopSubject?->getMedia($P::IMAGE_COLLECTION) ?? collect())
                     @if($images->isNotEmpty())
                     <div class="flex flex-wrap gap-2 mb-2">
                         @foreach($images as $image)
-                        <label class="relative cursor-pointer" title="Đánh dấu để xoá ảnh này khi lưu">
+                        <label class="relative cursor-pointer" title="{{ __('Đánh dấu để xoá ảnh này khi lưu') }}">
                             <input type="checkbox" name="remove_media_uuids[]" value="{{ $image->uuid }}" class="peer sr-only"
                                    @checked(in_array($image->uuid, old('remove_media_uuids', []), true))>
                             <img src="{{ app(\App\Services\Media\MediaUrlService::class)->url($image, 'thumb') }}" alt=""
@@ -148,18 +148,18 @@
                     @if($ocopSubject)
                     <div id="ocop-subject-gallery-filepond" data-context-type="ocop_subject" data-context-id="{{ $ocopSubject->id }}"
                          data-max-files="{{ max(1, $P::MAX_IMAGES - $images->count()) }}"></div>
-                    <p class="text-xs text-base-content/40 mt-1.5">Tối đa {{ $P::MAX_IMAGES }} ảnh. Bấm ✕ trên ảnh để xoá khi lưu.</p>
+                    <p class="text-xs text-base-content/40 mt-1.5">{{ __('Tối đa :m_a_x__i_m_a_g_e_s ảnh. Bấm ✕ trên ảnh để xoá khi lưu.', ['m_a_x__i_m_a_g_e_s' => $P::MAX_IMAGES]) }}</p>
                     @else
                     <div id="ocop-subject-gallery-filepond"></div>
                     <input type="hidden" name="media_uuids" id="ocop-subject-gallery-media-uuids" value="">
-                    <p class="text-xs text-base-content/40 mt-1.5">Tối đa {{ $P::MAX_IMAGES }} ảnh.</p>
+                    <p class="text-xs text-base-content/40 mt-1.5">{{ __('Tối đa :m_a_x__i_m_a_g_e_s ảnh.', ['m_a_x__i_m_a_g_e_s' => $P::MAX_IMAGES]) }}</p>
                     @endif
                     @error('media_uuids')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                 </div>
 
             </div>
 
-            <div x-show="tab === 'location'" x-cloak data-tab-label="Địa chỉ &amp; Định vị" class="space-y-4">
+            <div x-show="tab === 'location'" x-cloak data-tab-label="{{ __('Địa chỉ & Định vị') }}" class="space-y-4">
 
                 <x-address-picker
                     instance-id="ocop-subject"
@@ -170,8 +170,8 @@
 
                 <div class="form-control">
                     <label class="label py-0 pb-1.5">
-                        <span class="label-text font-medium">Địa chỉ trụ sở</span>
-                        <span class="label-text-alt text-xs text-base-content/40">Số nhà, đường, thôn/xóm</span>
+                        <span class="label-text font-medium">{{ __('Địa chỉ trụ sở') }}</span>
+                        <span class="label-text-alt text-xs text-base-content/40">{{ __('Số nhà, đường, thôn/xóm') }}</span>
                     </label>
                     <input type="text" name="address" value="{{ old('address', $ocopSubject?->address) }}"
                            maxlength="255"
@@ -182,8 +182,8 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Toạ độ GPS</span>
-                            <span class="label-text-alt text-xs text-base-content/40">vĩ độ, kinh độ</span>
+                            <span class="label-text font-medium">{{ __('Toạ độ GPS') }}</span>
+                            <span class="label-text-alt text-xs text-base-content/40">{{ __('vĩ độ, kinh độ') }}</span>
                         </label>
                         <input type="text" name="gps_coordinates" value="{{ old('gps_coordinates', $ocopSubject?->gps_coordinates) }}"
                                maxlength="60" placeholder="VD: 16.4637, 107.5909"
@@ -192,8 +192,8 @@
                     </div>
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Mã cơ sở / Mã vùng trồng</span>
-                            <span class="label-text-alt text-xs text-base-content/40">Không bắt buộc</span>
+                            <span class="label-text font-medium">{{ __('Mã cơ sở / Mã vùng trồng') }}</span>
+                            <span class="label-text-alt text-xs text-base-content/40">{{ __('Không bắt buộc') }}</span>
                         </label>
                         <input type="text" name="factory_code" value="{{ old('factory_code', $ocopSubject?->factory_code) }}" maxlength="50"
                                class="input input-bordered input-sm w-full font-mono @error('factory_code') input-error @enderror">
@@ -203,34 +203,34 @@
 
             </div>
 
-            <div x-show="tab === 'certs'" x-cloak data-tab-label="Chứng nhận &amp; Hồ sơ" class="space-y-5">
+            <div x-show="tab === 'certs'" x-cloak data-tab-label="{{ __('Chứng nhận & Hồ sơ') }}" class="space-y-5">
 
                 <label class="flex items-start gap-2.5 cursor-pointer select-none">
                     <input type="hidden" name="is_food_business" value="0">
                     <input type="checkbox" name="is_food_business" value="1" x-model="isFood"
                            class="checkbox checkbox-sm checkbox-primary mt-0.5 shrink-0">
                     <span>
-                        <span class="text-sm font-medium">Ngành thực phẩm</span>
-                        <span class="block text-xs text-base-content/50">Bắt buộc có Giấy chứng nhận cơ sở đủ điều kiện ATTP.</span>
+                        <span class="text-sm font-medium">{{ __('Ngành thực phẩm') }}</span>
+                        <span class="block text-xs text-base-content/50">{{ __('Bắt buộc có Giấy chứng nhận cơ sở đủ điều kiện ATTP.') }}</span>
                     </span>
                 </label>
 
                 @include('ocopsubject::admin._document-field', [
                     'collection' => $P::DOC_BUSINESS_LICENSE,
-                    'label' => 'Giấy chứng nhận đăng ký kinh doanh',
-                    'hint' => 'Giấy ĐKDN, giấy đăng ký HTX hoặc giấy đăng ký hộ kinh doanh.',
+                    'label' => __('Giấy chứng nhận đăng ký kinh doanh'),
+                    'hint' => __('Giấy ĐKDN, giấy đăng ký HTX hoặc giấy đăng ký hộ kinh doanh.'),
                 ])
 
-                <div class="divider my-1 text-xs text-base-content/40">Chứng nhận OCOP</div>
+                <div class="divider my-1 text-xs text-base-content/40">{{ __('Chứng nhận OCOP') }}</div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Hạng sao OCOP <span x-show="orgType === 'household'" x-cloak class="text-error">*</span></span>
+                            <span class="label-text font-medium">{{ __('Hạng sao OCOP') }} <span x-show="orgType === 'household'" x-cloak class="text-error">*</span></span>
                         </label>
                         <select id="ts-ocop_star" name="ocop_star"
                                 class="select select-bordered select-sm w-full ts-init @error('ocop_star') select-error @enderror"
-                                data-ts-placeholder="— Chưa xếp hạng —">
+                                data-ts-placeholder="{{ __('— Chưa xếp hạng —') }}">
                             <option value=""></option>
                             @foreach([3, 4, 5] as $star)
                             <option value="{{ $star }}" @selected((string) old('ocop_star', $ocopSubject?->ocop_star) === (string) $star)>{{ $star }} sao</option>
@@ -240,7 +240,7 @@
                     </div>
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Ngày hết hạn chứng nhận</span>
+                            <span class="label-text font-medium">{{ __('Ngày hết hạn chứng nhận') }}</span>
                         </label>
                         <input type="date" name="ocop_cert_expiry" value="{{ old('ocop_cert_expiry', $ocopSubject?->ocop_cert_expiry?->format('Y-m-d')) }}"
                                class="input input-bordered input-sm w-full @error('ocop_cert_expiry') input-error @enderror">
@@ -250,39 +250,39 @@
 
                 @include('ocopsubject::admin._document-field', [
                     'collection' => $P::DOC_OCOP_CERT,
-                    'label' => 'Quyết định phê duyệt hạng sao OCOP',
-                    'hint' => 'Bắt buộc với Hộ kinh doanh, tuỳ chọn với Doanh nghiệp/HTX.',
+                    'label' => __('Quyết định phê duyệt hạng sao OCOP'),
+                    'hint' => __('Bắt buộc với Hộ kinh doanh, tuỳ chọn với Doanh nghiệp/HTX.'),
                     'requiredWhen' => "orgType === 'household'",
                 ])
 
-                <div class="divider my-1 text-xs text-base-content/40">Chất lượng &amp; An toàn thực phẩm</div>
+                <div class="divider my-1 text-xs text-base-content/40">{{ __('Chất lượng') }} &amp; {{ __('An toàn thực phẩm') }}</div>
 
                 @include('ocopsubject::admin._document-field', [
                     'collection' => $P::DOC_QUALITY_CERT,
-                    'label' => 'Chứng nhận chất lượng',
-                    'hint' => 'ISO, HACCP, VietGAP, GlobalGAP, hữu cơ...',
+                    'label' => __('Chứng nhận chất lượng'),
+                    'hint' => __('ISO, HACCP, VietGAP, GlobalGAP, hữu cơ...'),
                 ])
 
                 @include('ocopsubject::admin._document-field', [
                     'collection' => $P::DOC_FOOD_SAFETY_CERT,
-                    'label' => 'Giấy chứng nhận cơ sở đủ điều kiện ATTP',
+                    'label' => __('Giấy chứng nhận cơ sở đủ điều kiện ATTP'),
                     'requiredWhen' => 'isFood',
                 ])
 
             </div>
 
-            <div x-show="tab === 'story'" x-cloak data-tab-label="Câu chuyện" class="space-y-4">
+            <div x-show="tab === 'story'" x-cloak data-tab-label="{{ __('Câu chuyện') }}" class="space-y-4">
                 <div class="form-control">
                     <label class="label py-0 pb-1.5">
-                        <span class="label-text font-medium">Câu chuyện thương hiệu</span>
-                        <span class="label-text-alt text-xs text-base-content/40">Lịch sử, truyền thống, triết lý sản xuất — hiển thị ở trang thương hiệu công khai</span>
+                        <span class="label-text font-medium">{{ __('Câu chuyện thương hiệu') }}</span>
+                        <span class="label-text-alt text-xs text-base-content/40">{{ __('Lịch sử, truyền thống, triết lý sản xuất — hiển thị ở trang thương hiệu công khai') }}</span>
                     </label>
                     <textarea id="ocop-subject-story" name="story" class="jodit-editor" data-jodit-preset="standard">{{ old('story', $ocopSubject?->story) }}</textarea>
                     @error('story')<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
                 </div>
             </div>
 
-            <div x-show="tab === 'contact'" x-cloak data-tab-label="Liên hệ" class="space-y-4">
+            <div x-show="tab === 'contact'" x-cloak data-tab-label="{{ __('Liên hệ') }}" class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="form-control">
                         <label class="label py-0 pb-1.5"><span class="label-text font-medium">Hotline</span></label>
@@ -309,11 +309,11 @@
             <div class="flex items-center justify-between pt-4">
                 <button type="button" x-show="tab !== 'basic'"
                         @click="tab = {{ Js::from($tabKeys) }}[{{ Js::from($tabKeys) }}.indexOf(tab) - 1]"
-                        class="btn btn-ghost btn-sm">‹ Quay lại</button>
+                        class="btn btn-ghost btn-sm">{{ __('‹ Quay lại') }}</button>
                 <span></span>
                 <button type="button" x-show="tab !== 'contact'"
                         @click="tab = {{ Js::from($tabKeys) }}[{{ Js::from($tabKeys) }}.indexOf(tab) + 1]"
-                        class="btn btn-ghost btn-sm">Tiếp theo ›</button>
+                        class="btn btn-ghost btn-sm">{{ __('Tiếp theo ›') }}</button>
             </div>
 
         </div>
@@ -324,7 +324,7 @@
             <div class="card-body p-3">
                 @if($ocopSubject?->qrIdentity)
                 <p class="text-xs text-base-content/50 mb-3">
-                    Mã QR chủ thể: <span class="font-mono font-semibold text-base-content">{{ $ocopSubject->qrIdentity->qr_code }}</span><br>
+                    {{ __('Mã QR chủ thể:') }} <span class="font-mono font-semibold text-base-content">{{ $ocopSubject->qrIdentity->qr_code }}</span><br>
                     <a href="{{ $ocopSubject->qrIdentity->publicUrl() }}" target="_blank" rel="noopener" class="link link-primary break-all">{{ $ocopSubject->qrIdentity->publicUrl() }}</a>
                 </p>
                 @endif
@@ -333,20 +333,20 @@
                     <input type="hidden" name="is_active" value="0">
                     <input type="checkbox" name="is_active" value="1"
                            class="checkbox checkbox-sm checkbox-primary mt-0.5 shrink-0" @checked(old('is_active', $ocopSubject?->is_active ?? true))>
-                    <span class="text-sm font-medium">Đang hoạt động</span>
+                    <span class="text-sm font-medium">{{ __('Đang hoạt động') }}</span>
                 </label>
 
                 @if($ocopSubject)
-                <p class="text-xs text-base-content/50 mb-4">Đang có <strong>{{ $ocopSubject->products()->count() }}</strong> sản phẩm OCOP.</p>
+                <p class="text-xs text-base-content/50 mb-4">{{ __('Đang có') }} <strong>{{ $ocopSubject->products()->count() }}</strong> {{ __('sản phẩm OCOP.') }}</p>
                 @endif
 
                 <div class="flex gap-2">
-                    <a href="{{ route('backend.ocop-subjects.index') }}" class="btn btn-ghost btn-sm flex-1">Hủy</a>
-                    <button type="submit" class="btn btn-primary btn-sm flex-1">{{ $ocopSubject ? 'Lưu thay đổi' : 'Tạo mới' }}</button>
+                    <a href="{{ route('backend.ocop-subjects.index') }}" class="btn btn-ghost btn-sm flex-1">{{ __('Hủy') }}</a>
+                    <button type="submit" class="btn btn-primary btn-sm flex-1">{{ $ocopSubject ? __('Lưu thay đổi') : __('Tạo mới') }}</button>
                 </div>
 
                 <p class="text-center text-xs text-base-content/30 mt-2.5">
-                    <span class="text-error">*</span> là trường bắt buộc
+                    <span class="text-error">*</span> {{ __('là trường bắt buộc') }}
                 </p>
 
             </div>

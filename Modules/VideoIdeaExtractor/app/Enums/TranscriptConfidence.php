@@ -18,8 +18,8 @@ enum TranscriptConfidence: string
     {
         return match ($this) {
             self::High   => 'Cao',
-            self::Medium => 'Trung bình',
-            self::Low    => 'Thấp',
+            self::Medium => __('Trung bình'),
+            self::Low    => __('Thấp'),
         };
     }
 

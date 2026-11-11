@@ -10,8 +10,8 @@ enum ProductType: string
     public function label(): string
     {
         return match ($this) {
-            self::Physical => 'Sản phẩm vật lý',
-            self::Service  => 'Dịch vụ',
+            self::Physical => __('Sản phẩm vật lý'),
+            self::Service  => __('Dịch vụ'),
         };
     }
 }

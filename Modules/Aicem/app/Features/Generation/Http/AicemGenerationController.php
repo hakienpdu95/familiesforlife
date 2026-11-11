@@ -29,7 +29,7 @@ class AicemGenerationController extends Controller
         ]);
 
         $modelClass = config("aicem_subjects.{$validated['subject_type']}.model");
-        abort_if(! $modelClass, 404, 'subject_type không hợp lệ.');
+        abort_if(! $modelClass, 404, __('subject_type không hợp lệ.'));
 
         $subject = $modelClass::withoutGlobalScopes()->findOrFail($validated['subject_id']);
 
@@ -38,11 +38,11 @@ class AicemGenerationController extends Controller
             ->where('is_active', true)
             ->find($validated['workflow_id']);
 
-        abort_if(! $workflow, 422, 'Workflow không hợp lệ cho bài viết/sản phẩm này.');
+        abort_if(! $workflow, 422, __('Workflow không hợp lệ cho bài viết/sản phẩm này.'));
 
         $action->handle($subject, $validated['subject_type'], $workflow, (int) auth()->id());
 
-        return back()->with('success', 'Đang xử lý AI... (thường mất 5-30 giây, tải lại trang sau ít phút để xem đề xuất).');
+        return back()->with('success', __('Đang xử lý AI... (thường mất 5-30 giây, tải lại trang sau ít phút để xem đề xuất).'));
     }
 
     public function status(AicemGenerationRun $run): JsonResponse
@@ -75,7 +75,7 @@ class AicemGenerationController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
-        return back()->with('success', 'Đã áp dụng đề xuất.');
+        return back()->with('success', __('Đã áp dụng đề xuất.'));
     }
 
     public function rejectSuggestion(AicemGenerationRun $run, AicemSuggestion $suggestion, RejectSuggestionAction $action): RedirectResponse
@@ -89,6 +89,6 @@ class AicemGenerationController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
-        return back()->with('success', 'Đã từ chối đề xuất.');
+        return back()->with('success', __('Đã từ chối đề xuất.'));
     }
 }

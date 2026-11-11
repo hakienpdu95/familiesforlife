@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', 'Sửa bài viết')
+@section('title', __('Sửa bài viết'))
 
 @section('content')
 @php
@@ -49,14 +49,14 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
 {{-- Page header --}}
 <div class="flex items-center justify-between mb-4">
     <div>
-        <h1 class="text-2xl font-bold text-base-content">Sửa bài viết</h1>
-        <p class="text-sm text-base-content/50 mt-0.5">Ngôn ngữ chính: {{ config('post.locales')[$article->main_locale] ?? $article->main_locale }}</p>
+        <h1 class="text-2xl font-bold text-base-content">{{ __('Sửa bài viết') }}</h1>
+        <p class="text-sm text-base-content/50 mt-0.5">{{ __('Ngôn ngữ chính: :main_locale', ['main_locale' => config('post.locales')[$article->main_locale] ?? $article->main_locale]) }}</p>
     </div>
     <a href="{{ route('backend.post.articles.index') }}" class="btn btn-ghost btn-sm gap-1.5">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
         </svg>
-        Quay lại
+        {{ __('Quay lại') }}
     </a>
 </div>
 
@@ -72,13 +72,13 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
             @if($t)
                 <span class="badge badge-xs {{ $t->status->badgeClass() }}">{{ $t->status->label() }}</span>
             @else
-                <span class="badge badge-xs badge-ghost">Chưa có</span>
+                <span class="badge badge-xs badge-ghost">{{ __('Chưa có') }}</span>
             @endif
             @if($article->is_sponsored)
                 {{-- §11 — dùng cờ is_sponsored thô (không phải isCurrentlySponsored()) vì đây là
                      badge quản trị nội bộ báo "bài đang cấu hình tài trợ", khác badge công khai
                      ở §12 vốn cần tôn trọng cửa sổ start/end date. --}}
-                <span class="badge badge-xs {{ $article->sponsor_label?->badgeClass() ?? 'badge-warning' }}" title="Bài viết tài trợ">🏷</span>
+                <span class="badge badge-xs {{ $article->sponsor_label?->badgeClass() ?? 'badge-warning' }}" title="{{ __('Bài viết tài trợ') }}">🏷</span>
             @endif
         </a>
     @endforeach
@@ -87,7 +87,7 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
 @if($errors->any())
 <div class="alert alert-error py-3 px-4 mb-5 flex items-start gap-3 text-sm">
     <div>
-        <p class="font-semibold">Có {{ $errors->count() }} lỗi cần kiểm tra:</p>
+        <p class="font-semibold">{{ __('Có :count lỗi cần kiểm tra:', ['count' => $errors->count()]) }}</p>
         <ul class="mt-1.5 list-disc list-inside space-y-0.5 text-xs opacity-90">
             @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
         </ul>
@@ -99,8 +99,8 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
 {{-- spec/Post_VersionHistory_Technical_Specification.md §13.4 — cảnh báo concurrent-edit,
      KHÔNG chặn submit, chỉ báo "nội dung có thể đã cũ", xem lịch sử để tự quyết. --}}
 <div x-show="concurrentWarning" x-cloak x-transition class="alert alert-warning py-3 px-4 mb-4 text-sm items-start">
-    <span x-text="concurrentWarning ? ('Bài viết đã được ' + (concurrentWarning.created_by?.name ?? 'người khác') + ' cập nhật lúc ' + (concurrentWarning.created_at_human ?? '') + ' kể từ khi bạn mở trang này — nội dung bạn đang sửa có thể đã cũ. Xem lịch sử phiên bản trước khi lưu.') : ''"></span>
-    @if($canViewHistory)<a href="{{ $historyPageUrl }}" class="btn btn-outline btn-xs ml-auto">Xem lịch sử</a>@endif
+    <span x-text="concurrentWarning ? ((@js(__('Bài viết đã được')) + ' ') + (concurrentWarning.created_by?.name ?? @js(__('người khác'))) + (' ' + @js(__('cập nhật lúc')) + ' ') + (concurrentWarning.created_at_human ?? '') + (' ' + @js(__('kể từ khi bạn mở trang này — nội dung bạn đang sửa có thể đã cũ. Xem lịch sử phiên bản trước khi lưu.')))) : ''"></span>
+    @if($canViewHistory)<a href="{{ $historyPageUrl }}" class="btn btn-outline btn-xs ml-auto">{{ __('Xem lịch sử') }}</a>@endif
     <button type="button" class="btn btn-ghost btn-xs @unless($canViewHistory) ml-auto @endunless" @click="concurrentWarning = null">✕</button>
 </div>
 @endif
@@ -127,7 +127,7 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
                 <button type="button" role="tab" @click="tab = 'noi_dung'"
                         class="flex items-center gap-1.5 px-1 py-4 mr-6 text-sm font-medium border-b-2 transition-colors"
                         :class="tab === 'noi_dung' ? 'border-primary text-primary' : 'border-transparent text-base-content/50 hover:text-base-content hover:border-base-content/20'">
-                    Nội dung
+                    {{ __('Nội dung') }}
                     <span x-show="errCount('noi_dung') > 0" x-text="errCount('noi_dung')" class="badge badge-error badge-xs"></span>
                 </button>
                 <button type="button" role="tab" @click="tab = 'seo'"
@@ -146,12 +146,12 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
 
         <div class="p-3">
 
-            <div x-show="tab === 'noi_dung'" data-tab-label="Nội dung" class="space-y-4">
+            <div x-show="tab === 'noi_dung'" data-tab-label="{{ __('Nội dung') }}" class="space-y-4">
 
                 <div class="form-control">
-                    <label class="label py-0 pb-1.5"><span class="label-text font-medium">Tiêu đề <span class="text-error">*</span></span></label>
+                    <label class="label py-0 pb-1.5"><span class="label-text font-medium">{{ __('Tiêu đề') }} <span class="text-error">*</span></span></label>
                     <input type="text" name="title" value="{{ old('title', $translation->title) }}"
-                           data-req="Vui lòng nhập tiêu đề" data-val-maxlength="300"
+                           data-req="{{ __('Vui lòng nhập tiêu đề') }}" data-val-maxlength="300"
                            class="input input-bordered input-sm w-full @error('title') input-error @enderror" maxlength="300">
                     @error('title')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                 </div>
@@ -159,7 +159,7 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
                 <div class="form-control">
                     <label class="label py-0 pb-1.5">
                         <span class="label-text font-medium">Slug</span>
-                        <span class="label-text-alt text-xs text-base-content/40">Để trống giữ nguyên</span>
+                        <span class="label-text-alt text-xs text-base-content/40">{{ __('Để trống giữ nguyên') }}</span>
                     </label>
                     <input type="text" name="slug" value="{{ old('slug', $translation->slug) }}"
                            class="input input-bordered input-sm w-full @error('slug') input-error @enderror" maxlength="320">
@@ -167,7 +167,7 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
                 </div>
 
                 <div class="form-control">
-                    <label class="label py-0 pb-1.5"><span class="label-text font-medium">Tóm tắt</span></label>
+                    <label class="label py-0 pb-1.5"><span class="label-text font-medium">{{ __('Tóm tắt') }}</span></label>
                     <textarea name="excerpt" rows="2" data-val-maxlength="500"
                               class="textarea textarea-bordered textarea-sm w-full @error('excerpt') textarea-error @enderror"
                               maxlength="500">{{ old('excerpt', $translation->excerpt) }}</textarea>
@@ -176,25 +176,24 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
 
                 <div class="form-control">
                     <label class="label py-0 pb-1.5">
-                        <span class="label-text font-medium">Câu trả lời trực tiếp (AEO)</span>
-                        <span class="label-text-alt text-xs text-base-content/40">~60 từ, trả lời thẳng câu hỏi chính của bài</span>
+                        <span class="label-text font-medium">{{ __('Câu trả lời trực tiếp (AEO)') }}</span>
+                        <span class="label-text-alt text-xs text-base-content/40">{{ __('~60 từ, trả lời thẳng câu hỏi chính của bài') }}</span>
                     </label>
                     <textarea name="direct_answer" rows="2" data-val-maxlength="500"
-                              placeholder="VD: Kỷ luật tích cực là phương pháp dạy con thiết lập ranh giới rõ ràng mà không cần la mắng, dựa trên tôn trọng và hợp tác thay vì trừng phạt."
+                              placeholder="{{ __('VD: Kỷ luật tích cực là phương pháp dạy con thiết lập ranh giới rõ ràng mà không cần la mắng, dựa trên tôn trọng và hợp tác thay vì trừng phạt.') }}"
                               class="textarea textarea-bordered textarea-sm w-full @error('direct_answer') textarea-error @enderror"
                               maxlength="500">{{ old('direct_answer', $translation->direct_answer) }}</textarea>
                     @error('direct_answer')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                     <p class="text-xs text-base-content/40 mt-1">
-                        Hiển thị nổi bật ngay đầu bài viết công khai — AI answer engine (Google AI Overview,
-                        ChatGPT...) ưu tiên trích dẫn câu trả lời trực tiếp xuất hiện sớm trong bài.
+                        {{ __('Hiển thị nổi bật ngay đầu bài viết công khai — AI answer engine (Google AI Overview, ChatGPT...) ưu tiên trích dẫn câu trả lời trực tiếp xuất hiện sớm trong bài.') }}
                     </p>
                 </div>
 
                 <div class="form-control">
                     <div class="flex items-center justify-between mb-1">
-                        <label class="label py-0 !p-0"><span class="label-text font-medium">Nội dung</span></label>
+                        <label class="label py-0 !p-0"><span class="label-text font-medium">{{ __('Nội dung') }}</span></label>
                         <span class="text-xs text-base-content/40">
-                            Tối đa 3 khối sản phẩm/bài ·
+                            {{ __('Tối đa 3 khối sản phẩm/bài ·') }}
                             <span class="pbc-total-word-count font-medium"></span>
                         </span>
                     </div>
@@ -207,7 +206,7 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
                     @if($errors->has('blocks'))
                     <div class="alert alert-error text-xs mb-2 items-start">
                         <div>
-                            <p class="font-semibold">Chưa lưu được — nội dung bạn vừa nhập vẫn được giữ nguyên bên dưới, hãy bổ sung rồi lưu lại:</p>
+                            <p class="font-semibold">{{ __('Chưa lưu được — nội dung bạn vừa nhập vẫn được giữ nguyên bên dưới, hãy bổ sung rồi lưu lại:') }}</p>
                             <ul class="list-disc list-inside mt-1 space-y-0.5">
                                 @foreach($errors->get('blocks') as $message)<li>{{ $message }}</li>@endforeach
                             </ul>
@@ -220,14 +219,14 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
                     <div class="pbc-composer">
                         <div class="pbc-block-list"></div>
                         <div class="pbc-add-row">
-                            <button type="button" class="btn btn-sm btn-outline pbc-add-text">+ Thêm đoạn văn bản</button>
-                            <button type="button" class="btn btn-sm btn-outline btn-primary pbc-add-product">+ Thêm khối sản phẩm</button>
-                            <button type="button" class="btn btn-sm btn-outline btn-warning pbc-add-ocop-product">+ Thêm khối sản phẩm OCOP</button>
-                            <button type="button" class="btn btn-sm btn-outline btn-secondary pbc-add-faq">+ Thêm câu hỏi thường gặp</button>
-                            <button type="button" class="btn btn-sm btn-outline btn-accent pbc-add-citation">+ Thêm trích dẫn có nguồn</button>
-                            <button type="button" class="btn btn-sm btn-outline pbc-add-howto">+ Thêm hướng dẫn từng bước</button>
-                            <button type="button" class="btn btn-sm btn-outline pbc-add-comparison">+ Thêm bảng so sánh</button>
-                            <button type="button" class="btn btn-sm btn-outline pbc-add-testimonial">+ Thêm lời chứng thực</button>
+                            <button type="button" class="btn btn-sm btn-outline pbc-add-text">{{ __('+ Thêm đoạn văn bản') }}</button>
+                            <button type="button" class="btn btn-sm btn-outline btn-primary pbc-add-product">{{ __('+ Thêm khối sản phẩm') }}</button>
+                            <button type="button" class="btn btn-sm btn-outline btn-warning pbc-add-ocop-product">{{ __('+ Thêm khối sản phẩm OCOP') }}</button>
+                            <button type="button" class="btn btn-sm btn-outline btn-secondary pbc-add-faq">{{ __('+ Thêm câu hỏi thường gặp') }}</button>
+                            <button type="button" class="btn btn-sm btn-outline btn-accent pbc-add-citation">{{ __('+ Thêm trích dẫn có nguồn') }}</button>
+                            <button type="button" class="btn btn-sm btn-outline pbc-add-howto">{{ __('+ Thêm hướng dẫn từng bước') }}</button>
+                            <button type="button" class="btn btn-sm btn-outline pbc-add-comparison">{{ __('+ Thêm bảng so sánh') }}</button>
+                            <button type="button" class="btn btn-sm btn-outline pbc-add-testimonial">{{ __('+ Thêm lời chứng thực') }}</button>
                         </div>
                         {{-- BUGFIX (không thuộc phần Version History) — phải nằm TRONG .pbc-composer:
                              post-block-composer.js dùng composerEl.querySelector('input[name="blocks_json"]')
@@ -241,14 +240,14 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
                 @if($article->is_sponsored)
                 {{-- §11 — chỉ hiện khi article.is_sponsored (đọc thẳng từ Blade, không cần JS
                      phức tạp vì đây là server-rendered per-locale form). --}}
-                <div class="divider text-xs text-base-content/40 my-2">Thông tin tài trợ ({{ config('post.locales')[$activeLocale] }})</div>
+                <div class="divider text-xs text-base-content/40 my-2">{{ __('Thông tin tài trợ (:active_locale)', ['active_locale' => config('post.locales')[$activeLocale]]) }}</div>
 
                 <div class="form-control">
                     <div class="flex items-center justify-between mb-1">
-                        <label class="label py-0 !p-0"><span class="label-text font-medium">Nội dung công bố tài trợ <span class="text-error">*</span></span></label>
+                        <label class="label py-0 !p-0"><span class="label-text font-medium">{{ __('Nội dung công bố tài trợ') }} <span class="text-error">*</span></span></label>
                         <button type="button" class="btn btn-ghost btn-xs"
                                 @click="$refs.disclosureText.value = 'Nội dung tài trợ bởi {{ addslashes($article->sponsor_name) }}'">
-                            Dùng mẫu
+                            {{ __('Dùng mẫu') }}
                         </button>
                     </div>
                     <textarea name="disclosure_text" rows="2" x-ref="disclosureText" data-val-maxlength="500"
@@ -258,7 +257,7 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
                 </div>
 
                 <div class="form-control">
-                    <label class="label py-0 pb-1.5"><span class="label-text font-medium">Nút CTA — nhãn</span></label>
+                    <label class="label py-0 pb-1.5"><span class="label-text font-medium">{{ __('Nút CTA — nhãn') }}</span></label>
                     <input type="text" name="cta_text" value="{{ old('cta_text', $translation->cta_text) }}"
                            data-val-maxlength="100"
                            class="input input-bordered input-sm w-full @error('cta_text') input-error @enderror" maxlength="100">
@@ -266,7 +265,7 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
                 </div>
 
                 <div class="form-control">
-                    <label class="label py-0 pb-1.5"><span class="label-text font-medium">Nút CTA — liên kết</span></label>
+                    <label class="label py-0 pb-1.5"><span class="label-text font-medium">{{ __('Nút CTA — liên kết') }}</span></label>
                     <input type="url" name="cta_url" value="{{ old('cta_url', $translation->cta_url) }}"
                            data-val-maxlength="500"
                            class="input input-bordered input-sm w-full @error('cta_url') input-error @enderror" maxlength="500">
@@ -295,8 +294,7 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
 
             <div x-show="tab === 'geo'" data-tab-label="GEO Checklist" class="space-y-6">
                 <p class="text-xs text-base-content/50">
-                    Checklist tham khảo để tối ưu nội dung cho AI search (ChatGPT, Gemini, Google AI Overview...) —
-                    tự đối chiếu bằng mắt trước khi xuất bản, không cần tick vào đây.
+                    {{ __('Checklist tham khảo để tối ưu nội dung cho AI search (ChatGPT, Gemini, Google AI Overview...) — tự đối chiếu bằng mắt trước khi xuất bản, không cần tick vào đây.') }}
                 </p>
 
                 @foreach($geoChecklistGroups as $groupLabel => $items)
@@ -320,9 +318,9 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
             @can('update', $translation)
             <div class="sticky bottom-0 z-10 -mx-3 -mb-3 px-3 py-3 bg-base-100 border-t border-base-200 mt-4 flex items-center justify-end gap-3 rounded-b-box">
                 @if($translation->status === \Modules\Post\Enums\TranslationStatus::Published)
-                <span class="text-xs text-base-content/50">Bài đang xuất bản — lưu xong nội dung mới hiển thị ngay.</span>
+                <span class="text-xs text-base-content/50">{{ __('Bài đang xuất bản — lưu xong nội dung mới hiển thị ngay.') }}</span>
                 @endif
-                <button type="submit" class="btn btn-primary btn-sm">{{ $translation->status === \Modules\Post\Enums\TranslationStatus::Published ? 'Cập nhật bài viết' : 'Lưu bản dịch' }} ({{ config('post.locales')[$activeLocale] }})</button>
+                <button type="submit" class="btn btn-primary btn-sm">{{ $translation->status === \Modules\Post\Enums\TranslationStatus::Published ? __('Cập nhật bài viết') : __('Lưu bản dịch') }} ({{ config('post.locales')[$activeLocale] }})</button>
             </div>
             @endcan
 
@@ -332,23 +330,23 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
     <div class="card bg-base-100 shadow-sm border border-base-200">
         <div class="card-body p-6">
             <p class="text-sm text-base-content/60 mb-4">
-                Chưa có bản dịch <strong>{{ config('post.locales')[$activeLocale] }}</strong> — tạo mới bên dưới
+                {{ __('Chưa có bản dịch') }} <strong>{{ config('post.locales')[$activeLocale] }}</strong> {{ __('— tạo mới bên dưới') }}
                 @if($article->translations->isNotEmpty())
-                    (nội dung sẽ copy từ bản dịch chính làm nháp khởi điểm).
+                    {{ __('(nội dung sẽ copy từ bản dịch chính làm nháp khởi điểm).') }}
                 @endif
             </p>
             <form method="POST" action="{{ route('backend.post.articles.translations.store', $article) }}" novalidate data-article-form>
                 @csrf
                 <input type="hidden" name="locale" value="{{ $activeLocale }}">
                 <div class="form-control mb-3">
-                    <label class="label py-0 pb-1.5"><span class="label-text font-medium">Tiêu đề <span class="text-error">*</span></span></label>
+                    <label class="label py-0 pb-1.5"><span class="label-text font-medium">{{ __('Tiêu đề') }} <span class="text-error">*</span></span></label>
                     <input type="text" name="title" value="{{ old('title', $article->mainTranslation()?->title) }}"
-                           data-req="Vui lòng nhập tiêu đề"
+                           data-req="{{ __('Vui lòng nhập tiêu đề') }}"
                            class="input input-bordered input-sm w-full @error('title') input-error @enderror" maxlength="300" autofocus>
                     @error('title')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                 </div>
                 <button type="submit" class="btn btn-primary btn-sm gap-1.5">
-                    + Tạo bản dịch {{ config('post.locales')[$activeLocale] }}
+                    {{ __('+ Tạo bản dịch :active_locale', ['active_locale' => config('post.locales')[$activeLocale]]) }}
                 </button>
             </form>
         </div>
@@ -378,7 +376,7 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
         @can('update', $translation)
         <button type="submit" form="article-translation-form" class="btn btn-primary btn-sm w-full gap-1.5">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-            {{ $translation->status === \Modules\Post\Enums\TranslationStatus::Published ? 'Cập nhật bài viết' : 'Lưu nội dung' }} ({{ config('post.locales')[$activeLocale] }})
+            {{ $translation->status === \Modules\Post\Enums\TranslationStatus::Published ? __('Cập nhật bài viết') : __('Lưu nội dung') }} ({{ config('post.locales')[$activeLocale] }})
         </button>
         @endcan
         @endif
@@ -395,17 +393,17 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
             @csrf
             @method('PUT')
             <div class="card-body p-3">
-                <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">Cài đặt chung</p>
+                <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">{{ __('Cài đặt chung') }}</p>
 
                 @if($article->qrIdentity)
                 <p class="text-xs text-base-content/50 mb-3">
-                    Mã QR bài viết: <span class="font-mono font-semibold text-base-content">{{ $article->qrIdentity->qr_code }}</span><br>
+                    {{ __('Mã QR bài viết:') }} <span class="font-mono font-semibold text-base-content">{{ $article->qrIdentity->qr_code }}</span><br>
                     <a href="{{ $article->qrIdentity->publicUrl() }}" target="_blank" rel="noopener" class="link link-primary break-all">{{ $article->qrIdentity->publicUrl() }}</a>
                 </p>
                 @endif
 
                 <div class="form-control mb-3">
-                    <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Định dạng nội dung</span></label>
+                    <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">{{ __('Định dạng nội dung') }}</span></label>
                     <select name="format" x-model="format" class="select select-bordered select-sm w-full ts-init @error('format') select-error @enderror">
                         @foreach(\Modules\Post\Enums\ArticleFormat::cases() as $f)
                         <option value="{{ $f->value }}" {{ old('format', $article->format->value) === $f->value ? 'selected' : '' }}>{{ $f->label() }}</option>
@@ -415,33 +413,33 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
 
                     <div x-show="format === 'redirect'" x-cloak class="mt-3">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">URL đích <span class="text-error">*</span></span>
+                            <span class="label-text font-medium">{{ __('URL đích') }} <span class="text-error">*</span></span>
                         </label>
                         <input type="url" name="redirect_url" value="{{ old('redirect_url', $article->redirect_url) }}"
                                class="input input-bordered input-sm w-full @error('redirect_url') input-error @enderror"
                                placeholder="https://nguon-khac.vn/bai-viet-goc">
                         @error('redirect_url')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
-                        <p class="mt-1 text-xs text-base-content/50">Nội dung soạn bên dưới (nếu có) sẽ không hiển thị công khai — bấm vào bài viết sẽ chuyển thẳng ra URL này.</p>
+                        <p class="mt-1 text-xs text-base-content/50">{{ __('Nội dung soạn bên dưới (nếu có) sẽ không hiển thị công khai — bấm vào bài viết sẽ chuyển thẳng ra URL này.') }}</p>
                         @if($article->isRedirect())
                         <a href="{{ route('backend.post.articles.clicks', $article) }}" class="mt-1.5 inline-flex items-center gap-1 text-xs text-primary hover:underline">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
                             </svg>
-                            Xem thống kê click ({{ number_format($article->redirectClicks()->count()) }})
+                            {{ __('Xem thống kê click (:count)', ['count' => number_format($article->redirectClicks()->count())]) }}
                         </a>
                         @endif
                     </div>
                 </div>
 
                 <div class="form-control mb-3">
-                    <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Ảnh đại diện</span></label>
+                    <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">{{ __('Ảnh đại diện') }}</span></label>
                     @if($article->cover_image_url)
                     <div class="mb-2 aspect-video w-full max-w-xs rounded-lg overflow-hidden bg-base-200">
-                        <img src="{{ $article->cover_image_url }}" alt="Ảnh đại diện hiện tại" class="h-full w-full object-cover">
+                        <img src="{{ $article->cover_image_url }}" alt="{{ __('Ảnh đại diện hiện tại') }}" class="h-full w-full object-cover">
                     </div>
                     @endif
                     <div id="cover-filepond" data-context-type="post_article" data-context-id="{{ $article->id }}"></div>
-                    <p class="mt-1 text-xs text-base-content/50">Tải ảnh mới sẽ tự động thay ảnh hiện tại.</p>
+                    <p class="mt-1 text-xs text-base-content/50">{{ __('Tải ảnh mới sẽ tự động thay ảnh hiện tại.') }}</p>
                 </div>
 
                 {{-- spec/Province_Showcase_Technical_Specification.md §6.3 — tuỳ chọn, không bắt buộc. --}}
@@ -465,7 +463,7 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
                      province_code. Sản phẩm đã tick vẫn được giữ lại dù không còn khớp bộ lọc mới
                      (tránh mất liên kết cũ ngoài ý muốn). --}}
                 <div class="form-control mb-3" id="ocop-product-picker" data-instance-id="article-edit">
-                    <label class="label py-0 pb-1.5"><span class="label-text text-xs font-medium">Sản phẩm OCOP liên quan</span></label>
+                    <label class="label py-0 pb-1.5"><span class="label-text text-xs font-medium">{{ __('Sản phẩm OCOP liên quan') }}</span></label>
                     @php
                         $selectedOcopIds = old('ocop_product_ids', $article->ocopProducts->pluck('id')->all());
                     @endphp
@@ -483,9 +481,9 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
                         @empty
                         <p class="text-xs text-base-content/30 py-1" data-ocop-picker-empty>
                             @if($article->ward_code || $article->province_code)
-                            Không có sản phẩm OCOP nào khớp tỉnh/phường đã chọn.
+                            {{ __('Không có sản phẩm OCOP nào khớp tỉnh/phường đã chọn.') }}
                             @else
-                            Chọn tỉnh/thành hoặc phường/xã ở trên để xem sản phẩm OCOP tương ứng.
+                            {{ __('Chọn tỉnh/thành hoặc phường/xã ở trên để xem sản phẩm OCOP tương ứng.') }}
                             @endif
                         </p>
                         @endforelse
@@ -496,7 +494,7 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
                      lắng nghe cùng sự kiện "address-picker:change" (instanceId=article-edit),
                      _setupHeritageSitePicker gọi GET /api/heritage-sites/picker. --}}
                 <div class="form-control mb-3" id="heritage-site-picker" data-instance-id="article-edit">
-                    <label class="label py-0 pb-1.5"><span class="label-text text-xs font-medium">Di tích liên quan</span></label>
+                    <label class="label py-0 pb-1.5"><span class="label-text text-xs font-medium">{{ __('Di tích liên quan') }}</span></label>
                     @php
                         $selectedHeritageIds = old('heritage_site_ids', $article->heritageSites->pluck('id')->all());
                     @endphp
@@ -514,9 +512,9 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
                         @empty
                         <p class="text-xs text-base-content/30 py-1" data-heritage-picker-empty>
                             @if($article->ward_code || $article->province_code)
-                            Không có di tích nào khớp tỉnh/phường đã chọn.
+                            {{ __('Không có di tích nào khớp tỉnh/phường đã chọn.') }}
                             @else
-                            Chọn tỉnh/thành hoặc phường/xã ở trên để xem di tích tương ứng.
+                            {{ __('Chọn tỉnh/thành hoặc phường/xã ở trên để xem di tích tương ứng.') }}
                             @endif
                         </p>
                         @endforelse
@@ -525,8 +523,8 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
 
                 <div class="form-control mb-3">
                     <label class="label py-0 pb-1.5">
-                        <span class="label-text text-xs font-medium">Danh mục</span>
-                        <span class="label-text-alt text-xs text-base-content/40">Bấm ★ để đặt danh mục chính</span>
+                        <span class="label-text text-xs font-medium">{{ __('Danh mục') }}</span>
+                        <span class="label-text-alt text-xs text-base-content/40">{{ __('Bấm ★ để đặt danh mục chính') }}</span>
                     </label>
                     @include('post::admin.articles._category-picker', [
                         'categoryTree' => $categoryTree,
@@ -547,7 +545,7 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
                     <input type="hidden" name="is_featured" value="0">
                     <input type="checkbox" name="is_featured" value="1"
                            class="checkbox checkbox-sm checkbox-primary mt-0.5 shrink-0" {{ old('is_featured', $article->is_featured) ? 'checked' : '' }}>
-                    <span class="text-sm font-medium group-hover:text-primary transition-colors">Bài viết nổi bật</span>
+                    <span class="text-sm font-medium group-hover:text-primary transition-colors">{{ __('Bài viết nổi bật') }}</span>
                 </label>
 
                 {{-- §11/§9 — checkbox luôn hiện nếu bài ĐANG sponsored (để không ai mất quyền xem
@@ -561,14 +559,14 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
                            {{ $canManageSponsorship ? '' : 'disabled' }}
                            class="checkbox checkbox-sm checkbox-warning mt-0.5 shrink-0"
                            {{ old('is_sponsored', $article->is_sponsored) ? 'checked' : '' }}>
-                    <span class="text-sm font-medium group-hover:text-primary transition-colors">Đây là bài viết tài trợ</span>
+                    <span class="text-sm font-medium group-hover:text-primary transition-colors">{{ __('Đây là bài viết tài trợ') }}</span>
                 </label>
 
                 <div x-show="isSponsored" x-cloak class="space-y-3 mb-3 pl-2.5 border-l-2 border-warning/30">
-                    <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide">Thông tin tài trợ</p>
+                    <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide">{{ __('Thông tin tài trợ') }}</p>
 
                     <div class="form-control">
-                        <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Tên nhãn hàng <span class="text-error">*</span></span></label>
+                        <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">{{ __('Tên nhãn hàng') }} <span class="text-error">*</span></span></label>
                         <input type="text" name="sponsor_name" value="{{ old('sponsor_name', $article->sponsor_name) }}"
                                {{ $canManageSponsorship ? '' : 'disabled' }}
                                class="input input-bordered input-sm w-full @error('sponsor_name') input-error @enderror" maxlength="255">
@@ -576,7 +574,7 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
                     </div>
 
                     <div class="form-control">
-                        <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Logo nhãn hàng (URL)</span></label>
+                        <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">{{ __('Logo nhãn hàng (URL)') }}</span></label>
                         <input type="text" name="sponsor_logo_url" value="{{ old('sponsor_logo_url', $article->sponsor_logo_url) }}"
                                {{ $canManageSponsorship ? '' : 'disabled' }}
                                class="input input-bordered input-sm w-full @error('sponsor_logo_url') input-error @enderror" maxlength="500">
@@ -584,10 +582,10 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
                     </div>
 
                     <div class="form-control">
-                        <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Loại nhãn <span class="text-error">*</span></span></label>
+                        <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">{{ __('Loại nhãn') }} <span class="text-error">*</span></span></label>
                         <select name="sponsor_label" {{ $canManageSponsorship ? '' : 'disabled' }}
                                 class="select select-bordered select-sm w-full @error('sponsor_label') select-error @enderror">
-                            <option value="">— Chọn —</option>
+                            <option value="">{{ __('— Chọn —') }}</option>
                             @foreach(\Modules\Post\Enums\SponsorLabel::cases() as $sl)
                             <option value="{{ $sl->value }}" {{ old('sponsor_label', $article->sponsor_label?->value) === $sl->value ? 'selected' : '' }}>{{ $sl->label() }}</option>
                             @endforeach
@@ -596,7 +594,7 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
                     </div>
 
                     <div class="form-control">
-                        <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Mã campaign</span></label>
+                        <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">{{ __('Mã campaign') }}</span></label>
                         <input type="text" name="campaign_code" value="{{ old('campaign_code', $article->campaign_code) }}"
                                {{ $canManageSponsorship ? '' : 'disabled' }}
                                class="input input-bordered input-sm w-full @error('campaign_code') input-error @enderror" maxlength="50">
@@ -605,14 +603,14 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
 
                     <div class="grid grid-cols-2 gap-2">
                         <div class="form-control">
-                            <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Bắt đầu</span></label>
+                            <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">{{ __('Bắt đầu') }}</span></label>
                             <input type="date" name="sponsored_start_date" value="{{ old('sponsored_start_date', $article->sponsored_start_date?->toDateString()) }}"
                                    {{ $canManageSponsorship ? '' : 'disabled' }}
                                    class="input input-bordered input-sm w-full @error('sponsored_start_date') input-error @enderror">
                             @error('sponsored_start_date')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                         </div>
                         <div class="form-control">
-                            <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Kết thúc</span></label>
+                            <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">{{ __('Kết thúc') }}</span></label>
                             <input type="date" name="sponsored_end_date" value="{{ old('sponsored_end_date', $article->sponsored_end_date?->toDateString()) }}"
                                    {{ $canManageSponsorship ? '' : 'disabled' }}
                                    class="input input-bordered input-sm w-full @error('sponsored_end_date') input-error @enderror">
@@ -622,7 +620,7 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
                 </div>
                 @endif
 
-                <button type="submit" class="btn btn-outline btn-sm w-full">Lưu cài đặt chung</button>
+                <button type="submit" class="btn btn-outline btn-sm w-full">{{ __('Lưu cài đặt chung') }}</button>
             </div>
         </form>
 
@@ -633,10 +631,10 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
         @endphp
         @if($publishAllSubject && Gate::allows('publish', $publishAllSubject))
         <form method="POST" action="{{ route('backend.post.articles.publish-all', $article) }}"
-              onsubmit="return confirm('Xuất bản tất cả bản dịch đã sẵn sàng (đã duyệt/đã lên lịch)?')">
+              onsubmit="return confirm(@js(__('Xuất bản tất cả bản dịch đã sẵn sàng (đã duyệt/đã lên lịch)?')))">
             @csrf
             <button type="submit" class="btn btn-success btn-sm w-full" {{ $hasPublishable ? '' : 'disabled' }}>
-                Xuất bản tất cả ngôn ngữ
+                {{ __('Xuất bản tất cả ngôn ngữ') }}
             </button>
         </form>
         @endif
@@ -647,7 +645,7 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
              x-data="{ showSchedule: false, showUnpublish: false, showTakedown: false }">
             <div class="card-body p-3">
                 <div class="flex items-center justify-between mb-3">
-                    <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide">Trạng thái ({{ config('post.locales')[$translation->locale] }})</p>
+                    <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide">{{ __('Trạng thái (:locale)', ['locale' => config('post.locales')[$translation->locale]]) }}</p>
                     <span class="badge badge-sm {{ $translation->status->badgeClass() }}">{{ $translation->status->label() }}</span>
                 </div>
 
@@ -661,9 +659,9 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
                     @endphp
 
                     @if($translation->status === $ts::Submitted && ! $canApproveThis && ! $canPublishThis)
-                    <p class="text-xs text-base-content/60">Đang chờ Biên tập viên duyệt sơ bộ.</p>
+                    <p class="text-xs text-base-content/60">{{ __('Đang chờ Biên tập viên duyệt sơ bộ.') }}</p>
                     @elseif($translation->status === $ts::Approved && ! $canPublishThis)
-                    <p class="text-xs text-base-content/60">Đã duyệt sơ bộ, đang chờ Tổng biên tập duyệt xuất bản.</p>
+                    <p class="text-xs text-base-content/60">{{ __('Đã duyệt sơ bộ, đang chờ Tổng biên tập duyệt xuất bản.') }}</p>
                     @endif
 
                     @if(! $canPublishThis)
@@ -671,7 +669,7 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
                     @if($translation->status === $ts::Draft)
                     <form method="POST" action="{{ route('backend.post.translations.submit', $translation) }}">
                         @csrf
-                        <button class="btn btn-outline btn-sm w-full">{{ $canApproveThis ? 'Gửi Tổng biên tập duyệt' : 'Gửi duyệt' }}</button>
+                        <button class="btn btn-outline btn-sm w-full">{{ $canApproveThis ? __('Gửi Tổng biên tập duyệt') : __('Gửi duyệt') }}</button>
                     </form>
                     @endif
                     @endcan
@@ -679,33 +677,33 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
                     @if($canApproveThis && $translation->status === $ts::Submitted)
                     <form method="POST" action="{{ route('backend.post.translations.approve', $translation) }}">
                         @csrf
-                        <button class="btn btn-info btn-sm w-full">Duyệt sơ bộ</button>
+                        <button class="btn btn-info btn-sm w-full">{{ __('Duyệt sơ bộ') }}</button>
                     </form>
                     @endif
                     @endif
 
                     @if($canPublishThis && $inReview)
                     <form method="POST" action="{{ route('backend.post.translations.publish', $translation) }}"
-                          @if($translation->status !== $ts::Approved) onsubmit="return confirm('Bạn là cấp duyệt cuối — bài sẽ được duyệt và xuất bản ngay. Tiếp tục?')" @endif>
+                          @if($translation->status !== $ts::Approved) onsubmit="return confirm(@js(__('Bạn là cấp duyệt cuối — bài sẽ được duyệt và xuất bản ngay. Tiếp tục?')))" @endif>
                         @csrf
-                        <button class="btn btn-success btn-sm w-full">{{ $translation->status === $ts::Approved ? 'Duyệt & đăng ngay' : 'Đăng ngay' }}</button>
+                        <button class="btn btn-success btn-sm w-full">{{ $translation->status === $ts::Approved ? __('Duyệt & đăng ngay') : __('Đăng ngay') }}</button>
                     </form>
                     @elseif($canPublishThis && $translation->status === $ts::Scheduled)
                     <form method="POST" action="{{ route('backend.post.translations.publish', $translation) }}">
                         @csrf
-                        <button class="btn btn-success btn-sm w-full">Đăng ngay</button>
+                        <button class="btn btn-success btn-sm w-full">{{ __('Đăng ngay') }}</button>
                     </form>
                     @endif
 
                     @can('returnToDraft', $translation)
                     @if(in_array($translation->status, [$ts::Submitted, $ts::Approved], true))
                     <div x-data="{ open: false }">
-                        <button type="button" class="btn btn-ghost btn-sm w-full text-warning" @click="open = !open">Trả lại người viết</button>
+                        <button type="button" class="btn btn-ghost btn-sm w-full text-warning" @click="open = !open">{{ __('Trả lại người viết') }}</button>
                         <form x-show="open" x-cloak x-transition method="POST" action="{{ route('backend.post.translations.return-to-draft', $translation) }}" class="flex flex-col gap-2 pt-1">
                             @csrf
                             <textarea name="reason" rows="2" minlength="10" maxlength="500" required
-                                      class="textarea textarea-bordered textarea-sm w-full" placeholder="Lý do cần chỉnh sửa (tối thiểu 10 ký tự)"></textarea>
-                            <button class="btn btn-warning btn-sm w-full">Xác nhận trả lại</button>
+                                      class="textarea textarea-bordered textarea-sm w-full" placeholder="{{ __('Lý do cần chỉnh sửa (tối thiểu 10 ký tự)') }}"></textarea>
+                            <button class="btn btn-warning btn-sm w-full">{{ __('Xác nhận trả lại') }}</button>
                         </form>
                     </div>
                     @endif
@@ -713,14 +711,14 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
 
                     @can('schedule', $translation)
                     @if($inReview)
-                    <button type="button" class="btn btn-info btn-sm w-full" @click="showSchedule = !showSchedule">Lên lịch xuất bản</button>
+                    <button type="button" class="btn btn-info btn-sm w-full" @click="showSchedule = !showSchedule">{{ __('Lên lịch xuất bản') }}</button>
                     <div x-show="showSchedule" x-cloak x-transition class="pt-1">
                         <form method="POST" action="{{ route('backend.post.translations.schedule', $translation) }}" class="flex flex-col gap-2">
                             @csrf
                             <input type="text" name="scheduled_at" id="fp-scheduled-at"
                                    class="input input-bordered input-sm w-full fp-init" data-fp-mode="datetime"
                                    placeholder="DD/MM/YYYY HH:mm" required>
-                            <button class="btn btn-primary btn-sm w-full">Xác nhận lên lịch</button>
+                            <button class="btn btn-primary btn-sm w-full">{{ __('Xác nhận lên lịch') }}</button>
                         </form>
                     </div>
                     @endif
@@ -728,33 +726,33 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
                     @if($translation->status === \Modules\Post\Enums\TranslationStatus::Scheduled)
                     <form method="POST" action="{{ route('backend.post.translations.cancel-schedule', $translation) }}">
                         @csrf
-                        <button class="btn btn-ghost btn-sm w-full">Huỷ lịch</button>
+                        <button class="btn btn-ghost btn-sm w-full">{{ __('Huỷ lịch') }}</button>
                     </form>
                     @endif
                     @endcan
 
                     @can('unpublish', $translation)
                     @if($translation->status === \Modules\Post\Enums\TranslationStatus::Published)
-                    <button type="button" class="btn btn-warning btn-sm w-full" @click="showUnpublish = !showUnpublish">Gỡ bài</button>
+                    <button type="button" class="btn btn-warning btn-sm w-full" @click="showUnpublish = !showUnpublish">{{ __('Gỡ bài') }}</button>
                     <div x-show="showUnpublish" x-cloak x-transition class="pt-1">
                         <form method="POST" action="{{ route('backend.post.translations.unpublish', $translation) }}" class="flex flex-col gap-2">
                             @csrf
-                            <textarea name="reason" rows="2" required minlength="10" placeholder="Lý do gỡ bài (bắt buộc, tối thiểu 10 ký tự)..."
+                            <textarea name="reason" rows="2" required minlength="10" placeholder="{{ __('Lý do gỡ bài (bắt buộc, tối thiểu 10 ký tự)...') }}"
                                       class="textarea textarea-bordered textarea-sm w-full"></textarea>
-                            <button class="btn btn-warning btn-sm w-full">Xác nhận gỡ bài</button>
+                            <button class="btn btn-warning btn-sm w-full">{{ __('Xác nhận gỡ bài') }}</button>
                         </form>
                     </div>
                     @endif
 
                     @if(in_array($translation->status, [\Modules\Post\Enums\TranslationStatus::Published, \Modules\Post\Enums\TranslationStatus::Unpublished], true))
-                    <button type="button" class="btn btn-error btn-sm w-full" @click="showTakedown = !showTakedown">Gỡ khẩn cấp</button>
+                    <button type="button" class="btn btn-error btn-sm w-full" @click="showTakedown = !showTakedown">{{ __('Gỡ khẩn cấp') }}</button>
                     <div x-show="showTakedown" x-cloak x-transition class="pt-1">
                         <form method="POST" action="{{ route('backend.post.translations.takedown', $translation) }}" class="flex flex-col gap-2"
-                              onsubmit="return confirm('Gỡ khẩn cấp sẽ lưu trữ vĩnh viễn bản dịch này và gửi thông báo cho CEO/AI Operator. Tiếp tục?')">
+                              onsubmit="return confirm(@js(__('Gỡ khẩn cấp sẽ lưu trữ vĩnh viễn bản dịch này và gửi thông báo cho CEO/AI Operator. Tiếp tục?')))">
                             @csrf
-                            <textarea name="reason" rows="2" required minlength="10" placeholder="Lý do gỡ khẩn cấp (bắt buộc, tối thiểu 10 ký tự)..."
+                            <textarea name="reason" rows="2" required minlength="10" placeholder="{{ __('Lý do gỡ khẩn cấp (bắt buộc, tối thiểu 10 ký tự)...') }}"
                                       class="textarea textarea-bordered textarea-sm w-full"></textarea>
-                            <button class="btn btn-error btn-sm w-full">Xác nhận gỡ khẩn cấp</button>
+                            <button class="btn btn-error btn-sm w-full">{{ __('Xác nhận gỡ khẩn cấp') }}</button>
                         </form>
                     </div>
                     @endif
@@ -763,9 +761,9 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
                     @can('archive', $translation)
                     @if(in_array($translation->status, [\Modules\Post\Enums\TranslationStatus::Published, \Modules\Post\Enums\TranslationStatus::Unpublished], true))
                     <form method="POST" action="{{ route('backend.post.translations.archive', $translation) }}"
-                          onsubmit="return confirm('Lưu trữ bản dịch này?')">
+                          onsubmit="return confirm(@js(__('Lưu trữ bản dịch này?')))">
                         @csrf
-                        <button class="btn btn-ghost btn-sm w-full">Lưu trữ</button>
+                        <button class="btn btn-ghost btn-sm w-full">{{ __('Lưu trữ') }}</button>
                     </form>
                     @endif
                     @endcan
@@ -774,7 +772,7 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
                     <form method="POST" action="{{ route('backend.post.translations.destroy', $translation) }}"
                           onsubmit="return confirm('Xoá bản dịch {{ $translation->locale }}? Nếu đây là bản dịch cuối cùng, cả bài viết sẽ bị xoá.')">
                         @csrf @method('DELETE')
-                        <button class="btn btn-ghost btn-sm w-full text-error">Xoá bản dịch này</button>
+                        <button class="btn btn-ghost btn-sm w-full text-error">{{ __('Xoá bản dịch này') }}</button>
                     </form>
                     @endcan
 
@@ -784,9 +782,9 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
                          (thay đổi dữ liệu ngay khi bấm), không phải trường xem thông tin. --}}
                     @if($article->is_sponsored && $canManageSponsorship)
                     <form method="POST" action="{{ route('backend.post.articles.remove-sponsor', $article) }}"
-                          onsubmit="return confirm('Gỡ tài trợ khỏi bài viết này? Toàn bộ thông tin sponsor sẽ bị xoá (không ảnh hưởng trạng thái xuất bản).')">
+                          onsubmit="return confirm(@js(__('Gỡ tài trợ khỏi bài viết này? Toàn bộ thông tin sponsor sẽ bị xoá (không ảnh hưởng trạng thái xuất bản).')))">
                         @csrf
-                        <button class="btn btn-ghost btn-sm w-full text-warning">Gỡ tài trợ</button>
+                        <button class="btn btn-ghost btn-sm w-full text-warning">{{ __('Gỡ tài trợ') }}</button>
                     </form>
                     @endif
 
@@ -800,8 +798,8 @@ function postConcurrentEditWatch(indexUrl, knownLatestId) {
         @if($canViewHistory)
         <div class="card bg-base-100 shadow-sm border border-base-200">
             <div class="card-body p-3">
-                <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">Lịch sử phiên bản</p>
-                <a href="{{ $historyPageUrl }}" class="btn btn-outline btn-sm w-full">Xem lịch sử phiên bản</a>
+                <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">{{ __('Lịch sử phiên bản') }}</p>
+                <a href="{{ $historyPageUrl }}" class="btn btn-outline btn-sm w-full">{{ __('Xem lịch sử phiên bản') }}</a>
             </div>
         </div>
         @endif

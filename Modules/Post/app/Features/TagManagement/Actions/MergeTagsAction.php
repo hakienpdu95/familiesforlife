@@ -22,7 +22,7 @@ class MergeTagsAction
     {
         if ($sourceTag->id === $targetTag->id) {
             throw ValidationException::withMessages([
-                'target_tag_id' => 'Không thể gộp tag vào chính nó.',
+                'target_tag_id' => __('Không thể gộp tag vào chính nó.'),
             ]);
         }
 

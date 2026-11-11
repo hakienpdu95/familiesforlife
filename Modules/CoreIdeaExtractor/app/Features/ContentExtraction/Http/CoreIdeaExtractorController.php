@@ -610,7 +610,7 @@ class CoreIdeaExtractorController extends Controller
             return $notes;
         }
 
-        $note = "Nội dung nguồn dài hơn giới hạn dán vào chat AI — đã ưu tiên giữ lại các đoạn liên quan tới chủ đề \"{$topic}\" (kể cả ở giữa/cuối bài) thay vì luôn cắt theo thứ tự xuất hiện; đoạn bị lược bỏ được đánh dấu \"[…]\".";
+        $note = __('Nội dung nguồn dài hơn giới hạn dán vào chat AI — đã ưu tiên giữ lại các đoạn liên quan tới chủ đề ":topic" (kể cả ở giữa/cuối bài) thay vì luôn cắt theo thứ tự xuất hiện; đoạn bị lược bỏ được đánh dấu "[…]".', ['topic' => $topic]);
 
         return $notes ? "{$notes} {$note}" : $note;
     }
@@ -622,7 +622,7 @@ class CoreIdeaExtractorController extends Controller
             return $notes;
         }
 
-        $note = 'Nội dung nguồn dài hơn giới hạn dán vào chat AI — đã giữ đoạn MỞ ĐẦU và đoạn KẾT LUẬN (thường chứa nhận định/trích dẫn chốt quan trọng của bài), cắt bớt một số đoạn ở GIỮA nếu cần thay vì luôn cắt bỏ phần cuối; đoạn bị lược bỏ được đánh dấu "[…]".';
+        $note = __('Nội dung nguồn dài hơn giới hạn dán vào chat AI — đã giữ đoạn MỞ ĐẦU và đoạn KẾT LUẬN (thường chứa nhận định/trích dẫn chốt quan trọng của bài), cắt bớt một số đoạn ở GIỮA nếu cần thay vì luôn cắt bỏ phần cuối; đoạn bị lược bỏ được đánh dấu "[…]".');
 
         return $notes ? "{$notes} {$note}" : $note;
     }
@@ -647,7 +647,7 @@ class CoreIdeaExtractorController extends Controller
 
         $percentKept = (int) round($finalLength / $originalLength * 100);
         $note = sprintf(
-            'Nội dung nguồn dài %s ký tự, đã CẮT BỚT còn ~%d%% (trần %s ký tự) trước khi đưa vào AI theo thứ tự xuất hiện (giữ phần đầu, bỏ phần sau) — mọi tóm tắt/viết lại/ý tưởng sinh ra bên dưới chỉ dựa trên phần ĐÃ GIỮ, CHƯA phản ánh phần bị cắt.',
+            __('Nội dung nguồn dài %s ký tự, đã CẮT BỚT còn ~%d%% (trần %s ký tự) trước khi đưa vào AI theo thứ tự xuất hiện (giữ phần đầu, bỏ phần sau) — mọi tóm tắt/viết lại/ý tưởng sinh ra bên dưới chỉ dựa trên phần ĐÃ GIỮ, CHƯA phản ánh phần bị cắt.'),
             number_format($originalLength),
             $percentKept,
             number_format($maxChars),
@@ -777,7 +777,7 @@ class CoreIdeaExtractorController extends Controller
             return $notes;
         }
 
-        $note = "Selector tùy chỉnh \"{$selector}\" không khớp phần tử nào trên trang — đã dùng thuật toán tự động để xác định main_content.";
+        $note = __('Selector tùy chỉnh ":selector" không khớp phần tử nào trên trang — đã dùng thuật toán tự động để xác định main_content.', ['selector' => $selector]);
 
         return $notes ? "{$note} {$notes}" : $note;
     }
@@ -798,7 +798,7 @@ class CoreIdeaExtractorController extends Controller
             return $notes;
         }
 
-        $note = 'Nguồn có bảng/danh sách số + heading dạng câu hỏi — đã cấu trúc khá tốt cho AI trích xuất (dễ được AI answer engine trích dẫn), cân nhắc chọn góc viết khác biệt thay vì lặp lại thông tin tương tự.';
+        $note = __('Nguồn có bảng/danh sách số + heading dạng câu hỏi — đã cấu trúc khá tốt cho AI trích xuất (dễ được AI answer engine trích dẫn), cân nhắc chọn góc viết khác biệt thay vì lặp lại thông tin tương tự.');
 
         return $notes ? "{$notes} {$note}" : $note;
     }
@@ -816,7 +816,7 @@ class CoreIdeaExtractorController extends Controller
             return $notes;
         }
 
-        $note = "Ngôn ngữ trang khai báo (<html lang>) không khớp ngôn ngữ thực tế phát hiện được trong nội dung — đã tự động điều chỉnh trường `language` thành \"{$language}\" (có thể do lỗi cấu hình CMS/template của site).";
+        $note = __('Ngôn ngữ trang khai báo (<html lang>) không khớp ngôn ngữ thực tế phát hiện được trong nội dung — đã tự động điều chỉnh trường `language` thành ":language" (có thể do lỗi cấu hình CMS/template của site).', ['language' => $language]);
 
         return $notes ? "{$notes} {$note}" : $note;
     }
@@ -833,7 +833,7 @@ class CoreIdeaExtractorController extends Controller
             return $notes;
         }
 
-        $note = 'Không tìm thấy <title>/<head> trong mã HTML đã dán — có thể bạn chỉ dán 1 đoạn fragment (VD riêng nội dung trong div class="post__content"), nên title/meta_description/author sẽ trống. Dán cả trang (View Source) nếu cần đầy đủ các trường này.';
+        $note = __('Không tìm thấy <title>/<head> trong mã HTML đã dán — có thể bạn chỉ dán 1 đoạn fragment (VD riêng nội dung trong div class="post__content"), nên title/meta_description/author sẽ trống. Dán cả trang (View Source) nếu cần đầy đủ các trường này.');
 
         return $notes ? "{$note} {$notes}" : $note;
     }

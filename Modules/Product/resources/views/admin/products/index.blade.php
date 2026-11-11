@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', 'Sản phẩm & Dịch vụ')
+@section('title', __('Sản phẩm & Dịch vụ'))
 
 @section('content')
 <div x-data="productListPage({{ Js::from([
@@ -28,19 +28,19 @@
     {{-- ── Page header ──────────────────────────────────────────────────── --}}
     <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div>
-            <h1 class="text-2xl font-bold text-base-content">Sản phẩm & Dịch vụ</h1>
-            <p class="text-sm text-base-content/50 mt-0.5">Catalog dùng để gọi ra trong Product CTA Box của bài viết</p>
+            <h1 class="text-2xl font-bold text-base-content">{{ __('Sản phẩm & Dịch vụ') }}</h1>
+            <p class="text-sm text-base-content/50 mt-0.5">{{ __('Catalog dùng để gọi ra trong Product CTA Box của bài viết') }}</p>
         </div>
         <div class="flex items-center gap-2">
             @can(\App\Enums\PermissionEnum::PRODUCT_CATEGORY_MANAGE->value)
-            <a href="{{ route('backend.products.categories.index') }}" class="btn btn-ghost btn-sm">Danh mục</a>
+            <a href="{{ route('backend.products.categories.index') }}" class="btn btn-ghost btn-sm">{{ __('Danh mục') }}</a>
             @endcan
             @can('create', \Modules\Product\Models\Product::class)
             <a href="{{ route('backend.products.create') }}" class="btn btn-primary btn-sm gap-1.5">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Thêm sản phẩm
+                {{ __('Thêm sản phẩm') }}
             </a>
             @endcan
         </div>
@@ -53,15 +53,15 @@
 
                     <div class="form-control filter-grid-wide">
                         <label class="label py-0.5">
-                            <span class="label-text text-xs font-medium">Tìm kiếm</span>
-                            <span class="label-text-alt text-xs text-base-content/40">Tên, SKU</span>
+                            <span class="label-text text-xs font-medium">{{ __('Tìm kiếm') }}</span>
+                            <span class="label-text-alt text-xs text-base-content/40">{{ __('Tên, SKU') }}</span>
                         </label>
                         <div class="input input-sm input-bordered flex items-center gap-2 bg-base-100">
                             <svg class="w-3.5 h-3.5 text-base-content/40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                             </svg>
                             <input type="text" x-model="filters.search" @input.debounce.350ms="onFilterChange()"
-                                   placeholder="Nhập tên/SKU..." class="grow bg-transparent outline-none text-sm">
+                                   placeholder="{{ __('Nhập tên/SKU...') }}" class="grow bg-transparent outline-none text-sm">
                             <button x-show="filters.search" @click="clearSearch()"
                                     class="text-base-content/30 hover:text-base-content transition-colors">
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -72,11 +72,11 @@
                     </div>
 
                     <div class="form-control">
-                        <label class="label py-0.5"><span class="label-text text-xs font-medium">Danh mục</span></label>
+                        <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Danh mục') }}</span></label>
                         <select id="ts-category" x-model="filters.category_id" @change="onFilterChange()"
-                                data-ts-placeholder="Tất cả danh mục"
+                                data-ts-placeholder="{{ __('Tất cả danh mục') }}"
                                 class="select select-sm select-bordered w-full">
-                            <option value="">Tất cả</option>
+                            <option value="">{{ __('Tất cả') }}</option>
                             @foreach($categories as $c)
                             <option value="{{ $c->id }}">{{ $c->name }}</option>
                             @endforeach
@@ -84,11 +84,11 @@
                     </div>
 
                     <div class="form-control">
-                        <label class="label py-0.5"><span class="label-text text-xs font-medium">Loại</span></label>
+                        <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Loại') }}</span></label>
                         <select id="ts-type" x-model="filters.type" @change="onFilterChange()"
-                                data-ts-placeholder="Tất cả loại"
+                                data-ts-placeholder="{{ __('Tất cả loại') }}"
                                 class="select select-sm select-bordered w-full">
-                            <option value="">Tất cả</option>
+                            <option value="">{{ __('Tất cả') }}</option>
                             @foreach(\Modules\Product\Enums\ProductType::cases() as $t)
                             <option value="{{ $t->value }}">{{ $t->label() }}</option>
                             @endforeach
@@ -96,11 +96,11 @@
                     </div>
 
                     <div class="form-control">
-                        <label class="label py-0.5"><span class="label-text text-xs font-medium">Trạng thái</span></label>
+                        <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Trạng thái') }}</span></label>
                         <select id="ts-status" x-model="filters.status" @change="onFilterChange()"
-                                data-ts-placeholder="Tất cả trạng thái"
+                                data-ts-placeholder="{{ __('Tất cả trạng thái') }}"
                                 class="select select-sm select-bordered w-full">
-                            <option value="">Tất cả</option>
+                            <option value="">{{ __('Tất cả') }}</option>
                             @foreach(\Modules\Product\Enums\ProductStatus::cases() as $s)
                             <option value="{{ $s->value }}">{{ $s->label() }}</option>
                             @endforeach
@@ -116,13 +116,13 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                         </svg>
-                        Đặt lại
+                        {{ __('Đặt lại') }}
                     </button>
                 </div>
 
                 <div x-show="activeChips.length > 0" x-cloak x-transition
                      class="flex flex-wrap gap-2 pt-3 mt-3 border-t border-base-200">
-                    <span class="text-xs text-base-content/40 self-center">Đang lọc:</span>
+                    <span class="text-xs text-base-content/40 self-center">{{ __('Đang lọc:') }}</span>
                     <template x-for="chip in activeChips" :key="chip.key">
                         <span class="badge badge-sm gap-1 cursor-pointer hover:badge-error transition-colors"
                               @click="removeChip(chip.key)">
@@ -148,14 +148,14 @@
 {{-- ── Delete confirm modal ─────────────────────────────────────────────── --}}
 <dialog id="productDeleteModal" class="modal">
     <div class="modal-box max-w-sm">
-        <h3 class="font-bold text-lg text-error">Xác nhận xoá</h3>
+        <h3 class="font-bold text-lg text-error">{{ __('Xác nhận xoá') }}</h3>
         <p class="py-3 text-sm text-base-content/70">
-            Bạn có chắc muốn xoá sản phẩm
+            {{ __('Bạn có chắc muốn xoá sản phẩm') }}
             <strong id="productDeleteItemName" class="text-base-content"></strong>?
         </p>
         <div class="modal-action mt-4">
-            <button id="productConfirmDeleteBtn" class="btn btn-error btn-sm">Xoá</button>
-            <button class="btn btn-ghost btn-sm" onclick="productDeleteModal.close()">Hủy</button>
+            <button id="productConfirmDeleteBtn" class="btn btn-error btn-sm">{{ __('Xoá') }}</button>
+            <button class="btn btn-ghost btn-sm" onclick="productDeleteModal.close()">{{ __('Hủy') }}</button>
         </div>
     </div>
     <form method="dialog" class="modal-backdrop"><button>close</button></form>

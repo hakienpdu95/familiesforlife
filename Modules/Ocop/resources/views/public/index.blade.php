@@ -1,7 +1,7 @@
 @extends('layouts.frontend')
 
-@section('title', $provinceName ? "Sản phẩm OCOP {$provinceName}" : 'Sản phẩm OCOP')
-@section('meta_description', 'Sản phẩm đặc trưng OCOP các địa phương — hạng sao, nhà sản xuất, thông tin liên hệ mua hàng.')
+@section('title', $provinceName ? "Sản phẩm OCOP {$provinceName}" : __('Sản phẩm OCOP'))
+@section('meta_description', __('Sản phẩm đặc trưng OCOP các địa phương — hạng sao, nhà sản xuất, thông tin liên hệ mua hàng.'))
 
 @php
     $search = trim((string) request('q')) ?: null;
@@ -28,9 +28,9 @@
     <div class="flex flex-wrap items-end justify-between gap-2 mb-6">
         <div>
             <h1 class="text-2xl font-bold text-base-content">
-                Sản phẩm OCOP @if($provinceName)<span class="text-primary">· {{ $provinceName }}</span>@endif
+                {{ __('Sản phẩm OCOP') }} @if($provinceName)<span class="text-primary">· {{ $provinceName }}</span>@endif
             </h1>
-            <p class="text-sm text-base-content/60 mt-1">{{ number_format($products->total(), 0, ',', '.') }} sản phẩm</p>
+            <p class="text-sm text-base-content/60 mt-1">{{ __(':total sản phẩm', ['total' => number_format($products->total(), 0, ',', '.')]) }}</p>
         </div>
     </div>
 
@@ -46,29 +46,29 @@
         <aside class="lg:sticky lg:top-4">
             <button type="button" @click="open = !open" :aria-expanded="open"
                     class="btn btn-sm btn-outline w-full justify-between lg:hidden mb-3">
-                <span>Bộ lọc @if($activeCount)<span class="badge badge-primary badge-sm">{{ $activeCount }}</span>@endif</span>
+                <span>{{ __('Bộ lọc') }} @if($activeCount)<span class="badge badge-primary badge-sm">{{ $activeCount }}</span>@endif</span>
                 <span x-text="open ? '▲' : '▼'">▼</span>
             </button>
 
             <div class="space-y-5 hidden lg:block" :class="{ 'hidden': !open }">
 
                 <div class="space-y-2">
-                    <label for="ocop-q" class="text-sm font-semibold text-base-content">Tìm kiếm</label>
+                    <label for="ocop-q" class="text-sm font-semibold text-base-content">{{ __('Tìm kiếm') }}</label>
                     <div class="join w-full">
-                        <input id="ocop-q" type="search" name="q" value="{{ $search }}" placeholder="Tên sản phẩm..."
+                        <input id="ocop-q" type="search" name="q" value="{{ $search }}" placeholder="{{ __('Tên sản phẩm...') }}"
                                class="input input-bordered input-sm join-item flex-1 min-w-0">
-                        <button class="btn btn-sm btn-primary join-item" aria-label="Tìm">Tìm</button>
+                        <button class="btn btn-sm btn-primary join-item" aria-label="{{ __('Tìm') }}">{{ __('Tìm') }}</button>
                     </div>
                 </div>
 
                 <div class="space-y-2">
-                    <label for="ts-category" class="text-sm font-semibold text-base-content">Danh mục</label>
+                    <label for="ts-category" class="text-sm font-semibold text-base-content">{{ __('Danh mục') }}</label>
                     {{-- Phân cấp Sản phẩm → Nhóm → Phân nhóm; chọn cấp cha = lấy cả cấp con.
                          Thụt lề bằng NBSP để vẫn đọc được khi TomSelect chưa nạp (fallback select thường). --}}
                     <select id="ts-category" name="category_id" onchange="this.form.submit()"
-                            data-ts-placeholder="Tất cả danh mục"
+                            data-ts-placeholder="{{ __('Tất cả danh mục') }}"
                             class="select select-bordered select-sm w-full">
-                        <option value="">Tất cả danh mục</option>
+                        <option value="">{{ __('Tất cả danh mục') }}</option>
                         @foreach($categoryOptions as $c)
                         <option value="{{ $c['id'] }}" data-depth="{{ $c['depth'] }}" @selected($categoryId === $c['id'])>{{ str_repeat("\u{00A0}\u{00A0}\u{00A0}", $c['depth']) }}{{ $c['name'] }}</option>
                         @endforeach
@@ -78,16 +78,16 @@
                 @if($provinceCode && $facets['wards']->isNotEmpty())
                 <fieldset class="space-y-2"
                           x-data="{ term: '', norm(s) { return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd'); } }">
-                    <legend class="text-sm font-semibold text-base-content mb-2">Địa phương</legend>
+                    <legend class="text-sm font-semibold text-base-content mb-2">{{ __('Địa phương') }}</legend>
                     @if($facets['wards']->count() > 6)
-                    <input type="search" x-model="term" placeholder="Tìm phường/xã..." aria-label="Tìm phường/xã"
+                    <input type="search" x-model="term" placeholder="{{ __('Tìm phường/xã...') }}" aria-label="{{ __('Tìm phường/xã') }}"
                            class="input input-bordered input-sm w-full">
                     @endif
                     <div class="max-h-72 overflow-y-auto space-y-0.5 pr-1">
                         <label class="flex items-center gap-2 cursor-pointer rounded px-1 py-1 hover:bg-base-200" x-show="!term">
                             <input type="radio" name="ward" value="" class="radio radio-sm radio-primary"
                                    onchange="this.form.submit()" @checked(! $selectedWard)>
-                            <span class="text-sm flex-1">Tất cả địa phương</span>
+                            <span class="text-sm flex-1">{{ __('Tất cả địa phương') }}</span>
                             <span class="text-xs text-base-content/50">{{ $facets['wards_total'] }}</span>
                         </label>
                         @foreach($facets['wards'] as $w)
@@ -106,11 +106,11 @@
                 @endif
 
                 <fieldset class="space-y-1">
-                    <legend class="text-sm font-semibold text-base-content mb-2">Xếp hạng sao</legend>
+                    <legend class="text-sm font-semibold text-base-content mb-2">{{ __('Xếp hạng sao') }}</legend>
                     <label class="flex items-center gap-2 cursor-pointer rounded px-1 py-1 hover:bg-base-200">
                         <input type="radio" name="stars" value="" class="radio radio-sm radio-primary"
                                onchange="this.form.submit()" @checked(! $stars)>
-                        <span class="text-sm flex-1">Tất cả</span>
+                        <span class="text-sm flex-1">{{ __('Tất cả') }}</span>
                     </label>
                     @foreach($facets['stars'] as $level => $total)
                     @php $checked = $stars === $level; $empty = $total === 0 && ! $checked; @endphp
@@ -127,7 +127,7 @@
 
                 @if($activeCount)
                 <a href="{{ route('ocop.public.index', array_filter(['province' => $provinceCode])) }}"
-                   class="btn btn-ghost btn-sm w-full text-error">Xoá tất cả bộ lọc</a>
+                   class="btn btn-ghost btn-sm w-full text-error">{{ __('Xoá tất cả bộ lọc') }}</a>
                 @endif
             </div>
         </aside>
@@ -137,7 +137,7 @@
 
             @if($activeCount)
             <div class="flex flex-wrap items-center gap-2 mb-4">
-                <span class="text-xs text-base-content/50">Đang lọc:</span>
+                <span class="text-xs text-base-content/50">{{ __('Đang lọc:') }}</span>
                 @if($search)
                 <a href="{{ $without('q') }}" class="badge badge-outline gap-1 hover:badge-error">“{{ $search }}” ✕</a>
                 @endif
@@ -167,15 +167,15 @@
                         <h3 class="font-bold leading-snug group-hover:text-primary mt-1">{{ $product->name }}</h3>
                         <p class="mt-1 text-xs text-base-content/60">
                             <span class="text-warning" aria-label="{{ $product->star_rating }} sao">{{ str_repeat('★', (int) $product->star_rating) }}</span>
-                            · {{ collect([$product->ward_name, $provinceCode ? null : $product->province_name])->filter()->implode(', ') ?: 'Chưa rõ địa phương' }}
+                            · {{ collect([$product->ward_name, $provinceCode ? null : $product->province_name])->filter()->implode(', ') ?: __('Chưa rõ địa phương') }}
                         </p>
                     </div>
                 </a>
                 @empty
                 <div class="col-span-full text-center py-12 text-base-content/50">
-                    <p>Không có sản phẩm phù hợp với bộ lọc.</p>
+                    <p>{{ __('Không có sản phẩm phù hợp với bộ lọc.') }}</p>
                     @if($activeCount)
-                    <a href="{{ route('ocop.public.index', array_filter(['province' => $provinceCode])) }}" class="link link-primary text-sm mt-2 inline-block">Xoá bộ lọc</a>
+                    <a href="{{ route('ocop.public.index', array_filter(['province' => $provinceCode])) }}" class="link link-primary text-sm mt-2 inline-block">{{ __('Xoá bộ lọc') }}</a>
                     @endif
                 </div>
                 @endforelse

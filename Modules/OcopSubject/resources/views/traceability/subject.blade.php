@@ -14,19 +14,19 @@
         @endif
 
         <div class="px-3 pt-4 pb-5">
-            <p class="tx-eyebrow">{{ $type ?: 'Chủ thể OCOP' }}</p>
+            <p class="tx-eyebrow">{{ $type ?: __('Chủ thể OCOP') }}</p>
             <h1 class="tx-display tx-h1 mt-1.5">{{ $title }}</h1>
             @if ($subtitle)<p class="mt-1 text-[15px] text-[#78716c]">{{ $subtitle }}</p>@endif
 
             @include('traceability.partials.ocop-cert', [
-                'certTitle' => 'Chủ thể có sản phẩm OCOP',
+                'certTitle' => __('Chủ thể có sản phẩm OCOP'),
                 'stars' => $stars,
                 'rows' => [
-                    'Sản phẩm' => $products_count ? $products_count.' sản phẩm OCOP' : null,
-                    'Ngành nghề' => $is_food_business ? 'Sản xuất thực phẩm' : null,
+                    __('Sản phẩm') => $products_count ? __(':count sản phẩm OCOP', ['count' => $products_count]) : null,
+                    __('Ngành nghề') => $is_food_business ? __('Sản xuất thực phẩm') : null,
                 ],
                 'docs' => $docs,
-                'docsLabel' => 'Giấy phép, chứng nhận',
+                'docsLabel' => __('Giấy phép, chứng nhận'),
                 'expiry' => $cert,
             ])
         </div>
@@ -36,14 +36,14 @@
     
     @if ($area || $hotline || ! empty($contact['email']) || ! empty($contact['website']) || ! empty($contact['map_url']))
         <section id="lien-he" class="tx-section">
-            <h2 class="tx-section-title">Liên hệ</h2>
+            <h2 class="tx-section-title">{{ __('Liên hệ') }}</h2>
             <div class="tx-card tx-rows">
                 @if ($area)
                     <div class="flex items-center gap-3.5 px-4 py-3">
                         <span class="tx-ico">@include('traceability.partials.icon', ['name' => 'map'])</span>
                         <span class="flex-1 text-[15px] leading-snug">{{ $area }}</span>
                         @if (! empty($contact['map_url']))
-                            <a href="{{ $contact['map_url'] }}" target="_blank" rel="noopener" class="tx-pill shrink-0">Chỉ đường</a>
+                            <a href="{{ $contact['map_url'] }}" target="_blank" rel="noopener" class="tx-pill shrink-0">{{ __('Chỉ đường') }}</a>
                         @endif
                     </div>
                 @endif
@@ -51,7 +51,7 @@
                     <a href="tel:{{ $hotline }}" class="tx-row group">
                         <span class="tx-ico">@include('traceability.partials.icon', ['name' => 'phone'])</span>
                         <span class="flex-1 text-[15px] font-medium group-hover:text-primary">{{ $contact['hotline'] }}</span>
-                        <span class="tx-pill">Gọi</span>
+                        <span class="tx-pill">{{ __('Gọi') }}</span>
                     </a>
                 @endif
                 @if (! empty($contact['email']))
@@ -71,7 +71,7 @@
                 @if (! $area && ! empty($contact['map_url']))
                     <a href="{{ $contact['map_url'] }}" target="_blank" rel="noopener" class="tx-row group">
                         <span class="tx-ico">@include('traceability.partials.icon', ['name' => 'map'])</span>
-                        <span class="flex-1 text-[15px] font-medium group-hover:text-primary">Chỉ đường</span>
+                        <span class="flex-1 text-[15px] font-medium group-hover:text-primary">{{ __('Chỉ đường') }}</span>
                         <span class="tx-chevron">@include('traceability.partials.icon', ['name' => 'chevron'])</span>
                     </a>
                 @endif
@@ -82,7 +82,7 @@
 
     @if ($sections)
         <section id="tim-hieu" class="tx-section">
-            <h2 class="tx-section-title">Tìm hiểu thêm</h2>
+            <h2 class="tx-section-title">{{ __('Tìm hiểu thêm') }}</h2>
             @include('traceability.partials.accordion', ['sections' => $sections, 'openFirst' => true])
         </section>
     @endif

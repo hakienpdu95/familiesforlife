@@ -10,48 +10,47 @@
                 <span class="text-lg font-bold">Anland</span>
             </div>
             <p class="text-sm text-neutral-content/70 leading-relaxed">
-                Kênh thông tin nhà đất — tra cứu tin đăng bán/cho thuê đã qua kiểm duyệt, minh bạch pháp lý,
-                cập nhật theo từng khu vực.
+                {{ __('Kênh thông tin nhà đất — tra cứu tin đăng bán/cho thuê đã qua kiểm duyệt, minh bạch pháp lý, cập nhật theo từng khu vực.') }}
             </p>
         </div>
 
         <div>
-            <h4 class="font-semibold mb-3">Danh mục</h4>
+            <h4 class="font-semibold mb-3">{{ __('Danh mục') }}</h4>
             <ul class="space-y-2 text-sm text-neutral-content/70">
-                <li><a href="{{ route('real-estate.public.sale.index') }}" class="hover:text-neutral-content">Nhà đất bán</a></li>
-                <li><a href="{{ route('real-estate.public.rent.index') }}" class="hover:text-neutral-content">Nhà đất cho thuê</a></li>
-                <li><a href="{{ route('real-estate.public.sale.index', ['property_type' => 'apartment']) }}" class="hover:text-neutral-content">Căn hộ chung cư</a></li>
-                <li><a href="{{ route('real-estate.public.sale.index', ['property_type' => 'land']) }}" class="hover:text-neutral-content">Đất thổ cư</a></li>
+                <li><a href="{{ route('real-estate.public.sale.index') }}" class="hover:text-neutral-content">{{ __('Nhà đất bán') }}</a></li>
+                <li><a href="{{ route('real-estate.public.rent.index') }}" class="hover:text-neutral-content">{{ __('Nhà đất cho thuê') }}</a></li>
+                <li><a href="{{ route('real-estate.public.sale.index', ['property_type' => 'apartment']) }}" class="hover:text-neutral-content">{{ __('Căn hộ chung cư') }}</a></li>
+                <li><a href="{{ route('real-estate.public.sale.index', ['property_type' => 'land']) }}" class="hover:text-neutral-content">{{ __('Đất thổ cư') }}</a></li>
             </ul>
         </div>
 
         <div>
-            <h4 class="font-semibold mb-3">Hỗ trợ</h4>
+            <h4 class="font-semibold mb-3">{{ __('Hỗ trợ') }}</h4>
             <ul class="space-y-2 text-sm text-neutral-content/70">
                 <li>
                     @auth
-                        <a href="{{ route('backend.real-estate.create') }}" class="hover:text-neutral-content">Đăng tin bất động sản</a>
+                        <a href="{{ route('backend.real-estate.create') }}" class="hover:text-neutral-content">{{ __('Đăng tin bất động sản') }}</a>
                     @else
-                        <a href="{{ route('login') }}" class="hover:text-neutral-content">Đăng tin bất động sản</a>
+                        <a href="{{ route('login') }}" class="hover:text-neutral-content">{{ __('Đăng tin bất động sản') }}</a>
                     @endauth
                 </li>
-                <li><span class="opacity-60">Hướng dẫn mua bán (sắp ra mắt)</span></li>
-                <li><span class="opacity-60">Câu hỏi thường gặp (sắp ra mắt)</span></li>
+                <li><span class="opacity-60">{{ __('Hướng dẫn mua bán (sắp ra mắt)') }}</span></li>
+                <li><span class="opacity-60">{{ __('Câu hỏi thường gặp (sắp ra mắt)') }}</span></li>
             </ul>
         </div>
 
         <div>
-            <h4 class="font-semibold mb-3">Liên hệ</h4>
+            <h4 class="font-semibold mb-3">{{ __('Liên hệ') }}</h4>
             <ul class="space-y-2 text-sm text-neutral-content/70">
                 <li>{{ config('app.site_name') }}</li>
-                <li>Hỗ trợ qua trang liên hệ chung của hệ thống</li>
+                <li>{{ __('Hỗ trợ qua trang liên hệ chung của hệ thống') }}</li>
             </ul>
         </div>
     </div>
 
     <div class="border-t border-white/10">
         <div class="anland-container py-4 text-sm text-neutral-content/60 text-center">
-            © {{ now()->year }} Anland — {{ config('app.site_name') }}. Bảo lưu mọi quyền.
+            {{ __('© :year Anland — :value. Bảo lưu mọi quyền.', ['year' => now()->year, 'value' => config('app.site_name')]) }}
         </div>
     </div>
 </footer>

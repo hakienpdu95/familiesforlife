@@ -135,7 +135,7 @@ class ArticleVersionController extends Controller
 
         // §13.3 — KHÔNG trả version_number của version restore vừa tạo (ghi bất đồng bộ, §9.4).
         return response()->json([
-            'message'          => "Đã khôi phục nội dung từ phiên bản #{$version->version_number}.",
+            'message'          => __('Đã khôi phục nội dung từ phiên bản #:version_number.', ['version_number' => $version->version_number]),
             'translation_uuid' => $translation->uuid,
         ]);
     }

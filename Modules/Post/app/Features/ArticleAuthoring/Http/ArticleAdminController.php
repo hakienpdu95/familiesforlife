@@ -132,7 +132,7 @@ class ArticleAdminController extends Controller
         });
 
         return redirect()->route('backend.post.articles.edit', $article)
-            ->with('success', 'Đã tạo bài viết — tiếp tục hoàn thiện nội dung bên dưới.')
+            ->with('success', __('Đã tạo bài viết — tiếp tục hoàn thiện nội dung bên dưới.'))
             ->with('active_locale', $translation->locale);
     }
 
@@ -222,7 +222,7 @@ class ArticleAdminController extends Controller
         $action->handle($article, $data);
 
         return redirect()->route('backend.post.articles.edit', $article)
-            ->with('success', 'Cập nhật bài viết thành công.');
+            ->with('success', __('Cập nhật bài viết thành công.'));
     }
 
     /** format=redirect — trang "Thống kê click": tổng, xu hướng 30 ngày, top referrer. */
@@ -237,7 +237,7 @@ class ArticleAdminController extends Controller
         return view('post::admin.articles.clicks', [
             'article' => $article,
             'stats' => $stats,
-            'title' => $article->mainTranslation()?->title ?? "Bài viết #{$article->id}",
+            'title' => $article->mainTranslation()?->title ?? __('Bài viết #:id', ['id' => $article->id]),
         ]);
     }
 
@@ -251,23 +251,23 @@ class ArticleAdminController extends Controller
 
         // dashboard/posts/articles xoá qua AJAX (Tabulator, xem article-index.js).
         if ($request->expectsJson()) {
-            return response()->json(['message' => 'Đã xoá bài viết "'.$title.'".']);
+            return response()->json(['message' => __('Đã xoá bài viết ":title".', ['title' => $title])]);
         }
 
         return redirect()->route('backend.post.articles.index')
-            ->with('success', 'Đã xoá bài viết.');
+            ->with('success', __('Đã xoá bài viết.'));
     }
 
     public function restore(Request $request, PostArticle $article, RestoreArticleAction $action): RedirectResponse|JsonResponse
     {
         $this->authorizeArticle($article, 'post_article.delete');
 
-        abort_unless($article->trashed(), 422, 'Bài viết này chưa bị xoá.');
+        abort_unless($article->trashed(), 422, __('Bài viết này chưa bị xoá.'));
 
         $action->handle($article);
 
         $title = $article->mainTranslation()?->title;
-        $message = 'Đã khôi phục bài viết "'.$title.'".';
+        $message = __('Đã khôi phục bài viết ":title".', ['title' => $title]);
 
         if ($request->expectsJson()) {
             return response()->json(['message' => $message, 'edit_url' => route('backend.post.articles.edit', $article)]);
@@ -284,7 +284,7 @@ class ArticleAdminController extends Controller
 
         $action->handle($article);
 
-        return back()->with('success', 'Đã xuất bản mọi bản dịch sẵn sàng.');
+        return back()->with('success', __('Đã xuất bản mọi bản dịch sẵn sàng.'));
     }
 
     /**
@@ -300,7 +300,7 @@ class ArticleAdminController extends Controller
 
         $action->handle($article);
 
-        return back()->with('success', 'Đã gỡ tài trợ khỏi bài viết.');
+        return back()->with('success', __('Đã gỡ tài trợ khỏi bài viết.'));
     }
 
     /**

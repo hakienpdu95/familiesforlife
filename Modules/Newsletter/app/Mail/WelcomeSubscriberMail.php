@@ -19,7 +19,7 @@ class WelcomeSubscriberMail extends Mailable
     {
         return new Envelope(
             from: config('newsletter.from_address'),
-            subject: 'Cảm ơn bạn đã đăng ký nhận bản tin',
+            subject: __('Cảm ơn bạn đã đăng ký nhận bản tin'),
         );
     }
 

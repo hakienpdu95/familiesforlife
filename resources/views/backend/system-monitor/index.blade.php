@@ -1,25 +1,25 @@
 @extends('layouts.backend')
-@section('title', 'Giám sát hệ thống')
+@section('title', __('Giám sát hệ thống'))
 
 @section('content')
 <div x-data="systemMonitor({{ Js::from(['url' => route('backend.system-monitor.data'), 'ranges' => $ranges]) }})">
 
     <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div>
-            <h1 class="text-2xl font-bold text-base-content">Giám sát hệ thống</h1>
+            <h1 class="text-2xl font-bold text-base-content">{{ __('Giám sát hệ thống') }}</h1>
             <p class="text-sm text-base-content/50 mt-0.5">
-                Cập nhật <span x-text="updatedAt || '—'"></span>
+                {{ __('Cập nhật') }} <span x-text="updatedAt || '—'"></span>
                 <span x-show="loading" x-cloak class="loading loading-spinner loading-xs align-middle ml-1"></span>
             </p>
         </div>
         <div class="flex items-center gap-2">
             <label class="label cursor-pointer gap-2">
-                <span class="label-text text-xs">Tự làm mới 15s</span>
+                <span class="label-text text-xs">{{ __('Tự làm mới 15s') }}</span>
                 <input type="checkbox" class="toggle toggle-sm toggle-primary" x-model="auto">
             </label>
-            <button type="button" class="btn btn-ghost btn-sm" @click="load()">Làm mới</button>
+            <button type="button" class="btn btn-ghost btn-sm" @click="load()">{{ __('Làm mới') }}</button>
             @can('viewHorizon')
-            <a href="{{ url(config('horizon.path', 'horizon')) }}" target="_blank" rel="noopener" class="btn btn-outline btn-sm">Mở Horizon</a>
+            <a href="{{ url(config('horizon.path', 'horizon')) }}" target="_blank" rel="noopener" class="btn btn-outline btn-sm">{{ __('Mở Horizon') }}</a>
             @endcan
         </div>
     </div>
@@ -46,8 +46,8 @@
             <div class="card-body p-4">
                 <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
                     <div>
-                        <h2 class="font-semibold text-sm">Lưu lượng &amp; thời gian phản hồi</h2>
-                        <p class="text-xs text-base-content/40 mt-0.5">Request/phút và thời gian phản hồi trung bình (ms)</p>
+                        <h2 class="font-semibold text-sm">{{ __('Lưu lượng') }} &amp; {{ __('thời gian phản hồi') }}</h2>
+                        <p class="text-xs text-base-content/40 mt-0.5">{{ __('Request/phút và thời gian phản hồi trung bình (ms)') }}</p>
                     </div>
                     <div class="flex items-center gap-1 bg-base-200 rounded-lg p-0.5">
                         <template x-for="r in ranges" :key="r">
@@ -65,13 +65,13 @@
 
             <div class="card bg-base-100 border border-base-200 shadow-sm">
                 <div class="card-body p-0">
-                    <h2 class="px-5 py-3 border-b border-base-200 font-semibold text-sm">Ứng dụng</h2>
+                    <h2 class="px-5 py-3 border-b border-base-200 font-semibold text-sm">{{ __('Ứng dụng') }}</h2>
                     <dl class="px-5 py-3 grid grid-cols-2 gap-2 text-sm">
-                        <dt class="text-base-content/50">RPM (5 phút)</dt><dd class="text-right tabular-nums" x-text="d.requests.last_5m.rpm"></dd>
-                        <dt class="text-base-content/50">TB phản hồi (5 phút)</dt><dd class="text-right tabular-nums" :class="msTone(d.requests.last_5m.avg_ms)" x-text="ms(d.requests.last_5m.avg_ms)"></dd>
-                        <dt class="text-base-content/50">Request (60 phút)</dt><dd class="text-right tabular-nums" x-text="num(d.requests.last_60m.count)"></dd>
-                        <dt class="text-base-content/50">TB phản hồi (60 phút)</dt><dd class="text-right tabular-nums" :class="msTone(d.requests.last_60m.avg_ms)" x-text="ms(d.requests.last_60m.avg_ms)"></dd>
-                        <dt class="text-base-content/50">Lỗi 5xx (60 phút)</dt><dd class="text-right tabular-nums" :class="d.requests.last_60m.errors > 0 ? 'text-error font-semibold' : ''" x-text="d.requests.last_60m.errors"></dd>
+                        <dt class="text-base-content/50">{{ __('RPM (5 phút)') }}</dt><dd class="text-right tabular-nums" x-text="d.requests.last_5m.rpm"></dd>
+                        <dt class="text-base-content/50">{{ __('TB phản hồi (5 phút)') }}</dt><dd class="text-right tabular-nums" :class="msTone(d.requests.last_5m.avg_ms)" x-text="ms(d.requests.last_5m.avg_ms)"></dd>
+                        <dt class="text-base-content/50">{{ __('Request (60 phút)') }}</dt><dd class="text-right tabular-nums" x-text="num(d.requests.last_60m.count)"></dd>
+                        <dt class="text-base-content/50">{{ __('TB phản hồi (60 phút)') }}</dt><dd class="text-right tabular-nums" :class="msTone(d.requests.last_60m.avg_ms)" x-text="ms(d.requests.last_60m.avg_ms)"></dd>
+                        <dt class="text-base-content/50">{{ __('Lỗi 5xx (60 phút)') }}</dt><dd class="text-right tabular-nums" :class="d.requests.last_60m.errors > 0 ? 'text-error font-semibold' : ''" x-text="d.requests.last_60m.errors"></dd>
                         <dt class="text-base-content/50">PHP / Laravel</dt><dd class="text-right" x-text="d.server.php + ' / ' + d.server.laravel"></dd>
                     </dl>
                 </div>
@@ -79,18 +79,18 @@
 
             <div class="card bg-base-100 border border-base-200 shadow-sm">
                 <div class="card-body p-0">
-                    <h2 class="px-5 py-3 border-b border-base-200 font-semibold text-sm">Cơ sở dữ liệu</h2>
+                    <h2 class="px-5 py-3 border-b border-base-200 font-semibold text-sm">{{ __('Cơ sở dữ liệu') }}</h2>
                     <template x-if="d.database.supported">
                     <dl class="px-5 py-3 grid grid-cols-2 gap-2 text-sm">
-                        <dt class="text-base-content/50">Kết nối đang mở</dt><dd class="text-right tabular-nums" x-text="d.database.connected + ' / ' + d.database.max_connections"></dd>
-                        <dt class="text-base-content/50">Đỉnh kết nối</dt><dd class="text-right tabular-nums" x-text="d.database.max_used"></dd>
-                        <dt class="text-base-content/50">Đang chạy</dt><dd class="text-right tabular-nums" x-text="d.database.running"></dd>
+                        <dt class="text-base-content/50">{{ __('Kết nối đang mở') }}</dt><dd class="text-right tabular-nums" x-text="d.database.connected + ' / ' + d.database.max_connections"></dd>
+                        <dt class="text-base-content/50">{{ __('Đỉnh kết nối') }}</dt><dd class="text-right tabular-nums" x-text="d.database.max_used"></dd>
+                        <dt class="text-base-content/50">{{ __('Đang chạy') }}</dt><dd class="text-right tabular-nums" x-text="d.database.running"></dd>
                         <dt class="text-base-content/50">Slow queries (MySQL)</dt><dd class="text-right tabular-nums" x-text="num(d.database.slow_queries) + ' (> ' + d.database.long_query_time + 's)'"></dd>
-                        <dt class="text-base-content/50">Dung lượng</dt><dd class="text-right" x-text="bytes(d.database.size)"></dd>
+                        <dt class="text-base-content/50">{{ __('Dung lượng') }}</dt><dd class="text-right" x-text="bytes(d.database.size)"></dd>
                         <dt class="text-base-content/50">Uptime</dt><dd class="text-right" x-text="duration(d.database.uptime)"></dd>
                     </dl>
                     </template>
-                    <p x-show="!d.database.supported" class="px-5 py-4 text-sm text-base-content/50" x-text="d.database.error || ('Driver ' + d.database.driver + ' chưa hỗ trợ')"></p>
+                    <p x-show="!d.database.supported" class="px-5 py-4 text-sm text-base-content/50" x-text="d.database.error || ('Driver ' + d.database.driver + (' ' + @js(__('chưa hỗ trợ'))))"></p>
                 </div>
             </div>
 
@@ -98,11 +98,11 @@
                 <div class="card-body p-0">
                     <h2 class="px-5 py-3 border-b border-base-200 font-semibold text-sm">Redis</h2>
                     <dl x-show="!d.redis.error" class="px-5 py-3 grid grid-cols-2 gap-2 text-sm">
-                        <dt class="text-base-content/50">Phiên bản</dt><dd class="text-right" x-text="d.redis.version"></dd>
-                        <dt class="text-base-content/50">Bộ nhớ</dt><dd class="text-right" x-text="d.redis.memory"></dd>
-                        <dt class="text-base-content/50">Client kết nối</dt><dd class="text-right tabular-nums" x-text="d.redis.clients"></dd>
-                        <dt class="text-base-content/50">Tỉ lệ hit</dt><dd class="text-right tabular-nums" x-text="d.redis.hit_rate === null ? '—' : d.redis.hit_rate + '%'"></dd>
-                        <dt class="text-base-content/50">Uptime</dt><dd class="text-right" x-text="d.redis.uptime_days + ' ngày'"></dd>
+                        <dt class="text-base-content/50">{{ __('Phiên bản') }}</dt><dd class="text-right" x-text="d.redis.version"></dd>
+                        <dt class="text-base-content/50">{{ __('Bộ nhớ') }}</dt><dd class="text-right" x-text="d.redis.memory"></dd>
+                        <dt class="text-base-content/50">{{ __('Client kết nối') }}</dt><dd class="text-right tabular-nums" x-text="d.redis.clients"></dd>
+                        <dt class="text-base-content/50">{{ __('Tỉ lệ hit') }}</dt><dd class="text-right tabular-nums" x-text="d.redis.hit_rate === null ? '—' : d.redis.hit_rate + '%'"></dd>
+                        <dt class="text-base-content/50">Uptime</dt><dd class="text-right" x-text="d.redis.uptime_days + (' ' + @js(__('ngày')))"></dd>
                     </dl>
                     <p x-show="d.redis.error" class="px-5 py-4 text-sm text-error" x-text="d.redis.error"></p>
                 </div>
@@ -111,15 +111,15 @@
             <div class="card bg-base-100 border border-base-200 shadow-sm">
                 <div class="card-body p-0">
                     <div class="px-5 py-3 border-b border-base-200 flex items-center justify-between">
-                        <h2 class="font-semibold text-sm">Hàng đợi</h2>
+                        <h2 class="font-semibold text-sm">{{ __('Hàng đợi') }}</h2>
                         <span class="badge badge-sm" :class="horizonBadge()" x-text="'Horizon: ' + horizonLabel()"></span>
                     </div>
                     <dl class="px-5 py-3 grid grid-cols-2 gap-2 text-sm">
-                        <dt class="text-base-content/50">Kết nối</dt><dd class="text-right" x-text="d.queue.connection"></dd>
-                        <dt class="text-base-content/50">Job/phút</dt><dd class="text-right tabular-nums" x-text="d.queue.horizon.jobs_per_minute ?? '—'"></dd>
-                        <dt class="text-base-content/50">Đang chờ</dt><dd class="text-right tabular-nums" x-text="queueTotal()"></dd>
-                        <dt class="text-base-content/50">Lỗi gần đây</dt><dd class="text-right tabular-nums" :class="(d.queue.horizon.recent_failed || 0) > 0 ? 'text-error font-semibold' : ''" x-text="d.queue.horizon.recent_failed ?? '—'"></dd>
-                        <dt class="text-base-content/50">Job lỗi (lưu trữ)</dt><dd class="text-right tabular-nums" :class="d.queue.failed > 0 ? 'text-error font-semibold' : ''" x-text="d.queue.failed ?? '—'"></dd>
+                        <dt class="text-base-content/50">{{ __('Kết nối') }}</dt><dd class="text-right" x-text="d.queue.connection"></dd>
+                        <dt class="text-base-content/50">{{ __('Job/phút') }}</dt><dd class="text-right tabular-nums" x-text="d.queue.horizon.jobs_per_minute ?? '—'"></dd>
+                        <dt class="text-base-content/50">{{ __('Đang chờ') }}</dt><dd class="text-right tabular-nums" x-text="queueTotal()"></dd>
+                        <dt class="text-base-content/50">{{ __('Lỗi gần đây') }}</dt><dd class="text-right tabular-nums" :class="(d.queue.horizon.recent_failed || 0) > 0 ? 'text-error font-semibold' : ''" x-text="d.queue.horizon.recent_failed ?? '—'"></dd>
+                        <dt class="text-base-content/50">{{ __('Job lỗi (lưu trữ)') }}</dt><dd class="text-right tabular-nums" :class="d.queue.failed > 0 ? 'text-error font-semibold' : ''" x-text="d.queue.failed ?? '—'"></dd>
                     </dl>
                     <div class="px-5 pb-4 flex flex-wrap gap-1.5">
                         <template x-for="(size, name) in d.queue.sizes" :key="name">
@@ -135,11 +135,11 @@
             <div class="card bg-base-100 border border-base-200 shadow-sm">
                 <div class="card-body p-0">
                     <h2 class="px-5 py-3 border-b border-base-200 font-semibold text-sm">
-                        Request chậm <span class="text-base-content/40 font-normal" x-text="'(≥ ' + d.requests.slow_request_ms + 'ms, 50 gần nhất)'"></span>
+                        {{ __('Request chậm') }} <span class="text-base-content/40 font-normal" x-text="'(≥ ' + d.requests.slow_request_ms + @js(__('ms, 50 gần nhất)'))"></span>
                     </h2>
                     <div class="overflow-x-auto max-h-96">
                         <table class="table table-sm">
-                            <thead><tr><th>Thời gian</th><th>Request</th><th class="text-right">ms</th></tr></thead>
+                            <thead><tr><th>{{ __('Thời gian') }}</th><th>Request</th><th class="text-right">ms</th></tr></thead>
                             <tbody>
                                 <template x-for="(r, i) in slowRequests" :key="i">
                                     <tr>
@@ -151,7 +151,7 @@
                                         <td class="text-right tabular-nums" :class="msTone(r.ms)" x-text="num(r.ms)"></td>
                                     </tr>
                                 </template>
-                                <tr x-show="slowRequests.length === 0"><td colspan="3" class="text-center text-base-content/40 py-6">Chưa có request chậm</td></tr>
+                                <tr x-show="slowRequests.length === 0"><td colspan="3" class="text-center text-base-content/40 py-6">{{ __('Chưa có request chậm') }}</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -161,11 +161,11 @@
             <div class="card bg-base-100 border border-base-200 shadow-sm">
                 <div class="card-body p-0">
                     <h2 class="px-5 py-3 border-b border-base-200 font-semibold text-sm">
-                        Query chậm <span class="text-base-content/40 font-normal" x-text="'(≥ ' + d.requests.slow_query_ms + 'ms, 50 gần nhất)'"></span>
+                        {{ __('Query chậm') }} <span class="text-base-content/40 font-normal" x-text="'(≥ ' + d.requests.slow_query_ms + @js(__('ms, 50 gần nhất)'))"></span>
                     </h2>
                     <div class="overflow-x-auto max-h-96">
                         <table class="table table-sm">
-                            <thead><tr><th>Thời gian</th><th>SQL</th><th class="text-right">ms</th></tr></thead>
+                            <thead><tr><th>{{ __('Thời gian') }}</th><th>SQL</th><th class="text-right">ms</th></tr></thead>
                             <tbody>
                                 <template x-for="(q, i) in slowQueries" :key="i">
                                     <tr>
@@ -174,7 +174,7 @@
                                         <td class="text-right tabular-nums" :class="msTone(q.ms)" x-text="num(q.ms)"></td>
                                     </tr>
                                 </template>
-                                <tr x-show="slowQueries.length === 0"><td colspan="3" class="text-center text-base-content/40 py-6">Chưa có query chậm</td></tr>
+                                <tr x-show="slowQueries.length === 0"><td colspan="3" class="text-center text-base-content/40 py-6">{{ __('Chưa có query chậm') }}</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -231,7 +231,7 @@ document.addEventListener('alpine:init', () => {
                     headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
                     credentials: 'same-origin',
                 });
-                if (!res.ok) throw new Error('Không tải được dữ liệu (HTTP ' + res.status + ')');
+                if (!res.ok) throw new Error((@js(__('Không tải được dữ liệu (HTTP')) + ' ') + res.status + ')');
                 const data = await res.json();
                 this.d = data;
                 this.slowRequests = data.slow_requests || [];
@@ -262,13 +262,13 @@ document.addEventListener('alpine:init', () => {
                     grid: { left: 8, right: 8, top: 36, bottom: 4, containLabel: true },
                     xAxis: { type: 'category', data: s.labels, axisLabel: { color: muted, fontSize: 11 }, axisLine: { lineStyle: { color: grid } } },
                     yAxis: [
-                        { type: 'value', name: 'req/phút', nameTextStyle: { color: muted, fontSize: 11 }, axisLabel: { color: muted, fontSize: 11 }, splitLine: { lineStyle: { color: grid } } },
+                        { type: 'value', name: @js(__('req/phút')), nameTextStyle: { color: muted, fontSize: 11 }, axisLabel: { color: muted, fontSize: 11 }, splitLine: { lineStyle: { color: grid } } },
                         { type: 'value', name: 'ms', nameTextStyle: { color: muted, fontSize: 11 }, axisLabel: { color: muted, fontSize: 11 }, splitLine: { show: false } },
                     ],
                     series: [
-                        { name: 'Request/phút', type: 'bar', data: s.rpm, barMaxWidth: 10, itemStyle: { color: '#6366f1', borderRadius: [2, 2, 0, 0] } },
-                        { name: 'TB phản hồi (ms)', type: 'line', yAxisIndex: 1, smooth: true, symbol: 'none', data: s.avg_ms, itemStyle: { color: '#f59e0b' } },
-                        { name: 'Lỗi 5xx', type: 'line', yAxisIndex: 0, symbol: 'none', data: s.errors, itemStyle: { color: '#ef4444' }, lineStyle: { width: 1 } },
+                        { name: @js(__('Request/phút')), type: 'bar', data: s.rpm, barMaxWidth: 10, itemStyle: { color: '#6366f1', borderRadius: [2, 2, 0, 0] } },
+                        { name: @js(__('TB phản hồi (ms)')), type: 'line', yAxisIndex: 1, smooth: true, symbol: 'none', data: s.avg_ms, itemStyle: { color: '#f59e0b' } },
+                        { name: @js(__('Lỗi 5xx')), type: 'line', yAxisIndex: 0, symbol: 'none', data: s.errors, itemStyle: { color: '#ef4444' }, lineStyle: { width: 1 } },
                     ],
                 }, true);
             };
@@ -278,10 +278,10 @@ document.addEventListener('alpine:init', () => {
         cards() {
             const s = this.d.server, db = this.d.database;
             return [
-                { label: 'CPU (load 1 phút)', pct: s.cpu_pct, value: s.cpu_pct + '%', hint: 'Load ' + s.load.join(' / ') + ' · ' + s.cores + ' core' },
-                { label: 'Bộ nhớ RAM', pct: s.mem_pct, value: s.mem_pct === null ? '—' : s.mem_pct + '%', hint: this.bytes(s.mem_used) + ' / ' + this.bytes(s.mem_total) },
-                { label: 'Ổ đĩa', pct: s.disk_pct, value: s.disk_pct === null ? '—' : s.disk_pct + '%', hint: this.bytes(s.disk_used) + ' / ' + this.bytes(s.disk_total) },
-                { label: 'Kết nối database', pct: db.usage_pct ?? null, value: db.supported ? db.connected + ' / ' + db.max_connections : '—', hint: db.supported ? 'Đỉnh ' + db.max_used + ' · ' + db.usage_pct + '% giới hạn' : (db.error || '') },
+                { label: @js(__('CPU (load 1 phút)')), pct: s.cpu_pct, value: s.cpu_pct + '%', hint: 'Load ' + s.load.join(' / ') + ' · ' + s.cores + ' core' },
+                { label: @js(__('Bộ nhớ RAM')), pct: s.mem_pct, value: s.mem_pct === null ? '—' : s.mem_pct + '%', hint: this.bytes(s.mem_used) + ' / ' + this.bytes(s.mem_total) },
+                { label: @js(__('Ổ đĩa')), pct: s.disk_pct, value: s.disk_pct === null ? '—' : s.disk_pct + '%', hint: this.bytes(s.disk_used) + ' / ' + this.bytes(s.disk_total) },
+                { label: @js(__('Kết nối database')), pct: db.usage_pct ?? null, value: db.supported ? db.connected + ' / ' + db.max_connections : '—', hint: db.supported ? (@js(__('Đỉnh')) + ' ') + db.max_used + ' · ' + db.usage_pct + @js(__('% giới hạn')) : (db.error || '') },
             ];
         },
 
@@ -289,7 +289,7 @@ document.addEventListener('alpine:init', () => {
             return Object.values(this.d.queue.sizes || {}).reduce((a, b) => a + (b || 0), 0);
         },
         horizonLabel() {
-            return { running: 'đang chạy', paused: 'tạm dừng', inactive: 'không chạy' }[this.d.queue.horizon.status] || 'không rõ';
+            return { running: @js(__('đang chạy')), paused: @js(__('tạm dừng')), inactive: @js(__('không chạy')) }[this.d.queue.horizon.status] || @js(__('không rõ'));
         },
         horizonBadge() {
             return { running: 'badge-success', paused: 'badge-warning', inactive: 'badge-error' }[this.d.queue.horizon.status] || 'badge-ghost';
@@ -297,7 +297,7 @@ document.addEventListener('alpine:init', () => {
         toneText(p) { return p === null ? '' : (p >= 90 ? 'text-error' : (p >= 75 ? 'text-warning' : 'text-base-content')); },
         toneProgress(p) { return p === null ? '' : (p >= 90 ? 'progress-error' : (p >= 75 ? 'progress-warning' : 'progress-success')); },
         msTone(ms) { return ms === null ? '' : (ms >= 1000 ? 'text-error font-semibold' : (ms >= 500 ? 'text-warning' : '')); },
-        rangeLabel(m) { return m < 60 * 2 ? (m / 60) + ' giờ' : (m / 60) + ' giờ'; },
+        rangeLabel(m) { return m < 60 * 2 ? (m / 60) + (' ' + @js(__('giờ'))) : (m / 60) + (' ' + @js(__('giờ'))); },
         num(n) { return n === null || n === undefined ? '—' : Number(n).toLocaleString('vi-VN'); },
         ms(n) { return n === null || n === undefined ? '—' : this.num(n) + ' ms'; },
         time(iso) { return iso ? new Date(iso).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: '2-digit' }) : ''; },
@@ -309,7 +309,7 @@ document.addEventListener('alpine:init', () => {
         },
         duration(sec) {
             const d = Math.floor(sec / 86400), h = Math.floor(sec % 86400 / 3600), m = Math.floor(sec % 3600 / 60);
-            return (d ? d + ' ngày ' : '') + h + ' giờ ' + m + ' phút';
+            return (d ? d + (' ' + @js(__('ngày')) + ' ') : '') + h + (' ' + @js(__('giờ')) + ' ') + m + (' ' + @js(__('phút')));
         },
     }));
 });

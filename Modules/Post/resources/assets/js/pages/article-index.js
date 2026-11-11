@@ -12,6 +12,7 @@ import { renderCategoryTreeOption } from '@shared/ts-tree-option.js';
 import { qrCellHtml } from '@shared/qr-tools.js';
 import { DELETED_AT_COLUMN, bindRestoreModal, restoreButtonHtml, trashState } from '@shared/trash-restore.js';
 
+import { t } from '../../../../../../resources/js/shared/i18n.js';
 function esc(v) {
     if (v == null) return '';
     return String(v)
@@ -23,14 +24,14 @@ function esc(v) {
 
 const COLUMNS = [
     {
-        title: 'Mã QR', field: 'qr_code', width: 96, hozAlign: 'center', headerSort: false, frozen: true,
+        title: t('Mã QR'), field: 'qr_code', width: 96, hozAlign: 'center', headerSort: false, frozen: true,
         formatter(cell) {
             const d = cell.getRow().getData();
             return qrCellHtml(d.qr_code, d.qr_url, d.title);
         },
     },
     {
-        title: 'Tiêu đề', field: 'title', minWidth: 240, sorter: 'string', frozen: true,
+        title: t('Tiêu đề'), field: 'title', minWidth: 240, sorter: 'string', frozen: true,
         formatter(cell) {
             const d = cell.getRow().getData();
             if (d.is_trashed) return '<span class="font-medium text-sm text-base-content/60">' + esc(d.title) + '</span>';
@@ -38,42 +39,42 @@ const COLUMNS = [
         },
     },
     {
-        title: 'Danh mục', field: 'category', minWidth: 160, headerSort: false,
+        title: t('Danh mục'), field: 'category', minWidth: 160, headerSort: false,
         formatter(cell) {
             return esc(cell.getValue()) || '<span class="text-base-content/25 text-xs">—</span>';
         },
     },
     {
-        title: 'Định dạng', field: 'format_label', width: 160, sorter: 'string',
+        title: t('Định dạng'), field: 'format_label', width: 160, sorter: 'string',
     },
     {
-        title: 'Trạng thái', field: 'status_value', width: 150, hozAlign: 'center', headerSort: false,
+        title: t('Trạng thái'), field: 'status_value', width: 150, hozAlign: 'center', headerSort: false,
         formatter(cell) {
             const d = cell.getRow().getData();
             let html = d.status_label
                 ? '<span class="badge badge-sm ' + esc(d.status_badge) + '">' + esc(d.status_label) + '</span>'
                 : '<span class="badge badge-sm badge-ghost">—</span>';
             if (d.is_sponsored) {
-                html += ' <span class="badge badge-sm ' + esc(d.sponsor_badge) + '" title="Bài viết tài trợ">🏷</span>';
+                html += ' <span class="badge badge-sm ' + esc(d.sponsor_badge) + ('" title="' + t('Bài viết tài trợ') + '">🏷</span>');
             }
             return html;
         },
     },
     {
-        title: 'Người tạo', field: 'created_by_name', width: 150, headerSort: false,
+        title: t('Người tạo'), field: 'created_by_name', width: 150, headerSort: false,
         formatter(cell) {
             return esc(cell.getValue()) || '<span class="text-base-content/25 text-xs">—</span>';
         },
     },
     {
-        title: 'Ngày tạo', field: 'created_at', width: 110, hozAlign: 'center', sorter: 'string',
+        title: t('Ngày tạo'), field: 'created_at', width: 110, hozAlign: 'center', sorter: 'string',
     },
     DELETED_AT_COLUMN,
     {
         // spec/ga-dashboard-statistics.md §2.2 — đọc từ ga_views_30d đã đồng bộ sẵn
         // (SyncGoogleAnalyticsStatsCommand), null khi bài chưa từng sync/ngoài top 1000 GA —
         // hiển thị "—" chứ không phải "0" để phân biệt "chưa có dữ liệu" với "có dữ liệu, bằng 0".
-        title: 'Lượt xem GA', field: 'ga_views_30d', width: 110, hozAlign: 'center', sorter: 'number',
+        title: t('Lượt xem GA'), field: 'ga_views_30d', width: 110, hozAlign: 'center', sorter: 'number',
         formatter(cell) {
             const v = cell.getValue();
             return v == null ? '<span class="text-base-content/25 text-xs">—</span>' : esc(v);
@@ -86,7 +87,7 @@ const COLUMNS = [
             let html = '<div class="flex items-center justify-center gap-1">';
 
             if (d.is_redirect && d.clicks_url) {
-                html += '<a href="' + esc(d.clicks_url) + '" class="btn btn-ghost btn-xs btn-square" title="Thống kê click">'
+                html += '<a href="' + esc(d.clicks_url) + ('" class="btn btn-ghost btn-xs btn-square" title="' + t('Thống kê click') + '">')
                     + '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>'
                     + '</a>';
             }
@@ -94,11 +95,11 @@ const COLUMNS = [
             html += restoreButtonHtml(d, d.title);
 
             if (d.can_manage) {
-                html += '<a href="' + esc(d.edit_url) + '" class="btn btn-ghost btn-xs btn-square" title="Sửa">'
+                html += '<a href="' + esc(d.edit_url) + ('" class="btn btn-ghost btn-xs btn-square" title="' + t('Sửa') + '">')
                     + '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>'
                     + '</a>';
 
-                html += '<button class="btn btn-ghost btn-xs btn-square text-error" title="Xoá"'
+                html += ('<button class="btn btn-ghost btn-xs btn-square text-error" title="' + t('Xoá') + '"')
                     + ' data-url="' + esc(d.destroy_url) + '" data-title="' + esc(d.title) + '"'
                     + ' onclick="window.articleDeleteConfirm(this.dataset.url, this.dataset.title)">'
                     + '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>'
@@ -131,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const csrf = document.querySelector('meta[name=csrf-token]')?.content ?? '';
         this.disabled    = true;
-        this.textContent = 'Đang xoá...';
+        this.textContent = t('Đang xoá...');
 
         try {
             const res = await fetch(pendingDeleteUrl, {
@@ -151,14 +152,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('deleteModal')?.close();
                 window.articleTable?.replaceData();
             } else {
-                alert(data.message || 'Xoá thất bại. Vui lòng thử lại.');
+                alert(data.message || t('Xoá thất bại. Vui lòng thử lại.'));
             }
         } catch (e) {
             console.error('[post-article] delete failed', e);
-            alert('Lỗi kết nối. Vui lòng thử lại.');
+            alert(t('Lỗi kết nối. Vui lòng thử lại.'));
         } finally {
             this.disabled    = false;
-            this.textContent = 'Xoá';
+            this.textContent = t('Xoá');
             pendingDeleteUrl = null;
         }
     });
@@ -191,7 +192,7 @@ document.addEventListener('alpine:init', () => {
 
             get activeChips() {
                 const chips = [], f = this.filters;
-                if (f.search)      chips.push({ key: 'search',      label: 'Tìm: ' + f.search });
+                if (f.search)      chips.push({ key: 'search',      label: (t('Tìm:') + ' ') + f.search });
                 if (f.category_id) chips.push({ key: 'category_id', label: optText(tsCategory, f.category_id) });
                 if (f.format)      chips.push({ key: 'format',      label: optText(tsFormat, f.format) });
                 if (f.status)      chips.push({ key: 'status',      label: optText(tsStatus, f.status) });
@@ -210,19 +211,19 @@ document.addEventListener('alpine:init', () => {
                 if (!categoryEl || !formatEl || !statusEl) return;
 
                 tsCategory = createTs(categoryEl, {
-                    placeholder: 'Tất cả danh mục',
+                    placeholder: t('Tất cả danh mục'),
                     maxOptions: null,
                     render: { option: renderCategoryTreeOption },
                     onChange() { categoryEl.dispatchEvent(new Event('change', { bubbles: true })); },
                 });
 
                 tsFormat = createTs(formatEl, {
-                    placeholder: 'Tất cả định dạng',
+                    placeholder: t('Tất cả định dạng'),
                     onChange() { formatEl.dispatchEvent(new Event('change', { bubbles: true })); },
                 });
 
                 tsStatus = createTs(statusEl, {
-                    placeholder: 'Tất cả trạng thái',
+                    placeholder: t('Tất cả trạng thái'),
                     onChange() { statusEl.dispatchEvent(new Event('change', { bubbles: true })); },
                 });
             },
@@ -262,11 +263,11 @@ document.addEventListener('alpine:init', () => {
                     langs: {
                         'vi-VN': {
                             pagination: {
-                                page_size: 'Dòng/trang', page_title: 'Trang',
+                                page_size: t('Dòng/trang'), page_title: t('Trang'),
                                 first: '«', last: '»', prev: '‹', next: '›',
-                                first_title: 'Trang đầu', last_title: 'Trang cuối',
-                                prev_title: 'Trang trước', next_title: 'Trang sau',
-                                counter: { showing: '', of: 'trong', rows: 'dòng', pages: 'trang' },
+                                first_title: t('Trang đầu'), last_title: t('Trang cuối'),
+                                prev_title: t('Trang trước'), next_title: t('Trang sau'),
+                                counter: { showing: '', of: t('trong'), rows: t('dòng'), pages: t('trang') },
                             },
                         },
                     },
@@ -274,7 +275,7 @@ document.addEventListener('alpine:init', () => {
                     columns: COLUMNS,
                     placeholder: '<div class="py-16 text-center opacity-40">'
                         + '<svg class="w-12 h-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'
-                        + '<p class="text-sm">Không có bài viết nào</p></div>',
+                        + ('<p class="text-sm">' + t('Không có bài viết nào') + '</p></div>'),
                 });
 
                 window.articleTable = tableInst;

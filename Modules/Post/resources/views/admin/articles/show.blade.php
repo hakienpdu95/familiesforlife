@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', $article->mainTranslation()?->title ?? 'Bài viết')
+@section('title', $article->mainTranslation()?->title ?? __('Bài viết'))
 
 @section('content')
 <div class="max-w-3xl">
@@ -7,14 +7,14 @@
     @php($main = $article->mainTranslation())
 
     <div class="flex items-center gap-3 mb-1">
-        <h1 class="text-2xl font-bold text-base-content">{{ $main?->title ?? '(chưa có bản dịch chính)' }}</h1>
+        <h1 class="text-2xl font-bold text-base-content">{{ $main?->title ?? __('(chưa có bản dịch chính)') }}</h1>
         @if($main)
         <span class="badge {{ $main->status->badgeClass() }}">{{ $main->status->label() }}</span>
         @endif
     </div>
     <p class="text-sm text-base-content/50 mb-5">
-        {{ $article->format->label() }} · Tạo bởi {{ $article->createdBy?->name ?? '—' }}
-        @if($main?->approvedBy) · Duyệt bởi {{ $main->approvedBy->name }} @endif
+        {{ __(':label · Tạo bởi :name', ['label' => $article->format->label(), 'name' => $article->createdBy?->name ?? '—']) }}
+        @if($main?->approvedBy) {{ __('· Duyệt bởi :name', ['name' => $main->approvedBy->name]) }} @endif
     </p>
 
     @if($article->categories->isNotEmpty())
@@ -36,7 +36,7 @@
         </div>
     </div>
     @else
-    <div class="alert alert-warning text-sm">Bài viết chưa có bản dịch nào cho ngôn ngữ chính ({{ $article->main_locale }}).</div>
+    <div class="alert alert-warning text-sm">{{ __('Bài viết chưa có bản dịch nào cho ngôn ngữ chính (:main_locale).', ['main_locale' => $article->main_locale]) }}</div>
     @endif
 
     @if($article->tags->isNotEmpty())
@@ -49,7 +49,7 @@
 
     @if($article->translations->count() > 1)
     <div class="mt-6">
-        <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-2">Các bản dịch khác</p>
+        <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-2">{{ __('Các bản dịch khác') }}</p>
         <div class="flex flex-wrap gap-2">
             @foreach($article->translations as $t)
             <a href="{{ route('backend.post.articles.edit', $article) }}?locale={{ $t->locale }}"
@@ -62,8 +62,8 @@
     @endif
 
     <div class="mt-6">
-        <a href="{{ route('backend.post.articles.index') }}" class="btn btn-ghost btn-sm">← Danh sách bài viết</a>
-        <a href="{{ route('backend.post.articles.edit', $article) }}" class="btn btn-primary btn-sm">Sửa bài viết</a>
+        <a href="{{ route('backend.post.articles.index') }}" class="btn btn-ghost btn-sm">{{ __('← Danh sách bài viết') }}</a>
+        <a href="{{ route('backend.post.articles.edit', $article) }}" class="btn btn-primary btn-sm">{{ __('Sửa bài viết') }}</a>
     </div>
 </div>
 @endsection

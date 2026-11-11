@@ -22,11 +22,11 @@ class PublishPageAction
     public function handle(Page $page): Page
     {
         throw_if($page->template === 'default' && blank($page->content), ValidationException::withMessages([
-            'content' => 'Cần nhập nội dung trước khi xuất bản.',
+            'content' => __('Cần nhập nội dung trước khi xuất bản.'),
         ]));
 
         throw_unless(View::exists($page->resolveView()), ValidationException::withMessages([
-            'template' => 'Chưa thể xuất bản: giao diện cho template này chưa sẵn sàng, liên hệ đội kỹ thuật.',
+            'template' => __('Chưa thể xuất bản: giao diện cho template này chưa sẵn sàng, liên hệ đội kỹ thuật.'),
         ]));
 
         $page->update([

@@ -9,7 +9,7 @@ class RegisterResponse implements RegisterResponseContract
     public function toResponse($request): mixed
     {
         if ($request->wantsJson()) {
-            return response()->json(['message' => 'Đăng ký thành công.'], 201);
+            return response()->json(['message' => __('Đăng ký thành công.')], 201);
         }
 
         return redirect()->intended(route('backend.dashboard'));

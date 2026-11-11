@@ -42,7 +42,7 @@ class SocialAuthController extends Controller
             $socialUser = Socialite::driver($driver)->user();
         } catch (Throwable) {
             return redirect()->route($wasLoggedIn ? 'auth.profile' : 'login')
-                ->withErrors(['social' => 'Xác thực ' . ucfirst($provider) . ' thất bại. Vui lòng thử lại.']);
+                ->withErrors(['social' => __('Xác thực :provider thất bại. Vui lòng thử lại.', ['provider' => ucfirst($provider)])]);
         }
 
         try {
@@ -54,7 +54,7 @@ class SocialAuthController extends Controller
         } catch (Throwable $e) {
             report($e);
             return redirect()->route($wasLoggedIn ? 'auth.profile' : 'login')
-                ->withErrors(['social' => 'Đã xảy ra lỗi khi xác thực. Vui lòng thử lại.']);
+                ->withErrors(['social' => __('Đã xảy ra lỗi khi xác thực. Vui lòng thử lại.')]);
         }
 
         $user = $result->user;
@@ -70,8 +70,8 @@ class SocialAuthController extends Controller
             }
 
             $errorMessage = ! $user->is_active
-                ? 'Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.'
-                : 'Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên.';
+                ? __('Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.')
+                : __('Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên.');
 
             return redirect()->route('login')
                 ->withErrors(['email' => $errorMessage]);
@@ -124,8 +124,7 @@ class SocialAuthController extends Controller
 
                 if (! $hasPassword && $otherSocialCount === 0) {
                     throw \Illuminate\Validation\ValidationException::withMessages([
-                        'social' => 'Không thể bỏ liên kết — đây là phương thức đăng nhập duy nhất. '
-                                  . 'Hãy đặt mật khẩu trước.',
+                        'social' => __('Không thể bỏ liên kết — đây là phương thức đăng nhập duy nhất. Hãy đặt mật khẩu trước.'),
                     ]);
                 }
 
@@ -135,7 +134,7 @@ class SocialAuthController extends Controller
             return back()->withErrors($e->errors());
         }
 
-        return back()->with('social_success', 'Đã bỏ liên kết tài khoản ' . ucfirst($provider) . '.');
+        return back()->with('social_success', __('Đã bỏ liên kết tài khoản :provider.', ['provider' => ucfirst($provider)]));
     }
 
     private function resolveDriver(string $provider): string

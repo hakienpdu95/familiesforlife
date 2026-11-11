@@ -1,0 +1,53 @@
+<?php
+
+use App\Http\Controllers\Backend\QrReportController;
+use App\Shared\Traceability\Models\QrReport;
+use Modules\ActivityLog\Http\Controllers\ActivityLogApiController;
+use Modules\Approval\Models\ApprovalLog;
+use Modules\Ocop\Features\Traceability\OcopProductTracePresenter;
+use Modules\Ocop\Models\OcopProduct;
+use Modules\OcopSubject\Features\PublicReading\Queries\ListBrandProductsQuery;
+use Modules\OcopSubject\Models\OcopSubject;
+use Modules\Page\Features\PageManagement\PageTemplate;
+
+return [
+
+    'source_locale' => 'vi',
+
+    'target_locales' => ['en'],
+
+    'scan_paths' => [
+        'app',
+        'Modules',
+        'resources/views',
+        'routes',
+    ],
+
+    'js_paths' => [
+        'resources/js',
+        'Modules',
+    ],
+
+    'exclude' => [
+        'vendor',
+        'node_modules',
+        'tests',
+        'database',
+        'resources/views/vendor',
+    ],
+
+    'translatable_constants' => [
+        QrReport::class.'::REASONS',
+        QrReport::class.'::REASON_HINTS',
+        QrReportController::class.'::KIND_LABELS',
+        ApprovalLog::class.'::ACTION_LABELS',
+        OcopProduct::class.'::SHELF_LIFE_UNITS',
+        OcopSubject::class.'::DOCUMENT_LABELS',
+        ListBrandProductsQuery::class.'::SORTS',
+        PageTemplate::class.'::MAP',
+        OcopProductTracePresenter::class.'::QUALITY_DOCS',
+        OcopProductTracePresenter::class.'::SECTIONS',
+        ActivityLogApiController::class.'::FIELD_LABELS',
+    ],
+
+];

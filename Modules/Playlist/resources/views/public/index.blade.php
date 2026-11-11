@@ -9,7 +9,7 @@
 
     @if($playlists->isEmpty())
         <div class="text-center py-16 text-base-content/60">
-            <p>Chưa có playlist nào được đăng.</p>
+            <p>{{ __('Chưa có playlist nào được đăng.') }}</p>
         </div>
     @else
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -25,7 +25,7 @@
                     @if($playlist->description)
                     <p class="text-sm text-base-content/70 mt-1">{{ Str::limit($playlist->description, 120) }}</p>
                     @endif
-                    <p class="text-xs text-base-content/40 mt-2">{{ $playlist->visible_itemables->count() }} nội dung</p>
+                    <p class="text-xs text-base-content/40 mt-2">{{ __(':count nội dung', ['count' => $playlist->visible_itemables->count()]) }}</p>
                 </div>
             </a>
             @endforeach

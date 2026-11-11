@@ -42,7 +42,7 @@ class BroadcastAdminController extends Controller
         }
 
         return redirect()->route('backend.newsletter.broadcast.logs')
-            ->with('success', $data->scheduled_at ? 'Đã lên lịch gửi bản tin.' : 'Đã gửi bản tin.');
+            ->with('success', $data->scheduled_at ? __('Đã lên lịch gửi bản tin.') : __('Đã gửi bản tin.'));
     }
 
     /** Dữ liệu bảng lấy qua BroadcastLogApiController (Tabulator, remote pagination/sort/filter). */

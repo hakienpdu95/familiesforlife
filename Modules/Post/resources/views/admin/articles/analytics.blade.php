@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', 'Thống kê traffic')
+@section('title', __('Thống kê traffic'))
 
 @section('content')
 @php
@@ -19,11 +19,11 @@
     // spec/ga-dashboard-statistics.md §2.1 — cùng key thật của package (pageReferrer/country/
     // browser/deviceCategory/newVsReturning), KHÔNG đổi tên tuỳ ý.
     $trafficSections = [
-        ['title' => 'Nguồn dẫn (Referrer)',        'key' => 'pageReferrer',   'metric' => 'screenPageViews', 'data' => $overview['referrers'] ?? collect()],
-        ['title' => 'Quốc gia',                     'key' => 'country',        'metric' => 'screenPageViews', 'data' => $overview['countries'] ?? collect()],
-        ['title' => 'Trình duyệt',                  'key' => 'browser',        'metric' => 'screenPageViews', 'data' => $overview['browsers'] ?? collect()],
-        ['title' => 'Thiết bị',                     'key' => 'deviceCategory', 'metric' => 'screenPageViews', 'data' => $overview['devices'] ?? collect()],
-        ['title' => 'Người dùng mới / quay lại',    'key' => 'newVsReturning', 'metric' => 'activeUsers',     'data' => $overview['userTypes'] ?? collect()],
+        ['title' => __('Nguồn dẫn (Referrer)'),        'key' => 'pageReferrer',   'metric' => 'screenPageViews', 'data' => $overview['referrers'] ?? collect()],
+        ['title' => __('Quốc gia'),                     'key' => 'country',        'metric' => 'screenPageViews', 'data' => $overview['countries'] ?? collect()],
+        ['title' => __('Trình duyệt'),                  'key' => 'browser',        'metric' => 'screenPageViews', 'data' => $overview['browsers'] ?? collect()],
+        ['title' => __('Thiết bị'),                     'key' => 'deviceCategory', 'metric' => 'screenPageViews', 'data' => $overview['devices'] ?? collect()],
+        ['title' => __('Người dùng mới / quay lại'),    'key' => 'newVsReturning', 'metric' => 'activeUsers',     'data' => $overview['userTypes'] ?? collect()],
     ];
 @endphp
 
@@ -32,16 +32,16 @@
     {{-- ── Header ─────────────────────────────────────────────────────── --}}
     <div class="flex flex-wrap items-start justify-between gap-4">
         <div class="min-w-0">
-            <h1 class="text-2xl font-bold text-base-content">Thống kê traffic</h1>
-            <p class="text-sm text-base-content/50 mt-0.5">Dữ liệu Google Analytics 4 cho toàn bộ bài viết.</p>
-            <p class="text-xs text-base-content/40 mt-1">Dữ liệu Google Analytics có thể trễ 1-2 ngày so với thời gian thực.</p>
+            <h1 class="text-2xl font-bold text-base-content">{{ __('Thống kê traffic') }}</h1>
+            <p class="text-sm text-base-content/50 mt-0.5">{{ __('Dữ liệu Google Analytics 4 cho toàn bộ bài viết.') }}</p>
+            <p class="text-xs text-base-content/40 mt-1">{{ __('Dữ liệu Google Analytics có thể trễ 1-2 ngày so với thời gian thực.') }}</p>
         </div>
 
         <form method="GET" class="flex items-center gap-2 shrink-0">
             <select name="days" class="select select-bordered select-sm" onchange="this.form.submit()">
-                <option value="7" @selected($days === 7)>7 ngày</option>
-                <option value="30" @selected($days === 30)>30 ngày</option>
-                <option value="90" @selected($days === 90)>90 ngày</option>
+                <option value="7" @selected($days === 7)>{{ __('7 ngày') }}</option>
+                <option value="30" @selected($days === 30)>{{ __('30 ngày') }}</option>
+                <option value="90" @selected($days === 90)>{{ __('90 ngày') }}</option>
             </select>
         </form>
     </div>
@@ -79,7 +79,7 @@
     {{-- ── Time-series chart ───────────────────────────────────────────── --}}
     <div class="card bg-base-100 border border-base-200 shadow-sm">
         <div class="card-body p-4 pb-3">
-            <h2 class="font-semibold text-base-content mb-3">Active Users & Page Views theo ngày</h2>
+            <h2 class="font-semibold text-base-content mb-3">{{ __('Active Users & Page Views theo ngày') }}</h2>
             <div id="analyticsTimeseriesChart" class="w-full" style="height:280px"></div>
         </div>
     </div>
@@ -91,7 +91,7 @@
             <div class="card-body p-4">
                 <h2 class="font-semibold text-base-content mb-3">{{ $section['title'] }}</h2>
                 @if($section['data']->isEmpty())
-                <p class="text-sm text-base-content/40 italic py-4 text-center">Chưa có dữ liệu.</p>
+                <p class="text-sm text-base-content/40 italic py-4 text-center">{{ __('Chưa có dữ liệu.') }}</p>
                 @else
                 @php $max = $section['data']->max($section['metric']) ?: 1; @endphp
                 <div class="space-y-2.5">
@@ -115,18 +115,18 @@
     {{-- ── Top nội dung (luôn hiển thị được — đọc ga_views_30d, không phụ thuộc $error) ──── --}}
     <div class="card bg-base-100 border border-base-200 shadow-sm">
         <div class="card-body p-4">
-            <h2 class="font-semibold text-base-content mb-3">Top nội dung</h2>
+            <h2 class="font-semibold text-base-content mb-3">{{ __('Top nội dung') }}</h2>
             @if($topArticles->isEmpty())
             <p class="text-sm text-base-content/40 italic py-4 text-center">
-                Chưa có dữ liệu — chờ lệnh <code>post:sync-ga-stats</code> chạy lần đầu.
+                {{ __('Chưa có dữ liệu — chờ lệnh') }} <code>post:sync-ga-stats</code> {{ __('chạy lần đầu.') }}
             </p>
             @else
             <div class="overflow-x-auto">
                 <table class="table table-sm">
                     <thead class="text-xs uppercase tracking-wide">
                         <tr>
-                            <th>Bài viết</th>
-                            <th class="text-center w-32">Lượt xem GA</th>
+                            <th>{{ __('Bài viết') }}</th>
+                            <th class="text-center w-32">{{ __('Lượt xem GA') }}</th>
                         </tr>
                     </thead>
                     <tbody>

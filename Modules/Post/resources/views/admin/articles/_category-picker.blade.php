@@ -12,6 +12,6 @@
             'selectedCategoryIds' => $selectedCategoryIds, 'primaryCategoryId' => $primaryCategoryId,
         ])
     @empty
-        <p class="text-xs text-base-content/30 py-2">Chưa có danh mục nào.</p>
+        <p class="text-xs text-base-content/30 py-2">{{ __('Chưa có danh mục nào.') }}</p>
     @endforelse
 </div>

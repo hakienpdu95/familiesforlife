@@ -25,7 +25,7 @@ class StoreEventPosterAction
         abort_if(
             $width && $height && $width < $height,
             422,
-            'Poster nên ở dạng ngang (landscape), không phải ảnh chân dung.'
+            __('Poster nên ở dạng ngang (landscape), không phải ảnh chân dung.')
         );
 
         $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();

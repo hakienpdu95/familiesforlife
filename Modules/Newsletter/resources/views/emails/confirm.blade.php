@@ -28,23 +28,22 @@ table { border-collapse:collapse; }
 
     <tr>
       <td class="email-body" style="padding:36px 40px 28px;">
-        <p style="font-size:15px;line-height:1.6;margin:0 0 12px;">Xin chào {{ $fullName }},</p>
+        <p style="font-size:15px;line-height:1.6;margin:0 0 12px;">{{ __('Xin chào :full_name,', ['full_name' => $fullName]) }}</p>
         <p style="font-size:15px;line-height:1.6;margin:0 0 20px;color:#374151;">
-            Bạn (hoặc ai đó dùng email này) vừa đăng ký nhận bản tin từ {{ config('app.name') }}. Bấm nút bên
-            dưới để xác nhận — nếu không xác nhận, bạn sẽ không nhận được bất kỳ email nào khác.
+            {{ __('Bạn (hoặc ai đó dùng email này) vừa đăng ký nhận bản tin từ :value. Bấm nút bên dưới để xác nhận — nếu không xác nhận, bạn sẽ không nhận được bất kỳ email nào khác.', ['value' => config('app.name')]) }}
         </p>
         <table cellpadding="0" cellspacing="0" role="presentation" style="margin:0 auto;">
           <tr>
             <td style="border-radius:6px;background:#4f46e5;">
               <a href="{{ $confirmUrl }}" target="_blank"
                  style="display:inline-block;padding:12px 28px;font-size:14px;font-weight:600;color:#ffffff;text-decoration:none;">
-                Xác nhận đăng ký
+                {{ __('Xác nhận đăng ký') }}
               </a>
             </td>
           </tr>
         </table>
         <p style="font-size:13px;line-height:1.6;margin:20px 0 0;color:#94a3b8;">
-            Nếu nút không hoạt động, dán liên kết sau vào trình duyệt: <br>
+            {{ __('Nếu nút không hoạt động, dán liên kết sau vào trình duyệt:') }} <br>
             <span style="word-break:break-all;">{{ $confirmUrl }}</span>
         </p>
       </td>
@@ -53,8 +52,7 @@ table { border-collapse:collapse; }
     <tr>
       <td style="border-top:1px solid #e0e7ff;padding:16px 40px 24px;text-align:center;">
         <p style="font-size:12px;color:#94a3b8;margin:0;line-height:1.6;">
-          © {{ date('Y') }} <strong>{{ config('app.name') }}</strong> —
-          Email được gửi tự động, vui lòng không trả lời trực tiếp.
+          © {{ date('Y') }} <strong>{{ config('app.name') }}</strong> {{ __('— Email được gửi tự động, vui lòng không trả lời trực tiếp.') }}
         </p>
       </td>
     </tr>

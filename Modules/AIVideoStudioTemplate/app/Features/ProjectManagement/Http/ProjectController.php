@@ -40,7 +40,7 @@ class ProjectController extends Controller
         $project = $action->handle($data, $request->user()->id);
 
         return redirect()->route('backend.aivideostudiotemplate.show', $project)
-            ->with('success', 'Đã tạo project — thêm shot bên dưới để bắt đầu soạn Director Prompt Template.');
+            ->with('success', __('Đã tạo project — thêm shot bên dưới để bắt đầu soạn Director Prompt Template.'));
     }
 
     public function show(AiVideoStudioProject $project, CompileProjectDirectorPromptAction $compilePrompt): View
@@ -66,7 +66,7 @@ class ProjectController extends Controller
         $action->handle($project, $data, $request->user()->id);
 
         return redirect()->route('backend.aivideostudiotemplate.show', $project)
-            ->with('success', 'Đã cập nhật project.');
+            ->with('success', __('Đã cập nhật project.'));
     }
 
     public function destroy(AiVideoStudioProject $project, DeleteProjectAction $action): RedirectResponse
@@ -75,7 +75,7 @@ class ProjectController extends Controller
         $action->handle($project);
 
         return redirect()->route('backend.aivideostudiotemplate.index')
-            ->with('success', "Đã xoá project \"{$name}\" và toàn bộ shot bên trong.");
+            ->with('success', __('Đã xoá project ":name" và toàn bộ shot bên trong.', ['name' => $name]));
     }
 
     /** spec §6/§8 — tải file .md ghép các compiled_prompt theo sort_order (CompileProjectDirectorPromptAction). */

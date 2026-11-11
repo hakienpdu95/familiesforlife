@@ -8,6 +8,7 @@
 import { TabulatorFull as Tabulator } from 'tabulator-tables';
 import 'tabulator-tables/dist/css/tabulator.min.css';
 
+import { t } from '../shared/i18n.js';
 const DEFAULTS = {
     layout:          'fitColumns',
     responsiveLayout:'collapse',
@@ -21,11 +22,11 @@ const DEFAULTS = {
     langs: {
         'vi-VN': {
             pagination: {
-                page_size: 'Dòng/trang',
-                page_title: 'Trang',
+                page_size: t('Dòng/trang'),
+                page_title: t('Trang'),
                 first: '«', last: '»', prev: '‹', next: '›',
-                first_title: 'Trang đầu', last_title: 'Trang cuối',
-                prev_title:  'Trang trước', next_title: 'Trang sau',
+                first_title: t('Trang đầu'), last_title: t('Trang cuối'),
+                prev_title:  t('Trang trước'), next_title: t('Trang sau'),
             },
         },
     },

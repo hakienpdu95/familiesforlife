@@ -205,22 +205,22 @@ class ActivityLogApiController extends Controller
             || preg_match('/^[a-z0-9_]*\.?(created|updated|deleted)$/i', $rawDescription) === 1;
 
         if (!$isGeneric) {
-            return $rawDescription;
+            return __($rawDescription);
         }
 
         $changedFields = collect(array_keys($attributes))
             ->reject(fn ($key) => in_array($key, self::NOISE_KEYS, true))
-            ->map(fn ($key) => self::FIELD_LABELS[$key] ?? str_replace('_', ' ', $key))
+            ->map(fn ($key) => isset(self::FIELD_LABELS[$key]) ? __(self::FIELD_LABELS[$key]) : str_replace('_', ' ', $key))
             ->values();
 
         $quotedName = $subjectName ? " \"{$subjectName}\"" : '';
 
         return match (true) {
-            str_contains($event, 'delete') => "Xoá{$quotedName}",
-            str_contains($event, 'create') => "Tạo mới{$quotedName}",
+            str_contains($event, 'delete') => __('Xoá:quoted_name', ['quoted_name' => $quotedName]),
+            str_contains($event, 'create') => __('Tạo mới:quoted_name', ['quoted_name' => $quotedName]),
             str_contains($event, 'update') && $changedFields->isNotEmpty() =>
-                'Cập nhật ' . $changedFields->implode(', '),
-            str_contains($event, 'update') => "Cập nhật thông tin{$quotedName}",
+                __('Cập nhật :fields', ['fields' => $changedFields->implode(', ')]),
+            str_contains($event, 'update') => __('Cập nhật thông tin:quoted_name', ['quoted_name' => $quotedName]),
             $event !== '' => ucfirst(str_replace(['_', '.'], [' ', ' — '], $event)),
             default => null,
         };

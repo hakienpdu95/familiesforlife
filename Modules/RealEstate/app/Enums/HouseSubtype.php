@@ -13,10 +13,10 @@ enum HouseSubtype: string
     public function label(): string
     {
         return match ($this) {
-            self::Alley    => 'Nhà hẻm',
-            self::Street   => 'Nhà mặt tiền',
-            self::Adjacent => 'Nhà liền kề',
-            self::Villa    => 'Biệt thự',
+            self::Alley    => __('Nhà hẻm'),
+            self::Street   => __('Nhà mặt tiền'),
+            self::Adjacent => __('Nhà liền kề'),
+            self::Villa    => __('Biệt thự'),
         };
     }
 }

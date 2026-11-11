@@ -13,11 +13,11 @@ enum ArticleStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Draft         => 'Nháp',
-            self::PendingReview => 'Chờ duyệt',
-            self::Published     => 'Đã xuất bản',
-            self::Scheduled     => 'Đã lên lịch',
-            self::Archived      => 'Đã lưu trữ',
+            self::Draft         => __('Nháp'),
+            self::PendingReview => __('Chờ duyệt'),
+            self::Published     => __('Đã xuất bản'),
+            self::Scheduled     => __('Đã lên lịch'),
+            self::Archived      => __('Đã lưu trữ'),
         };
     }
 

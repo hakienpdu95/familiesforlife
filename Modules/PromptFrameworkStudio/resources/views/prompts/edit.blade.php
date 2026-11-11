@@ -1,19 +1,19 @@
 @extends('layouts.backend')
-@section('title', 'Sửa — '.$prompt->label)
+@section('title', __('Sửa — :label', ['label' => $prompt->label]))
 
 @section('content')
 
 <div class="flex items-center justify-between mb-6">
     <div>
-        <h1 class="text-2xl font-bold text-base-content">Sửa &amp; sinh lại prompt</h1>
+        <h1 class="text-2xl font-bold text-base-content">{{ __('Sửa') }} &amp; {{ __('sinh lại prompt') }}</h1>
         <p class="text-sm text-base-content/50 mt-0.5">
-            Mẫu đang dùng: <span class="badge badge-primary badge-outline font-mono">{{ $framework['name'] }}</span>
-            — không đổi sang mẫu khác được (bấm "Tạo prompt mới" ở danh sách nếu muốn dùng mẫu khác)
+            {{ __('Mẫu đang dùng:') }} <span class="badge badge-primary badge-outline font-mono">{{ $framework['name'] }}</span>
+            {{ __('— không đổi sang mẫu khác được (bấm "Tạo prompt mới" ở danh sách nếu muốn dùng mẫu khác)') }}
         </p>
     </div>
     <div class="flex items-center gap-2">
         <a href="{{ route('backend.promptstudio.prompts.show', $prompt) }}" class="btn btn-ghost btn-sm">Xem</a>
-        <a href="{{ route('backend.promptstudio.prompts.index') }}" class="btn btn-ghost btn-sm">Danh sách</a>
+        <a href="{{ route('backend.promptstudio.prompts.index') }}" class="btn btn-ghost btn-sm">{{ __('Danh sách') }}</a>
     </div>
 </div>
 
@@ -38,7 +38,7 @@
 
             <div class="form-control">
                 <label class="label py-0 pb-1.5">
-                    <span class="label-text font-medium">Tên prompt <span class="text-error">*</span></span>
+                    <span class="label-text font-medium">{{ __('Tên prompt') }} <span class="text-error">*</span></span>
                 </label>
                 <input type="text" name="label" value="{{ old('label', $prompt->label) }}" maxlength="150" required
                        class="input input-bordered input-sm w-full @error('label') input-error @enderror">
@@ -53,7 +53,7 @@
             <div class="pt-2">
                 <button type="submit" class="btn btn-primary btn-sm gap-1.5">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                    Sinh lại
+                    {{ __('Sinh lại') }}
                 </button>
             </div>
         </div>

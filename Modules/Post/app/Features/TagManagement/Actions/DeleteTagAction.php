@@ -21,7 +21,7 @@ class DeleteTagAction
 
         if ($articleCount > 0) {
             throw new \RuntimeException(
-                "Không thể xoá tag đang được sử dụng ở {$articleCount} bài viết. Hãy gộp tag này vào tag khác hoặc gỡ tag khỏi từng bài trước khi xoá."
+                __('Không thể xoá tag đang được sử dụng ở :article_count bài viết. Hãy gộp tag này vào tag khác hoặc gỡ tag khỏi từng bài trước khi xoá.', ['article_count' => $articleCount])
             );
         }
 

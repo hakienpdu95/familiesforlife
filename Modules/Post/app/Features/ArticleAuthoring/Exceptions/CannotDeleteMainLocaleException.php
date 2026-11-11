@@ -6,6 +6,6 @@ class CannotDeleteMainLocaleException extends \RuntimeException
 {
     public function __construct(string $locale)
     {
-        parent::__construct("Không thể xoá bản dịch \"{$locale}\" vì đang là ngôn ngữ chính — hãy đổi ngôn ngữ chính trước.");
+        parent::__construct(__('Không thể xoá bản dịch ":locale" vì đang là ngôn ngữ chính — hãy đổi ngôn ngữ chính trước.', ['locale' => $locale]));
     }
 }

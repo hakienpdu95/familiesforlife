@@ -11,9 +11,9 @@ enum OcopSubjectOrganizationType: string
     public function label(): string
     {
         return match ($this) {
-            self::Enterprise => 'Doanh nghiệp',
-            self::Cooperative => 'Hợp tác xã',
-            self::Household => 'Hộ kinh doanh',
+            self::Enterprise => __('Doanh nghiệp'),
+            self::Cooperative => __('Hợp tác xã'),
+            self::Household => __('Hộ kinh doanh'),
         };
     }
 

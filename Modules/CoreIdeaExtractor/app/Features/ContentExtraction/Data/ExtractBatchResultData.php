@@ -137,9 +137,9 @@ class ExtractBatchResultData extends Data
         $problem = $this->blocked_count + $this->error_count;
 
         if ($this->success_count === 0) {
-            return "Không trích được nguồn nào tự động ({$this->blocked_count} bị chặn, {$this->error_count} lỗi) — xem failure_type từng nguồn, dùng tab \"Dán mã HTML\" để trích thủ công.";
+            return __('Không trích được nguồn nào tự động (:blocked_count bị chặn, :error_count lỗi) — xem failure_type từng nguồn, dùng tab "Dán mã HTML" để trích thủ công.', ['blocked_count' => $this->blocked_count, 'error_count' => $this->error_count]);
         }
 
-        return "{$problem}/{$this->requested_count} nguồn không trích được tự động ({$this->blocked_count} bị chặn, {$this->error_count} lỗi) — xem failure_type từng nguồn, dùng tab \"Dán mã HTML\" nếu cần bổ sung.";
+        return __(':problem/:requested_count nguồn không trích được tự động (:blocked_count bị chặn, :error_count lỗi) — xem failure_type từng nguồn, dùng tab "Dán mã HTML" nếu cần bổ sung.', ['problem' => $problem, 'requested_count' => $this->requested_count, 'blocked_count' => $this->blocked_count, 'error_count' => $this->error_count]);
     }
 }

@@ -41,7 +41,7 @@ class VideoAdminController extends Controller
         $video = $createVideo->handle(VideoData::from($this->validated($request)));
 
         return redirect()->route('backend.video.items.index')
-            ->with('success', "Đã thêm video \"{$video->name}\".");
+            ->with('success', __('Đã thêm video ":name".', ['name' => $video->name]));
     }
 
     public function edit(Video $video): View
@@ -54,7 +54,7 @@ class VideoAdminController extends Controller
         $updateVideo->handle($video, VideoData::from($this->validated($request)));
 
         return redirect()->route('backend.video.items.index')
-            ->with('success', 'Đã cập nhật video.');
+            ->with('success', __('Đã cập nhật video.'));
     }
 
     public function destroy(Request $request, Video $video, DeleteVideoAction $deleteVideo): RedirectResponse|JsonResponse
@@ -62,11 +62,11 @@ class VideoAdminController extends Controller
         $deleteVideo->handle($video);
 
         if ($request->expectsJson()) {
-            return response()->json(['message' => 'Đã xoá video.']);
+            return response()->json(['message' => __('Đã xoá video.')]);
         }
 
         return redirect()->route('backend.video.items.index')
-            ->with('success', 'Đã xoá video.');
+            ->with('success', __('Đã xoá video.'));
     }
 
     /** Toggle nhanh is_active từ bảng danh sách — trả JSON cho Tabulator cập nhật UI tại chỗ, không reload trang. */
@@ -79,7 +79,7 @@ class VideoAdminController extends Controller
         return response()->json([
             'success'   => true,
             'is_active' => $video->is_active,
-            'message'   => $video->is_active ? 'Đã bật hiển thị video.' : 'Đã tắt hiển thị video.',
+            'message'   => $video->is_active ? __('Đã bật hiển thị video.') : __('Đã tắt hiển thị video.'),
         ]);
     }
 

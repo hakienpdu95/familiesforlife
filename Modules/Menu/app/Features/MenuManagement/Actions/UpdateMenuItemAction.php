@@ -25,11 +25,11 @@ class UpdateMenuItemAction
             $parent = MenuItem::findOrFail($data->parent_id);
 
             throw_if($parent->id === $menuItem->id, ValidationException::withMessages([
-                'parent_id' => 'Không thể chọn chính mục này làm mục cha.',
+                'parent_id' => __('Không thể chọn chính mục này làm mục cha.'),
             ]));
 
             throw_if($parent->depth >= config('menu.max_depth'), ValidationException::withMessages([
-                'parent_id' => 'Menu chỉ hỗ trợ tối đa 3 cấp — không thể đặt mục con vào đây.',
+                'parent_id' => __('Menu chỉ hỗ trợ tối đa 3 cấp — không thể đặt mục con vào đây.'),
             ]));
 
             $depth = $parent->depth + 1;
@@ -70,7 +70,7 @@ class UpdateMenuItemAction
         $hasGrandchildren = $menuItem->children()->whereHas('children')->exists();
 
         throw_if($hasGrandchildren && $newDepth + 2 > config('menu.max_depth'), ValidationException::withMessages([
-            'parent_id' => 'Không thể đổi cấp — mục này đang có cấp cháu, đổi cấp sẽ vượt quá 3 cấp cho phép.',
+            'parent_id' => __('Không thể đổi cấp — mục này đang có cấp cháu, đổi cấp sẽ vượt quá 3 cấp cho phép.'),
         ]));
     }
 

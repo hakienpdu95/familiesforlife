@@ -49,7 +49,7 @@ class ContentOutlineController extends Controller
         $outline = $action->handle($data, $request->user()->id);
 
         return redirect()->route('backend.contentoutlines.show', $outline)
-            ->with('success', 'Đã sinh dàn ý nội dung — sao chép prompt bên dưới để dán sang AI.');
+            ->with('success', __('Đã sinh dàn ý nội dung — sao chép prompt bên dưới để dán sang AI.'));
     }
 
     /**
@@ -100,14 +100,14 @@ class ContentOutlineController extends Controller
         $action->handle($outline, $data, $request->user()->id);
 
         return redirect()->route('backend.contentoutlines.show', $outline)
-            ->with('success', 'Đã sinh lại prompt theo input mới.');
+            ->with('success', __('Đã sinh lại prompt theo input mới.'));
     }
 
     public function destroy(ContentOutline $outline): RedirectResponse
     {
         $outline->delete();
 
-        return redirect()->route('backend.contentoutlines.index')->with('success', 'Đã xoá dàn ý.');
+        return redirect()->route('backend.contentoutlines.index')->with('success', __('Đã xoá dàn ý.'));
     }
 
     /**
@@ -154,6 +154,6 @@ class ContentOutlineController extends Controller
         $action->handle($outline, $articleId, $request->user()->id);
 
         return redirect()->route('backend.contentoutlines.show', $outline)
-            ->with('success', $articleId ? 'Đã gắn dàn ý vào bài viết.' : 'Đã gỡ liên kết bài viết.');
+            ->with('success', $articleId ? __('Đã gắn dàn ý vào bài viết.') : __('Đã gỡ liên kết bài viết.'));
     }
 }

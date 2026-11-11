@@ -21,13 +21,13 @@ enum CalendarEntryStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Idea     => 'Ý tưởng',
-            self::Planned  => 'Đã lên kế hoạch',
-            self::Drafting => 'Đang viết',
-            self::Blocked  => 'Đang vướng',
-            self::Ready    => 'Sẵn sàng duyệt',
-            self::Done     => 'Đã xong',
-            self::Dropped  => 'Đã huỷ',
+            self::Idea     => __('Ý tưởng'),
+            self::Planned  => __('Đã lên kế hoạch'),
+            self::Drafting => __('Đang viết'),
+            self::Blocked  => __('Đang vướng'),
+            self::Ready    => __('Sẵn sàng duyệt'),
+            self::Done     => __('Đã xong'),
+            self::Dropped  => __('Đã huỷ'),
         };
     }
 

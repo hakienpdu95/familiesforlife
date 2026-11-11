@@ -87,7 +87,7 @@ class PostArticleTracePresenter implements TracePresenter
         if ($live) {
             $live->loadMissing(['ocopProducts.media', 'ocopProducts.qrIdentity']);
             $related = [
-                ['title' => 'Sản phẩm OCOP trong bài', 'icon' => 'fa-certificate', 'items' => $this->ocopCards($live->ocopProducts, true)],
+                ['title' => __('Sản phẩm OCOP trong bài'), 'icon' => 'fa-certificate', 'items' => $this->ocopCards($live->ocopProducts, true)],
             ];
         }
 
@@ -121,7 +121,7 @@ class PostArticleTracePresenter implements TracePresenter
             'tags' => $payload['tags'] ?? [],
             'related' => $related,
             'cta' => $t
-                ? ['url' => route('post.public.article', ['slug' => $t->slug, 'id' => $t->id]), 'label' => 'Đọc bài trên website']
+                ? ['url' => route('post.public.article', ['slug' => $t->slug, 'id' => $t->id]), 'label' => __('Đọc bài trên website')]
                 : null,
         ]);
     }
@@ -130,7 +130,7 @@ class PostArticleTracePresenter implements TracePresenter
     public function pending(Model $target): array
     {
         return $this->base([
-            'title' => 'Bài viết',
+            'title' => __('Bài viết'),
             'notice' => 'Bài viết hiện chưa được xuất bản.',
         ]);
     }
@@ -138,7 +138,7 @@ class PostArticleTracePresenter implements TracePresenter
     private function base(array $page): array
     {
         return T::page([
-            'heading' => 'Thông tin bài viết',
+            'heading' => __('Thông tin bài viết'),
             'icon' => 'fa-newspaper',
             'kind' => 'Bài viết',
             'category' => null,

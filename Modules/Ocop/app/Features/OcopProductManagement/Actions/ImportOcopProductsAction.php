@@ -31,7 +31,7 @@ class ImportOcopProductsAction
 
         [$headerIndex, $columns] = $this->locateHeader($rows);
         if ($headerIndex === null) {
-            return ['created' => 0, 'updated' => 0, 'unchanged' => 0, 'errors' => ['Không tìm thấy dòng tiêu đề có các cột "Tên sản phẩm" và "Tên cơ sở sản xuất".']];
+            return ['created' => 0, 'updated' => 0, 'unchanged' => 0, 'errors' => [__('Không tìm thấy dòng tiêu đề có các cột "Tên sản phẩm" và "Tên cơ sở sản xuất".')]];
         }
 
         $subjects = $this->subjectLookup($provinceCode);
@@ -57,19 +57,19 @@ class ImportOcopProductsAction
                 }
 
                 if ($name === '' || $subjectName === '') {
-                    $errors[] = "Dòng {$rowNumber}: thiếu ".($name === '' ? 'tên sản phẩm' : 'tên cơ sở sản xuất').'.';
+                    $errors[] = ($name === '' ? __('Dòng :row: thiếu tên sản phẩm.', ['row' => $rowNumber]) : __('Dòng :row: thiếu tên cơ sở sản xuất.', ['row' => $rowNumber]));
 
                     continue;
                 }
 
                 $subject = $subjects[$this->normalize($subjectName)] ?? null;
                 if ($subject === null) {
-                    $errors[] = "Dòng {$rowNumber}: không tìm thấy chủ thể \"{$subjectName}\" thuộc tỉnh/thành đã chọn ({$name}).";
+                    $errors[] = __('Dòng :row_number: không tìm thấy chủ thể ":subject_name" thuộc tỉnh/thành đã chọn (:name).', ['row_number' => $rowNumber, 'subject_name' => $subjectName, 'name' => $name]);
 
                     continue;
                 }
                 if ($subject === false) {
-                    $errors[] = "Dòng {$rowNumber}: có nhiều chủ thể cùng tên \"{$subjectName}\" trong tỉnh/thành, cần gán thủ công ({$name}).";
+                    $errors[] = __('Dòng :row_number: có nhiều chủ thể cùng tên ":subject_name" trong tỉnh/thành, cần gán thủ công (:name).', ['row_number' => $rowNumber, 'subject_name' => $subjectName, 'name' => $name]);
 
                     continue;
                 }

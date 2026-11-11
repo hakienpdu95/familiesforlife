@@ -26,7 +26,7 @@ class ReorderPlaylistItemsAction
 
         if ($unknownIds !== []) {
             throw ValidationException::withMessages([
-                'ordered_item_ids' => 'Danh sách sắp xếp chứa item không thuộc playlist này.',
+                'ordered_item_ids' => __('Danh sách sắp xếp chứa item không thuộc playlist này.'),
             ]);
         }
 

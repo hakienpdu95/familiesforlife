@@ -1,11 +1,11 @@
 @extends('layouts.frontend')
 
 @php
-    $periodTitle = ['tuan-nay' => 'Sự Kiện Tuần Này', 'thang-nay' => 'Sự Kiện Tháng Này'][$period ?? ''] ?? null;
+    $periodTitle = ['tuan-nay' => __('Sự Kiện Tuần Này'), 'thang-nay' => __('Sự Kiện Tháng Này')][$period ?? ''] ?? null;
 @endphp
 
-@section('title', $search ? "Tìm sự kiện: {$search}" : ($periodTitle ?? 'Sự Kiện'))
-@section('meta_description', 'Sự kiện, hoạt động vui chơi và trải nghiệm cho gia đình — cập nhật liên tục.')
+@section('title', $search ? "Tìm sự kiện: {$search}" : ($periodTitle ?? __('Sự Kiện')))
+@section('meta_description', __('Sự kiện, hoạt động vui chơi và trải nghiệm cho gia đình — cập nhật liên tục.'))
 
 @push('meta')
 <link rel="canonical" href="{{ route('event.public.home') }}">
@@ -25,14 +25,14 @@
 <div class="container">
     <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
         <h1 class="text-2xl font-bold text-base-content">
-            {{ $search ? "Kết quả tìm kiếm: “{$search}”" : ($periodTitle ?? 'Sự Kiện Sắp Diễn Ra') }}
+            {{ $search ? "Kết quả tìm kiếm: “{$search}”" : ($periodTitle ?? __('Sự Kiện Sắp Diễn Ra')) }}
         </h1>
-        <a href="{{ route('event.public.submit.form') }}" class="btn btn-sm border-none bg-secondary text-white hover:bg-secondary/90">Gửi Sự Kiện Của Bạn</a>
+        <a href="{{ route('event.public.submit.form') }}" class="btn btn-sm border-none bg-secondary text-white hover:bg-secondary/90">{{ __('Gửi Sự Kiện Của Bạn') }}</a>
     </div>
 
     <form method="GET" class="mb-6" id="tim-su-kien">
         @if($period)<input type="hidden" name="thoi-gian" value="{{ $period }}">@endif
-        <input type="text" name="q" value="{{ $search }}" placeholder="Tìm sự kiện..."
+        <input type="text" name="q" value="{{ $search }}" placeholder="{{ __('Tìm sự kiện...') }}"
                class="input input-bordered input-sm w-full sm:w-72">
     </form>
 
@@ -57,14 +57,14 @@
             @forelse($collection as $event)
             <x-frontend.event-card :event="$event" size="sm" />
             @empty
-            <p class="col-span-full text-center text-base-content/40 py-10">Chưa có sự kiện nào sắp diễn ra.</p>
+            <p class="col-span-full text-center text-base-content/40 py-10">{{ __('Chưa có sự kiện nào sắp diễn ra.') }}</p>
             @endforelse
         </section>
 
         <div class="pt-10 flex justify-center" x-show="hasMore" x-cloak>
             <button type="button" class="btn btn-primary vgd-load-more-button" @click="loadMore()" :disabled="loading">
-                <span x-show="!loading">Xem thêm sự kiện</span>
-                <span x-show="loading" x-cloak>Đang tải...</span>
+                <span x-show="!loading">{{ __('Xem thêm sự kiện') }}</span>
+                <span x-show="loading" x-cloak>{{ __('Đang tải...') }}</span>
             </button>
         </div>
     </div>

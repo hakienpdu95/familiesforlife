@@ -9,6 +9,7 @@
 
 import { createTs } from '@shared/tom-select-factory.js';
 
+import { t } from '../../../../../../resources/js/shared/i18n.js';
 function esc(v) {
     if (v == null) return '';
     return String(v)
@@ -18,7 +19,7 @@ function esc(v) {
 
 const COLUMNS = [
     {
-        title: 'Ảnh', field: 'thumbnail_url', width: 110, headerSort: false,
+        title: t('Ảnh'), field: 'thumbnail_url', width: 110, headerSort: false,
         formatter(cell) {
             const d = cell.getRow().getData();
             if (!d.thumbnail_url) return '';
@@ -26,20 +27,20 @@ const COLUMNS = [
         },
     },
     {
-        title: 'Tên', field: 'name', minWidth: 220, sorter: 'string',
+        title: t('Tên'), field: 'name', minWidth: 220, sorter: 'string',
         formatter(cell) {
             const d = cell.getRow().getData();
             return '<a href="' + esc(d.edit_url) + '" class="text-sm font-medium hover:underline">' + esc(d.name) + '</a>';
         },
     },
     {
-        title: 'Số nội dung', field: 'items_count', width: 110, hozAlign: 'center', sorter: 'number', headerSort: false,
+        title: t('Số nội dung'), field: 'items_count', width: 110, hozAlign: 'center', sorter: 'number', headerSort: false,
     },
     {
-        title: 'Thứ tự', field: 'sort_order', width: 90, hozAlign: 'center', sorter: 'number',
+        title: t('Thứ tự'), field: 'sort_order', width: 90, hozAlign: 'center', sorter: 'number',
     },
     {
-        title: 'Trạng thái', field: 'is_active', width: 110, hozAlign: 'center', headerSort: false,
+        title: t('Trạng thái'), field: 'is_active', width: 110, hozAlign: 'center', headerSort: false,
         formatter(cell) {
             const d = cell.getRow().getData();
             const checked = d.is_active ? 'checked' : '';
@@ -49,7 +50,7 @@ const COLUMNS = [
         },
     },
     {
-        title: 'Ngày tạo', field: 'created_at', width: 140, sorter: 'string',
+        title: t('Ngày tạo'), field: 'created_at', width: 140, sorter: 'string',
     },
     {
         title: '', field: 'id', width: 140, hozAlign: 'center', headerSort: false,
@@ -57,15 +58,15 @@ const COLUMNS = [
             const d = cell.getRow().getData();
             let html = '<div class="flex items-center justify-center gap-1">';
 
-            html += '<a href="' + esc(d.public_url) + '" target="_blank" class="btn btn-ghost btn-xs" title="Xem trang công khai">Xem</a>';
+            html += '<a href="' + esc(d.public_url) + ('" target="_blank" class="btn btn-ghost btn-xs" title="' + t('Xem trang công khai') + '">Xem</a>');
 
             if (d.can_update) {
-                html += '<a href="' + esc(d.edit_url) + '" class="btn btn-ghost btn-xs" title="Sửa">Sửa</a>';
+                html += '<a href="' + esc(d.edit_url) + ('" class="btn btn-ghost btn-xs" title="' + t('Sửa') + '">' + t('Sửa') + '</a>');
             }
             if (d.can_delete) {
-                html += '<button class="btn btn-ghost btn-xs text-error" title="Xoá"'
+                html += ('<button class="btn btn-ghost btn-xs text-error" title="' + t('Xoá') + '"')
                     + ' data-url="' + esc(d.delete_url) + '"'
-                    + ' onclick="window.playlistDeleteConfirm(this.dataset.url)">Xoá</button>';
+                    + (' onclick="window.playlistDeleteConfirm(this.dataset.url)">' + t('Xoá') + '</button>');
             }
 
             html += '</div>';
@@ -98,12 +99,12 @@ window.playlistToggleActive = async function (el) {
 
         if (!res.ok) {
             el.checked = !wasChecked;
-            alert(data.message || 'Cập nhật trạng thái thất bại. Vui lòng thử lại.');
+            alert(data.message || t('Cập nhật trạng thái thất bại. Vui lòng thử lại.'));
         }
     } catch (e) {
         console.error('[playlist] toggle-active failed', e);
         el.checked = !wasChecked;
-        alert('Lỗi kết nối. Vui lòng thử lại.');
+        alert(t('Lỗi kết nối. Vui lòng thử lại.'));
     } finally {
         el.disabled = false;
     }
@@ -127,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const csrf = document.querySelector('meta[name=csrf-token]')?.content ?? '';
         this.disabled    = true;
-        this.textContent = 'Đang xoá...';
+        this.textContent = t('Đang xoá...');
 
         try {
             const res = await fetch(pendingDeleteUrl, {
@@ -147,14 +148,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('playlistDeleteModal')?.close();
                 window.playlistTable?.replaceData();
             } else {
-                alert(data.message || 'Xoá thất bại. Vui lòng thử lại.');
+                alert(data.message || t('Xoá thất bại. Vui lòng thử lại.'));
             }
         } catch (e) {
             console.error('[playlist] delete failed', e);
-            alert('Lỗi kết nối. Vui lòng thử lại.');
+            alert(t('Lỗi kết nối. Vui lòng thử lại.'));
         } finally {
             this.disabled    = false;
-            this.textContent = 'Xoá';
+            this.textContent = t('Xoá');
             pendingDeleteUrl = null;
         }
     });
@@ -191,7 +192,7 @@ document.addEventListener('alpine:init', () => {
 
             get activeChips() {
                 const chips = [], f = this.filters;
-                if (f.search)           chips.push({ key: 'search',    label: 'Tìm: ' + f.search });
+                if (f.search)           chips.push({ key: 'search',    label: (t('Tìm:') + ' ') + f.search });
                 if (f.is_active !== '') chips.push({ key: 'is_active', label: optText(tsActive, f.is_active) });
                 return chips;
             },
@@ -212,7 +213,7 @@ document.addEventListener('alpine:init', () => {
                 if (!activeEl) return;
 
                 tsActive = createTs(activeEl, {
-                    placeholder: 'Tất cả trạng thái',
+                    placeholder: t('Tất cả trạng thái'),
                     onChange() { activeEl.dispatchEvent(new Event('change', { bubbles: true })); },
                 });
             },
@@ -248,18 +249,18 @@ document.addEventListener('alpine:init', () => {
                     langs: {
                         'vi-VN': {
                             pagination: {
-                                page_size: 'Dòng/trang', page_title: 'Trang',
+                                page_size: t('Dòng/trang'), page_title: t('Trang'),
                                 first: '«', last: '»', prev: '‹', next: '›',
-                                first_title: 'Trang đầu', last_title: 'Trang cuối',
-                                prev_title: 'Trang trước', next_title: 'Trang sau',
-                                counter: { showing: '', of: 'trong', rows: 'dòng', pages: 'trang' },
+                                first_title: t('Trang đầu'), last_title: t('Trang cuối'),
+                                prev_title: t('Trang trước'), next_title: t('Trang sau'),
+                                counter: { showing: '', of: t('trong'), rows: t('dòng'), pages: t('trang') },
                             },
                         },
                     },
 
                     columns: COLUMNS,
                     placeholder: '<div class="py-16 text-center opacity-40">'
-                        + '<p class="text-sm">Chưa có playlist nào</p></div>',
+                        + ('<p class="text-sm">' + t('Chưa có playlist nào') + '</p></div>'),
                 });
 
                 window.playlistTable = tableInst;

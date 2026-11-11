@@ -27,7 +27,7 @@ class UpdateHeritageSiteAction
         // §5.1 — cùng kiểm tra như CreateHeritageSiteAction.
         if (($data->latitude === null) !== ($data->longitude === null)) {
             throw ValidationException::withMessages([
-                'latitude' => 'Vĩ độ và kinh độ phải được nhập cùng nhau, hoặc để trống cả hai.',
+                'latitude' => __('Vĩ độ và kinh độ phải được nhập cùng nhau, hoặc để trống cả hai.'),
             ]);
         }
 

@@ -20,7 +20,7 @@ class RejectEventAction
         abort_unless(
             $event->status->canTransitionTo(EventStatus::Rejected),
             422,
-            "Không thể từ chối sự kiện đang ở trạng thái \"{$event->status->label()}\"."
+            __('Không thể từ chối sự kiện đang ở trạng thái ":status".', ['status' => $event->status->label()])
         );
 
         $event->update([

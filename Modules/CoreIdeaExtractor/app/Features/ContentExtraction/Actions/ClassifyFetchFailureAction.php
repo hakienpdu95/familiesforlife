@@ -38,7 +38,7 @@ class ClassifyFetchFailureAction
             return $this->result($status, 'blocked', 'bot_protection', 'Trang chặn truy cập tự động (bot protection/WAF, HTTP '.$status.') — dùng tab "Dán mã HTML" để trích riêng nguồn này.');
         }
 
-        return $this->result($status, 'error', 'http_error', "Trang trả về mã lỗi HTTP {$status}.");
+        return $this->result($status, 'error', 'http_error', __('Trang trả về mã lỗi HTTP :status.', ['status' => $status]));
     }
 
     /** @param array<string, mixed> $headers */

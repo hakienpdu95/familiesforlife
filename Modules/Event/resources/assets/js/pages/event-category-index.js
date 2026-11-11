@@ -1,3 +1,5 @@
+import { t } from '../../../../../../resources/js/shared/i18n.js';
+
 /**
  * pages/event-category-index.js
  * Alpine component + Tabulator (dataTree) cho dashboard/events/categories — cùng pattern
@@ -16,7 +18,7 @@ function esc(v) {
 
 const COLUMNS = [
     {
-        title: 'Tên danh mục', field: 'name', minWidth: 260,
+        title: t('Tên danh mục'), field: 'name', minWidth: 260,
         formatter(cell) {
             const d = cell.getRow().getData();
             const dot = '<span class="inline-block size-2.5 rounded-full mr-1.5 align-middle" style="background:' + esc(d.color_hex || '#94a3b8') + '"></span>';
@@ -25,19 +27,19 @@ const COLUMNS = [
         },
     },
     {
-        title: 'Danh mục cha', field: 'parent_name', width: 160, headerSort: false,
+        title: t('Danh mục cha'), field: 'parent_name', width: 160, headerSort: false,
         formatter(cell) {
             return esc(cell.getValue()) || '<span class="text-base-content/25 text-xs">—</span>';
         },
     },
     {
-        title: 'Số sự kiện', field: 'events_count', width: 120, hozAlign: 'center', sorter: 'number',
+        title: t('Số sự kiện'), field: 'events_count', width: 120, hozAlign: 'center', sorter: 'number',
     },
     {
-        title: 'Trạng thái', field: 'is_active', width: 110, hozAlign: 'center', headerSort: false,
+        title: t('Trạng thái'), field: 'is_active', width: 110, hozAlign: 'center', headerSort: false,
         formatter(cell) {
             const active = cell.getValue();
-            return '<span class="badge badge-sm ' + (active ? 'badge-success' : 'badge-ghost') + '">' + (active ? 'Hiện' : 'Ẩn') + '</span>';
+            return '<span class="badge badge-sm ' + (active ? 'badge-success' : 'badge-ghost') + '">' + (active ? t('Hiện') : t('Ẩn')) + '</span>';
         },
     },
     {
@@ -47,12 +49,12 @@ const COLUMNS = [
             let html = '<div class="flex items-center justify-center gap-1">';
 
             if (d.can_update) {
-                html += '<a href="' + esc(d.edit_url) + '" class="btn btn-ghost btn-xs btn-square" title="Sửa">'
+                html += '<a href="' + esc(d.edit_url) + ('" class="btn btn-ghost btn-xs btn-square" title="' + t('Sửa') + '">')
                     + '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>'
                     + '</a>';
             }
             if (d.can_delete) {
-                html += '<button class="btn btn-ghost btn-xs btn-square text-error" title="Xoá"'
+                html += ('<button class="btn btn-ghost btn-xs btn-square text-error" title="' + t('Xoá') + '"')
                     + ' data-url="' + esc(d.destroy_url) + '" data-name="' + esc(d.name) + '"'
                     + ' onclick="window.eventCategoryDeleteConfirm(this.dataset.url, this.dataset.name)">'
                     + '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>'
@@ -85,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const csrf = document.querySelector('meta[name=csrf-token]')?.content ?? '';
         this.disabled    = true;
-        this.textContent = 'Đang xoá...';
+        this.textContent = t('Đang xoá...');
 
         try {
             const res = await fetch(pendingDeleteUrl, {
@@ -105,14 +107,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('eventCategoryDeleteModal')?.close();
                 window.eventCategoryTable?.replaceData();
             } else {
-                alert(data.message || 'Xoá thất bại. Vui lòng thử lại.');
+                alert(data.message || t('Xoá thất bại. Vui lòng thử lại.'));
             }
         } catch (e) {
             console.error('[event-category] delete failed', e);
-            alert('Lỗi kết nối. Vui lòng thử lại.');
+            alert(t('Lỗi kết nối. Vui lòng thử lại.'));
         } finally {
             this.disabled    = false;
-            this.textContent = 'Xoá';
+            this.textContent = t('Xoá');
             pendingDeleteUrl = null;
         }
     });
@@ -135,7 +137,7 @@ document.addEventListener('alpine:init', () => {
 
             get activeChips() {
                 const chips = [];
-                if (this.filters.search) chips.push({ key: 'search', label: 'Tìm: ' + this.filters.search });
+                if (this.filters.search) chips.push({ key: 'search', label: (t('Tìm:') + ' ') + this.filters.search });
                 return chips;
             },
 
@@ -178,11 +180,11 @@ document.addEventListener('alpine:init', () => {
                     langs: {
                         'vi-VN': {
                             pagination: {
-                                page_size: 'Dòng/trang', page_title: 'Trang',
+                                page_size: t('Dòng/trang'), page_title: t('Trang'),
                                 first: '«', last: '»', prev: '‹', next: '›',
-                                first_title: 'Trang đầu', last_title: 'Trang cuối',
-                                prev_title: 'Trang trước', next_title: 'Trang sau',
-                                counter: { showing: '', of: 'trong', rows: 'dòng', pages: 'trang' },
+                                first_title: t('Trang đầu'), last_title: t('Trang cuối'),
+                                prev_title: t('Trang trước'), next_title: t('Trang sau'),
+                                counter: { showing: '', of: t('trong'), rows: t('dòng'), pages: t('trang') },
                             },
                         },
                     },
@@ -190,7 +192,7 @@ document.addEventListener('alpine:init', () => {
                     columns: COLUMNS,
                     placeholder: '<div class="py-16 text-center opacity-40">'
                         + '<svg class="w-12 h-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'
-                        + '<p class="text-sm">Chưa có danh mục nào</p></div>',
+                        + ('<p class="text-sm">' + t('Chưa có danh mục nào') + '</p></div>'),
                 });
 
                 window.eventCategoryTable = tableInst;

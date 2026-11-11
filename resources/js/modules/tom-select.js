@@ -10,17 +10,18 @@ import TomSelect from 'tom-select';
 import 'tom-select/dist/css/tom-select.css';
 import { createTs, enhancePageSizeSelect } from '../shared/tom-select-factory.js';
 
+import { t } from '../shared/i18n.js';
 const DEFAULTS = {
     create:          false,
     sortField:       { field: 'text', direction: 'asc' },
-    placeholder:     'Chọn...',
+    placeholder:     t('Chọn...'),
     searchField:     ['text', 'value'],
     maxOptions:      200,
     // Append dropdown to body → thoát khỏi overflow/clip của parent container
     // (cần thiết khi TomSelect nằm trong Alpine x-show, modal, tab ẩn, v.v.)
     dropdownParent:  'body',
     render: {
-        no_results: () => `<div class="no-results" style="padding:8px 12px;font-size:13px;color:#94a3b8">Không tìm thấy kết quả</div>`,
+        no_results: () => `<div class="no-results" style="padding:8px 12px;font-size:13px;color:#94a3b8">${t('Không tìm thấy kết quả')}</div>`,
     },
 };
 
@@ -45,7 +46,7 @@ function initTagsInput(selector, options = {}) {
         createOnBlur:true,
         delimiter:   ',',
         persist:     false,
-        placeholder: 'Nhập và Enter để thêm tag...',
+        placeholder: t('Nhập và Enter để thêm tag...'),
         ...options,
     });
 }
@@ -78,7 +79,7 @@ function initOrgAddress(provId, wardId, initProv, initWard, onChange) {
     // Ward: starts disabled, populated on province change
     const wardTs = new TomSelect(wardEl, {
         ...DEFAULTS,
-        placeholder: 'Chọn tỉnh / TP trước',
+        placeholder: t('Chọn tỉnh / TP trước'),
         maxOptions: null,
         plugins: ['clear_button'],
         onChange(val) {
@@ -92,7 +93,7 @@ function initOrgAddress(provId, wardId, initProv, initWard, onChange) {
     // Province: full searchable list, triggers ward load on change
     const provTs = new TomSelect(provEl, {
         ...DEFAULTS,
-        placeholder: 'Tìm tỉnh / thành phố...',
+        placeholder: t('Tìm tỉnh / thành phố...'),
         maxOptions: null,
         plugins: ['clear_button'],
         onChange(val) {
@@ -112,19 +113,19 @@ function initOrgAddress(provId, wardId, initProv, initWard, onChange) {
         wardTs.disable();
 
         if (!code) {
-            setWardPlaceholder('Chọn tỉnh / TP trước');
+            setWardPlaceholder(t('Chọn tỉnh / TP trước'));
             onChange?.(null, null);
             return;
         }
 
-        setWardPlaceholder('Đang tải...');
+        setWardPlaceholder(t('Đang tải...'));
 
         try {
             const res   = await fetch('/api/provinces/' + code + '/wards');
             const wards = await res.json();
 
             wards.forEach(w => wardTs.addOption({ value: w.ward_code, text: w.name }));
-            setWardPlaceholder('Tìm phường / xã...');
+            setWardPlaceholder(t('Tìm phường / xã...'));
             wardTs.enable();
 
             if (pendingWard) {
@@ -136,8 +137,8 @@ function initOrgAddress(provId, wardId, initProv, initWard, onChange) {
                 onChange?.(code, null);
             }
         } catch (err) {
-            console.error('[orgAddress] Lỗi tải phường/xã:', err);
-            setWardPlaceholder('Lỗi tải dữ liệu');
+            console.error(t('[orgAddress] Lỗi tải phường/xã:'), err);
+            setWardPlaceholder(t('Lỗi tải dữ liệu'));
             wardTs.enable();
             onChange?.(code, null);
         }

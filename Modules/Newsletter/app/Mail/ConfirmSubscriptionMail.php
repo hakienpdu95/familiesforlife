@@ -21,7 +21,7 @@ class ConfirmSubscriptionMail extends Mailable
     {
         return new Envelope(
             from: config('newsletter.from_address'),
-            subject: 'Xác nhận đăng ký nhận bản tin',
+            subject: __('Xác nhận đăng ký nhận bản tin'),
         );
     }
 

@@ -13,11 +13,11 @@ enum SubscriberStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::PendingConfirmation => 'Chờ xác nhận email',
-            self::Active               => 'Đang nhận tin',
-            self::Unsubscribed         => 'Đã huỷ đăng ký',
-            self::Bounced              => 'Email không gửi được (bounce)',
-            self::Complained           => 'Đã báo cáo spam',
+            self::PendingConfirmation => __('Chờ xác nhận email'),
+            self::Active               => __('Đang nhận tin'),
+            self::Unsubscribed         => __('Đã huỷ đăng ký'),
+            self::Bounced              => __('Email không gửi được (bounce)'),
+            self::Complained           => __('Đã báo cáo spam'),
         };
     }
 

@@ -2,12 +2,12 @@
 
 @php
     $isSale = $listingType->value === 'sale';
-    $pageTitle = $isSale ? 'Nhà đất bán' : 'Nhà đất thuê';
+    $pageTitle = $isSale ? __('Nhà đất bán') : __('Nhà đất thuê');
     $routePrefix = 'real-estate.public.' . $listingType->value;
 @endphp
 
 @section('title', $pageTitle)
-@section('meta_description', $pageTitle . ' — tin đăng đã qua kiểm duyệt')
+@section('meta_description', __(':title — tin đăng đã qua kiểm duyệt', ['title' => $pageTitle]))
 
 @section('content')
 <div class="container">
@@ -18,15 +18,15 @@
     <form method="GET" class="card bg-base-100 border border-base-200 shadow-sm mb-6">
         <div class="card-body grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
             <select name="property_type" class="select select-bordered select-sm">
-                <option value="">-- Loại hình --</option>
+                <option value="">{{ __('-- Loại hình --') }}</option>
                 @foreach(\Modules\RealEstate\Enums\PropertyType::validFor($listingType) as $type)
                 <option value="{{ $type->value }}" @selected(request('property_type') === $type->value)>{{ $type->label() }}</option>
                 @endforeach
             </select>
-            <input type="number" name="price_min" value="{{ request('price_min') }}" placeholder="Giá từ (VNĐ)" class="input input-bordered input-sm">
-            <input type="number" name="price_max" value="{{ request('price_max') }}" placeholder="Giá đến (VNĐ)" class="input input-bordered input-sm">
-            <input type="number" name="bedrooms" value="{{ request('bedrooms') }}" placeholder="Số phòng ngủ tối thiểu" class="input input-bordered input-sm">
-            <button type="submit" class="btn btn-primary btn-sm">Lọc</button>
+            <input type="number" name="price_min" value="{{ request('price_min') }}" placeholder="{{ __('Giá từ (VNĐ)') }}" class="input input-bordered input-sm">
+            <input type="number" name="price_max" value="{{ request('price_max') }}" placeholder="{{ __('Giá đến (VNĐ)') }}" class="input input-bordered input-sm">
+            <input type="number" name="bedrooms" value="{{ request('bedrooms') }}" placeholder="{{ __('Số phòng ngủ tối thiểu') }}" class="input input-bordered input-sm">
+            <button type="submit" class="btn btn-primary btn-sm">{{ __('Lọc') }}</button>
         </div>
     </form>
 
@@ -40,12 +40,12 @@
                 @if($firstImage)
                 <img src="{{ $firstImage }}" alt="{{ $content['title'] }}" class="w-full h-full object-cover">
                 @else
-                <div class="w-full h-full flex items-center justify-center text-base-content/30">Chưa có ảnh</div>
+                <div class="w-full h-full flex items-center justify-center text-base-content/30">{{ __('Chưa có ảnh') }}</div>
                 @endif
             </figure>
             <div class="card-body p-3">
                 @if($listing->is_urgent)
-                <span class="badge badge-error badge-sm mb-1">Bán gấp</span>
+                <span class="badge badge-error badge-sm mb-1">{{ __('Bán gấp') }}</span>
                 @endif
                 <h2 class="font-semibold text-base-content truncate">{{ $content['title'] }}</h2>
                 <p class="text-primary font-bold">{{ $listing->display_price }}</p>
@@ -56,7 +56,7 @@
             </div>
         </a>
         @empty
-        <p class="col-span-full text-center text-base-content/40 py-10">Chưa có tin nào.</p>
+        <p class="col-span-full text-center text-base-content/40 py-10">{{ __('Chưa có tin nào.') }}</p>
         @endforelse
     </section>
 

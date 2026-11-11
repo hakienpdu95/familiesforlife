@@ -51,7 +51,7 @@ class FetchArticleHtmlAction
                 $location = $response->header('Location');
 
                 if (! $location) {
-                    throw new UrlFetchException('Redirect không có header Location.');
+                    throw new UrlFetchException(__('Redirect không có header Location.'));
                 }
 
                 $current = $this->resolveRedirectUrl($current, $location);
@@ -69,13 +69,13 @@ class FetchArticleHtmlAction
                     ? ' Trang có thể đang chặn truy cập tự động (bot protection/WAF) — không thể trích xuất bằng công cụ này.'
                     : '';
 
-                throw new UrlFetchException("Trang trả về mã lỗi HTTP {$response->status()}.{$hint}");
+                throw new UrlFetchException(__('Trang trả về mã lỗi HTTP :response.:hint', ['response' => $response->status(), 'hint' => $hint]));
             }
 
             $contentType = (string) $response->header('Content-Type');
 
             if ($contentType !== '' && ! str_contains($contentType, 'html')) {
-                throw new UrlFetchException("Nội dung không phải HTML (Content-Type: {$contentType}).");
+                throw new UrlFetchException(__('Nội dung không phải HTML (Content-Type: :content_type).', ['content_type' => $contentType]));
             }
 
             $body     = $this->normalizeToUtf8($response->body(), $contentType);
@@ -87,7 +87,7 @@ class FetchArticleHtmlAction
             return $body;
         }
 
-        throw new UrlFetchException("Quá nhiều lượt redirect (>{$maxRedirects}).");
+        throw new UrlFetchException(__('Quá nhiều lượt redirect (>:max_redirects).', ['max_redirects' => $maxRedirects]));
     }
 
 }

@@ -12,10 +12,10 @@ enum ButtonStyle: string
     public function label(): string
     {
         return match ($this) {
-            self::Primary   => 'Chính (primary)',
-            self::Secondary => 'Phụ (secondary)',
-            self::Outline   => 'Viền (outline)',
-            self::Ghost     => 'Trong suốt (ghost)',
+            self::Primary   => __('Chính (primary)'),
+            self::Secondary => __('Phụ (secondary)'),
+            self::Outline   => __('Viền (outline)'),
+            self::Ghost     => __('Trong suốt (ghost)'),
         };
     }
 

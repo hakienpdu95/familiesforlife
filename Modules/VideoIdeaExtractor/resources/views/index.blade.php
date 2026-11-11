@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', 'Trích ý tưởng từ transcript video')
+@section('title', __('Trích ý tưởng từ transcript video'))
 
 @section('content')
 <div x-data="videoIdeaExtractorPage({{ Js::from([
@@ -26,20 +26,13 @@
 
     <div class="mb-5 flex items-start justify-between flex-wrap gap-2">
         <div>
-            <h1 class="text-2xl font-bold text-base-content">Trích ý tưởng từ transcript video</h1>
+            <h1 class="text-2xl font-bold text-base-content">{{ __('Trích ý tưởng từ transcript video') }}</h1>
             <p class="text-sm text-base-content/50 mt-0.5">
-                Dán tiêu đề + transcript của tối đa <span x-text="maxVideos"></span> video (VD lấy từ panel "Show transcript"
-                của YouTube) để lấy dữ liệu thô (số từ, các mốc chương nếu có) dưới dạng 1 JSON — công cụ nghiên cứu ý
-                tưởng/chủ đề làm video mới, copy JSON này dán thẳng vào chat AI (VD claude.ai) hoặc bấm "Chạy AI" để sinh ý
-                tưởng ngay. Sau khi trích xuất, mỗi video còn có 7 nút gọi AI trực tiếp — chọn phương án: Tiêu đề &amp;
-                Thumbnail, Hook mở đầu, Ý tưởng Shorts; dựng kịch bản: Dàn ý thân bài, CTA &amp; giữ chân, Biên tập lời
-                nói, Dàn ý Vlog (từ 1 sự việc thật, không cần transcript) — cộng 2 nút "Lắp ráp" CHƯA gọi AI (module
-                chưa tích hợp API cho 2 tính năng này): "Kịch bản đầy đủ" và "Mô tả &amp; Tag SEO", chỉ copy sẵn
-                prompt để tự dán vào Grok/Claude/ChatGPT.
-                Module này chỉ trích xuất transcript, không tải video/không gọi API YouTube nào.
+                {{ __('Dán tiêu đề + transcript của tối đa') }} <span x-text="maxVideos"></span> {{ __('video (VD lấy từ panel "Show transcript" của YouTube) để lấy dữ liệu thô (số từ, các mốc chương nếu có) dưới dạng 1 JSON — công cụ nghiên cứu ý tưởng/chủ đề làm video mới, copy JSON này dán thẳng vào chat AI (VD claude.ai) hoặc bấm "Chạy AI" để sinh ý tưởng ngay. Sau khi trích xuất, mỗi video còn có 7 nút gọi AI trực tiếp — chọn phương án: Tiêu đề') }} &amp;
+                {{ __('Thumbnail, Hook mở đầu, Ý tưởng Shorts; dựng kịch bản: Dàn ý thân bài, CTA') }} &amp; {{ __('giữ chân, Biên tập lời nói, Dàn ý Vlog (từ 1 sự việc thật, không cần transcript) — cộng 2 nút "Lắp ráp" CHƯA gọi AI (module chưa tích hợp API cho 2 tính năng này): "Kịch bản đầy đủ" và "Mô tả') }} &amp; {{ __('Tag SEO", chỉ copy sẵn prompt để tự dán vào Grok/Claude/ChatGPT. Module này chỉ trích xuất transcript, không tải video/không gọi API YouTube nào.') }}
             </p>
         </div>
-        <a :href="categoryFoundationsUrl" class="btn btn-ghost btn-xs">Quản lý Content Foundation theo chuyên mục</a>
+        <a :href="categoryFoundationsUrl" class="btn btn-ghost btn-xs">{{ __('Quản lý Content Foundation theo chuyên mục') }}</a>
     </div>
 
     <div class="card bg-base-100 shadow-sm border border-base-200 mb-4">
@@ -49,61 +42,61 @@
                     <div class="border border-base-200 rounded-md p-3 flex flex-col gap-2">
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-medium text-base-content/50">Video <span x-text="index + 1"></span></span>
-                            <button type="button" class="btn btn-ghost btn-xs text-error" x-show="videos.length > 1" @click="removeVideo(index)">Xoá</button>
+                            <button type="button" class="btn btn-ghost btn-xs text-error" x-show="videos.length > 1" @click="removeVideo(index)">{{ __('Xoá') }}</button>
                         </div>
-                        <input type="text" x-model="video.title" placeholder="Tiêu đề video"
+                        <input type="text" x-model="video.title" placeholder="{{ __('Tiêu đề video') }}"
                                class="input input-sm input-bordered w-full">
-                        <textarea x-model="video.transcript" rows="6" placeholder="Dán transcript video vào đây..."
+                        <textarea x-model="video.transcript" rows="6" placeholder="{{ __('Dán transcript video vào đây...') }}"
                                   class="textarea textarea-bordered textarea-sm w-full font-mono text-xs"></textarea>
                     </div>
                 </template>
 
                 <button type="button" class="btn btn-ghost btn-xs w-fit" x-show="videos.length < maxVideos" @click="addVideo()">
-                    + Thêm video
+                    {{ __('+ Thêm video') }}
                 </button>
 
                 <div class="divider my-1"></div>
 
                 <div class="form-control">
-                    <label class="label py-0.5"><span class="label-text text-xs font-medium">Chuyên mục</span></label>
+                    <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Chuyên mục') }}</span></label>
                     <select x-model="selectedCategoryUuid" @change="applyCategoryFoundation()" class="select select-sm select-bordered w-full">
-                        <option value="">— Chưa chọn —</option>
+                        <option value="">{{ __('— Chưa chọn —') }}</option>
                         <template x-for="cat in categories" :key="cat.uuid">
                             <option :value="cat.uuid" x-text="'　'.repeat(cat.depth) + cat.name"></option>
                         </template>
                     </select>
-                    <p x-show="selectedCategoryUuid && loadingFoundation" x-cloak class="text-xs text-base-content/40 mt-1">Đang tải ngữ cảnh chuyên mục...</p>
+                    <p x-show="selectedCategoryUuid && loadingFoundation" x-cloak class="text-xs text-base-content/40 mt-1">{{ __('Đang tải ngữ cảnh chuyên mục...') }}</p>
                     <p x-show="!loadingFoundation && selectedFoundationSummary()" x-cloak class="text-xs text-base-content/40 mt-1" x-text="selectedFoundationSummary()"></p>
                 </div>
 
                 <div class="flex flex-wrap gap-3">
                     <div class="form-control flex-1 min-w-48">
-                        <label class="label py-0.5"><span class="label-text text-xs font-medium">Chủ đề đang nghiên cứu</span></label>
-                        <input type="text" x-model="topic" placeholder="VD: ăn dặm cho trẻ 6 tháng"
+                        <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Chủ đề đang nghiên cứu') }}</span></label>
+                        <input type="text" x-model="topic" placeholder="{{ __('VD: ăn dặm cho trẻ 6 tháng') }}"
                                class="input input-sm input-bordered w-full">
                     </div>
                     <div class="form-control flex-1 min-w-48">
-                        <label class="label py-0.5"><span class="label-text text-xs font-medium">Đối tượng khán giả</span></label>
-                        <input type="text" x-model="audience" placeholder="VD: mẹ mới sinh con đầu lòng"
+                        <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Đối tượng khán giả') }}</span></label>
+                        <input type="text" x-model="audience" placeholder="{{ __('VD: mẹ mới sinh con đầu lòng') }}"
                                class="input input-sm input-bordered w-full">
                     </div>
                 </div>
                 <div class="flex flex-wrap gap-3">
                     <div class="form-control flex-1 min-w-48">
-                        <label class="label py-0.5"><span class="label-text text-xs font-medium">Mục tiêu</span></label>
-                        <input type="text" x-model="goal" placeholder="VD: tăng lượt xem/đăng ký kênh"
+                        <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Mục tiêu') }}</span></label>
+                        <input type="text" x-model="goal" placeholder="{{ __('VD: tăng lượt xem/đăng ký kênh') }}"
                                class="input input-sm input-bordered w-full">
                     </div>
                     <div class="form-control flex-1 min-w-48">
-                        <label class="label py-0.5"><span class="label-text text-xs font-medium">Ràng buộc / không muốn</span></label>
-                        <input type="text" x-model="constraints" placeholder="VD: không giật gân"
+                        <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Ràng buộc / không muốn') }}</span></label>
+                        <input type="text" x-model="constraints" placeholder="{{ __('VD: không giật gân') }}"
                                class="input input-sm input-bordered w-full">
                     </div>
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-sm w-fit" :disabled="loading">
-                    <span x-show="!loading">Trích xuất</span>
-                    <span x-show="loading" x-cloak>Đang xử lý...</span>
+                    <span x-show="!loading">{{ __('Trích xuất') }}</span>
+                    <span x-show="loading" x-cloak>{{ __('Đang xử lý...') }}</span>
                 </button>
                 <p x-show="errorMessage" x-cloak class="text-error text-sm" x-text="errorMessage"></p>
             </form>
@@ -113,19 +106,19 @@
     <div x-show="result" x-cloak class="card bg-base-100 shadow-sm border border-base-200">
         <div class="card-body py-3 px-3">
             <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
-                <h2 class="font-semibold text-sm">Kết quả (<span x-text="result?.videos?.length ?? 0"></span> video)</h2>
+                <h2 class="font-semibold text-sm">{{ __('Kết quả (') }}<span x-text="result?.videos?.length ?? 0"></span> video)</h2>
                 <div class="flex items-center gap-2">
                     <button type="button" class="btn btn-ghost btn-xs gap-1.5" @click="copyJson()">
                         <span x-show="!copied">Copy JSON</span>
-                        <span x-show="copied" x-cloak>Đã copy!</span>
+                        <span x-show="copied" x-cloak>{{ __('Đã copy!') }}</span>
                     </button>
                     <button type="button" class="btn btn-ghost btn-xs gap-1.5" @click="copyPromptForAi()">
                         <span x-show="!copiedPrompt">Copy prompt cho AI</span>
-                        <span x-show="copiedPrompt" x-cloak>Đã copy!</span>
+                        <span x-show="copiedPrompt" x-cloak>{{ __('Đã copy!') }}</span>
                     </button>
                     <button type="button" class="btn btn-primary btn-xs" :disabled="layer2Loading" @click="runLayer2()">
-                        <span x-show="!layer2Loading">Chạy AI</span>
-                        <span x-show="layer2Loading" x-cloak>Đang chạy...</span>
+                        <span x-show="!layer2Loading">{{ __('Chạy AI') }}</span>
+                        <span x-show="layer2Loading" x-cloak>{{ __('Đang chạy...') }}</span>
                     </button>
                 </div>
             </div>
@@ -143,56 +136,56 @@
                     <p x-show="video.notes" x-cloak class="text-xs text-warning mt-1" x-text="video.notes"></p>
 
                     <div class="flex items-center gap-1.5 mt-2 flex-wrap">
-                        <span class="text-xs text-base-content/40 mr-0.5">Chọn phương án:</span>
+                        <span class="text-xs text-base-content/40 mr-0.5">{{ __('Chọn phương án:') }}</span>
                         <template x-for="kind in pickKinds" :key="kind">
                             <button type="button" class="btn btn-ghost btn-xs" :disabled="video._tools[kind].loading" @click="runTool(video, kind)">
                                 <span x-show="!video._tools[kind].loading" x-text="toolLabels[kind]"></span>
-                                <span x-show="video._tools[kind].loading" x-cloak>Đang chạy...</span>
+                                <span x-show="video._tools[kind].loading" x-cloak>{{ __('Đang chạy...') }}</span>
                             </button>
                         </template>
                     </div>
 
                     <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                        <span class="text-xs text-base-content/40 mr-0.5">Dựng kịch bản:</span>
+                        <span class="text-xs text-base-content/40 mr-0.5">{{ __('Dựng kịch bản:') }}</span>
                         <template x-for="kind in scriptKinds" :key="kind">
                             <button type="button" class="btn btn-ghost btn-xs" :disabled="video._tools[kind].loading" @click="runTool(video, kind)">
                                 <span x-show="!video._tools[kind].loading" x-text="toolLabels[kind]"></span>
-                                <span x-show="video._tools[kind].loading" x-cloak>Đang chạy...</span>
+                                <span x-show="video._tools[kind].loading" x-cloak>{{ __('Đang chạy...') }}</span>
                             </button>
                         </template>
                     </div>
 
                     <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                        <span class="text-xs text-base-content/40 mr-0.5">Lắp ráp:</span>
+                        <span class="text-xs text-base-content/40 mr-0.5">{{ __('Lắp ráp:') }}</span>
                         <template x-for="kind in copyKinds" :key="kind">
                             <button type="button" class="btn btn-ghost btn-xs btn-primary" @click="copyToolPrompt(video, kind)">
                                 <span x-show="!video._copied[kind]" x-text="toolLabels[kind]"></span>
-                                <span x-show="video._copied[kind]" x-cloak>Đã copy!</span>
+                                <span x-show="video._copied[kind]" x-cloak>{{ __('Đã copy!') }}</span>
                             </button>
                         </template>
-                        <span class="text-xs text-base-content/40">— copy prompt, tự dán vào Grok/Claude/ChatGPT (chưa gọi AI tự động)</span>
+                        <span class="text-xs text-base-content/40">{{ __('— copy prompt, tự dán vào Grok/Claude/ChatGPT (chưa gọi AI tự động)') }}</span>
                     </div>
 
                     <details class="mt-1.5">
-                        <summary class="text-xs text-base-content/50 cursor-pointer">Tuỳ chọn cho nhóm "Dựng kịch bản" &amp; "Lắp ráp"</summary>
+                        <summary class="text-xs text-base-content/50 cursor-pointer">{{ __('Tuỳ chọn cho nhóm "Dựng kịch bản"') }} &amp; {{ __('"Lắp ráp"') }}</summary>
                         <div class="flex flex-col gap-2 mt-2 pl-1">
                             <div class="flex flex-wrap gap-2">
-                                <input type="text" x-model="video._plan.chosenTitle" placeholder="Tiêu đề đã chốt (tuỳ chọn — lấy từ bảng Tiêu đề ở trên)"
+                                <input type="text" x-model="video._plan.chosenTitle" placeholder="{{ __('Tiêu đề đã chốt (tuỳ chọn — lấy từ bảng Tiêu đề ở trên)') }}"
                                        class="input input-xs input-bordered flex-1 min-w-64">
                                 <label class="input input-xs input-bordered flex items-center gap-1.5 w-40">
-                                    <span class="text-base-content/50 whitespace-nowrap">Dài (phút)</span>
+                                    <span class="text-base-content/50 whitespace-nowrap">{{ __('Dài (phút)') }}</span>
                                     <input type="number" min="1" max="60" x-model.number="video._plan.targetMinutes" class="w-full">
                                 </label>
                             </div>
-                            <input type="text" x-model="video._plan.chosenHook" placeholder="Hook mở đầu đã chốt (tuỳ chọn — lấy từ bảng Hook ở trên, dùng nguyên văn cho &quot;Kịch bản đầy đủ&quot;)"
+                            <input type="text" x-model="video._plan.chosenHook" placeholder="{{ __('Hook mở đầu đã chốt (tuỳ chọn — lấy từ bảng Hook ở trên, dùng nguyên văn cho "Kịch bản đầy đủ")') }}"
                                    class="input input-xs input-bordered w-full">
                             <textarea x-model="video._plan.draft" rows="4"
-                                      placeholder="Bản nháp kịch bản — chỉ cần cho nút &quot;Biên tập lời nói&quot;. Dán bản tự viết vào đây..."
+                                      placeholder="{{ __('Bản nháp kịch bản — chỉ cần cho nút "Biên tập lời nói". Dán bản tự viết vào đây...') }}"
                                       class="textarea textarea-bordered textarea-xs w-full font-mono"></textarea>
                             <p class="text-xs" :class="video._plan.draft.length > maxDraftChars ? 'text-error' : 'text-base-content/40'"
                                x-text="`${video._plan.draft.length.toLocaleString('vi-VN')} / ${maxDraftChars.toLocaleString('vi-VN')} ký tự`"></p>
                             <textarea x-model="video._plan.rawEvents" rows="3"
-                                      placeholder="Sự việc THẬT trong tuần — chỉ cần cho nút &quot;Dàn ý Vlog&quot;, KHÔNG liên quan transcript ở trên. VD: khó khăn/tình huống thật đã xảy ra với bạn/gia đình/công việc..."
+                                      placeholder="{{ __('Sự việc THẬT trong tuần — chỉ cần cho nút "Dàn ý Vlog", KHÔNG liên quan transcript ở trên. VD: khó khăn/tình huống thật đã xảy ra với bạn/gia đình/công việc...') }}"
                                       class="textarea textarea-bordered textarea-xs w-full font-mono"></textarea>
                         </div>
                     </details>
@@ -212,7 +205,7 @@
             <div x-show="layer2Error" x-cloak class="text-error text-sm mt-2" x-text="layer2Error"></div>
             <div x-show="layer2Result" x-cloak class="mt-3 border-t border-base-200 pt-3">
                 <p class="text-xs text-base-content/40 mb-2" x-show="layer2Result">
-                    Model: <span x-text="layer2Result?.model_used"></span> — Chi phí: $<span x-text="layer2Result?.cost_usd?.toFixed(4)"></span>
+                    Model: <span x-text="layer2Result?.model_used"></span> {{ __('— Chi phí: $') }}<span x-text="layer2Result?.cost_usd?.toFixed(4)"></span>
                 </p>
                 <div class="bg-base-200 rounded-lg p-4 max-h-[70vh] overflow-y-auto" x-html="renderMarkdown(layer2Result?.markdown_output)"></div>
             </div>

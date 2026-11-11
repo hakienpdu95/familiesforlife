@@ -16,8 +16,8 @@
 <div class="rounded-lg border border-base-200 bg-base-200/30 p-3 space-y-2">
     <div class="form-control">
         <label class="label py-0 pb-1">
-            <span class="label-text font-medium text-sm">Chuyên mục nội dung</span>
-            <span class="label-text-alt text-xs text-base-content/40">Tuỳ chọn — bỏ qua thì prompt không có thông tin gì về độc giả thật của trang</span>
+            <span class="label-text font-medium text-sm">{{ __('Chuyên mục nội dung') }}</span>
+            <span class="label-text-alt text-xs text-base-content/40">{{ __('Tuỳ chọn — bỏ qua thì prompt không có thông tin gì về độc giả thật của trang') }}</span>
         </label>
         <select name="post_category_uuid" x-model="categoryUuid" @change="loadEditorialContext()"
                 class="select select-sm select-bordered w-full @error('post_category_uuid') select-error @enderror">
@@ -25,7 +25,7 @@
                  của HTML ngay khi Alpine khởi tạo, nên để cả 2 là có 2 nguồn sự thật mà chỉ 1 cái
                  thắng — giá trị ban đầu truyền qua serverData.initialCategoryUuid (đã tính cả
                  old() cho trường hợp validate lỗi quay lại form). --}}
-            <option value="">— Không gắn chuyên mục —</option>
+            <option value="">{{ __('— Không gắn chuyên mục —') }}</option>
             @foreach($categories as $c)
             <option value="{{ $c['uuid'] }}">{{ str_repeat('— ', $c['depth']) }}{{ $c['name'] }}</option>
             @endforeach
@@ -33,24 +33,22 @@
         @error('post_category_uuid')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
     </div>
 
-    <p x-show="loadingEditorial" x-cloak class="text-xs text-base-content/50">Đang tải ngữ cảnh biên tập...</p>
+    <p x-show="loadingEditorial" x-cloak class="text-xs text-base-content/50">{{ __('Đang tải ngữ cảnh biên tập...') }}</p>
 
     {{-- Nói rõ payload vô hình vừa được gắn thêm: người dùng phải biết cái gì đang được chèn vào
          prompt mà họ không nhìn thấy trong form — đây là điều kiện để tin công cụ. --}}
     <div x-show="!loadingEditorial && editorialHasFoundation" x-cloak
          class="rounded border border-success/30 bg-success/5 px-2.5 py-2 text-xs">
         <p class="text-success-content/90">
-            ✓ Ngữ cảnh biên tập của chuyên mục này (độc giả, nỗi đau, nghi ngờ, tiêu chí chọn, giọng văn)
-            <b>sẽ được chèn vào đầu prompt</b> — bạn không cần gõ lại vào các ô bên dưới.
+            {{ __('✓ Ngữ cảnh biên tập của chuyên mục này (độc giả, nỗi đau, nghi ngờ, tiêu chí chọn, giọng văn)') }}
+            <b>{{ __('sẽ được chèn vào đầu prompt') }}</b> {{ __('— bạn không cần gõ lại vào các ô bên dưới.') }}
         </p>
-        <p class="text-base-content/50 mt-1">Xem nguyên văn ở khung "Xem trước prompt" cuối trang.</p>
+        <p class="text-base-content/50 mt-1">{{ __('Xem nguyên văn ở khung "Xem trước prompt" cuối trang.') }}</p>
     </div>
 
     <div x-show="!loadingEditorial && categoryUuid && !editorialHasFoundation" x-cloak
          class="rounded border border-warning/40 bg-warning/10 px-2.5 py-2 text-xs">
-        Chuyên mục này <b>chưa có ngữ cảnh biên tập</b> nào được soạn — prompt sẽ không có khối bối cảnh.
-        Soạn 1 lần tại <a href="{{ route('backend.contentfoundation.index') }}" class="link link-primary" target="_blank" rel="noopener">Content Foundation</a>,
-        sau đó mọi prompt gắn chuyên mục này đều dùng lại được.
+        {{ __('Chuyên mục này') }} <b>{{ __('chưa có ngữ cảnh biên tập') }}</b> {{ __('nào được soạn — prompt sẽ không có khối bối cảnh. Soạn 1 lần tại') }} <a href="{{ route('backend.contentfoundation.index') }}" class="link link-primary" target="_blank" rel="noopener">Content Foundation</a>{{ __(', sau đó mọi prompt gắn chuyên mục này đều dùng lại được.') }}
     </div>
 </div>
 
@@ -74,7 +72,7 @@
          select cùng lúc, thuần JS phía client, không endpoint mới. --}}
     <button type="button" x-show="hasSelectFields" @click="randomizeSelectFields()"
             class="btn btn-outline btn-xs gap-1 shrink-0">
-        🎲 Ngẫu nhiên
+        {{ __('🎲 Ngẫu nhiên') }}
     </button>
 </div>
 
@@ -87,14 +85,14 @@
      để tự điền form — người dùng đọc rồi tự gõ vào từng ô (§2.11, "gợi ý không quyết định thay"). --}}
 <details class="rounded-lg border border-secondary/30 bg-secondary/5">
     <summary class="cursor-pointer p-3 text-xs font-semibold text-secondary-content/90 flex items-center gap-1.5 select-none">
-        🪄 Có sẵn nội dung thô (thông cáo/quảng cáo)? Dán vào đây để nhờ AI ngoài gợi ý điền field
+        {{ __('🪄 Có sẵn nội dung thô (thông cáo/quảng cáo)? Dán vào đây để nhờ AI ngoài gợi ý điền field') }}
     </summary>
     <div class="px-3 pb-3 space-y-2">
         <textarea x-model="rawContentToSplit" rows="4"
-                  placeholder="Dán nguyên văn thông cáo/quảng cáo/mô tả sản phẩm vào đây..."
+                  placeholder="{{ __('Dán nguyên văn thông cáo/quảng cáo/mô tả sản phẩm vào đây...') }}"
                   class="textarea textarea-bordered textarea-sm w-full placeholder:text-base-content/30"></textarea>
         <div class="flex items-center justify-between gap-2">
-            <p class="text-xs text-base-content/50">Copy prompt bên dưới, dán sang ChatGPT/Claude, đọc kết quả rồi tự gõ vào từng field — công cụ không tự điền hộ.</p>
+            <p class="text-xs text-base-content/50">{{ __('Copy prompt bên dưới, dán sang ChatGPT/Claude, đọc kết quả rồi tự gõ vào từng field — công cụ không tự điền hộ.') }}</p>
             <button type="button" @click="copyFieldSplittingPrompt($event.target.closest('button'))"
                     class="btn btn-secondary btn-outline btn-xs shrink-0">📋 Copy prompt</button>
         </div>
@@ -114,7 +112,7 @@
 <div x-show="exampleRows.length > 0" x-cloak
      class="rounded-lg border border-info/30 bg-info/5 p-3 space-y-1.5">
     <p class="text-xs font-semibold text-info-content/90 flex items-center gap-1.5">
-        📋 Ví dụ tham khảo — điền thử nội dung nào để hình dung trước khi bạn tự điền:
+        {{ __('📋 Ví dụ tham khảo — điền thử nội dung nào để hình dung trước khi bạn tự điền:') }}
     </p>
     <template x-for="row in exampleRows" :key="row.label">
         <p class="text-xs leading-snug">
@@ -171,12 +169,12 @@
                     :value="selectValueFor(field)" @change="onSelectChange(field, $event.target.value)"
                     @focus="focusedKey = field.key" @blur="focusedKey = null"
                     class="select select-bordered select-sm w-full">
-                <option value="">— Chưa chọn —</option>
+                <option value="">{{ __('— Chưa chọn —') }}</option>
                 <template x-for="[optKey, optLabel] in Object.entries(field.options || {})" :key="optKey">
                     <option :value="optKey" x-text="optLabel"></option>
                 </template>
                 <template x-if="field.allow_custom">
-                    <option value="__custom__">✏️ Khác (tự nhập)…</option>
+                    <option value="__custom__">{{ __('✏️ Khác (tự nhập)…') }}</option>
                 </template>
             </select>
             <input x-show="field.type === 'select' && isCustomSelect(field)" x-model="values[field.key]" type="text"
@@ -186,19 +184,19 @@
                         field (nếu config có khai) thay vì 1 chuỗi generic dùng chung cho mọi field
                         allow_custom — ví dụ "Trẻ sợ đi khám răng" hợp với Tình huống Gia đình nhưng
                         SAI ngữ cảnh nếu hiện y hệt cho Yếu tố Di sản/Sản phẩm. --}}
-                   :placeholder="field.custom_placeholder || '1 cụm từ ngắn — không phải cả đoạn quảng cáo/thông cáo báo chí'"
+                   :placeholder="field.custom_placeholder || @js(__('1 cụm từ ngắn — không phải cả đoạn quảng cáo/thông cáo báo chí'))"
                    class="input input-bordered input-sm w-full mt-1.5 placeholder:text-base-content/30">
             {{-- spec/AIIdeaMatrixGenerator.md §2.6 (v2.2) — cảnh báo mềm, cùng tinh thần isFieldThin
                  (không chặn submit, `maxlength` HTML ở trên mới là chặn cứng): nhắc lại field này là
                  CỤM TỪ, không phải đoạn văn, ngay khi người dùng gõ gần chạm giới hạn. --}}
             <p class="text-xs text-warning mt-1" x-show="isCustomFieldNearLimit(field)">
-                Gần chạm giới hạn <span x-text="field.custom_max_length || 150"></span> ký tự — ô này nên là 1 cụm từ ngắn, không phải đoạn văn/nội dung quảng cáo đầy đủ. Nội dung dài hơn nên đưa vào field textarea khác của mẫu này (nếu có).
+                {{ __('Gần chạm giới hạn') }} <span x-text="field.custom_max_length || 150"></span> {{ __('ký tự — ô này nên là 1 cụm từ ngắn, không phải đoạn văn/nội dung quảng cáo đầy đủ. Nội dung dài hơn nên đưa vào field textarea khác của mẫu này (nếu có).') }}
             </p>
 
             {{-- Gợi ý chất lượng, KHÔNG chặn submit — chỉ nhắc field bắt buộc đã điền nhưng còn
                  ngắn/có khả năng chung chung (xem isFieldThin trong prompt-framework-studio.js). --}}
             <p class="text-xs text-warning mt-1" x-show="isFieldThin(field)">
-                Có vẻ còn ngắn — thử cụ thể hơn để AI hiểu đúng ý bạn?
+                {{ __('Có vẻ còn ngắn — thử cụ thể hơn để AI hiểu đúng ý bạn?') }}
             </p>
         </div>
     </template>
@@ -212,12 +210,12 @@
 <div x-show="selectedKey === 'topiccluster' && seedKeywordMatches.length > 0" x-cloak
      class="rounded border border-warning/40 bg-warning/10 px-3 py-2 text-xs space-y-1">
     <p class="font-medium text-warning-content/90">
-        ⚠ Từ khóa hạt giống này có vẻ đã dùng ở <span x-text="seedKeywordMatches.length"></span> cụm chủ đề khác — cân nhắc để tránh 2 cụm "ăn thịt" từ khóa của nhau:
+        {{ __('⚠ Từ khóa hạt giống này có vẻ đã dùng ở') }} <span x-text="seedKeywordMatches.length"></span> {{ __('cụm chủ đề khác — cân nhắc để tránh 2 cụm "ăn thịt" từ khóa của nhau:') }}
     </p>
     <template x-for="m in seedKeywordMatches" :key="m.uuid">
         <p>
             <a :href="m.show_url" target="_blank" rel="noopener" class="link link-hover font-medium" x-text="m.label"></a>
-            <span class="text-base-content/50"> — từ khóa đã lưu: "<span x-text="m.seed_keyword"></span>"</span>
+            <span class="text-base-content/50"> {{ __('— từ khóa đã lưu: "') }}<span x-text="m.seed_keyword"></span>"</span>
         </p>
     </template>
 </div>
@@ -237,15 +235,15 @@
 <div class="collapse collapse-arrow bg-base-200/50 border border-base-200 rounded-lg">
     <input type="checkbox" checked>
     <div class="collapse-title text-xs font-medium py-2 min-h-0 pr-10">
-        Xem trước prompt sẽ được ghép
-        <span class="text-base-content/40 font-normal">— ước lượng <span x-text="estimatedWordCount.toLocaleString('vi-VN')"></span> từ</span>
+        {{ __('Xem trước prompt sẽ được ghép') }}
+        <span class="text-base-content/40 font-normal">{{ __('— ước lượng') }} <span x-text="estimatedWordCount.toLocaleString('vi-VN')"></span> {{ __('từ') }}</span>
     </div>
     <div class="collapse-content">
         {{-- Cảnh báo độ dài: CHỈ cảnh báo, không tự cắt — cùng quyết định đã ghi ở
              spec/CoreIdeaExtractor.md §12.5 ("cắt nội dung phá mất chiều sâu là cái mất CHẮC CHẮN
              100%, lợi ích chỉ là suy đoán"). Ngưỡng 6.000 từ giống ContentOutlines. --}}
         <p x-show="estimatedWordCount > 6000" x-cloak class="text-xs text-warning mb-2">
-            ⚠ Prompt khá dài (hơn 6.000 từ) — một số AI xử lý kém đi ở mức này. Cân nhắc rút gọn phần dán thêm hoặc tách thành nhiều lượt.
+            {{ __('⚠ Prompt khá dài (hơn 6.000 từ) — một số AI xử lý kém đi ở mức này. Cân nhắc rút gọn phần dán thêm hoặc tách thành nhiều lượt.') }}
         </p>
         <pre class="text-xs whitespace-pre-wrap font-mono text-base-content/70 leading-relaxed" x-text="assembledPreview"></pre>
     </div>

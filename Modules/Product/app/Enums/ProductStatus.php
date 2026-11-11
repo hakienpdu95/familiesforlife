@@ -12,10 +12,10 @@ enum ProductStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Active       => 'Đang hoạt động',
-            self::Inactive     => 'Tạm ẩn',
-            self::Discontinued => 'Ngừng kinh doanh',
-            self::OutOfStock   => 'Hết hàng',
+            self::Active       => __('Đang hoạt động'),
+            self::Inactive     => __('Tạm ẩn'),
+            self::Discontinued => __('Ngừng kinh doanh'),
+            self::OutOfStock   => __('Hết hàng'),
         };
     }
 

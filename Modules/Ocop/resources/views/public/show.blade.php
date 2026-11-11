@@ -24,7 +24,7 @@
                         @foreach($images as $i => $image)
                         <div class="swiper-slide">
                             <button type="button" class="block w-full aspect-square cursor-zoom-in" @click="open({{ $i }})">
-                                <img src="{{ $image['full'] }}" alt="{{ $product->name }} - ảnh {{ $i + 1 }}"
+                                <img src="{{ $image['full'] }}" alt="{{ __(':name - ảnh :i', ['name' => $product->name, 'i' => $i + 1]) }}"
                                      class="h-full w-full object-cover" @if($i > 0) loading="lazy" @endif>
                             </button>
                         </div>
@@ -44,7 +44,7 @@
                         <button type="button" class="relative block w-full aspect-square overflow-hidden border-1 border-base-300"
                                 @click="open({{ $i }})">
                             <img src="{{ $image['thumb'] }}" alt="" class="h-full w-full object-cover" loading="lazy">
-                            <span class="absolute inset-0 flex items-center justify-center bg-black/55 text-xs font-semibold text-white">Xem thêm</span>
+                            <span class="absolute inset-0 flex items-center justify-center bg-black/55 text-xs font-semibold text-white">{{ __('Xem thêm') }}</span>
                         </button>
                         @else
                         <button type="button" class="block w-full aspect-square overflow-hidden border-1 transition"
@@ -59,20 +59,20 @@
             </div>
             @endif
 
-            <div class="modal" :class="{ 'modal-open': lightbox }" role="dialog" aria-label="Thư viện ảnh {{ $product->name }}">
+            <div class="modal" :class="{ 'modal-open': lightbox }" role="dialog" aria-label="{{ __('Thư viện ảnh :name', ['name' => $product->name]) }}">
                 <div class="modal-box w-11/12 max-w-5xl p-0 bg-base-100 relative">
-                    <button type="button" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 z-20" @click="close()" aria-label="Đóng">✕</button>
+                    <button type="button" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 z-20" @click="close()" aria-label="{{ __('Đóng') }}">✕</button>
                     <div class="swiper" x-ref="lightbox">
                         <div class="swiper-wrapper">
                             @foreach($images as $i => $image)
                             <div class="swiper-slide flex items-center justify-center bg-base-200">
-                                <img src="{{ $image['full'] }}" alt="{{ $product->name }} - ảnh {{ $i + 1 }}"
+                                <img src="{{ $image['full'] }}" alt="{{ __(':name - ảnh :i', ['name' => $product->name, 'i' => $i + 1]) }}"
                                      class="max-h-[80vh] w-full object-contain" loading="lazy">
                             </div>
                             @endforeach
                         </div>
-                        <button type="button" class="swiper-button-prev" x-ref="prev" aria-label="Ảnh trước"></button>
-                        <button type="button" class="swiper-button-next" x-ref="next" aria-label="Ảnh sau"></button>
+                        <button type="button" class="swiper-button-prev" x-ref="prev" aria-label="{{ __('Ảnh trước') }}"></button>
+                        <button type="button" class="swiper-button-next" x-ref="next" aria-label="{{ __('Ảnh sau') }}"></button>
                     </div>
                     <p class="py-2 text-center text-sm text-base-content/60" x-text="(lightboxIndex + 1) + ' / ' + total"></p>
                 </div>
@@ -84,7 +84,7 @@
         <div class="space-y-4">
             <h1 class="text-2xl lg:text-3xl font-medium text-base-content leading-tight">{{ $product->name }}</h1>
 
-            <div class="mt-3 flex items-center gap-2" title="Hạng {{ $product->star_rating }} sao OCOP">
+            <div class="mt-3 flex items-center gap-2" title="{{ __('Hạng :star_rating sao OCOP', ['star_rating' => $product->star_rating]) }}">
                 <div class="rating rating-sm pointer-events-none">
                     @for($s = 1; $s <= 5; $s++)
                     <div class="mask mask-star-2 {{ $s <= $product->star_rating ? 'bg-warning' : 'bg-base-300' }}"></div>
@@ -96,13 +96,13 @@
             <div class="mt-4 flex flex-wrap gap-2">
                 <span class="badge badge-success gap-1 text-white">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                    Sản phẩm OCOP
+                    {{ __('Sản phẩm OCOP') }}
                 </span>
                 @if($product->province_name)
-                <span class="badge badge-outline">Xuất xứ: {{ $product->province_name }}</span>
+                <span class="badge badge-outline">{{ __('Xuất xứ: :province_name', ['province_name' => $product->province_name]) }}</span>
                 @endif
                 @if($product->producer_name)
-                <span class="badge badge-ghost">Thương hiệu: {{ $product->producer_name }}</span>
+                <span class="badge badge-ghost">{{ __('Thương hiệu: :producer_name', ['producer_name' => $product->producer_name]) }}</span>
                 @endif
             </div>
 
@@ -114,7 +114,7 @@
             <div class="border border-base-300 rounded-lg p-4 flex gap-3 mb-3">
                 <svg class="w-6 h-6 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg>
                 <div>
-                    <p class="text-sm font-semibold">Làng nghề / di tích</p>
+                    <p class="text-sm font-semibold">{{ __('Làng nghề / di tích') }}</p>
                     <a href="{{ route('heritage.public.show', ['slug' => $heritageSite->slug, 'id' => $heritageSite->id]) }}" class="link link-primary text-sm">
                         {{ $heritageSite->name }}
                     </a>
@@ -124,8 +124,8 @@
 
             @php
                 $affiliateLinks = array_filter([
-                    'Mua trên Shopee' => $product->shopee_url,
-                    'Mua trên TikTok Shop' => $product->tiktok_url,
+                    __('Mua trên Shopee') => $product->shopee_url,
+                    __('Mua trên TikTok Shop') => $product->tiktok_url,
                 ]);
             @endphp
             @if($affiliateLinks)
@@ -143,14 +143,14 @@
 
     @php
         $specs = [
-            'Mã nhóm' => $product->category?->fullCode(),
-            'Mã sản phẩm' => 'OP'.$product->id,
-            'Xuất xứ' => $product->origin ?: $product->province_name,
-            'Ngày sản xuất' => $product->production_date,
-            'Hạn sử dụng' => $product->shelf_life,
-            'Thành phần' => $product->ingredients,
-            'Hướng dẫn sử dụng' => $product->usage_instructions,
-            'Hướng dẫn bảo quản' => $product->storage_instructions,
+            __('Mã nhóm') => $product->category?->fullCode(),
+            __('Mã sản phẩm') => 'OP'.$product->id,
+            __('Xuất xứ') => $product->origin ?: $product->province_name,
+            __('Ngày sản xuất') => $product->production_date,
+            __('Hạn sử dụng') => $product->shelf_life,
+            __('Thành phần') => $product->ingredients,
+            __('Hướng dẫn sử dụng') => $product->usage_instructions,
+            __('Hướng dẫn bảo quản') => $product->storage_instructions,
         ];
         $producerMoreUrl = match (true) {
             $subject?->is_active && Route::has('ocop-subject.public.show') => route('ocop-subject.public.show', ['slug' => $subject->slug]),
@@ -163,7 +163,7 @@
     <section class="mt-12">
         <div class="flex">
             <h2 class="bg-primary px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-primary-content">
-                Thông tin sản phẩm
+                {{ __('Thông tin sản phẩm') }}
             </h2>
         </div>
 
@@ -180,7 +180,7 @@
                         {!! \Modules\Ocop\Models\OcopProduct::richText($product->description) !!}
                     </div>
                     @else
-                    <p class="text-sm text-base-content/50">Câu chuyện sản phẩm đang được cập nhật.</p>
+                    <p class="text-sm text-base-content/50">{{ __('Câu chuyện sản phẩm đang được cập nhật.') }}</p>
                     @endif
                 </div>
 
@@ -199,7 +199,7 @@
                         ])->filter();
                     @endphp
                     <div class="overflow-hidden rounded-sm bg-[#f8f9fa]">
-                        <div class="border-b border-[#e0e0e0] px-4 py-3 text-base font-semibold text-[#333]">Thương hiệu</div>
+                        <div class="border-b border-[#e0e0e0] px-4 py-3 text-base font-semibold text-[#333]">{{ __('Thương hiệu') }}</div>
                         <div class="flex items-center gap-4 p-4">
                             @if($subjectImages->isNotEmpty())
                             <a href="{{ $subjectImages[0]['full'] }}" target="_blank" rel="noopener"
@@ -218,7 +218,7 @@
                                 @endif
                                 @if($producerMoreUrl)
                                 <a href="{{ $producerMoreUrl }}" class="inline-flex items-center gap-0.5 self-start text-sm font-medium text-[#117a3a] hover:underline">
-                                    Xem thêm
+                                    {{ __('Xem thêm') }}
                                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                                 </a>
                                 @endif
@@ -248,9 +248,9 @@
                                         <th scope="row" class="w-[38%] px-4 py-3 text-left font-semibold">{{ $label }}:</th>
                                         <td class="px-4 py-3 font-normal break-words">
                                             @if(filled($value))
-                                            <div class="[&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_p+p]:mt-2">{!! in_array($label, ['Thành phần', 'Hướng dẫn sử dụng', 'Hướng dẫn bảo quản'], true) ? \Modules\Ocop\Models\OcopProduct::richText($value) : nl2br(e($value)) !!}</div>
+                                            <div class="[&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_p+p]:mt-2">{!! in_array($label, [__('Thành phần'), __('Hướng dẫn sử dụng'), __('Hướng dẫn bảo quản')], true) ? \Modules\Ocop\Models\OcopProduct::richText($value) : nl2br(e($value)) !!}</div>
                                             @else
-                                            <span class="text-[#999]">Đang cập nhật</span>
+                                            <span class="text-[#999]">{{ __('Đang cập nhật') }}</span>
                                             @endif
                                         </td>
                                     </tr>

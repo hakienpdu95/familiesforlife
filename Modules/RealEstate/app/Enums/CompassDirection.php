@@ -21,14 +21,14 @@ enum CompassDirection: string
     public function label(): string
     {
         return match ($this) {
-            self::Northwest => 'Tây Bắc',
-            self::North     => 'Bắc',
-            self::Northeast => 'Đông Bắc',
-            self::West      => 'Tây',
-            self::East      => 'Đông',
-            self::Southwest => 'Tây Nam',
+            self::Northwest => __('Tây Bắc'),
+            self::North     => __('Bắc'),
+            self::Northeast => __('Đông Bắc'),
+            self::West      => __('Tây'),
+            self::East      => __('Đông'),
+            self::Southwest => __('Tây Nam'),
             self::South     => 'Nam',
-            self::Southeast => 'Đông Nam',
+            self::Southeast => __('Đông Nam'),
         };
     }
 

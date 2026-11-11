@@ -8,6 +8,7 @@
     <meta name="description" content="@yield('meta_description')">
     @endif
 
+    @include('layouts.partials.i18n-script')
     @vite(['resources/css/anland.css', 'resources/js/anland.js'], 'build/frontend')
     @stack('styles')
 </head>

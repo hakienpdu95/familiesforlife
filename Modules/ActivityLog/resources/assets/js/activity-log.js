@@ -1,3 +1,5 @@
+import { t } from '../../../../../resources/js/shared/i18n.js';
+
 /**
  * activity-log.js — Activity Log listing page controller
  *
@@ -83,7 +85,7 @@ function descHtml(row) {
 
 const COLUMNS = [
     {
-        title: 'Thời gian', field: 'created_at', width: 148, sorter: 'datetime',
+        title: t('Thời gian'), field: 'created_at', width: 148, sorter: 'datetime',
         formatter(cell) {
             const v = cell.getValue();
             if (!v) return '—';
@@ -94,7 +96,7 @@ const COLUMNS = [
         },
     },
     {
-        title: 'Cấp độ', field: 'level', width: 90, hozAlign: 'center', sorter: 'number',
+        title: t('Cấp độ'), field: 'level', width: 90, hozAlign: 'center', sorter: 'number',
         formatter(cell) { return levelBadge(cell.getValue()); },
     },
     {
@@ -110,11 +112,11 @@ const COLUMNS = [
         formatter(cell) { return actorHtml(cell.getData()); },
     },
     {
-        title: 'Đối tượng', field: 'display_subject', minWidth: 150,
+        title: t('Đối tượng'), field: 'display_subject', minWidth: 150,
         formatter(cell) { return subjectHtml(cell.getData()); },
     },
     {
-        title: 'Mô tả / Chi tiết', field: 'description', minWidth: 200,
+        title: t('Mô tả / Chi tiết'), field: 'description', minWidth: 200,
         formatter(cell) { return descHtml(cell.getData()); },
     },
 ];

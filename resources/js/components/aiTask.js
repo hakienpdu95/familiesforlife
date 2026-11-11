@@ -1,3 +1,5 @@
+import { t } from '../shared/i18n.js';
+
 /**
  * resources/js/components/aiTask.js
  *
@@ -50,15 +52,15 @@ export function aiTask({
                 });
 
                 if (res.status === 402) {
-                    this.error = 'Đã hết quota AI tháng này. Vui lòng nâng cấp gói.';
+                    this.error = t('Đã hết quota AI tháng này. Vui lòng nâng cấp gói.');
                     return;
                 }
                 if (res.status === 403) {
-                    this.error = 'Bạn không có quyền sử dụng tính năng AI.';
+                    this.error = t('Bạn không có quyền sử dụng tính năng AI.');
                     return;
                 }
                 if (!res.ok) {
-                    this.error = `Lỗi server (${res.status}). Vui lòng thử lại.`;
+                    this.error = `${t('Lỗi server (:status). Vui lòng thử lại.', { status: (res.status) })}`;
                     return;
                 }
 
@@ -70,7 +72,7 @@ export function aiTask({
                     this._startPoll(data.uuid);
                 }
             } catch {
-                this.error = 'Lỗi kết nối. Vui lòng thử lại.';
+                this.error = t('Lỗi kết nối. Vui lòng thử lại.');
             } finally {
                 if (!this._poll) this.loading = false;
             }
@@ -89,7 +91,7 @@ export function aiTask({
                     clearInterval(this._poll);
                     this._poll   = null;
                     this.loading = false;
-                    this.error   = 'AI mất quá nhiều thời gian để phản hồi.';
+                    this.error   = t('AI mất quá nhiều thời gian để phản hồi.');
                     return;
                 }
                 try {
@@ -107,7 +109,7 @@ export function aiTask({
                         clearInterval(this._poll);
                         this._poll   = null;
                         this.loading = false;
-                        this.error   = 'AI xử lý thất bại.';
+                        this.error   = t('AI xử lý thất bại.');
                     }
                 } catch {}
             }, 1500);

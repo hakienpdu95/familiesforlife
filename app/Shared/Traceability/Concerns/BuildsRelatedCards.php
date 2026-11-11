@@ -88,7 +88,7 @@ trait BuildsRelatedCards
             $media = $model->getMedia($collection);
 
             return [
-                'label' => $label,
+                'label' => __($label),
                 'count' => $media->count(),
                 'updated_at' => format_date($media->max('updated_at')),
             ];

@@ -1,3 +1,5 @@
+import { t } from '../../../../../../resources/js/shared/i18n.js';
+
 /**
  * pages/breaking-news-index.js
  * Alpine component + Tabulator cho dashboard/breaking-news/items — cùng pattern
@@ -15,30 +17,30 @@ function esc(v) {
 
 const COLUMNS = [
     {
-        title: 'Tiêu đề', field: 'headline', minWidth: 240, sorter: 'string',
+        title: t('Tiêu đề'), field: 'headline', minWidth: 240, sorter: 'string',
         formatter(cell) {
             const d = cell.getRow().getData();
             let html = '<span class="badge badge-error badge-sm mr-1.5">' + esc(d.badge_label) + '</span>';
             html += '<span class="text-sm">' + esc(d.headline) + '</span>';
-            if (d.has_override) html += '<p class="text-xs text-base-content/40">Gốc: ' + esc(d.article_title) + '</p>';
+            if (d.has_override) html += ('<p class="text-xs text-base-content/40">' + t('Gốc:') + ' ') + esc(d.article_title) + '</p>';
             return html;
         },
     },
     {
-        title: 'Lịch hiển thị', field: 'starts_at', width: 220, headerSort: false,
+        title: t('Lịch hiển thị'), field: 'starts_at', width: 220, headerSort: false,
         formatter(cell) {
             const d = cell.getRow().getData();
-            if (!d.starts_at && !d.ends_at) return '<span class="text-base-content/30 text-xs">Không giới hạn</span>';
+            if (!d.starts_at && !d.ends_at) return ('<span class="text-base-content/30 text-xs">' + t('Không giới hạn') + '</span>');
             return '<span class="text-xs">' + esc(d.starts_at || '—') + ' → ' + esc(d.ends_at || '—') + '</span>';
         },
     },
     {
-        title: 'Trạng thái', field: 'is_active', width: 130, hozAlign: 'center', headerSort: false,
+        title: t('Trạng thái'), field: 'is_active', width: 130, hozAlign: 'center', headerSort: false,
         formatter(cell) {
             const d = cell.getRow().getData();
-            if (d.is_running) return '<span class="badge badge-success badge-sm">Đang chạy</span>';
-            if (!d.is_active) return '<span class="badge badge-neutral badge-sm">Đã tắt</span>';
-            return '<span class="badge badge-ghost badge-sm">Ngoài lịch</span>';
+            if (d.is_running) return ('<span class="badge badge-success badge-sm">' + t('Đang chạy') + '</span>');
+            if (!d.is_active) return ('<span class="badge badge-neutral badge-sm">' + t('Đã tắt') + '</span>');
+            return ('<span class="badge badge-ghost badge-sm">' + t('Ngoài lịch') + '</span>');
         },
     },
     {
@@ -48,12 +50,12 @@ const COLUMNS = [
             let html = '<div class="flex items-center justify-center gap-1">';
 
             if (d.can_update) {
-                html += '<a href="' + esc(d.edit_url) + '" class="btn btn-ghost btn-xs" title="Sửa">Sửa</a>';
+                html += '<a href="' + esc(d.edit_url) + ('" class="btn btn-ghost btn-xs" title="' + t('Sửa') + '">' + t('Sửa') + '</a>');
             }
             if (d.can_delete) {
-                html += '<button class="btn btn-ghost btn-xs text-error" title="Xoá"'
+                html += ('<button class="btn btn-ghost btn-xs text-error" title="' + t('Xoá') + '"')
                     + ' data-url="' + esc(d.destroy_url) + '"'
-                    + ' onclick="window.breakingNewsDeleteConfirm(this.dataset.url)">Xoá</button>';
+                    + (' onclick="window.breakingNewsDeleteConfirm(this.dataset.url)">' + t('Xoá') + '</button>');
             }
 
             html += '</div>';
@@ -80,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const csrf = document.querySelector('meta[name=csrf-token]')?.content ?? '';
         this.disabled    = true;
-        this.textContent = 'Đang xoá...';
+        this.textContent = t('Đang xoá...');
 
         try {
             const res = await fetch(pendingDeleteUrl, {
@@ -100,14 +102,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('breakingNewsDeleteModal')?.close();
                 window.breakingNewsTable?.replaceData();
             } else {
-                alert(data.message || 'Xoá thất bại. Vui lòng thử lại.');
+                alert(data.message || t('Xoá thất bại. Vui lòng thử lại.'));
             }
         } catch (e) {
             console.error('[breaking-news] delete failed', e);
-            alert('Lỗi kết nối. Vui lòng thử lại.');
+            alert(t('Lỗi kết nối. Vui lòng thử lại.'));
         } finally {
             this.disabled    = false;
-            this.textContent = 'Xoá';
+            this.textContent = t('Xoá');
             pendingDeleteUrl = null;
         }
     });
@@ -149,11 +151,11 @@ document.addEventListener('alpine:init', () => {
                     langs: {
                         'vi-VN': {
                             pagination: {
-                                page_size: 'Dòng/trang', page_title: 'Trang',
+                                page_size: t('Dòng/trang'), page_title: t('Trang'),
                                 first: '«', last: '»', prev: '‹', next: '›',
-                                first_title: 'Trang đầu', last_title: 'Trang cuối',
-                                prev_title: 'Trang trước', next_title: 'Trang sau',
-                                counter: { showing: '', of: 'trong', rows: 'dòng', pages: 'trang' },
+                                first_title: t('Trang đầu'), last_title: t('Trang cuối'),
+                                prev_title: t('Trang trước'), next_title: t('Trang sau'),
+                                counter: { showing: '', of: t('trong'), rows: t('dòng'), pages: t('trang') },
                             },
                         },
                     },
@@ -161,7 +163,7 @@ document.addEventListener('alpine:init', () => {
                     columns: COLUMNS,
                     placeholder: '<div class="py-16 text-center opacity-40">'
                         + '<svg class="w-12 h-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>'
-                        + '<p class="text-sm">Chưa có tin nóng nào</p></div>',
+                        + ('<p class="text-sm">' + t('Chưa có tin nóng nào') + '</p></div>'),
                 });
 
                 window.breakingNewsTable = tableInst;

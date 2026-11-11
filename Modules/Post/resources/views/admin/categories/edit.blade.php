@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', 'Sửa danh mục bài viết')
+@section('title', __('Sửa danh mục bài viết'))
 
 
 @section('content')
@@ -7,11 +7,11 @@
 {{-- Page header --}}
 <div class="flex items-center justify-between mb-6">
     <div>
-        <h1 class="text-2xl font-bold text-base-content">Sửa danh mục</h1>
+        <h1 class="text-2xl font-bold text-base-content">{{ __('Sửa danh mục') }}</h1>
         <p class="text-sm text-base-content/50 mt-0.5 flex items-center gap-2">
             {{ $category->name }}
             <span class="badge badge-sm {{ $category->is_active ? 'badge-success' : 'badge-ghost' }}">
-                {{ $category->is_active ? 'Hiện' : 'Ẩn' }}
+                {{ $category->is_active ? __('Hiện') : __('Ẩn') }}
             </span>
         </p>
     </div>
@@ -19,7 +19,7 @@
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
         </svg>
-        Quay lại
+        {{ __('Quay lại') }}
     </a>
 </div>
 
@@ -30,7 +30,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
     </svg>
     <div>
-        <p class="font-semibold">Có {{ $errors->count() }} lỗi cần kiểm tra:</p>
+        <p class="font-semibold">{{ __('Có :count lỗi cần kiểm tra:', ['count' => $errors->count()]) }}</p>
         <ul class="mt-1.5 list-disc list-inside space-y-0.5 text-xs opacity-90">
             @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
         </ul>
@@ -53,17 +53,17 @@
                         <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
                         </svg>
-                        Thông tin danh mục
+                        {{ __('Thông tin danh mục') }}
                     </h2>
 
                     <div class="space-y-4">
 
                         <div class="form-control">
                             <label class="label py-0 pb-1.5">
-                                <span class="label-text font-medium">Tên danh mục <span class="text-error">*</span></span>
+                                <span class="label-text font-medium">{{ __('Tên danh mục') }} <span class="text-error">*</span></span>
                             </label>
                             <input type="text" name="name" value="{{ old('name', $category->name) }}"
-                                   data-req="Vui lòng nhập tên danh mục"
+                                   data-req="{{ __('Vui lòng nhập tên danh mục') }}"
                                    data-val-maxlength="150"
                                    class="input input-bordered input-sm w-full @error('name') input-error @enderror"
                                    maxlength="150">
@@ -72,13 +72,13 @@
 
                         <div class="form-control">
                             <label class="label py-0 pb-1.5">
-                                <span class="label-text font-medium">Danh mục cha</span>
-                                <span class="label-text-alt text-xs text-base-content/40">Không bắt buộc</span>
+                                <span class="label-text font-medium">{{ __('Danh mục cha') }}</span>
+                                <span class="label-text-alt text-xs text-base-content/40">{{ __('Không bắt buộc') }}</span>
                             </label>
                             <select id="ts-parent" name="parent_id"
                                     class="select select-bordered select-sm w-full ts-init @error('parent_id') select-error @enderror"
-                                    data-ts-placeholder="— Danh mục gốc —">
-                                <option value="">— Danh mục gốc —</option>
+                                    data-ts-placeholder="{{ __('— Danh mục gốc —') }}">
+                                <option value="">{{ __('— Danh mục gốc —') }}</option>
                                 @foreach($categoryTree as $row)
                                 @php($c = $row['category'])
                                 <option value="{{ $c->id }}" {{ old('parent_id', $category->parent_id) == $c->id ? 'selected' : '' }}>
@@ -86,18 +86,18 @@
                                 </option>
                                 @endforeach
                             </select>
-                            <p class="mt-1 text-xs text-base-content/40">Không thể chọn chính danh mục này hoặc danh mục con/cháu của nó làm cha</p>
+                            <p class="mt-1 text-xs text-base-content/40">{{ __('Không thể chọn chính danh mục này hoặc danh mục con/cháu của nó làm cha') }}</p>
                             @error('parent_id')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                         </div>
 
                         <div class="form-control">
                             <label class="label py-0 pb-1.5">
-                                <span class="label-text font-medium">Mô tả</span>
-                                <span class="label-text-alt text-xs text-base-content/40">Không bắt buộc</span>
+                                <span class="label-text font-medium">{{ __('Mô tả') }}</span>
+                                <span class="label-text-alt text-xs text-base-content/40">{{ __('Không bắt buộc') }}</span>
                             </label>
                             <textarea name="description" rows="3"
                                       class="textarea textarea-bordered textarea-sm w-full"
-                                      placeholder="Mô tả ngắn về danh mục...">{{ old('description', $category->description) }}</textarea>
+                                      placeholder="{{ __('Mô tả ngắn về danh mục...') }}">{{ old('description', $category->description) }}</textarea>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -112,7 +112,7 @@
                             </div>
                             <div class="form-control">
                                 <label class="label py-0 pb-1.5">
-                                    <span class="label-text font-medium">Màu</span>
+                                    <span class="label-text font-medium">{{ __('Màu') }}</span>
                                 </label>
                                 <div class="color-picker-combo">
                                     <input type="color" id="colorPicker" value="{{ old('color_hex', $category->color_hex ?? '#94a3b8') }}">
@@ -126,7 +126,7 @@
                             </div>
                             <div class="form-control">
                                 <label class="label py-0 pb-1.5">
-                                    <span class="label-text font-medium">Thứ tự hiển thị</span>
+                                    <span class="label-text font-medium">{{ __('Thứ tự hiển thị') }}</span>
                                 </label>
                                 <input type="number" name="sort_order" min="0"
                                        value="{{ old('sort_order', $category->sort_order) }}"
@@ -141,8 +141,8 @@
                                    class="checkbox checkbox-sm checkbox-primary mt-0.5 shrink-0"
                                    {{ old('is_active', $category->is_active) ? 'checked' : '' }}>
                             <div>
-                                <span class="text-sm font-medium group-hover:text-primary transition-colors">Hiển thị danh mục</span>
-                                <p class="text-xs text-base-content/50 mt-0.5">Tắt để tạm ẩn khỏi bộ lọc chọn danh mục</p>
+                                <span class="text-sm font-medium group-hover:text-primary transition-colors">{{ __('Hiển thị danh mục') }}</span>
+                                <p class="text-xs text-base-content/50 mt-0.5">{{ __('Tắt để tạm ẩn khỏi bộ lọc chọn danh mục') }}</p>
                             </div>
                         </label>
 
@@ -157,26 +157,26 @@
                 <div class="card-body p-3">
 
                     <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">
-                        Xuất bản
+                        {{ __('Xuất bản') }}
                     </p>
 
                     <div class="flex justify-between text-xs text-base-content/40 mb-4 px-0.5">
-                        <span>Tạo {{ format_date($category->created_at) }}</span>
-                        <span>Sửa {{ $category->updated_at->diffForHumans() }}</span>
+                        <span>{{ __('Tạo :created_at', ['created_at' => format_date($category->created_at)]) }}</span>
+                        <span>{{ __('Sửa :diff_for_humans', ['diff_for_humans' => $category->updated_at->diffForHumans()]) }}</span>
                     </div>
 
                     <div class="flex gap-2">
-                        <a href="{{ route('backend.post.categories.index') }}" class="btn btn-ghost btn-sm flex-1">Hủy</a>
+                        <a href="{{ route('backend.post.categories.index') }}" class="btn btn-ghost btn-sm flex-1">{{ __('Hủy') }}</a>
                         <button type="submit" class="btn btn-primary btn-sm flex-1 gap-1.5">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
-                            Lưu lại
+                            {{ __('Lưu lại') }}
                         </button>
                     </div>
 
                     <p class="text-center text-xs text-base-content/30 mt-2.5">
-                        <span class="text-error">*</span> là trường bắt buộc
+                        <span class="text-error">*</span> {{ __('là trường bắt buộc') }}
                     </p>
 
                 </div>
@@ -188,7 +188,7 @@
                 <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                <span>Danh mục đang chứa <strong>{{ $articlesCount }}</strong> bài viết.</span>
+                <span>{{ __('Danh mục đang chứa') }} <strong>{{ $articlesCount }}</strong> {{ __('bài viết.') }}</span>
             </div>
             @endif
 

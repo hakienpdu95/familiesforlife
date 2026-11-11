@@ -82,7 +82,7 @@ class RestoreArticleVersionAction
 
         if ($missing->isNotEmpty()) {
             throw new VersionRestoreException(
-                "Không thể khôi phục: sản phẩm #{$missing->implode(', #')} trong phiên bản này không còn tồn tại."
+                __('Không thể khôi phục: sản phẩm #:missing trong phiên bản này không còn tồn tại.', ['missing' => $missing->implode(', #')])
             );
         }
     }

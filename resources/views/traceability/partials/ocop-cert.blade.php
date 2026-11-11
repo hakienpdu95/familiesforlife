@@ -7,9 +7,9 @@
     $daysLeft <= 90 => 'soon',
     default => 'valid',
 })
-@php($remain = $daysLeft !== null && $daysLeft >= 0 ? ($daysLeft >= 60 ? 'còn '.intdiv($daysLeft, 30).' tháng' : 'còn '.max(1, $daysLeft).' ngày') : null)
+@php($remain = $daysLeft !== null && $daysLeft >= 0 ? ($daysLeft >= 60 ? __('còn :count tháng', ['count' => intdiv($daysLeft, 30)]) : __('còn :count ngày', ['count' => max(1, $daysLeft)])) : null)
 @php($star = 'M10 1.6l2.47 5.01 5.53.8-4 3.9.94 5.5L10 14.2l-4.94 2.6.94-5.5-4-3.9 5.53-.8L10 1.6z')
-<section class="mt-4 rounded-xl border border-[#ead9a8] overflow-hidden" aria-label="Thông tin chứng nhận OCOP">
+<section class="mt-4 rounded-xl border border-[#ead9a8] overflow-hidden" aria-label="{{ __('Thông tin chứng nhận OCOP') }}">
     <div class="relative flex items-center gap-3 px-3.5 py-3 bg-[radial-gradient(120%_140%_at_0%_0%,#fffaf0_0%,#fbf0d2_70%,#f7e7bd_100%)]">
         <svg viewBox="0 0 48 56" @class(['shrink-0 w-9 h-[42px] sm:w-10 sm:h-12 drop-shadow-[0_1px_1.5px_rgb(120_80_0/.25)]', 'grayscale opacity-60' => ! $stars || $state === 'expired']) aria-hidden="true">
             <path d="M14 32 8 54l8-4 5 6 5-20z" fill="#b45309"/>
@@ -21,9 +21,9 @@
         </svg>
         <div class="flex-1 min-w-0">
             @if ($stars)
-                <p class="text-[clamp(14.5px,4vw,16px)] font-semibold leading-snug tracking-[-0.01em] text-[#422006] [text-wrap:balance]">@php($certText = $certTitle ?? 'Sản phẩm đạt chuẩn OCOP'){{ \Illuminate\Support\Str::beforeLast($certText, ' ') }} <span class="whitespace-nowrap">{{ \Illuminate\Support\Str::afterLast($certText, ' ') }} {{ $stars }} sao</span></p>
+                <p class="text-[clamp(14.5px,4vw,16px)] font-semibold leading-snug tracking-[-0.01em] text-[#422006] [text-wrap:balance]">@php($certText = $certTitle ?? __('Sản phẩm đạt chuẩn OCOP')){{ \Illuminate\Support\Str::beforeLast($certText, ' ') }} <span class="whitespace-nowrap">{{ \Illuminate\Support\Str::afterLast($certText, ' ') }} {{ $stars }} sao</span></p>
                 <div class="mt-1 flex items-center gap-1.5">
-                    <span class="flex gap-0.5" role="img" aria-label="Hạng {{ $stars }} trên 5 sao">
+                    <span class="flex gap-0.5" role="img" aria-label="{{ __('Hạng :stars trên 5 sao', ['stars' => $stars]) }}">
                         @for ($i = 1; $i <= 5; $i++)
                             @if ($i <= $stars)
                                 <svg viewBox="0 0 20 20" @class(['w-4 h-4', 'text-[#e0a100]' => $state !== 'expired', 'text-[#a8a29e]' => $state === 'expired']) fill="currentColor" aria-hidden="true"><path d="{{ $star }}"/></svg>
@@ -35,7 +35,7 @@
                     <span class="text-[11.5px] font-semibold text-[#a16207] tabular-nums">{{ $stars }}/5</span>
                 </div>
             @else
-                <p class="text-[clamp(14.5px,4vw,16px)] font-semibold leading-snug text-[#57534e]">Chưa xếp hạng OCOP</p>
+                <p class="text-[clamp(14.5px,4vw,16px)] font-semibold leading-snug text-[#57534e]">{{ __('Chưa xếp hạng OCOP') }}</p>
             @endif
         </div>
     </div>
@@ -50,13 +50,13 @@
             <span class="flex-1 min-w-0">
                 @switch($state)
                     @case('valid')
-                        Còn hiệu lực đến <strong class="font-semibold tabular-nums">{{ $expiry['label'] }}</strong><span class="opacity-75"> · {{ $remain }}</span>
+                        {{ __('Còn hiệu lực đến') }} <strong class="font-semibold tabular-nums">{{ $expiry['label'] }}</strong><span class="opacity-75"> · {{ $remain }}</span>
                         @break
                     @case('soon')
-                        Sắp hết hiệu lực: <strong class="font-semibold tabular-nums">{{ $expiry['label'] }}</strong> · {{ $remain }}
+                        {{ __('Sắp hết hiệu lực:') }} <strong class="font-semibold tabular-nums">{{ $expiry['label'] }}</strong> · {{ $remain }}
                         @break
                     @default
-                        Chứng nhận đã hết hiệu lực từ <strong class="font-semibold tabular-nums">{{ $expiry['label'] }}</strong>
+                        {{ __('Chứng nhận đã hết hiệu lực từ') }} <strong class="font-semibold tabular-nums">{{ $expiry['label'] }}</strong>
                 @endswitch
             </span>
         </div>
@@ -72,6 +72,6 @@
         </dl>
     @endif
     @if (! empty($docs))
-        @include('traceability.partials.checklist', ['items' => $docs, 'label' => $docsLabel ?? 'Hồ sơ chất lượng'])
+        @include('traceability.partials.checklist', ['items' => $docs, 'label' => $docsLabel ?? __('Hồ sơ chất lượng')])
     @endif
 </section>

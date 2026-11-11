@@ -19,12 +19,12 @@ enum EventStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Submitted => 'Chờ duyệt',
-            self::Approved  => 'Đã duyệt',
-            self::Published => 'Đã xuất bản',
-            self::Rejected  => 'Đã từ chối',
-            self::Expired   => 'Đã kết thúc',
-            self::Archived  => 'Lưu trữ',
+            self::Submitted => __('Chờ duyệt'),
+            self::Approved  => __('Đã duyệt'),
+            self::Published => __('Đã xuất bản'),
+            self::Rejected  => __('Đã từ chối'),
+            self::Expired   => __('Đã kết thúc'),
+            self::Archived  => __('Lưu trữ'),
         };
     }
 

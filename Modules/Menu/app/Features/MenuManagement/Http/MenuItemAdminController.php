@@ -47,7 +47,7 @@ class MenuItemAdminController extends Controller
         $menuItem = $action->handle($data);
 
         return redirect()->route('backend.menu.items.index')
-            ->with('success', "Mục menu \"{$menuItem->label}\" đã được tạo.");
+            ->with('success', __('Mục menu ":menu_item_label" đã được tạo.', ['menu_item_label' => $menuItem->label]));
     }
 
     public function edit(MenuItem $menuItem): View
@@ -66,7 +66,7 @@ class MenuItemAdminController extends Controller
         $action->handle($menuItem, $data);
 
         return redirect()->route('backend.menu.items.index')
-            ->with('success', 'Cập nhật mục menu thành công.');
+            ->with('success', __('Cập nhật mục menu thành công.'));
     }
 
     public function destroy(Request $request, MenuItem $menuItem, DeleteMenuItemAction $action): RedirectResponse|JsonResponse
@@ -84,11 +84,11 @@ class MenuItemAdminController extends Controller
         }
 
         if ($request->expectsJson()) {
-            return response()->json(['message' => "Đã xoá mục menu \"{$label}\"."]);
+            return response()->json(['message' => __('Đã xoá mục menu ":label".', ['label' => $label])]);
         }
 
         return redirect()->route('backend.menu.items.index')
-            ->with('success', "Đã xoá mục menu \"{$label}\".");
+            ->with('success', __('Đã xoá mục menu ":label".', ['label' => $label]));
     }
 
     public function reorder(Request $request, ReorderMenuItemsAction $action): RedirectResponse|JsonResponse
@@ -98,10 +98,10 @@ class MenuItemAdminController extends Controller
         $action->handle($request->array('order'));
 
         if ($request->expectsJson()) {
-            return response()->json(['message' => 'Đã cập nhật thứ tự menu.']);
+            return response()->json(['message' => __('Đã cập nhật thứ tự menu.')]);
         }
 
-        return back()->with('success', 'Đã cập nhật thứ tự menu.');
+        return back()->with('success', __('Đã cập nhật thứ tự menu.'));
     }
 
     /**
@@ -142,9 +142,9 @@ class MenuItemAdminController extends Controller
                 'prohibited_unless:link_type,' . MenuLinkType::Url->value,
             ],
         ], [
-            'page_id.required_if'       => 'Vui lòng chọn trang tĩnh.',
-            'page_id.prohibited_unless' => 'Chỉ chọn trang tĩnh khi đích liên kết là "Trang tĩnh".',
-            'page_id.exists'            => 'Trang tĩnh được chọn không hợp lệ hoặc đã bị xoá.',
+            'page_id.required_if'       => __('Vui lòng chọn trang tĩnh.'),
+            'page_id.prohibited_unless' => __('Chỉ chọn trang tĩnh khi đích liên kết là "Trang tĩnh".'),
+            'page_id.exists'            => __('Trang tĩnh được chọn không hợp lệ hoặc đã bị xoá.'),
         ]);
     }
 

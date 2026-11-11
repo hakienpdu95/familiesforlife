@@ -16,7 +16,7 @@ class ApproveEventAction
         abort_unless(
             $event->status->canTransitionTo(EventStatus::Approved),
             422,
-            "Không thể duyệt sự kiện đang ở trạng thái \"{$event->status->label()}\"."
+            __('Không thể duyệt sự kiện đang ở trạng thái ":status".', ['status' => $event->status->label()])
         );
 
         $event->update([

@@ -11,9 +11,9 @@ enum VersionTrigger: string
     public function label(): string
     {
         return match ($this) {
-            self::Save    => 'Lưu chỉnh sửa',
-            self::Publish => 'Xuất bản',
-            self::Restore => 'Khôi phục từ phiên bản cũ',
+            self::Save    => __('Lưu chỉnh sửa'),
+            self::Publish => __('Xuất bản'),
+            self::Restore => __('Khôi phục từ phiên bản cũ'),
         };
     }
 

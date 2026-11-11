@@ -49,7 +49,7 @@ class ProvinceAdminController extends Controller
         $action->handle($province, $data, $request->file('cover_image'), $request->file('logo'));
 
         return redirect()->route('backend.provinces.index')
-            ->with('success', "Đã cập nhật \"{$province->name}\".");
+            ->with('success', __('Đã cập nhật ":name".', ['name' => $province->name]));
     }
 
     private function validated(Request $request): array
@@ -79,19 +79,19 @@ class ProvinceAdminController extends Controller
             'highlight_tags' => ['array', 'max:10'],
             'highlight_tags.*' => ['string', 'max:50'],
         ], [
-            'slogan.max' => 'Khẩu hiệu tối đa :max ký tự.',
-            'description.max' => 'Mô tả tối đa :max ký tự.',
-            'cover_image.image' => 'Ảnh cover phải là tệp ảnh.',
-            'cover_image.mimes' => 'Ảnh cover chỉ chấp nhận JPG, PNG hoặc WEBP.',
-            'cover_image.max' => 'Ảnh cover tối đa 4MB.',
-            'logo.image' => 'Logo phải là tệp ảnh.',
-            'logo.mimes' => 'Logo chỉ chấp nhận JPG, PNG hoặc WEBP.',
-            'logo.max' => 'Logo tối đa 2MB.',
-            'logo.dimensions' => 'Logo tối thiểu 64×64px.',
-            'tvc_video_url.url' => 'Link video TVC không hợp lệ — phải bắt đầu bằng https://',
-            'vr360_map_url.url' => 'Link bản đồ VR360 không hợp lệ — phải bắt đầu bằng https://',
-            'highlight_tags.max' => 'Tối đa :max thẻ nổi bật.',
-            'highlight_tags.*.max' => 'Mỗi thẻ nổi bật tối đa :max ký tự.',
+            'slogan.max' => __('Khẩu hiệu tối đa :max ký tự.'),
+            'description.max' => __('Mô tả tối đa :max ký tự.'),
+            'cover_image.image' => __('Ảnh cover phải là tệp ảnh.'),
+            'cover_image.mimes' => __('Ảnh cover chỉ chấp nhận JPG, PNG hoặc WEBP.'),
+            'cover_image.max' => __('Ảnh cover tối đa 4MB.'),
+            'logo.image' => __('Logo phải là tệp ảnh.'),
+            'logo.mimes' => __('Logo chỉ chấp nhận JPG, PNG hoặc WEBP.'),
+            'logo.max' => __('Logo tối đa 2MB.'),
+            'logo.dimensions' => __('Logo tối thiểu 64×64px.'),
+            'tvc_video_url.url' => __('Link video TVC không hợp lệ — phải bắt đầu bằng https://'),
+            'vr360_map_url.url' => __('Link bản đồ VR360 không hợp lệ — phải bắt đầu bằng https://'),
+            'highlight_tags.max' => __('Tối đa :max thẻ nổi bật.'),
+            'highlight_tags.*.max' => __('Mỗi thẻ nổi bật tối đa :max ký tự.'),
         ]);
 
         unset($validated['cover_image'], $validated['logo']);

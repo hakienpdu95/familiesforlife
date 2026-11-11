@@ -1,5 +1,5 @@
-<section class="not-prose my-7" aria-label="{{ $block->heading ?: 'Sản phẩm' }}">
-    <h4 class="pb-2 border-b border-base-300 text-[11px] font-semibold uppercase tracking-[.12em] text-base-content/60">{{ $block->heading ?: ($block->isOcop() ? 'Sản phẩm OCOP' : 'Sản phẩm') }}</h4>
+<section class="not-prose my-7" aria-label="{{ $block->heading ?: __('Sản phẩm') }}">
+    <h4 class="pb-2 border-b border-base-300 text-[11px] font-semibold uppercase tracking-[.12em] text-base-content/60">{{ $block->heading ?: ($block->isOcop() ? __('Sản phẩm OCOP') : __('Sản phẩm')) }}</h4>
     <ul>
         @foreach ($block->items as $item)
             @php($price = $item->ocop_stars && blank($item->price_label_override) ? null : $item->display_price_label)

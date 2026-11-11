@@ -41,7 +41,7 @@ class ExampleCandidateAdminController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
-        return back()->with('success', "Đã duyệt — tạo tri thức \"{$candidate->suggested_title}\".");
+        return back()->with('success', __('Đã duyệt — tạo tri thức ":suggested_title".', ['suggested_title' => $candidate->suggested_title]));
     }
 
     public function reject(AicemExampleCandidate $candidate, RejectExampleCandidateAction $action): RedirectResponse
@@ -54,6 +54,6 @@ class ExampleCandidateAdminController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
-        return back()->with('success', 'Đã từ chối đề xuất.');
+        return back()->with('success', __('Đã từ chối đề xuất.'));
     }
 }

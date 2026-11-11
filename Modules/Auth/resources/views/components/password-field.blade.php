@@ -18,7 +18,7 @@
             @click="show = !show"
             tabindex="-1"
             class="btn btn-ghost btn-sm btn-square text-base-content/50"
-            :aria-label="show ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
+            :aria-label="show ? @js(__('Ẩn mật khẩu')) : @js(__('Hiện mật khẩu'))"
         >
             <svg x-show="!show" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>

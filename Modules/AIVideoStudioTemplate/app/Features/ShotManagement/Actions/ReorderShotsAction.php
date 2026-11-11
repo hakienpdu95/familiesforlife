@@ -26,7 +26,7 @@ class ReorderShotsAction
         $ownedIds = $project->shots()->pluck('id');
 
         if (collect($shotIdsInOrder)->diff($ownedIds)->isNotEmpty()) {
-            throw new AuthorizationException('1 hoặc nhiều shot không thuộc project này.');
+            throw new AuthorizationException(__('1 hoặc nhiều shot không thuộc project này.'));
         }
 
         foreach ($shotIdsInOrder as $index => $shotId) {

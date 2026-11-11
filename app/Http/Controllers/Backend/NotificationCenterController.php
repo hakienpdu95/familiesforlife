@@ -29,7 +29,7 @@ class NotificationCenterController extends Controller
     {
         $request->user()->notifications()->where('uuid', $uuid)->firstOrFail()->markAsRead();
 
-        return back()->with('success', 'Đã đánh dấu đã đọc.');
+        return back()->with('success', __('Đã đánh dấu đã đọc.'));
     }
 
     public function markAllRead(Request $request): RedirectResponse
@@ -37,13 +37,13 @@ class NotificationCenterController extends Controller
         $request->user()->unreadNotifications()
             ->update(['read_at' => now()]);
 
-        return back()->with('success', 'Đã đánh dấu tất cả là đã đọc.');
+        return back()->with('success', __('Đã đánh dấu tất cả là đã đọc.'));
     }
 
     public function destroy(Request $request, string $uuid): RedirectResponse
     {
         $request->user()->notifications()->where('uuid', $uuid)->firstOrFail()->delete();
 
-        return back()->with('success', 'Đã xoá thông báo.');
+        return back()->with('success', __('Đã xoá thông báo.'));
     }
 }

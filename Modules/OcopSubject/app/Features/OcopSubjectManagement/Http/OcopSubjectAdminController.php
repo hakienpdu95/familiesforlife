@@ -42,7 +42,7 @@ class OcopSubjectAdminController extends Controller
         $result = $action->handle($request->file('file')->getRealPath(), $request->validated('province_code'));
 
         return redirect()->route('backend.ocop-subjects.index')
-            ->with('success', "Import xong: thêm mới {$result['created']} chủ thể, bỏ qua {$result['duplicates']} chủ thể đã tồn tại, ".count($result['errors']).' dòng lỗi.')
+            ->with('success', __('Import xong: thêm mới :created chủ thể, bỏ qua :duplicates chủ thể đã tồn tại, :errors dòng lỗi.', ['created' => $result['created'], 'duplicates' => $result['duplicates'], 'errors' => count($result['errors'])]))
             ->with('import_errors', $result['errors']);
     }
 
@@ -60,7 +60,7 @@ class OcopSubjectAdminController extends Controller
         $storeDocuments->handle($ocopSubject, $validated['documents'] ?? []);
 
         return redirect()->route('backend.ocop-subjects.index')
-            ->with('success', "Đã tạo chủ thể \"{$ocopSubject->name}\".");
+            ->with('success', __('Đã tạo chủ thể ":name".', ['name' => $ocopSubject->name]));
     }
 
     public function edit(OcopSubject $ocopSubject): View
@@ -77,7 +77,7 @@ class OcopSubjectAdminController extends Controller
         $storeDocuments->handle($ocopSubject, $validated['documents'] ?? []);
 
         return redirect()->route('backend.ocop-subjects.index')
-            ->with('success', 'Cập nhật chủ thể thành công.');
+            ->with('success', __('Cập nhật chủ thể thành công.'));
     }
 
     public function destroy(Request $request, OcopSubject $ocopSubject, DeleteOcopSubjectAction $action): RedirectResponse|JsonResponse
@@ -85,10 +85,10 @@ class OcopSubjectAdminController extends Controller
         $action->handle($ocopSubject);
 
         if ($request->expectsJson()) {
-            return response()->json(['message' => 'Đã xoá chủ thể.']);
+            return response()->json(['message' => __('Đã xoá chủ thể.')]);
         }
 
         return redirect()->route('backend.ocop-subjects.index')
-            ->with('success', 'Đã xoá chủ thể.');
+            ->with('success', __('Đã xoá chủ thể.'));
     }
 }

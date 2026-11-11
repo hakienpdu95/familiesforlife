@@ -1,5 +1,6 @@
 import { createTs } from '@shared/tom-select-factory.js';
 
+import { t } from '../../../../../../resources/js/shared/i18n.js';
 function esc(v) {
     if (v == null) return '';
     return String(v)
@@ -14,18 +15,18 @@ const COLUMNS = [
         title: '★', field: 'is_featured', width: 60, hozAlign: 'center', sorter: 'boolean',
         formatter(cell) {
             return cell.getValue()
-                ? '<span class="text-warning text-lg leading-none" title="Nổi bật">★</span>'
+                ? ('<span class="text-warning text-lg leading-none" title="' + t('Nổi bật') + '">★</span>')
                 : '<span class="text-base-content/20">☆</span>';
         },
     },
     {
-        title: 'Mã', field: 'province_code', width: 80, hozAlign: 'center', sorter: 'string',
+        title: t('Mã'), field: 'province_code', width: 80, hozAlign: 'center', sorter: 'string',
         formatter(cell) {
             return '<span class="font-mono text-sm">' + esc(cell.getValue()) + '</span>';
         },
     },
     {
-        title: 'Tỉnh/Thành phố', field: 'name', minWidth: 220, sorter: 'string',
+        title: t('Tỉnh/Thành phố'), field: 'name', minWidth: 220, sorter: 'string',
         formatter(cell) {
             const d = cell.getRow().getData();
             let html = '<span class="font-medium text-sm">' + esc(d.name) + '</span>';
@@ -45,14 +46,14 @@ const COLUMNS = [
         },
     },
     {
-        title: 'Loại', field: 'place_type', width: 140, sorter: 'string',
+        title: t('Loại'), field: 'place_type', width: 140, sorter: 'string',
         formatter(cell) {
             const d = cell.getRow().getData();
             return '<span class="badge badge-sm ' + esc(d.place_type_badge) + '">' + esc(d.place_type_label) + '</span>';
         },
     },
     {
-        title: 'Màu chủ đạo', field: 'theme_color', width: 130, headerSort: false,
+        title: t('Màu chủ đạo'), field: 'theme_color', width: 130, headerSort: false,
         formatter(cell) {
             const v = cell.getValue();
             if (!v) return EMPTY;
@@ -60,17 +61,17 @@ const COLUMNS = [
         },
     },
     {
-        title: 'Vùng', field: 'region', minWidth: 160, headerSort: false,
+        title: t('Vùng'), field: 'region', minWidth: 160, headerSort: false,
         formatter(cell) {
             return esc(cell.getValue()) || EMPTY;
         },
     },
     {
-        title: 'Trạng thái', field: 'is_active', width: 140, hozAlign: 'center', sorter: 'boolean',
+        title: t('Trạng thái'), field: 'is_active', width: 140, hozAlign: 'center', sorter: 'boolean',
         formatter(cell) {
             return cell.getValue()
-                ? '<span class="badge badge-sm badge-success">Hoạt động</span>'
-                : '<span class="badge badge-sm badge-ghost">Ngừng</span>';
+                ? ('<span class="badge badge-sm badge-success">' + t('Hoạt động') + '</span>')
+                : ('<span class="badge badge-sm badge-ghost">' + t('Ngừng') + '</span>');
         },
     },
     {
@@ -78,7 +79,7 @@ const COLUMNS = [
         formatter(cell) {
             const d = cell.getRow().getData();
             if (!d.can_update) return '';
-            return '<a href="' + esc(d.edit_url) + '" class="btn btn-ghost btn-xs btn-square" title="Sửa">'
+            return '<a href="' + esc(d.edit_url) + ('" class="btn btn-ghost btn-xs btn-square" title="' + t('Sửa') + '">')
                 + '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>'
                 + '</a>';
         },
@@ -108,7 +109,7 @@ document.addEventListener('alpine:init', () => {
 
             get activeChips() {
                 const chips = [], f = this.filters;
-                if (f.search)             chips.push({ key: 'search',      label: 'Tìm: ' + f.search });
+                if (f.search)             chips.push({ key: 'search',      label: (t('Tìm:') + ' ') + f.search });
                 if (f.region_id)          chips.push({ key: 'region_id',   label: optText(tsRegion, f.region_id) });
                 if (f.place_type)         chips.push({ key: 'place_type',  label: optText(tsPlaceType, f.place_type) });
                 if (f.is_featured !== '') chips.push({ key: 'is_featured', label: optText(tsIsFeatured, f.is_featured) });
@@ -129,22 +130,22 @@ document.addEventListener('alpine:init', () => {
                 if (!regionEl || !placeTypeEl || !isFeaturedEl || !isActiveEl) return;
 
                 tsRegion = createTs(regionEl, {
-                    placeholder: 'Tất cả vùng',
+                    placeholder: t('Tất cả vùng'),
                     onChange() { regionEl.dispatchEvent(new Event('change', { bubbles: true })); },
                 });
 
                 tsPlaceType = createTs(placeTypeEl, {
-                    placeholder: 'Tất cả loại',
+                    placeholder: t('Tất cả loại'),
                     onChange() { placeTypeEl.dispatchEvent(new Event('change', { bubbles: true })); },
                 });
 
                 tsIsFeatured = createTs(isFeaturedEl, {
-                    placeholder: 'Tất cả',
+                    placeholder: t('Tất cả'),
                     onChange() { isFeaturedEl.dispatchEvent(new Event('change', { bubbles: true })); },
                 });
 
                 tsIsActive = createTs(isActiveEl, {
-                    placeholder: 'Tất cả trạng thái',
+                    placeholder: t('Tất cả trạng thái'),
                     onChange() { isActiveEl.dispatchEvent(new Event('change', { bubbles: true })); },
                 });
             },
@@ -183,17 +184,17 @@ document.addEventListener('alpine:init', () => {
                     langs: {
                         'vi-VN': {
                             pagination: {
-                                page_size: 'Dòng/trang', page_title: 'Trang',
+                                page_size: t('Dòng/trang'), page_title: t('Trang'),
                                 first: '«', last: '»', prev: '‹', next: '›',
-                                first_title: 'Trang đầu', last_title: 'Trang cuối',
-                                prev_title: 'Trang trước', next_title: 'Trang sau',
-                                counter: { showing: '', of: 'trong', rows: 'dòng', pages: 'trang' },
+                                first_title: t('Trang đầu'), last_title: t('Trang cuối'),
+                                prev_title: t('Trang trước'), next_title: t('Trang sau'),
+                                counter: { showing: '', of: t('trong'), rows: t('dòng'), pages: t('trang') },
                             },
                         },
                     },
 
                     columns: COLUMNS,
-                    placeholder: '<div class="py-16 text-center opacity-40"><p class="text-sm">Chưa có tỉnh thành nào</p></div>',
+                    placeholder: ('<div class="py-16 text-center opacity-40"><p class="text-sm">' + t('Chưa có tỉnh thành nào') + '</p></div>'),
                 });
 
                 window.provinceTable = tableInst;

@@ -6,6 +6,7 @@
  */
 import { syncEntryDialogWidgets } from '../shared/entry-dialog-select.js';
 
+import { t } from '../../../../../../resources/js/shared/i18n.js';
 document.addEventListener('alpine:init', () => {
     Alpine.data('contentCalendarMonthView', (serverData = {}) => ({
         ...serverData,
@@ -75,7 +76,7 @@ document.addEventListener('alpine:init', () => {
 
         monthLabel() {
             const [year, month] = this.selectedMonth.split('-').map(Number);
-            return `Tháng ${month}, ${year}`;
+            return `${t('Tháng :month, :year', { month: (month), year: (year) })}`;
         },
 
         /**
@@ -160,7 +161,7 @@ document.addEventListener('alpine:init', () => {
 
             const json = await res.json().catch(() => ({}));
             if (!res.ok) {
-                window.Toast?.error(json.message ?? 'Không chuyển được trạng thái.');
+                window.Toast?.error(json.message ?? t('Không chuyển được trạng thái.'));
                 return;
             }
 
@@ -170,7 +171,7 @@ document.addEventListener('alpine:init', () => {
 
         async promptLinkArticle() {
             if (!this.editingEntry) return;
-            const uuid = prompt('Dán UUID bài viết (Post) muốn gắn với kế hoạch này:');
+            const uuid = prompt(t('Dán UUID bài viết (Post) muốn gắn với kế hoạch này:'));
             if (!uuid) return;
 
             const res = await fetch(this.linkArticleUrlTemplate.replace('__UUID__', this.editingEntry.uuid), {
@@ -181,18 +182,18 @@ document.addEventListener('alpine:init', () => {
 
             const json = await res.json().catch(() => ({}));
             if (!res.ok) {
-                window.Toast?.error(json.message ?? 'Không gắn được bài viết.');
+                window.Toast?.error(json.message ?? t('Không gắn được bài viết.'));
                 return;
             }
 
-            window.Toast?.success('Đã gắn kế hoạch với bài viết.');
+            window.Toast?.success(t('Đã gắn kế hoạch với bài viết.'));
             this.editingEntry = json.entry;
             await this.loadEntries();
         },
 
         async deleteEntry() {
             if (!this.editingEntry) return;
-            if (!confirm(`Xoá kế hoạch "${this.editingEntry.title}"?`)) return;
+            if (!confirm(`${t('Xoá kế hoạch ":title"?', { title: (this.editingEntry.title) })}`)) return;
 
             const res = await fetch(this.destroyUrlTemplate.replace('__UUID__', this.editingEntry.uuid), {
                 method: 'DELETE',
@@ -200,7 +201,7 @@ document.addEventListener('alpine:init', () => {
             });
 
             if (!res.ok) {
-                window.Toast?.error('Không xoá được kế hoạch.');
+                window.Toast?.error(t('Không xoá được kế hoạch.'));
                 return;
             }
 
@@ -263,8 +264,8 @@ document.addEventListener('alpine:init', () => {
                     // hậu tố tiếng Anh của Laravel. Khi ĐÃ có fieldErrors (từng field tự hiện lỗi
                     // riêng rồi), banner chỉ cần câu chung tiếng Việt, không dùng json.message.
                     this.errorMessage = Object.keys(this.fieldErrors).length
-                        ? 'Vui lòng kiểm tra lại các trường bên dưới.'
-                        : (json.message ?? 'Vui lòng kiểm tra lại các trường bên dưới.');
+                        ? t('Vui lòng kiểm tra lại các trường bên dưới.')
+                        : (json.message ?? t('Vui lòng kiểm tra lại các trường bên dưới.'));
                     return;
                 }
 

@@ -64,7 +64,7 @@ class CheckAndReserveBudgetAction
 
             if ($usedSoFar + $estimated > $budget) {
                 throw new BudgetExceededException(sprintf(
-                    'Đã vượt hạn mức chi phí AI tháng %s ($%.4f đã dùng/reserve + $%.4f ước tính cho lần chạy này > hạn mức $%.2f/tháng).',
+                    __('Đã vượt hạn mức chi phí AI tháng %s ($%.4f đã dùng/reserve + $%.4f ước tính cho lần chạy này > hạn mức $%.2f/tháng).'),
                     $yearMonth, $usedSoFar, $estimated, $budget
                 ));
             }

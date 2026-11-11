@@ -17,9 +17,9 @@ enum CalendarEntryOrigin: string
     public function label(): string
     {
         return match ($this) {
-            self::Manual            => 'Thủ công',
+            self::Manual            => __('Thủ công'),
             self::CoreIdeaExtractor => 'CoreIdeaExtractor (Layer 2)',
-            self::Aicem              => 'Gợi ý từ Aicem',
+            self::Aicem              => __('Gợi ý từ Aicem'),
         };
     }
 }

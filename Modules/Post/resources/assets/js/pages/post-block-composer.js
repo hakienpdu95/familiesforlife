@@ -1,3 +1,5 @@
+import { t } from '../../../../../../resources/js/shared/i18n.js';
+
 /**
  * pages/post-block-composer.js
  *
@@ -53,9 +55,9 @@
             return `<div class="pbc-block-header">
                 <span class="${badgeClass}">${esc(label)}</span>
                 <span style="margin-left:auto;display:flex;gap:2px;">
-                    <button type="button" class="btn btn-ghost btn-xs pbc-up" title="Lên">↑</button>
-                    <button type="button" class="btn btn-ghost btn-xs pbc-down" title="Xuống">↓</button>
-                    <button type="button" class="btn btn-ghost btn-xs text-error pbc-remove" title="Xoá block">✕</button>
+                    <button type="button" class="btn btn-ghost btn-xs pbc-up" title="${t('Lên')}">↑</button>
+                    <button type="button" class="btn btn-ghost btn-xs pbc-down" title="${t('Xuống')}">↓</button>
+                    <button type="button" class="btn btn-ghost btn-xs text-error pbc-remove" title="${t('Xoá block')}">✕</button>
                 </span>
             </div>`;
         }
@@ -75,7 +77,7 @@
         }
 
         function removeBlock(el) {
-            if (!confirm('Xoá block này khỏi bài viết?')) return;
+            if (!confirm(t('Xoá block này khỏi bài viết?'))) return;
             el.remove();
             updateTotalWordCount();
         }
@@ -98,7 +100,7 @@
                 if (text) totalWords += text.split(/\s+/).filter(Boolean).length;
             });
 
-            totalWordCountEl.textContent = `Tổng ${totalWords.toLocaleString('vi-VN')} từ (đoạn văn bản)`;
+            totalWordCountEl.textContent = `${t('Tổng :v_n từ (đoạn văn bản)', { v_n: (totalWords.toLocaleString('vi-VN')) })}`;
         }
 
         // ── Block: Đoạn văn bản ──────────────────────────────────────────
@@ -108,7 +110,7 @@
             const el = document.createElement('div');
             el.className = 'pbc-block';
             el.dataset.kind = 'text';
-            el.innerHTML = blockHeaderHtml('Đoạn văn bản', 'pbc-badge-text')
+            el.innerHTML = blockHeaderHtml(t('Đoạn văn bản'), 'pbc-badge-text')
                 + '<div class="pbc-block-body"><textarea class="jodit-editor" data-jodit-preset="standard"></textarea></div>';
             wireCommonControls(el);
             listEl.appendChild(el);
@@ -127,7 +129,7 @@
             const el = document.createElement('div');
             el.className = 'pbc-block';
             el.dataset.kind = 'product';
-            el.innerHTML = blockHeaderHtml(src === 'ocop' ? 'Khối sản phẩm OCOP' : 'Khối sản phẩm', src === 'ocop' ? 'pbc-badge-ocop' : 'pbc-badge-product')
+            el.innerHTML = blockHeaderHtml(src === 'ocop' ? t('Khối sản phẩm OCOP') : t('Khối sản phẩm'), src === 'ocop' ? 'pbc-badge-ocop' : 'pbc-badge-product')
                 + '<div class="pbc-block-body"></div>';
             wireCommonControls(el);
             listEl.appendChild(el);
@@ -142,17 +144,17 @@
             body.innerHTML = `
                 <div style="display:grid;grid-template-columns:1fr 200px;gap:10px;margin-bottom:10px;">
                     <div>
-                        <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Tiêu đề khối (không bắt buộc)</label>
+                        <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">${t('Tiêu đề khối (không bắt buộc)')}</label>
                         <input type="text" class="input input-bordered input-sm w-full pbc-heading" value="${esc(state.heading)}"
-                               placeholder="VD: Sản phẩm gợi ý cho mẹ và bé">
+                               placeholder="${t('VD: Sản phẩm gợi ý cho mẹ và bé')}">
                     </div>
                     <div>
-                        <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Mẫu hiển thị</label>
+                        <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">${t('Mẫu hiển thị')}</label>
                         <select class="select select-bordered select-sm w-full pbc-template">
-                            <option value="single_card">Thẻ đơn (1 sản phẩm)</option>
-                            <option value="banner">Banner nổi bật (1 sản phẩm)</option>
-                            <option value="multi_grid">Lưới nhiều sản phẩm (2-7)</option>
-                            <option value="compact_list">Danh sách gọn (2-7)</option>
+                            <option value="single_card">${t('Thẻ đơn (1 sản phẩm)')}</option>
+                            <option value="banner">${t('Banner nổi bật (1 sản phẩm)')}</option>
+                            <option value="multi_grid">${t('Lưới nhiều sản phẩm (2-7)')}</option>
+                            <option value="compact_list">${t('Danh sách gọn (2-7)')}</option>
                         </select>
                     </div>
                 </div>
@@ -163,7 +165,7 @@
                 </div>
                 <div>
                     <div style="font-size:11px;font-weight:600;margin-bottom:4px;">
-                        Đã chọn (<span class="pbc-count">${state.items.length}</span>/${MAX_ITEMS})
+                        ${t('Đã chọn (')}<span class="pbc-count">${state.items.length}</span>/${MAX_ITEMS})
                     </div>
                     <div class="pbc-selected-list" style="display:flex;flex-direction:column;gap:6px;"></div>
                 </div>
@@ -213,7 +215,7 @@
                         <div style="font-size:11px;opacity:.6;">${esc(item.cachedPrice || '')}</div>
                         <div style="margin-top:4px;">${linkChips || '<span style="font-size:11px;opacity:.4;">Sản phẩm chưa cấu hình link nào</span>'}</div>
                     </div>
-                    <button type="button" data-remove-idx="${idx}" title="Bỏ chọn"
+                    <button type="button" data-remove-idx="${idx}" title="${t('Bỏ chọn')}"
                         class="btn btn-ghost btn-xs text-error" style="flex-shrink:0;">×</button>
                 </div>`;
             }
@@ -235,7 +237,7 @@
                     });
                 } catch (e) {
                     resultsBox.style.display = 'block';
-                    resultsBox.innerHTML = '<div style="padding:8px;font-size:12px;color:#ef4444;">Không tải được danh sách sản phẩm.</div>';
+                    resultsBox.innerHTML = ('<div style="padding:8px;font-size:12px;color:#ef4444;">' + t('Không tải được danh sách sản phẩm.') + '</div>');
                 }
             }
 
@@ -252,7 +254,7 @@
             function pickProduct(p) {
                 if (!p || state.items.some((it) => it.productId === p.id)) return;
                 if (state.items.length >= MAX_ITEMS) {
-                    alert(`Đã đạt tối đa ${MAX_ITEMS} sản phẩm/khối.`);
+                    alert(`${t('Đã đạt tối đa :m_a_x__i_t_e_m_s sản phẩm/khối.', { m_a_x__i_t_e_m_s: (MAX_ITEMS) })}`);
                     return;
                 }
 
@@ -288,7 +290,7 @@
                     return;
                 }
                 if (item.buttons.length >= MAX_BUTTONS_PER_ITEM) {
-                    alert(`Tối đa ${MAX_BUTTONS_PER_ITEM} nút/sản phẩm.`);
+                    alert(`${t('Tối đa :m_a_x__b_u_t_t_o_n_s__p_e_r__i_t_e_m nút/sản phẩm.', { m_a_x__b_u_t_t_o_n_s__p_e_r__i_t_e_m: (MAX_BUTTONS_PER_ITEM) })}`);
                     return;
                 }
                 item.buttons.push({
@@ -308,7 +310,7 @@
             const el = document.createElement('div');
             el.className = 'pbc-block';
             el.dataset.kind = 'faq';
-            el.innerHTML = blockHeaderHtml('Câu hỏi thường gặp', 'pbc-badge-faq')
+            el.innerHTML = blockHeaderHtml(t('Câu hỏi thường gặp'), 'pbc-badge-faq')
                 + '<div class="pbc-block-body"></div>';
             wireCommonControls(el);
             listEl.appendChild(el);
@@ -321,12 +323,12 @@
         function renderFaqForm(body, state) {
             body.innerHTML = `
                 <div style="margin-bottom:10px;">
-                    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Tiêu đề khối (không bắt buộc)</label>
+                    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">${t('Tiêu đề khối (không bắt buộc)')}</label>
                     <input type="text" class="input input-bordered input-sm w-full pbc-faq-heading" value="${esc(state.heading)}"
-                           placeholder="VD: Câu hỏi thường gặp">
+                           placeholder="${t('VD: Câu hỏi thường gặp')}">
                 </div>
                 <div class="pbc-faq-items" style="display:flex;flex-direction:column;gap:8px;"></div>
-                <button type="button" class="btn btn-sm btn-outline pbc-faq-add mt-2">+ Thêm câu hỏi</button>
+                <button type="button" class="btn btn-sm btn-outline pbc-faq-add mt-2">${t('+ Thêm câu hỏi')}</button>
             `;
 
             body.querySelector('.pbc-faq-heading').addEventListener('input', (e) => { state.heading = e.target.value; });
@@ -338,10 +340,10 @@
                     <div class="pbc-faq-item" data-idx="${idx}" style="border:1px solid var(--fallback-b3,#e5e7eb);border-radius:8px;padding:8px;">
                         <div style="display:flex;gap:6px;align-items:start;">
                             <div style="flex:1;">
-                                <input type="text" class="input input-bordered input-sm w-full pbc-faq-question" placeholder="Câu hỏi" value="${esc(item.question)}">
-                                <textarea class="textarea textarea-bordered textarea-sm w-full mt-1 pbc-faq-answer" rows="2" placeholder="Câu trả lời">${esc(item.answer)}</textarea>
+                                <input type="text" class="input input-bordered input-sm w-full pbc-faq-question" placeholder="${t('Câu hỏi')}" value="${esc(item.question)}">
+                                <textarea class="textarea textarea-bordered textarea-sm w-full mt-1 pbc-faq-answer" rows="2" placeholder="${t('Câu trả lời')}">${esc(item.answer)}</textarea>
                             </div>
-                            <button type="button" class="btn btn-ghost btn-xs text-error pbc-faq-remove" title="Xoá câu hỏi">✕</button>
+                            <button type="button" class="btn btn-ghost btn-xs text-error pbc-faq-remove" title="${t('Xoá câu hỏi')}">✕</button>
                         </div>
                     </div>
                 `).join('');
@@ -373,7 +375,7 @@
             const el = document.createElement('div');
             el.className = 'pbc-block';
             el.dataset.kind = 'citation';
-            el.innerHTML = blockHeaderHtml('Trích dẫn có nguồn', 'pbc-badge-citation')
+            el.innerHTML = blockHeaderHtml(t('Trích dẫn có nguồn'), 'pbc-badge-citation')
                 + '<div class="pbc-block-body"></div>';
             wireCommonControls(el);
             listEl.appendChild(el);
@@ -386,18 +388,18 @@
         function renderCitationForm(body, state) {
             body.innerHTML = `
                 <div style="margin-bottom:10px;">
-                    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Nội dung trích dẫn/thống kê</label>
+                    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">${t('Nội dung trích dẫn/thống kê')}</label>
                     <textarea class="textarea textarea-bordered textarea-sm w-full pbc-citation-text" rows="2"
-                              placeholder="VD: 82% trẻ dưới 2 tuổi ở Việt Nam thiếu vi chất kẽm theo khảo sát quốc gia 2025">${esc(state.citationText)}</textarea>
+                              placeholder="${t('VD: 82% trẻ dưới 2 tuổi ở Việt Nam thiếu vi chất kẽm theo khảo sát quốc gia 2025')}">${esc(state.citationText)}</textarea>
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
                     <div>
-                        <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Tên nguồn (bắt buộc)</label>
+                        <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">${t('Tên nguồn (bắt buộc)')}</label>
                         <input type="text" class="input input-bordered input-sm w-full pbc-citation-source-name" value="${esc(state.citationSourceName)}"
-                               placeholder="VD: Bộ Y tế, 2025">
+                               placeholder="${t('VD: Bộ Y tế, 2025')}">
                     </div>
                     <div>
-                        <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Link nguồn (không bắt buộc)</label>
+                        <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">${t('Link nguồn (không bắt buộc)')}</label>
                         <input type="url" class="input input-bordered input-sm w-full pbc-citation-source-url" value="${esc(state.citationSourceUrl)}"
                                placeholder="https://...">
                     </div>
@@ -416,7 +418,7 @@
             const el = document.createElement('div');
             el.className = 'pbc-block';
             el.dataset.kind = 'howto';
-            el.innerHTML = blockHeaderHtml('Hướng dẫn từng bước', 'pbc-badge-howto')
+            el.innerHTML = blockHeaderHtml(t('Hướng dẫn từng bước'), 'pbc-badge-howto')
                 + '<div class="pbc-block-body"></div>';
             wireCommonControls(el);
             listEl.appendChild(el);
@@ -429,16 +431,16 @@
         function renderHowtoForm(body, state) {
             body.innerHTML = `
                 <div style="margin-bottom:10px;">
-                    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Tên hướng dẫn (không bắt buộc)</label>
+                    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">${t('Tên hướng dẫn (không bắt buộc)')}</label>
                     <input type="text" class="input input-bordered input-sm w-full pbc-howto-name" value="${esc(state.name)}"
-                           placeholder="VD: Cách pha sữa công thức đúng chuẩn">
+                           placeholder="${t('VD: Cách pha sữa công thức đúng chuẩn')}">
                 </div>
                 <div style="margin-bottom:10px;">
-                    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Mô tả ngắn (không bắt buộc)</label>
+                    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">${t('Mô tả ngắn (không bắt buộc)')}</label>
                     <textarea class="textarea textarea-bordered textarea-sm w-full pbc-howto-description" rows="2">${esc(state.description)}</textarea>
                 </div>
                 <div class="pbc-howto-steps" style="display:flex;flex-direction:column;gap:8px;"></div>
-                <button type="button" class="btn btn-sm btn-outline pbc-howto-add mt-2">+ Thêm bước</button>
+                <button type="button" class="btn btn-sm btn-outline pbc-howto-add mt-2">${t('+ Thêm bước')}</button>
             `;
 
             body.querySelector('.pbc-howto-name').addEventListener('input', (e) => { state.name = e.target.value; });
@@ -452,9 +454,9 @@
                         <div style="display:flex;gap:6px;align-items:start;">
                             <div style="flex:1;">
                                 <input type="text" class="input input-bordered input-sm w-full pbc-howto-step-name" placeholder="Tên bước (VD: Bước ${idx + 1} — Rửa tay sạch)" value="${esc(step.name)}">
-                                <textarea class="textarea textarea-bordered textarea-sm w-full mt-1 pbc-howto-step-text" rows="2" placeholder="Nội dung chi tiết bước này">${esc(step.text)}</textarea>
+                                <textarea class="textarea textarea-bordered textarea-sm w-full mt-1 pbc-howto-step-text" rows="2" placeholder="${t('Nội dung chi tiết bước này')}">${esc(step.text)}</textarea>
                             </div>
-                            <button type="button" class="btn btn-ghost btn-xs text-error pbc-howto-step-remove" title="Xoá bước">✕</button>
+                            <button type="button" class="btn btn-ghost btn-xs text-error pbc-howto-step-remove" title="${t('Xoá bước')}">✕</button>
                         </div>
                     </div>
                 `).join('');
@@ -488,7 +490,7 @@
             const el = document.createElement('div');
             el.className = 'pbc-block';
             el.dataset.kind = 'comparison';
-            el.innerHTML = blockHeaderHtml('Bảng so sánh', 'pbc-badge-comparison')
+            el.innerHTML = blockHeaderHtml(t('Bảng so sánh'), 'pbc-badge-comparison')
                 + '<div class="pbc-block-body"></div>';
             wireCommonControls(el);
             listEl.appendChild(el);
@@ -505,18 +507,18 @@
         function renderComparisonForm(body, state) {
             body.innerHTML = `
                 <div style="margin-bottom:10px;">
-                    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Tiêu đề bảng (không bắt buộc)</label>
+                    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">${t('Tiêu đề bảng (không bắt buộc)')}</label>
                     <input type="text" class="input input-bordered input-sm w-full pbc-comparison-name" value="${esc(state.name)}"
-                           placeholder="VD: So sánh 3 dòng máy hút sữa phổ biến">
+                           placeholder="${t('VD: So sánh 3 dòng máy hút sữa phổ biến')}">
                 </div>
                 <div style="margin-bottom:10px;">
-                    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Mô tả ngắn (không bắt buộc)</label>
+                    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">${t('Mô tả ngắn (không bắt buộc)')}</label>
                     <textarea class="textarea textarea-bordered textarea-sm w-full pbc-comparison-description" rows="2">${esc(state.description)}</textarea>
                 </div>
                 <div class="pbc-comparison-table-wrap" style="overflow-x:auto;"></div>
                 <div style="display:flex;gap:8px;margin-top:8px;">
-                    <button type="button" class="btn btn-sm btn-outline pbc-comparison-add-column">+ Thêm cột</button>
-                    <button type="button" class="btn btn-sm btn-outline pbc-comparison-add-row">+ Thêm tiêu chí</button>
+                    <button type="button" class="btn btn-sm btn-outline pbc-comparison-add-column">${t('+ Thêm cột')}</button>
+                    <button type="button" class="btn btn-sm btn-outline pbc-comparison-add-row">${t('+ Thêm tiêu chí')}</button>
                 </div>
             `;
 
@@ -534,7 +536,7 @@
                         <div style="display:flex;gap:2px;align-items:center;">
                             <input type="text" class="input input-bordered input-sm pbc-comparison-column-label" data-col-idx="${colIdx}"
                                    value="${esc(col.label)}" placeholder="Cột ${colIdx + 1}">
-                            <button type="button" class="btn btn-ghost btn-xs text-error pbc-comparison-remove-column" data-col-idx="${colIdx}" title="Xoá cột">✕</button>
+                            <button type="button" class="btn btn-ghost btn-xs text-error pbc-comparison-remove-column" data-col-idx="${colIdx}" title="${t('Xoá cột')}">✕</button>
                         </div>
                     </th>`;
                 });
@@ -545,8 +547,8 @@
                         <td style="padding:4px;">
                             <div style="display:flex;gap:2px;align-items:center;">
                                 <input type="text" class="input input-bordered input-sm pbc-comparison-row-label" data-row-idx="${rowIdx}"
-                                       value="${esc(row.label)}" placeholder="Tiêu chí">
-                                <button type="button" class="btn btn-ghost btn-xs text-error pbc-comparison-remove-row" data-row-idx="${rowIdx}" title="Xoá tiêu chí">✕</button>
+                                       value="${esc(row.label)}" placeholder="${t('Tiêu chí')}">
+                                <button type="button" class="btn btn-ghost btn-xs text-error pbc-comparison-remove-row" data-row-idx="${rowIdx}" title="${t('Xoá tiêu chí')}">✕</button>
                             </div>
                         </td>`;
                     row.values.forEach((value, colIdx) => {
@@ -574,7 +576,7 @@
                 tableWrap.querySelectorAll('.pbc-comparison-remove-column').forEach((btn) => {
                     btn.addEventListener('click', () => {
                         if (state.columns.length <= 2) {
-                            alert('Bảng so sánh cần tối thiểu 2 cột.');
+                            alert(t('Bảng so sánh cần tối thiểu 2 cột.'));
                             return;
                         }
                         const idx = Number(btn.dataset.colIdx);
@@ -594,7 +596,7 @@
 
             body.querySelector('.pbc-comparison-add-column').addEventListener('click', () => {
                 if (state.columns.length >= 6) {
-                    alert('Bảng so sánh tối đa 6 cột.');
+                    alert(t('Bảng so sánh tối đa 6 cột.'));
                     return;
                 }
                 state.columns.push({ label: '' });
@@ -604,7 +606,7 @@
 
             body.querySelector('.pbc-comparison-add-row').addEventListener('click', () => {
                 if (state.rows.length >= 20) {
-                    alert('Bảng so sánh tối đa 20 tiêu chí.');
+                    alert(t('Bảng so sánh tối đa 20 tiêu chí.'));
                     return;
                 }
                 state.rows.push({ label: '', values: state.columns.map(() => '') });
@@ -622,7 +624,7 @@
             const el = document.createElement('div');
             el.className = 'pbc-block';
             el.dataset.kind = 'testimonial';
-            el.innerHTML = blockHeaderHtml('Lời chứng thực khách hàng', 'pbc-badge-testimonial')
+            el.innerHTML = blockHeaderHtml(t('Lời chứng thực khách hàng'), 'pbc-badge-testimonial')
                 + '<div class="pbc-block-body"></div>';
             wireCommonControls(el);
             listEl.appendChild(el);
@@ -637,35 +639,35 @@
         function renderTestimonialForm(body, state) {
             body.innerHTML = `
                 <div style="margin-bottom:10px;">
-                    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Nội dung lời chứng thực</label>
+                    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">${t('Nội dung lời chứng thực')}</label>
                     <textarea class="textarea textarea-bordered textarea-sm w-full pbc-testimonial-quote" rows="2"
-                              placeholder="VD: Nhờ sản phẩm này mà bé nhà mình ăn dặm ngoan hẳn...">${esc(state.quote)}</textarea>
+                              placeholder="${t('VD: Nhờ sản phẩm này mà bé nhà mình ăn dặm ngoan hẳn...')}">${esc(state.quote)}</textarea>
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
                     <div>
-                        <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Tên người chứng thực (bắt buộc)</label>
+                        <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">${t('Tên người chứng thực (bắt buộc)')}</label>
                         <input type="text" class="input input-bordered input-sm w-full pbc-testimonial-person-name" value="${esc(state.personName)}"
-                               placeholder="VD: Chị Lan">
+                               placeholder="${t('VD: Chị Lan')}">
                     </div>
                     <div>
-                        <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Chức danh (không bắt buộc)</label>
+                        <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">${t('Chức danh (không bắt buộc)')}</label>
                         <input type="text" class="input input-bordered input-sm w-full pbc-testimonial-person-title" value="${esc(state.personTitle)}"
-                               placeholder="VD: Mẹ 2 con">
+                               placeholder="${t('VD: Mẹ 2 con')}">
                     </div>
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
                     <div>
-                        <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Công ty/thương hiệu (không bắt buộc)</label>
+                        <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">${t('Công ty/thương hiệu (không bắt buộc)')}</label>
                         <input type="text" class="input input-bordered input-sm w-full pbc-testimonial-company-name" value="${esc(state.companyName)}">
                     </div>
                     <div>
-                        <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Kết quả đạt được (không bắt buộc)</label>
+                        <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">${t('Kết quả đạt được (không bắt buộc)')}</label>
                         <input type="text" class="input input-bordered input-sm w-full pbc-testimonial-result-metric" value="${esc(state.resultMetric)}"
-                               placeholder="VD: Tiết kiệm 5 giờ/tuần">
+                               placeholder="${t('VD: Tiết kiệm 5 giờ/tuần')}">
                     </div>
                 </div>
                 <div>
-                    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">Link ảnh đại diện (không bắt buộc)</label>
+                    <label style="font-size:11px;font-weight:600;display:block;margin-bottom:2px;">${t('Link ảnh đại diện (không bắt buộc)')}</label>
                     <input type="url" class="input input-bordered input-sm w-full pbc-testimonial-avatar-url" value="${esc(state.avatarUrl)}"
                            placeholder="https://...">
                 </div>
@@ -776,32 +778,32 @@
             const errs = [];
             if (el.dataset.kind === 'faq') {
                 const items = el._faqState.items;
-                if (items.length === 0) errs.push('Cần ít nhất 1 câu hỏi.');
+                if (items.length === 0) errs.push(t('Cần ít nhất 1 câu hỏi.'));
                 items.forEach((it, i) => {
-                    if (blank(it.question)) errs.push(`Câu hỏi #${i + 1}: chưa nhập câu hỏi.`);
-                    if (blank(it.answer)) errs.push(`Câu hỏi #${i + 1}: chưa nhập câu trả lời.`);
+                    if (blank(it.question)) errs.push(`${t('Câu hỏi #:value: chưa nhập câu hỏi.', { value: (i + 1) })}`);
+                    if (blank(it.answer)) errs.push(`${t('Câu hỏi #:value: chưa nhập câu trả lời.', { value: (i + 1) })}`);
                 });
             } else if (el.dataset.kind === 'howto') {
                 const steps = el._howtoState.steps;
-                if (steps.length < 2) errs.push('Cần ít nhất 2 bước.');
+                if (steps.length < 2) errs.push(t('Cần ít nhất 2 bước.'));
                 steps.forEach((st, i) => {
-                    if (blank(st.name)) errs.push(`Bước #${i + 1}: chưa nhập tên bước.`);
-                    if (blank(st.text)) errs.push(`Bước #${i + 1}: chưa nhập nội dung bước.`);
+                    if (blank(st.name)) errs.push(`${t('Bước #:value: chưa nhập tên bước.', { value: (i + 1) })}`);
+                    if (blank(st.text)) errs.push(`${t('Bước #:value: chưa nhập nội dung bước.', { value: (i + 1) })}`);
                 });
             } else if (el.dataset.kind === 'citation') {
                 const st = el._citationState;
-                if (blank(st.citationText)) errs.push('Chưa nhập nội dung trích dẫn.');
-                if (blank(st.citationSourceName)) errs.push('Chưa ghi tên nguồn trích dẫn.');
+                if (blank(st.citationText)) errs.push(t('Chưa nhập nội dung trích dẫn.'));
+                if (blank(st.citationSourceName)) errs.push(t('Chưa ghi tên nguồn trích dẫn.'));
             } else if (el.dataset.kind === 'testimonial') {
                 const st = el._testimonialState;
-                if (blank(st.quote)) errs.push('Chưa nhập nội dung lời chứng thực.');
-                if (blank(st.personName)) errs.push('Chưa nhập tên người chứng thực.');
+                if (blank(st.quote)) errs.push(t('Chưa nhập nội dung lời chứng thực.'));
+                if (blank(st.personName)) errs.push(t('Chưa nhập tên người chứng thực.'));
             } else if (el.dataset.kind === 'comparison') {
                 const st = el._comparisonState;
-                if (st.columns.length < 2 || st.columns.length > 6) errs.push('Cần 2–6 cột so sánh.');
-                st.columns.forEach((c, i) => { if (blank(c.label)) errs.push(`Cột #${i + 1}: chưa nhập tên cột.`); });
-                if (st.rows.length === 0) errs.push('Cần ít nhất 1 tiêu chí so sánh.');
-                st.rows.forEach((r, i) => { if (blank(r.label)) errs.push(`Tiêu chí #${i + 1}: chưa nhập tên tiêu chí.`); });
+                if (st.columns.length < 2 || st.columns.length > 6) errs.push(t('Cần 2–6 cột so sánh.'));
+                st.columns.forEach((c, i) => { if (blank(c.label)) errs.push(`${t('Cột #:value: chưa nhập tên cột.', { value: (i + 1) })}`); });
+                if (st.rows.length === 0) errs.push(t('Cần ít nhất 1 tiêu chí so sánh.'));
+                st.rows.forEach((r, i) => { if (blank(r.label)) errs.push(`${t('Tiêu chí #:value: chưa nhập tên tiêu chí.', { value: (i + 1) })}`); });
             }
             return errs;
         }
@@ -831,7 +833,7 @@
                 const data = wrap && window.Alpine ? window.Alpine.$data(wrap) : null;
                 if (data && 'tab' in data) data.tab = 'noi_dung';
                 setTimeout(() => firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
-                window.Toast?.error?.('Có khối nội dung chưa nhập đủ — xem các khối được đánh dấu đỏ.');
+                window.Toast?.error?.(t('Có khối nội dung chưa nhập đủ — xem các khối được đánh dấu đỏ.'));
                 return;
             }
 

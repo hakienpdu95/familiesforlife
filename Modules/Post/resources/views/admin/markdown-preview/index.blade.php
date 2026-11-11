@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', 'Xem trước Markdown')
+@section('title', __('Xem trước Markdown'))
 
 @section('content')
 <div class="space-y-6">
@@ -7,11 +7,11 @@
     {{-- ── Header ─────────────────────────────────────────────────────── --}}
     <div class="flex flex-wrap items-start justify-between gap-4">
         <div class="min-w-0">
-            <h1 class="text-2xl font-bold text-base-content">Xem trước Markdown</h1>
+            <h1 class="text-2xl font-bold text-base-content">{{ __('Xem trước Markdown') }}</h1>
             <p class="text-sm text-base-content/50 mt-0.5 max-w-2xl">
-                Xem đúng bản Markdown mà content negotiation trả về khi crawler/agent gửi header
+                {{ __('Xem đúng bản Markdown mà content negotiation trả về khi crawler/agent gửi header') }}
                 <code class="bg-base-200 px-1.5 py-0.5 rounded text-xs">Accept: text/markdown</code>
-                khi tải URL bài viết (cùng 1 URL với bản HTML — không có URL riêng cho bản Markdown).
+                {{ __('khi tải URL bài viết (cùng 1 URL với bản HTML — không có URL riêng cho bản Markdown).') }}
             </p>
         </div>
     </div>
@@ -21,7 +21,7 @@
         <div class="card-body p-4">
             <form method="GET" action="{{ route('backend.post.markdown-preview.index') }}">
                 <label class="label" for="markdown-preview-picker">
-                    <span class="label-text font-medium">Chọn bài viết đã xuất bản</span>
+                    <span class="label-text font-medium">{{ __('Chọn bài viết đã xuất bản') }}</span>
                 </label>
                 <select id="markdown-preview-picker" name="translation_id"
                         data-ts-remote-url="{{ route('backend.api.post.articles.search') }}"
@@ -49,7 +49,7 @@
                     <span class="badge badge-ghost badge-sm font-mono">Content-Type: text/markdown</span>
                     <button type="button" id="markdown-copy-btn" class="btn btn-ghost btn-sm gap-1.5"
                             data-clipboard-target="markdown-source">
-                        Sao chép
+                        {{ __('Sao chép') }}
                     </button>
                 </div>
             </div>
@@ -60,7 +60,7 @@
     @else
     <div class="card bg-base-100 border border-base-200 shadow-sm">
         <div class="card-body p-8 text-center text-sm text-base-content/40 italic">
-            Chọn 1 bài viết ở trên để xem trước bản Markdown.
+            {{ __('Chọn 1 bài viết ở trên để xem trước bản Markdown.') }}
         </div>
     </div>
     @endif
@@ -77,7 +77,7 @@
 
         navigator.clipboard.writeText(source.textContent).then(() => {
             const label = this.textContent;
-            this.textContent = 'Đã sao chép ✓';
+            this.textContent = @js(__('Đã sao chép ✓'));
             setTimeout(() => { this.textContent = label; }, 1500);
         });
     });

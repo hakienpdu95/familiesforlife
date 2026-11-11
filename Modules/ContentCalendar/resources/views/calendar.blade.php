@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', 'Lịch biên tập — Lịch tháng')
+@section('title', __('Lịch biên tập — Lịch tháng'))
 
 @section('content')
 <div x-data="contentCalendarMonthView({{ Js::from([
@@ -20,28 +20,28 @@
     {{-- ── Header ──────────────────────────────────────────────────────── --}}
     <div class="mb-4 flex items-start justify-between flex-wrap gap-3">
         <div>
-            <h1 class="text-2xl font-bold text-base-content">Lịch biên tập</h1>
+            <h1 class="text-2xl font-bold text-base-content">{{ __('Lịch biên tập') }}</h1>
             <p class="text-sm text-base-content/50 mt-0.5">
-                Kế hoạch nội dung theo ngày dự kiến đăng — xem theo cột trạng thái ở
+                {{ __('Kế hoạch nội dung theo ngày dự kiến đăng — xem theo cột trạng thái ở') }}
                 <a :href="boardUrl" class="link link-primary">trang Board</a>.
             </p>
         </div>
-        <button type="button" class="btn btn-primary btn-sm" x-show="canManage" x-cloak @click="openCreateModal(null)">+ Tạo kế hoạch</button>
+        <button type="button" class="btn btn-primary btn-sm" x-show="canManage" x-cloak @click="openCreateModal(null)">{{ __('+ Tạo kế hoạch') }}</button>
     </div>
 
     {{-- ── Thanh điều hướng tháng ──────────────────────────────────────── --}}
     <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
         <div class="flex items-center gap-1">
-            <button type="button" class="btn btn-sm btn-square btn-ghost" @click="goToMonth(-1)" aria-label="Tháng trước">
+            <button type="button" class="btn btn-sm btn-square btn-ghost" @click="goToMonth(-1)" aria-label="{{ __('Tháng trước') }}">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 18-6-6 6-6"/></svg>
             </button>
             <span class="min-w-36 text-center font-semibold text-base-content" x-text="monthLabel()"></span>
-            <button type="button" class="btn btn-sm btn-square btn-ghost" @click="goToMonth(1)" aria-label="Tháng sau">
+            <button type="button" class="btn btn-sm btn-square btn-ghost" @click="goToMonth(1)" aria-label="{{ __('Tháng sau') }}">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18 6-6-6-6"/></svg>
             </button>
         </div>
         <div class="flex items-center gap-2">
-            <button type="button" class="btn btn-ghost btn-sm" @click="goToToday()">Hôm nay</button>
+            <button type="button" class="btn btn-ghost btn-sm" @click="goToToday()">{{ __('Hôm nay') }}</button>
             <input type="month" x-model="selectedMonth" @change="renderMonth()" class="input input-sm input-bordered">
         </div>
     </div>
@@ -56,13 +56,13 @@
         </template>
     </div>
 
-    <p x-show="loading" class="text-sm text-base-content/50 mb-2">Đang tải...</p>
+    <p x-show="loading" class="text-sm text-base-content/50 mb-2">{{ __('Đang tải...') }}</p>
 
     {{-- ── Chưa xếp lịch ───────────────────────────────────────────────── --}}
     <div class="card bg-base-100 shadow-sm border border-base-200 mb-4" x-show="!loading && unscheduled.length > 0" x-cloak>
         <div class="card-body p-3">
             <p class="text-xs font-semibold text-base-content/60 mb-2 uppercase tracking-wide">
-                Chưa xếp lịch <span class="badge badge-sm badge-ghost" x-text="unscheduled.length"></span>
+                {{ __('Chưa xếp lịch') }} <span class="badge badge-sm badge-ghost" x-text="unscheduled.length"></span>
             </p>
             <div class="flex flex-wrap gap-1.5">
                 <template x-for="entry in unscheduled" :key="entry.uuid">
@@ -99,7 +99,7 @@
                               x-text="cell.day"></span>
                         <button type="button" x-show="canManage && cell.inMonth" x-cloak
                                 class="w-5 h-5 rounded flex items-center justify-center text-base-content/40 opacity-0 group-hover:opacity-100 hover:bg-base-200 hover:text-base-content transition"
-                                title="Tạo kế hoạch cho ngày này"
+                                title="{{ __('Tạo kế hoạch cho ngày này') }}"
                                 @click="openCreateModal(cell.dateStr)">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                         </button>
@@ -121,13 +121,13 @@
     </div>
 
     <p x-show="!loading && entries.length === 0" x-cloak class="text-sm text-base-content/40 text-center py-10">
-        Chưa có kế hoạch nào — bấm "+ Tạo kế hoạch" để bắt đầu.
+        {{ __('Chưa có kế hoạch nào — bấm "+ Tạo kế hoạch" để bắt đầu.') }}
     </p>
 
     {{-- ── Modal tạo/sửa entry ─────────────────────────────────────────── --}}
     <dialog x-ref="entryDialog" class="modal">
         <div class="modal-box max-w-2xl">
-            <h3 class="font-bold text-lg" x-text="editingEntry ? 'Sửa kế hoạch' : 'Tạo kế hoạch mới'"></h3>
+            <h3 class="font-bold text-lg" x-text="editingEntry ? @js(__('Sửa kế hoạch')) : @js(__('Tạo kế hoạch mới'))"></h3>
 
             {{-- docs/form-ui-spec.md §13.1 — grid 2 cột desktop, field full-width dùng sm:col-span-2.
                  §14 — cấu trúc form-control bắt buộc (label + hint + input + error). --}}
@@ -135,10 +135,10 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="form-control sm:col-span-2">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Tiêu đề <span class="text-error">*</span></span>
+                            <span class="label-text font-medium">{{ __('Tiêu đề') }} <span class="text-error">*</span></span>
                         </label>
                         <input type="text" x-model="form.title" required maxlength="255"
-                               placeholder="VD: 7 mẹo giúp bé ăn dặm không quấy khóc"
+                               placeholder="{{ __('VD: 7 mẹo giúp bé ăn dặm không quấy khóc') }}"
                                class="input input-bordered input-sm w-full"
                                :class="fieldErrors.title ? 'input-error' : ''">
                         <p x-show="fieldErrors.title" x-cloak class="mt-1 text-xs text-error" x-text="fieldErrors.title?.[0]"></p>
@@ -151,8 +151,8 @@
                         <select id="ts-entry-category" x-model="form.post_category_id" required
                                 class="select select-bordered select-sm w-full"
                                 :class="fieldErrors.post_category_id ? 'select-error' : ''"
-                                data-ts-placeholder="— Chọn category —">
-                            <option value="" disabled>— Chọn category —</option>
+                                data-ts-placeholder="{{ __('— Chọn category —') }}">
+                            <option value="" disabled>{{ __('— Chọn category —') }}</option>
                             <template x-for="cat in categories" :key="cat.id">
                                 <option :value="cat.id" :disabled="!cat.selectable" x-text="categoryOptionLabel(cat)"></option>
                             </template>
@@ -162,11 +162,11 @@
 
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Nguồn gốc ý tưởng <span class="text-error">*</span></span>
+                            <span class="label-text font-medium">{{ __('Nguồn gốc ý tưởng') }} <span class="text-error">*</span></span>
                         </label>
                         <select id="ts-entry-origin" x-model="form.origin"
                                 class="select select-bordered select-sm w-full"
-                                data-ts-placeholder="— Chọn nguồn gốc —">
+                                data-ts-placeholder="{{ __('— Chọn nguồn gốc —') }}">
                             <template x-for="o in origins" :key="o.value">
                                 <option :value="o.value" x-text="o.label"></option>
                             </template>
@@ -176,8 +176,8 @@
 
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Ngày dự kiến đăng</span>
-                            <span class="label-text-alt text-base-content/40 text-xs">Không bắt buộc</span>
+                            <span class="label-text font-medium">{{ __('Ngày dự kiến đăng') }}</span>
+                            <span class="label-text-alt text-base-content/40 text-xs">{{ __('Không bắt buộc') }}</span>
                         </label>
                         <input type="text" id="fp-entry-target-publish-date" x-model="form.target_publish_date"
                                placeholder="dd/mm/yyyy"
@@ -188,13 +188,13 @@
 
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Người phụ trách</span>
-                            <span class="label-text-alt text-base-content/40 text-xs">Không bắt buộc</span>
+                            <span class="label-text font-medium">{{ __('Người phụ trách') }}</span>
+                            <span class="label-text-alt text-base-content/40 text-xs">{{ __('Không bắt buộc') }}</span>
                         </label>
                         <select id="ts-entry-assignee" x-model="form.assigned_to"
                                 class="select select-bordered select-sm w-full"
-                                data-ts-placeholder="— Chưa gán —">
-                            <option value="">— Chưa gán —</option>
+                                data-ts-placeholder="{{ __('— Chưa gán —') }}">
+                            <option value="">{{ __('— Chưa gán —') }}</option>
                             <template x-for="u in assignableUsers" :key="u.id">
                                 <option :value="u.id" x-text="u.name"></option>
                             </template>
@@ -206,11 +206,11 @@
                 {{-- Textarea ngoài grid — §13.1 "Textarea, rich text: Full (ngoài grid)". --}}
                 <div class="form-control mt-4">
                     <label class="label py-0 pb-1.5">
-                        <span class="label-text font-medium">Tóm tắt / góc nhìn</span>
-                        <span class="label-text-alt text-base-content/40 text-xs">Không bắt buộc</span>
+                        <span class="label-text font-medium">{{ __('Tóm tắt / góc nhìn') }}</span>
+                        <span class="label-text-alt text-base-content/40 text-xs">{{ __('Không bắt buộc') }}</span>
                     </label>
                     <textarea x-model="form.brief" rows="2" maxlength="2000"
-                              placeholder="Góc nhìn riêng / tóm tắt ngắn — không phải nội dung bài"
+                              placeholder="{{ __('Góc nhìn riêng / tóm tắt ngắn — không phải nội dung bài') }}"
                               class="textarea textarea-bordered textarea-sm w-full"
                               :class="fieldErrors.brief ? 'textarea-error' : ''"></textarea>
                     <p x-show="fieldErrors.brief" x-cloak class="mt-1 text-xs text-error" x-text="fieldErrors.brief?.[0]"></p>
@@ -218,11 +218,11 @@
 
                 <div class="form-control mt-4" x-show="form.origin !== 'manual'" x-cloak>
                     <label class="label py-0 pb-1.5">
-                        <span class="label-text font-medium">Ghi chú nguồn gốc <span class="text-error">*</span></span>
-                        <span class="label-text-alt text-base-content/40 text-xs">Dán ý tưởng + lý do</span>
+                        <span class="label-text font-medium">{{ __('Ghi chú nguồn gốc') }} <span class="text-error">*</span></span>
+                        <span class="label-text-alt text-base-content/40 text-xs">{{ __('Dán ý tưởng + lý do') }}</span>
                     </label>
                     <textarea x-model="form.origin_note" rows="3" maxlength="5000"
-                              placeholder="VD: dán nguyên dòng ý tưởng + lý do từ bảng Layer 2 CoreIdeaExtractor"
+                              placeholder="{{ __('VD: dán nguyên dòng ý tưởng + lý do từ bảng Layer 2 CoreIdeaExtractor') }}"
                               class="textarea textarea-bordered textarea-sm w-full font-mono text-xs"
                               :class="fieldErrors.origin_note ? 'textarea-error' : ''"
                               :required="form.origin !== 'manual'"></textarea>
@@ -234,15 +234,15 @@
                     <span class="badge" :class="editingEntry?.status_badge_class" x-text="editingEntry?.status_label"></span>
 
                     <select class="select select-xs select-bordered" x-show="editingEntry?.can_manage" @change="changeStatus($event.target.value); $event.target.value=''">
-                        <option value="">Chuyển sang...</option>
+                        <option value="">{{ __('Chuyển sang...') }}</option>
                         <template x-for="opt in nextStatusOptions(editingEntry)" :key="opt.value">
                             <option :value="opt.value" x-text="opt.label"></option>
                         </template>
                     </select>
 
-                    <button type="button" class="btn btn-2xs btn-ghost" x-show="editingEntry?.can_manage && !editingEntry?.is_linked" @click="promptLinkArticle()">Gắn bài viết</button>
-                    <a x-show="editingEntry?.is_linked" href="#" class="btn btn-2xs btn-ghost" @click.prevent="alert('post_article uuid: ' + editingEntry.post_article.uuid)">Xem bài viết</a>
-                    <button type="button" class="btn btn-2xs btn-ghost text-error ml-auto" x-show="editingEntry?.can_delete" @click="deleteEntry()">Xoá kế hoạch</button>
+                    <button type="button" class="btn btn-2xs btn-ghost" x-show="editingEntry?.can_manage && !editingEntry?.is_linked" @click="promptLinkArticle()">{{ __('Gắn bài viết') }}</button>
+                    <a x-show="editingEntry?.is_linked" href="#" class="btn btn-2xs btn-ghost" @click.prevent="alert('post_article uuid: ' + editingEntry.post_article.uuid)">{{ __('Xem bài viết') }}</a>
+                    <button type="button" class="btn btn-2xs btn-ghost text-error ml-auto" x-show="editingEntry?.can_delete" @click="deleteEntry()">{{ __('Xoá kế hoạch') }}</button>
                 </div>
 
                 {{-- docs/form-ui-spec.md §20 — Submit Actions Bar, phương án "có validation state". --}}
@@ -252,10 +252,10 @@
                         <span x-text="errorMessage"></span>
                     </div>
                     <div class="ml-auto flex gap-2">
-                        <button type="button" class="btn btn-ghost btn-sm" @click="closeModal()">Đóng</button>
+                        <button type="button" class="btn btn-ghost btn-sm" @click="closeModal()">{{ __('Đóng') }}</button>
                         <button type="submit" class="btn btn-primary btn-sm gap-2" :disabled="saving" :class="{ 'btn-disabled': saving }">
                             <span x-show="saving" class="loading loading-spinner loading-xs"></span>
-                            <span x-text="saving ? 'Đang lưu...' : (editingEntry ? 'Lưu thay đổi' : 'Tạo kế hoạch')"></span>
+                            <span x-text="saving ? @js(__('Đang lưu...')) : (editingEntry ? @js(__('Lưu thay đổi')) : @js(__('Tạo kế hoạch')))"></span>
                         </button>
                     </div>
                 </div>

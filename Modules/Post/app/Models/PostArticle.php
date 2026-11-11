@@ -294,7 +294,7 @@ class PostArticle extends Model implements HasMedia, PlaylistableContract
 
     public function getPlaylistCardTypeLabel(): string
     {
-        return 'Bài viết';
+        return __('Bài viết');
     }
 
     public function isPlaylistCardVisible(): bool

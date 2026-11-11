@@ -16,7 +16,7 @@ class PublishEventAction
         abort_unless(
             $event->status->canTransitionTo(EventStatus::Published),
             422,
-            "Không thể xuất bản sự kiện đang ở trạng thái \"{$event->status->label()}\"."
+            __('Không thể xuất bản sự kiện đang ở trạng thái ":status".', ['status' => $event->status->label()])
         );
 
         $event->update([

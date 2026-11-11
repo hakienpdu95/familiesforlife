@@ -362,14 +362,14 @@ class MediaUploadService
             ->unique()
             ->implode(', ');
 
-        return "File '{$fileName}' có định dạng không hợp lệ. Chỉ chấp nhận: {$labels}.";
+        return __('File \':file_name\' có định dạng không hợp lệ. Chỉ chấp nhận: :labels.', ['file_name' => $fileName, 'labels' => $labels]);
     }
 
     public static function tooLargeMessage(string $fileName, int $maxKb): string
     {
         $limit = $maxKb >= 1024 ? round($maxKb / 1024).' MB' : $maxKb.' KB';
 
-        return "File '{$fileName}' quá lớn. Tối đa {$limit}.";
+        return __('File \':file_name\' quá lớn. Tối đa :limit.', ['file_name' => $fileName, 'limit' => $limit]);
     }
 
     public static function extensionAllowed(string $fileName, array $allowedMime): bool

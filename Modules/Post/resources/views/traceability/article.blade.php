@@ -5,7 +5,7 @@
         <header class="px-3 pt-5">
             @if ($category)<p class="tx-eyebrow">{{ $category }}</p>@endif
             <h1 class="tx-display text-[26px] leading-[1.25] mt-1.5">{{ $title }}</h1>
-            @php($meta = array_filter([$published_label ? 'Đăng '.$published_label : null, $updated_label ? 'Cập nhật '.$updated_label : null, $reading_minutes ? $reading_minutes.' phút đọc' : null]))
+            @php($meta = array_filter([$published_label ? __('Đăng :date', ['date' => $published_label]) : null, $updated_label ? __('Cập nhật :date', ['date' => $updated_label]) : null, $reading_minutes ? __(':count phút đọc', ['count' => $reading_minutes]) : null]))
             @if ($meta)
                 <p class="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] font-medium text-[#78716c]">
                     @foreach ($meta as $m)
@@ -20,13 +20,13 @@
         </header>
 
         @if ($sponsor)
-            <aside class="mx-4 mt-4 flex items-center gap-3 rounded-lg bg-[#fdf8ea] border border-[#ead9a8] px-3.5 py-3" aria-label="Công bố tài trợ">
+            <aside class="mx-4 mt-4 flex items-center gap-3 rounded-lg bg-[#fdf8ea] border border-[#ead9a8] px-3.5 py-3" aria-label="{{ __('Công bố tài trợ') }}">
                 @if (! empty($sponsor['logo']))
                     <img src="{{ $sponsor['logo'] }}" alt="{{ $sponsor['name'] }}" width="40" height="40" class="w-10 h-10 rounded-md bg-base-100 object-contain shrink-0">
                 @endif
                 <p class="text-[13px] leading-snug text-base-content/75">
-                    <span class="block mb-0.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#8a6413]">{{ $sponsor['label'] ?: 'Nội dung tài trợ' }}</span>
-                    Bài viết được thực hiện với sự tài trợ của <strong class="text-base-content">{{ $sponsor['name'] ?: 'đối tác' }}</strong>.
+                    <span class="block mb-0.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#8a6413]">{{ $sponsor['label'] ?: __('Nội dung tài trợ') }}</span>
+                    {{ __('Bài viết được thực hiện với sự tài trợ của') }} <strong class="text-base-content">{{ $sponsor['name'] ?: __('đối tác') }}</strong>.
                     @if (! empty($sponsor['disclosure'])){{ $sponsor['disclosure'] }}@endif
                 </p>
             </aside>
@@ -49,7 +49,7 @@
 
     @if ($citations)
         <section class="tx-section">
-            <h2 class="tx-section-title">Nguồn tham khảo <small>{{ count($citations) }}</small></h2>
+            <h2 class="tx-section-title">{{ __('Nguồn tham khảo') }} <small>{{ count($citations) }}</small></h2>
             <ol class="tx-card tx-rows text-[14px]">
                 @foreach ($citations as $citation)
                     <li class="flex gap-3 px-4 py-3">
@@ -70,7 +70,7 @@
 
     @if ($tags)
         <section class="tx-section">
-            <h2 class="tx-section-title">Chủ đề</h2>
+            <h2 class="tx-section-title">{{ __('Chủ đề') }}</h2>
             <p class="flex flex-wrap gap-2">
                 @foreach ($tags as $tag)
                     <span class="inline-flex items-center h-8 px-2.5 rounded-md bg-base-100 border border-[var(--tx-line)] text-[13px] font-medium text-[#57534e]">#{{ $tag }}</span>

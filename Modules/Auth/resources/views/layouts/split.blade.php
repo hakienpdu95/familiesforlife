@@ -5,9 +5,9 @@
 @section('content')
 @php
     $slides = [
-        ['title' => 'Hệ thống Quản trị Nội dung', 'text' => 'Quản lý nội dung, dữ liệu và quy trình làm việc của tổ chức trên một nền tảng duy nhất.'],
-        ['title' => 'AI Studio tích hợp', 'text' => 'Khai thác ý tưởng, phân tích và sản xuất nội dung nhanh hơn với trợ lý AI.'],
-        ['title' => 'Phân quyền linh hoạt', 'text' => 'Kiểm soát truy cập theo vai trò, an toàn cho mọi phòng ban trong tổ chức.'],
+        ['title' => __('Hệ thống Quản trị Nội dung'), 'text' => __('Quản lý nội dung, dữ liệu và quy trình làm việc của tổ chức trên một nền tảng duy nhất.')],
+        ['title' => __('AI Studio tích hợp'), 'text' => __('Khai thác ý tưởng, phân tích và sản xuất nội dung nhanh hơn với trợ lý AI.')],
+        ['title' => __('Phân quyền linh hoạt'), 'text' => __('Kiểm soát truy cập theo vai trò, an toàn cho mọi phòng ban trong tổ chức.')],
     ];
 @endphp
 <div class="grid h-screen w-full lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] xl:grid-cols-2">
@@ -22,7 +22,7 @@
         <div class="relative flex w-full max-w-2xl flex-col items-center text-center">
             <img
                 src="{{ asset('images/post-cover-placeholder.svg') }}"
-                alt="Minh họa"
+                alt="{{ __('Minh họa') }}"
                 width="640"
                 height="480"
                 class="mb-10 aspect-4/3 h-auto w-4/5 rounded-box object-contain"

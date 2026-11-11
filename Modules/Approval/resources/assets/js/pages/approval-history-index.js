@@ -1,5 +1,6 @@
 import { createTs } from '@shared/tom-select-factory.js';
 
+import { t } from '../../../../../../resources/js/shared/i18n.js';
 function esc(v) {
     if (v == null) return '';
     return String(v)
@@ -11,16 +12,16 @@ const EMPTY = '<span class="text-base-content/25 text-xs">—</span>';
 
 const COLUMNS = [
     {
-        title: 'Thời gian', field: 'created_at', width: 140, hozAlign: 'center', sorter: 'string',
+        title: t('Thời gian'), field: 'created_at', width: 140, hozAlign: 'center', sorter: 'string',
         formatter(cell) {
             return '<span class="text-xs text-base-content/60">' + esc(cell.getValue()) + '</span>';
         },
     },
     {
-        title: 'Nội dung', field: 'entity_label', minWidth: 260, headerSort: false,
+        title: t('Nội dung'), field: 'entity_label', minWidth: 260, headerSort: false,
         formatter(cell) {
             const d = cell.getRow().getData();
-            if (!d.entity_label) return '<span class="text-base-content/30 italic text-sm">Entity đã bị xoá</span>';
+            if (!d.entity_label) return ('<span class="text-base-content/30 italic text-sm">' + t('Entity đã bị xoá') + '</span>');
             let html = d.entity_url
                 ? '<a href="' + esc(d.entity_url) + '" class="font-medium text-sm link link-hover">' + esc(d.entity_label) + '</a>'
                 : '<span class="font-medium text-sm">' + esc(d.entity_label) + '</span>';
@@ -29,17 +30,17 @@ const COLUMNS = [
         },
     },
     {
-        title: 'Loại', field: 'type_label', width: 180, headerSort: false,
+        title: t('Loại'), field: 'type_label', width: 180, headerSort: false,
         formatter(cell) {
             const v = cell.getValue();
             return v ? '<span class="badge badge-sm badge-ghost">' + esc(v) + '</span>' : EMPTY;
         },
     },
     {
-        title: 'Hành động', field: 'action_label', width: 170, headerSort: false,
+        title: t('Hành động'), field: 'action_label', width: 170, headerSort: false,
     },
     {
-        title: 'Chuyển trạng thái', field: 'to_status_label', width: 210, headerSort: false,
+        title: t('Chuyển trạng thái'), field: 'to_status_label', width: 210, headerSort: false,
         formatter(cell) {
             const d = cell.getRow().getData();
             let html = '';
@@ -49,13 +50,13 @@ const COLUMNS = [
         },
     },
     {
-        title: 'Người thực hiện', field: 'performed_by_name', width: 170, headerSort: false,
+        title: t('Người thực hiện'), field: 'performed_by_name', width: 170, headerSort: false,
         formatter(cell) {
-            return esc(cell.getValue()) || '<span class="text-base-content/50 text-xs">Hệ thống (job/command)</span>';
+            return esc(cell.getValue()) || ('<span class="text-base-content/50 text-xs">' + t('Hệ thống (job/command)') + '</span>');
         },
     },
     {
-        title: 'Lý do', field: 'reason', minWidth: 200, headerSort: false, tooltip: true,
+        title: t('Lý do'), field: 'reason', minWidth: 200, headerSort: false, tooltip: true,
         formatter(cell) {
             return esc(cell.getValue()) || EMPTY;
         },
@@ -97,12 +98,12 @@ document.addEventListener('alpine:init', () => {
                 if (!typeEl || !actionEl) return;
 
                 tsSubjectType = createTs(typeEl, {
-                    placeholder: 'Tất cả loại',
+                    placeholder: t('Tất cả loại'),
                     onChange() { typeEl.dispatchEvent(new Event('change', { bubbles: true })); },
                 });
 
                 tsAction = createTs(actionEl, {
-                    placeholder: 'Tất cả hành động',
+                    placeholder: t('Tất cả hành động'),
                     onChange() { actionEl.dispatchEvent(new Event('change', { bubbles: true })); },
                 });
             },
@@ -139,11 +140,11 @@ document.addEventListener('alpine:init', () => {
                     langs: {
                         'vi-VN': {
                             pagination: {
-                                page_size: 'Dòng/trang', page_title: 'Trang',
+                                page_size: t('Dòng/trang'), page_title: t('Trang'),
                                 first: '«', last: '»', prev: '‹', next: '›',
-                                first_title: 'Trang đầu', last_title: 'Trang cuối',
-                                prev_title: 'Trang trước', next_title: 'Trang sau',
-                                counter: { showing: '', of: 'trong', rows: 'dòng', pages: 'trang' },
+                                first_title: t('Trang đầu'), last_title: t('Trang cuối'),
+                                prev_title: t('Trang trước'), next_title: t('Trang sau'),
+                                counter: { showing: '', of: t('trong'), rows: t('dòng'), pages: t('trang') },
                             },
                         },
                     },
@@ -151,7 +152,7 @@ document.addEventListener('alpine:init', () => {
                     columns: COLUMNS,
                     placeholder: '<div class="py-16 text-center opacity-40">'
                         + '<svg class="w-12 h-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
-                        + '<p class="text-sm">Chưa có lịch sử duyệt nào</p></div>',
+                        + ('<p class="text-sm">' + t('Chưa có lịch sử duyệt nào') + '</p></div>'),
                 });
 
                 window.approvalHistoryTable = tableInst;

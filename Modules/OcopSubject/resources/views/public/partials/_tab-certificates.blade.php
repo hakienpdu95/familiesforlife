@@ -24,5 +24,5 @@
     </div>
 </div>
 @empty
-<p class="py-10 text-center text-sm text-base-content/50">Chủ thể chưa công bố giấy chứng nhận nào.</p>
+<p class="py-10 text-center text-sm text-base-content/50">{{ __('Chủ thể chưa công bố giấy chứng nhận nào.') }}</p>
 @endforelse

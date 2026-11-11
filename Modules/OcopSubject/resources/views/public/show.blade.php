@@ -1,7 +1,7 @@
 @extends('layouts.frontend')
 
 @section('title', $subject->name)
-@section('meta_description', \Illuminate\Support\Str::limit(trim(strip_tags((string) $subject->story)) ?: $subject->name.' — chủ thể sản phẩm OCOP '.$subject->province_name, 160))
+@section('meta_description', \Illuminate\Support\Str::limit(trim(strip_tags((string) $subject->story)) ?: __(':name — chủ thể sản phẩm OCOP :province', ['name' => $subject->name, 'province' => $subject->province_name]), 160))
 
 @section('content')
 <div class="container">
@@ -22,9 +22,9 @@
 
             @php
                 $tabs = [
-                    'products' => 'Sản phẩm',
-                    'story' => 'Câu chuyện',
-                    'certificates' => 'Giấy chứng nhận',
+                    'products' => __('Sản phẩm'),
+                    'story' => __('Câu chuyện'),
+                    'certificates' => __('Giấy chứng nhận'),
                 ];
             @endphp
             <div id="products" class="mt-5 flex scroll-mt-24 overflow-x-auto border-b border-[#e0e0e0]" role="tablist">

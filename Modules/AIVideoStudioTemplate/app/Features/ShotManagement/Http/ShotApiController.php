@@ -57,7 +57,7 @@ class ShotApiController extends Controller
             return response()->json(['message' => $e->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        return response()->json(['message' => 'Đã cập nhật thứ tự shot.']);
+        return response()->json(['message' => __('Đã cập nhật thứ tự shot.')]);
     }
 
     public function saveResult(SaveShotAiResultRequest $request, AiVideoStudioShot $shot, SaveShotAiResultAction $action): JsonResponse

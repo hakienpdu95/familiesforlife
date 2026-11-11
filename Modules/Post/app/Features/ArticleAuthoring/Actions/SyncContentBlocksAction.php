@@ -73,7 +73,7 @@ class SyncContentBlocksAction
     {
         if (count($blocks) > self::MAX_TOTAL_BLOCKS) {
             throw new ProductBlockValidationException([
-                sprintf('Bài viết chỉ được tối đa %d block (hiện có %d).', self::MAX_TOTAL_BLOCKS, count($blocks)),
+                sprintf(__('Bài viết chỉ được tối đa %d block (hiện có %d).'), self::MAX_TOTAL_BLOCKS, count($blocks)),
             ]);
         }
 
@@ -257,7 +257,7 @@ class SyncContentBlocksAction
         $errors = [];
 
         if (count($blocksData) > self::MAX_PRODUCT_BLOCKS_PER_ARTICLE) {
-            $errors[] = sprintf('Bài viết chỉ được tối đa %d khối sản phẩm (hiện có %d).', self::MAX_PRODUCT_BLOCKS_PER_ARTICLE, count($blocksData));
+            $errors[] = sprintf(__('Bài viết chỉ được tối đa %d khối sản phẩm (hiện có %d).'), self::MAX_PRODUCT_BLOCKS_PER_ARTICLE, count($blocksData));
         }
 
         foreach ($blocksData as $i => $block) {
@@ -265,7 +265,7 @@ class SyncContentBlocksAction
             $label = ($isOcop ? 'Khối sản phẩm OCOP #' : 'Khối sản phẩm #').($i + 1);
 
             if (! in_array($block['source'] ?? PostProductBlock::SOURCE_PRODUCT, [PostProductBlock::SOURCE_PRODUCT, PostProductBlock::SOURCE_OCOP], true)) {
-                $errors[] = "{$label}: nguồn sản phẩm không hợp lệ.";
+                $errors[] = __(':label: nguồn sản phẩm không hợp lệ.', ['label' => $label]);
 
                 continue;
             }
@@ -273,7 +273,7 @@ class SyncContentBlocksAction
             // Chặn hijack: 1 block_uuid hợp lệ nhưng đang thuộc bản dịch KHÁC (vd tự chỉnh
             // request) — không cho reassign, vì `uuid` có unique constraint toàn cục.
             if (PostProductBlock::where('uuid', $block['block_uuid'] ?? '')->where('translation_id', '!=', $translation->id)->exists()) {
-                $errors[] = "{$label}: block_uuid đã thuộc về 1 bản dịch khác, không thể dùng lại.";
+                $errors[] = __(':label: block_uuid đã thuộc về 1 bản dịch khác, không thể dùng lại.', ['label' => $label]);
 
                 continue;
             }
@@ -281,7 +281,7 @@ class SyncContentBlocksAction
             $template = ProductBlockTemplate::tryFrom($block['template'] ?? '');
 
             if (! $template) {
-                $errors[] = "{$label}: template \"{$block['template']}\" không hợp lệ.";
+                $errors[] = __(':label: template ":block" không hợp lệ.', ['label' => $label, 'block' => $block['template']]);
 
                 continue;
             }
@@ -290,7 +290,7 @@ class SyncContentBlocksAction
             $itemCount = count($items);
 
             if ($itemCount < $template->minItems() || $itemCount > $template->maxItems()) {
-                $errors[] = "{$label} ({$template->label()}): cần {$template->minItems()}-{$template->maxItems()} sản phẩm, hiện có {$itemCount}.";
+                $errors[] = __(':label (:template): cần :template2-:template3 sản phẩm, hiện có :item_count.', ['label' => $label, 'template' => $template->label(), 'template2' => $template->minItems(), 'template3' => $template->maxItems(), 'item_count' => $itemCount]);
             }
 
             foreach ($items as $item) {
@@ -299,13 +299,12 @@ class SyncContentBlocksAction
                     : Product::find($item['product_id'] ?? null);
 
                 if (! $product) {
-                    $errors[] = "{$label}: sản phẩm #{$item['product_id']} không tồn tại hoặc đã bị xoá.";
+                    $errors[] = __(':label: sản phẩm #:item không tồn tại hoặc đã bị xoá.', ['label' => $label, 'item' => $item['product_id']]);
                 }
 
                 $buttons = $item['buttons'] ?? [];
                 if (count($buttons) > self::MAX_BUTTONS_PER_ITEM) {
-                    $errors[] = "{$label}: sản phẩm #{$item['product_id']} có ".count($buttons)
-                        .' nút, vượt tối đa '.self::MAX_BUTTONS_PER_ITEM.'.';
+                    $errors[] = __(':label: sản phẩm #:product có :count nút, vượt tối đa :max.', ['label' => $label, 'product' => $item['product_id'], 'count' => count($buttons), 'max' => self::MAX_BUTTONS_PER_ITEM]);
                 }
 
                 foreach ($buttons as $button) {
@@ -328,7 +327,7 @@ class SyncContentBlocksAction
         $urlType = ButtonUrlType::tryFrom($button['url_type'] ?? '');
 
         if (! $urlType) {
-            $errors[] = "{$label}: url_type \"{$button['url_type']}\" không hợp lệ.";
+            $errors[] = __(':label: url_type ":button" không hợp lệ.', ['label' => $label, 'button' => $button['url_type']]);
 
             return;
         }
@@ -336,23 +335,23 @@ class SyncContentBlocksAction
         match ($urlType) {
             ButtonUrlType::UseProductLink => (function () use ($button, $label, &$errors) {
                 if (! ProductLinkType::tryFrom((string) ($button['product_link_type'] ?? ''))) {
-                    $errors[] = "{$label}: product_link_type \"{$button['product_link_type']}\" không hợp lệ.";
+                    $errors[] = __(':label: product_link_type ":button" không hợp lệ.', ['label' => $label, 'button' => $button['product_link_type']]);
                 }
             })(),
             ButtonUrlType::CustomUrl => (function () use ($button, $label, &$errors) {
                 $url = $button['url'] ?? '';
                 if (! filter_var($url, FILTER_VALIDATE_URL) || ! preg_match('#^https?://#i', $url)) {
-                    $errors[] = "{$label}: URL tuỳ chỉnh không hợp lệ (\"{$url}\").";
+                    $errors[] = __(':label: URL tuỳ chỉnh không hợp lệ (":url").', ['label' => $label, 'url' => $url]);
                 }
             })(),
             ButtonUrlType::Phone => (function () use ($button, $label, &$errors) {
                 if (! preg_match('/^[0-9+][0-9.\-\s]{6,20}$/', (string) ($button['url'] ?? ''))) {
-                    $errors[] = "{$label}: số điện thoại không hợp lệ.";
+                    $errors[] = __(':label: số điện thoại không hợp lệ.', ['label' => $label]);
                 }
             })(),
             ButtonUrlType::Email => (function () use ($button, $label, &$errors) {
                 if (! filter_var($button['url'] ?? '', FILTER_VALIDATE_EMAIL)) {
-                    $errors[] = "{$label}: email không hợp lệ.";
+                    $errors[] = __(':label: email không hợp lệ.', ['label' => $label]);
                 }
             })(),
             ButtonUrlType::Zalo => (function () use ($button, $label, &$errors) {
@@ -360,7 +359,7 @@ class SyncContentBlocksAction
                 $isZaloUrl = preg_match('#^https://zalo\.me/#i', $url);
                 $isPhone = preg_match('/^[0-9+][0-9.\-\s]{6,20}$/', $url);
                 if (! $isZaloUrl && ! $isPhone) {
-                    $errors[] = "{$label}: Zalo phải là link https://zalo.me/... hoặc số điện thoại.";
+                    $errors[] = __(':label: Zalo phải là link https://zalo.me/... hoặc số điện thoại.', ['label' => $label]);
                 }
             })(),
         };
@@ -372,28 +371,28 @@ class SyncContentBlocksAction
         $errors = [];
 
         if (count($blocksData) > self::MAX_FAQ_BLOCKS_PER_ARTICLE) {
-            $errors[] = sprintf('Bài viết chỉ được tối đa %d khối FAQ (hiện có %d).', self::MAX_FAQ_BLOCKS_PER_ARTICLE, count($blocksData));
+            $errors[] = sprintf(__('Bài viết chỉ được tối đa %d khối FAQ (hiện có %d).'), self::MAX_FAQ_BLOCKS_PER_ARTICLE, count($blocksData));
         }
 
         foreach ($blocksData as $i => $block) {
-            $label = 'Khối FAQ #'.($i + 1);
+            $label = __('Khối FAQ #:number', ['number' => $i + 1]);
             $items = $block['items'] ?? [];
 
             if (count($items) === 0) {
-                $errors[] = "{$label}: cần ít nhất 1 câu hỏi.";
+                $errors[] = __(':label: cần ít nhất 1 câu hỏi.', ['label' => $label]);
             }
 
             if (count($items) > self::MAX_FAQ_ITEMS_PER_BLOCK) {
-                $errors[] = "{$label}: tối đa ".self::MAX_FAQ_ITEMS_PER_BLOCK.' câu hỏi (hiện có '.count($items).').';
+                $errors[] = __(':label: tối đa :max câu hỏi (hiện có :count).', ['label' => $label, 'max' => self::MAX_FAQ_ITEMS_PER_BLOCK, 'count' => count($items)]);
             }
 
             foreach ($items as $j => $item) {
                 if (trim((string) ($item['question'] ?? '')) === '') {
-                    $errors[] = "{$label}, câu hỏi #".($j + 1).': không được để trống câu hỏi.';
+                    $errors[] = __(':label, câu hỏi #:number: không được để trống câu hỏi.', ['label' => $label, 'number' => $j + 1]);
                 }
 
                 if (trim((string) ($item['answer'] ?? '')) === '') {
-                    $errors[] = "{$label}, câu hỏi #".($j + 1).': không được để trống câu trả lời.';
+                    $errors[] = __(':label, câu hỏi #:number: không được để trống câu trả lời.', ['label' => $label, 'number' => $j + 1]);
                 }
             }
         }
@@ -415,23 +414,23 @@ class SyncContentBlocksAction
         $errors = [];
 
         if (count($blocksData) > self::MAX_CITATION_BLOCKS_PER_ARTICLE) {
-            $errors[] = sprintf('Bài viết chỉ được tối đa %d khối trích dẫn (hiện có %d).', self::MAX_CITATION_BLOCKS_PER_ARTICLE, count($blocksData));
+            $errors[] = sprintf(__('Bài viết chỉ được tối đa %d khối trích dẫn (hiện có %d).'), self::MAX_CITATION_BLOCKS_PER_ARTICLE, count($blocksData));
         }
 
         foreach ($blocksData as $i => $block) {
-            $label = 'Trích dẫn #'.($i + 1);
+            $label = __('Trích dẫn #:number', ['number' => $i + 1]);
 
             if (trim((string) ($block['citation_text'] ?? '')) === '') {
-                $errors[] = "{$label}: không được để trống nội dung trích dẫn.";
+                $errors[] = __(':label: không được để trống nội dung trích dẫn.', ['label' => $label]);
             }
 
             if (trim((string) ($block['citation_source_name'] ?? '')) === '') {
-                $errors[] = "{$label}: cần ghi rõ tên nguồn (VD: \"Bộ Y tế, 2026\") — trích dẫn không nêu nguồn không có giá trị.";
+                $errors[] = __(':label: cần ghi rõ tên nguồn (VD: "Bộ Y tế, 2026") — trích dẫn không nêu nguồn không có giá trị.', ['label' => $label]);
             }
 
             $url = $block['citation_source_url'] ?? null;
             if ($url && (! filter_var($url, FILTER_VALIDATE_URL) || ! preg_match('#^https?://#i', $url))) {
-                $errors[] = "{$label}: link nguồn không hợp lệ (\"{$url}\").";
+                $errors[] = __(':label: link nguồn không hợp lệ (":url").', ['label' => $label, 'url' => $url]);
             }
         }
 
@@ -453,23 +452,23 @@ class SyncContentBlocksAction
         $errors = [];
 
         if (count($blocksData) > self::MAX_TESTIMONIAL_BLOCKS_PER_ARTICLE) {
-            $errors[] = sprintf('Bài viết chỉ được tối đa %d khối lời chứng thực (hiện có %d).', self::MAX_TESTIMONIAL_BLOCKS_PER_ARTICLE, count($blocksData));
+            $errors[] = sprintf(__('Bài viết chỉ được tối đa %d khối lời chứng thực (hiện có %d).'), self::MAX_TESTIMONIAL_BLOCKS_PER_ARTICLE, count($blocksData));
         }
 
         foreach ($blocksData as $i => $block) {
-            $label = 'Lời chứng thực #'.($i + 1);
+            $label = __('Lời chứng thực #:number', ['number' => $i + 1]);
 
             if (trim((string) ($block['quote'] ?? '')) === '') {
-                $errors[] = "{$label}: không được để trống nội dung lời chứng thực.";
+                $errors[] = __(':label: không được để trống nội dung lời chứng thực.', ['label' => $label]);
             }
 
             if (trim((string) ($block['person_name'] ?? '')) === '') {
-                $errors[] = "{$label}: cần ghi rõ tên người chứng thực — lời chứng thực không nêu tên không có giá trị.";
+                $errors[] = __(':label: cần ghi rõ tên người chứng thực — lời chứng thực không nêu tên không có giá trị.', ['label' => $label]);
             }
 
             $avatarUrl = $block['avatar_url'] ?? null;
             if ($avatarUrl && (! filter_var($avatarUrl, FILTER_VALIDATE_URL) || ! preg_match('#^https?://#i', $avatarUrl))) {
-                $errors[] = "{$label}: link ảnh đại diện không hợp lệ (\"{$avatarUrl}\").";
+                $errors[] = __(':label: link ảnh đại diện không hợp lệ (":avatar_url").', ['label' => $label, 'avatar_url' => $avatarUrl]);
             }
         }
 
@@ -484,28 +483,28 @@ class SyncContentBlocksAction
         $errors = [];
 
         if (count($blocksData) > self::MAX_HOWTO_BLOCKS_PER_ARTICLE) {
-            $errors[] = sprintf('Bài viết chỉ được tối đa %d khối hướng dẫn từng bước (hiện có %d).', self::MAX_HOWTO_BLOCKS_PER_ARTICLE, count($blocksData));
+            $errors[] = sprintf(__('Bài viết chỉ được tối đa %d khối hướng dẫn từng bước (hiện có %d).'), self::MAX_HOWTO_BLOCKS_PER_ARTICLE, count($blocksData));
         }
 
         foreach ($blocksData as $i => $block) {
-            $label = 'Khối hướng dẫn #'.($i + 1);
+            $label = __('Khối hướng dẫn #:number', ['number' => $i + 1]);
             $steps = $block['steps'] ?? [];
 
             if (count($steps) < 2) {
-                $errors[] = "{$label}: cần ít nhất 2 bước (dưới 2 bước không phải \"hướng dẫn từng bước\").";
+                $errors[] = __(':label: cần ít nhất 2 bước (dưới 2 bước không phải "hướng dẫn từng bước").', ['label' => $label]);
             }
 
             if (count($steps) > self::MAX_HOWTO_STEPS_PER_BLOCK) {
-                $errors[] = "{$label}: tối đa ".self::MAX_HOWTO_STEPS_PER_BLOCK.' bước (hiện có '.count($steps).').';
+                $errors[] = __(':label: tối đa :max bước (hiện có :count).', ['label' => $label, 'max' => self::MAX_HOWTO_STEPS_PER_BLOCK, 'count' => count($steps)]);
             }
 
             foreach ($steps as $j => $step) {
                 if (trim((string) ($step['name'] ?? '')) === '') {
-                    $errors[] = "{$label}, bước #".($j + 1).': không được để trống tên bước.';
+                    $errors[] = __(':label, bước #:number: không được để trống tên bước.', ['label' => $label, 'number' => $j + 1]);
                 }
 
                 if (trim((string) ($step['text'] ?? '')) === '') {
-                    $errors[] = "{$label}, bước #".($j + 1).': không được để trống nội dung bước.';
+                    $errors[] = __(':label, bước #:number: không được để trống nội dung bước.', ['label' => $label, 'number' => $j + 1]);
                 }
             }
         }
@@ -527,43 +526,41 @@ class SyncContentBlocksAction
         $errors = [];
 
         if (count($blocksData) > self::MAX_COMPARISON_BLOCKS_PER_ARTICLE) {
-            $errors[] = sprintf('Bài viết chỉ được tối đa %d khối so sánh (hiện có %d).', self::MAX_COMPARISON_BLOCKS_PER_ARTICLE, count($blocksData));
+            $errors[] = sprintf(__('Bài viết chỉ được tối đa %d khối so sánh (hiện có %d).'), self::MAX_COMPARISON_BLOCKS_PER_ARTICLE, count($blocksData));
         }
 
         foreach ($blocksData as $i => $block) {
-            $label = 'Khối so sánh #'.($i + 1);
+            $label = __('Khối so sánh #:number', ['number' => $i + 1]);
             $columns = $block['columns'] ?? [];
             $rows = $block['rows'] ?? [];
             $columnCount = count($columns);
 
             if ($columnCount < self::MIN_COMPARISON_COLUMNS || $columnCount > self::MAX_COMPARISON_COLUMNS) {
-                $errors[] = "{$label}: cần ".self::MIN_COMPARISON_COLUMNS.'-'.self::MAX_COMPARISON_COLUMNS
-                    ." cột (hiện có {$columnCount}).";
+                $errors[] = __(':label: cần :min-:max cột (hiện có :count).', ['label' => $label, 'min' => self::MIN_COMPARISON_COLUMNS, 'max' => self::MAX_COMPARISON_COLUMNS, 'count' => $columnCount]);
             }
 
             foreach ($columns as $j => $column) {
                 if (trim((string) ($column['label'] ?? '')) === '') {
-                    $errors[] = "{$label}, cột #".($j + 1).': không được để trống tên cột.';
+                    $errors[] = __(':label, cột #:number: không được để trống tên cột.', ['label' => $label, 'number' => $j + 1]);
                 }
             }
 
             if (count($rows) === 0) {
-                $errors[] = "{$label}: cần ít nhất 1 tiêu chí so sánh.";
+                $errors[] = __(':label: cần ít nhất 1 tiêu chí so sánh.', ['label' => $label]);
             }
 
             if (count($rows) > self::MAX_COMPARISON_ROWS) {
-                $errors[] = "{$label}: tối đa ".self::MAX_COMPARISON_ROWS.' tiêu chí (hiện có '.count($rows).').';
+                $errors[] = __(':label: tối đa :max tiêu chí (hiện có :count).', ['label' => $label, 'max' => self::MAX_COMPARISON_ROWS, 'count' => count($rows)]);
             }
 
             foreach ($rows as $j => $row) {
                 if (trim((string) ($row['label'] ?? '')) === '') {
-                    $errors[] = "{$label}, tiêu chí #".($j + 1).': không được để trống tên tiêu chí.';
+                    $errors[] = __(':label, tiêu chí #:number: không được để trống tên tiêu chí.', ['label' => $label, 'number' => $j + 1]);
                 }
 
                 $values = $row['values'] ?? [];
                 if (count($values) !== $columnCount) {
-                    $errors[] = "{$label}, tiêu chí #".($j + 1).': có '.count($values)
-                        ." giá trị nhưng khối có {$columnCount} cột — mỗi tiêu chí phải điền đủ giá trị cho mọi cột.";
+                    $errors[] = __(':label, tiêu chí #:number: có :count giá trị nhưng khối có :columns cột — mỗi tiêu chí phải điền đủ giá trị cho mọi cột.', ['label' => $label, 'number' => $j + 1, 'count' => count($values), 'columns' => $columnCount]);
                 }
             }
         }

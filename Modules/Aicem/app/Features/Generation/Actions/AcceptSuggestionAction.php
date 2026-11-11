@@ -33,7 +33,7 @@ class AcceptSuggestionAction
 
             if (! in_array($suggestion->status, [SuggestionStatus::Pending, SuggestionStatus::Stale], true)) {
                 throw new SuggestionAlreadyDecidedException(
-                    "Đề xuất đã được quyết định trước đó ({$suggestion->status->label()})."
+                    __('Đề xuất đã được quyết định trước đó (:status).', ['status' => $suggestion->status->label()])
                 );
             }
 
@@ -52,7 +52,7 @@ class AcceptSuggestionAction
 
                 if (! $block || ! in_array($block['type'], $editableTypes, true)) {
                     $suggestion->update(['status' => SuggestionStatus::Stale]);
-                    $staleMessage = 'Block đã bị xoá/thay đổi, hãy chạy lại AI để có đề xuất mới.';
+                    $staleMessage = __('Block đã bị xoá/thay đổi, hãy chạy lại AI để có đề xuất mới.');
 
                     return $suggestion;
                 }
@@ -65,7 +65,7 @@ class AcceptSuggestionAction
 
             if ($currentText !== $suggestion->original_text) {
                 $suggestion->update(['status' => SuggestionStatus::Stale]);
-                $staleMessage = 'Nội dung đã thay đổi từ lúc AI phân tích (giá trị hiện tại: "'
+                $staleMessage = __('Nội dung đã thay đổi từ lúc AI phân tích (giá trị hiện tại: "')
                     . \Illuminate\Support\Str::limit($currentText, 100) . '"). Không thể tự ghi đè — '
                     . 'hãy chạy lại AI để có đề xuất mới dựa trên nội dung hiện tại.';
 

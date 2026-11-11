@@ -21,31 +21,31 @@
     <div>
         <h1 class="text-2xl font-bold text-base-content">{{ $outline->label }}</h1>
         <p class="text-sm text-base-content/50 mt-0.5">
-            {{ $outline->topic }} — từ khoá: <code>{{ $outline->target_keyword }}</code>
+            {{ __(':topic — từ khoá:', ['topic' => $outline->topic]) }} <code>{{ $outline->target_keyword }}</code>
             @if($outline->category)
-                — chuyên mục: {{ $outline->category->name }}
+                {{ __('— chuyên mục: :name', ['name' => $outline->category->name]) }}
             @endif
         </p>
     </div>
     <div class="flex items-center gap-2">
         <a href="{{ route('backend.contentoutlines.edit', $outline) }}" class="btn btn-ghost btn-sm gap-1.5"
-           @if($hasDownstreamSteps) title="Đã có Bước 2/3 — sinh lại outline có thể làm nội dung đó không còn khớp." @endif>
+           @if($hasDownstreamSteps) title="{{ __('Đã có Bước 2/3 — sinh lại outline có thể làm nội dung đó không còn khớp.') }}" @endif>
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-            Sửa &amp; Sinh lại
+            {{ __('Sửa') }} &amp; {{ __('Sinh lại') }}
             @if($hasDownstreamSteps)<span class="text-warning">⚠</span>@endif
         </a>
-        <a href="{{ route('backend.contentoutlines.index') }}" class="btn btn-ghost btn-sm">Danh sách</a>
+        <a href="{{ route('backend.contentoutlines.index') }}" class="btn btn-ghost btn-sm">{{ __('Danh sách') }}</a>
     </div>
 </div>
 
 {{-- §4.24 (v1.20) — stepper điều hướng + trạng thái hoàn thành, cải thiện "visual hierarchy"
      Bước 1→2→3 giữa 3 khối prompt lớn trên cùng 1 trang (rủi ro UX đã ghi nhận, xem spec §4.24). --}}
 <div class="flex items-center gap-2 mb-4 text-xs">
-    <a href="#buoc-1" class="badge badge-sm badge-success gap-1">Bước 1 ✓</a>
+    <a href="#buoc-1" class="badge badge-sm badge-success gap-1">{{ __('Bước 1 ✓') }}</a>
     <span class="text-base-content/30">→</span>
-    <a href="#buoc-2" class="badge badge-sm {{ $outline->article_draft_prompt ? 'badge-success' : 'badge-ghost' }} gap-1">Bước 2{{ $outline->article_draft_prompt ? ' ✓' : '' }}</a>
+    <a href="#buoc-2" class="badge badge-sm {{ $outline->article_draft_prompt ? 'badge-success' : 'badge-ghost' }} gap-1">{{ __('Bước 2:article_draft_prompt', ['article_draft_prompt' => $outline->article_draft_prompt ? ' ✓' : '']) }}</a>
     <span class="text-base-content/30">→</span>
-    <a href="#buoc-3" class="badge badge-sm {{ $outline->review_prompt ? 'badge-success' : 'badge-ghost' }} gap-1">Bước 3{{ $outline->review_prompt ? ' ✓' : '' }}</a>
+    <a href="#buoc-3" class="badge badge-sm {{ $outline->review_prompt ? 'badge-success' : 'badge-ghost' }} gap-1">{{ __('Bước 3:review_prompt', ['review_prompt' => $outline->review_prompt ? ' ✓' : '']) }}</a>
 </div>
 
 {{-- §4.1 (v1.1) — soft warning, KHÔNG chặn gì — chỉ cảnh báo prompt có thể bị cắt/giảm chất
@@ -53,7 +53,7 @@
 @if($promptIsLong)
 <div class="alert py-3 px-4 mb-4 bg-warning/10 border border-warning/40 text-sm">
     <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-    <span>Prompt dài <b>~{{ number_format($promptWordCount, 0, ',', '.') }} từ</b> — 1 số AI ngoài có thể cắt hoặc giảm chất lượng phản hồi với prompt quá dài. Cân nhắc sửa &amp; chọn "Rút gọn (brief)" ở độ chi tiết, hoặc bớt nguồn tham khảo/ghi chú.</span>
+    <span>{{ __('Prompt dài') }} <b>{{ __('~:prompt_word_count từ', ['prompt_word_count' => number_format($promptWordCount, 0, ',', '.')]) }}</b> {{ __('— 1 số AI ngoài có thể cắt hoặc giảm chất lượng phản hồi với prompt quá dài. Cân nhắc sửa') }} &amp; {{ __('chọn "Rút gọn (brief)" ở độ chi tiết, hoặc bớt nguồn tham khảo/ghi chú.') }}</span>
 </div>
 @endif
 
@@ -62,11 +62,11 @@
     <div class="card bg-base-100 shadow-sm border border-base-200" x-data="{ view: 'raw' }">
         <div class="card-body">
             <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
-                <h2 class="card-title text-base">Prompt đã sinh</h2>
+                <h2 class="card-title text-base">{{ __('Prompt đã sinh') }}</h2>
                 <div class="flex items-center gap-2">
                     <div role="tablist" class="tabs tabs-boxed tabs-sm">
-                        <a role="tab" class="tab" :class="view === 'raw' ? 'tab-active' : ''" @click="view = 'raw'">Prompt thô</a>
-                        <a role="tab" class="tab" :class="view === 'preview' ? 'tab-active' : ''" @click="view = 'preview'; $nextTick(() => window.contentOutlineMakeCollapsible?.('content-outline-preview'))">Xem trước Markdown</a>
+                        <a role="tab" class="tab" :class="view === 'raw' ? 'tab-active' : ''" @click="view = 'raw'">{{ __('Prompt thô') }}</a>
+                        <a role="tab" class="tab" :class="view === 'preview' ? 'tab-active' : ''" @click="view = 'preview'; $nextTick(() => window.contentOutlineMakeCollapsible?.('content-outline-preview'))">{{ __('Xem trước Markdown') }}</a>
                     </div>
                     <button type="button" class="btn btn-ghost btn-sm gap-1.5" onclick="window.contentOutlineDownloadPrompt('content-outline-prompt', '{{ \Illuminate\Support\Str::slug($outline->label) }}.md')">
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
@@ -92,7 +92,7 @@
                 {!! $promptHtml !!}
             </div>
 
-            <p class="text-xs text-base-content/40 mt-2">Dán đoạn prompt trên vào ChatGPT/Claude/Gemini (bản có web search/browsing cho kết quả research tốt nhất) để nhận outline hoàn chỉnh.</p>
+            <p class="text-xs text-base-content/40 mt-2">{{ __('Dán đoạn prompt trên vào ChatGPT/Claude/Gemini (bản có web search/browsing cho kết quả research tốt nhất) để nhận outline hoàn chỉnh.') }}</p>
         </div>
     </div>
 
@@ -101,20 +101,20 @@
             <div class="card-body p-4">
                 {{-- §4.4 (v1.1) — liên kết 1-1: chỉ gắn được TỐI ĐA 1 PostArticle tại 1 thời điểm,
                      xem spec §8 "Ngoài phạm vi". --}}
-                <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">Gắn vào bài viết (tối đa 1 bài)</p>
+                <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">{{ __('Gắn vào bài viết (tối đa 1 bài)') }}</p>
                 @if($outline->linkedArticle)
-                    <p class="text-sm mb-2">Đã gắn: <b>{{ $outline->linkedArticle->mainTranslation()?->title ?? '(chưa có tiêu đề)' }}</b></p>
+                    <p class="text-sm mb-2">{{ __('Đã gắn:') }} <b>{{ $outline->linkedArticle->mainTranslation()?->title ?? __('(chưa có tiêu đề)') }}</b></p>
                     <form method="POST" action="{{ route('backend.contentoutlines.link-article', $outline) }}">
                         @csrf
                         <input type="hidden" name="post_article_uuid" value="">
-                        <button type="submit" class="btn btn-ghost btn-xs text-error">Gỡ liên kết</button>
+                        <button type="submit" class="btn btn-ghost btn-xs text-error">{{ __('Gỡ liên kết') }}</button>
                     </form>
                 @else
                     <form method="POST" action="{{ route('backend.contentoutlines.link-article', $outline) }}" class="space-y-2">
                         @csrf
                         <input type="text" name="post_article_uuid" class="input input-bordered input-sm w-full font-mono text-xs"
-                               placeholder="Dán UUID bài viết (từ URL sửa bài viết)">
-                        <button type="submit" class="btn btn-primary btn-xs w-full">Gắn</button>
+                               placeholder="{{ __('Dán UUID bài viết (từ URL sửa bài viết)') }}">
+                        <button type="submit" class="btn btn-primary btn-xs w-full">{{ __('Gắn') }}</button>
                     </form>
                 @endif
             </div>
@@ -122,18 +122,18 @@
 
         <div class="card bg-base-100 shadow-sm border border-base-200">
             <div class="card-body p-4 text-xs text-base-content/60 space-y-1.5">
-                <p><b>Tạo bởi:</b> {{ $outline->createdBy?->name ?? '—' }}</p>
-                <p><b>Ngày tạo:</b> {{ format_datetime($outline->created_at) }}</p>
-                <p><b>Cập nhật gần nhất:</b> {{ format_datetime($outline->updated_at) }}</p>
-                <p><b>Ngôn ngữ đầu ra:</b> {{ $outline->language === 'en' ? 'English' : 'Tiếng Việt' }}</p>
-                <p><b>Độ chi tiết:</b> {{ ['brief' => 'Rút gọn', 'standard' => 'Chuẩn', 'detailed' => 'Chi tiết'][$outline->outline_depth] ?? $outline->outline_depth }}</p>
+                <p><b>{{ __('Tạo bởi:') }}</b> {{ $outline->createdBy?->name ?? '—' }}</p>
+                <p><b>{{ __('Ngày tạo:') }}</b> {{ format_datetime($outline->created_at) }}</p>
+                <p><b>{{ __('Cập nhật gần nhất:') }}</b> {{ format_datetime($outline->updated_at) }}</p>
+                <p><b>{{ __('Ngôn ngữ đầu ra:') }}</b> {{ $outline->language === 'en' ? 'English' : __('Tiếng Việt') }}</p>
+                <p><b>{{ __('Độ chi tiết:') }}</b> {{ ['brief' => __('Rút gọn'), 'standard' => __('Chuẩn'), 'detailed' => __('Chi tiết')][$outline->outline_depth] ?? $outline->outline_depth }}</p>
                 @if($outline->content_role)
-                <p><b>Vai trò nội dung:</b> {{ $outline->content_role === 'pillar' ? 'Trụ cột (pillar)' : 'Cụm (cluster)' }}</p>
+                <p><b>{{ __('Vai trò nội dung:') }}</b> {{ $outline->content_role === 'pillar' ? __('Trụ cột (pillar)') : __('Cụm (cluster)') }}</p>
                 @endif
                 @if($outline->cta_url)
                 <p><b>CTA URL:</b> <a href="{{ $outline->cta_url }}" target="_blank" rel="noopener" class="link link-hover break-all">{{ $outline->cta_url }}</a></p>
                 @endif
-                <p><b>Độ dài prompt:</b> ~{{ number_format($promptWordCount, 0, ',', '.') }} từ</p>
+                <p><b>{{ __('Độ dài prompt:') }}</b> {{ __('~:prompt_word_count từ', ['prompt_word_count' => number_format($promptWordCount, 0, ',', '.')]) }}</p>
             </div>
         </div>
     </div>
@@ -152,18 +152,18 @@
          dung KHÔNG bị mất khi đóng. --}}
     <details @if($outline->article_draft_prompt) open @endif>
         <summary class="card-title text-base cursor-pointer">
-            Bước 2 — Viết bài từ outline
-            @if($outline->article_draft_prompt)<span class="badge badge-success badge-xs align-middle">Đã sinh</span>@endif
+            {{ __('Bước 2 — Viết bài từ outline') }}
+            @if($outline->article_draft_prompt)<span class="badge badge-success badge-xs align-middle">{{ __('Đã sinh') }}</span>@endif
         </summary>
-        <p class="text-xs text-base-content/40 mb-3 mt-1">Sau khi dán prompt ở trên vào AI ngoài và nhận outline hoàn chỉnh (đã đọc/sửa lại nếu cần), dán outline đó vào đây để sinh 1 prompt viết bài — dùng ở 1 lượt chat AI MỚI.</p>
+        <p class="text-xs text-base-content/40 mb-3 mt-1">{{ __('Sau khi dán prompt ở trên vào AI ngoài và nhận outline hoàn chỉnh (đã đọc/sửa lại nếu cần), dán outline đó vào đây để sinh 1 prompt viết bài — dùng ở 1 lượt chat AI MỚI.') }}</p>
 
         <form method="POST" action="{{ route('backend.contentoutlines.generate-article-prompt', $outline) }}"
-              @if($outline->article_draft_prompt) data-confirm-regenerate="Sinh prompt viết bài mới sẽ GHI ĐÈ prompt hiện tại — KHÔNG thể khôi phục lại prompt cũ (không versioning). Tiếp tục?" @endif>
+              @if($outline->article_draft_prompt) data-confirm-regenerate="{{ __('Sinh prompt viết bài mới sẽ GHI ĐÈ prompt hiện tại — KHÔNG thể khôi phục lại prompt cũ (không versioning). Tiếp tục?') }}" @endif>
             @csrf
             <textarea name="approved_outline" rows="8" required maxlength="50000"
-                      placeholder="Dán outline (Markdown) mà AI ngoài đã trả về ở đây..."
+                      placeholder="{{ __('Dán outline (Markdown) mà AI ngoài đã trả về ở đây...') }}"
                       class="textarea textarea-bordered w-full font-mono text-xs leading-relaxed mb-3">{{ old('approved_outline', $outline->approved_outline) }}</textarea>
-            <button type="submit" class="btn btn-primary btn-sm">{{ $outline->article_draft_prompt ? 'Lưu & Sinh lại prompt viết bài' : 'Lưu & Sinh prompt viết bài' }}</button>
+            <button type="submit" class="btn btn-primary btn-sm">{{ $outline->article_draft_prompt ? __('Lưu & Sinh lại prompt viết bài') : __('Lưu & Sinh prompt viết bài') }}</button>
         </form>
 
         @if($outline->article_draft_prompt)
@@ -171,14 +171,14 @@
             @if($articlePromptIsLong)
             <div class="alert py-3 px-4 mb-3 bg-warning/10 border border-warning/40 text-sm">
                 <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                <span>Prompt dài <b>~{{ number_format($articlePromptWordCount, 0, ',', '.') }} từ</b> — phần lớn do outline đã dán dài, đây là BÌNH THƯỜNG (không phải dấu hiệu lỗi). Vẫn cân nhắc rút gọn outline nếu 1 số AI ngoài cắt/giảm chất lượng phản hồi.</span>
+                <span>{{ __('Prompt dài') }} <b>{{ __('~:article_prompt_word_count từ', ['article_prompt_word_count' => number_format($articlePromptWordCount, 0, ',', '.')]) }}</b> {{ __('— phần lớn do outline đã dán dài, đây là BÌNH THƯỜNG (không phải dấu hiệu lỗi). Vẫn cân nhắc rút gọn outline nếu 1 số AI ngoài cắt/giảm chất lượng phản hồi.') }}</span>
             </div>
             @endif
 
             <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
                 <div role="tablist" class="tabs tabs-boxed tabs-sm">
-                    <a role="tab" class="tab" :class="view === 'raw' ? 'tab-active' : ''" @click="view = 'raw'">Prompt thô</a>
-                    <a role="tab" class="tab" :class="view === 'preview' ? 'tab-active' : ''" @click="view = 'preview'; $nextTick(() => window.contentOutlineMakeCollapsible?.('content-outline-article-preview'))">Xem trước Markdown</a>
+                    <a role="tab" class="tab" :class="view === 'raw' ? 'tab-active' : ''" @click="view = 'raw'">{{ __('Prompt thô') }}</a>
+                    <a role="tab" class="tab" :class="view === 'preview' ? 'tab-active' : ''" @click="view = 'preview'; $nextTick(() => window.contentOutlineMakeCollapsible?.('content-outline-article-preview'))">{{ __('Xem trước Markdown') }}</a>
                 </div>
                 <div class="flex items-center gap-2">
                     <button type="button" class="btn btn-ghost btn-sm gap-1.5" onclick="window.contentOutlineDownloadPrompt('content-outline-article-prompt', '{{ \Illuminate\Support\Str::slug($outline->label) }}-bai-viet.md')">
@@ -202,7 +202,7 @@
                 {!! $articlePromptHtml !!}
             </div>
 
-            <p class="text-xs text-base-content/40 mt-2">Dán đoạn prompt trên vào 1 lượt chat AI MỚI để nhận bài viết hoàn chỉnh — biên tập viên vẫn rà lại nội dung trước khi publish (§ "Lưu ý EEAT" trong prompt).</p>
+            <p class="text-xs text-base-content/40 mt-2">{{ __('Dán đoạn prompt trên vào 1 lượt chat AI MỚI để nhận bài viết hoàn chỉnh — biên tập viên vẫn rà lại nội dung trước khi publish (§ "Lưu ý EEAT" trong prompt).') }}</p>
         </div>
         @endif
     </details>
@@ -218,18 +218,18 @@
          review_prompt), mở khi đã có kết quả. --}}
     <details @if($outline->review_prompt) open @endif>
         <summary class="card-title text-base cursor-pointer">
-            Bước 3 — Soát lỗi/Sửa bài
-            @if($outline->review_prompt)<span class="badge badge-success badge-xs align-middle">Đã sinh</span>@endif
+            {{ __('Bước 3 — Soát lỗi/Sửa bài') }}
+            @if($outline->review_prompt)<span class="badge badge-success badge-xs align-middle">{{ __('Đã sinh') }}</span>@endif
         </summary>
-        <p class="text-xs text-base-content/40 mb-3 mt-1">Sau khi có bài viết hoàn chỉnh (từ AI ngoài ở Bước 2, hoặc viết tay), dán bài đó vào đây để sinh 1 prompt soát lỗi/sửa (SEO, độ dễ đọc, rà soát cuối) — dùng ở 1 lượt chat AI MỚI.</p>
+        <p class="text-xs text-base-content/40 mb-3 mt-1">{{ __('Sau khi có bài viết hoàn chỉnh (từ AI ngoài ở Bước 2, hoặc viết tay), dán bài đó vào đây để sinh 1 prompt soát lỗi/sửa (SEO, độ dễ đọc, rà soát cuối) — dùng ở 1 lượt chat AI MỚI.') }}</p>
 
         <form method="POST" action="{{ route('backend.contentoutlines.generate-review-prompt', $outline) }}"
-              @if($outline->review_prompt) data-confirm-regenerate="Sinh prompt soát lỗi mới sẽ GHI ĐÈ prompt hiện tại — KHÔNG thể khôi phục lại prompt cũ (không versioning). Tiếp tục?" @endif>
+              @if($outline->review_prompt) data-confirm-regenerate="{{ __('Sinh prompt soát lỗi mới sẽ GHI ĐÈ prompt hiện tại — KHÔNG thể khôi phục lại prompt cũ (không versioning). Tiếp tục?') }}" @endif>
             @csrf
             <textarea name="drafted_article" rows="10" required maxlength="100000"
-                      placeholder="Dán bài viết hoàn chỉnh (Markdown) vào đây..."
+                      placeholder="{{ __('Dán bài viết hoàn chỉnh (Markdown) vào đây...') }}"
                       class="textarea textarea-bordered w-full font-mono text-xs leading-relaxed mb-3">{{ old('drafted_article', $outline->drafted_article) }}</textarea>
-            <button type="submit" class="btn btn-primary btn-sm">{{ $outline->review_prompt ? 'Lưu & Sinh lại prompt soát lỗi' : 'Lưu & Sinh prompt soát lỗi' }}</button>
+            <button type="submit" class="btn btn-primary btn-sm">{{ $outline->review_prompt ? __('Lưu & Sinh lại prompt soát lỗi') : __('Lưu & Sinh prompt soát lỗi') }}</button>
         </form>
 
         @if($outline->review_prompt)
@@ -237,14 +237,14 @@
             @if($reviewPromptIsLong)
             <div class="alert py-3 px-4 mb-3 bg-warning/10 border border-warning/40 text-sm">
                 <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                <span>Prompt dài <b>~{{ number_format($reviewPromptWordCount, 0, ',', '.') }} từ</b> — phần lớn do bài viết đã dán dài, đây là BÌNH THƯỜNG (không phải dấu hiệu lỗi).</span>
+                <span>{{ __('Prompt dài') }} <b>{{ __('~:review_prompt_word_count từ', ['review_prompt_word_count' => number_format($reviewPromptWordCount, 0, ',', '.')]) }}</b> {{ __('— phần lớn do bài viết đã dán dài, đây là BÌNH THƯỜNG (không phải dấu hiệu lỗi).') }}</span>
             </div>
             @endif
 
             <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
                 <div role="tablist" class="tabs tabs-boxed tabs-sm">
-                    <a role="tab" class="tab" :class="view === 'raw' ? 'tab-active' : ''" @click="view = 'raw'">Prompt thô</a>
-                    <a role="tab" class="tab" :class="view === 'preview' ? 'tab-active' : ''" @click="view = 'preview'; $nextTick(() => window.contentOutlineMakeCollapsible?.('content-outline-review-preview'))">Xem trước Markdown</a>
+                    <a role="tab" class="tab" :class="view === 'raw' ? 'tab-active' : ''" @click="view = 'raw'">{{ __('Prompt thô') }}</a>
+                    <a role="tab" class="tab" :class="view === 'preview' ? 'tab-active' : ''" @click="view = 'preview'; $nextTick(() => window.contentOutlineMakeCollapsible?.('content-outline-review-preview'))">{{ __('Xem trước Markdown') }}</a>
                 </div>
                 <div class="flex items-center gap-2">
                     <button type="button" class="btn btn-ghost btn-sm gap-1.5" onclick="window.contentOutlineDownloadPrompt('content-outline-review-prompt', '{{ \Illuminate\Support\Str::slug($outline->label) }}-soat-loi.md')">
@@ -268,7 +268,7 @@
                 {!! $reviewPromptHtml !!}
             </div>
 
-            <p class="text-xs text-base-content/40 mt-2">Dán đoạn prompt trên vào 1 lượt chat AI MỚI để nhận đánh giá SEO/độ dễ đọc/rà soát cuối + đề xuất sửa cụ thể — biên tập viên tự áp dụng các đề xuất phù hợp, không nhất thiết phải nghe theo tất cả.</p>
+            <p class="text-xs text-base-content/40 mt-2">{{ __('Dán đoạn prompt trên vào 1 lượt chat AI MỚI để nhận đánh giá SEO/độ dễ đọc/rà soát cuối + đề xuất sửa cụ thể — biên tập viên tự áp dụng các đề xuất phù hợp, không nhất thiết phải nghe theo tất cả.') }}</p>
         </div>
         @endif
     </details>

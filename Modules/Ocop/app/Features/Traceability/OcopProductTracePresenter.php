@@ -108,14 +108,14 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
 
         $sections = [];
         if ($live && T::hasContent($live->story)) {
-            $sections[] = ['key' => 'story', 'title' => 'Câu chuyện sản phẩm', 'icon' => 'fa-book-open', 'html' => $live->story, 'preview' => Str::limit(OcopProduct::plainText($live->story), 90) ?: null];
+            $sections[] = ['key' => 'story', 'title' => __('Câu chuyện sản phẩm'), 'icon' => 'fa-book-open', 'html' => $live->story, 'preview' => Str::limit(OcopProduct::plainText($live->story), 90) ?: null];
         }
         foreach (self::SECTIONS as $field => [$title, $icon]) {
             $html = $live ? OcopProduct::richText($live->{$field}) : null;
             $text = $payload[$field] ?? null;
             $sections[] = [
                 'key' => $field,
-                'title' => $title,
+                'title' => __($title),
                 'icon' => $icon,
                 'html' => $html && T::hasContent($html) ? $html : null,
                 'text' => $html ? null : $text,
@@ -133,16 +133,16 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
                 ? OcopProduct::query()->with('media')->published()->where('ocop_subject_id', $live->ocop_subject_id)->whereKeyNot($live->id)->latest()->limit(8)->get()
                 : collect();
             $related = [
-                ['title' => 'Di tích, làng nghề gắn với sản phẩm', 'icon' => 'fa-landmark', 'items' => $this->heritageCards($heritage)],
-                ['title' => 'Bài viết nhắc tới sản phẩm', 'icon' => 'fa-newspaper', 'items' => $this->articleCards($live->articles)],
-                ['title' => 'Sản phẩm khác cùng chủ thể', 'icon' => 'fa-store', 'items' => $this->ocopCards($siblings)],
+                ['title' => __('Di tích, làng nghề gắn với sản phẩm'), 'icon' => 'fa-landmark', 'items' => $this->heritageCards($heritage)],
+                ['title' => __('Bài viết nhắc tới sản phẩm'), 'icon' => 'fa-newspaper', 'items' => $this->articleCards($live->articles)],
+                ['title' => __('Sản phẩm khác cùng chủ thể'), 'icon' => 'fa-store', 'items' => $this->ocopCards($siblings)],
             ];
         }
 
         $channels = $live ? $this->buyChannels($live) : [];
         $detail = $live
-            ? ['url' => route('ocop.public.show', ['slug' => $live->slug, 'id' => $live->id]), 'label' => 'Xem chi tiết', 'icon' => 'fa-arrow-right']
-            : ['url' => route('ocop.public.index'), 'label' => 'Xem sản phẩm OCOP khác', 'icon' => 'fa-arrow-right'];
+            ? ['url' => route('ocop.public.show', ['slug' => $live->slug, 'id' => $live->id]), 'label' => __('Xem chi tiết'), 'icon' => 'fa-arrow-right']
+            : ['url' => route('ocop.public.index'), 'label' => __('Xem sản phẩm OCOP khác'), 'icon' => 'fa-arrow-right'];
 
         return $this->base([
             'title' => $payload['name'] ?? 'Sản phẩm OCOP',
@@ -164,7 +164,7 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
             'category_code' => $live?->category?->fullCode(),
             'area' => $payload['area'] ?? null,
             'facts' => [
-                ['icon' => 'fa-hourglass-half', 'label' => 'Hạn sử dụng', 'value' => self::shelfLife($payload['shelf_life'] ?? null)],
+                ['icon' => 'fa-hourglass-half', 'label' => __('Hạn sử dụng'), 'value' => self::shelfLife($payload['shelf_life'] ?? null)],
                 T::fact('fa-industry', 'Nhà sản xuất', $payload['producer'] ?? null),
             ],
             'subject' => [
@@ -177,7 +177,7 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
             'sections' => $sections,
             'related' => $related,
             'channels' => $channels,
-            'cta' => $channels ? ['url' => '#mua-hang', 'label' => 'Mua sản phẩm chính hãng'] : ['url' => $detail['url'], 'label' => $live ? 'Xem trang sản phẩm' : $detail['label']],
+            'cta' => $channels ? ['url' => '#mua-hang', 'label' => __('Mua sản phẩm chính hãng')] : ['url' => $detail['url'], 'label' => $live ? 'Xem trang sản phẩm' : $detail['label']],
         ]);
     }
 
@@ -193,7 +193,7 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
     private function base(array $page): array
     {
         return T::page([
-            'heading' => 'Truy xuất sản phẩm OCOP',
+            'heading' => __('Truy xuất sản phẩm OCOP'),
             'icon' => 'fa-certificate',
             'kind' => 'Sản phẩm OCOP',
             'stars' => null,
@@ -209,7 +209,7 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
             'product_code' => null,
             'updated_label' => null,
             'info' => null,
-            'cta' => ['url' => route('ocop.public.index'), 'label' => 'Xem sản phẩm OCOP khác', 'icon' => 'fa-arrow-right'],
+            'cta' => ['url' => route('ocop.public.index'), 'label' => __('Xem sản phẩm OCOP khác'), 'icon' => 'fa-arrow-right'],
             ...$page,
         ]);
     }
@@ -254,17 +254,17 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
                 ->filter(fn ($m) => in_array($m->mime_type, T::DOCUMENT_MIMES, true))
                 ->sortByDesc(fn ($m) => $m->created_at)->first();
 
-            return $file ? ['type' => 'doc', 'label' => 'Đối chiếu '.mb_strtolower(self::QUALITY_DOCS[$collection][0]), 'uuid' => $file->uuid] : null;
+            return $file ? ['type' => 'doc', 'label' => __('Đối chiếu :doc', ['doc' => mb_strtolower(__(self::QUALITY_DOCS[$collection][0]))]), 'uuid' => $file->uuid] : null;
         };
         $label = $evidence('ocop_label_docs');
-        $selfDeclared = ['type' => 'self', 'label' => 'Tự khai báo'];
+        $selfDeclared = ['type' => 'self', 'label' => __('Tự khai báo')];
         $subject = $live?->ocopSubject;
         $subjectLinked = $subject && ! $subject->trashed() && $producer && Str::lower(trim($producer)) === Str::lower(trim((string) $subject->name));
 
         $row = fn (string $label, ?string $value, array $extra = []) => ['label' => $label, 'value' => filled($value) ? $value : null, ...$extra];
 
         $groups = [
-            ['key' => 'nguon-goc', 'title' => 'Định danh & nguồn gốc', 'rows' => array_values(array_filter([
+            ['key' => 'nguon-goc', 'title' => __('Định danh & nguồn gốc'), 'rows' => array_values(array_filter([
                 $live ? $row('Mã sản phẩm', 'OP'.$live->id, ['mono' => true, 'required' => true, 'verified' => true]) : null,
                 $row('Cơ sở sản xuất', $producer, ['note' => $producerAddress, 'required' => true, 'verified' => $subjectLinked, 'source' => $subjectLinked ? null : $selfDeclared]),
                 $row('Hạn sử dụng', self::shelfLife($payload['shelf_life'] ?? null), ['required' => true, 'source' => $label ?? $selfDeclared]),
@@ -278,12 +278,12 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
         ];
         $byKey = collect($sections)->keyBy('key')->map(fn ($s, $k) => isset($sources[$k]) ? [...$s, 'source' => $sources[$k]] : $s);
         $panels = [
-            ['key' => 'su-dung', 'title' => 'Thành phần & sử dụng', 'items' => array_values(array_filter([
+            ['key' => 'su-dung', 'title' => __('Thành phần & sử dụng'), 'items' => array_values(array_filter([
                 $byKey->get('ingredients'), $byKey->get('usage_instructions'), $byKey->get('storage_instructions'),
             ]))],
-            ['key' => 'gioi-thieu', 'title' => 'Giới thiệu', 'items' => array_values(array_filter([
+            ['key' => 'gioi-thieu', 'title' => __('Giới thiệu'), 'items' => array_values(array_filter([
                 $description && T::hasContent($description) && mb_strlen(OcopProduct::plainText($description)) > 220
-                    ? ['key' => 'mo-ta', 'title' => 'Mô tả sản phẩm', 'html' => $description, 'text' => null, 'preview' => null, 'open' => false]
+                    ? ['key' => 'mo-ta', 'title' => __('Mô tả sản phẩm'), 'html' => $description, 'text' => null, 'preview' => null, 'open' => false]
                     : null,
                 $byKey->get('story'),
             ]))],
@@ -294,7 +294,7 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
             ->concat(collect(['ingredients', 'usage_instructions', 'storage_instructions'])->map(function ($k) use ($byKey) {
                 $ok = filled($byKey->get($k)['html'] ?? null) || filled($byKey->get($k)['text'] ?? null);
 
-                return ['label' => self::SECTIONS[$k][0], 'ok' => $ok, 'verified' => $ok && ($byKey->get($k)['source']['type'] ?? null) === 'doc'];
+                return ['label' => __(self::SECTIONS[$k][0]), 'ok' => $ok, 'verified' => $ok && ($byKey->get($k)['source']['type'] ?? null) === 'doc'];
             }));
 
         return [
@@ -326,12 +326,12 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
             $refresh = self::REFRESH_MONTHS[$collection] ?? null;
 
             return [
-                'label' => $doc[0],
-                'hint' => $doc[1],
-                'required' => $minStars && (int) $product->star_rating >= $minStars ? 'Bắt buộc với OCOP '.$minStars.'–5 sao' : null,
+                'label' => __($doc[0]),
+                'hint' => __($doc[1]),
+                'required' => $minStars && (int) $product->star_rating >= $minStars ? __('Bắt buộc với OCOP :stars–5 sao', ['stars' => $minStars]) : null,
                 'count' => $media->count(),
                 'updated_at' => format_date($latest),
-                'stale' => $refresh && $latest && $latest->lt(now()->subMonths($refresh)) ? 'Tệp mới nhất đăng hơn '.$refresh.' tháng trước — hồ sơ định kỳ có thể đã hết hạn' : null,
+                'stale' => $refresh && $latest && $latest->lt(now()->subMonths($refresh)) ? __('Tệp mới nhất đăng hơn :count tháng trước — hồ sơ định kỳ có thể đã hết hạn', ['count' => $refresh]) : null,
                 'files' => $media->filter(fn ($m) => in_array($m->mime_type, T::DOCUMENT_MIMES, true))
                     ->map(fn ($m) => [
                         'uuid' => $m->uuid,

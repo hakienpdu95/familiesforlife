@@ -31,8 +31,8 @@ class TraceQrController extends Controller
 
         return view($page['view'], [
             'brand' => config('app.site_name'),
-            'reportReasons' => QrReport::REASONS,
-            'reportHints' => QrReport::REASON_HINTS,
+            'reportReasons' => array_map('__', QrReport::REASONS),
+            'reportHints' => array_map(fn (array $hints) => array_map('__', $hints), QrReport::REASON_HINTS),
             ...$page,
         ]);
     }
@@ -67,11 +67,11 @@ class TraceQrController extends Controller
             'content' => ['required', 'string', 'min:10', 'max:1000'],
             'contact' => ['nullable', 'string', 'max:120'],
         ], [
-            'reason.required' => 'Vui lòng chọn lý do phản ánh.',
-            'content.required' => 'Vui lòng mô tả nội dung phản ánh.',
-            'content.min' => 'Nội dung phản ánh cần tối thiểu :min ký tự.',
-            'content.max' => 'Nội dung phản ánh tối đa :max ký tự.',
-            'contact.max' => 'Thông tin liên hệ tối đa :max ký tự.',
+            'reason.required' => __('Vui lòng chọn lý do phản ánh.'),
+            'content.required' => __('Vui lòng mô tả nội dung phản ánh.'),
+            'content.min' => __('Nội dung phản ánh cần tối thiểu :min ký tự.'),
+            'content.max' => __('Nội dung phản ánh tối đa :max ký tự.'),
+            'contact.max' => __('Thông tin liên hệ tối đa :max ký tự.'),
         ]);
 
         $report = QrReport::create([

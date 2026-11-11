@@ -1,6 +1,7 @@
 import { initSwiper, Navigation, Thumbs } from '../modules/swiper.js';
 import { A11y, FreeMode, Keyboard } from 'swiper/modules';
 
+import { t } from '../shared/i18n.js';
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 function mount(root) {
@@ -33,7 +34,7 @@ function mount(root) {
         threshold: 6,
         resistanceRatio: 0.6,
         keyboard: { enabled: true, onlyInViewport: true },
-        a11y: { prevSlideMessage: 'Ảnh trước', nextSlideMessage: 'Ảnh sau', slideLabelMessage: 'Ảnh {{index}}/{{slidesLength}}' },
+        a11y: { prevSlideMessage: t('Ảnh trước'), nextSlideMessage: t('Ảnh sau'), slideLabelMessage: t('Ảnh {{index}}/{{slidesLength}}') },
         navigation: { prevEl: mainEl.querySelector('[data-prev]'), nextEl: mainEl.querySelector('[data-next]') },
         pagination: false,
         thumbs: thumbs ? { swiper: thumbs } : undefined,

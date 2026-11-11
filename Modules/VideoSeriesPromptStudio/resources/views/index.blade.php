@@ -6,12 +6,10 @@
     <div>
         <h1 class="text-2xl font-bold text-base-content">Video Series Prompt Studio</h1>
         <p class="text-sm text-base-content/50 mt-0.5">
-            Danh sách prompt "Series Bible" đã sinh — kiến trúc cho cả chuỗi video nhiều tập (concept, khung 1 tập
-            chuẩn lặp lại, dàn ý 5-10 tập đầu tiên), thay vì kịch bản cho 1 video đơn lẻ. Công cụ KHÔNG gọi AI trong
-            app — mỗi dòng dưới đây là 1 prompt đã ghép sẵn để copy sang ChatGPT/Claude.
+            {{ __('Danh sách prompt "Series Bible" đã sinh — kiến trúc cho cả chuỗi video nhiều tập (concept, khung 1 tập chuẩn lặp lại, dàn ý 5-10 tập đầu tiên), thay vì kịch bản cho 1 video đơn lẻ. Công cụ KHÔNG gọi AI trong app — mỗi dòng dưới đây là 1 prompt đã ghép sẵn để copy sang ChatGPT/Claude.') }}
         </p>
     </div>
-    <a href="{{ route('backend.videoseriespromptstudio.create') }}" class="btn btn-primary btn-sm">+ Tạo prompt mới</a>
+    <a href="{{ route('backend.videoseriespromptstudio.create') }}" class="btn btn-primary btn-sm">{{ __('+ Tạo prompt mới') }}</a>
 </div>
 
 @if (session('success'))
@@ -21,18 +19,18 @@
 <div class="card bg-base-100 shadow-sm border border-base-200">
     <div class="card-body py-3 px-3">
         @if ($promptList->isEmpty())
-            <p class="text-sm text-base-content/50 py-6 text-center">Chưa có prompt nào — bấm "+ Tạo prompt mới" để bắt đầu.</p>
+            <p class="text-sm text-base-content/50 py-6 text-center">{{ __('Chưa có prompt nào — bấm "+ Tạo prompt mới" để bắt đầu.') }}</p>
         @else
             <div class="overflow-x-auto">
                 <table class="table table-sm">
                     <thead>
                         <tr>
-                            <th>Tên gọi</th>
-                            <th>Chủ đề</th>
-                            <th>Nền tảng</th>
-                            <th>Chuyên mục</th>
-                            <th>Số tập</th>
-                            <th>Ngày tạo</th>
+                            <th>{{ __('Tên gọi') }}</th>
+                            <th>{{ __('Chủ đề') }}</th>
+                            <th>{{ __('Nền tảng') }}</th>
+                            <th>{{ __('Chuyên mục') }}</th>
+                            <th>{{ __('Số tập') }}</th>
+                            <th>{{ __('Ngày tạo') }}</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -56,7 +54,7 @@
                                               onsubmit="return confirm('Xoá prompt &quot;{{ $prompt->label }}&quot;?');">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-ghost btn-xs text-error">Xoá</button>
+                                            <button type="submit" class="btn btn-ghost btn-xs text-error">{{ __('Xoá') }}</button>
                                         </form>
                                     </div>
                                 </td>

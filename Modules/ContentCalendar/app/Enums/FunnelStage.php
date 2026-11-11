@@ -22,9 +22,9 @@ enum FunnelStage: string
     public function label(): string
     {
         return match ($this) {
-            self::Cold => 'Lạnh',
-            self::Warm => 'Ấm',
-            self::Hot => 'Nóng',
+            self::Cold => __('Lạnh'),
+            self::Warm => __('Ấm'),
+            self::Hot => __('Nóng'),
         };
     }
 
@@ -37,9 +37,9 @@ enum FunnelStage: string
     public function hint(): string
     {
         return match ($this) {
-            self::Cold => 'Mới biết vấn đề, CHƯA sẵn sàng nghe về sản phẩm/dịch vụ. Hợp: bài định nghĩa, giải đáp "là gì/vì sao", hướng dẫn tổng quan — không nhắc thương hiệu.',
-            self::Warm => 'Đã hiểu vấn đề, đang so sánh giải pháp. Hợp: bài so sánh, đánh giá, hướng dẫn từng bước có thể nhắc tới sản phẩm/dịch vụ như 1 lựa chọn.',
-            self::Hot => 'Đã nghiên cứu xong, cần bằng chứng cụ thể để quyết định. Hợp: case study, so sánh chi tiết, đánh giá thật, FAQ gỡ lăn tăn cuối cùng.',
+            self::Cold => __('Mới biết vấn đề, CHƯA sẵn sàng nghe về sản phẩm/dịch vụ. Hợp: bài định nghĩa, giải đáp "là gì/vì sao", hướng dẫn tổng quan — không nhắc thương hiệu.'),
+            self::Warm => __('Đã hiểu vấn đề, đang so sánh giải pháp. Hợp: bài so sánh, đánh giá, hướng dẫn từng bước có thể nhắc tới sản phẩm/dịch vụ như 1 lựa chọn.'),
+            self::Hot => __('Đã nghiên cứu xong, cần bằng chứng cụ thể để quyết định. Hợp: case study, so sánh chi tiết, đánh giá thật, FAQ gỡ lăn tăn cuối cùng.'),
         };
     }
 

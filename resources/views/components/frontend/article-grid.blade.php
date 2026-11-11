@@ -9,7 +9,7 @@
     @forelse($items as $t)
     <x-frontend.article-card :translation="$t" size="sm" />
     @empty
-    <p class="col-span-full text-center text-base-content/40 py-10">Chưa có bài viết nào.</p>
+    <p class="col-span-full text-center text-base-content/40 py-10">{{ __('Chưa có bài viết nào.') }}</p>
     @endforelse
 </section>
 

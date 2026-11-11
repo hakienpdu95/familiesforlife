@@ -32,9 +32,9 @@ class SponsorshipExpiredNotification extends Notification implements ShouldQueue
 
     private function title(): string
     {
-        $name = $this->article->mainTranslation()?->title ?? "Bài viết #{$this->article->id}";
+        $name = $this->article->mainTranslation()?->title ?? __('Bài viết #:id', ['id' => $this->article->id]);
 
-        return "Đã hết hạn tài trợ: \"{$name}\"";
+        return __('Đã hết hạn tài trợ: ":name"', ['name' => $name]);
     }
 
     public function toDatabase(object $notifiable): array
@@ -42,7 +42,7 @@ class SponsorshipExpiredNotification extends Notification implements ShouldQueue
         return NotificationData::make(
             type:     'post_sponsorship_expired',
             title:    $this->title(),
-            body:     "Tài trợ của \"{$this->article->sponsor_name}\" (campaign \"{$this->article->campaign_code}\") đã hết hạn — bài viết vẫn giữ nguyên trạng thái xuất bản, chỉ tắt nhãn tài trợ. Liên hệ lại doanh nghiệp qua kênh sales/CRM nếu cần gia hạn.",
+            body:     __('Tài trợ của ":sponsor_name" (campaign ":campaign_code") đã hết hạn — bài viết vẫn giữ nguyên trạng thái xuất bản, chỉ tắt nhãn tài trợ. Liên hệ lại doanh nghiệp qua kênh sales/CRM nếu cần gia hạn.', ['sponsor_name' => $this->article->sponsor_name, 'campaign_code' => $this->article->campaign_code]),
             url:      route('backend.post.articles.edit', $this->article),
             icon:     'info',
             severity: 'warning',
@@ -53,9 +53,9 @@ class SponsorshipExpiredNotification extends Notification implements ShouldQueue
     {
         return (new MailMessage)
             ->subject($this->title())
-            ->line("Tài trợ của \"{$this->article->sponsor_name}\" (campaign \"{$this->article->campaign_code}\") đã hết hạn.")
-            ->line('Bài viết vẫn giữ nguyên trạng thái xuất bản — chỉ tắt nhãn/disclosure tài trợ.')
-            ->line('Hệ thống không còn liên kết tới tổ chức tài trợ — nếu cần gia hạn, liên hệ lại doanh nghiệp qua kênh sales/CRM riêng.')
-            ->action('Xem bài viết', route('backend.post.articles.edit', $this->article));
+            ->line(__('Tài trợ của ":sponsor_name" (campaign ":campaign_code") đã hết hạn.', ['sponsor_name' => $this->article->sponsor_name, 'campaign_code' => $this->article->campaign_code]))
+            ->line(__('Bài viết vẫn giữ nguyên trạng thái xuất bản — chỉ tắt nhãn/disclosure tài trợ.'))
+            ->line(__('Hệ thống không còn liên kết tới tổ chức tài trợ — nếu cần gia hạn, liên hệ lại doanh nghiệp qua kênh sales/CRM riêng.'))
+            ->action(__('Xem bài viết'), route('backend.post.articles.edit', $this->article));
     }
 }

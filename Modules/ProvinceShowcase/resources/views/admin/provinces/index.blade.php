@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', 'Tỉnh thành')
+@section('title', __('Tỉnh thành'))
 
 @section('content')
 <div x-data="provinceListPage({{ Js::from([
@@ -19,10 +19,10 @@
 
     <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div>
-            <h1 class="text-2xl font-bold text-base-content">Tỉnh thành</h1>
-            <p class="text-sm text-base-content/50 mt-0.5">Danh sách tỉnh/thành phố</p>
+            <h1 class="text-2xl font-bold text-base-content">{{ __('Tỉnh thành') }}</h1>
+            <p class="text-sm text-base-content/50 mt-0.5">{{ __('Danh sách tỉnh/thành phố') }}</p>
         </div>
-        <span class="badge badge-warning badge-outline gap-1">★ Nổi bật: {{ $featuredCount }}/{{ $featuredMax }}</span>
+        <span class="badge badge-warning badge-outline gap-1">{{ __('★ Nổi bật: :featured_count/:featured_max', ['featured_count' => $featuredCount, 'featured_max' => $featuredMax]) }}</span>
     </div>
 
     <div class="section-page">
@@ -32,15 +32,15 @@
 
                     <div class="form-control filter-grid-wide">
                         <label class="label py-0.5">
-                            <span class="label-text text-xs font-medium">Tìm kiếm</span>
-                            <span class="label-text-alt text-xs text-base-content/40">Tên, mã, slug</span>
+                            <span class="label-text text-xs font-medium">{{ __('Tìm kiếm') }}</span>
+                            <span class="label-text-alt text-xs text-base-content/40">{{ __('Tên, mã, slug') }}</span>
                         </label>
                         <div class="input input-sm input-bordered flex items-center gap-2 bg-base-100">
                             <svg class="w-3.5 h-3.5 text-base-content/40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                             </svg>
                             <input type="text" x-model="filters.search" @input.debounce.350ms="onFilterChange()"
-                                   placeholder="Nhập tên/mã tỉnh..." class="grow bg-transparent outline-none text-sm">
+                                   placeholder="{{ __('Nhập tên/mã tỉnh...') }}" class="grow bg-transparent outline-none text-sm">
                             <button x-show="filters.search" @click="clearSearch()"
                                     class="text-base-content/30 hover:text-base-content transition-colors">
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -51,11 +51,11 @@
                     </div>
 
                     <div class="form-control">
-                        <label class="label py-0.5"><span class="label-text text-xs font-medium">Vùng</span></label>
+                        <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Vùng') }}</span></label>
                         <select id="ts-region" x-model="filters.region_id" @change="onFilterChange()"
-                                data-ts-placeholder="Tất cả vùng"
+                                data-ts-placeholder="{{ __('Tất cả vùng') }}"
                                 class="select select-sm select-bordered w-full">
-                            <option value="">Tất cả</option>
+                            <option value="">{{ __('Tất cả') }}</option>
                             @foreach($regions as $r)
                             <option value="{{ $r->id }}">{{ $r->name }}</option>
                             @endforeach
@@ -63,11 +63,11 @@
                     </div>
 
                     <div class="form-control">
-                        <label class="label py-0.5"><span class="label-text text-xs font-medium">Loại</span></label>
+                        <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Loại') }}</span></label>
                         <select id="ts-place_type" x-model="filters.place_type" @change="onFilterChange()"
-                                data-ts-placeholder="Tất cả loại"
+                                data-ts-placeholder="{{ __('Tất cả loại') }}"
                                 class="select select-sm select-bordered w-full">
-                            <option value="">Tất cả</option>
+                            <option value="">{{ __('Tất cả') }}</option>
                             @foreach($placeTypes as $t)
                             <option value="{{ $t['value'] }}">{{ $t['text'] }}</option>
                             @endforeach
@@ -75,24 +75,24 @@
                     </div>
 
                     <div class="form-control">
-                        <label class="label py-0.5"><span class="label-text text-xs font-medium">Nổi bật</span></label>
+                        <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Nổi bật') }}</span></label>
                         <select id="ts-is_featured" x-model="filters.is_featured" @change="onFilterChange()"
-                                data-ts-placeholder="Tất cả"
+                                data-ts-placeholder="{{ __('Tất cả') }}"
                                 class="select select-sm select-bordered w-full">
-                            <option value="">Tất cả</option>
-                            <option value="1">Nổi bật</option>
-                            <option value="0">Không nổi bật</option>
+                            <option value="">{{ __('Tất cả') }}</option>
+                            <option value="1">{{ __('Nổi bật') }}</option>
+                            <option value="0">{{ __('Không nổi bật') }}</option>
                         </select>
                     </div>
 
                     <div class="form-control">
-                        <label class="label py-0.5"><span class="label-text text-xs font-medium">Trạng thái</span></label>
+                        <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Trạng thái') }}</span></label>
                         <select id="ts-is_active" x-model="filters.is_active" @change="onFilterChange()"
-                                data-ts-placeholder="Tất cả trạng thái"
+                                data-ts-placeholder="{{ __('Tất cả trạng thái') }}"
                                 class="select select-sm select-bordered w-full">
-                            <option value="">Tất cả</option>
-                            <option value="1">Hoạt động</option>
-                            <option value="0">Ngừng hoạt động</option>
+                            <option value="">{{ __('Tất cả') }}</option>
+                            <option value="1">{{ __('Hoạt động') }}</option>
+                            <option value="0">{{ __('Ngừng hoạt động') }}</option>
                         </select>
                     </div>
 
@@ -105,13 +105,13 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                         </svg>
-                        Đặt lại
+                        {{ __('Đặt lại') }}
                     </button>
                 </div>
 
                 <div x-show="activeChips.length > 0" x-cloak x-transition
                      class="flex flex-wrap gap-2 pt-3 mt-3 border-t border-base-200">
-                    <span class="text-xs text-base-content/40 self-center">Đang lọc:</span>
+                    <span class="text-xs text-base-content/40 self-center">{{ __('Đang lọc:') }}</span>
                     <template x-for="chip in activeChips" :key="chip.key">
                         <span class="badge badge-sm gap-1 cursor-pointer hover:badge-error transition-colors"
                               @click="removeChip(chip.key)">

@@ -48,7 +48,7 @@ class TranslationController extends Controller
             'locale' => ['required', 'string', 'in:' . implode(',', array_keys(config('post.locales')))],
         ])['locale'];
 
-        abort_if($article->translation($locale), 422, "Bản dịch \"{$locale}\" đã tồn tại.");
+        abort_if($article->translation($locale), 422, __('Bản dịch ":locale" đã tồn tại.', ['locale' => $locale]));
 
         $data = TranslationData::from($this->validated($request, null, $locale, $article));
 
@@ -59,7 +59,7 @@ class TranslationController extends Controller
         }
 
         return redirect()->route('backend.post.articles.edit', $article)
-            ->with('success', "Đã tạo bản dịch \"{$locale}\".")
+            ->with('success', __('Đã tạo bản dịch ":locale".', ['locale' => $locale]))
             ->with('active_locale', $translation->locale);
     }
 
@@ -76,7 +76,7 @@ class TranslationController extends Controller
         }
 
         return redirect()->route('backend.post.articles.edit', $translation->article)
-            ->with('success', 'Cập nhật bản dịch thành công.')
+            ->with('success', __('Cập nhật bản dịch thành công.'))
             ->with('active_locale', $translation->locale);
     }
 
@@ -94,11 +94,11 @@ class TranslationController extends Controller
         }
 
         if (PostArticle::find($article->id) === null) {
-            return redirect()->route('backend.post.articles.index')->with('success', 'Đã xoá bài viết (không còn bản dịch nào).');
+            return redirect()->route('backend.post.articles.index')->with('success', __('Đã xoá bài viết (không còn bản dịch nào).'));
         }
 
         return redirect()->route('backend.post.articles.edit', $article)
-            ->with('success', "Đã xoá bản dịch \"{$locale}\".");
+            ->with('success', __('Đã xoá bản dịch ":locale".', ['locale' => $locale]));
     }
 
     public function submit(Request $request, PostArticleTranslation $translation, SubmitArticleForReviewAction $action): RedirectResponse
@@ -106,7 +106,7 @@ class TranslationController extends Controller
         $this->authorize('submitForReview', $translation);
 
         if (Gate::allows('publish', $translation)) {
-            return back()->with('error', 'Tài khoản của bạn có quyền xuất bản trực tiếp, không cần gửi duyệt.');
+            return back()->with('error', __('Tài khoản của bạn có quyền xuất bản trực tiếp, không cần gửi duyệt.'));
         }
 
         $user = $request->user();
@@ -115,7 +115,7 @@ class TranslationController extends Controller
         return $this->runTransition(
             $translation,
             fn () => $action->handle($translation, $user),
-            $toHead ? 'Đã gửi bản dịch lên Tổng biên tập duyệt xuất bản.' : 'Đã gửi bản dịch tới Biên tập viên duyệt sơ bộ.',
+            $toHead ? __('Đã gửi bản dịch lên Tổng biên tập duyệt xuất bản.') : __('Đã gửi bản dịch tới Biên tập viên duyệt sơ bộ.'),
         );
     }
 
@@ -123,7 +123,7 @@ class TranslationController extends Controller
     {
         $this->authorize('approve', $translation);
 
-        return $this->runTransition($translation, fn () => $action->handle($translation, $request->user()), 'Đã duyệt sơ bộ, chuyển Tổng biên tập duyệt xuất bản.');
+        return $this->runTransition($translation, fn () => $action->handle($translation, $request->user()), __('Đã duyệt sơ bộ, chuyển Tổng biên tập duyệt xuất bản.'));
     }
 
     public function returnToDraft(Request $request, PostArticleTranslation $translation, ReturnArticleToDraftAction $action): RedirectResponse
@@ -132,7 +132,7 @@ class TranslationController extends Controller
 
         $reason = $request->validate(['reason' => ['required', 'string', 'min:10', 'max:500']])['reason'];
 
-        return $this->runTransition($translation, fn () => $action->handle($translation, $request->user(), $reason), 'Đã trả bài về người viết để chỉnh sửa.');
+        return $this->runTransition($translation, fn () => $action->handle($translation, $request->user(), $reason), __('Đã trả bài về người viết để chỉnh sửa.'));
     }
 
     public function publish(Request $request, PostArticleTranslation $translation, PublishArticleAction $action, FastTrackApprovalAction $fastTrack): RedirectResponse
@@ -142,7 +142,7 @@ class TranslationController extends Controller
         return $this->runTransition($translation, fn () => DB::transaction(function () use ($request, $translation, $action, $fastTrack) {
             $fastTrack->handle($translation, $request->user());
             $action->handle($translation);
-        }), 'Đã xuất bản bản dịch.');
+        }), __('Đã xuất bản bản dịch.'));
     }
 
     public function schedule(Request $request, PostArticleTranslation $translation, ScheduleArticleAction $action, FastTrackApprovalAction $fastTrack): RedirectResponse
@@ -157,7 +157,7 @@ class TranslationController extends Controller
                 $fastTrack->handle($translation, $request->user());
                 $action->handle($translation, Carbon::parse($validated['scheduled_at']));
             }),
-            'Đã lên lịch xuất bản bản dịch.',
+            __('Đã lên lịch xuất bản bản dịch.'),
         );
     }
 
@@ -165,7 +165,7 @@ class TranslationController extends Controller
     {
         $this->authorize('schedule', $translation);
 
-        return $this->runTransition($translation, fn () => $action->handle($translation), 'Đã huỷ lịch xuất bản.');
+        return $this->runTransition($translation, fn () => $action->handle($translation), __('Đã huỷ lịch xuất bản.'));
     }
 
     public function unpublish(Request $request, PostArticleTranslation $translation, UnpublishArticleTranslationAction $action): RedirectResponse
@@ -174,7 +174,7 @@ class TranslationController extends Controller
 
         $reason = $request->validate(['reason' => ['required', 'string', 'min:10']])['reason'];
 
-        return $this->runTransition($translation, fn () => $action->handle($translation, $reason), 'Đã gỡ bản dịch.');
+        return $this->runTransition($translation, fn () => $action->handle($translation, $reason), __('Đã gỡ bản dịch.'));
     }
 
     public function takedown(Request $request, PostArticleTranslation $translation, TakeDownArticleTranslationAction $action): RedirectResponse
@@ -183,14 +183,14 @@ class TranslationController extends Controller
 
         $reason = $request->validate(['reason' => ['required', 'string', 'min:10']])['reason'];
 
-        return $this->runTransition($translation, fn () => $action->handle($translation, $reason), 'Đã gỡ khẩn cấp bản dịch.');
+        return $this->runTransition($translation, fn () => $action->handle($translation, $reason), __('Đã gỡ khẩn cấp bản dịch.'));
     }
 
     public function archive(PostArticleTranslation $translation, ArchiveArticleAction $action): RedirectResponse
     {
         $this->authorize('archive', $translation);
 
-        return $this->runTransition($translation, fn () => $action->handle($translation), 'Đã lưu trữ bản dịch.');
+        return $this->runTransition($translation, fn () => $action->handle($translation), __('Đã lưu trữ bản dịch.'));
     }
 
     private function runTransition(PostArticleTranslation $translation, \Closure $callback, string $successMessage): RedirectResponse

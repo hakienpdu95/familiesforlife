@@ -1,16 +1,16 @@
 @extends('layouts.backend')
-@section('title', 'Tạo prompt mới')
+@section('title', __('Tạo prompt mới'))
 
 @section('content')
 
 <div class="flex items-center justify-between mb-2">
     <div>
-        <h1 class="text-2xl font-bold text-base-content">Tạo yêu cầu mới cho AI</h1>
-        <p class="text-sm text-base-content/50 mt-0.5">Chọn 1 mẫu phù hợp, điền vào từng ô như đang mô tả công việc cho một trợ lý — hệ thống tự ghép thành 1 yêu cầu hoàn chỉnh, kèm sẵn ngữ cảnh biên tập của chuyên mục bạn chọn (độc giả, nỗi đau, giọng văn) nên bạn không phải gõ lại mỗi lần</p>
+        <h1 class="text-2xl font-bold text-base-content">{{ __('Tạo yêu cầu mới cho AI') }}</h1>
+        <p class="text-sm text-base-content/50 mt-0.5">{{ __('Chọn 1 mẫu phù hợp, điền vào từng ô như đang mô tả công việc cho một trợ lý — hệ thống tự ghép thành 1 yêu cầu hoàn chỉnh, kèm sẵn ngữ cảnh biên tập của chuyên mục bạn chọn (độc giả, nỗi đau, giọng văn) nên bạn không phải gõ lại mỗi lần') }}</p>
     </div>
     <div class="flex items-center gap-2">
-        <a href="{{ route('backend.promptstudio.library') }}" class="btn btn-ghost btn-sm">Thư viện mẫu</a>
-        <a href="{{ route('backend.promptstudio.prompts.index') }}" class="btn btn-ghost btn-sm">Danh sách</a>
+        <a href="{{ route('backend.promptstudio.library') }}" class="btn btn-ghost btn-sm">{{ __('Thư viện mẫu') }}</a>
+        <a href="{{ route('backend.promptstudio.prompts.index') }}" class="btn btn-ghost btn-sm">{{ __('Danh sách') }}</a>
     </div>
 </div>
 
@@ -31,7 +31,7 @@
     {{-- Bước 1: lưới chọn mẫu — thẻ lớn, hiện rõ "phù hợp khi" để không cần biết thuật ngữ kỹ thuật --}}
     <div class="card bg-base-100 shadow-sm border border-base-200 mb-4" x-show="!selectedKey || showFrameworkPicker" x-cloak>
         <div class="card-body p-5">
-            <h2 class="card-title text-base mb-3">1. Chọn mẫu phù hợp với việc bạn đang cần làm</h2>
+            <h2 class="card-title text-base mb-3">{{ __('1. Chọn mẫu phù hợp với việc bạn đang cần làm') }}</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                 <template x-for="(fw, key) in frameworks" :key="key">
                     <button type="button" @click="select(key); showFrameworkPicker = false"
@@ -54,28 +54,28 @@
             <div class="card-body p-5 space-y-4">
                 <div class="flex items-center justify-between">
                     <h2 class="card-title text-base">
-                        2. Điền nội dung —
+                        {{ __('2. Điền nội dung —') }}
                         <span class="badge badge-primary badge-outline font-mono" x-text="selectedFramework.name"></span>
                     </h2>
                     <div class="flex items-center gap-1">
                         {{-- spec/AIIdeaMatrixGenerator.md §3 — chỉ có ý nghĩa ở trang TẠO MỚI (edit
                              đã có sẵn giá trị thật của chính bản ghi đang sửa). --}}
                         <button type="button" class="btn btn-ghost btn-xs" @click="reuseLastPromptValues()">
-                            🔁 Dùng lại giá trị từ prompt trước
+                            {{ __('🔁 Dùng lại giá trị từ prompt trước') }}
                         </button>
-                        <button type="button" class="btn btn-ghost btn-xs" @click="showFrameworkPicker = true">Đổi mẫu khác</button>
+                        <button type="button" class="btn btn-ghost btn-xs" @click="showFrameworkPicker = true">{{ __('Đổi mẫu khác') }}</button>
                     </div>
                 </div>
                 <p class="text-xs text-base-content/40 -mt-2" x-text="selectedFramework.description"></p>
 
                 <div class="form-control">
                     <label class="label py-0 pb-1.5">
-                        <span class="label-text font-medium">Tên gọi cho prompt này <span class="text-error">*</span></span>
-                        <span class="label-text-alt text-xs text-base-content/40">Để bạn dễ tìm lại sau này</span>
+                        <span class="label-text font-medium">{{ __('Tên gọi cho prompt này') }} <span class="text-error">*</span></span>
+                        <span class="label-text-alt text-xs text-base-content/40">{{ __('Để bạn dễ tìm lại sau này') }}</span>
                     </label>
                     <input type="text" name="label" value="{{ old('label') }}" maxlength="150" required
                            class="input input-bordered input-sm w-full @error('label') input-error @enderror"
-                           placeholder="VD: Mở bài blog tài chính gia đình">
+                           placeholder="{{ __('VD: Mở bài blog tài chính gia đình') }}">
                     @error('label')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                 </div>
 

@@ -47,7 +47,7 @@ class PlaylistAdminController extends Controller
         $playlist = $createPlaylist->handle(PlaylistData::from($this->validated($request)));
 
         return redirect()->route('backend.playlist.items.edit', $playlist)
-            ->with('success', "Đã tạo playlist \"{$playlist->name}\". Tiếp tục thêm nội dung vào playlist bên dưới.");
+            ->with('success', __('Đã tạo playlist ":name". Tiếp tục thêm nội dung vào playlist bên dưới.', ['name' => $playlist->name]));
     }
 
     public function edit(Playlist $playlist, BuildPlaylistIdeaPromptAction $buildIdeaPrompt): View
@@ -66,7 +66,7 @@ class PlaylistAdminController extends Controller
         $updatePlaylist->handle($playlist, PlaylistData::from($this->validated($request, $playlist)));
 
         return redirect()->route('backend.playlist.items.edit', $playlist)
-            ->with('success', 'Đã cập nhật playlist.');
+            ->with('success', __('Đã cập nhật playlist.'));
     }
 
     public function destroy(Request $request, Playlist $playlist, DeletePlaylistAction $deletePlaylist): RedirectResponse|JsonResponse
@@ -74,10 +74,10 @@ class PlaylistAdminController extends Controller
         $deletePlaylist->handle($playlist);
 
         if ($request->expectsJson()) {
-            return response()->json(['message' => 'Đã xoá playlist.']);
+            return response()->json(['message' => __('Đã xoá playlist.')]);
         }
 
-        return redirect()->route('backend.playlist.items.index')->with('success', 'Đã xoá playlist.');
+        return redirect()->route('backend.playlist.items.index')->with('success', __('Đã xoá playlist.'));
     }
 
     /** Toggle nhanh is_active từ bảng danh sách — trả JSON cho Tabulator cập nhật UI tại chỗ. */
@@ -90,7 +90,7 @@ class PlaylistAdminController extends Controller
         return response()->json([
             'success' => true,
             'is_active' => $playlist->is_active,
-            'message' => $playlist->is_active ? 'Đã bật hiển thị playlist.' : 'Đã tắt hiển thị playlist.',
+            'message' => $playlist->is_active ? __('Đã bật hiển thị playlist.') : __('Đã tắt hiển thị playlist.'),
         ]);
     }
 
@@ -109,7 +109,7 @@ class PlaylistAdminController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Đã thêm vào playlist.',
+            'message' => __('Đã thêm vào playlist.'),
             'item' => [
                 'id' => $item->id,
                 'title' => $item->resolved_itemable?->getPlaylistCardTitle(),
@@ -126,7 +126,7 @@ class PlaylistAdminController extends Controller
 
         $removeItem->handle($playlistItem);
 
-        return response()->json(['success' => true, 'message' => 'Đã gỡ khỏi playlist.']);
+        return response()->json(['success' => true, 'message' => __('Đã gỡ khỏi playlist.')]);
     }
 
     /** Sắp xếp lại thứ tự item — nhận mảng ID theo đúng thứ tự mới (§0: nhập tay, không kéo-thả). */
@@ -141,7 +141,7 @@ class PlaylistAdminController extends Controller
 
         $reorderItems->handle($playlist, $validated['ordered_item_ids']);
 
-        return response()->json(['success' => true, 'message' => 'Đã lưu thứ tự mới.']);
+        return response()->json(['success' => true, 'message' => __('Đã lưu thứ tự mới.')]);
     }
 
     private function validated(Request $request, ?Playlist $playlist = null): array

@@ -1,14 +1,14 @@
 @extends('layouts.backend')
-@section('title', 'Cấu hình AICEM')
+@section('title', __('Cấu hình AICEM'))
 
 @section('content')
 
 <div class="flex items-center justify-between mb-6">
     <div>
-        <h1 class="text-2xl font-bold text-base-content">Cấu hình AICEM</h1>
-        <p class="text-sm text-base-content/50 mt-0.5">Provider AI (BYOK), hạn mức chi phí, rate limit</p>
+        <h1 class="text-2xl font-bold text-base-content">{{ __('Cấu hình AICEM') }}</h1>
+        <p class="text-sm text-base-content/50 mt-0.5">{{ __('Provider AI (BYOK), hạn mức chi phí, rate limit') }}</p>
     </div>
-    <a href="{{ route('backend.aicem.dashboard') }}" class="btn btn-ghost btn-sm">← Tổng quan</a>
+    <a href="{{ route('backend.aicem.dashboard') }}" class="btn btn-ghost btn-sm">{{ __('← Tổng quan') }}</a>
 </div>
 
 @foreach(['success', 'error'] as $type)
@@ -54,14 +54,14 @@
         <div class="card-body">
             <h2 class="card-title text-base mb-1">Provider AI (BYOK)</h2>
             <p class="text-xs text-base-content/40 mb-4">
-                Mặc định Anthropic — chọn "Dùng mặc định nền tảng" nếu muốn theo config('ai.default') thay vì tự chọn ở đây.
+                {{ __('Mặc định Anthropic — chọn "Dùng mặc định nền tảng" nếu muốn theo config(\'ai.default\') thay vì tự chọn ở đây.') }}
             </p>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div class="form-control">
                     <label class="label py-0 pb-1.5"><span class="label-text font-medium">Provider</span></label>
                     <select name="ai_provider" x-model="provider" class="select select-bordered select-sm w-full @error('ai_provider') select-error @enderror">
-                        <option value="">— Dùng mặc định nền tảng —</option>
+                        <option value="">{{ __('— Dùng mặc định nền tảng —') }}</option>
                         <option value="anthropic" {{ $currentProvider === 'anthropic' ? 'selected' : '' }}>Anthropic</option>
                         <option value="openai" {{ $currentProvider === 'openai' ? 'selected' : '' }}>OpenAI</option>
                     </select>
@@ -73,7 +73,7 @@
                     <select name="ai_model" x-show="provider === 'anthropic'" :disabled="provider !== 'anthropic'"
                             class="select select-bordered select-sm w-full font-mono @error('ai_model') select-error @enderror">
                         @if($currentModel && !in_array($currentModel, $anthropicModels, true))
-                        <option value="{{ $currentModel }}" selected>{{ $currentModel }} (đã lưu trước đó)</option>
+                        <option value="{{ $currentModel }}" selected>{{ __(':current_model (đã lưu trước đó)', ['current_model' => $currentModel]) }}</option>
                         @endif
                         @foreach($anthropicModels as $m)
                         <option value="{{ $m }}" {{ $currentModel === $m ? 'selected' : '' }}>{{ $m }}</option>
@@ -83,7 +83,7 @@
                     <select name="ai_model" x-show="provider === 'openai'" :disabled="provider !== 'openai'"
                             class="select select-bordered select-sm w-full font-mono @error('ai_model') select-error @enderror">
                         @if($currentModel && !in_array($currentModel, $openaiModels, true))
-                        <option value="{{ $currentModel }}" selected>{{ $currentModel }} (đã lưu trước đó)</option>
+                        <option value="{{ $currentModel }}" selected>{{ __(':current_model (đã lưu trước đó)', ['current_model' => $currentModel]) }}</option>
                         @endif
                         @foreach($openaiModels as $m)
                         <option value="{{ $m }}" {{ $currentModel === $m ? 'selected' : '' }}>{{ $m }}</option>
@@ -103,11 +103,11 @@
             <div class="form-control">
                 <label class="label py-0 pb-1.5">
                     <span class="label-text font-medium">API key</span>
-                    <span class="label-text-alt text-xs text-base-content/40">Để trống nếu không đổi key hiện có</span>
+                    <span class="label-text-alt text-xs text-base-content/40">{{ __('Để trống nếu không đổi key hiện có') }}</span>
                 </label>
                 <input type="password" name="ai_api_key" value=""
                        class="input input-bordered input-sm w-full font-mono @error('ai_api_key') input-error @enderror"
-                       placeholder="{{ ($settings->provider_config['api_key'] ?? null) ? '•••••••••••• (đã lưu)' : 'Chưa cấu hình' }}"
+                       placeholder="{{ ($settings->provider_config['api_key'] ?? null) ? __('•••••••••••• (đã lưu)') : __('Chưa cấu hình') }}"
                        autocomplete="new-password">
                 @error('ai_api_key')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
             </div>
@@ -116,11 +116,11 @@
 
     <div class="card bg-base-100 shadow-sm border border-base-200 mb-5">
         <div class="card-body">
-            <h2 class="card-title text-base mb-4">Hạn mức chi phí</h2>
+            <h2 class="card-title text-base mb-4">{{ __('Hạn mức chi phí') }}</h2>
             <div class="form-control">
                 <label class="label py-0 pb-1.5">
-                    <span class="label-text font-medium">Hạn mức/tháng (USD)</span>
-                    <span class="label-text-alt text-xs text-base-content/40">Để trống = không giới hạn</span>
+                    <span class="label-text font-medium">{{ __('Hạn mức/tháng (USD)') }}</span>
+                    <span class="label-text-alt text-xs text-base-content/40">{{ __('Để trống = không giới hạn') }}</span>
                 </label>
                 <input type="number" step="0.01" min="0" name="ai_monthly_budget_usd"
                        value="{{ old('ai_monthly_budget_usd', $settings->monthly_budget_usd) }}"
@@ -134,17 +134,17 @@
     <div class="card bg-base-100 shadow-sm border border-base-200 mb-5">
         <div class="card-body">
             <h2 class="card-title text-base mb-1">Rate limit</h2>
-            <p class="text-xs text-base-content/40 mb-4">Để trống = dùng mặc định config('aicem.rate_limit') ({{ config('aicem.rate_limit.per_minute') }}/phút, {{ config('aicem.rate_limit.per_day') }}/ngày).</p>
+            <p class="text-xs text-base-content/40 mb-4">{{ __('Để trống = dùng mặc định config(\'aicem.rate_limit\') (:value/phút, :value2/ngày).', ['value' => config('aicem.rate_limit.per_minute'), 'value2' => config('aicem.rate_limit.per_day')]) }}</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="form-control">
-                    <label class="label py-0 pb-1.5"><span class="label-text font-medium">Lượt/phút mỗi user</span></label>
+                    <label class="label py-0 pb-1.5"><span class="label-text font-medium">{{ __('Lượt/phút mỗi user') }}</span></label>
                     <input type="number" min="1" name="rate_limit_per_minute"
                            value="{{ old('rate_limit_per_minute', $settings->rate_limit_override['per_minute'] ?? '') }}"
                            class="input input-bordered input-sm w-full @error('rate_limit_per_minute') input-error @enderror">
                     @error('rate_limit_per_minute')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                 </div>
                 <div class="form-control">
-                    <label class="label py-0 pb-1.5"><span class="label-text font-medium">Lượt/ngày mỗi user</span></label>
+                    <label class="label py-0 pb-1.5"><span class="label-text font-medium">{{ __('Lượt/ngày mỗi user') }}</span></label>
                     <input type="number" min="1" name="rate_limit_per_day"
                            value="{{ old('rate_limit_per_day', $settings->rate_limit_override['per_day'] ?? '') }}"
                            class="input input-bordered input-sm w-full @error('rate_limit_per_day') input-error @enderror">
@@ -154,7 +154,7 @@
         </div>
     </div>
 
-    <button type="submit" class="btn btn-primary btn-sm">Lưu cấu hình</button>
+    <button type="submit" class="btn btn-primary btn-sm">{{ __('Lưu cấu hình') }}</button>
 </form>
 
 @endsection

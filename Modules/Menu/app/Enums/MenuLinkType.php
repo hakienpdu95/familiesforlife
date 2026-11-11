@@ -15,10 +15,10 @@ enum MenuLinkType: string
     public function label(): string
     {
         return match ($this) {
-            self::Category => 'Danh mục bài viết',
-            self::Page     => 'Trang tĩnh',
-            self::Url      => 'URL tuỳ ý',
-            self::None     => 'Không liên kết — chỉ mở submenu',
+            self::Category => __('Danh mục bài viết'),
+            self::Page     => __('Trang tĩnh'),
+            self::Url      => __('URL tuỳ ý'),
+            self::None     => __('Không liên kết — chỉ mở submenu'),
         };
     }
 }

@@ -15,6 +15,7 @@
  */
 import './pages/project-index.js';
 
+import { t } from '../../../../../resources/js/shared/i18n.js';
 function esc(v) {
     if (v == null) return '';
     return String(v)
@@ -59,17 +60,17 @@ window.aivsCopy = async function (elId, btnEl) {
     const idleHtml = btnEl ? btnEl.innerHTML : null;
     if (btnEl) {
         btnEl.disabled = true;
-        btnEl.innerHTML = '<span class="loading loading-spinner loading-xs"></span> Đang copy...';
+        btnEl.innerHTML = ('<span class="loading loading-spinner loading-xs"></span> ' + t('Đang copy...'));
     }
 
     try {
         await navigator.clipboard.writeText(el.value);
-        window.Toast?.success('Đã copy vào clipboard.');
+        window.Toast?.success(t('Đã copy vào clipboard.'));
 
         if (btnEl) {
             btnEl.classList.remove('btn-primary', 'btn-outline');
             btnEl.classList.add('btn-success');
-            btnEl.innerHTML = '✓ Đã copy!';
+            btnEl.innerHTML = t('✓ Đã copy!');
             setTimeout(() => {
                 btnEl.classList.remove('btn-success');
                 btnEl.classList.add('btn-outline');
@@ -88,15 +89,15 @@ window.aivsCopy = async function (elId, btnEl) {
 // UI/UX v2 — 3 nhóm field (PHẢI khớp thứ tự/nhãn/placeholder với 3 khối @foreach trong show.blade.php).
 function shotFieldsGroupsHtml(shot) {
     const groupA = [
-        ['subject', 'Subject (Chủ thể)', null],
-        ['action', 'Action (Hành động)', null],
-        ['environment', 'Environment (Bối cảnh)', 'VD: hẻm nhỏ về đêm, đồng cỏ rộng mở, studio trong nhà, hang động dưới nước + thời điểm: lúc rạng đông, chiều tà, sáng mùa đông, giờ vàng (golden hour) — mô tả cả không gian VÀ thời điểm'],
+        ['subject', t('Subject (Chủ thể)'), null],
+        ['action', t('Action (Hành động)'), null],
+        ['environment', t('Environment (Bối cảnh)'), t('VD: hẻm nhỏ về đêm, đồng cỏ rộng mở, studio trong nhà, hang động dưới nước + thời điểm: lúc rạng đông, chiều tà, sáng mùa đông, giờ vàng (golden hour) — mô tả cả không gian VÀ thời điểm')],
     ];
     const groupB = [
-        ['camera', 'Camera (Góc máy)', 'VD: cận cảnh (close-up), góc thấp (low angle), máy đẩy chậm vào chủ thể (slow push-in) — cỡ cảnh: toàn/trung/cận/đại cận; chuyển động: lia ngang (pan), tracking, tĩnh (locked-off), cầm tay'],
-        ['style', 'Style (Phong cách)', 'VD: phong cách phim tài liệu, ánh sáng chụp sản phẩm, nắng vàng hoàng hôn, ánh trăng lạnh (không chỉ "đẹp") — gọi tên rõ nguồn sáng + thời điểm trong ngày nếu ánh sáng quan trọng với cảnh; hoặc phong cách hoạt hình/nghệ thuật (anime, claymation, tranh màu nước, hiệu ứng VHS cũ) nếu cần bản sắc hình ảnh riêng biệt'],
-        ['mood', 'Mood (Tâm trạng)', 'VD: năng lượng cao, trầm lắng, chuyên nghiệp, vui tươi'],
-        ['audio_direction', 'Audio (Âm thanh/Nhạc nền)', 'VD: tiếng bước chân trên sỏi, gió thổi xa xa; nhạc: điện tử tối giản, tempo trung bình — KHÁC lời thoại bên dưới'],
+        ['camera', t('Camera (Góc máy)'), t('VD: cận cảnh (close-up), góc thấp (low angle), máy đẩy chậm vào chủ thể (slow push-in) — cỡ cảnh: toàn/trung/cận/đại cận; chuyển động: lia ngang (pan), tracking, tĩnh (locked-off), cầm tay')],
+        ['style', t('Style (Phong cách)'), 'VD: phong cách phim tài liệu, ánh sáng chụp sản phẩm, nắng vàng hoàng hôn, ánh trăng lạnh (không chỉ "đẹp") — gọi tên rõ nguồn sáng + thời điểm trong ngày nếu ánh sáng quan trọng với cảnh; hoặc phong cách hoạt hình/nghệ thuật (anime, claymation, tranh màu nước, hiệu ứng VHS cũ) nếu cần bản sắc hình ảnh riêng biệt'],
+        ['mood', t('Mood (Tâm trạng)'), t('VD: năng lượng cao, trầm lắng, chuyên nghiệp, vui tươi')],
+        ['audio_direction', t('Audio (Âm thanh/Nhạc nền)'), t('VD: tiếng bước chân trên sỏi, gió thổi xa xa; nhạc: điện tử tối giản, tempo trung bình — KHÁC lời thoại bên dưới')],
     ];
 
     const fieldHtml = ([key, label, placeholder]) => `
@@ -109,7 +110,7 @@ function shotFieldsGroupsHtml(shot) {
     return `
         <div class="space-y-4">
             <div>
-                <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/40 mb-1.5">Nội dung cảnh — đang diễn ra chuyện gì</p>
+                <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/40 mb-1.5">${t('Nội dung cảnh — đang diễn ra chuyện gì')}</p>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3">${groupA.map(fieldHtml).join('')}</div>
             </div>
             <div>
@@ -120,12 +121,12 @@ function shotFieldsGroupsHtml(shot) {
                 <p class="text-[11px] font-semibold uppercase tracking-wide text-base-content/40 mb-1.5">Timeline &amp; Lời thoại — nói gì, khi nào</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div class="form-control md:col-span-2">
-                        <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Timeline nội dung (theo giây)</span></label>
+                        <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">${t('Timeline nội dung (theo giây)')}</span></label>
                         <textarea rows="2" class="aivs-field textarea textarea-bordered textarea-sm w-full" data-field="timeline_breakdown"
-                                  placeholder="VD: 0-5s: hook mở đầu gây chú ý&#10;5-15s: nội dung chính&#10;15-20s: kết + CTA">${esc(shot.timeline_breakdown)}</textarea>
+                                  placeholder="${t('VD: 0-5s: hook mở đầu gây chú ý&#10;5-15s: nội dung chính&#10;15-20s: kết + CTA')}">${esc(shot.timeline_breakdown)}</textarea>
                     </div>
                     <div class="form-control">
-                        <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Lời thoại (Script line)</span></label>
+                        <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">${t('Lời thoại (Script line)')}</span></label>
                         <textarea rows="2" class="aivs-field textarea textarea-bordered textarea-sm w-full" data-field="script_line">${esc(shot.script_line)}</textarea>
                     </div>
                     <div class="form-control">
@@ -136,7 +137,7 @@ function shotFieldsGroupsHtml(shot) {
                 </div>
             </div>
             <div class="form-control">
-                <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Constraints (Ràng buộc)</span></label>
+                <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">${t('Constraints (Ràng buộc)')}</span></label>
                 <textarea rows="2" class="aivs-field textarea textarea-bordered textarea-sm w-full" data-field="constraints"
                           placeholder='VD cụ thể (negative prompt): "không motion blur, nét mặt nhân vật, không lens flare" — tránh mô tả chung chung như "không mờ"'>${esc(shot.constraints)}</textarea>
             </div>
@@ -151,7 +152,7 @@ function updateWordCount(card) {
     if (!el || !label) return;
 
     const words = el.value.trim() ? el.value.trim().split(/\s+/).length : 0;
-    label.textContent = `${words} từ`;
+    label.textContent = `${t(':words từ', { words: (words) })}`;
     label.classList.toggle('text-warning', words > 0 && (words < 50 || words > 150));
     label.classList.toggle('text-base-content/40', words === 0 || (words >= 50 && words <= 150));
 }
@@ -162,18 +163,18 @@ function shotCardHtml(shot, projectUuid) {
         <div class="card-body space-y-3">
             <div class="flex items-center justify-between gap-2 flex-wrap">
                 <div class="flex items-center gap-2">
-                    <span class="badge badge-neutral badge-sm shrink-0 aivs-shot-number">Cảnh</span>
+                    <span class="badge badge-neutral badge-sm shrink-0 aivs-shot-number">${t('Cảnh')}</span>
                     <input type="text" class="aivs-field input input-bordered input-sm font-medium w-56" data-field="label"
                            value="${esc(shot.label)}" placeholder="VD: Shot 1 — Hook">
                     <input type="number" min="1" max="36000" class="aivs-field input input-bordered input-sm w-24" data-field="duration_seconds"
-                           value="${esc(shot.duration_seconds)}" placeholder="Giây" title="Thời lượng ước tính (giây)">
+                           value="${esc(shot.duration_seconds)}" placeholder="${t('Giây')}" title="${t('Thời lượng ước tính (giây)')}">
                 </div>
                 <div class="flex items-center gap-1">
-                    <button type="button" class="btn btn-primary btn-xs aivs-save-shot">Lưu</button>
+                    <button type="button" class="btn btn-primary btn-xs aivs-save-shot">${t('Lưu')}</button>
                     <span class="aivs-save-status text-xs text-base-content/40"></span>
-                    <button type="button" class="btn btn-ghost btn-xs aivs-move-up" title="Lên">↑</button>
-                    <button type="button" class="btn btn-ghost btn-xs aivs-move-down" title="Xuống">↓</button>
-                    <button type="button" class="btn btn-ghost btn-xs text-error aivs-delete-shot">Xoá</button>
+                    <button type="button" class="btn btn-ghost btn-xs aivs-move-up" title="${t('Lên')}">↑</button>
+                    <button type="button" class="btn btn-ghost btn-xs aivs-move-down" title="${t('Xuống')}">↓</button>
+                    <button type="button" class="btn btn-ghost btn-xs text-error aivs-delete-shot">${t('Xoá')}</button>
                 </div>
             </div>
 
@@ -181,7 +182,7 @@ function shotCardHtml(shot, projectUuid) {
 
             <div class="form-control">
                 <label class="label py-0 pb-1 flex items-center justify-between">
-                    <span class="label-text text-xs font-medium">Prompt hoàn chỉnh (tự sinh)</span>
+                    <span class="label-text text-xs font-medium">${t('Prompt hoàn chỉnh (tự sinh)')}</span>
                     <span class="aivs-word-count text-xs text-base-content/40"></span>
                 </label>
                 <div class="flex gap-2 items-start">
@@ -191,21 +192,21 @@ function shotCardHtml(shot, projectUuid) {
             </div>
 
             <details class="collapse collapse-arrow bg-base-200/40 border border-base-200">
-                <summary class="collapse-title text-xs font-medium py-2 min-h-0">Prompt 2 bước — Ảnh + Motion (Image-to-Video)</summary>
+                <summary class="collapse-title text-xs font-medium py-2 min-h-0">${t('Prompt 2 bước — Ảnh + Motion (Image-to-Video)')}</summary>
                 <div class="collapse-content space-y-3">
                     <div class="form-control">
-                        <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Prompt Ảnh (tạo keyframe)</span></label>
+                        <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">${t('Prompt Ảnh (tạo keyframe)')}</span></label>
                         <div class="flex gap-2 items-start">
                             <textarea rows="3" class="aivs-field aivs-image-prompt textarea textarea-bordered textarea-xs w-full font-mono" data-field="image_prompt"
-                                      placeholder="VD: Midjourney/DALL-E prompt cho khung hình tĩnh — chủ thể, bối cảnh, góc máy, phong cách... --ar 9:16">${esc(shot.image_prompt)}</textarea>
+                                      placeholder="${t('VD: Midjourney/DALL-E prompt cho khung hình tĩnh — chủ thể, bối cảnh, góc máy, phong cách... --ar 9:16')}">${esc(shot.image_prompt)}</textarea>
                             <button type="button" class="btn btn-outline btn-xs shrink-0 aivs-copy-image-prompt">Copy</button>
                         </div>
                     </div>
                     <div class="form-control">
-                        <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Prompt Motion (hoạt hình hoá ảnh)</span></label>
+                        <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">${t('Prompt Motion (hoạt hình hoá ảnh)')}</span></label>
                         <div class="flex gap-2 items-start">
                             <textarea rows="3" class="aivs-field aivs-motion-prompt textarea textarea-bordered textarea-xs w-full font-mono" data-field="motion_prompt"
-                                      placeholder="VD: RunwayML/Kling prompt cho chuyển động — hành động, chuyển động máy, thời lượng...">${esc(shot.motion_prompt)}</textarea>
+                                      placeholder="${t('VD: RunwayML/Kling prompt cho chuyển động — hành động, chuyển động máy, thời lượng...')}">${esc(shot.motion_prompt)}</textarea>
                             <button type="button" class="btn btn-outline btn-xs shrink-0 aivs-copy-motion-prompt">Copy</button>
                         </div>
                     </div>
@@ -268,7 +269,7 @@ function renderTimeline() {
     if (!shots.some((s) => s.duration > 0)) {
         container.innerHTML = `
             <div class="alert py-2 px-3 text-xs bg-base-200/60 border border-base-200">
-                <span>Điền <b>Thời lượng (giây)</b> cho từng cảnh bên dưới để xem timeline trực quan tại đây.</span>
+                <span>${t('Điền')} <b>${t('Thời lượng (giây)')}</b> ${t('cho từng cảnh bên dưới để xem timeline trực quan tại đây.')}</span>
             </div>`;
         return;
     }
@@ -280,7 +281,7 @@ function renderTimeline() {
         const start = cursor;
         cursor += flexWeight;
         const color = AIVS_TIMELINE_PALETTE[i % AIVS_TIMELINE_PALETTE.length];
-        const timeLabel = s.duration ? `${start}–${start + s.duration}s` : 'chưa có thời lượng';
+        const timeLabel = s.duration ? `${start}–${start + s.duration}s` : t('chưa có thời lượng');
         return `
             <a href="#shot-${s.uuid}" style="flex: ${flexWeight} 1 0" class="${color} border-t-0 border-b-0 px-2 py-2 text-[11px] leading-tight hover:brightness-95 transition-[filter] min-w-[64px]">
                 <div class="font-medium truncate">${i + 1}. ${esc(s.label) || 'Chưa đặt tên'}</div>
@@ -291,7 +292,7 @@ function renderTimeline() {
     container.innerHTML = `
         <div class="flex items-center justify-between mb-1.5">
             <span class="text-xs font-medium text-base-content/60">Timeline video</span>
-            <span class="badge badge-neutral badge-sm">Tổng: ${total} giây</span>
+            <span class="badge badge-neutral badge-sm">${t('Tổng: :total giây', { total: (total) })}</span>
         </div>
         <div class="flex w-full rounded-lg overflow-hidden border border-base-200 divide-x divide-base-200">${segments}</div>`;
 }
@@ -299,7 +300,7 @@ function renderTimeline() {
 function renumberShots() {
     document.querySelectorAll('#aivsShotList .aivs-shot-card').forEach((card, i) => {
         const badge = card.querySelector('.aivs-shot-number');
-        if (badge) badge.textContent = `Cảnh ${i + 1}`;
+        if (badge) badge.textContent = `${t('Cảnh :value', { value: (i + 1) })}`;
     });
 }
 
@@ -312,7 +313,7 @@ function updateEmptyState() {
     if (empty) empty.style.display = count === 0 ? '' : 'none';
 
     const heading = document.getElementById('aivsShotCountHeading');
-    if (heading) heading.textContent = `Danh sách cảnh (${count})`;
+    if (heading) heading.textContent = `${t('Danh sách cảnh (:count)', { count: (count) })}`;
 }
 
 function refreshOverview() {
@@ -331,7 +332,7 @@ function bindShotCard(card, shotApiBaseUrl) {
     card.querySelectorAll('.aivs-field').forEach((el) => {
         el.addEventListener('input', () => {
             card.dataset.dirty = 'true';
-            setSaveStatus(card, 'Chưa lưu — bấm "Lưu"');
+            setSaveStatus(card, t('Chưa lưu — bấm "Lưu"'));
             renderTimeline();
         });
     });
@@ -339,7 +340,7 @@ function bindShotCard(card, shotApiBaseUrl) {
     card.querySelector('.aivs-save-shot')?.addEventListener('click', async function () {
         const btn = this;
         btn.disabled = true;
-        setSaveStatus(card, 'Đang lưu...');
+        setSaveStatus(card, t('Đang lưu...'));
         try {
             const shot = await fetchJson(shotUrl(), {
                 method: 'PUT',
@@ -347,12 +348,12 @@ function bindShotCard(card, shotApiBaseUrl) {
             });
             applyShotResource(card, shot);
             card.dataset.dirty = 'false';
-            setSaveStatus(card, 'Đã lưu');
+            setSaveStatus(card, t('Đã lưu'));
             setTimeout(() => setSaveStatus(card, ''), 2000);
             renderTimeline();
         } catch (e) {
             console.error('[aivideostudiotemplate] save shot failed', e);
-            setSaveStatus(card, 'Lỗi lưu!');
+            setSaveStatus(card, t('Lỗi lưu!'));
         } finally {
             btn.disabled = false;
         }
@@ -381,8 +382,8 @@ function bindShotCard(card, shotApiBaseUrl) {
     });
 
     card.querySelector('.aivs-delete-shot')?.addEventListener('click', async function () {
-        const label = card.querySelector('[data-field="label"]')?.value || '(chưa đặt tên)';
-        if (!window.confirm(`Xoá shot "${label}"? Không thể hoàn tác.`)) return;
+        const label = card.querySelector('[data-field="label"]')?.value || t('(chưa đặt tên)');
+        if (!window.confirm(`${t('Xoá shot ":label"? Không thể hoàn tác.', { label: (label) })}`)) return;
 
         try {
             await fetchJson(shotUrl(), { method: 'DELETE' });
@@ -390,7 +391,7 @@ function bindShotCard(card, shotApiBaseUrl) {
             refreshOverview();
         } catch (e) {
             console.error('[aivideostudiotemplate] delete shot failed', e);
-            alert('Xoá shot thất bại. Vui lòng thử lại.');
+            alert(t('Xoá shot thất bại. Vui lòng thử lại.'));
         }
     });
 
@@ -425,7 +426,7 @@ async function moveShot(card, direction) {
         });
     } catch (e) {
         console.error('[aivideostudiotemplate] reorder failed', e);
-        alert('Sắp xếp lại thất bại. Vui lòng tải lại trang.');
+        alert(t('Sắp xếp lại thất bại. Vui lòng tải lại trang.'));
     }
 }
 
@@ -433,9 +434,9 @@ async function moveShot(card, direction) {
 // tổng đúng 60s (3+7+15+15+20) khớp bảng Hook/Problem/Solution/Proof/CTA hiển thị ở khối cheat-sheet.
 const AIVS_QUICK_START_TEMPLATE = [
     { label: 'Hook', duration_seconds: 3 },
-    { label: 'Vấn đề', duration_seconds: 7 },
-    { label: 'Giải pháp', duration_seconds: 15 },
-    { label: 'Bằng chứng', duration_seconds: 15 },
+    { label: t('Vấn đề'), duration_seconds: 7 },
+    { label: t('Giải pháp'), duration_seconds: 15 },
+    { label: t('Bằng chứng'), duration_seconds: 15 },
     { label: 'CTA', duration_seconds: 20 },
 ];
 
@@ -491,7 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
             card.querySelector('[data-field="label"]')?.focus();
         } catch (e) {
             console.error('[aivideostudiotemplate] add shot failed', e);
-            alert('Thêm shot thất bại. Vui lòng thử lại.');
+            alert(t('Thêm shot thất bại. Vui lòng thử lại.'));
         } finally {
             btn.disabled = false;
         }
@@ -508,10 +509,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 await addShot(step);
             }
             refreshOverview();
-            window.Toast?.success('Đã chèn 5 cảnh mẫu — sửa lại nội dung cho phù hợp với sản phẩm của bạn.');
+            window.Toast?.success(t('Đã chèn 5 cảnh mẫu — sửa lại nội dung cho phù hợp với sản phẩm của bạn.'));
         } catch (e) {
             console.error('[aivideostudiotemplate] quick start failed', e);
-            alert('Chèn cảnh mẫu thất bại. Vui lòng thử lại — các cảnh đã tạo thành công vẫn được giữ lại.');
+            alert(t('Chèn cảnh mẫu thất bại. Vui lòng thử lại — các cảnh đã tạo thành công vẫn được giữ lại.'));
         } finally {
             btn.disabled = false;
         }

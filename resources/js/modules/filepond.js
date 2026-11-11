@@ -31,6 +31,7 @@ import FilePondPluginFileValidateType     from 'filepond-plugin-file-validate-ty
 import FilePondPluginFileRename           from 'filepond-plugin-file-rename';
 import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orientation';
 
+import { t } from '../shared/i18n.js';
 FilePond.registerPlugin(
     FilePondPluginImageExifOrientation,
     FilePondPluginImagePreview,
@@ -62,27 +63,27 @@ const DEFAULTS = {
     allowMultiple:            true,
     maxFiles:                 10,
     maxFileSize:              '10MB',
-    labelIdle:                'Kéo thả file vào đây hoặc <span class="filepond--label-action">Duyệt file</span>',
-    labelMaxFileSizeExceeded: 'File quá lớn',
-    labelMaxFileSize:         'Kích thước tối đa: {filesize}',
-    labelFileTypeNotAllowed:  'Định dạng file không hợp lệ',
-    fileValidateTypeLabelExpectedTypes:    'Chỉ chấp nhận: {allTypes}',
+    labelIdle:                (t('Kéo thả file vào đây hoặc') + ' <span class="filepond--label-action">' + t('Duyệt file') + '</span>'),
+    labelMaxFileSizeExceeded: t('File quá lớn'),
+    labelMaxFileSize:         t('Kích thước tối đa: {filesize}'),
+    labelFileTypeNotAllowed:  t('Định dạng file không hợp lệ'),
+    fileValidateTypeLabelExpectedTypes:    t('Chỉ chấp nhận: {allTypes}'),
     fileValidateTypeLabelExpectedTypesMap: MIME_LABEL,
     fileValidateTypeDetectType:            detectFileType,
-    labelFileProcessing:      'Đang tải lên...',
-    labelFileProcessingComplete: 'Tải lên hoàn tất',
-    labelFileProcessingAborted:  'Đã hủy',
-    labelFileProcessingError: (error) => error?.body || 'Tải lên thất bại',
-    labelTapToCancel:         'nhấn để hủy',
-    labelTapToRetry:          'nhấn để thử lại',
-    labelTapToUndo:           'nhấn để xóa',
-    labelButtonRemoveItem:    'Xóa',
-    labelButtonAbortItemLoad: 'Hủy',
-    labelButtonRetryItemLoad: 'Thử lại',
-    labelButtonAbortItemProcessing: 'Hủy',
-    labelButtonUndoItemProcessing:  'Hoàn tác',
-    labelButtonRetryItemProcessing: 'Thử lại',
-    labelButtonProcessItem:   'Tải lên',
+    labelFileProcessing:      t('Đang tải lên...'),
+    labelFileProcessingComplete: t('Tải lên hoàn tất'),
+    labelFileProcessingAborted:  t('Đã hủy'),
+    labelFileProcessingError: (error) => error?.body || t('Tải lên thất bại'),
+    labelTapToCancel:         t('nhấn để hủy'),
+    labelTapToRetry:          t('nhấn để thử lại'),
+    labelTapToUndo:           t('nhấn để xóa'),
+    labelButtonRemoveItem:    t('Xóa'),
+    labelButtonAbortItemLoad: t('Hủy'),
+    labelButtonRetryItemLoad: t('Thử lại'),
+    labelButtonAbortItemProcessing: t('Hủy'),
+    labelButtonUndoItemProcessing:  t('Hoàn tác'),
+    labelButtonRetryItemProcessing: t('Thử lại'),
+    labelButtonProcessItem:   t('Tải lên'),
     imagePreviewMaxHeight:    200,
 };
 
@@ -259,9 +260,9 @@ function initFilePondUpload(selector, options = {}) {
                 },
                 onerror(response) {
                     try {
-                        return JSON.parse(response).message ?? 'Upload thất bại';
+                        return JSON.parse(response).message ?? t('Upload thất bại');
                     } catch {
-                        return 'Upload thất bại';
+                        return t('Upload thất bại');
                     }
                 },
             },
@@ -297,11 +298,11 @@ function initFilePondUpload(selector, options = {}) {
                             load();
                         } else {
                             res.json()
-                               .then(d => error(d.message ?? 'Không thể hủy'))
-                               .catch(() => error('Không thể hủy'));
+                               .then(d => error(d.message ?? t('Không thể hủy')))
+                               .catch(() => error(t('Không thể hủy')));
                         }
                     })
-                    .catch(() => error('Không thể hủy'));
+                    .catch(() => error(t('Không thể hủy')));
             },
         },
 

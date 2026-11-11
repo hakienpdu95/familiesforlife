@@ -23,7 +23,7 @@ class CreateMenuItemAction
             $parent = MenuItem::findOrFail($data->parent_id);
 
             throw_if($parent->depth >= config('menu.max_depth'), ValidationException::withMessages([
-                'parent_id' => 'Menu chỉ hỗ trợ tối đa 3 cấp — không thể thêm mục con vào đây.',
+                'parent_id' => __('Menu chỉ hỗ trợ tối đa 3 cấp — không thể thêm mục con vào đây.'),
             ]));
 
             $depth = $parent->depth + 1;

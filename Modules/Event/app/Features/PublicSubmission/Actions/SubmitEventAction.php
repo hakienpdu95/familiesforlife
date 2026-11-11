@@ -75,7 +75,7 @@ class SubmitEventAction
         abort_if(
             $activeCount >= 3,
             422,
-            'Bạn đã có 3 sự kiện đang hiển thị công khai. Vui lòng chờ sự kiện cũ kết thúc trước khi nộp thêm.'
+            __('Bạn đã có 3 sự kiện đang hiển thị công khai. Vui lòng chờ sự kiện cũ kết thúc trước khi nộp thêm.')
         );
     }
 

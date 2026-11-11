@@ -33,12 +33,12 @@ class QrIdentity extends Model
     {
         static::updating(function (self $identity): void {
             if ($identity->isDirty(self::IMMUTABLE)) {
-                throw new LogicException('Mã QR truy xuất là bất biến — không được sửa mã hoặc đối tượng gốc.');
+                throw new LogicException(__('Mã QR truy xuất là bất biến — không được sửa mã hoặc đối tượng gốc.'));
             }
         });
 
         static::deleting(function (): void {
-            throw new LogicException('Không được xoá mã QR truy xuất — chỉ được thu hồi (revoke).');
+            throw new LogicException(__('Không được xoá mã QR truy xuất — chỉ được thu hồi (revoke).'));
         });
     }
 
@@ -57,7 +57,7 @@ class QrIdentity extends Model
             }
         }
 
-        throw new LogicException('Không sinh được mã QR duy nhất sau 5 lần thử.');
+        throw new LogicException(__('Không sinh được mã QR duy nhất sau 5 lần thử.'));
     }
 
     public static function generateCode(int $length = self::CODE_LENGTH): string

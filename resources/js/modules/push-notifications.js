@@ -1,3 +1,5 @@
+import { t } from '../shared/i18n.js';
+
 /**
  * resources/js/modules/push-notifications.js
  * ─────────────────────────────────────────────
@@ -43,13 +45,13 @@ async function getCurrentSubscription() {
 
 /* ── Subscribe ──────────────────────────────────────────────────────── */
 export async function subscribePush() {
-    if (!isSupported()) throw new Error('Browser không hỗ trợ Web Push.');
+    if (!isSupported()) throw new Error(t('Browser không hỗ trợ Web Push.'));
 
     const permission = await Notification.requestPermission();
-    if (permission !== 'granted') throw new Error('Quyền thông báo bị từ chối.');
+    if (permission !== 'granted') throw new Error(t('Quyền thông báo bị từ chối.'));
 
     const vapidKey = getVapidKey();
-    if (!vapidKey) throw new Error('VAPID key chưa được cấu hình.');
+    if (!vapidKey) throw new Error(t('VAPID key chưa được cấu hình.'));
 
     const reg = await getRegistration();
     const sub = await reg.pushManager.subscribe({
@@ -68,7 +70,7 @@ export async function subscribePush() {
         body: JSON.stringify(sub.toJSON()),
     });
 
-    if (!res.ok) throw new Error('Không thể lưu subscription.');
+    if (!res.ok) throw new Error(t('Không thể lưu subscription.'));
 
     localStorage.setItem(STORAGE_KEY, '1');
     return sub;
@@ -126,9 +128,9 @@ export function pushToggleComponent() {
         },
 
         get label() {
-            if (!this.supported) return 'Trình duyệt không hỗ trợ';
-            if (this.permission === 'denied') return 'Quyền bị chặn — mở lại trong cài đặt trình duyệt';
-            return this.subscribed ? 'Tắt thông báo trình duyệt' : 'Bật thông báo trình duyệt';
+            if (!this.supported) return t('Trình duyệt không hỗ trợ');
+            if (this.permission === 'denied') return t('Quyền bị chặn — mở lại trong cài đặt trình duyệt');
+            return this.subscribed ? t('Tắt thông báo trình duyệt') : t('Bật thông báo trình duyệt');
         },
 
         get icon() {

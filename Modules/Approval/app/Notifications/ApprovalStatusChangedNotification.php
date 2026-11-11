@@ -41,8 +41,8 @@ class ApprovalStatusChangedNotification extends Notification implements ShouldQu
     {
         return NotificationData::make(
             type:     'approval_status_changed',
-            title:    "{$this->subjectLabel} đã chuyển sang \"{$this->to->label()}\"",
-            body:     'Trạng thái phê duyệt vừa được cập nhật.',
+            title:    __(':subject_label đã chuyển sang ":to"', ['subject_label' => $this->subjectLabel, 'to' => $this->to->label()]),
+            body:     __('Trạng thái phê duyệt vừa được cập nhật.'),
             url:      $this->url,
             icon:     'task',
             severity: $this->to === ApprovalStatus::Archived ? 'info' : 'success',

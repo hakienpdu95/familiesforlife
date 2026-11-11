@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', 'Thêm bài viết')
+@section('title', __('Thêm bài viết'))
 
 @section('content')
 <div class="max-w-6xl">
@@ -7,21 +7,21 @@
 {{-- Page header --}}
 <div class="flex items-center justify-between mb-6">
     <div>
-        <h1 class="text-2xl font-bold text-base-content">Thêm bài viết</h1>
-        <p class="text-sm text-base-content/50 mt-0.5">Tạo bài viết và tiếp tục soạn nội dung chi tiết/SEO ngay sau khi lưu</p>
+        <h1 class="text-2xl font-bold text-base-content">{{ __('Thêm bài viết') }}</h1>
+        <p class="text-sm text-base-content/50 mt-0.5">{{ __('Tạo bài viết và tiếp tục soạn nội dung chi tiết/SEO ngay sau khi lưu') }}</p>
     </div>
     <a href="{{ route('backend.post.articles.index') }}" class="btn btn-ghost btn-sm gap-1.5">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
         </svg>
-        Quay lại
+        {{ __('Quay lại') }}
     </a>
 </div>
 
 @if($errors->any())
 <div class="alert alert-error py-3 px-4 mb-5 flex items-start gap-3 text-sm">
     <div>
-        <p class="font-semibold">Có {{ $errors->count() }} lỗi cần kiểm tra:</p>
+        <p class="font-semibold">{{ __('Có :count lỗi cần kiểm tra:', ['count' => $errors->count()]) }}</p>
         <ul class="mt-1.5 list-disc list-inside space-y-0.5 text-xs opacity-90">
             @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
         </ul>
@@ -40,18 +40,18 @@
              đúng trải nghiệm "1 bước tạo xong" trước khi PostArticle tách vỏ đa ngôn ngữ. --}}
         <div class="form-control">
             <label class="label py-0 pb-1.5">
-                <span class="label-text font-medium">Tiêu đề <span class="text-error">*</span></span>
+                <span class="label-text font-medium">{{ __('Tiêu đề') }} <span class="text-error">*</span></span>
             </label>
             <input type="text" name="title" value="{{ old('title') }}"
-                   data-req="Vui lòng nhập tiêu đề" data-val-maxlength="300"
+                   data-req="{{ __('Vui lòng nhập tiêu đề') }}" data-val-maxlength="300"
                    class="input input-bordered input-sm w-full @error('title') input-error @enderror"
-                   placeholder="VD: 5 mẹo giúp bé ngủ ngon" maxlength="300" autofocus>
+                   placeholder="{{ __('VD: 5 mẹo giúp bé ngủ ngon') }}" maxlength="300" autofocus>
             @error('title')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
         </div>
 
         <div class="form-control">
             <label class="label py-0 pb-1">
-                <span class="label-text text-xs font-medium">Ngôn ngữ chính</span>
+                <span class="label-text text-xs font-medium">{{ __('Ngôn ngữ chính') }}</span>
             </label>
             <select name="main_locale" class="select select-bordered select-sm w-full ts-init @error('main_locale') select-error @enderror">
                 @foreach(config('post.locales') as $code => $label)
@@ -63,7 +63,7 @@
 
         <div class="form-control" x-data="{ format: '{{ old('format', 'article') }}' }">
             <label class="label py-0 pb-1">
-                <span class="label-text text-xs font-medium">Định dạng nội dung</span>
+                <span class="label-text text-xs font-medium">{{ __('Định dạng nội dung') }}</span>
             </label>
             <select name="format" x-model="format" class="select select-bordered select-sm w-full ts-init @error('format') select-error @enderror">
                 @foreach(\Modules\Post\Enums\ArticleFormat::cases() as $f)
@@ -74,19 +74,19 @@
 
             <div x-show="format === 'redirect'" x-cloak class="mt-3">
                 <label class="label py-0 pb-1.5">
-                    <span class="label-text font-medium">URL đích <span class="text-error">*</span></span>
+                    <span class="label-text font-medium">{{ __('URL đích') }} <span class="text-error">*</span></span>
                 </label>
                 <input type="url" name="redirect_url" value="{{ old('redirect_url') }}"
                        class="input input-bordered input-sm w-full @error('redirect_url') input-error @enderror"
                        placeholder="https://nguon-khac.vn/bai-viet-goc">
                 @error('redirect_url')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
-                <p class="mt-1 text-xs text-base-content/50">Bài viết dạng "Liên kết ngoài" không có nội dung riêng — khi người dùng bấm vào sẽ được chuyển thẳng ra URL này.</p>
+                <p class="mt-1 text-xs text-base-content/50">{{ __('Bài viết dạng "Liên kết ngoài" không có nội dung riêng — khi người dùng bấm vào sẽ được chuyển thẳng ra URL này.') }}</p>
             </div>
         </div>
 
         <div class="form-control">
             <label class="label py-0 pb-1">
-                <span class="label-text text-xs font-medium">Ảnh đại diện</span>
+                <span class="label-text text-xs font-medium">{{ __('Ảnh đại diện') }}</span>
             </label>
             <div id="cover-filepond"></div>
             <input type="hidden" name="cover_media_uuid" id="cover-media-uuid" value="{{ old('cover_media_uuid') }}">
@@ -105,8 +105,8 @@
 
         <div class="form-control">
             <label class="label py-0 pb-1.5">
-                <span class="label-text font-medium">Danh mục</span>
-                <span class="label-text-alt text-xs text-base-content/40">Bấm ★ để đặt danh mục chính</span>
+                <span class="label-text font-medium">{{ __('Danh mục') }}</span>
+                <span class="label-text-alt text-xs text-base-content/40">{{ __('Bấm ★ để đặt danh mục chính') }}</span>
             </label>
             @include('post::admin.articles._category-picker', [
                 'categoryTree' => $categoryTree,
@@ -120,7 +120,7 @@
                 <span class="label-text font-medium">Tags</span>
             </label>
             <input type="text" name="tags" value="{{ old('tags') }}"
-                   class="input input-bordered input-sm w-full" placeholder="ngủ, sơ sinh, mẹo hay">
+                   class="input input-bordered input-sm w-full" placeholder="{{ __('ngủ, sơ sinh, mẹo hay') }}">
         </div>
 
         <label class="flex items-start gap-2.5 cursor-pointer select-none group">
@@ -128,14 +128,14 @@
             <input type="checkbox" name="is_featured" value="1"
                    class="checkbox checkbox-sm checkbox-primary mt-0.5 shrink-0" {{ old('is_featured') ? 'checked' : '' }}>
             <div>
-                <span class="text-sm font-medium group-hover:text-primary transition-colors">Bài viết nổi bật</span>
-                <p class="text-xs text-base-content/50 mt-0.5">Ưu tiên hiển thị ở trang chủ</p>
+                <span class="text-sm font-medium group-hover:text-primary transition-colors">{{ __('Bài viết nổi bật') }}</span>
+                <p class="text-xs text-base-content/50 mt-0.5">{{ __('Ưu tiên hiển thị ở trang chủ') }}</p>
             </div>
         </label>
 
         <div class="flex gap-2 pt-2">
-            <a href="{{ route('backend.post.articles.index') }}" class="btn btn-ghost btn-sm flex-1">Hủy</a>
-            <button type="submit" class="btn btn-primary btn-sm flex-1">Tạo bài viết</button>
+            <a href="{{ route('backend.post.articles.index') }}" class="btn btn-ghost btn-sm flex-1">{{ __('Hủy') }}</a>
+            <button type="submit" class="btn btn-primary btn-sm flex-1">{{ __('Tạo bài viết') }}</button>
         </div>
     </div>
 </form>

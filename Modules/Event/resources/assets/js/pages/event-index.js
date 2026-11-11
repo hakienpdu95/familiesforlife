@@ -10,6 +10,7 @@
 
 import { createTs } from '@shared/tom-select-factory.js';
 
+import { t } from '../../../../../../resources/js/shared/i18n.js';
 function esc(v) {
     if (v == null) return '';
     return String(v)
@@ -23,7 +24,7 @@ function csrf() {
 
 const COLUMNS = [
     {
-        title: 'Sự kiện', field: 'title', minWidth: 220, sorter: 'string', frozen: true,
+        title: t('Sự kiện'), field: 'title', minWidth: 220, sorter: 'string', frozen: true,
         formatter(cell) {
             const d = cell.getRow().getData();
             return '<span class="font-medium text-sm">' + esc(d.title) + '</span>'
@@ -31,7 +32,7 @@ const COLUMNS = [
         },
     },
     {
-        title: 'Danh mục', field: 'category_name', minWidth: 150, headerSort: false,
+        title: t('Danh mục'), field: 'category_name', minWidth: 150, headerSort: false,
         formatter(cell) {
             const d = cell.getRow().getData();
             if (!d.category_name) return '<span class="text-base-content/25 text-xs">—</span>';
@@ -40,14 +41,14 @@ const COLUMNS = [
         },
     },
     {
-        title: 'Thời gian', field: 'start_date', width: 170, headerSort: false,
+        title: t('Thời gian'), field: 'start_date', width: 170, headerSort: false,
         formatter(cell) {
             const d = cell.getRow().getData();
             return '<span class="text-sm">' + esc(d.start_date) + ' – ' + esc(d.end_date) + '</span>';
         },
     },
     {
-        title: 'Trạng thái', field: 'status_value', width: 130, hozAlign: 'center', sorter: 'string',
+        title: t('Trạng thái'), field: 'status_value', width: 130, hozAlign: 'center', sorter: 'string',
         formatter(cell) {
             const d = cell.getRow().getData();
             return '<span class="badge badge-sm ' + esc(d.status_badge) + '">' + esc(d.status_label) + '</span>';
@@ -60,19 +61,19 @@ const COLUMNS = [
             let html = '<div class="flex items-center justify-end gap-1.5">';
 
             if (d.can_approve) {
-                html += '<button class="btn btn-success btn-xs" data-url="' + esc(d.approve_url) + '" onclick="window.eventAction(this.dataset.url, \'Đã duyệt sự kiện.\')">Duyệt</button>';
+                html += '<button class="btn btn-success btn-xs" data-url="' + esc(d.approve_url) + ('" onclick="window.eventAction(this.dataset.url, \'Đã duyệt sự kiện.\')">' + t('Duyệt') + '</button>');
             }
             if (d.can_reject) {
-                html += '<button class="btn btn-error btn-outline btn-xs" data-url="' + esc(d.reject_url) + '" data-title="' + esc(d.title) + '" onclick="window.eventRejectConfirm(this.dataset.url, this.dataset.title)">Từ chối</button>';
+                html += '<button class="btn btn-error btn-outline btn-xs" data-url="' + esc(d.reject_url) + '" data-title="' + esc(d.title) + ('" onclick="window.eventRejectConfirm(this.dataset.url, this.dataset.title)">' + t('Từ chối') + '</button>');
             }
             if (d.can_publish) {
-                html += '<button class="btn btn-primary btn-xs" data-url="' + esc(d.publish_url) + '" onclick="window.eventAction(this.dataset.url, \'Đã xuất bản sự kiện.\')">Xuất bản</button>';
+                html += '<button class="btn btn-primary btn-xs" data-url="' + esc(d.publish_url) + ('" onclick="window.eventAction(this.dataset.url, \'Đã xuất bản sự kiện.\')">' + t('Xuất bản') + '</button>');
             }
             if (d.can_archive) {
-                html += '<button class="btn btn-ghost btn-xs" data-url="' + esc(d.archive_url) + '" data-title="' + esc(d.title) + '" onclick="window.eventArchiveConfirm(this.dataset.url, this.dataset.title)">Lưu trữ</button>';
+                html += '<button class="btn btn-ghost btn-xs" data-url="' + esc(d.archive_url) + '" data-title="' + esc(d.title) + ('" onclick="window.eventArchiveConfirm(this.dataset.url, this.dataset.title)">' + t('Lưu trữ') + '</button>');
             }
             if (d.can_update) {
-                html += '<a href="' + esc(d.edit_url) + '" class="btn btn-ghost btn-xs btn-square" title="Sửa">'
+                html += '<a href="' + esc(d.edit_url) + ('" class="btn btn-ghost btn-xs btn-square" title="' + t('Sửa') + '">')
                     + '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>'
                     + '</a>';
             }
@@ -100,11 +101,11 @@ window.eventAction = async function (url, successMessage) {
         if (res.ok) {
             window.eventTable?.replaceData();
         } else {
-            alert(data.message || 'Thao tác thất bại. Vui lòng thử lại.');
+            alert(data.message || t('Thao tác thất bại. Vui lòng thử lại.'));
         }
     } catch (e) {
         console.error('[event] action failed', e);
-        alert('Lỗi kết nối. Vui lòng thử lại.');
+        alert(t('Lỗi kết nối. Vui lòng thử lại.'));
     }
 };
 
@@ -138,10 +139,10 @@ document.addEventListener('DOMContentLoaded', () => {
         confirmRejectBtn.addEventListener('click', async function () {
             if (!pendingRejectUrl) return;
             const reason = document.getElementById('eventRejectReason')?.value?.trim();
-            if (!reason) { alert('Vui lòng nhập lý do từ chối.'); return; }
+            if (!reason) { alert(t('Vui lòng nhập lý do từ chối.')); return; }
 
             this.disabled = true;
-            this.textContent = 'Đang xử lý...';
+            this.textContent = t('Đang xử lý...');
 
             try {
                 const res = await fetch(pendingRejectUrl, {
@@ -158,14 +159,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('eventRejectModal')?.close();
                     window.eventTable?.replaceData();
                 } else {
-                    alert(data.message || 'Từ chối thất bại. Vui lòng thử lại.');
+                    alert(data.message || t('Từ chối thất bại. Vui lòng thử lại.'));
                 }
             } catch (e) {
                 console.error('[event] reject failed', e);
-                alert('Lỗi kết nối. Vui lòng thử lại.');
+                alert(t('Lỗi kết nối. Vui lòng thử lại.'));
             } finally {
                 this.disabled = false;
-                this.textContent = 'Từ chối sự kiện';
+                this.textContent = t('Từ chối sự kiện');
                 pendingRejectUrl = null;
             }
         });
@@ -177,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!pendingArchiveUrl) return;
 
             this.disabled = true;
-            this.textContent = 'Đang xử lý...';
+            this.textContent = t('Đang xử lý...');
 
             try {
                 const res = await fetch(pendingArchiveUrl, {
@@ -194,14 +195,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('eventArchiveModal')?.close();
                     window.eventTable?.replaceData();
                 } else {
-                    alert(data.message || 'Lưu trữ thất bại. Vui lòng thử lại.');
+                    alert(data.message || t('Lưu trữ thất bại. Vui lòng thử lại.'));
                 }
             } catch (e) {
                 console.error('[event] archive failed', e);
-                alert('Lỗi kết nối. Vui lòng thử lại.');
+                alert(t('Lỗi kết nối. Vui lòng thử lại.'));
             } finally {
                 this.disabled = false;
-                this.textContent = 'Lưu trữ sự kiện';
+                this.textContent = t('Lưu trữ sự kiện');
                 pendingArchiveUrl = null;
             }
         });
@@ -228,7 +229,7 @@ document.addEventListener('alpine:init', () => {
 
             get activeChips() {
                 const chips = [], f = this.filters;
-                if (f.search) chips.push({ key: 'search', label: 'Tìm: ' + f.search });
+                if (f.search) chips.push({ key: 'search', label: (t('Tìm:') + ' ') + f.search });
                 if (f.status) chips.push({ key: 'status', label: optText(tsStatus, f.status) });
                 return chips;
             },
@@ -245,7 +246,7 @@ document.addEventListener('alpine:init', () => {
                 if (!statusEl) return;
 
                 tsStatus = createTs(statusEl, {
-                    placeholder: 'Tất cả trạng thái',
+                    placeholder: t('Tất cả trạng thái'),
                     onChange() { statusEl.dispatchEvent(new Event('change', { bubbles: true })); },
                 });
             },
@@ -281,11 +282,11 @@ document.addEventListener('alpine:init', () => {
                     langs: {
                         'vi-VN': {
                             pagination: {
-                                page_size: 'Dòng/trang', page_title: 'Trang',
+                                page_size: t('Dòng/trang'), page_title: t('Trang'),
                                 first: '«', last: '»', prev: '‹', next: '›',
-                                first_title: 'Trang đầu', last_title: 'Trang cuối',
-                                prev_title: 'Trang trước', next_title: 'Trang sau',
-                                counter: { showing: '', of: 'trong', rows: 'dòng', pages: 'trang' },
+                                first_title: t('Trang đầu'), last_title: t('Trang cuối'),
+                                prev_title: t('Trang trước'), next_title: t('Trang sau'),
+                                counter: { showing: '', of: t('trong'), rows: t('dòng'), pages: t('trang') },
                             },
                         },
                     },
@@ -293,7 +294,7 @@ document.addEventListener('alpine:init', () => {
                     columns: COLUMNS,
                     placeholder: '<div class="py-16 text-center opacity-40">'
                         + '<svg class="w-12 h-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>'
-                        + '<p class="text-sm">Chưa có sự kiện nào</p></div>',
+                        + ('<p class="text-sm">' + t('Chưa có sự kiện nào') + '</p></div>'),
                 });
 
                 window.eventTable = tableInst;

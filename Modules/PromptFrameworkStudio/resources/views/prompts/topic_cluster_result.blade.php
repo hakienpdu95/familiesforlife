@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', 'Duyệt kết quả — '.$prompt->label)
+@section('title', __('Duyệt kết quả — :label', ['label' => $prompt->label]))
 
 {{-- (2026-08-28, phản hồi review spec/TopicClusterGenerator.md) — dán kết quả AI (Markdown) đã
      chạy từ prompt `topiccluster` → hệ thống parse thành Pillar/Cluster (xem
@@ -18,7 +18,7 @@
 
 <div class="flex items-center justify-between mb-6">
     <div>
-        <h1 class="text-2xl font-bold text-base-content">Duyệt kết quả AI &amp; đẩy sang Content Outlines</h1>
+        <h1 class="text-2xl font-bold text-base-content">{{ __('Duyệt kết quả AI') }} &amp; {{ __('đẩy sang Content Outlines') }}</h1>
         <p class="text-sm text-base-content/50 mt-0.5">Prompt: <b>{{ $prompt->label }}</b></p>
     </div>
     <a href="{{ route('backend.promptstudio.prompts.show', $prompt) }}" class="btn btn-ghost btn-sm">Xem prompt</a>
@@ -26,18 +26,18 @@
 
 <div class="card bg-base-100 shadow-sm border border-base-200 mb-4">
     <div class="card-body p-5 space-y-2">
-        <h2 class="card-title text-base">1. Dán kết quả AI đã chạy</h2>
+        <h2 class="card-title text-base">{{ __('1. Dán kết quả AI đã chạy') }}</h2>
         <p class="text-xs text-base-content/50">
-            Chạy prompt ở ChatGPT/Claude như bình thường, rồi dán TOÀN BỘ câu trả lời (bao gồm cả khối mã
-            <code>PILLAR: ... | ...</code> / <code>CLUSTER: ... | ...</code> ở cuối) vào ô bên dưới.
+            {{ __('Chạy prompt ở ChatGPT/Claude như bình thường, rồi dán TOÀN BỘ câu trả lời (bao gồm cả khối mã') }}
+            <code>PILLAR: ... | ...</code> / <code>CLUSTER: ... | ...</code> {{ __('ở cuối) vào ô bên dưới.') }}
         </p>
         <form method="POST" action="{{ route('backend.promptstudio.prompts.topic-cluster-result.save', $prompt) }}">
             @csrf
             <textarea name="ai_result_raw" rows="10" required maxlength="100000"
                       class="textarea textarea-bordered w-full font-mono text-xs @error('ai_result_raw') textarea-error @enderror"
-                      placeholder="Dán nguyên văn câu trả lời của AI vào đây...">{{ old('ai_result_raw') }}</textarea>
+                      placeholder="{{ __('Dán nguyên văn câu trả lời của AI vào đây...') }}">{{ old('ai_result_raw') }}</textarea>
             @error('ai_result_raw')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
-            <button type="submit" class="btn btn-primary btn-sm mt-2">Phân tích</button>
+            <button type="submit" class="btn btn-primary btn-sm mt-2">{{ __('Phân tích') }}</button>
         </form>
     </div>
 </div>
@@ -49,10 +49,10 @@
 
     <div class="card bg-base-100 shadow-sm border border-base-200">
         <div class="card-body p-5 space-y-3">
-            <h2 class="card-title text-base">2. Duyệt từng mục rồi đẩy sang Content Outlines</h2>
+            <h2 class="card-title text-base">{{ __('2. Duyệt từng mục rồi đẩy sang Content Outlines') }}</h2>
 
             @if(!$pillar)
-                <p class="text-sm text-warning">Chưa parse được Pillar/Cluster nào — kiểm tra bạn đã dán đủ khối mã "PILLAR:/CLUSTER:" ở cuối kết quả AI.</p>
+                <p class="text-sm text-warning">{{ __('Chưa parse được Pillar/Cluster nào — kiểm tra bạn đã dán đủ khối mã "PILLAR:/CLUSTER:" ở cuối kết quả AI.') }}</p>
             @else
                 <form method="POST" action="{{ route('backend.promptstudio.prompts.topic-cluster-result.push', $prompt) }}" class="space-y-2">
                     @csrf
@@ -61,10 +61,10 @@
                             <thead>
                                 <tr>
                                     <th class="w-8"></th>
-                                    <th>Vai trò</th>
-                                    <th>Tiêu đề</th>
-                                    <th>Từ khóa mục tiêu</th>
-                                    <th>Trạng thái</th>
+                                    <th>{{ __('Vai trò') }}</th>
+                                    <th>{{ __('Tiêu đề') }}</th>
+                                    <th>{{ __('Từ khóa mục tiêu') }}</th>
+                                    <th>{{ __('Trạng thái') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -81,9 +81,9 @@
                                     <td class="text-xs text-base-content/60">{{ $pillar['target_keyword'] }}</td>
                                     <td>
                                         @if($pillar['content_outline_uuid'])
-                                            <a href="{{ route('backend.contentoutlines.show', $pillar['content_outline_uuid']) }}" class="link link-success text-xs" target="_blank" rel="noopener">✓ Đã đẩy — xem Content Outline</a>
+                                            <a href="{{ route('backend.contentoutlines.show', $pillar['content_outline_uuid']) }}" class="link link-success text-xs" target="_blank" rel="noopener">{{ __('✓ Đã đẩy — xem Content Outline') }}</a>
                                         @else
-                                            <span class="text-xs text-base-content/40">Chưa đẩy</span>
+                                            <span class="text-xs text-base-content/40">{{ __('Chưa đẩy') }}</span>
                                         @endif
                                     </td>
                                 </tr>
@@ -101,9 +101,9 @@
                                     <td class="text-xs text-base-content/60">{{ $cluster['target_keyword'] }}</td>
                                     <td>
                                         @if($cluster['content_outline_uuid'])
-                                            <a href="{{ route('backend.contentoutlines.show', $cluster['content_outline_uuid']) }}" class="link link-success text-xs" target="_blank" rel="noopener">✓ Đã đẩy — xem Content Outline</a>
+                                            <a href="{{ route('backend.contentoutlines.show', $cluster['content_outline_uuid']) }}" class="link link-success text-xs" target="_blank" rel="noopener">{{ __('✓ Đã đẩy — xem Content Outline') }}</a>
                                         @else
-                                            <span class="text-xs text-base-content/40">Chưa đẩy</span>
+                                            <span class="text-xs text-base-content/40">{{ __('Chưa đẩy') }}</span>
                                         @endif
                                     </td>
                                 </tr>
@@ -112,9 +112,9 @@
                         </table>
                     </div>
                     @can('content_outlines.use')
-                        <button type="submit" class="btn btn-primary btn-sm">Đẩy các mục đã chọn sang Content Outlines</button>
+                        <button type="submit" class="btn btn-primary btn-sm">{{ __('Đẩy các mục đã chọn sang Content Outlines') }}</button>
                     @else
-                        <p class="text-xs text-base-content/40">Bạn cần quyền dùng Content Outlines để đẩy mục sang module đó.</p>
+                        <p class="text-xs text-base-content/40">{{ __('Bạn cần quyền dùng Content Outlines để đẩy mục sang module đó.') }}</p>
                     @endcan
                 </form>
             @endif

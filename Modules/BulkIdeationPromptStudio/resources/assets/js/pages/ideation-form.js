@@ -9,6 +9,7 @@
 
 import { initAllTomSelects } from '@shared/tom-select-factory.js';
 
+import { t } from '../../../../../../resources/js/shared/i18n.js';
 // ── Constants ──────────────────────────────────────────────────────────────
 
 const FORM_SEL = '[data-bulk-ideation-form]';
@@ -42,7 +43,7 @@ function _setupCategoryFoundationHint(form) {
         }
 
         hint.hidden = false;
-        hint.textContent = 'Đang tải ngữ cảnh chuyên mục...';
+        hint.textContent = t('Đang tải ngữ cảnh chuyên mục...');
 
         try {
             const res = await fetch(urlTemplate.replace('__UUID__', uuid), {
@@ -53,9 +54,9 @@ function _setupCategoryFoundationHint(form) {
 
             const parts = [];
             if (foundation?.audience) parts.push(`ICP: ${foundation.audience}`);
-            if (foundation?.product_service_docs) parts.push('Đã có tài liệu sản phẩm/dịch vụ trọng tâm');
+            if (foundation?.product_service_docs) parts.push(t('Đã có tài liệu sản phẩm/dịch vụ trọng tâm'));
 
-            hint.textContent = parts.length ? parts.join(' — ') : 'Chuyên mục này chưa có ngữ cảnh biên tập.';
+            hint.textContent = parts.length ? parts.join(' — ') : t('Chuyên mục này chưa có ngữ cảnh biên tập.');
         } catch (e) {
             console.error('[bulk-ideation-prompt-studio] failed to load category foundation detail', e);
             hint.hidden = true;

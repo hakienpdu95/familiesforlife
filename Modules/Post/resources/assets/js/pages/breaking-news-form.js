@@ -15,6 +15,7 @@
  */
 import { createTsRemote } from '@shared/tom-select-factory.js';
 
+import { t } from '../../../../../../resources/js/shared/i18n.js';
 function esc(v) {
     if (v == null) return '';
     return String(v)
@@ -38,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         valueField:  'id',
         labelField:  'text',
         searchField: ['text'],
-        placeholder: picker.dataset.tsPlaceholder || 'Tìm bài viết theo tiêu đề...',
+        placeholder: picker.dataset.tsPlaceholder || t('Tìm bài viết theo tiêu đề...'),
         preload:     true,
         render: {
             option: (data) => `
@@ -49,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${data.published_at ? `<span>${esc(data.published_at)}</span>` : ''}
                     </div>
                 </div>`,
-            no_results: () => `<div class="no-results" style="padding:.75rem;font-size:.875rem;color:#94a3b8;text-align:center">Không tìm thấy bài viết</div>`,
+            no_results: () => `<div class="no-results" style="padding:.75rem;font-size:.875rem;color:#94a3b8;text-align:center">${t('Không tìm thấy bài viết')}</div>`,
         },
         onChange(value) {
             if (!warningEl) return;

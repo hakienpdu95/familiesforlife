@@ -44,7 +44,7 @@ class ContentAnalyticsDashboardController extends Controller
                 'message' => $e->getMessage(),
             ]);
 
-            $error = 'Không thể tải dữ liệu Google Analytics. Kiểm tra cấu hình ANALYTICS_PROPERTY_ID / Service Account trong .env.';
+            $error = __('Không thể tải dữ liệu Google Analytics. Kiểm tra cấu hình ANALYTICS_PROPERTY_ID / Service Account trong .env.');
         }
 
         // Top nội dung đọc từ ga_views_30d (cột DB, không gọi GA) — không phụ thuộc vào việc

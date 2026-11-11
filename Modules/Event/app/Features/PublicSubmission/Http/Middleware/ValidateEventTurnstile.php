@@ -28,8 +28,8 @@ class ValidateEventTurnstile
         $request->validate(
             ['cf-turnstile-response' => ['required', new Turnstile()]],
             [
-                'cf-turnstile-response.required' => 'Vui lòng hoàn thành xác minh bảo mật.',
-                'cf-turnstile-response.*'        => 'Xác thực bảo mật thất bại, vui lòng thử lại.',
+                'cf-turnstile-response.required' => __('Vui lòng hoàn thành xác minh bảo mật.'),
+                'cf-turnstile-response.*'        => __('Xác thực bảo mật thất bại, vui lòng thử lại.'),
             ]
         );
 

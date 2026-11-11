@@ -94,7 +94,7 @@ class MediaUploadController extends Controller
         $collection = $request->header('X-Collection', '');
 
         if (! in_array($collection, self::ALLOWED_COLLECTIONS, true)) {
-            return response()->json(['message' => 'Collection không hợp lệ.'], 422);
+            return response()->json(['message' => __('Collection không hợp lệ.')], 422);
         }
 
         $collectionConfig = config("media.collections.{$collection}", []);
@@ -122,8 +122,8 @@ class MediaUploadController extends Controller
             ]);
 
             return in_array($uploaded->getError(), [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)
-                ? response()->json(['message' => "File '{$uploaded->getClientOriginalName()}' vượt giới hạn upload của máy chủ (upload_max_filesize = ".ini_get('upload_max_filesize').').'], 413)
-                : response()->json(['message' => "File '{$uploaded->getClientOriginalName()}' tải lên thất bại: ".$uploaded->getErrorMessage()], 422);
+                ? response()->json(['message' => __('File \':name\' vượt giới hạn upload của máy chủ (upload_max_filesize = :limit).', ['name' => $uploaded->getClientOriginalName(), 'limit' => ini_get('upload_max_filesize')])], 413)
+                : response()->json(['message' => __('File \':name\' tải lên thất bại: :error', ['name' => $uploaded->getClientOriginalName(), 'error' => $uploaded->getErrorMessage()])], 422);
         }
 
         $maxKb = $collectionConfig['max_size_kb'] ?? 10240;
@@ -132,8 +132,8 @@ class MediaUploadController extends Controller
         Validator::make(['file' => $uploaded], [
             'file' => ['required', 'file', 'max:'.$maxKb],
         ], [
-            'file.required' => 'Không nhận được file tải lên.',
-            'file.file' => 'Không nhận được file tải lên.',
+            'file.required' => __('Không nhận được file tải lên.'),
+            'file.file' => __('Không nhận được file tải lên.'),
             'file.max' => MediaUploadService::tooLargeMessage($fileName, $maxKb),
         ])->validate();
 
@@ -167,7 +167,7 @@ class MediaUploadController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            return response()->json(['message' => 'Upload thất bại: '.$e->getMessage()], 422);
+            return response()->json(['message' => __('Upload thất bại: :error', ['error' => $e->getMessage()])], 422);
         }
     }
 
@@ -219,7 +219,7 @@ class MediaUploadController extends Controller
         if (! $media) {
             return $this->chunkService->discardFor($uuid, (int) auth()->id())
                 ? response()->json(['ok' => true])
-                : response()->json(['message' => 'File không tồn tại.'], 404);
+                : response()->json(['message' => __('File không tồn tại.')], 404);
         }
 
         $isDraft = $media->model_type === FilePondDraft::class;
@@ -227,11 +227,11 @@ class MediaUploadController extends Controller
 
         // Non-draft files: only the uploader may revert, and only for managed collections
         if (! $isDraft && (int) $uploadedBy !== auth()->id()) {
-            return response()->json(['message' => 'Không có quyền xóa file này.'], 403);
+            return response()->json(['message' => __('Không có quyền xóa file này.')], 403);
         }
 
         if (! $isDraft && ! in_array($media->collection_name, self::ALLOWED_COLLECTIONS, true)) {
-            return response()->json(['message' => 'Không thể hủy upload này.'], 403);
+            return response()->json(['message' => __('Không thể hủy upload này.')], 403);
         }
 
         $this->uploadService->delete($media);

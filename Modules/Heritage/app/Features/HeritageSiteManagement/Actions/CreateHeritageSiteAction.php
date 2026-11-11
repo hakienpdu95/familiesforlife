@@ -33,7 +33,7 @@ class CreateHeritageSiteAction
         // kiểm tra đơn giản ở đây thay vì rule required_with hai chiều (dễ gây lỗi lặp/khó hiểu).
         if (($data->latitude === null) !== ($data->longitude === null)) {
             throw ValidationException::withMessages([
-                'latitude' => 'Vĩ độ và kinh độ phải được nhập cùng nhau, hoặc để trống cả hai.',
+                'latitude' => __('Vĩ độ và kinh độ phải được nhập cùng nhau, hoặc để trống cả hai.'),
             ]);
         }
 

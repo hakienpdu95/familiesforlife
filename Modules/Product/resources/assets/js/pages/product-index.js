@@ -9,6 +9,7 @@
 import { createTs } from '@shared/tom-select-factory.js';
 import { qrCellHtml } from '@shared/qr-tools.js';
 
+import { t } from '../../../../../../resources/js/shared/i18n.js';
 function esc(v) {
     if (v == null) return '';
     return String(v)
@@ -18,16 +19,16 @@ function esc(v) {
 
 const COLUMNS = [
     {
-        title: 'Mã QR', field: 'qr_code', width: 96, hozAlign: 'center', headerSort: false, frozen: true,
+        title: t('Mã QR'), field: 'qr_code', width: 96, hozAlign: 'center', headerSort: false, frozen: true,
         formatter(cell) {
             const d = cell.getRow().getData();
             const html = qrCellHtml(d.qr_code, d.qr_url, d.name);
             if (!d.qr_code || d.qr_public) return html;
-            return '<div class="opacity-50" title="Chưa công khai — quét mã sẽ thấy thông báo đang cập nhật">' + html + '</div>';
+            return ('<div class="opacity-50" title="' + t('Chưa công khai — quét mã sẽ thấy thông báo đang cập nhật') + '">') + html + '</div>';
         },
     },
     {
-        title: 'Sản phẩm', field: 'name', minWidth: 220, sorter: 'string', frozen: true,
+        title: t('Sản phẩm'), field: 'name', minWidth: 220, sorter: 'string', frozen: true,
         formatter(cell) {
             const d = cell.getRow().getData();
             let html = '<span class="font-medium text-sm">' + esc(d.name) + '</span>';
@@ -36,37 +37,37 @@ const COLUMNS = [
         },
     },
     {
-        title: 'Danh mục', field: 'category', minWidth: 150, headerSort: false,
+        title: t('Danh mục'), field: 'category', minWidth: 150, headerSort: false,
         formatter(cell) {
             return esc(cell.getValue()) || '<span class="text-base-content/25 text-xs">—</span>';
         },
     },
     {
-        title: 'Loại', field: 'type_label', width: 130, headerSort: false,
+        title: t('Loại'), field: 'type_label', width: 130, headerSort: false,
     },
     {
-        title: 'Giá', field: 'display_price', width: 130, hozAlign: 'right', headerSort: false,
+        title: t('Giá'), field: 'display_price', width: 130, hozAlign: 'right', headerSort: false,
         formatter(cell) {
             return esc(cell.getValue()) || '<span class="text-base-content/25 text-xs">—</span>';
         },
     },
     {
-        title: 'Trạng thái', field: 'status_value', width: 130, hozAlign: 'center', sorter: 'string',
+        title: t('Trạng thái'), field: 'status_value', width: 130, hozAlign: 'center', sorter: 'string',
         formatter(cell) {
             const d = cell.getRow().getData();
             return '<span class="badge badge-sm ' + esc(d.status_badge) + '">' + esc(d.status_label) + '</span>';
         },
     },
     {
-        title: 'Duyệt nội dung', field: 'approval_label', width: 140, hozAlign: 'center', headerSort: false,
+        title: t('Duyệt nội dung'), field: 'approval_label', width: 140, hozAlign: 'center', headerSort: false,
         formatter(cell) {
             const d = cell.getRow().getData();
             if (!d.approval_label) return '<span class="text-base-content/30 text-xs">—</span>';
-            return '<span class="badge badge-sm ' + esc(d.approval_badge) + '" title="Trạng thái duyệt nội dung — độc lập với trạng thái kinh doanh">' + esc(d.approval_label) + '</span>';
+            return '<span class="badge badge-sm ' + esc(d.approval_badge) + ('" title="' + t('Trạng thái duyệt nội dung — độc lập với trạng thái kinh doanh') + '">') + esc(d.approval_label) + '</span>';
         },
     },
     {
-        title: 'Bài viết dùng', field: 'used_in_articles_count', width: 120, hozAlign: 'center', sorter: 'number',
+        title: t('Bài viết dùng'), field: 'used_in_articles_count', width: 120, hozAlign: 'center', sorter: 'number',
         formatter(cell) {
             const v = cell.getValue();
             return v > 0 ? '<span class="badge badge-sm badge-info">' + v + '</span>' : '<span class="text-base-content/30">0</span>';
@@ -79,12 +80,12 @@ const COLUMNS = [
             let html = '<div class="flex items-center justify-center gap-1">';
 
             if (d.can_update) {
-                html += '<a href="' + esc(d.edit_url) + '" class="btn btn-ghost btn-xs btn-square" title="Sửa">'
+                html += '<a href="' + esc(d.edit_url) + ('" class="btn btn-ghost btn-xs btn-square" title="' + t('Sửa') + '">')
                     + '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>'
                     + '</a>';
             }
             if (d.can_delete) {
-                html += '<button class="btn btn-ghost btn-xs btn-square text-error" title="Xoá"'
+                html += ('<button class="btn btn-ghost btn-xs btn-square text-error" title="' + t('Xoá') + '"')
                     + ' data-url="' + esc(d.destroy_url) + '" data-name="' + esc(d.name) + '"'
                     + ' onclick="window.productDeleteConfirm(this.dataset.url, this.dataset.name)">'
                     + '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>'
@@ -117,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const csrf = document.querySelector('meta[name=csrf-token]')?.content ?? '';
         this.disabled    = true;
-        this.textContent = 'Đang xoá...';
+        this.textContent = t('Đang xoá...');
 
         try {
             const res = await fetch(pendingDeleteUrl, {
@@ -137,14 +138,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('productDeleteModal')?.close();
                 window.productTable?.replaceData();
             } else {
-                alert(data.message || 'Xoá thất bại. Vui lòng thử lại.');
+                alert(data.message || t('Xoá thất bại. Vui lòng thử lại.'));
             }
         } catch (e) {
             console.error('[product] delete failed', e);
-            alert('Lỗi kết nối. Vui lòng thử lại.');
+            alert(t('Lỗi kết nối. Vui lòng thử lại.'));
         } finally {
             this.disabled    = false;
-            this.textContent = 'Xoá';
+            this.textContent = t('Xoá');
             pendingDeleteUrl = null;
         }
     });
@@ -173,7 +174,7 @@ document.addEventListener('alpine:init', () => {
 
             get activeChips() {
                 const chips = [], f = this.filters;
-                if (f.search)      chips.push({ key: 'search',      label: 'Tìm: ' + f.search });
+                if (f.search)      chips.push({ key: 'search',      label: (t('Tìm:') + ' ') + f.search });
                 if (f.category_id) chips.push({ key: 'category_id', label: optText(tsCategory, f.category_id) });
                 if (f.type)        chips.push({ key: 'type',        label: optText(tsType, f.type) });
                 if (f.status)      chips.push({ key: 'status',      label: optText(tsStatus, f.status) });
@@ -192,18 +193,18 @@ document.addEventListener('alpine:init', () => {
                 if (!categoryEl || !typeEl || !statusEl) return;
 
                 tsCategory = createTs(categoryEl, {
-                    placeholder: 'Tất cả danh mục',
+                    placeholder: t('Tất cả danh mục'),
                     maxOptions: null,
                     onChange() { categoryEl.dispatchEvent(new Event('change', { bubbles: true })); },
                 });
 
                 tsType = createTs(typeEl, {
-                    placeholder: 'Tất cả loại',
+                    placeholder: t('Tất cả loại'),
                     onChange() { typeEl.dispatchEvent(new Event('change', { bubbles: true })); },
                 });
 
                 tsStatus = createTs(statusEl, {
-                    placeholder: 'Tất cả trạng thái',
+                    placeholder: t('Tất cả trạng thái'),
                     onChange() { statusEl.dispatchEvent(new Event('change', { bubbles: true })); },
                 });
             },
@@ -241,11 +242,11 @@ document.addEventListener('alpine:init', () => {
                     langs: {
                         'vi-VN': {
                             pagination: {
-                                page_size: 'Dòng/trang', page_title: 'Trang',
+                                page_size: t('Dòng/trang'), page_title: t('Trang'),
                                 first: '«', last: '»', prev: '‹', next: '›',
-                                first_title: 'Trang đầu', last_title: 'Trang cuối',
-                                prev_title: 'Trang trước', next_title: 'Trang sau',
-                                counter: { showing: '', of: 'trong', rows: 'dòng', pages: 'trang' },
+                                first_title: t('Trang đầu'), last_title: t('Trang cuối'),
+                                prev_title: t('Trang trước'), next_title: t('Trang sau'),
+                                counter: { showing: '', of: t('trong'), rows: t('dòng'), pages: t('trang') },
                             },
                         },
                     },
@@ -253,7 +254,7 @@ document.addEventListener('alpine:init', () => {
                     columns: COLUMNS,
                     placeholder: '<div class="py-16 text-center opacity-40">'
                         + '<svg class="w-12 h-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>'
-                        + '<p class="text-sm">Chưa có sản phẩm nào</p></div>',
+                        + ('<p class="text-sm">' + t('Chưa có sản phẩm nào') + '</p></div>'),
                 });
 
                 window.productTable = tableInst;

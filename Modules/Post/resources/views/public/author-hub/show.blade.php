@@ -50,7 +50,7 @@
             @if($authorProfile->job_title)
             <p class="text-sm font-medium text-primary mt-0.5">{{ $authorProfile->job_title }}</p>
             @endif
-            <p class="text-sm text-base-content/50 mt-0.5">{{ $articles->total() }} bài đã xuất bản</p>
+            <p class="text-sm text-base-content/50 mt-0.5">{{ __(':total bài đã xuất bản', ['total' => $articles->total()]) }}</p>
 
             @if($authorProfile->credentials)
             <p class="text-xs text-base-content/60 mt-1">{{ $authorProfile->credentials }}</p>
@@ -73,7 +73,7 @@
         </div>
     </header>
 
-    <h2 class="text-lg font-semibold text-base-content mb-4">Bài đã xuất bản</h2>
+    <h2 class="text-lg font-semibold text-base-content mb-4">{{ __('Bài đã xuất bản') }}</h2>
 
     <x-frontend.article-grid :articles="$articles" />
 

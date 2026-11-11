@@ -53,7 +53,7 @@ class BrandController extends Controller
 
         $certificates = collect(OcopSubject::DOCUMENT_LABELS)
             ->map(fn (string $label, string $collection) => [
-                'label' => $label,
+                'label' => __($label),
                 'files' => $subject->getMedia($collection)->map(fn ($media) => [
                     'url' => $mediaUrl->url($media),
                     'name' => $media->name ?: $media->file_name,
@@ -68,7 +68,7 @@ class BrandController extends Controller
             'subject' => $subject,
             'products' => $products,
             'filters' => $filters,
-            'sorts' => ListBrandProductsQuery::SORTS,
+            'sorts' => array_map('__', ListBrandProductsQuery::SORTS),
             'starLevels' => self::STAR_LEVELS,
             'starCounts' => $starCounts,
             'gallery' => $gallery,

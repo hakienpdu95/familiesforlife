@@ -11,9 +11,9 @@ enum ExampleCandidateStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Pending  => 'Chờ duyệt',
-            self::Approved => 'Đã duyệt',
-            self::Rejected => 'Đã từ chối',
+            self::Pending  => __('Chờ duyệt'),
+            self::Approved => __('Đã duyệt'),
+            self::Rejected => __('Đã từ chối'),
         };
     }
 }

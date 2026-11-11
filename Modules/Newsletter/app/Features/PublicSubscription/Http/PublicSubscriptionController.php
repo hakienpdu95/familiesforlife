@@ -24,7 +24,7 @@ class PublicSubscriptionController extends Controller
 
         $action->handle($data->full_name, $data->email);
 
-        $message = 'Đã đăng ký nhận bản tin — cảm ơn bạn!';
+        $message = __('Đã đăng ký nhận bản tin — cảm ơn bạn!');
 
         // Nhánh JSON cho form AJAX (vd khối newsletter trang chủ, resources/views/components/
         // frontend/newsletter-signup.blade.php) — lỗi validate (422) đã tự trả JSON sẵn qua

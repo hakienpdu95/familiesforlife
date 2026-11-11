@@ -1,9 +1,9 @@
 @php
     $intro = \Illuminate\Support\Str::limit(trim(preg_replace('/\s+/u', ' ', strip_tags((string) $subject->story))), 220);
     $infoRows = collect([
-        'Loại hình' => $subject->organization_type?->label(),
-        'Hạng OCOP' => $subject->ocop_star ? $subject->ocop_star.' sao' : null,
-        'Địa chỉ' => $subject->fullAddress(),
+        __('Loại hình') => $subject->organization_type?->label(),
+        __('Hạng OCOP') => $subject->ocop_star ? $subject->ocop_star.' sao' : null,
+        __('Địa chỉ') => $subject->fullAddress(),
     ])->filter();
     $contacts = collect([
         'Hotline' => $subject->hotline ? ['tel:'.preg_replace('/[^0-9+]/', '', $subject->hotline), $subject->hotline, false] : null,
@@ -24,7 +24,7 @@
     @endif
     <h2 class="mt-3 font-bold uppercase leading-snug text-[#117a3a]">{{ $subject->name }}</h2>
     @if($subject->ocop_star)
-    <div class="mt-2 flex justify-center" title="Hạng {{ $subject->ocop_star }} sao OCOP">
+    <div class="mt-2 flex justify-center" title="{{ __('Hạng :ocop_star sao OCOP', ['ocop_star' => $subject->ocop_star]) }}">
         <div class="rating rating-xs pointer-events-none">
             @for($s = 1; $s <= 5; $s++)
             <div class="mask mask-star-2 {{ $s <= $subject->ocop_star ? 'bg-warning' : 'bg-base-300' }}"></div>
@@ -35,7 +35,7 @@
 </div>
 
 <div class="overflow-hidden rounded-sm bg-[#f8f9fa]">
-    <div class="border-b border-[#e0e0e0] px-4 py-3 text-base font-semibold text-[#333]">Thông tin thương hiệu</div>
+    <div class="border-b border-[#e0e0e0] px-4 py-3 text-base font-semibold text-[#333]">{{ __('Thông tin thương hiệu') }}</div>
     <div class="space-y-3 p-4 text-sm text-[#555]">
         @if($intro)
         <p class="leading-relaxed">{{ $intro }}</p>
@@ -61,7 +61,7 @@
         @if(filled($subject->story))
         <button type="button" @click="activeTab = 'story'; document.getElementById('products').scrollIntoView({ behavior: 'smooth' })"
                 class="inline-flex items-center gap-0.5 text-sm font-medium text-[#117a3a] hover:underline">
-            Đọc câu chuyện
+            {{ __('Đọc câu chuyện') }}
             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </button>
         @endif
@@ -69,7 +69,7 @@
 </div>
 
 <div class="overflow-hidden rounded-sm bg-[#f8f9fa]">
-    <div class="border-b border-[#e0e0e0] px-4 py-3 text-base font-semibold text-[#333]">Hạng sao OCOP</div>
+    <div class="border-b border-[#e0e0e0] px-4 py-3 text-base font-semibold text-[#333]">{{ __('Hạng sao OCOP') }}</div>
     <div class="space-y-2 p-4">
         @foreach($starLevels as $star)
         <label class="flex cursor-pointer items-center gap-2.5 text-sm text-[#333]">

@@ -1,20 +1,20 @@
 @extends('layouts.backend')
-@section('title', 'Thêm chủ thể OCOP')
+@section('title', __('Thêm chủ thể OCOP'))
 
 @section('content')
 
 <div class="flex items-center justify-between mb-6">
     <div>
-        <h1 class="text-2xl font-bold text-base-content">Thêm chủ thể OCOP</h1>
-        <p class="text-sm text-base-content/50 mt-0.5">Doanh nghiệp, HTX hoặc hộ kinh doanh có sản phẩm OCOP</p>
+        <h1 class="text-2xl font-bold text-base-content">{{ __('Thêm chủ thể OCOP') }}</h1>
+        <p class="text-sm text-base-content/50 mt-0.5">{{ __('Doanh nghiệp, HTX hoặc hộ kinh doanh có sản phẩm OCOP') }}</p>
     </div>
-    <a href="{{ route('backend.ocop-subjects.index') }}" class="btn btn-ghost btn-sm">← Quay lại</a>
+    <a href="{{ route('backend.ocop-subjects.index') }}" class="btn btn-ghost btn-sm">{{ __('← Quay lại') }}</a>
 </div>
 
 @if($errors->any())
 <div class="alert alert-error py-3 px-4 mb-5 text-sm">
     <div>
-        <p class="font-semibold">Có {{ $errors->count() }} lỗi cần kiểm tra:</p>
+        <p class="font-semibold">{{ __('Có :count lỗi cần kiểm tra:', ['count' => $errors->count()]) }}</p>
         <ul class="mt-1.5 list-disc list-inside space-y-0.5 text-xs opacity-90">
             @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
         </ul>

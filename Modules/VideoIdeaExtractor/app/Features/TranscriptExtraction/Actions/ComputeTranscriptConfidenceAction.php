@@ -30,7 +30,7 @@ class ComputeTranscriptConfidenceAction
         }
 
         $notes = $confidence === TranscriptConfidence::Low
-            ? "Transcript quá ngắn (~{$wordCount} từ) — có thể chỉ là đoạn trích, không đủ để sinh ý tưởng chất lượng."
+            ? __('Transcript quá ngắn (~:word_count từ) — có thể chỉ là đoạn trích, không đủ để sinh ý tưởng chất lượng.', ['word_count' => $wordCount])
             : null;
 
         return ['confidence' => $confidence, 'notes' => $notes];

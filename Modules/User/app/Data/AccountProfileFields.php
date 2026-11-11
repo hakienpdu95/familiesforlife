@@ -33,12 +33,12 @@ final class AccountProfileFields
     public static function messages(): array
     {
         return [
-            'username.regex' => 'Tên đăng nhập chỉ gồm chữ thường a-z, số và . _ -, bắt đầu và kết thúc bằng chữ hoặc số.',
-            'username.not_regex' => 'Tên đăng nhập không được có hai ký tự . _ - liền nhau.',
-            'username.unique' => 'Tên đăng nhập này đã được sử dụng.',
-            'phone.regex' => 'Số điện thoại không hợp lệ (10–11 số, bắt đầu bằng 0 hoặc +84).',
-            'role.in' => 'Vai trò không hợp lệ.',
-            'role.exists' => 'Vai trò chưa tồn tại trong bảng roles — chạy seeder tương ứng trước.',
+            'username.regex' => __('Tên đăng nhập chỉ gồm chữ thường a-z, số và . _ -, bắt đầu và kết thúc bằng chữ hoặc số.'),
+            'username.not_regex' => __('Tên đăng nhập không được có hai ký tự . _ - liền nhau.'),
+            'username.unique' => __('Tên đăng nhập này đã được sử dụng.'),
+            'phone.regex' => __('Số điện thoại không hợp lệ (10–11 số, bắt đầu bằng 0 hoặc +84).'),
+            'role.in' => __('Vai trò không hợp lệ.'),
+            'role.exists' => __('Vai trò chưa tồn tại trong bảng roles — chạy seeder tương ứng trước.'),
         ];
     }
 }

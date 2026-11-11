@@ -31,13 +31,13 @@ class AccountInvitationNotification extends Notification implements ShouldQueue
         $expire = config('auth.passwords.'.config('fortify.passwords').'.expire');
 
         return (new MailMessage)
-            ->subject('Tài khoản của bạn đã được tạo — '.config('app.name'))
-            ->greeting('Xin chào '.$notifiable->name.',')
-            ->line('Quản trị viên đã tạo tài khoản cho bạn trên '.config('app.name').'.')
-            ->line('• Email đăng nhập: **'.$notifiable->email.'**')
-            ->when($roleLabel, fn (MailMessage $m) => $m->line('• Vai trò: **'.$roleLabel.'**'))
-            ->line('Bấm nút bên dưới để tự đặt mật khẩu cho tài khoản.')
-            ->action('Đặt mật khẩu', $url)
-            ->line('Liên kết hết hạn sau '.$expire.' phút. Nếu đã hết hạn, hãy dùng chức năng "Quên mật khẩu" hoặc nhờ quản trị viên gửi lại.');
+            ->subject(__('Tài khoản của bạn đã được tạo — :app', ['app' => config('app.name')]))
+            ->greeting(__('Xin chào :name,', ['name' => $notifiable->name]))
+            ->line(__('Quản trị viên đã tạo tài khoản cho bạn trên :app.', ['app' => config('app.name')]))
+            ->line(__('• Email đăng nhập: **:email**', ['email' => $notifiable->email]))
+            ->when($roleLabel, fn (MailMessage $m) => $m->line(__('• Vai trò: **:role**', ['role' => $roleLabel])))
+            ->line(__('Bấm nút bên dưới để tự đặt mật khẩu cho tài khoản.'))
+            ->action(__('Đặt mật khẩu'), $url)
+            ->line(__('Liên kết hết hạn sau :count phút. Nếu đã hết hạn, hãy dùng chức năng "Quên mật khẩu" hoặc nhờ quản trị viên gửi lại.', ['count' => $expire]));
     }
 }

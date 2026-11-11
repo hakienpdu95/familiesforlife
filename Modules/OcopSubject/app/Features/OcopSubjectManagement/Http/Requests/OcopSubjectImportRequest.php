@@ -22,11 +22,11 @@ class OcopSubjectImportRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'province_code.required' => 'Vui lòng chọn tỉnh/thành.',
-            'province_code.exists' => 'Tỉnh/thành được chọn không hợp lệ.',
-            'file.required' => 'Vui lòng chọn file Excel.',
-            'file.mimes' => 'Chỉ chấp nhận file .xlsx hoặc .csv.',
-            'file.max' => 'File tối đa 10MB.',
+            'province_code.required' => __('Vui lòng chọn tỉnh/thành.'),
+            'province_code.exists' => __('Tỉnh/thành được chọn không hợp lệ.'),
+            'file.required' => __('Vui lòng chọn file Excel.'),
+            'file.mimes' => __('Chỉ chấp nhận file .xlsx hoặc .csv.'),
+            'file.max' => __('File tối đa 10MB.'),
         ];
     }
 }

@@ -19,7 +19,7 @@ class ArchiveEventAction
         abort_unless(
             $event->status->canTransitionTo(EventStatus::Archived),
             422,
-            "Không thể lưu trữ sự kiện đang ở trạng thái \"{$event->status->label()}\"."
+            __('Không thể lưu trữ sự kiện đang ở trạng thái ":status".', ['status' => $event->status->label()])
         );
 
         $event->update(['status' => EventStatus::Archived]);

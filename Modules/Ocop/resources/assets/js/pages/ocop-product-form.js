@@ -14,6 +14,7 @@
 import { createTs, initAllTomSelects } from '@shared/tom-select-factory.js';
 import { renderCategoryTreeOption } from '@shared/ts-tree-option.js';
 
+import { t } from '../../../../../../resources/js/shared/i18n.js';
 // ── Constants & lookup tables ──────────────────────────────────────────────
 
 const FORM_SEL = '[data-ocop-product-form]';
@@ -47,7 +48,7 @@ function _setupDocumentUploads(form) {
             collection,
             maxFiles: Number(box.dataset.maxFiles) || 10,
             credits: false,
-            labelIdle: 'Kéo thả tệp hồ sơ vào đây hoặc <span class="filepond--label-action">Chọn tệp</span>',
+            labelIdle: (t('Kéo thả tệp hồ sơ vào đây hoặc') + ' <span class="filepond--label-action">' + t('Chọn tệp') + '</span>'),
             onUploaded(uuid) {
                 const input = document.createElement('input');
                 input.type = 'hidden';
@@ -75,7 +76,7 @@ function _setupDocumentUploads(form) {
 
         e.preventDefault();
         e.stopImmediatePropagation();
-        const msg = 'Tệp đang được tải lên, vui lòng chờ hoàn tất rồi bấm Lưu.';
+        const msg = t('Tệp đang được tải lên, vui lòng chờ hoàn tất rồi bấm Lưu.');
         window.Toast ? Toast.warning(msg, { duration: 5000 }) : alert(msg);
     }, true);
 }
@@ -102,7 +103,7 @@ function _initCategorySelect(form) {
     const el = form.querySelector('#ts-category_id');
     if (!el || el.tomselect) return;
     createTs(el, {
-        placeholder: el.dataset.tsPlaceholder || '— Chọn danh mục —',
+        placeholder: el.dataset.tsPlaceholder || t('— Chọn danh mục —'),
         maxOptions:  null,
         render:      { option: renderCategoryTreeOption },
     });
@@ -150,7 +151,7 @@ function _resolveFieldLabel(field) {
     const labelText = field.closest('.form-control')
         ?.querySelector('.label-text')
         ?.textContent.replace(/\s*\*\s*$/, '').trim();
-    return labelText || field.placeholder || field.name || 'Trường bắt buộc';
+    return labelText || field.placeholder || field.name || t('Trường bắt buộc');
 }
 
 function _switchAlpineTab(wrapper, tabKey) {
@@ -168,7 +169,7 @@ function _toastHiddenErrors(errors) {
         `${label}: ${fields.join(', ')}`
     );
 
-    Toast.warning(`Còn thiếu thông tin bắt buộc:\n${lines.join('\n')}`, {
+    Toast.warning(`${t('Còn thiếu thông tin bắt buộc:\\n:n', { n: (lines.join('\n')) })}`, {
         duration: 5000,
     });
 }

@@ -13,7 +13,7 @@ class DeleteMenuItemAction
     public function handle(MenuItem $menuItem): void
     {
         if ($menuItem->children()->exists()) {
-            throw new \RuntimeException('Không thể xoá mục menu còn mục con — hãy chuyển/xoá mục con trước.');
+            throw new \RuntimeException(__('Không thể xoá mục menu còn mục con — hãy chuyển/xoá mục con trước.'));
         }
 
         $menuItem->delete();

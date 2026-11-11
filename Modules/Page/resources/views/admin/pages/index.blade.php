@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', 'Trang tĩnh')
+@section('title', __('Trang tĩnh'))
 
 @section('content')
 <div x-data="pageListPage({{ Js::from([
@@ -27,8 +27,8 @@
 
     <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div>
-            <h1 class="text-2xl font-bold text-base-content">Trang tĩnh</h1>
-            <p class="text-sm text-base-content/50 mt-0.5">Giới thiệu, Liên hệ, Điều khoản, Chính sách... — không tổ chức hoá, URL gốc</p>
+            <h1 class="text-2xl font-bold text-base-content">{{ __('Trang tĩnh') }}</h1>
+            <p class="text-sm text-base-content/50 mt-0.5">{{ __('Giới thiệu, Liên hệ, Điều khoản, Chính sách... — không tổ chức hoá, URL gốc') }}</p>
         </div>
         <div class="flex items-center gap-2">
             @can('create', \Modules\Page\Models\Page::class)
@@ -36,7 +36,7 @@
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Thêm trang
+                {{ __('Thêm trang') }}
             </a>
             @endcan
         </div>
@@ -49,15 +49,15 @@
 
                     <div class="form-control filter-grid-wide">
                         <label class="label py-0.5">
-                            <span class="label-text text-xs font-medium">Tìm kiếm</span>
-                            <span class="label-text-alt text-xs text-base-content/40">Tiêu đề, đường dẫn</span>
+                            <span class="label-text text-xs font-medium">{{ __('Tìm kiếm') }}</span>
+                            <span class="label-text-alt text-xs text-base-content/40">{{ __('Tiêu đề, đường dẫn') }}</span>
                         </label>
                         <div class="input input-sm input-bordered flex items-center gap-2 bg-base-100">
                             <svg class="w-3.5 h-3.5 text-base-content/40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                             </svg>
                             <input type="text" x-model="filters.search" @input.debounce.350ms="onFilterChange()"
-                                   placeholder="Nhập tiêu đề/đường dẫn..." class="grow bg-transparent outline-none text-sm">
+                                   placeholder="{{ __('Nhập tiêu đề/đường dẫn...') }}" class="grow bg-transparent outline-none text-sm">
                             <button x-show="filters.search" @click="clearSearch()"
                                     class="text-base-content/30 hover:text-base-content transition-colors">
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -68,11 +68,11 @@
                     </div>
 
                     <div class="form-control">
-                        <label class="label py-0.5"><span class="label-text text-xs font-medium">Trạng thái</span></label>
+                        <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Trạng thái') }}</span></label>
                         <select id="ts-status" x-model="filters.status" @change="onFilterChange()"
-                                data-ts-placeholder="Tất cả trạng thái"
+                                data-ts-placeholder="{{ __('Tất cả trạng thái') }}"
                                 class="select select-sm select-bordered w-full">
-                            <option value="">Tất cả</option>
+                            <option value="">{{ __('Tất cả') }}</option>
                             @foreach(\Modules\Page\Enums\PageStatus::cases() as $s)
                             <option value="{{ $s->value }}">{{ $s->label() }}</option>
                             @endforeach
@@ -88,13 +88,13 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                         </svg>
-                        Đặt lại
+                        {{ __('Đặt lại') }}
                     </button>
                 </div>
 
                 <div x-show="activeChips.length > 0" x-cloak x-transition
                      class="flex flex-wrap gap-2 pt-3 mt-3 border-t border-base-200">
-                    <span class="text-xs text-base-content/40 self-center">Đang lọc:</span>
+                    <span class="text-xs text-base-content/40 self-center">{{ __('Đang lọc:') }}</span>
                     <template x-for="chip in activeChips" :key="chip.key">
                         <span class="badge badge-sm gap-1 cursor-pointer hover:badge-error transition-colors"
                               @click="removeChip(chip.key)">
@@ -120,14 +120,14 @@
 {{-- ── Delete confirm modal ─────────────────────────────────────────────── --}}
 <dialog id="pageDeleteModal" class="modal">
     <div class="modal-box max-w-sm">
-        <h3 class="font-bold text-lg text-error">Xác nhận xoá</h3>
+        <h3 class="font-bold text-lg text-error">{{ __('Xác nhận xoá') }}</h3>
         <p class="py-3 text-sm text-base-content/70">
-            Bạn có chắc muốn xoá trang
+            {{ __('Bạn có chắc muốn xoá trang') }}
             <strong id="pageDeleteItemTitle" class="text-base-content"></strong>?
         </p>
         <div class="modal-action mt-4">
-            <button id="pageConfirmDeleteBtn" class="btn btn-error btn-sm">Xoá</button>
-            <button class="btn btn-ghost btn-sm" onclick="pageDeleteModal.close()">Hủy</button>
+            <button id="pageConfirmDeleteBtn" class="btn btn-error btn-sm">{{ __('Xoá') }}</button>
+            <button class="btn btn-ghost btn-sm" onclick="pageDeleteModal.close()">{{ __('Hủy') }}</button>
         </div>
     </div>
     <form method="dialog" class="modal-backdrop"><button>close</button></form>

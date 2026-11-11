@@ -19,7 +19,7 @@ class SendBroadcastAction
     {
         if (! str_contains($bodyHtml, '{{{RESEND_UNSUBSCRIBE_URL}}}')) {
             throw new InvalidArgumentException(
-                'Nội dung bản tin phải chứa merge tag {{{RESEND_UNSUBSCRIBE_URL}}} (bắt buộc để tuân thủ unsubscribe).'
+                __('Nội dung bản tin phải chứa merge tag {{{RESEND_UNSUBSCRIBE_URL}}} (bắt buộc để tuân thủ unsubscribe).')
             );
         }
 

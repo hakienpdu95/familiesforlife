@@ -129,7 +129,7 @@ class FetchArticlesBatchAction
 
         foreach ($items as $key => $item) {
             if (! $item['done']) {
-                $this->markFailed($items, $key, 'error', 'too_many_redirects', null, "Quá nhiều lượt redirect (>{$maxRedirects}).");
+                $this->markFailed($items, $key, 'error', 'too_many_redirects', null, __('Quá nhiều lượt redirect (>:max_redirects).', ['max_redirects' => $maxRedirects]));
             }
         }
 
@@ -171,7 +171,7 @@ class FetchArticlesBatchAction
         $contentType = (string) $response->header('Content-Type');
 
         if ($contentType !== '' && ! str_contains($contentType, 'html')) {
-            $this->markFailed($items, $key, 'error', 'invalid_content_type', $response->status(), "Nội dung không phải HTML (Content-Type: {$contentType}).");
+            $this->markFailed($items, $key, 'error', 'invalid_content_type', $response->status(), __('Nội dung không phải HTML (Content-Type: :content_type).', ['content_type' => $contentType]));
 
             return;
         }

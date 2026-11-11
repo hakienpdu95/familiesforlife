@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', 'Sửa tri thức — Kho tri thức')
+@section('title', __('Sửa tri thức — Kho tri thức'))
 
 @section('content')
 
@@ -16,7 +16,7 @@
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
         </svg>
-        Quay lại
+        {{ __('Quay lại') }}
     </a>
 </div>
 
@@ -37,7 +37,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
     </svg>
     <div>
-        <p class="font-semibold">Có {{ $errors->count() }} lỗi cần kiểm tra:</p>
+        <p class="font-semibold">{{ __('Có :count lỗi cần kiểm tra:', ['count' => $errors->count()]) }}</p>
         <ul class="mt-1.5 list-disc list-inside space-y-0.5 text-xs opacity-90">
             @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
         </ul>
@@ -54,12 +54,12 @@
 
             <div class="card bg-base-100 shadow-sm border border-base-200 mb-5">
                 <div class="card-body">
-                    <h2 class="card-title text-base mb-5">Nội dung</h2>
+                    <h2 class="card-title text-base mb-5">{{ __('Nội dung') }}</h2>
 
                     <div class="space-y-4">
                         <div class="form-control">
                             <label class="label py-0 pb-1.5">
-                                <span class="label-text font-medium">Tiêu đề <span class="text-error">*</span></span>
+                                <span class="label-text font-medium">{{ __('Tiêu đề') }} <span class="text-error">*</span></span>
                             </label>
                             <input type="text" name="title" value="{{ old('title', $document->title) }}"
                                    class="input input-bordered input-sm w-full @error('title') input-error @enderror"
@@ -69,7 +69,7 @@
 
                         <div class="form-control">
                             <label class="label py-0 pb-1.5">
-                                <span class="label-text font-medium">Nội dung (Markdown) <span class="text-error">*</span></span>
+                                <span class="label-text font-medium">{{ __('Nội dung (Markdown)') }} <span class="text-error">*</span></span>
                             </label>
                             <textarea name="content" rows="12"
                                       class="textarea textarea-bordered textarea-sm w-full font-mono @error('content') textarea-error @enderror">{{ old('content', $document->content) }}</textarea>
@@ -81,13 +81,13 @@
 
             <div class="card bg-base-100 shadow-sm border border-base-200 mb-5">
                 <div class="card-body">
-                    <h2 class="card-title text-base mb-5">Phạm vi áp dụng (scope)</h2>
+                    <h2 class="card-title text-base mb-5">{{ __('Phạm vi áp dụng (scope)') }}</h2>
 
                     <div class="space-y-4">
                         <div class="form-control">
                             <label class="label py-0 pb-1.5">
-                                <span class="label-text font-medium">Phạm vi (JSON)</span>
-                                <span class="label-text-alt text-xs text-base-content/40">Để trống = áp dụng mọi bài/sản phẩm</span>
+                                <span class="label-text font-medium">{{ __('Phạm vi (JSON)') }}</span>
+                                <span class="label-text-alt text-xs text-base-content/40">{{ __('Để trống = áp dụng mọi bài/sản phẩm') }}</span>
                             </label>
                             @php
                                 $docSchema = $taxonomySchema[$document->subject_type] ?? null;
@@ -98,12 +98,12 @@
                             @error('scope_json')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                             @if($docSchema)
                             <p class="text-xs text-base-content/40 mt-1">
-                                Key phải khớp taxonomy_keys của <span class="font-mono">{{ $document->subject_type }}</span>:
+                                {{ __('Key phải khớp taxonomy_keys của') }} <span class="font-mono">{{ $document->subject_type }}</span>:
                                 <span class="font-mono">{{ implode(', ', $docSchema) }}</span>.
                             </p>
                             @else
                             <p class="text-xs text-warning mt-1">
-                                Tài liệu này là DNA chung toàn tổ chức (không gắn subject_type) — KHÔNG được đặt scope, để trống ô này (đã tự khoá).
+                                {{ __('Tài liệu này là DNA chung toàn tổ chức (không gắn subject_type) — KHÔNG được đặt scope, để trống ô này (đã tự khoá).') }}
                             </p>
                             @endif
                         </div>
@@ -111,16 +111,16 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div class="form-control">
                                 <label class="label py-0 pb-1.5">
-                                    <span class="label-text font-medium">Kiểu khớp phạm vi</span>
+                                    <span class="label-text font-medium">{{ __('Kiểu khớp phạm vi') }}</span>
                                 </label>
                                 <select name="scope_match" class="select select-bordered select-sm w-full">
-                                    <option value="any" {{ old('scope_match', $document->scope_match->value) === 'any' ? 'selected' : '' }}>any — khớp 1 key là đủ</option>
-                                    <option value="all" {{ old('scope_match', $document->scope_match->value) === 'all' ? 'selected' : '' }}>all — phải khớp mọi key</option>
+                                    <option value="any" {{ old('scope_match', $document->scope_match->value) === 'any' ? 'selected' : '' }}>{{ __('any — khớp 1 key là đủ') }}</option>
+                                    <option value="all" {{ old('scope_match', $document->scope_match->value) === 'all' ? 'selected' : '' }}>{{ __('all — phải khớp mọi key') }}</option>
                                 </select>
                             </div>
                             <div class="form-control">
                                 <label class="label py-0 pb-1.5">
-                                    <span class="label-text font-medium">Độ ưu tiên</span>
+                                    <span class="label-text font-medium">{{ __('Độ ưu tiên') }}</span>
                                 </label>
                                 <input type="number" name="priority" min="1" max="999"
                                        value="{{ old('priority', $document->priority) }}"
@@ -137,7 +137,7 @@
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
-                    Lưu thay đổi
+                    {{ __('Lưu thay đổi') }}
                 </button>
             </div>
         </form>
@@ -145,10 +145,9 @@
         {{-- ── Lịch sử phiên bản / rollback ─────────────────────────────── --}}
         <div class="card bg-base-100 shadow-sm border border-base-200">
             <div class="card-body">
-                <h2 class="card-title text-base mb-1">Lịch sử phiên bản</h2>
+                <h2 class="card-title text-base mb-1">{{ __('Lịch sử phiên bản') }}</h2>
                 <p class="text-xs text-base-content/40 mb-4">
-                    Mỗi lần lưu tạo 1 phiên bản mới lưu lại trạng thái trước đó. Khôi phục sẽ tạo thêm 1 phiên bản mới
-                    (không xoá lịch sử) — bản thân thao tác khôi phục cũng được audit lại được.
+                    {{ __('Mỗi lần lưu tạo 1 phiên bản mới lưu lại trạng thái trước đó. Khôi phục sẽ tạo thêm 1 phiên bản mới (không xoá lịch sử) — bản thân thao tác khôi phục cũng được audit lại được.') }}
                 </p>
 
                 @forelse($document->versions as $version)
@@ -157,7 +156,7 @@
                         <div class="flex items-center gap-2">
                             <span class="badge badge-sm badge-outline">v{{ $version->version }}</span>
                             <span class="text-xs text-base-content/50">{{ format_datetime($version->changed_at) }}</span>
-                            <span class="text-xs text-base-content/40">bởi {{ $version->changer?->name ?? '—' }}</span>
+                            <span class="text-xs text-base-content/40">{{ __('bởi :name', ['name' => $version->changer?->name ?? '—']) }}</span>
                         </div>
                         <p class="text-xs text-base-content/60 mt-1 line-clamp-2">{{ \Illuminate\Support\Str::limit($version->content, 160) }}</p>
                     </div>
@@ -165,12 +164,12 @@
                     <form method="POST" action="{{ route('backend.aicem.knowledge-documents.versions.restore', [$document, $version]) }}"
                           onsubmit="return confirm('Khôi phục về phiên bản v{{ $version->version }}? Trạng thái hiện tại sẽ được lưu thành 1 phiên bản mới trước khi ghi đè.')">
                         @csrf
-                        <button class="btn btn-ghost btn-xs shrink-0">Khôi phục</button>
+                        <button class="btn btn-ghost btn-xs shrink-0">{{ __('Khôi phục') }}</button>
                     </form>
                     @endcan
                 </div>
                 @empty
-                <p class="text-sm text-base-content/40 py-4 text-center">Chưa có lịch sử — tài liệu chưa từng được sửa.</p>
+                <p class="text-sm text-base-content/40 py-4 text-center">{{ __('Chưa có lịch sử — tài liệu chưa từng được sửa.') }}</p>
                 @endforelse
             </div>
         </div>
@@ -179,14 +178,14 @@
     <div class="xl:sticky xl:top-4 space-y-4">
         <div class="card bg-base-100 shadow-sm border border-base-200">
             <div class="card-body p-4 text-sm space-y-2">
-                <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-1">Thông tin</p>
-                <p><span class="text-base-content/50">Loại:</span> {{ config("aicem_subjects.knowledge_slot_definitions.{$document->type}.label", $document->type) }}
+                <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-1">{{ __('Thông tin') }}</p>
+                <p><span class="text-base-content/50">{{ __('Loại:') }}</span> {{ config("aicem_subjects.knowledge_slot_definitions.{$document->type}.label", $document->type) }}
                     <span class="text-xs font-mono text-base-content/30">({{ $document->type }})</span></p>
-                <p><span class="text-base-content/50">Đối tượng áp dụng:</span> {{ $document->subject_type ? config("aicem_subjects.{$document->subject_type}.label", $document->subject_type) : 'DNA chung' }}</p>
-                <p><span class="text-base-content/50">Tạo bởi:</span> {{ $document->creator?->name ?? '—' }}</p>
-                <p><span class="text-base-content/50">Sửa lần cuối bởi:</span> {{ $document->updater?->name ?? '—' }}</p>
+                <p><span class="text-base-content/50">{{ __('Đối tượng áp dụng:') }}</span> {{ $document->subject_type ? config("aicem_subjects.{$document->subject_type}.label", $document->subject_type) : 'DNA chung' }}</p>
+                <p><span class="text-base-content/50">{{ __('Tạo bởi:') }}</span> {{ $document->creator?->name ?? '—' }}</p>
+                <p><span class="text-base-content/50">{{ __('Sửa lần cuối bởi:') }}</span> {{ $document->updater?->name ?? '—' }}</p>
                 <p class="text-xs text-base-content/30 pt-2 border-t border-base-200">
-                    Type/subject_type không thể sửa sau khi tạo — cần thiết thì xoá và tạo tài liệu mới.
+                    {{ __('Type/subject_type không thể sửa sau khi tạo — cần thiết thì xoá và tạo tài liệu mới.') }}
                 </p>
             </div>
         </div>

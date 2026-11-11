@@ -21,6 +21,7 @@
 
 import { createTs, initAllTomSelects } from '@shared/tom-select-factory.js';
 
+import { t } from '../../../../../../resources/js/shared/i18n.js';
 // ── Constants & lookup tables ──────────────────────────────────────────────
 
 /** Selector phải khớp với attribute trên form trong blade. */
@@ -125,7 +126,7 @@ function _resolveFieldLabel(field) {
     const labelText = field.closest('.form-control')
         ?.querySelector('.label-text')
         ?.textContent.replace(/\s*\*\s*$/, '').trim();
-    return labelText || field.placeholder || field.name || 'Trường bắt buộc';
+    return labelText || field.placeholder || field.name || t('Trường bắt buộc');
 }
 
 /** Chuyển tab qua Alpine reactive data — đồng bộ, không cần event. */
@@ -145,7 +146,7 @@ function _toastHiddenErrors(errors) {
         `${label}: ${fields.join(', ')}`
     );
 
-    Toast.warning(`Còn thiếu thông tin bắt buộc:\n${lines.join('\n')}`, {
+    Toast.warning(`${t('Còn thiếu thông tin bắt buộc:\\n:n', { n: (lines.join('\n')) })}`, {
         duration: 5000,
     });
 }
@@ -212,7 +213,7 @@ function _setupPropertyTypeCascade(form) {
         types: (o.dataset.listingType || '').split(' '),
     }));
 
-    const ts = createTs(ptEl, { placeholder: ptEl.dataset.tsPlaceholder || '— Chọn loại hình —' });
+    const ts = createTs(ptEl, { placeholder: ptEl.dataset.tsPlaceholder || t('— Chọn loại hình —') });
     if (!ts) return;
 
     const applyFilter = () => {
@@ -249,7 +250,7 @@ function _setupLazySelectReveal(form) {
             const el = form.querySelector(`#${id}`);
             if (!el || el.tomselect) continue;
             if (_isHiddenByAncestor(el)) continue;
-            createTs(el, { placeholder: el.dataset.tsPlaceholder || '— Chọn —' });
+            createTs(el, { placeholder: el.dataset.tsPlaceholder || t('— Chọn —') });
         }
     };
 

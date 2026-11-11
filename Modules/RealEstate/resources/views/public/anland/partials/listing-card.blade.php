@@ -10,13 +10,13 @@
         @if($firstImage)
         <img src="{{ $firstImage }}" alt="{{ $content['title'] }}" class="w-full h-full object-cover">
         @else
-        <div class="w-full h-full flex items-center justify-center text-base-content/30 text-sm">Chưa có ảnh</div>
+        <div class="w-full h-full flex items-center justify-center text-base-content/30 text-sm">{{ __('Chưa có ảnh') }}</div>
         @endif
         @if($listing->is_featured)
-        <span class="badge badge-accent badge-sm absolute top-2 left-2">Nổi bật</span>
+        <span class="badge badge-accent badge-sm absolute top-2 left-2">{{ __('Nổi bật') }}</span>
         @endif
         @if($listing->isSale() && $listing->is_urgent)
-        <span class="badge badge-error badge-sm absolute top-2 right-2">Bán gấp</span>
+        <span class="badge badge-error badge-sm absolute top-2 right-2">{{ __('Bán gấp') }}</span>
         @endif
         @if(count($gallery) > 0)
         <span class="absolute bottom-2 right-2 flex items-center gap-1 bg-black/55 text-white text-[11px] rounded-md px-1.5 py-0.5">

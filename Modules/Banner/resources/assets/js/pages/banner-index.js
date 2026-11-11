@@ -8,6 +8,7 @@
 
 import { createTs } from '@shared/tom-select-factory.js';
 
+import { t } from '../../../../../../resources/js/shared/i18n.js';
 function esc(v) {
     if (v == null) return '';
     return String(v)
@@ -17,14 +18,14 @@ function esc(v) {
 
 const COLUMNS = [
     {
-        title: 'Ảnh', field: 'image_url', width: 90, headerSort: false,
+        title: t('Ảnh'), field: 'image_url', width: 90, headerSort: false,
         formatter(cell) {
             const v = cell.getValue();
             return v ? '<img src="' + esc(v) + '" alt="" class="h-10 w-auto rounded border border-base-300 object-cover">' : '';
         },
     },
     {
-        title: 'Vị trí', field: 'placement_label', minWidth: 160, sorter: 'string',
+        title: t('Vị trí'), field: 'placement_label', minWidth: 160, sorter: 'string',
         formatter(cell) {
             const d = cell.getRow().getData();
             let html = '<span class="text-sm">' + esc(d.placement_label) + '</span>';
@@ -38,16 +39,16 @@ const COLUMNS = [
             const d = cell.getRow().getData();
             if (!d.target_label) return '';
             const cls = d.target_kind == null ? 'badge-ghost'
-                : d.target_label.includes('đã xoá') || d.target_label.includes('không rõ') ? 'badge-warning'
+                : d.target_label.includes(t('đã xoá')) || d.target_label.includes(t('không rõ')) ? 'badge-warning'
                 : 'badge-info';
             return '<span class="badge ' + cls + ' badge-sm">' + esc(d.target_label) + '</span>';
         },
     },
     {
-        title: 'Lịch chạy', field: 'start_date', width: 170, headerSort: false,
+        title: t('Lịch chạy'), field: 'start_date', width: 170, headerSort: false,
         formatter(cell) {
             const d = cell.getRow().getData();
-            if (!d.start_date && !d.end_date) return '<span class="text-base-content/30 text-xs">Không giới hạn</span>';
+            if (!d.start_date && !d.end_date) return ('<span class="text-base-content/30 text-xs">' + t('Không giới hạn') + '</span>');
             return '<span class="text-xs">' + esc(d.start_date || '—') + ' → ' + esc(d.end_date || '—') + '</span>';
         },
     },
@@ -55,12 +56,12 @@ const COLUMNS = [
         title: 'Click', field: 'click_count', width: 90, hozAlign: 'center', sorter: 'number',
     },
     {
-        title: 'Trạng thái', field: 'is_active', width: 130, hozAlign: 'center', headerSort: false,
+        title: t('Trạng thái'), field: 'is_active', width: 130, hozAlign: 'center', headerSort: false,
         formatter(cell) {
             const d = cell.getRow().getData();
-            if (d.is_running) return '<span class="badge badge-success badge-sm">Đang chạy</span>';
-            if (!d.is_active) return '<span class="badge badge-neutral badge-sm">Đã tắt</span>';
-            return '<span class="badge badge-ghost badge-sm">Ngoài lịch</span>';
+            if (d.is_running) return ('<span class="badge badge-success badge-sm">' + t('Đang chạy') + '</span>');
+            if (!d.is_active) return ('<span class="badge badge-neutral badge-sm">' + t('Đã tắt') + '</span>');
+            return ('<span class="badge badge-ghost badge-sm">' + t('Ngoài lịch') + '</span>');
         },
     },
     {
@@ -70,12 +71,12 @@ const COLUMNS = [
             let html = '<div class="flex items-center justify-center gap-1">';
 
             if (d.can_update) {
-                html += '<a href="' + esc(d.edit_url) + '" class="btn btn-ghost btn-xs" title="Sửa">Sửa</a>';
+                html += '<a href="' + esc(d.edit_url) + ('" class="btn btn-ghost btn-xs" title="' + t('Sửa') + '">' + t('Sửa') + '</a>');
             }
             if (d.can_delete) {
-                html += '<button class="btn btn-ghost btn-xs text-error" title="Xoá"'
+                html += ('<button class="btn btn-ghost btn-xs text-error" title="' + t('Xoá') + '"')
                     + ' data-url="' + esc(d.destroy_url) + '"'
-                    + ' onclick="window.bannerDeleteConfirm(this.dataset.url)">Xoá</button>';
+                    + (' onclick="window.bannerDeleteConfirm(this.dataset.url)">' + t('Xoá') + '</button>');
             }
 
             html += '</div>';
@@ -102,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const csrf = document.querySelector('meta[name=csrf-token]')?.content ?? '';
         this.disabled    = true;
-        this.textContent = 'Đang xoá...';
+        this.textContent = t('Đang xoá...');
 
         try {
             const res = await fetch(pendingDeleteUrl, {
@@ -122,14 +123,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('bannerDeleteModal')?.close();
                 window.bannerTable?.replaceData();
             } else {
-                alert(data.message || 'Xoá thất bại. Vui lòng thử lại.');
+                alert(data.message || t('Xoá thất bại. Vui lòng thử lại.'));
             }
         } catch (e) {
             console.error('[banner] delete failed', e);
-            alert('Lỗi kết nối. Vui lòng thử lại.');
+            alert(t('Lỗi kết nối. Vui lòng thử lại.'));
         } finally {
             this.disabled    = false;
-            this.textContent = 'Xoá';
+            this.textContent = t('Xoá');
             pendingDeleteUrl = null;
         }
     });
@@ -174,13 +175,13 @@ document.addEventListener('alpine:init', () => {
                 if (!placementEl || !targetTypeEl) return;
 
                 tsPlacement = createTs(placementEl, {
-                    placeholder: 'Tất cả vị trí',
+                    placeholder: t('Tất cả vị trí'),
                     maxOptions: null,
                     onChange() { placementEl.dispatchEvent(new Event('change', { bubbles: true })); },
                 });
 
                 tsTargetType = createTs(targetTypeEl, {
-                    placeholder: 'Tất cả target',
+                    placeholder: t('Tất cả target'),
                     onChange() { targetTypeEl.dispatchEvent(new Event('change', { bubbles: true })); },
                 });
             },
@@ -216,11 +217,11 @@ document.addEventListener('alpine:init', () => {
                     langs: {
                         'vi-VN': {
                             pagination: {
-                                page_size: 'Dòng/trang', page_title: 'Trang',
+                                page_size: t('Dòng/trang'), page_title: t('Trang'),
                                 first: '«', last: '»', prev: '‹', next: '›',
-                                first_title: 'Trang đầu', last_title: 'Trang cuối',
-                                prev_title: 'Trang trước', next_title: 'Trang sau',
-                                counter: { showing: '', of: 'trong', rows: 'dòng', pages: 'trang' },
+                                first_title: t('Trang đầu'), last_title: t('Trang cuối'),
+                                prev_title: t('Trang trước'), next_title: t('Trang sau'),
+                                counter: { showing: '', of: t('trong'), rows: t('dòng'), pages: t('trang') },
                             },
                         },
                     },
@@ -228,7 +229,7 @@ document.addEventListener('alpine:init', () => {
                     columns: COLUMNS,
                     placeholder: '<div class="py-16 text-center opacity-40">'
                         + '<svg class="w-12 h-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M4 6h16v12H4V6z"/></svg>'
-                        + '<p class="text-sm">Chưa có banner nào</p></div>',
+                        + ('<p class="text-sm">' + t('Chưa có banner nào') + '</p></div>'),
                 });
 
                 window.bannerTable = tableInst;

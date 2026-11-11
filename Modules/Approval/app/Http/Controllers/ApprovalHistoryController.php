@@ -22,7 +22,7 @@ class ApprovalHistoryController extends Controller
 
         return view('approval::history.index', [
             'subjectTypes' => collect(config('approval.subjects'))->map(fn (array $config) => $config['label']),
-            'actions' => ApprovalLog::ACTION_LABELS,
+            'actions' => array_map('__', ApprovalLog::ACTION_LABELS),
         ]);
     }
 }

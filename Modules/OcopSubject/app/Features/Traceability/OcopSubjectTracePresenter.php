@@ -69,9 +69,9 @@ class OcopSubjectTracePresenter implements TracePresenter
 
         $sections = [];
         if ($live && T::hasContent($live->story)) {
-            $sections[] = ['title' => 'Câu chuyện thương hiệu', 'icon' => 'fa-book-open', 'html' => $live->story];
+            $sections[] = ['title' => __('Câu chuyện thương hiệu'), 'icon' => 'fa-book-open', 'html' => $live->story];
         } elseif (! empty($payload['story'])) {
-            $sections[] = ['title' => 'Câu chuyện thương hiệu', 'icon' => 'fa-book-open', 'text' => $payload['story']];
+            $sections[] = ['title' => __('Câu chuyện thương hiệu'), 'icon' => 'fa-book-open', 'text' => $payload['story']];
         }
 
         $products = $live
@@ -86,7 +86,7 @@ class OcopSubjectTracePresenter implements TracePresenter
             'badges' => array_values(array_filter([
                 ! empty($payload['type']) ? ['label' => $payload['type'], 'icon' => 'fa-building', 'class' => 'badge-outline'] : null,
                 $stars ? ['label' => 'OCOP '.$stars.' sao', 'icon' => 'fa-star', 'class' => 'badge-warning'] : null,
-                ! empty($payload['is_food_business']) ? ['label' => 'Cơ sở thực phẩm', 'icon' => 'fa-utensils', 'class' => 'badge-ghost'] : null,
+                ! empty($payload['is_food_business']) ? ['label' => __('Cơ sở thực phẩm'), 'icon' => 'fa-utensils', 'class' => 'badge-ghost'] : null,
             ])),
             'stars' => $stars,
             'type' => $payload['type'] ?? null,
@@ -109,11 +109,11 @@ class OcopSubjectTracePresenter implements TracePresenter
             'docs' => $payload['docs'] ?? [],
             'sections' => $sections,
             'related' => [
-                ['title' => 'Sản phẩm OCOP của chủ thể', 'icon' => 'fa-certificate', 'items' => $this->ocopCards($products, linkToQr: true)],
+                ['title' => __('Sản phẩm OCOP của chủ thể'), 'icon' => 'fa-certificate', 'items' => $this->ocopCards($products, linkToQr: true)],
             ],
             'cta' => $live
-                ? ['url' => route('ocop-subject.public.show', $live->slug), 'label' => 'Trang thương hiệu', 'icon' => 'fa-store']
-                : ['url' => route('ocop.public.index'), 'label' => 'Xem sản phẩm OCOP', 'icon' => 'fa-arrow-right'],
+                ? ['url' => route('ocop-subject.public.show', $live->slug), 'label' => __('Trang thương hiệu'), 'icon' => 'fa-store']
+                : ['url' => route('ocop.public.index'), 'label' => __('Xem sản phẩm OCOP'), 'icon' => 'fa-arrow-right'],
         ]);
     }
 
@@ -129,7 +129,7 @@ class OcopSubjectTracePresenter implements TracePresenter
     private function base(array $page): array
     {
         return T::page([
-            'heading' => 'Hồ sơ chủ thể OCOP',
+            'heading' => __('Hồ sơ chủ thể OCOP'),
             'icon' => 'fa-building',
             'kind' => 'Chủ thể OCOP',
             'stars' => null,
@@ -139,7 +139,7 @@ class OcopSubjectTracePresenter implements TracePresenter
             'cert' => null,
             'contact' => [],
             'docs' => [],
-            'cta' => ['url' => route('ocop.public.index'), 'label' => 'Xem sản phẩm OCOP', 'icon' => 'fa-arrow-right'],
+            'cta' => ['url' => route('ocop.public.index'), 'label' => __('Xem sản phẩm OCOP'), 'icon' => 'fa-arrow-right'],
             ...$page,
         ]);
     }

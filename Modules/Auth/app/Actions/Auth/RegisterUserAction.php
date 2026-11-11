@@ -22,8 +22,8 @@ class RegisterUserAction implements CreatesNewUsers
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class)],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ], [
-            'name.required' => 'Họ và tên là bắt buộc.',
-            'email.unique' => 'Email này đã được sử dụng.',
+            'name.required' => __('Họ và tên là bắt buộc.'),
+            'email.unique' => __('Email này đã được sử dụng.'),
         ])->validate();
 
         $user = User::create([

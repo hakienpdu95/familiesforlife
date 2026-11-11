@@ -8,7 +8,7 @@
 @endphp
 
 @if($provinces->isNotEmpty())
-<nav aria-label="Tỉnh/thành nổi bật" class="flex flex-wrap sm:flex-nowrap text-sm font-medium uppercase tracking-wide text-center">
+<nav aria-label="{{ __('Tỉnh/thành nổi bật') }}" class="flex flex-wrap sm:flex-nowrap text-sm font-medium uppercase tracking-wide text-center">
     @foreach($provinces as $province)
     <a href="{{ route('province.public.show', ['type' => $province->place_type, 'slug' => $province->slug]) }}"
        style="{{ \Modules\ProvinceShowcase\Support\ProvinceTabColor::style($province->theme_color) }}"

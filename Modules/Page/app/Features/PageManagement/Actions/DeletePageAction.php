@@ -18,7 +18,7 @@ class DeletePageAction
     public function handle(Page $page): void
     {
         throw_if($page->is_system, ValidationException::withMessages([
-            'page' => 'Không thể xoá trang hệ thống — hãy chuyển về "Nháp" hoặc bật "Không lập chỉ mục" để ẩn thay vì xoá.',
+            'page' => __('Không thể xoá trang hệ thống — hãy chuyển về "Nháp" hoặc bật "Không lập chỉ mục" để ẩn thay vì xoá.'),
         ]));
 
         $page->delete();

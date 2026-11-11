@@ -80,9 +80,9 @@ Route::middleware(['auth'])->prefix('dashboard')->name('backend.')->group(functi
 
     // ── Placeholder routes (modules chưa triển khai) ──────────────────
     // products.index/products.create giờ do Modules/Product/routes/web.php đảm nhiệm
-    Route::get('/orders',           fn () => abort(503, 'Module đang phát triển'))->name('orders.index');
-    Route::get('/categories',       fn () => abort(503, 'Module đang phát triển'))->name('categories.index');
-    Route::get('/categories/create',fn () => abort(503, 'Module đang phát triển'))->name('categories.create');
+    Route::get('/orders',           fn () => abort(503, __('Module đang phát triển')))->name('orders.index');
+    Route::get('/categories',       fn () => abort(503, __('Module đang phát triển')))->name('categories.index');
+    Route::get('/categories/create',fn () => abort(503, __('Module đang phát triển')))->name('categories.create');
 
     // ── Notification Center ───────────────────────────────────────────────
     Route::prefix('notifications')->name('notifications.')->group(function () {

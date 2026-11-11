@@ -56,7 +56,7 @@ class TraceabilityService
         } elseif ($presenter && $live) {
             $page = $presenter->pending($target);
         } else {
-            $page = self::page(['title' => 'Không còn khả dụng', 'notice' => 'Không còn dữ liệu lưu trữ cho mã QR này.']);
+            $page = self::page(['title' => __('Không còn khả dụng'), 'notice' => 'Không còn dữ liệu lưu trữ cho mã QR này.']);
             $archived = true;
         }
 
@@ -204,10 +204,10 @@ class TraceabilityService
     public static function page(array $page): array
     {
         return [
-            'heading' => 'Thông tin truy xuất nguồn gốc',
+            'heading' => __('Thông tin truy xuất nguồn gốc'),
             'icon' => 'fa-qrcode',
             'kind' => 'Đối tượng',
-            'title' => 'Không xác định',
+            'title' => __('Không xác định'),
             'subtitle' => null,
             'images' => [],
             'image_srcsets' => [],

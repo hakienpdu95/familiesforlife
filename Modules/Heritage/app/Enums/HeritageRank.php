@@ -17,10 +17,10 @@ enum HeritageRank: string
     public function label(): string
     {
         return match ($this) {
-            self::SpecialNational => 'Di tích quốc gia đặc biệt',
-            self::National => 'Di tích cấp quốc gia',
-            self::Provincial => 'Di tích cấp tỉnh/thành phố',
-            self::Unranked => 'Chưa xếp hạng',
+            self::SpecialNational => __('Di tích quốc gia đặc biệt'),
+            self::National => __('Di tích cấp quốc gia'),
+            self::Provincial => __('Di tích cấp tỉnh/thành phố'),
+            self::Unranked => __('Chưa xếp hạng'),
         };
     }
 }

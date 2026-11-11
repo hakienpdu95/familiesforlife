@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', 'Lịch biên tập — Board')
+@section('title', __('Lịch biên tập — Board'))
 
 @section('content')
 <div x-data="contentCalendarBoard({{ Js::from([
@@ -21,14 +21,14 @@
 
     <div class="mb-4 flex items-start justify-between flex-wrap gap-2">
         <div>
-            <h1 class="text-2xl font-bold text-base-content">Lịch biên tập — Board</h1>
+            <h1 class="text-2xl font-bold text-base-content">{{ __('Lịch biên tập — Board') }}</h1>
             <p class="text-sm text-base-content/50 mt-0.5">
-                Hàng đợi ý tưởng đã chọn + tiến độ, nối giữa CoreIdeaExtractor/Aicem và bài viết thật (Post).
+                {{ __('Hàng đợi ý tưởng đã chọn + tiến độ, nối giữa CoreIdeaExtractor/Aicem và bài viết thật (Post).') }}
             </p>
         </div>
         <div class="flex gap-2">
-            <a href="{{ route('backend.contentcalendar.calendar') }}" class="btn btn-ghost btn-sm">Xem theo lịch tháng</a>
-            <button type="button" class="btn btn-primary btn-sm" x-show="canManage" x-cloak @click="openCreateModal()">+ Tạo kế hoạch</button>
+            <a href="{{ route('backend.contentcalendar.calendar') }}" class="btn btn-ghost btn-sm">{{ __('Xem theo lịch tháng') }}</a>
+            <button type="button" class="btn btn-primary btn-sm" x-show="canManage" x-cloak @click="openCreateModal()">{{ __('+ Tạo kế hoạch') }}</button>
         </div>
     </div>
 
@@ -38,16 +38,16 @@
             <div class="form-control">
                 <label class="label py-0.5"><span class="label-text text-xs font-medium">Category</span></label>
                 <select x-model="filters.categoryId" @change="loadEntries(); loadFunnelGap()" class="select select-sm select-bordered w-64">
-                    <option value="">Tất cả</option>
+                    <option value="">{{ __('Tất cả') }}</option>
                     <template x-for="cat in categories" :key="cat.id">
                         <option :value="cat.id" x-text="categoryOptionLabel(cat)"></option>
                     </template>
                 </select>
             </div>
             <div class="form-control">
-                <label class="label py-0.5"><span class="label-text text-xs font-medium">Người phụ trách</span></label>
+                <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Người phụ trách') }}</span></label>
                 <select x-model="filters.assignedTo" @change="loadEntries()" class="select select-sm select-bordered w-52">
-                    <option value="">Tất cả</option>
+                    <option value="">{{ __('Tất cả') }}</option>
                     <template x-for="u in assignableUsers" :key="u.id">
                         <option :value="u.id" x-text="u.name"></option>
                     </template>
@@ -55,9 +55,9 @@
             </div>
             <label class="label cursor-pointer gap-2">
                 <input type="checkbox" x-model="filters.includeDone" @change="loadEntries()" class="checkbox checkbox-sm">
-                <span class="label-text text-xs">Hiện cả Đã xong/Đã huỷ</span>
+                <span class="label-text text-xs">{{ __('Hiện cả Đã xong/Đã huỷ') }}</span>
             </label>
-            <p x-show="loading" class="text-xs text-base-content/40">Đang tải...</p>
+            <p x-show="loading" class="text-xs text-base-content/40">{{ __('Đang tải...') }}</p>
         </div>
 
         {{-- (2026-08-11) — tự hiện ngay khi chọn 1 category (loadFunnelGap() gọi kèm @change ở
@@ -69,28 +69,28 @@
         <template x-if="filters.categoryId">
             <div class="border-t border-base-200 px-3 py-2.5">
                 <div x-show="funnelGap.loading" class="flex items-center gap-2 text-xs text-base-content/40">
-                    <span class="loading loading-spinner loading-xs"></span> Đang tính phân bổ Lạnh/Ấm/Nóng...
+                    <span class="loading loading-spinner loading-xs"></span> {{ __('Đang tính phân bổ Lạnh/Ấm/Nóng...') }}
                 </div>
                 <template x-if="!funnelGap.loading && funnelGap.loaded">
                     <div class="flex items-center gap-3 flex-wrap">
-                        <span class="text-xs font-medium text-base-content/60 shrink-0">Lạnh/Ấm/Nóng:</span>
+                        <span class="text-xs font-medium text-base-content/60 shrink-0">{{ __('Lạnh/Ấm/Nóng:') }}</span>
                         <div class="flex h-2.5 w-40 overflow-hidden rounded-full bg-base-200 shrink-0">
-                            <div class="bg-info" :style="`width: ${funnelGapPercent('cold')}%`" title="Lạnh"></div>
-                            <div class="bg-warning" :style="`width: ${funnelGapPercent('warm')}%`" title="Ấm"></div>
-                            <div class="bg-error" :style="`width: ${funnelGapPercent('hot')}%`" title="Nóng"></div>
+                            <div class="bg-info" :style="`width: ${funnelGapPercent('cold')}%`" title="{{ __('Lạnh') }}"></div>
+                            <div class="bg-warning" :style="`width: ${funnelGapPercent('warm')}%`" title="{{ __('Ấm') }}"></div>
+                            <div class="bg-error" :style="`width: ${funnelGapPercent('hot')}%`" title="{{ __('Nóng') }}"></div>
                         </div>
                         <span class="text-xs text-base-content/50">
                             <span x-text="funnelGap.counts?.cold ?? 0"></span>L ·
-                            <span x-text="funnelGap.counts?.warm ?? 0"></span>Ấ ·
+                            <span x-text="funnelGap.counts?.warm ?? 0"></span>{{ __('Ấ ·') }}
                             <span x-text="funnelGap.counts?.hot ?? 0"></span>N
                             <template x-if="(funnelGap.counts?.unclassified ?? 0) > 0">
-                                <span>· <span x-text="funnelGap.counts.unclassified"></span> chưa phân loại</span>
+                                <span>· <span x-text="funnelGap.counts.unclassified"></span> {{ __('chưa phân loại') }}</span>
                             </template>
                         </span>
                         <span class="badge badge-warning badge-sm gap-1" x-show="funnelGap.weakestStageLabel" x-cloak>
-                            ⚠ Đang bỏ ngỏ giai đoạn <span x-text="funnelGap.weakestStageLabel"></span>
+                            {{ __('⚠ Đang bỏ ngỏ giai đoạn') }} <span x-text="funnelGap.weakestStageLabel"></span>
                         </span>
-                        <button type="button" class="btn btn-outline btn-2xs ml-auto" @click="openFunnelGapModal()">Xem gợi ý prompt</button>
+                        <button type="button" class="btn btn-outline btn-2xs ml-auto" @click="openFunnelGapModal()">{{ __('Xem gợi ý prompt') }}</button>
                     </div>
                 </template>
             </div>
@@ -113,38 +113,38 @@
                                 <div class="flex flex-wrap gap-1 items-center">
                                     <span class="badge badge-ghost badge-xs" x-text="entry.category?.name"></span>
                                     <span class="badge badge-xs" :class="entry.status_badge_class" x-text="entry.status_label"
-                                          :title="entry.is_linked ? 'Đọc từ trạng thái bài viết thật — không sửa trực tiếp được' : ''"></span>
+                                          :title="entry.is_linked ? @js(__('Đọc từ trạng thái bài viết thật — không sửa trực tiếp được')) : ''"></span>
                                     <span class="badge badge-xs" x-show="entry.funnel_stage" x-cloak
                                           :class="entry.funnel_stage_badge_class" x-text="entry.funnel_stage_label"
-                                          title="Giai đoạn hành trình độc giả"></span>
+                                          title="{{ __('Giai đoạn hành trình độc giả') }}"></span>
                                 </div>
                                 <p class="text-xs text-base-content/50" x-show="entry.assigned_to">
-                                    Người viết: <span x-text="entry.assigned_to?.name"></span>
+                                    {{ __('Người viết:') }} <span x-text="entry.assigned_to?.name"></span>
                                 </p>
                                 <p class="text-xs text-base-content/50" x-show="entry.target_publish_date">
-                                    Dự kiến: <span x-text="entry.target_publish_date"></span>
+                                    {{ __('Dự kiến:') }} <span x-text="entry.target_publish_date"></span>
                                 </p>
 
                                 <div class="flex flex-wrap gap-1 mt-1">
-                                    <a x-show="entry.is_linked" x-cloak :href="'#'" class="btn btn-2xs btn-ghost" @click.prevent="alert('post_article uuid: ' + entry.post_article.uuid)">Xem bài viết</a>
+                                    <a x-show="entry.is_linked" x-cloak :href="'#'" class="btn btn-2xs btn-ghost" @click.prevent="alert('post_article uuid: ' + entry.post_article.uuid)">{{ __('Xem bài viết') }}</a>
 
                                     <template x-if="entry.can_manage">
                                         <select class="select select-2xs select-bordered" @change="changeStatus(entry, $event.target.value); $event.target.value=''">
-                                            <option value="">Chuyển sang...</option>
+                                            <option value="">{{ __('Chuyển sang...') }}</option>
                                             <template x-for="opt in nextStatusOptions(entry)" :key="opt.value">
                                                 <option :value="opt.value" x-text="opt.label"></option>
                                             </template>
                                         </select>
                                     </template>
 
-                                    <button type="button" class="btn btn-2xs btn-ghost" x-show="entry.can_manage" @click="openEditModal(entry)">Sửa</button>
-                                    <button type="button" class="btn btn-2xs btn-ghost" x-show="entry.can_manage && !entry.is_linked" @click="promptLinkArticle(entry)">Gắn bài viết</button>
-                                    <button type="button" class="btn btn-2xs btn-ghost text-error" x-show="entry.can_delete" @click="deleteEntry(entry)">Xoá</button>
+                                    <button type="button" class="btn btn-2xs btn-ghost" x-show="entry.can_manage" @click="openEditModal(entry)">{{ __('Sửa') }}</button>
+                                    <button type="button" class="btn btn-2xs btn-ghost" x-show="entry.can_manage && !entry.is_linked" @click="promptLinkArticle(entry)">{{ __('Gắn bài viết') }}</button>
+                                    <button type="button" class="btn btn-2xs btn-ghost text-error" x-show="entry.can_delete" @click="deleteEntry(entry)">{{ __('Xoá') }}</button>
                                 </div>
                             </div>
                         </div>
                     </template>
-                    <p x-show="entriesByStatus(col.value).length === 0" class="text-xs text-base-content/30 text-center py-4">Trống</p>
+                    <p x-show="entriesByStatus(col.value).length === 0" class="text-xs text-base-content/30 text-center py-4">{{ __('Trống') }}</p>
                 </div>
             </div>
         </template>
@@ -153,7 +153,7 @@
     {{-- ── Modal tạo/sửa entry ─────────────────────────────────────────── --}}
     <dialog x-ref="entryDialog" class="modal">
         <div class="modal-box max-w-2xl">
-            <h3 class="font-bold text-lg" x-text="editingEntry ? 'Sửa kế hoạch' : 'Tạo kế hoạch mới'"></h3>
+            <h3 class="font-bold text-lg" x-text="editingEntry ? @js(__('Sửa kế hoạch')) : @js(__('Tạo kế hoạch mới'))"></h3>
 
             {{-- docs/form-ui-spec.md §13.1 — grid 2 cột desktop, field full-width dùng sm:col-span-2.
                  §14 — cấu trúc form-control bắt buộc (label + hint + input + error). --}}
@@ -161,10 +161,10 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="form-control sm:col-span-2">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Tiêu đề <span class="text-error">*</span></span>
+                            <span class="label-text font-medium">{{ __('Tiêu đề') }} <span class="text-error">*</span></span>
                         </label>
                         <input type="text" x-model="form.title" required maxlength="255"
-                               placeholder="VD: 7 mẹo giúp bé ăn dặm không quấy khóc"
+                               placeholder="{{ __('VD: 7 mẹo giúp bé ăn dặm không quấy khóc') }}"
                                class="input input-bordered input-sm w-full"
                                :class="fieldErrors.title ? 'input-error' : ''">
                         <p x-show="fieldErrors.title" x-cloak class="mt-1 text-xs text-error" x-text="fieldErrors.title?.[0]"></p>
@@ -177,8 +177,8 @@
                         <select id="ts-entry-category" x-model="form.post_category_id" required
                                 class="select select-bordered select-sm w-full"
                                 :class="fieldErrors.post_category_id ? 'select-error' : ''"
-                                data-ts-placeholder="— Chọn category —">
-                            <option value="" disabled>— Chọn category —</option>
+                                data-ts-placeholder="{{ __('— Chọn category —') }}">
+                            <option value="" disabled>{{ __('— Chọn category —') }}</option>
                             <template x-for="cat in categories" :key="cat.id">
                                 <option :value="cat.id" :disabled="!cat.selectable" x-text="categoryOptionLabel(cat)"></option>
                             </template>
@@ -188,11 +188,11 @@
 
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Nguồn gốc ý tưởng <span class="text-error">*</span></span>
+                            <span class="label-text font-medium">{{ __('Nguồn gốc ý tưởng') }} <span class="text-error">*</span></span>
                         </label>
                         <select id="ts-entry-origin" x-model="form.origin"
                                 class="select select-bordered select-sm w-full"
-                                data-ts-placeholder="— Chọn nguồn gốc —">
+                                data-ts-placeholder="{{ __('— Chọn nguồn gốc —') }}">
                             <template x-for="o in origins" :key="o.value">
                                 <option :value="o.value" x-text="o.label"></option>
                             </template>
@@ -202,13 +202,13 @@
 
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Giai đoạn hành trình</span>
-                            <span class="label-text-alt text-base-content/40 text-xs">Không bắt buộc</span>
+                            <span class="label-text font-medium">{{ __('Giai đoạn hành trình') }}</span>
+                            <span class="label-text-alt text-base-content/40 text-xs">{{ __('Không bắt buộc') }}</span>
                         </label>
                         <select id="ts-entry-funnel-stage" x-model="form.funnel_stage"
                                 class="select select-bordered select-sm w-full"
-                                data-ts-placeholder="— Chưa phân loại —">
-                            <option value="">— Chưa phân loại —</option>
+                                data-ts-placeholder="{{ __('— Chưa phân loại —') }}">
+                            <option value="">{{ __('— Chưa phân loại —') }}</option>
                             <template x-for="s in funnelStages" :key="s.value">
                                 <option :value="s.value" x-text="s.label"></option>
                             </template>
@@ -221,8 +221,8 @@
 
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Ngày dự kiến đăng</span>
-                            <span class="label-text-alt text-base-content/40 text-xs">Không bắt buộc</span>
+                            <span class="label-text font-medium">{{ __('Ngày dự kiến đăng') }}</span>
+                            <span class="label-text-alt text-base-content/40 text-xs">{{ __('Không bắt buộc') }}</span>
                         </label>
                         <input type="text" id="fp-entry-target-publish-date" x-model="form.target_publish_date"
                                placeholder="dd/mm/yyyy"
@@ -233,13 +233,13 @@
 
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Người phụ trách</span>
-                            <span class="label-text-alt text-base-content/40 text-xs">Không bắt buộc</span>
+                            <span class="label-text font-medium">{{ __('Người phụ trách') }}</span>
+                            <span class="label-text-alt text-base-content/40 text-xs">{{ __('Không bắt buộc') }}</span>
                         </label>
                         <select id="ts-entry-assignee" x-model="form.assigned_to"
                                 class="select select-bordered select-sm w-full"
-                                data-ts-placeholder="— Chưa gán —">
-                            <option value="">— Chưa gán —</option>
+                                data-ts-placeholder="{{ __('— Chưa gán —') }}">
+                            <option value="">{{ __('— Chưa gán —') }}</option>
                             <template x-for="u in assignableUsers" :key="u.id">
                                 <option :value="u.id" x-text="u.name"></option>
                             </template>
@@ -251,11 +251,11 @@
                 {{-- Textarea ngoài grid — §13.1 "Textarea, rich text: Full (ngoài grid)". --}}
                 <div class="form-control mt-4">
                     <label class="label py-0 pb-1.5">
-                        <span class="label-text font-medium">Tóm tắt / góc nhìn</span>
-                        <span class="label-text-alt text-base-content/40 text-xs">Không bắt buộc</span>
+                        <span class="label-text font-medium">{{ __('Tóm tắt / góc nhìn') }}</span>
+                        <span class="label-text-alt text-base-content/40 text-xs">{{ __('Không bắt buộc') }}</span>
                     </label>
                     <textarea x-model="form.brief" rows="2" maxlength="2000"
-                              placeholder="Góc nhìn riêng / tóm tắt ngắn — không phải nội dung bài"
+                              placeholder="{{ __('Góc nhìn riêng / tóm tắt ngắn — không phải nội dung bài') }}"
                               class="textarea textarea-bordered textarea-sm w-full"
                               :class="fieldErrors.brief ? 'textarea-error' : ''"></textarea>
                     <p x-show="fieldErrors.brief" x-cloak class="mt-1 text-xs text-error" x-text="fieldErrors.brief?.[0]"></p>
@@ -263,11 +263,11 @@
 
                 <div class="form-control mt-4" x-show="form.origin !== 'manual'" x-cloak>
                     <label class="label py-0 pb-1.5">
-                        <span class="label-text font-medium">Ghi chú nguồn gốc <span class="text-error">*</span></span>
-                        <span class="label-text-alt text-base-content/40 text-xs">Dán ý tưởng + lý do</span>
+                        <span class="label-text font-medium">{{ __('Ghi chú nguồn gốc') }} <span class="text-error">*</span></span>
+                        <span class="label-text-alt text-base-content/40 text-xs">{{ __('Dán ý tưởng + lý do') }}</span>
                     </label>
                     <textarea x-model="form.origin_note" rows="3" maxlength="5000"
-                              placeholder="VD: dán nguyên dòng ý tưởng + lý do từ bảng Layer 2 CoreIdeaExtractor"
+                              placeholder="{{ __('VD: dán nguyên dòng ý tưởng + lý do từ bảng Layer 2 CoreIdeaExtractor') }}"
                               class="textarea textarea-bordered textarea-sm w-full font-mono text-xs"
                               :class="fieldErrors.origin_note ? 'textarea-error' : ''"
                               :required="form.origin !== 'manual'"></textarea>
@@ -281,10 +281,10 @@
                         <span x-text="errorMessage"></span>
                     </div>
                     <div class="ml-auto flex gap-2">
-                        <button type="button" class="btn btn-ghost btn-sm" @click="closeModal()">Huỷ</button>
+                        <button type="button" class="btn btn-ghost btn-sm" @click="closeModal()">{{ __('Huỷ') }}</button>
                         <button type="submit" class="btn btn-primary btn-sm gap-2" :disabled="saving" :class="{ 'btn-disabled': saving }">
                             <span x-show="saving" class="loading loading-spinner loading-xs"></span>
-                            <span x-text="saving ? 'Đang lưu...' : (editingEntry ? 'Lưu thay đổi' : 'Tạo kế hoạch')"></span>
+                            <span x-text="saving ? @js(__('Đang lưu...')) : (editingEntry ? @js(__('Lưu thay đổi')) : @js(__('Tạo kế hoạch')))"></span>
                         </button>
                     </div>
                 </div>
@@ -298,15 +298,15 @@
          AI Provider, cùng nguyên tắc ContentOutlines/PromptFrameworkStudio. --}}
     <dialog x-ref="funnelGapDialog" class="modal">
         <div class="modal-box max-w-2xl">
-            <h3 class="font-bold text-lg">Gợi ý bù giai đoạn thiếu</h3>
+            <h3 class="font-bold text-lg">{{ __('Gợi ý bù giai đoạn thiếu') }}</h3>
             <div class="flex items-center gap-2 mt-0.5">
                 <p class="text-xs text-base-content/50" x-text="funnelGap.categoryName"></p>
                 <span class="badge badge-warning badge-xs gap-1" x-show="funnelGap.weakestStageLabel" x-cloak>
-                    ⚠ Bỏ ngỏ giai đoạn <span x-text="funnelGap.weakestStageLabel"></span>
+                    {{ __('⚠ Bỏ ngỏ giai đoạn') }} <span x-text="funnelGap.weakestStageLabel"></span>
                 </span>
             </div>
 
-            <div x-show="funnelGap.loading" class="py-6 text-center text-sm text-base-content/40">Đang tính...</div>
+            <div x-show="funnelGap.loading" class="py-6 text-center text-sm text-base-content/40">{{ __('Đang tính...') }}</div>
 
             {{-- Phân bổ đầy đủ đã hiện sẵn ở thanh lọc (không lặp lại ở đây) — modal chỉ tập trung
                  vào việc dùng prompt: đọc + copy. --}}
@@ -314,8 +314,8 @@
                 <div class="mt-4 space-y-4">
                     <div class="form-control">
                         <div class="flex items-center justify-between">
-                            <label class="label py-0 pb-1.5"><span class="label-text font-medium">Prompt gợi ý bù giai đoạn thiếu</span></label>
-                            <button type="button" class="btn btn-ghost btn-2xs" @click="copyFunnelGapPrompt()">Sao chép</button>
+                            <label class="label py-0 pb-1.5"><span class="label-text font-medium">{{ __('Prompt gợi ý bù giai đoạn thiếu') }}</span></label>
+                            <button type="button" class="btn btn-ghost btn-2xs" @click="copyFunnelGapPrompt()">{{ __('Sao chép') }}</button>
                         </div>
                         <textarea readonly rows="12" class="textarea textarea-bordered textarea-sm w-full font-mono text-xs" x-text="funnelGap.prompt"></textarea>
                     </div>

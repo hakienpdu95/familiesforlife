@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', 'Sửa tài khoản')
+@section('title', __('Sửa tài khoản'))
 
 @section('content')
 @php
@@ -19,9 +19,9 @@
                 <div class="flex flex-wrap items-center gap-2">
                     <h1 class="text-2xl font-bold text-base-content truncate">{{ $account->name }}</h1>
                     @if ($account->is_active)
-                        <span class="badge badge-success badge-sm">Hoạt động</span>
+                        <span class="badge badge-success badge-sm">{{ __('Hoạt động') }}</span>
                     @else
-                        <span class="badge badge-ghost badge-sm">Đã vô hiệu hoá</span>
+                        <span class="badge badge-ghost badge-sm">{{ __('Đã vô hiệu hoá') }}</span>
                     @endif
                 </div>
                 <p class="text-sm text-base-content/50 mt-0.5 truncate">
@@ -36,7 +36,7 @@
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
             </svg>
-            Quay lại
+            {{ __('Quay lại') }}
         </a>
     </div>
 
@@ -61,38 +61,38 @@
             @include('user::partials.account-fields', ['account' => $account])
 
             <div class="flex justify-end gap-2 px-6 py-4">
-                <a href="{{ route('backend.users.index') }}" class="btn btn-ghost btn-sm">Huỷ</a>
-                <button type="submit" class="btn btn-primary btn-sm">Lưu thay đổi</button>
+                <a href="{{ route('backend.users.index') }}" class="btn btn-ghost btn-sm">{{ __('Huỷ') }}</a>
+                <button type="submit" class="btn btn-primary btn-sm">{{ __('Lưu thay đổi') }}</button>
             </div>
         </form>
 
         <aside class="space-y-5">
             <div class="card bg-base-100 shadow-sm border border-base-200">
                 <div class="card-body p-5">
-                    <h2 class="font-semibold text-base-content mb-2">Tóm tắt tài khoản</h2>
+                    <h2 class="font-semibold text-base-content mb-2">{{ __('Tóm tắt tài khoản') }}</h2>
                     <dl class="divide-y divide-base-200 text-sm">
                         <div class="flex justify-between gap-3 py-2">
-                            <dt class="text-base-content/50">Vai trò</dt>
+                            <dt class="text-base-content/50">{{ __('Vai trò') }}</dt>
                             <dd><span class="badge badge-soft badge-sm {{ \App\Enums\RoleEnum::tryFrom((string) $currentRole)?->badgeClass() ?? 'badge-ghost' }}">{{ \App\Enums\RoleEnum::tryFrom((string) $currentRole)?->label() ?? $currentRole ?? '—' }}</span></dd>
                         </div>
                         <div class="flex justify-between gap-3 py-2">
-                            <dt class="text-base-content/50">Điện thoại</dt>
+                            <dt class="text-base-content/50">{{ __('Điện thoại') }}</dt>
                             <dd>{{ $account->phone ?? '—' }}</dd>
                         </div>
                         <div class="flex justify-between gap-3 py-2">
-                            <dt class="text-base-content/50">Trạng thái</dt>
-                            <dd>{{ $account->is_active ? 'Hoạt động' : 'Đã vô hiệu hoá' }}</dd>
+                            <dt class="text-base-content/50">{{ __('Trạng thái') }}</dt>
+                            <dd>{{ $account->is_active ? __('Hoạt động') : __('Đã vô hiệu hoá') }}</dd>
                         </div>
                         <div class="flex justify-between gap-3 py-2">
-                            <dt class="text-base-content/50">Ngày tạo</dt>
+                            <dt class="text-base-content/50">{{ __('Ngày tạo') }}</dt>
                             <dd>{{ format_datetime($account->created_at) ?? '—' }}</dd>
                         </div>
                         <div class="flex justify-between gap-3 py-2">
-                            <dt class="text-base-content/50">Hoạt động cuối</dt>
-                            <dd title="{{ format_datetime($account->last_active_at) }}">{{ $account->last_active_at?->diffForHumans() ?? 'Chưa đăng nhập' }}</dd>
+                            <dt class="text-base-content/50">{{ __('Hoạt động cuối') }}</dt>
+                            <dd title="{{ format_datetime($account->last_active_at) }}">{{ $account->last_active_at?->diffForHumans() ?? __('Chưa đăng nhập') }}</dd>
                         </div>
                         <div class="flex justify-between gap-3 py-2">
-                            <dt class="text-base-content/50">Cập nhật</dt>
+                            <dt class="text-base-content/50">{{ __('Cập nhật') }}</dt>
                             <dd>{{ format_datetime($account->updated_at) ?? '—' }}</dd>
                         </div>
                     </dl>
@@ -102,31 +102,31 @@
             @canany(['sendPasswordResetLink', 'deactivate', 'activate'], $account)
             <div class="card bg-base-100 shadow-sm border border-base-200">
                 <div class="card-body p-5 gap-2">
-                    <h2 class="font-semibold text-base-content">Thao tác tài khoản</h2>
+                    <h2 class="font-semibold text-base-content">{{ __('Thao tác tài khoản') }}</h2>
 
                     @can('sendPasswordResetLink', $account)
                     <form method="POST" action="{{ route('backend.users.password-reset-link', $account) }}"
-                          onsubmit="return confirm('Gửi email chứa link đặt lại mật khẩu cho tài khoản này?');">
+                          onsubmit="return confirm(@js(__('Gửi email chứa link đặt lại mật khẩu cho tài khoản này?')));">
                         @csrf
-                        <button type="submit" class="btn btn-outline btn-warning btn-sm w-full">Gửi link đặt lại mật khẩu</button>
+                        <button type="submit" class="btn btn-outline btn-warning btn-sm w-full">{{ __('Gửi link đặt lại mật khẩu') }}</button>
                     </form>
                     @endcan
 
                     @can('deactivate', $account)
                     <form method="POST" action="{{ route('backend.users.destroy', $account) }}"
-                          onsubmit="return confirm('Vô hiệu hoá tài khoản này?');">
+                          onsubmit="return confirm(@js(__('Vô hiệu hoá tài khoản này?')));">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-outline btn-error btn-sm w-full">Vô hiệu hoá</button>
+                        <button type="submit" class="btn btn-outline btn-error btn-sm w-full">{{ __('Vô hiệu hoá') }}</button>
                     </form>
                     @endcan
 
                     @can('activate', $account)
                     <form method="POST" action="{{ route('backend.users.activate', $account) }}"
-                          onsubmit="return confirm('Kích hoạt lại tài khoản này?');">
+                          onsubmit="return confirm(@js(__('Kích hoạt lại tài khoản này?')));">
                         @csrf
                         @method('PATCH')
-                        <button type="submit" class="btn btn-outline btn-success btn-sm w-full">Kích hoạt lại</button>
+                        <button type="submit" class="btn btn-outline btn-success btn-sm w-full">{{ __('Kích hoạt lại') }}</button>
                     </form>
                     @endcan
                 </div>

@@ -11,8 +11,8 @@ enum ListingType: string
     public function label(): string
     {
         return match ($this) {
-            self::Sale => 'Bán',
-            self::Rent => 'Thuê',
+            self::Sale => __('Bán'),
+            self::Rent => __('Thuê'),
         };
     }
 }

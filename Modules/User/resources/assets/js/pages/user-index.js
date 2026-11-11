@@ -1,5 +1,6 @@
 import { createTs } from '@shared/tom-select-factory.js';
 
+import { t } from '../../../../../../resources/js/shared/i18n.js';
 function esc(v) {
     if (v == null) return '';
     return String(v)
@@ -31,7 +32,7 @@ const COLUMNS = [
         width: 44, headerSort: false, frozen: true, download: false,
     },
     {
-        title: 'Tên', field: 'name', minWidth: 210, sorter: 'string', frozen: true,
+        title: t('Tên'), field: 'name', minWidth: 210, sorter: 'string', frozen: true,
         formatter(cell) {
             const d = cell.getRow().getData();
             return '<div class="leading-tight"><div class="font-medium text-sm">' + esc(d.name) + '</div>'
@@ -39,7 +40,7 @@ const COLUMNS = [
         },
     },
     {
-        title: 'Tên đăng nhập', field: 'username', visible: false, download: true,
+        title: t('Tên đăng nhập'), field: 'username', visible: false, download: true,
     },
     {
         title: 'Email', field: 'email', minWidth: 220, sorter: 'string',
@@ -48,7 +49,7 @@ const COLUMNS = [
         },
     },
     {
-        title: 'Chức danh / Phòng ban', field: 'department', minWidth: 190, sorter: 'string',
+        title: t('Chức danh / Phòng ban'), field: 'department', minWidth: 190, sorter: 'string',
         accessorDownload: (_v, d) => [d.job_title, d.department].filter(Boolean).join(' — '),
         formatter(cell) {
             const d = cell.getRow().getData();
@@ -58,63 +59,63 @@ const COLUMNS = [
         },
     },
     {
-        title: 'Điện thoại', field: 'phone', width: 130, headerSort: false,
+        title: t('Điện thoại'), field: 'phone', width: 130, headerSort: false,
         formatter(cell) {
             return cell.getValue() ? '<span class="text-sm tabular-nums">' + esc(cell.getValue()) + '</span>' : EMPTY;
         },
     },
     {
-        title: 'Vai trò', field: 'role_label', minWidth: 180, headerSort: false,
+        title: t('Vai trò'), field: 'role_label', minWidth: 180, headerSort: false,
         formatter(cell) {
             const d = cell.getRow().getData();
             return d.role_label ? '<span class="badge badge-soft badge-sm ' + esc(d.role_badge) + '">' + esc(d.role_label) + '</span>' : EMPTY;
         },
     },
     {
-        title: 'Trạng thái', field: 'is_active', width: 150, hozAlign: 'center', headerSort: false,
-        accessorDownload: (v) => (v ? 'Hoạt động' : 'Đã vô hiệu hoá'),
+        title: t('Trạng thái'), field: 'is_active', width: 150, hozAlign: 'center', headerSort: false,
+        accessorDownload: (v) => (v ? t('Hoạt động') : t('Đã vô hiệu hoá')),
         formatter(cell) {
             return cell.getValue()
-                ? '<span class="badge badge-success badge-sm">Hoạt động</span>'
-                : '<span class="badge badge-ghost badge-sm">Đã vô hiệu hoá</span>';
+                ? ('<span class="badge badge-success badge-sm">' + t('Hoạt động') + '</span>')
+                : ('<span class="badge badge-ghost badge-sm">' + t('Đã vô hiệu hoá') + '</span>');
         },
     },
     {
-        title: 'Ngày tạo', field: 'created_at', width: 110, hozAlign: 'center', sorter: 'string',
+        title: t('Ngày tạo'), field: 'created_at', width: 110, hozAlign: 'center', sorter: 'string',
     },
     {
-        title: 'Hoạt động cuối', field: 'last_active_at', width: 150, hozAlign: 'center', sorter: 'string',
+        title: t('Hoạt động cuối'), field: 'last_active_at', width: 150, hozAlign: 'center', sorter: 'string',
         formatter(cell) {
             return cell.getValue() ? esc(cell.getValue()) : EMPTY;
         },
     },
     {
-        title: 'Thao tác', field: 'id', width: 170, hozAlign: 'center', headerHozAlign: 'center', headerSort: false, frozen: true, download: false,
+        title: t('Thao tác'), field: 'id', width: 170, hozAlign: 'center', headerHozAlign: 'center', headerSort: false, frozen: true, download: false,
         cssClass: 'account-actions',
         formatter(cell) {
             const d = cell.getRow().getData();
-            if (!d.can_update) return '<span class="text-xs text-base-content/30">Không thể sửa qua đây</span>';
+            if (!d.can_update) return ('<span class="text-xs text-base-content/30">' + t('Không thể sửa qua đây') + '</span>');
 
             let html = '<div class="flex items-center justify-center gap-3">';
 
-            html += withTooltip('Sửa', '<a href="' + esc(d.edit_url) + '" class="btn btn-ghost btn-sm btn-square text-primary" aria-label="Sửa">' + iconSvg(ICON_EDIT) + '</a>');
+            html += withTooltip(t('Sửa'), '<a href="' + esc(d.edit_url) + ('" class="btn btn-ghost btn-sm btn-square text-primary" aria-label="' + t('Sửa') + '">') + iconSvg(ICON_EDIT) + '</a>');
 
             if (d.can_reset) {
                 html += actionButton(d.reset_url, 'POST',
-                    'Gửi email chứa link đặt lại mật khẩu cho tài khoản này?',
-                    'text-warning', 'Gửi link đặt lại mật khẩu',
+                    t('Gửi email chứa link đặt lại mật khẩu cho tài khoản này?'),
+                    'text-warning', t('Gửi link đặt lại mật khẩu'),
                     'M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z');
             }
 
             if (d.can_deactivate) {
-                html += actionButton(d.destroy_url, 'DELETE', 'Vô hiệu hoá tài khoản này?',
-                    'text-error', 'Vô hiệu hoá',
+                html += actionButton(d.destroy_url, 'DELETE', t('Vô hiệu hoá tài khoản này?'),
+                    'text-error', t('Vô hiệu hoá'),
                     'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636');
             }
 
             if (d.can_activate) {
-                html += actionButton(d.activate_url, 'PATCH', 'Kích hoạt lại tài khoản này?',
-                    'text-success', 'Kích hoạt lại',
+                html += actionButton(d.activate_url, 'PATCH', t('Kích hoạt lại tài khoản này?'),
+                    'text-success', t('Kích hoạt lại'),
                     'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z');
             }
 
@@ -154,7 +155,7 @@ document.addEventListener('alpine:init', () => {
 
             get activeChips() {
                 const chips = [], f = this.filters;
-                if (f.search) chips.push({ key: 'search', label: 'Tìm: ' + f.search });
+                if (f.search) chips.push({ key: 'search', label: (t('Tìm:') + ' ') + f.search });
                 if (f.role)   chips.push({ key: 'role',   label: optText(tsRole, f.role) });
                 if (f.status) chips.push({ key: 'status', label: optText(tsStatus, f.status) });
                 return chips;
@@ -171,12 +172,12 @@ document.addEventListener('alpine:init', () => {
                 if (!roleEl || !statusEl) return;
 
                 tsRole = createTs(roleEl, {
-                    placeholder: 'Tất cả vai trò',
+                    placeholder: t('Tất cả vai trò'),
                     onChange() { roleEl.dispatchEvent(new Event('change', { bubbles: true })); },
                 });
 
                 tsStatus = createTs(statusEl, {
-                    placeholder: 'Tất cả trạng thái',
+                    placeholder: t('Tất cả trạng thái'),
                     onChange() { statusEl.dispatchEvent(new Event('change', { bubbles: true })); },
                 });
             },
@@ -214,11 +215,11 @@ document.addEventListener('alpine:init', () => {
                     langs: {
                         'vi-VN': {
                             pagination: {
-                                page_size: 'Dòng/trang', page_title: 'Trang',
+                                page_size: t('Dòng/trang'), page_title: t('Trang'),
                                 first: '«', last: '»', prev: '‹', next: '›',
-                                first_title: 'Trang đầu', last_title: 'Trang cuối',
-                                prev_title: 'Trang trước', next_title: 'Trang sau',
-                                counter: { showing: '', of: 'trong', rows: 'dòng', pages: 'trang' },
+                                first_title: t('Trang đầu'), last_title: t('Trang cuối'),
+                                prev_title: t('Trang trước'), next_title: t('Trang sau'),
+                                counter: { showing: '', of: t('trong'), rows: t('dòng'), pages: t('trang') },
                             },
                         },
                     },
@@ -228,7 +229,7 @@ document.addEventListener('alpine:init', () => {
                     columns: COLUMNS,
                     placeholder: '<div class="py-16 text-center opacity-40">'
                         + '<svg class="w-12 h-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>'
-                        + '<p class="text-sm">Chưa có tài khoản nào</p></div>',
+                        + ('<p class="text-sm">' + t('Chưa có tài khoản nào') + '</p></div>'),
                 });
 
                 tableInst.on('rowSelectionChanged', (rows) => { self.selectedCount = rows.length; });
@@ -261,7 +262,7 @@ document.addEventListener('alpine:init', () => {
 
             bulkDeactivate() {
                 const rows = tableInst?.getSelectedData() ?? [];
-                if (!rows.length || !window.confirm('Vô hiệu hoá ' + rows.length + ' tài khoản đã chọn? Tài khoản không đủ điều kiện (Super Admin, chính bạn, đã vô hiệu hoá) sẽ được bỏ qua.')) return;
+                if (!rows.length || !window.confirm((t('Vô hiệu hoá') + ' ') + rows.length + (' ' + t('tài khoản đã chọn? Tài khoản không đủ điều kiện (Super Admin, chính bạn, đã vô hiệu hoá) sẽ được bỏ qua.')))) return;
 
                 const form = document.getElementById('accountBulkForm');
                 if (!form) return;

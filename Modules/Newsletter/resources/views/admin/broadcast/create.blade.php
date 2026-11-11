@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', 'Soạn bản tin')
+@section('title', __('Soạn bản tin'))
 
 @section('content')
 <div>
@@ -16,11 +16,11 @@
 
 <div class="flex items-center justify-between mb-4">
     <div>
-        <h1 class="text-2xl font-bold text-base-content">Soạn bản tin</h1>
-        <p class="text-sm text-base-content/50 mt-0.5">Gửi tới toàn bộ danh sách đăng ký qua Resend Broadcast.</p>
+        <h1 class="text-2xl font-bold text-base-content">{{ __('Soạn bản tin') }}</h1>
+        <p class="text-sm text-base-content/50 mt-0.5">{{ __('Gửi tới toàn bộ danh sách đăng ký qua Resend Broadcast.') }}</p>
     </div>
     <a href="{{ route('backend.newsletter.broadcast.logs') }}" class="btn btn-ghost btn-sm gap-1.5">
-        Lịch sử gửi
+        {{ __('Lịch sử gửi') }}
     </a>
 </div>
 
@@ -40,7 +40,7 @@
     <div class="card-body p-6 space-y-4">
 
         <div class="form-control">
-            <label class="label py-0 pb-1.5"><span class="label-text font-medium">Chủ đề (subject) <span class="text-error">*</span></span></label>
+            <label class="label py-0 pb-1.5"><span class="label-text font-medium">{{ __('Chủ đề (subject)') }} <span class="text-error">*</span></span></label>
             <input type="text" name="subject" value="{{ old('subject') }}" required maxlength="255"
                    class="input input-bordered input-sm w-full @error('subject') input-error @enderror">
             @error('subject')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
@@ -48,22 +48,22 @@
 
         <div class="form-control">
             <div class="flex items-center justify-between mb-1">
-                <label class="label py-0 !p-0"><span class="label-text font-medium">Nội dung <span class="text-error">*</span></span></label>
+                <label class="label py-0 !p-0"><span class="label-text font-medium">{{ __('Nội dung') }} <span class="text-error">*</span></span></label>
                 <button type="button" class="btn btn-ghost btn-xs" onclick="window.__nlInsertUnsubscribeTag()">
-                    + Chèn link unsubscribe (bắt buộc)
+                    {{ __('+ Chèn link unsubscribe (bắt buộc)') }}
                 </button>
             </div>
             <textarea name="body_html" id="body_html" class="jodit-editor" data-jodit-preset="standard">{{ old('body_html') }}</textarea>
             @error('body_html')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
             <p class="text-xs text-base-content/40 mt-1">
-                Nội dung bắt buộc phải chứa <code>@{{{RESEND_UNSUBSCRIBE_URL}}}</code> — Resend tự thay bằng link huỷ đăng ký hợp lệ cho từng người nhận.
+                {{ __('Nội dung bắt buộc phải chứa') }} <code>@{{{RESEND_UNSUBSCRIBE_URL}}}</code> {{ __('— Resend tự thay bằng link huỷ đăng ký hợp lệ cho từng người nhận.') }}
             </p>
         </div>
 
         <div class="form-control">
             <label class="flex items-center gap-2 cursor-pointer select-none w-fit">
                 <input type="checkbox" class="checkbox checkbox-sm" @change="showSchedule = $event.target.checked">
-                <span class="text-sm font-medium">Lên lịch gửi (thay vì gửi ngay)</span>
+                <span class="text-sm font-medium">{{ __('Lên lịch gửi (thay vì gửi ngay)') }}</span>
             </label>
             <div x-show="showSchedule" x-cloak x-transition class="pt-2 max-w-xs">
                 <input type="text" name="scheduled_at" id="fp-scheduled-at" value="{{ old('scheduled_at') }}"
@@ -75,8 +75,8 @@
 
         <div class="flex justify-end pt-4 border-t border-base-200">
             <button type="submit" class="btn btn-primary btn-sm" x-bind:class="showSchedule ? '' : 'btn-success'"
-                    onclick="return confirm('Gửi bản tin này tới toàn bộ danh sách đăng ký?')">
-                <span x-text="showSchedule ? 'Lên lịch gửi' : 'Gửi ngay'"></span>
+                    onclick="return confirm(@js(__('Gửi bản tin này tới toàn bộ danh sách đăng ký?')))">
+                <span x-text="showSchedule ? @js(__('Lên lịch gửi')) : @js(__('Gửi ngay'))"></span>
             </button>
         </div>
 

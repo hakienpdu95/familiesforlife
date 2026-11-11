@@ -29,9 +29,9 @@ class SubscriberAdminController extends Controller
         $action->handle($subscriber);
 
         if ($request->expectsJson()) {
-            return response()->json(['message' => "Đã xoá subscriber \"{$email}\"."]);
+            return response()->json(['message' => __('Đã xoá subscriber ":email".', ['email' => $email])]);
         }
 
-        return back()->with('success', "Đã xoá subscriber \"{$email}\".");
+        return back()->with('success', __('Đã xoá subscriber ":email".', ['email' => $email]));
     }
 }

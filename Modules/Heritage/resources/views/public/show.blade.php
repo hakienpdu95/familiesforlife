@@ -26,15 +26,15 @@
             @endphp
             <h1 id="btn_exp_edit" class="detail__title"> {{ $site->name }} </h1>
             <p class="mt-2 text-sm text-base-content/60">
-                {{ trim(collect([$site->address, $site->ward_name, $site->province_name])->filter()->implode(', '), ', ') ?: 'Chưa cập nhật địa chỉ' }}
-                @if($site->era) &middot; Niên đại: {{ $site->era }} @endif
+                {{ trim(collect([$site->address, $site->ward_name, $site->province_name])->filter()->implode(', '), ', ') ?: __('Chưa cập nhật địa chỉ') }}
+                @if($site->era) &middot; {{ __('Niên đại: :era', ['era' => $site->era]) }} @endif
             </p>
             <div class="detail__tools print-hide">
                 <div class="detail__author">
                     @if($authorIsLinkable)
                         <a href="{{ route('post.public.author-hub.show', $authorProfile) }}" class="hover:underline">{{ $authorProfile->displayName() }}</a>
                     @else
-                        <strong>{{ $site->createdBy?->name ?? 'Ban biên tập' }}</strong>
+                        <strong>{{ $site->createdBy?->name ?? __('Ban biên tập') }}</strong>
                     @endif
                 </div>
                 <div class="detail__share">
@@ -61,7 +61,7 @@
 
     @if($articles->isNotEmpty())
     <section class="mt-10 pt-8 border-t border-base-200">
-        <h2 class="text-xl font-bold text-base-content mb-4">Bài viết liên quan</h2>
+        <h2 class="text-xl font-bold text-base-content mb-4">{{ __('Bài viết liên quan') }}</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             @foreach($articles as $article)
             @php($t = $article->mainTranslation())
@@ -82,7 +82,7 @@
     {{-- ── Lễ hội sắp diễn ra ───────────────────────────────────────────── --}}
     @if($events->isNotEmpty())
     <section class="mt-10 pt-8 border-t border-base-200">
-        <h2 class="text-xl font-bold text-base-content mb-4">Lễ hội sắp diễn ra</h2>
+        <h2 class="text-xl font-bold text-base-content mb-4">{{ __('Lễ hội sắp diễn ra') }}</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($events as $event)
             <a href="{{ route('event.public.show', ['slug' => $event->slug, 'id' => $event->id]) }}" class="group flex flex-col gap-2">
@@ -100,7 +100,7 @@
     {{-- ── Sản phẩm OCOP của làng nghề này ─────────────────────────────── --}}
     @if($products->isNotEmpty())
     <section class="mt-10 pt-8 border-t border-base-200">
-        <h2 class="text-xl font-bold text-base-content mb-4">Sản phẩm OCOP của làng nghề này</h2>
+        <h2 class="text-xl font-bold text-base-content mb-4">{{ __('Sản phẩm OCOP của làng nghề này') }}</h2>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-5">
             @foreach($products as $product)
             <a href="{{ route('ocop.public.show', ['slug' => $product->slug, 'id' => $product->id]) }}" class="group flex flex-col gap-2">

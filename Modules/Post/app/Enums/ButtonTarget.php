@@ -10,8 +10,8 @@ enum ButtonTarget: string
     public function label(): string
     {
         return match ($this) {
-            self::SelfTab => 'Tab hiện tại',
-            self::NewTab  => 'Tab mới',
+            self::SelfTab => __('Tab hiện tại'),
+            self::NewTab  => __('Tab mới'),
         };
     }
 }

@@ -31,21 +31,21 @@
     $timeLabel = $event->start_time
         ? \Illuminate\Support\Carbon::parse($event->start_time)->format('H:i').($event->end_time ? ' – '.\Illuminate\Support\Carbon::parse($event->end_time)->format('H:i') : '')
         : null;
-    $venueLabel = $isOnline ? 'Trực tuyến' : collect([$event->venue_name, $address])->filter()->implode(', ');
+    $venueLabel = $isOnline ? __('Trực tuyến') : collect([$event->venue_name, $address])->filter()->implode(', ');
 
     $navItems = [
-        ['Tất cả sự kiện', route('event.public.home'), 'bg-neutral-900'],
-        ['Tuần này', route('event.public.home', ['thoi-gian' => 'tuan-nay']), 'bg-blue-800'],
-        ['Tháng này', route('event.public.home', ['thoi-gian' => 'thang-nay']), 'bg-pink-600'],
-        ['Gửi sự kiện', route('event.public.submit.form'), 'bg-orange-500'],
-        ['Tìm sự kiện', route('event.public.home').'#tim-su-kien', 'bg-emerald-400'],
+        [__('Tất cả sự kiện'), route('event.public.home'), 'bg-neutral-900'],
+        [__('Tuần này'), route('event.public.home', ['thoi-gian' => 'tuan-nay']), 'bg-blue-800'],
+        [__('Tháng này'), route('event.public.home', ['thoi-gian' => 'thang-nay']), 'bg-pink-600'],
+        [__('Gửi sự kiện'), route('event.public.submit.form'), 'bg-orange-500'],
+        [__('Tìm sự kiện'), route('event.public.home').'#tim-su-kien', 'bg-emerald-400'],
     ];
 
     $details = array_filter([
-        'Thời gian' => trim($dateLabel.($timeLabel ? ', '.$timeLabel : '')),
-        'Địa điểm' => $venueLabel,
-        'Giá vé' => $event->priceLabel(),
-        'Danh mục' => $event->category?->name,
+        __('Thời gian') => trim($dateLabel.($timeLabel ? ', '.$timeLabel : '')),
+        __('Địa điểm') => $venueLabel,
+        __('Giá vé') => $event->priceLabel(),
+        __('Danh mục') => $event->category?->name,
     ]);
 @endphp
 
@@ -53,28 +53,28 @@
 
     <div>
         <span class="text-xs font-bold uppercase tracking-widest text-pink-600">
-            {{ $event->category?->name ?? 'Sự kiện' }}
+            {{ $event->category?->name ?? __('Sự kiện') }}
         </span>
 
         <h1 class="mt-4 font-serif text-3xl font-bold leading-tight text-black">{{ $event->title }}</h1>
 
         <div class="mt-8 grid max-w-md grid-cols-2 gap-x-8 gap-y-6">
             <div>
-                <p class="text-xs font-bold uppercase tracking-widest text-pink-600">Thời gian</p>
+                <p class="text-xs font-bold uppercase tracking-widest text-pink-600">{{ __('Thời gian') }}</p>
                 <p class="mt-1.5 text-sm leading-relaxed text-black">
                     {{ $dateLabel }}
                     @if($timeLabel)<br>{{ $timeLabel }}@endif
                 </p>
             </div>
             <div>
-                <p class="text-xs font-bold uppercase tracking-widest text-pink-600">Giá vé</p>
+                <p class="text-xs font-bold uppercase tracking-widest text-pink-600">{{ __('Giá vé') }}</p>
                 <p class="mt-1.5 text-sm leading-relaxed text-black">{{ $event->priceLabel() }}</p>
             </div>
             <div>
-                <p class="text-xs font-bold uppercase tracking-widest text-pink-600">Địa điểm</p>
+                <p class="text-xs font-bold uppercase tracking-widest text-pink-600">{{ __('Địa điểm') }}</p>
                 <p class="mt-1.5 text-sm leading-relaxed text-black">
                     @if($isOnline)
-                    Trực tuyến
+                    {{ __('Trực tuyến') }}
                     @else
                     {{ $event->venue_name }}
                     @if($address)<br><span class="text-neutral-500">{{ $address }}</span>@endif
@@ -82,7 +82,7 @@
                 </p>
                 @if($heritageSite)
                 <a href="{{ route('heritage.public.show', ['slug' => $heritageSite->slug, 'id' => $heritageSite->id]) }}" class="mt-1 inline-block text-sm text-blue-800 hover:underline">
-                    Di tích: {{ $heritageSite->name }}
+                    {{ __('Di tích: :name', ['name' => $heritageSite->name]) }}
                 </a>
                 @endif
             </div>
@@ -90,7 +90,7 @@
                 @if($ctaUrl)
                 <a href="{{ $ctaUrl }}" target="_blank" rel="noopener"
                    class="inline-block rounded-sm bg-blue-800 px-6 py-3 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-blue-900">
-                    Tìm hiểu thêm
+                    {{ __('Tìm hiểu thêm') }}
                 </a>
                 @endif
             </div>
@@ -105,7 +105,7 @@
 
 </section>
 
-<nav class="container mb-4" aria-label="Điều hướng sự kiện">
+<nav class="container mb-4" aria-label="{{ __('Điều hướng sự kiện') }}">
     <div class="grid grid-cols-2 sm:grid-cols-5">
         @foreach($navItems as [$label, $url, $color])
         <a href="{{ $url }}"
@@ -118,14 +118,14 @@
 
 <article class="container mb-10 px-4">
     <div class="float-left mr-6 mb-4 flex h-32 w-32 rotate-[-10deg] items-center justify-center rounded-full bg-pink-600 text-center text-lg font-bold leading-tight text-white">
-        Bạn được<br>mời!
+        {{ __('Bạn được') }}<br>{{ __('mời!') }}
     </div>
 
     <p class="text-lg leading-relaxed text-neutral-800">
-        Trân trọng mời bạn và gia đình tham gia <strong class="text-black">{{ $event->title }}</strong>.
-        Sự kiện diễn ra {{ $event->start_date?->isSameDay($event->end_date) ? 'ngày' : 'từ' }} {{ $dateLabel }}{{ $timeLabel ? ', '.$timeLabel : '' }}{{ $isOnline ? ' theo hình thức trực tuyến' : ($venueLabel ? ' tại '.$venueLabel : '') }}.
-        Giá vé: {{ mb_strtolower($event->priceLabel()) }}.
-        @if($ctaUrl)Thông tin đăng ký và chương trình chi tiết được cập nhật tại trang của ban tổ chức — đừng bỏ lỡ nhé!@else Hãy lưu lại lịch và rủ thêm bạn bè, người thân cùng tham gia nhé!@endif
+        {{ __('Trân trọng mời bạn và gia đình tham gia') }} <strong class="text-black">{{ $event->title }}</strong>.
+        {{ __('Sự kiện diễn ra :when', ['when' => ($event->start_date?->isSameDay($event->end_date) ? __('ngày :date', ['date' => $dateLabel]) : __('từ :date', ['date' => $dateLabel])).($timeLabel ? ', '.$timeLabel : '').($isOnline ? ' '.__('theo hình thức trực tuyến') : ($venueLabel ? ' '.__('tại :venue', ['venue' => $venueLabel]) : ''))]) }}.
+        {{ __('Giá vé: :price', ['price' => mb_strtolower($event->priceLabel())]) }}.
+        @if($ctaUrl){{ __('Thông tin đăng ký và chương trình chi tiết được cập nhật tại trang của ban tổ chức — đừng bỏ lỡ nhé!') }}@else {{ __('Hãy lưu lại lịch và rủ thêm bạn bè, người thân cùng tham gia nhé!') }}@endif
     </p>
 
     <div class="clear-both"></div>
@@ -133,13 +133,13 @@
     <div class="prose prose-lg mt-8 max-w-none prose-p:text-neutral-800">
         <p>{!! nl2br(e($event->description)) !!}</p>
 
-        <h2>Thông tin chi tiết</h2>
+        <h2>{{ __('Thông tin chi tiết') }}</h2>
         <ol>
             @foreach($details as $label => $value)
             <li><strong>{{ $label }}:</strong> {{ $value }}</li>
             @endforeach
             @if($ctaUrl)
-            <li><strong>Đăng ký / tham gia:</strong> <a href="{{ $ctaUrl }}" target="_blank" rel="noopener" class="break-all">{{ $ctaUrl }}</a></li>
+            <li><strong>{{ __('Đăng ký / tham gia:') }}</strong> <a href="{{ $ctaUrl }}" target="_blank" rel="noopener" class="break-all">{{ $ctaUrl }}</a></li>
             @endif
         </ol>
     </div>

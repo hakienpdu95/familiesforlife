@@ -52,7 +52,7 @@ class EmailVerificationController extends Controller
         }
 
         return redirect()->intended(config('fortify.home', '/home'))
-            ->with('status', 'Email đã được xác minh thành công!');
+            ->with('status', __('Email đã được xác minh thành công!'));
     }
 
     public function send(Request $request): RedirectResponse

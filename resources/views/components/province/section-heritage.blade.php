@@ -4,8 +4,8 @@
 <section class="py-10 border-t border-base-200">
     <div class="container">
         <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-bold text-base-content">Di sản văn hóa {{ $province->name }}</h2>
-            <a href="{{ route('heritage.public.index', ['province' => $province->province_code]) }}" class="text-sm font-semibold text-primary hover:underline">Xem tất cả →</a>
+            <h2 class="text-xl font-bold text-base-content">{{ __('Di sản văn hóa :name', ['name' => $province->name]) }}</h2>
+            <a href="{{ route('heritage.public.index', ['province' => $province->province_code]) }}" class="text-sm font-semibold text-primary hover:underline">{{ __('Xem tất cả →') }}</a>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($sites as $site)

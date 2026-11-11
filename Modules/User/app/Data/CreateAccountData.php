@@ -45,7 +45,7 @@ class CreateAccountData extends Data
     public static function messages(): array
     {
         return [
-            'email.unique' => 'Email này đã được sử dụng.',
+            'email.unique' => __('Email này đã được sử dụng.'),
             ...AccountProfileFields::messages(),
         ];
     }

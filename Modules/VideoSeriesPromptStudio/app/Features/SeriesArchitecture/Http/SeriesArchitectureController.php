@@ -70,7 +70,7 @@ class SeriesArchitectureController extends Controller
         );
 
         return redirect()->route('backend.videoseriespromptstudio.show', $prompt)
-            ->with('success', 'Đã sinh prompt — sao chép bên dưới để dùng.');
+            ->with('success', __('Đã sinh prompt — sao chép bên dưới để dùng.'));
     }
 
     public function show(VideoSeriesPrompt $prompt): View
@@ -87,6 +87,6 @@ class SeriesArchitectureController extends Controller
         $prompt->delete();
 
         return redirect()->route('backend.videoseriespromptstudio.index')
-            ->with('success', 'Đã xoá prompt.');
+            ->with('success', __('Đã xoá prompt.'));
     }
 }

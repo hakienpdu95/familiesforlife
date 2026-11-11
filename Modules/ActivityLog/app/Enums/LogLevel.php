@@ -15,9 +15,9 @@ enum LogLevel: int
         return match($this) {
             self::Debug    => 'Debug',
             self::Info     => 'Info',
-            self::Warning  => 'Cảnh báo',
-            self::Error    => 'Lỗi',
-            self::Critical => 'Nghiêm trọng',
+            self::Warning  => __('Cảnh báo'),
+            self::Error    => __('Lỗi'),
+            self::Critical => __('Nghiêm trọng'),
         };
     }
 

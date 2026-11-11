@@ -1,19 +1,19 @@
 {{-- resources/views/notifications/index.blade.php --}}
 @extends('layouts.backend')
 
-@section('title', 'Trung tâm thông báo')
+@section('title', __('Trung tâm thông báo'))
 
 @section('content')
 
 {{-- Page header --}}
 <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
     <div>
-        <h1 class="text-2xl font-bold text-base-content leading-tight">Thông báo</h1>
+        <h1 class="text-2xl font-bold text-base-content leading-tight">{{ __('Thông báo') }}</h1>
         <p class="text-sm text-base-content/50 mt-0.5">
             @if($unreadCount > 0)
-                Bạn có <strong class="text-base-content/80">{{ $unreadCount }}</strong> thông báo chưa đọc
+                {{ __('Bạn có') }} <strong class="text-base-content/80">{{ $unreadCount }}</strong> {{ __('thông báo chưa đọc') }}
             @else
-                Tất cả thông báo đã được đọc
+                {{ __('Tất cả thông báo đã được đọc') }}
             @endif
         </p>
     </div>
@@ -25,7 +25,7 @@
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="w-4 h-4">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                Đọc tất cả
+                {{ __('Đọc tất cả') }}
             </button>
         </form>
         @endif
@@ -33,7 +33,7 @@
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="w-4 h-4">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
             </svg>
-            Cài đặt
+            {{ __('Cài đặt') }}
         </a>
     </div>
 </div>
@@ -47,9 +47,9 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
         </svg>
         <div class="min-w-0">
-            <p class="text-sm font-semibold text-base-content">Thông báo trình duyệt</p>
+            <p class="text-sm font-semibold text-base-content">{{ __('Thông báo trình duyệt') }}</p>
             <p class="text-xs text-base-content/50 truncate"
-               x-text="error || (subscribed ? 'Đang bật — nhận thông báo kể cả khi không mở tab.' : 'Tắt — bật để nhận thông báo ngay cả khi không mở tab.')"></p>
+               x-text="error || (subscribed ? @js(__('Đang bật — nhận thông báo kể cả khi không mở tab.')) : @js(__('Tắt — bật để nhận thông báo ngay cả khi không mở tab.')))"></p>
         </div>
     </div>
     <button @click="toggle()"
@@ -57,7 +57,7 @@
             class="btn btn-sm shrink-0"
             :class="subscribed ? 'btn-ghost' : 'btn-primary'">
         <span x-show="loading" class="notif-spinner" style="width:14px;height:14px;border-width:2px"></span>
-        <span x-show="!loading" x-text="subscribed ? 'Tắt' : 'Bật'"></span>
+        <span x-show="!loading" x-text="subscribed ? @js(__('Tắt')) : @js(__('Bật'))"></span>
     </button>
 </div>
 @endif
@@ -71,12 +71,12 @@
 <div class="nc-tabs">
     <a href="{{ route('backend.notifications.index') }}"
        class="nc-tab {{ !request('filter') ? 'nc-tab--active' : '' }}">
-        Tất cả
+        {{ __('Tất cả') }}
         <span class="nc-tab-badge">{{ $notifications->total() }}</span>
     </a>
     <a href="{{ route('backend.notifications.index', ['filter' => 'unread']) }}"
        class="nc-tab {{ request('filter') === 'unread' ? 'nc-tab--active' : '' }}">
-        Chưa đọc
+        {{ __('Chưa đọc') }}
         @if($unreadCount > 0)
         <span class="nc-tab-badge nc-tab-badge--unread">{{ $unreadCount }}</span>
         @endif
@@ -89,7 +89,7 @@
     @php
         $data     = $n->data;
         $type     = $data['type']     ?? 'unknown';
-        $title    = $data['title']    ?? $data['message'] ?? '(Thông báo)';
+        $title    = $data['title']    ?? $data['message'] ?? __('(Thông báo)');
         $body     = $data['body']     ?? $data['message'] ?? '';
         $url      = $data['url']      ?? '';
         $icon     = $data['icon']     ?? 'bell';
@@ -154,7 +154,7 @@
         {{-- Actions --}}
         <div class="nc-actions">
             @if($url)
-            <a href="{{ $url }}" class="notif-act-link" title="Xem chi tiết">
+            <a href="{{ $url }}" class="notif-act-link" title="{{ __('Xem chi tiết') }}">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                 </svg>
@@ -164,7 +164,7 @@
             <form method="POST" action="{{ route('backend.notifications.mark-read', $uuid) }}" style="display:inline">
                 @csrf
                 @method('PATCH')
-                <button type="submit" class="notif-act-btn" title="Đánh dấu đã đọc">
+                <button type="submit" class="notif-act-btn" title="{{ __('Đánh dấu đã đọc') }}">
                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                     </svg>
@@ -174,8 +174,8 @@
             <form method="POST" action="{{ route('backend.notifications.destroy', $uuid) }}" style="display:inline">
                 @csrf
                 @method('DELETE')
-                <button type="submit" class="notif-act-btn nc-delete-btn" title="Xoá"
-                        onclick="return confirm('Xoá thông báo này?')">
+                <button type="submit" class="notif-act-btn nc-delete-btn" title="{{ __('Xoá') }}"
+                        onclick="return confirm(@js(__('Xoá thông báo này?')))">
                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                     </svg>
@@ -188,7 +188,7 @@
         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2" class="w-12 h-12 opacity-20">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
         </svg>
-        <p class="text-base-content/40 text-sm">Không có thông báo nào</p>
+        <p class="text-base-content/40 text-sm">{{ __('Không có thông báo nào') }}</p>
     </div>
     @endforelse
 </div>

@@ -17,10 +17,10 @@ enum PropertyType: string
     public function label(): string
     {
         return match ($this) {
-            self::House     => 'Nhà riêng',
-            self::Apartment => 'Căn hộ chung cư',
-            self::Land      => 'Đất thổ cư',
-            self::Layout    => 'Mặt bằng',
+            self::House     => __('Nhà riêng'),
+            self::Apartment => __('Căn hộ chung cư'),
+            self::Land      => __('Đất thổ cư'),
+            self::Layout    => __('Mặt bằng'),
         };
     }
 

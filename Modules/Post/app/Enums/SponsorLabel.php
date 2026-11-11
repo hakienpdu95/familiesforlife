@@ -17,8 +17,8 @@ enum SponsorLabel: string
     {
         return match ($this) {
             self::Sponsored        => 'Sponsored',
-            self::SponsoredNews    => 'Tin tài trợ',
-            self::BrandPartnership => 'Hợp tác thương hiệu',
+            self::SponsoredNews    => __('Tin tài trợ'),
+            self::BrandPartnership => __('Hợp tác thương hiệu'),
             self::Advertorial      => 'Advertorial',
         };
     }

@@ -55,7 +55,7 @@ There is no multi-tenancy: no `organizations` table, no `organization_id` column
 
 ### Ngôn ngữ (i18n)
 
-Xem `spec/I18n_Specification.md`. UI locale (vi|en) là cấu hình hệ thống trong bảng 1 dòng `system_settings` (`App\Models\SystemSetting::current()`, trang `/dashboard/settings`, chỉ super-admin), áp dụng qua middleware `ApplySystemLocale` (web+api), `Queue::before` và console boot — tách biệt với content locale của bài viết (`post_articles.main_locale`). Hiển thị ngày giờ dùng `format_date()` / `format_datetime()` (`app/Helpers/datetime.php`), không viết `->format('d/m/Y')` mới. Chuỗi giao diện mới bọc `__('Câu tiếng Việt')` và thêm bản tiếng Anh vào `lang/en.json`.
+Xem `spec/I18n_Specification.md`. UI locale (vi|en) là cấu hình hệ thống trong bảng 1 dòng `system_settings` (`App\Models\SystemSetting::current()`, trang `/dashboard/settings`, chỉ super-admin), áp dụng qua middleware `ApplySystemLocale` (web+api), `Queue::before` và console boot — tách biệt với content locale của bài viết (`post_articles.main_locale`). Hiển thị ngày giờ dùng `format_date()` / `format_datetime()` (`app/Helpers/datetime.php`), không viết `->format('d/m/Y')` mới. Chuỗi giao diện mới bọc `__('Câu tiếng Việt')` (Blade/PHP), `@js(__('…'))` (Alpine/inline script), `t('…')` từ `resources/js/shared/i18n.js` (file JS); câu có biến dùng placeholder `:name`, không cắt câu thành mảnh. Hằng số mảng chứa nhãn phải khai báo trong `config/i18n.php` `translatable_constants`. Trước khi xong việc chạy `php artisan i18n:missing --write` để thêm key vào `lang/en.json`. Không dịch prompt gửi cho AI.
 
 ### RBAC
 

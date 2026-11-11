@@ -63,10 +63,10 @@ class MenuItemApiController extends Controller
             'location_label'  => config('menu.locations')[$item->location] ?? $item->location,
             'link_type'       => $item->link_type->value,
             'link_target'     => match ($item->link_type->value) {
-                'category' => $item->category ? "Danh mục: {$item->category->name}" : '— (đã xoá) —',
+                'category' => $item->category ? __('Danh mục: :name', ['name' => $item->category->name]) : __('— (đã xoá) —'),
                 'page'     => match (true) {
-                    ! $item->page               => 'Trang: — (đã xoá) —',
-                    $item->resolveUrl() === null => "Trang: {$item->page->title} (Nháp — đang ẩn)",
+                    ! $item->page               => __('Trang: — (đã xoá) —'),
+                    $item->resolveUrl() === null => __('Trang: :title (Nháp — đang ẩn)', ['title' => $item->page->title]),
                     default                      => "Trang: {$item->page->title} (/{$item->page->slug})",
                 },
                 'url'      => $item->url,

@@ -41,6 +41,7 @@ import { css } from 'jodit/esm/core/helpers/utils/css.js';
 import { hAlignElement } from 'jodit/esm/core/helpers/utils/align.js';
 import { isString } from 'jodit/esm/core/helpers/checker/is-string.js';
 
+import { t } from '../shared/i18n.js';
 // ── Draft orphan tracking ──────────────────────────────────────────────
 // Map<editorKey, Set<uuid>>  — uuid của ảnh đã upload trong session hiện tại
 const _uploadedUuids = new Map();
@@ -201,7 +202,7 @@ const BASE = {
             {
                 name: 'delete',
                 icon: 'bin',
-                tooltip: 'Xóa ảnh',
+                tooltip: t('Xóa ảnh'),
                 exec: (editor, image) => {
                     image && editor.s.removeNode(image);
                 },
@@ -214,13 +215,13 @@ const BASE = {
                         editor.e.fire('openImageProperties', current);
                     }
                 },
-                tooltip: 'Chỉnh sửa ảnh',
+                tooltip: t('Chỉnh sửa ảnh'),
             },
             '|',
             {
                 name: 'valign',
                 list: ['Top', 'Middle', 'Bottom', 'Normal'],
-                tooltip: 'Căn dọc',
+                tooltip: t('Căn dọc'),
                 exec: (editor, image, { control }) => {
                     if (!Dom.isTag(image, 'img')) return;
                     const command = control.args && isString(control.args[0])
@@ -233,7 +234,7 @@ const BASE = {
             {
                 name: 'left',
                 list: ['Left', 'Right', 'Center', 'Normal'],
-                tooltip: 'Căn ngang',
+                tooltip: t('Căn ngang'),
                 childTemplate: (_, __, value) => value,
                 exec: (editor, elm, { control }) => {
                     if (!Dom.isTag(elm, new Set(['img', 'jodit', 'jodit-media']))) return;

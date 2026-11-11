@@ -12,10 +12,10 @@ enum GenerationRunStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Pending   => 'Đang chờ',
-            self::Running   => 'Đang chạy',
-            self::Succeeded => 'Thành công',
-            self::Failed    => 'Thất bại',
+            self::Pending   => __('Đang chờ'),
+            self::Running   => __('Đang chạy'),
+            self::Succeeded => __('Thành công'),
+            self::Failed    => __('Thất bại'),
         };
     }
 }

@@ -8,6 +8,7 @@
     <title>@yield('title', config('app.name')) — {{ config('app.name') }}</title>
 
     @include('layouts.partials.font-preload', ['fonts' => ['open-sans'], 'build' => 'build/backend'])
+    @include('layouts.partials.i18n-script')
     @vite(['resources/css/app.css', 'resources/js/app.js'], 'build/backend')
 
     @stack('styles')

@@ -7,6 +7,7 @@
  */
 import Alpine from 'alpinejs';
 
+import { t } from './shared/i18n.js';
 window.Alpine = Alpine;
 
 document.addEventListener('alpine:init', () => {
@@ -68,7 +69,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         formatVnd(value) {
-            return Math.round(value).toLocaleString('vi-VN') + ' đ';
+            return Math.round(value).toLocaleString('vi-VN') + (' ' + t('đ'));
         },
     }));
 });

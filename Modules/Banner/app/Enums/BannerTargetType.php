@@ -18,8 +18,8 @@ enum BannerTargetType: string
     public function label(): string
     {
         return match ($this) {
-            self::Category => 'Theo danh mục bài viết',
-            self::Province => 'Theo tỉnh/thành',
+            self::Category => __('Theo danh mục bài viết'),
+            self::Province => __('Theo tỉnh/thành'),
         };
     }
 }

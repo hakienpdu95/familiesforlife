@@ -1,3 +1,5 @@
+import { t } from '../../../../../resources/js/shared/i18n.js';
+
 /**
  * Modules/ContentOutlines/resources/assets/js/content-outlines.js
  * Entry point JS module ContentOutlines.
@@ -38,17 +40,17 @@ window.contentOutlineCopyPrompt = async function (elId, btnEl, btnFallbackId) {
     if (btn) {
         btn.disabled = true;
         btn.classList.add('scale-95');
-        btn.innerHTML = '<span class="loading loading-spinner loading-xs"></span><span>Đang copy prompt...</span>';
+        btn.innerHTML = ('<span class="loading loading-spinner loading-xs"></span><span>' + t('Đang copy prompt...') + '</span>');
     }
 
     try {
         await navigator.clipboard.writeText(el.value);
-        window.Toast?.success('Đã copy prompt vào clipboard.');
+        window.Toast?.success(t('Đã copy prompt vào clipboard.'));
 
         if (btn) {
             btn.classList.remove('btn-primary', 'scale-95');
             btn.classList.add('btn-success', 'scale-105');
-            btn.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>Đã copy!</span>';
+            btn.innerHTML = ('<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>' + t('Đã copy!') + '</span>');
 
             setTimeout(() => {
                 btn.classList.remove('btn-success', 'scale-105');
@@ -136,7 +138,7 @@ window.contentOutlineMakeCollapsible = function (containerId) {
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('form[data-confirm-regenerate]').forEach((form) => {
         const message = form.dataset.confirmRegenerate === '1'
-            ? 'Sinh lại sẽ GHI ĐÈ prompt hiện tại bằng prompt mới — KHÔNG thể khôi phục lại prompt cũ (không versioning). Tiếp tục?'
+            ? t('Sinh lại sẽ GHI ĐÈ prompt hiện tại bằng prompt mới — KHÔNG thể khôi phục lại prompt cũ (không versioning). Tiếp tục?')
             : form.dataset.confirmRegenerate;
 
         form.addEventListener('submit', (e) => {
@@ -226,37 +228,37 @@ document.addEventListener('alpine:init', () => {
 // ── index.blade.php — Tabulator + delete confirm (§4.3 — hiện rõ label/topic) ──
 const COLUMNS = [
     {
-        title: 'Dàn ý', field: 'label', minWidth: 220, sorter: 'string',
+        title: t('Dàn ý'), field: 'label', minWidth: 220, sorter: 'string',
         formatter(cell) {
             const d = cell.getRow().getData();
             let html = '<a href="' + esc(d.show_url) + '" class="link link-hover text-sm font-medium">' + esc(d.label) + '</a>';
-            if (d.is_long_prompt) html += ' <span class="badge badge-xs badge-warning" title="Prompt dài, có thể bị AI ngoài cắt">dài</span>';
+            if (d.is_long_prompt) html += (' <span class="badge badge-xs badge-warning" title="' + t('Prompt dài, có thể bị AI ngoài cắt') + '">' + t('dài') + '</span>');
             html += '<p class="text-xs text-base-content/40 truncate max-w-xs">' + esc(d.topic) + '</p>';
 
             return html;
         },
     },
     {
-        title: 'Từ khoá', field: 'target_keyword', minWidth: 140,
+        title: t('Từ khoá'), field: 'target_keyword', minWidth: 140,
         formatter: (cell) => '<code class="text-xs">' + esc(cell.getValue()) + '</code>',
     },
-    { title: 'Chuyên mục', field: 'category_name', minWidth: 140, formatter: (cell) => esc(cell.getValue() || '—') },
-    { title: 'Người tạo', field: 'created_by_name', width: 140, formatter: (cell) => esc(cell.getValue() || '—') },
+    { title: t('Chuyên mục'), field: 'category_name', minWidth: 140, formatter: (cell) => esc(cell.getValue() || '—') },
+    { title: t('Người tạo'), field: 'created_by_name', width: 140, formatter: (cell) => esc(cell.getValue() || '—') },
     {
-        title: 'Bài viết', field: 'linked_article_title', minWidth: 160, headerSort: false,
-        formatter: (cell) => cell.getValue() ? '<span class="badge badge-xs badge-success">Đã gắn</span> ' + esc(cell.getValue()) : '<span class="text-base-content/30">—</span>',
+        title: t('Bài viết'), field: 'linked_article_title', minWidth: 160, headerSort: false,
+        formatter: (cell) => cell.getValue() ? ('<span class="badge badge-xs badge-success">' + t('Đã gắn') + '</span> ') + esc(cell.getValue()) : '<span class="text-base-content/30">—</span>',
     },
-    { title: 'Ngày tạo', field: 'created_at', width: 140, sorter: 'string' },
+    { title: t('Ngày tạo'), field: 'created_at', width: 140, sorter: 'string' },
     {
         title: '', field: 'uuid', width: 90, hozAlign: 'center', headerSort: false,
         formatter(cell) {
             const d = cell.getRow().getData();
 
-            return '<button class="btn btn-ghost btn-xs text-error" title="Xoá"'
+            return ('<button class="btn btn-ghost btn-xs text-error" title="' + t('Xoá') + '"')
                 + ' data-url="' + esc(d.delete_url) + '"'
                 + ' data-label="' + esc(d.label) + '"'
                 + ' data-topic="' + esc(d.topic) + '"'
-                + ' onclick="window.contentOutlineDeleteConfirm(this.dataset.url, this.dataset.label, this.dataset.topic)">Xoá</button>';
+                + (' onclick="window.contentOutlineDeleteConfirm(this.dataset.url, this.dataset.label, this.dataset.topic)">' + t('Xoá') + '</button>');
         },
     },
 ];
@@ -283,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const csrf = document.querySelector('meta[name=csrf-token]')?.content ?? '';
         this.disabled = true;
-        this.textContent = 'Đang xoá...';
+        this.textContent = t('Đang xoá...');
 
         try {
             const res = await fetch(pendingDeleteUrl, {
@@ -300,14 +302,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (res.ok || res.redirected) {
                 location.reload();
             } else {
-                alert('Xoá thất bại. Vui lòng thử lại.');
+                alert(t('Xoá thất bại. Vui lòng thử lại.'));
             }
         } catch (e) {
             console.error('[content-outlines] delete failed', e);
-            alert('Lỗi kết nối. Vui lòng thử lại.');
+            alert(t('Lỗi kết nối. Vui lòng thử lại.'));
         } finally {
             this.disabled = false;
-            this.textContent = 'Xoá';
+            this.textContent = t('Xoá');
             pendingDeleteUrl = null;
         }
     });
@@ -336,7 +338,7 @@ document.addEventListener('alpine:init', () => {
 
             get activeChips() {
                 const chips = [];
-                if (this.filters.search) chips.push({ key: 'search', label: 'Tìm: ' + this.filters.search });
+                if (this.filters.search) chips.push({ key: 'search', label: (t('Tìm:') + ' ') + this.filters.search });
                 return chips;
             },
 
@@ -376,11 +378,11 @@ document.addEventListener('alpine:init', () => {
                     langs: {
                         'vi-VN': {
                             pagination: {
-                                page_size: 'Dòng/trang', page_title: 'Trang',
+                                page_size: t('Dòng/trang'), page_title: t('Trang'),
                                 first: '«', last: '»', prev: '‹', next: '›',
-                                first_title: 'Trang đầu', last_title: 'Trang cuối',
-                                prev_title: 'Trang trước', next_title: 'Trang sau',
-                                counter: { showing: '', of: 'trong', rows: 'dòng', pages: 'trang' },
+                                first_title: t('Trang đầu'), last_title: t('Trang cuối'),
+                                prev_title: t('Trang trước'), next_title: t('Trang sau'),
+                                counter: { showing: '', of: t('trong'), rows: t('dòng'), pages: t('trang') },
                             },
                         },
                     },
@@ -388,7 +390,7 @@ document.addEventListener('alpine:init', () => {
                     columns: COLUMNS,
                     placeholder: '<div class="py-16 text-center opacity-40">'
                         + '<svg class="w-12 h-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'
-                        + '<p class="text-sm">Chưa có dàn ý nào</p></div>',
+                        + ('<p class="text-sm">' + t('Chưa có dàn ý nào') + '</p></div>'),
                 });
 
                 window.contentOutlinesTable = tableInst;

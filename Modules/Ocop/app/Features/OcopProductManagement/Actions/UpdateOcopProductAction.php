@@ -27,7 +27,7 @@ class UpdateOcopProductAction
 
         if (! $ocopSubject) {
             throw ValidationException::withMessages([
-                'ocop_subject_id' => 'Không tìm thấy Chủ thể OCOP hợp lệ để gán cho sản phẩm.',
+                'ocop_subject_id' => __('Không tìm thấy Chủ thể OCOP hợp lệ để gán cho sản phẩm.'),
             ]);
         }
 

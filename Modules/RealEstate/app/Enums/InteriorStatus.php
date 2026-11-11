@@ -11,9 +11,9 @@ enum InteriorStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Full       => 'Nội thất đầy đủ',
-            self::Basic      => 'Nội thất cơ bản',
-            self::Unfinished => 'Bàn giao thô',
+            self::Full       => __('Nội thất đầy đủ'),
+            self::Basic      => __('Nội thất cơ bản'),
+            self::Unfinished => __('Bàn giao thô'),
         };
     }
 }

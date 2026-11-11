@@ -17,11 +17,11 @@ enum HeritageType: string
     public function label(): string
     {
         return match ($this) {
-            self::HistoricalMonument => 'Di tích lịch sử - văn hóa',
-            self::ArchitecturalArt => 'Di tích kiến trúc nghệ thuật',
-            self::Archaeological => 'Di tích khảo cổ',
-            self::ScenicLandscape => 'Danh lam thắng cảnh',
-            self::Intangible => 'Di sản văn hóa phi vật thể',
+            self::HistoricalMonument => __('Di tích lịch sử - văn hóa'),
+            self::ArchitecturalArt => __('Di tích kiến trúc nghệ thuật'),
+            self::Archaeological => __('Di tích khảo cổ'),
+            self::ScenicLandscape => __('Danh lam thắng cảnh'),
+            self::Intangible => __('Di sản văn hóa phi vật thể'),
         };
     }
 }

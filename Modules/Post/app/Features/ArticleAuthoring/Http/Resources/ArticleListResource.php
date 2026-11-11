@@ -23,7 +23,7 @@ class ArticleListResource extends JsonResource
 
         return [
             'id'          => $this->id,
-            'title'       => $main?->title ?? "(chưa có bản dịch {$this->main_locale})",
+            'title'       => $main?->title ?? __('(chưa có bản dịch :main_locale)', ['main_locale' => $this->main_locale]),
             'category'    => $this->categories->pluck('name')->implode(', ') ?: null,
             'format'      => $this->format->value,
             'format_label' => $this->format->label(),

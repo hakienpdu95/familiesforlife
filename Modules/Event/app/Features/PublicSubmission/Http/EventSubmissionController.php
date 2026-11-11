@@ -43,7 +43,7 @@ class EventSubmissionController extends Controller
         $action->handle($data, $submitter, $request->ip(), $request->userAgent());
 
         return redirect()->route('event.public.submit.success')
-            ->with('success', 'Cảm ơn bạn đã gửi sự kiện! Đội ngũ biên tập sẽ xem xét và phản hồi qua email trong thời gian sớm nhất.');
+            ->with('success', __('Cảm ơn bạn đã gửi sự kiện! Đội ngũ biên tập sẽ xem xét và phản hồi qua email trong thời gian sớm nhất.'));
     }
 
     public function success(): View

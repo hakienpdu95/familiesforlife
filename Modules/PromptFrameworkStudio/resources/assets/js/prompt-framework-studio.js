@@ -1,3 +1,5 @@
+import { t } from '../../../../../resources/js/shared/i18n.js';
+
 /**
  * Modules/PromptFrameworkStudio/resources/assets/js/prompt-framework-studio.js
  * Entry point JS module PromptFrameworkStudio.
@@ -109,7 +111,7 @@ document.addEventListener('alpine:init', () => {
             const lines = [
                 'Bạn là trợ lý phân tích nội dung marketing. Tôi sẽ dán 1 đoạn nội dung thô (thông cáo báo chí/quảng cáo/mô tả sản phẩm) ở cuối prompt này. Nhiệm vụ của bạn: đề xuất giá trị cho các trường bên dưới, dựa vào nội dung thô đó.',
                 '',
-                'CÁC TRƯỜNG CẦN ĐIỀN (theo đúng thứ tự):',
+                t('CÁC TRƯỜNG CẦN ĐIỀN (theo đúng thứ tự):'),
             ];
 
             this.selectedFramework.fields.forEach((field, idx) => {
@@ -130,9 +132,9 @@ document.addEventListener('alpine:init', () => {
             lines.push('');
             lines.push('QUY TẮC TRẢ LỜI: chỉ trả về đúng các dòng theo định dạng "Tên trường: giá trị", không giải thích thêm, không đánh số lại, không markdown. Field nào KHÔNG có sẵn thông tin trong nội dung thô thì bạn TỰ ĐỀ XUẤT hợp lý theo đúng hướng dẫn của field đó (không bỏ trống, không bịa số liệu/sự kiện cụ thể).');
             lines.push('');
-            lines.push('NỘI DUNG THÔ CẦN TÁCH:');
+            lines.push(t('NỘI DUNG THÔ CẦN TÁCH:'));
             lines.push('"""');
-            lines.push(this.rawContentToSplit || '(dán nội dung của bạn vào đây trước khi copy prompt)');
+            lines.push(this.rawContentToSplit || t('(dán nội dung của bạn vào đây trước khi copy prompt)'));
             lines.push('"""');
 
             return lines.join('\n');
@@ -143,10 +145,10 @@ document.addEventListener('alpine:init', () => {
 
             try {
                 await navigator.clipboard.writeText(this.fieldSplittingPrompt);
-                window.Toast?.success?.('Đã copy prompt tách field vào clipboard.');
+                window.Toast?.success?.(t('Đã copy prompt tách field vào clipboard.'));
 
                 if (btnEl) {
-                    btnEl.innerHTML = '✓ Đã copy!';
+                    btnEl.innerHTML = t('✓ Đã copy!');
                     setTimeout(() => { btnEl.innerHTML = idleHtml; }, 1500);
                 }
             } catch (e) {
@@ -248,7 +250,7 @@ document.addEventListener('alpine:init', () => {
 
                 const data = await res.json();
                 if (!data.found) {
-                    window.Toast?.info?.('Chưa có prompt nào trước đó dùng mẫu này.');
+                    window.Toast?.info?.(t('Chưa có prompt nào trước đó dùng mẫu này.'));
 
                     return;
                 }
@@ -411,17 +413,17 @@ window.promptStudioCopyPrompt = async function (elId, btnEl) {
 
     if (btnEl) {
         btnEl.disabled = true;
-        btnEl.innerHTML = '<span class="loading loading-spinner loading-xs"></span><span>Đang copy...</span>';
+        btnEl.innerHTML = ('<span class="loading loading-spinner loading-xs"></span><span>' + t('Đang copy...') + '</span>');
     }
 
     try {
         await navigator.clipboard.writeText(el.value);
-        window.Toast?.success('Đã copy prompt vào clipboard.');
+        window.Toast?.success(t('Đã copy prompt vào clipboard.'));
 
         if (btnEl) {
             btnEl.classList.remove('btn-primary');
             btnEl.classList.add('btn-success');
-            btnEl.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>Đã copy!</span>';
+            btnEl.innerHTML = ('<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>' + t('Đã copy!') + '</span>');
 
             setTimeout(() => {
                 btnEl.classList.remove('btn-success');
@@ -446,7 +448,7 @@ window.promptStudioCopyPrompt = async function (elId, btnEl) {
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('form[data-confirm-regenerate]').forEach((form) => {
         form.addEventListener('submit', (e) => {
-            if (!window.confirm('Sinh lại sẽ GHI ĐÈ prompt hiện tại bằng prompt mới — KHÔNG thể khôi phục lại prompt cũ. Tiếp tục?')) {
+            if (!window.confirm(t('Sinh lại sẽ GHI ĐÈ prompt hiện tại bằng prompt mới — KHÔNG thể khôi phục lại prompt cũ. Tiếp tục?'))) {
                 e.preventDefault();
             }
         });
@@ -456,11 +458,11 @@ document.addEventListener('DOMContentLoaded', () => {
 // ── prompts/index.blade.php — Tabulator + delete confirm ─────────────────────────────────────
 const COLUMNS = [
     {
-        title: 'Tên prompt', field: 'label', minWidth: 220, sorter: 'string',
+        title: t('Tên prompt'), field: 'label', minWidth: 220, sorter: 'string',
         formatter(cell) {
             const d = cell.getRow().getData();
             let html = '<a href="' + esc(d.show_url) + '" class="link link-hover text-sm font-medium">' + esc(d.label) + '</a>';
-            if (d.is_orphaned) html += ' <span class="badge badge-xs badge-warning" title="Framework đã bị gỡ khỏi hệ thống">Đã gỡ</span>';
+            if (d.is_orphaned) html += (' <span class="badge badge-xs badge-warning" title="' + t('Framework đã bị gỡ khỏi hệ thống') + '">' + t('Đã gỡ') + '</span>');
 
             return html;
         },
@@ -472,29 +474,29 @@ const COLUMNS = [
     {
         // §4.4 (v2.7) — cột này trả lời "prompt nào đã được đắp ngữ cảnh biên tập, prompt nào
         // chưa" ngay ở danh sách, để thấy được phần chưa tận dụng Content Foundation.
-        title: 'Ngữ cảnh', field: 'category_name', width: 150, headerSort: false,
+        title: t('Ngữ cảnh'), field: 'category_name', width: 150, headerSort: false,
         formatter(cell) {
             const v = cell.getValue();
 
             return v
                 ? '<span class="badge badge-ghost badge-sm">' + esc(v) + '</span>'
-                : '<span class="text-xs text-base-content/30" title="Chưa gắn chuyên mục — prompt không có khối bối cảnh biên tập">—</span>';
+                : ('<span class="text-xs text-base-content/30" title="' + t('Chưa gắn chuyên mục — prompt không có khối bối cảnh biên tập') + '">—</span>');
         },
     },
-    { title: 'Người tạo', field: 'created_by_name', width: 140, formatter: (cell) => esc(cell.getValue() || '—') },
-    { title: 'Cập nhật lần cuối', field: 'updated_at', width: 160, sorter: 'string' },
+    { title: t('Người tạo'), field: 'created_by_name', width: 140, formatter: (cell) => esc(cell.getValue() || '—') },
+    { title: t('Cập nhật lần cuối'), field: 'updated_at', width: 160, sorter: 'string' },
     {
         title: '', field: 'uuid', width: 140, hozAlign: 'center', headerSort: false,
         formatter(cell) {
             const d = cell.getRow().getData();
             let html = '';
             if (d.edit_url) {
-                html += '<a href="' + esc(d.edit_url) + '" class="btn btn-ghost btn-xs" title="Sửa">Sửa</a> ';
+                html += '<a href="' + esc(d.edit_url) + ('" class="btn btn-ghost btn-xs" title="' + t('Sửa') + '">' + t('Sửa') + '</a> ');
             }
-            html += '<button class="btn btn-ghost btn-xs text-error" title="Xoá"'
+            html += ('<button class="btn btn-ghost btn-xs text-error" title="' + t('Xoá') + '"')
                 + ' data-url="' + esc(d.delete_url) + '"'
                 + ' data-label="' + esc(d.label) + '"'
-                + ' onclick="window.promptStudioDeleteConfirm(this.dataset.url, this.dataset.label)">Xoá</button>';
+                + (' onclick="window.promptStudioDeleteConfirm(this.dataset.url, this.dataset.label)">' + t('Xoá') + '</button>');
 
             return html;
         },
@@ -521,7 +523,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const csrf = document.querySelector('meta[name=csrf-token]')?.content ?? '';
         this.disabled = true;
-        this.textContent = 'Đang xoá...';
+        this.textContent = t('Đang xoá...');
 
         try {
             const res = await fetch(pendingDeleteUrl, {
@@ -538,14 +540,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (res.ok || res.redirected) {
                 location.reload();
             } else {
-                alert('Xoá thất bại. Vui lòng thử lại.');
+                alert(t('Xoá thất bại. Vui lòng thử lại.'));
             }
         } catch (e) {
             console.error('[prompt-framework-studio] delete failed', e);
-            alert('Lỗi kết nối. Vui lòng thử lại.');
+            alert(t('Lỗi kết nối. Vui lòng thử lại.'));
         } finally {
             this.disabled = false;
-            this.textContent = 'Xoá';
+            this.textContent = t('Xoá');
             pendingDeleteUrl = null;
         }
     });
@@ -600,11 +602,11 @@ document.addEventListener('alpine:init', () => {
                     langs: {
                         'vi-VN': {
                             pagination: {
-                                page_size: 'Dòng/trang', page_title: 'Trang',
+                                page_size: t('Dòng/trang'), page_title: t('Trang'),
                                 first: '«', last: '»', prev: '‹', next: '›',
-                                first_title: 'Trang đầu', last_title: 'Trang cuối',
-                                prev_title: 'Trang trước', next_title: 'Trang sau',
-                                counter: { showing: '', of: 'trong', rows: 'dòng', pages: 'trang' },
+                                first_title: t('Trang đầu'), last_title: t('Trang cuối'),
+                                prev_title: t('Trang trước'), next_title: t('Trang sau'),
+                                counter: { showing: '', of: t('trong'), rows: t('dòng'), pages: t('trang') },
                             },
                         },
                     },
@@ -612,7 +614,7 @@ document.addEventListener('alpine:init', () => {
                     columns: COLUMNS,
                     placeholder: '<div class="py-16 text-center opacity-40">'
                         + '<svg class="w-12 h-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'
-                        + '<p class="text-sm">Chưa có prompt nào</p></div>',
+                        + ('<p class="text-sm">' + t('Chưa có prompt nào') + '</p></div>'),
                 });
 
                 window.promptStudioTable = tableInst;

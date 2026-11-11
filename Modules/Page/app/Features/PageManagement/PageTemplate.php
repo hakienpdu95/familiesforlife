@@ -29,6 +29,6 @@ final class PageTemplate
     /** @return array<string, string> key => label, dùng đổ vào <select> form admin. */
     public static function options(): array
     {
-        return array_map(fn (array $t) => $t['label'], self::MAP);
+        return array_map(fn (array $t) => __($t['label']), self::MAP);
     }
 }

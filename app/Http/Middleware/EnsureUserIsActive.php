@@ -14,7 +14,7 @@ class EnsureUserIsActive
         $user = $request->user();
 
         if ($user && (! $user->is_active || ! $user->account_type->canLogin())) {
-            $message = 'Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.';
+            $message = __('Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.');
 
             Auth::guard('web')->logout();
 

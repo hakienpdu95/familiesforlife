@@ -1,5 +1,6 @@
 import { createTs } from '@shared/tom-select-factory.js';
 
+import { t } from '../../../../../../resources/js/shared/i18n.js';
 function esc(v) {
     if (v == null) return '';
     return String(v)
@@ -11,7 +12,7 @@ const EMPTY = '<span class="text-base-content/25 text-xs">—</span>';
 
 const COLUMNS = [
     {
-        title: 'Nội dung', field: 'entity_label', minWidth: 260, sorter: 'string', frozen: true,
+        title: t('Nội dung'), field: 'entity_label', minWidth: 260, sorter: 'string', frozen: true,
         formatter(cell) {
             const d = cell.getRow().getData();
             let html = '<span class="font-medium text-sm">' + esc(d.entity_label) + '</span>';
@@ -20,13 +21,13 @@ const COLUMNS = [
         },
     },
     {
-        title: 'Loại', field: 'type_label', width: 200, sorter: 'string',
+        title: t('Loại'), field: 'type_label', width: 200, sorter: 'string',
         formatter(cell) {
             return '<span class="badge badge-sm badge-ghost">' + esc(cell.getValue()) + '</span>';
         },
     },
     {
-        title: 'Gửi lúc', field: 'submitted_at', width: 170, hozAlign: 'center', sorter: 'string',
+        title: t('Gửi lúc'), field: 'submitted_at', width: 170, hozAlign: 'center', sorter: 'string',
         formatter(cell) {
             const d = cell.getRow().getData();
             return '<span title="' + esc(d.submitted_at_label) + '">' + esc(d.submitted_ago) + '</span>';
@@ -59,7 +60,7 @@ document.addEventListener('alpine:init', () => {
 
             get activeChips() {
                 const chips = [], f = this.filters;
-                if (f.search)       chips.push({ key: 'search',       label: 'Tìm: ' + f.search });
+                if (f.search)       chips.push({ key: 'search',       label: (t('Tìm:') + ' ') + f.search });
                 if (f.subject_type) chips.push({ key: 'subject_type', label: tsSubjectType?.options?.[f.subject_type]?.text ?? f.subject_type });
                 return chips;
             },
@@ -74,7 +75,7 @@ document.addEventListener('alpine:init', () => {
                 if (!el) return;
 
                 tsSubjectType = createTs(el, {
-                    placeholder: 'Tất cả loại',
+                    placeholder: t('Tất cả loại'),
                     onChange() { el.dispatchEvent(new Event('change', { bubbles: true })); },
                 });
             },
@@ -102,11 +103,11 @@ document.addEventListener('alpine:init', () => {
                     langs: {
                         'vi-VN': {
                             pagination: {
-                                page_size: 'Dòng/trang', page_title: 'Trang',
+                                page_size: t('Dòng/trang'), page_title: t('Trang'),
                                 first: '«', last: '»', prev: '‹', next: '›',
-                                first_title: 'Trang đầu', last_title: 'Trang cuối',
-                                prev_title: 'Trang trước', next_title: 'Trang sau',
-                                counter: { showing: '', of: 'trong', rows: 'dòng', pages: 'trang' },
+                                first_title: t('Trang đầu'), last_title: t('Trang cuối'),
+                                prev_title: t('Trang trước'), next_title: t('Trang sau'),
+                                counter: { showing: '', of: t('trong'), rows: t('dòng'), pages: t('trang') },
                             },
                         },
                     },
@@ -114,7 +115,7 @@ document.addEventListener('alpine:init', () => {
                     columns: COLUMNS,
                     placeholder: '<div class="py-16 text-center opacity-40">'
                         + '<svg class="w-12 h-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"/></svg>'
-                        + '<p class="text-sm">Không có nội dung nào đang chờ bạn duyệt</p></div>',
+                        + ('<p class="text-sm">' + t('Không có nội dung nào đang chờ bạn duyệt') + '</p></div>'),
                 });
 
                 tableInst.on('tableBuilt', () => this.applyFilters());

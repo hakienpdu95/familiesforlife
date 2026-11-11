@@ -1,7 +1,7 @@
 @extends('layouts.frontend')
 
 @php
-    $pageTitle = $provinceName ? "Di sản & Văn hóa {$provinceName}" : 'Di sản & Văn hóa';
+    $pageTitle = $provinceName ? "Di sản & Văn hóa {$provinceName}" : __('Di sản & Văn hóa');
     $currentPage = $sites->currentPage();
     $canonicalUrl = route('heritage.public.index', array_filter([
         'province' => $provinceCode,
@@ -9,7 +9,7 @@
     ]));
     $metaDescription = $provinceName
         ? "Di tích, di sản văn hóa tại {$provinceName} — loại hình, xếp hạng, cùng bài viết, lễ hội và sản phẩm OCOP liên quan."
-        : 'Di tích, di sản văn hóa có cấu trúc — loại hình, xếp hạng, toạ độ — cùng bài viết, lễ hội và sản phẩm OCOP liên quan.';
+        : __('Di tích, di sản văn hóa có cấu trúc — loại hình, xếp hạng, toạ độ — cùng bài viết, lễ hội và sản phẩm OCOP liên quan.');
 
     // Bố cục đồng nhất trang danh mục bài viết (danh-muc/{slug}): trang 1 lấy di tích đầu tiên
     // (nổi bật nhất theo thứ tự is_featured → sort_order) làm "tin to" ngang, phần còn lại là lưới 4 cột.
@@ -74,7 +74,7 @@
         @include('heritage::public.partials.site-card', ['site' => $site, 'size' => 'sm', 'showProvince' => $showProvince])
         @empty
         @unless($lead)
-        <p class="col-span-full text-center text-base-content/40 py-10">Chưa có di tích nào.</p>
+        <p class="col-span-full text-center text-base-content/40 py-10">{{ __('Chưa có di tích nào.') }}</p>
         @endunless
         @endforelse
     </section>

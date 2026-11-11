@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', 'Sửa tin — ' . $listing->title)
+@section('title', __('Sửa tin — :title', ['title' => $listing->title]))
 
 @php
     $val = function (string $field, $default = null) use ($listing) {
@@ -10,12 +10,12 @@
     $status = $listing->approvalStatus();
 
     $tabs = [
-        'basic'    => 'Loại tin & Cơ bản',
-        'location' => 'Vị trí',
-        'price'    => 'Giá',
-        'area'     => 'Diện tích & phòng',
-        'details'  => 'Đặc điểm',
-        'media'    => 'Hình ảnh',
+        'basic'    => __('Loại tin & Cơ bản'),
+        'location' => __('Vị trí'),
+        'price'    => __('Giá'),
+        'area'     => __('Diện tích & phòng'),
+        'details'  => __('Đặc điểm'),
+        'media'    => __('Hình ảnh'),
     ];
 @endphp
 
@@ -45,9 +45,9 @@
     }">
 
 <div class="flex items-center gap-2 text-sm text-base-content/50 mb-3">
-    <a href="{{ route('backend.real-estate.index') }}" class="hover:text-primary">Bất động sản</a>
+    <a href="{{ route('backend.real-estate.index') }}" class="hover:text-primary">{{ __('Bất động sản') }}</a>
     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-    <span>Sửa tin</span>
+    <span>{{ __('Sửa tin') }}</span>
 </div>
 
 <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
@@ -69,7 +69,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
     </svg>
     <div>
-        <p class="font-semibold">Có {{ $errors->count() }} lỗi cần kiểm tra:</p>
+        <p class="font-semibold">{{ __('Có :count lỗi cần kiểm tra:', ['count' => $errors->count()]) }}</p>
         <ul class="mt-1.5 list-disc list-inside space-y-0.5 text-xs opacity-90">
             @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
         </ul>
@@ -83,28 +83,28 @@
         @can('submitForApproval', $listing)
         <form method="POST" action="{{ route('backend.real-estate.submit-approval', $listing) }}">
             @csrf
-            <button type="submit" class="btn btn-primary btn-sm">Gửi duyệt</button>
+            <button type="submit" class="btn btn-primary btn-sm">{{ __('Gửi duyệt') }}</button>
         </form>
         @endcan
         @can('approve', $listing)
         <form method="POST" action="{{ route('backend.real-estate.approve-content', $listing) }}">
             @csrf
-            <button type="submit" class="btn btn-info btn-sm">Duyệt nội dung</button>
+            <button type="submit" class="btn btn-info btn-sm">{{ __('Duyệt nội dung') }}</button>
         </form>
         @endcan
         @can('publishApproval', $listing)
         <form method="POST" action="{{ route('backend.real-estate.publish-content', $listing) }}">
             @csrf
-            <button type="submit" class="btn btn-success btn-sm">Xuất bản</button>
+            <button type="submit" class="btn btn-success btn-sm">{{ __('Xuất bản') }}</button>
         </form>
         @endcan
         @can('reject', $listing)
-        <button type="button" class="btn btn-error btn-outline btn-sm" onclick="rejectRealEstateModal.showModal()">Từ chối</button>
+        <button type="button" class="btn btn-error btn-outline btn-sm" onclick="rejectRealEstateModal.showModal()">{{ __('Từ chối') }}</button>
         @endcan
         @can('archiveApproval', $listing)
-        <form method="POST" action="{{ route('backend.real-estate.archive-content', $listing) }}" onsubmit="return confirm('Lưu trữ tin này?')">
+        <form method="POST" action="{{ route('backend.real-estate.archive-content', $listing) }}" onsubmit="return confirm(@js(__('Lưu trữ tin này?')))">
             @csrf
-            <button type="submit" class="btn btn-ghost btn-sm">Lưu trữ</button>
+            <button type="submit" class="btn btn-ghost btn-sm">{{ __('Lưu trữ') }}</button>
         </form>
         @endcan
     </div>
@@ -139,28 +139,28 @@
             <div class="p-3">
 
                 {{-- ══ Tab: Loại tin & Cơ bản ══════════════════════════════ --}}
-                <div x-show="tab === 'basic'" data-tab-label="Loại tin & Cơ bản" class="space-y-4">
+                <div x-show="tab === 'basic'" data-tab-label="{{ __('Loại tin & Cơ bản') }}" class="space-y-4">
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="form-control">
-                            <label class="label py-0 pb-1.5"><span class="label-text font-medium">Bán hay thuê <span class="text-error">*</span></span></label>
+                            <label class="label py-0 pb-1.5"><span class="label-text font-medium">{{ __('Bán hay thuê') }} <span class="text-error">*</span></span></label>
                             <select id="ts-listing_type" name="listing_type" x-model="listingType"
-                                    data-req="Vui lòng chọn loại tin"
+                                    data-req="{{ __('Vui lòng chọn loại tin') }}"
                                     class="select select-bordered select-sm w-full ts-init @error('listing_type') select-error @enderror"
-                                    data-ts-placeholder="— Chọn —">
-                                <option value="sale" {{ $val('listing_type') === 'sale' ? 'selected' : '' }}>Bán</option>
-                                <option value="rent" {{ $val('listing_type') === 'rent' ? 'selected' : '' }}>Thuê</option>
+                                    data-ts-placeholder="{{ __('— Chọn —') }}">
+                                <option value="sale" {{ $val('listing_type') === 'sale' ? 'selected' : '' }}>{{ __('Bán') }}</option>
+                                <option value="rent" {{ $val('listing_type') === 'rent' ? 'selected' : '' }}>{{ __('Thuê') }}</option>
                             </select>
                             @error('listing_type')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                         </div>
 
                         <div class="form-control">
-                            <label class="label py-0 pb-1.5"><span class="label-text font-medium">Loại hình <span class="text-error">*</span></span></label>
+                            <label class="label py-0 pb-1.5"><span class="label-text font-medium">{{ __('Loại hình') }} <span class="text-error">*</span></span></label>
                             <select id="ts-property_type" name="property_type" x-model="propertyType"
-                                    data-req="Vui lòng chọn loại hình"
+                                    data-req="{{ __('Vui lòng chọn loại hình') }}"
                                     class="select select-bordered select-sm w-full @error('property_type') select-error @enderror"
-                                    data-ts-placeholder="— Chọn loại hình —">
-                                <option value="">— Chọn loại hình —</option>
+                                    data-ts-placeholder="{{ __('— Chọn loại hình —') }}">
+                                <option value="">{{ __('— Chọn loại hình —') }}</option>
                                 @foreach(\Modules\RealEstate\Enums\PropertyType::cases() as $pt)
                                 <option value="{{ $pt->value }}"
                                         data-listing-type="{{ implode(' ', array_map(fn ($lt) => $lt->value, array_filter(\Modules\RealEstate\Enums\ListingType::cases(), fn ($lt) => in_array($pt, \Modules\RealEstate\Enums\PropertyType::validFor($lt), true)))) }}"
@@ -172,9 +172,9 @@
                     </div>
 
                     <div class="form-control">
-                        <label class="label py-0 pb-1.5"><span class="label-text font-medium">Tiêu đề tin <span class="text-error">*</span></span></label>
+                        <label class="label py-0 pb-1.5"><span class="label-text font-medium">{{ __('Tiêu đề tin') }} <span class="text-error">*</span></span></label>
                         <input type="text" name="title" value="{{ $val('title') }}" maxlength="250"
-                               data-req="Vui lòng nhập tiêu đề tin"
+                               data-req="{{ __('Vui lòng nhập tiêu đề tin') }}"
                                class="input input-bordered input-sm w-full @error('title') input-error @enderror">
                         @error('title')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                     </div>
@@ -185,12 +185,12 @@
                         </label>
                         <input type="text" name="slug" value="{{ $val('slug') }}"
                                class="input input-bordered input-sm w-full font-mono @error('slug') input-error @enderror">
-                        <p class="mt-1 text-xs text-base-content/40">Chỉ dùng chữ thường, số và dấu <code class="bg-base-200 px-1 rounded">-</code></p>
+                        <p class="mt-1 text-xs text-base-content/40">{{ __('Chỉ dùng chữ thường, số và dấu') }} <code class="bg-base-200 px-1 rounded">-</code></p>
                         @error('slug')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                     </div>
 
                     <div class="form-control">
-                        <label class="label py-0 pb-1.5"><span class="label-text font-medium">Mô tả chi tiết</span></label>
+                        <label class="label py-0 pb-1.5"><span class="label-text font-medium">{{ __('Mô tả chi tiết') }}</span></label>
                         <textarea name="description" rows="5"
                                   class="textarea textarea-bordered textarea-sm w-full @error('description') textarea-error @enderror">{{ $val('description') }}</textarea>
                         @error('description')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
@@ -198,19 +198,19 @@
 
                     <div class="flex justify-end pt-2">
                         <button type="button" @click="tab = next()" class="btn btn-ghost btn-sm gap-1.5">
-                            Tiếp theo: Vị trí
+                            {{ __('Tiếp theo: Vị trí') }}
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                         </button>
                     </div>
                 </div>
 
                 {{-- ══ Tab: Vị trí ══════════════════════════════════════════ --}}
-                <div x-show="tab === 'location'" data-tab-label="Vị trí" class="space-y-4">
+                <div x-show="tab === 'location'" data-tab-label="{{ __('Vị trí') }}" class="space-y-4">
 
                     <div class="form-control">
-                        <label class="label py-0 pb-1.5"><span class="label-text font-medium">Số nhà, đường</span></label>
+                        <label class="label py-0 pb-1.5"><span class="label-text font-medium">{{ __('Số nhà, đường') }}</span></label>
                         <input type="text" name="address_detail" value="{{ $val('address_detail') }}" maxlength="255"
-                               placeholder="Ví dụ: 12 Nguyễn Văn A"
+                               placeholder="{{ __('Ví dụ: 12 Nguyễn Văn A') }}"
                                class="input input-bordered input-sm w-full @error('address_detail') input-error @enderror">
                         @error('address_detail')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                     </div>
@@ -227,30 +227,30 @@
                     <div class="flex items-center justify-between pt-2">
                         <button type="button" @click="tab = prev()" class="btn btn-ghost btn-sm gap-1.5">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                            Loại tin & Cơ bản
+                            {{ __('Loại tin & Cơ bản') }}
                         </button>
                         <button type="button" @click="tab = next()" class="btn btn-ghost btn-sm gap-1.5">
-                            Tiếp theo: Giá
+                            {{ __('Tiếp theo: Giá') }}
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                         </button>
                     </div>
                 </div>
 
                 {{-- ══ Tab: Giá ══════════════════════════════════════════════ --}}
-                <div x-show="tab === 'price'" data-tab-label="Giá" class="space-y-4">
+                <div x-show="tab === 'price'" data-tab-label="{{ __('Giá') }}" class="space-y-4">
 
                     <label class="label cursor-pointer justify-start gap-2">
                         <input type="hidden" name="is_price_negotiable" value="0">
                         <input type="checkbox" name="is_price_negotiable" value="1" x-model="isNegotiable" class="checkbox checkbox-sm">
-                        <span class="label-text text-sm">Giá thoả thuận (không niêm yết số cố định)</span>
+                        <span class="label-text text-sm">{{ __('Giá thoả thuận (không niêm yết số cố định)') }}</span>
                     </label>
 
                     <div x-show="listingType === 'sale'" class="grid sm:grid-cols-2 gap-4">
                         <div class="form-control">
-                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">Giá bán (VNĐ) <span x-show="!isNegotiable" class="text-error">*</span></span></label>
+                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">{{ __('Giá bán (VNĐ)') }} <span x-show="!isNegotiable" class="text-error">*</span></span></label>
                             <input type="number" name="price" value="{{ $val('price') }}" step="1000000" min="0"
                                    x-bind:disabled="isNegotiable"
-                                   :data-req="!isNegotiable ? 'Vui lòng nhập giá bán' : null"
+                                   :data-req="!isNegotiable ? @js(__('Vui lòng nhập giá bán')) : null"
                                    class="input input-bordered input-sm w-full @error('price') input-error @enderror">
                             @error('price')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                         </div>
@@ -258,17 +258,17 @@
                             <label class="label cursor-pointer justify-start gap-2 mt-6">
                                 <input type="hidden" name="is_urgent" value="0">
                                 <input type="checkbox" name="is_urgent" value="1" x-model="isUrgent" class="checkbox checkbox-sm">
-                                <span class="label-text text-sm">Bán gấp</span>
+                                <span class="label-text text-sm">{{ __('Bán gấp') }}</span>
                             </label>
                         </div>
                         <div class="form-control" x-show="isUrgent">
-                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">Muốn bán trong (số ngày)</span></label>
+                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">{{ __('Muốn bán trong (số ngày)') }}</span></label>
                             <input type="number" name="urgent_days" value="{{ $val('urgent_days') }}" min="1"
                                    class="input input-bordered input-sm w-full @error('urgent_days') input-error @enderror">
                             @error('urgent_days')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                         </div>
                         <div class="form-control">
-                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">Đang cho thuê, giá thuê hiện tại (VNĐ/tháng)</span></label>
+                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">{{ __('Đang cho thuê, giá thuê hiện tại (VNĐ/tháng)') }}</span></label>
                             <input type="number" name="current_rental_income" value="{{ $val('current_rental_income') }}" step="100000" min="0"
                                    class="input input-bordered input-sm w-full @error('current_rental_income') input-error @enderror">
                             @error('current_rental_income')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
@@ -277,27 +277,27 @@
 
                     <div x-show="listingType === 'rent'" class="grid sm:grid-cols-2 gap-4">
                         <div class="form-control">
-                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">Giá thuê/tháng (VNĐ) <span x-show="!isNegotiable" class="text-error">*</span></span></label>
+                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">{{ __('Giá thuê/tháng (VNĐ)') }} <span x-show="!isNegotiable" class="text-error">*</span></span></label>
                             <input type="number" name="monthly_rent" value="{{ $val('monthly_rent') }}" step="100000" min="0"
                                    x-bind:disabled="isNegotiable"
-                                   :data-req="!isNegotiable ? 'Vui lòng nhập giá thuê/tháng' : null"
+                                   :data-req="!isNegotiable ? @js(__('Vui lòng nhập giá thuê/tháng')) : null"
                                    class="input input-bordered input-sm w-full @error('monthly_rent') input-error @enderror">
                             @error('monthly_rent')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                         </div>
                         <div class="form-control">
-                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">Tiền cọc (VNĐ)</span></label>
+                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">{{ __('Tiền cọc (VNĐ)') }}</span></label>
                             <input type="number" name="deposit" value="{{ $val('deposit') }}" step="100000" min="0"
                                    class="input input-bordered input-sm w-full @error('deposit') input-error @enderror">
                             @error('deposit')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                         </div>
                         <div class="form-control">
-                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">Thời hạn thuê (tháng, tối thiểu 3)</span></label>
+                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">{{ __('Thời hạn thuê (tháng, tối thiểu 3)') }}</span></label>
                             <input type="number" name="rental_period_months" value="{{ $val('rental_period_months') }}" min="3"
                                    class="input input-bordered input-sm w-full @error('rental_period_months') input-error @enderror">
                             @error('rental_period_months')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                         </div>
                         <div class="form-control" x-show="propertyType === 'apartment'">
-                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">Phí quản lý/tháng (VNĐ)</span></label>
+                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">{{ __('Phí quản lý/tháng (VNĐ)') }}</span></label>
                             <input type="number" name="management_fee" value="{{ $val('management_fee') }}" step="10000" min="0"
                                    class="input input-bordered input-sm w-full @error('management_fee') input-error @enderror">
                             @error('management_fee')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
@@ -307,66 +307,66 @@
                     <div class="flex items-center justify-between pt-2">
                         <button type="button" @click="tab = prev()" class="btn btn-ghost btn-sm gap-1.5">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                            Vị trí
+                            {{ __('Vị trí') }}
                         </button>
                         <button type="button" @click="tab = next()" class="btn btn-ghost btn-sm gap-1.5">
-                            Tiếp theo: Diện tích & phòng
+                            {{ __('Tiếp theo: Diện tích & phòng') }}
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                         </button>
                     </div>
                 </div>
 
                 {{-- ══ Tab: Diện tích & phòng ═══════════════════════════════ --}}
-                <div x-show="tab === 'area'" data-tab-label="Diện tích & phòng" class="space-y-4">
+                <div x-show="tab === 'area'" data-tab-label="{{ __('Diện tích & phòng') }}" class="space-y-4">
 
                     <div class="form-control">
-                        <label class="label py-0 pb-1.5"><span class="label-text text-sm">Diện tích sử dụng (m²) <span class="text-error">*</span></span></label>
+                        <label class="label py-0 pb-1.5"><span class="label-text text-sm">{{ __('Diện tích sử dụng (m²)') }} <span class="text-error">*</span></span></label>
                         <input type="number" name="area" value="{{ $val('area') }}" step="0.1" min="1"
-                               data-req="Vui lòng nhập diện tích"
+                               data-req="{{ __('Vui lòng nhập diện tích') }}"
                                class="input input-bordered input-sm w-full @error('area') input-error @enderror">
                         @error('area')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                     </div>
 
                     <div x-show="listingType === 'sale' && (propertyType === 'house' || propertyType === 'land')" class="grid sm:grid-cols-3 gap-4">
                         <div class="form-control">
-                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">Chiều ngang (m)</span></label>
+                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">{{ __('Chiều ngang (m)') }}</span></label>
                             <input type="number" name="width" value="{{ $val('width') }}" step="0.01" min="0" class="input input-bordered input-sm w-full">
                         </div>
                         <div class="form-control">
-                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">Chiều dài (m)</span></label>
+                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">{{ __('Chiều dài (m)') }}</span></label>
                             <input type="number" name="length" value="{{ $val('length') }}" step="0.01" min="0" class="input input-bordered input-sm w-full">
                         </div>
                         <div class="form-control">
-                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">Diện tích đất (m²)</span></label>
+                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">{{ __('Diện tích đất (m²)') }}</span></label>
                             <input type="number" name="land_area" value="{{ $val('land_area') }}" step="0.1" min="0" class="input input-bordered input-sm w-full">
                         </div>
                     </div>
 
                     <div x-show="propertyType === 'apartment'" class="grid sm:grid-cols-2 gap-4">
                         <div class="form-control" x-show="listingType === 'sale'">
-                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">Diện tích tim tường (m²)</span></label>
+                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">{{ __('Diện tích tim tường (m²)') }}</span></label>
                             <input type="number" name="usable_area" value="{{ $val('usable_area') }}" step="0.1" min="0" class="input input-bordered input-sm w-full">
                         </div>
                         <div class="form-control" x-show="listingType === 'sale'">
-                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">Diện tích thông thuỷ (m²)</span></label>
+                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">{{ __('Diện tích thông thuỷ (m²)') }}</span></label>
                             <input type="number" name="net_area" value="{{ $val('net_area') }}" step="0.1" min="0" class="input input-bordered input-sm w-full">
                         </div>
                     </div>
                     <p class="text-xs text-base-content/40" x-show="listingType === 'sale' && propertyType !== ''">
-                        * Diện tích chính dùng để lọc/hiển thị được lấy từ diện tích đất (nhà riêng/đất) hoặc thông thuỷ/tim tường (căn hộ).
+                        {{ __('* Diện tích chính dùng để lọc/hiển thị được lấy từ diện tích đất (nhà riêng/đất) hoặc thông thuỷ/tim tường (căn hộ).') }}
                     </p>
 
                     <div class="grid sm:grid-cols-3 gap-4">
                         <div class="form-control" x-show="propertyType === 'house' || propertyType === 'apartment'">
-                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">Số phòng ngủ</span></label>
+                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">{{ __('Số phòng ngủ') }}</span></label>
                             <input type="number" name="bedrooms" value="{{ $val('bedrooms') }}" min="0" class="input input-bordered input-sm w-full">
                         </div>
                         <div class="form-control" x-show="propertyType === 'house' || propertyType === 'apartment'">
-                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">Số phòng tắm</span></label>
+                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">{{ __('Số phòng tắm') }}</span></label>
                             <input type="number" name="bathrooms" value="{{ $val('bathrooms') }}" min="0" class="input input-bordered input-sm w-full">
                         </div>
                         <div class="form-control" x-show="propertyType === 'house'">
-                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">Số tầng</span></label>
+                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">{{ __('Số tầng') }}</span></label>
                             <input type="number" name="floors" value="{{ $val('floors') }}" min="1" class="input input-bordered input-sm w-full">
                         </div>
                     </div>
@@ -374,34 +374,34 @@
                     <div class="flex items-center justify-between pt-2">
                         <button type="button" @click="tab = prev()" class="btn btn-ghost btn-sm gap-1.5">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                            Giá
+                            {{ __('Giá') }}
                         </button>
                         <button type="button" @click="tab = next()" class="btn btn-ghost btn-sm gap-1.5">
-                            Tiếp theo: Đặc điểm
+                            {{ __('Tiếp theo: Đặc điểm') }}
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                         </button>
                     </div>
                 </div>
 
                 {{-- ══ Tab: Đặc điểm ═══════════════════════════════════════ --}}
-                <div x-show="tab === 'details'" data-tab-label="Đặc điểm" class="space-y-4">
+                <div x-show="tab === 'details'" data-tab-label="{{ __('Đặc điểm') }}" class="space-y-4">
 
                     <div class="grid sm:grid-cols-2 gap-4">
                         <div class="form-control" x-show="listingType === 'sale' && propertyType === 'house'">
-                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">Loại nhà riêng</span></label>
-                            <select id="ts-house_subtype" name="house_subtype" data-ts-placeholder="— Chọn —"
+                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">{{ __('Loại nhà riêng') }}</span></label>
+                            <select id="ts-house_subtype" name="house_subtype" data-ts-placeholder="{{ __('— Chọn —') }}"
                                     class="select select-bordered select-sm w-full">
-                                <option value="">— Chọn —</option>
+                                <option value="">{{ __('— Chọn —') }}</option>
                                 @foreach(\Modules\RealEstate\Enums\HouseSubtype::cases() as $c)
                                 <option value="{{ $c->value }}" {{ $val('house_subtype') === $c->value ? 'selected' : '' }}>{{ $c->label() }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="form-control" x-show="listingType === 'sale' && propertyType === 'apartment'">
-                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">Loại căn hộ</span></label>
-                            <select id="ts-apartment_subtype" name="apartment_subtype" data-ts-placeholder="— Chọn —"
+                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">{{ __('Loại căn hộ') }}</span></label>
+                            <select id="ts-apartment_subtype" name="apartment_subtype" data-ts-placeholder="{{ __('— Chọn —') }}"
                                     class="select select-bordered select-sm w-full">
-                                <option value="">— Chọn —</option>
+                                <option value="">{{ __('— Chọn —') }}</option>
                                 @foreach(\Modules\RealEstate\Enums\ApartmentSubtype::cases() as $c)
                                 <option value="{{ $c->value }}" {{ $val('apartment_subtype') === $c->value ? 'selected' : '' }}>{{ $c->label() }}</option>
                                 @endforeach
@@ -409,20 +409,20 @@
                         </div>
 
                         <div class="form-control" x-show="propertyType !== 'layout' && propertyType !== ''">
-                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">Giấy tờ pháp lý</span></label>
-                            <select id="ts-legal_status" name="legal_status" data-ts-placeholder="— Chọn —"
+                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">{{ __('Giấy tờ pháp lý') }}</span></label>
+                            <select id="ts-legal_status" name="legal_status" data-ts-placeholder="{{ __('— Chọn —') }}"
                                     class="select select-bordered select-sm w-full">
-                                <option value="">— Chọn —</option>
+                                <option value="">{{ __('— Chọn —') }}</option>
                                 @foreach(\Modules\RealEstate\Enums\LegalStatus::cases() as $c)
                                 <option value="{{ $c->value }}" {{ $val('legal_status') === $c->value ? 'selected' : '' }}>{{ $c->label() }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="form-control" x-show="propertyType !== 'layout' && propertyType !== ''">
-                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">Hướng</span></label>
-                            <select id="ts-direction" name="direction" data-ts-placeholder="— Chọn —"
+                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">{{ __('Hướng') }}</span></label>
+                            <select id="ts-direction" name="direction" data-ts-placeholder="{{ __('— Chọn —') }}"
                                     class="select select-bordered select-sm w-full">
-                                <option value="">— Chọn —</option>
+                                <option value="">{{ __('— Chọn —') }}</option>
                                 @foreach(\Modules\RealEstate\Enums\CompassDirection::cases() as $c)
                                 <option value="{{ $c->value }}" {{ $val('direction') === $c->value ? 'selected' : '' }}>{{ $c->label() }}</option>
                                 @endforeach
@@ -430,20 +430,20 @@
                         </div>
 
                         <div class="form-control" x-show="propertyType === 'apartment'">
-                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">Hướng ban công</span></label>
-                            <select id="ts-balcony_direction" name="balcony_direction" data-ts-placeholder="— Chọn —"
+                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">{{ __('Hướng ban công') }}</span></label>
+                            <select id="ts-balcony_direction" name="balcony_direction" data-ts-placeholder="{{ __('— Chọn —') }}"
                                     class="select select-bordered select-sm w-full">
-                                <option value="">— Chọn —</option>
+                                <option value="">{{ __('— Chọn —') }}</option>
                                 @foreach(\Modules\RealEstate\Enums\CompassDirection::balconyOptions() as $c)
                                 <option value="{{ $c->value }}" {{ $val('balcony_direction') === $c->value ? 'selected' : '' }}>{{ $c->label() }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="form-control" x-show="propertyType === 'apartment'">
-                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">Tình trạng sử dụng</span></label>
-                            <select id="ts-usage_status" name="usage_status" data-ts-placeholder="— Chọn —"
+                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">{{ __('Tình trạng sử dụng') }}</span></label>
+                            <select id="ts-usage_status" name="usage_status" data-ts-placeholder="{{ __('— Chọn —') }}"
                                     class="select select-bordered select-sm w-full">
-                                <option value="">— Chọn —</option>
+                                <option value="">{{ __('— Chọn —') }}</option>
                                 @foreach(\Modules\RealEstate\Enums\UsageStatus::cases() as $c)
                                 <option value="{{ $c->value }}" {{ $val('usage_status') === $c->value ? 'selected' : '' }}>{{ $c->label() }}</option>
                                 @endforeach
@@ -451,24 +451,24 @@
                         </div>
 
                         <div class="form-control" x-show="propertyType === 'apartment'">
-                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">Tên dự án / toà nhà</span></label>
+                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">{{ __('Tên dự án / toà nhà') }}</span></label>
                             <input type="text" name="project_name" value="{{ $val('project_name') }}" maxlength="150" class="input input-bordered input-sm w-full">
                         </div>
                         <div class="form-control" x-show="propertyType === 'apartment'">
-                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">Số căn - Tầng - Block</span></label>
+                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">{{ __('Số căn - Tầng - Block') }}</span></label>
                             <input type="text" name="apartment_address" value="{{ $val('apartment_address') }}" maxlength="150" class="input input-bordered input-sm w-full">
                         </div>
 
                         <div class="form-control" x-show="listingType === 'sale' && propertyType === 'land'">
-                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">Đường trước nhà/đất (m)</span></label>
+                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">{{ __('Đường trước nhà/đất (m)') }}</span></label>
                             <input type="number" name="front_road_width" value="{{ $val('front_road_width') }}" step="0.1" min="0" class="input input-bordered input-sm w-full">
                         </div>
 
                         <div class="form-control" x-show="propertyType !== 'layout' && propertyType !== ''">
-                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">Nội thất</span></label>
-                            <select id="ts-interior_status" name="interior_status" data-ts-placeholder="— Chọn —"
+                            <label class="label py-0 pb-1.5"><span class="label-text text-sm">{{ __('Nội thất') }}</span></label>
+                            <select id="ts-interior_status" name="interior_status" data-ts-placeholder="{{ __('— Chọn —') }}"
                                     class="select select-bordered select-sm w-full">
-                                <option value="">— Chọn —</option>
+                                <option value="">{{ __('— Chọn —') }}</option>
                                 @foreach(\Modules\RealEstate\Enums\InteriorStatus::cases() as $c)
                                 <option value="{{ $c->value }}" {{ $val('interior_status') === $c->value ? 'selected' : '' }}>{{ $c->label() }}</option>
                                 @endforeach
@@ -476,24 +476,24 @@
                         </div>
                     </div>
 
-                    <p class="text-xs text-base-content/40" x-show="propertyType === ''">Chọn loại hình ở tab "Loại tin & Cơ bản" để hiện các trường đặc điểm phù hợp.</p>
+                    <p class="text-xs text-base-content/40" x-show="propertyType === ''">{{ __('Chọn loại hình ở tab "Loại tin & Cơ bản" để hiện các trường đặc điểm phù hợp.') }}</p>
 
                     <div class="flex items-center justify-between pt-2">
                         <button type="button" @click="tab = prev()" class="btn btn-ghost btn-sm gap-1.5">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                            Diện tích & phòng
+                            {{ __('Diện tích & phòng') }}
                         </button>
                         <button type="button" @click="tab = next()" class="btn btn-ghost btn-sm gap-1.5">
-                            Tiếp theo: Hình ảnh
+                            {{ __('Tiếp theo: Hình ảnh') }}
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                         </button>
                     </div>
                 </div>
 
                 {{-- ══ Tab: Hình ảnh ═══════════════════════════════════════ --}}
-                <div x-show="tab === 'media'" data-tab-label="Hình ảnh" class="space-y-4">
+                <div x-show="tab === 'media'" data-tab-label="{{ __('Hình ảnh') }}" class="space-y-4">
 
-                    <p class="text-xs text-base-content/50">Tối đa 6 ảnh — kéo-thả để sắp thứ tự hiển thị.</p>
+                    <p class="text-xs text-base-content/50">{{ __('Tối đa 6 ảnh — kéo-thả để sắp thứ tự hiển thị.') }}</p>
                     <div class="flex flex-wrap gap-2 mb-1">
                         @foreach($listing->galleryUrls('thumb') as $url)
                         <img src="{{ $url }}" alt="" class="w-20 h-20 rounded-lg object-cover border border-base-200">
@@ -506,9 +506,9 @@
                     <div class="flex items-center justify-between pt-2">
                         <button type="button" @click="tab = prev()" class="btn btn-ghost btn-sm gap-1.5">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                            Đặc điểm
+                            {{ __('Đặc điểm') }}
                         </button>
-                        <span class="text-xs text-base-content/40">Điền xong? Nhấn <strong>Lưu thay đổi</strong> ở bên phải</span>
+                        <span class="text-xs text-base-content/40">{{ __('Điền xong? Nhấn') }} <strong>{{ __('Lưu thay đổi') }}</strong> {{ __('ở bên phải') }}</span>
                     </div>
                 </div>
 
@@ -520,11 +520,11 @@
             <div class="card bg-base-100 shadow-sm border border-base-200">
                 <div class="card-body p-3">
 
-                    <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">Xuất bản</p>
+                    <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">{{ __('Xuất bản') }}</p>
 
                     @if($status)
                     <div class="flex items-center justify-between mb-3 text-xs">
-                        <span class="text-base-content/50">Trạng thái duyệt</span>
+                        <span class="text-base-content/50">{{ __('Trạng thái duyệt') }}</span>
                         <span class="badge {{ $status->badgeClass() }} badge-sm">{{ $status->label() }}</span>
                     </div>
                     @endif
@@ -532,40 +532,40 @@
                     <label class="label cursor-pointer justify-start gap-2 mb-3">
                         <input type="hidden" name="is_featured" value="0">
                         <input type="checkbox" name="is_featured" value="1" class="checkbox checkbox-sm" @checked($val('is_featured'))>
-                        <span class="label-text text-sm">Ghim nổi bật</span>
+                        <span class="label-text text-sm">{{ __('Ghim nổi bật') }}</span>
                     </label>
 
                     <div class="form-control mb-4">
-                        <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">Thứ tự sắp xếp</span></label>
+                        <label class="label py-0 pb-1"><span class="label-text text-xs font-medium">{{ __('Thứ tự sắp xếp') }}</span></label>
                         <input type="number" name="sort_order" value="{{ $val('sort_order', 0) }}" min="0"
                                class="input input-bordered input-sm w-full">
                     </div>
 
                     <p class="text-xs text-base-content/40 mb-4">
-                        Tạo: {{ format_datetime($listing->created_at) }}
+                        {{ __('Tạo: :created_at', ['created_at' => format_datetime($listing->created_at)]) }}
                         @if($listing->updated_at && $listing->updated_at != $listing->created_at)
-                        · Sửa: {{ format_datetime($listing->updated_at) }}
+                        {{ __('· Sửa: :updated_at', ['updated_at' => format_datetime($listing->updated_at)]) }}
                         @endif
                     </p>
 
                     <div class="flex gap-2">
-                        <a href="{{ route('backend.real-estate.index') }}" class="btn btn-ghost btn-sm flex-1">Hủy</a>
+                        <a href="{{ route('backend.real-estate.index') }}" class="btn btn-ghost btn-sm flex-1">{{ __('Hủy') }}</a>
                         <button type="submit" class="btn btn-primary btn-sm flex-1 gap-1.5">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            Lưu thay đổi
+                            {{ __('Lưu thay đổi') }}
                         </button>
                     </div>
 
                     <p class="text-center text-xs text-base-content/30 mt-2.5">
-                        <span class="text-error">*</span> là trường bắt buộc
+                        <span class="text-error">*</span> {{ __('là trường bắt buộc') }}
                     </p>
 
                     @can('delete', $listing)
                     <div class="divider my-3"></div>
-                    <form method="POST" action="{{ route('backend.real-estate.destroy', $listing) }}" onsubmit="return confirm('Xoá tin này? Hành động không thể hoàn tác.')">
+                    <form method="POST" action="{{ route('backend.real-estate.destroy', $listing) }}" onsubmit="return confirm(@js(__('Xoá tin này? Hành động không thể hoàn tác.')))">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-error btn-outline btn-sm w-full">Xoá tin</button>
+                        <button type="submit" class="btn btn-error btn-outline btn-sm w-full">{{ __('Xoá tin') }}</button>
                     </form>
                     @endcan
 
@@ -580,13 +580,13 @@
 @can('reject', $listing)
 <dialog id="rejectRealEstateModal" class="modal">
     <div class="modal-box max-w-sm">
-        <h3 class="font-bold text-lg text-error">Từ chối duyệt</h3>
+        <h3 class="font-bold text-lg text-error">{{ __('Từ chối duyệt') }}</h3>
         <form method="POST" action="{{ route('backend.real-estate.reject-content', $listing) }}" class="mt-3">
             @csrf
-            <textarea name="reason" rows="3" minlength="10" required class="textarea textarea-bordered w-full" placeholder="Lý do từ chối (tối thiểu 10 ký tự)"></textarea>
+            <textarea name="reason" rows="3" minlength="10" required class="textarea textarea-bordered w-full" placeholder="{{ __('Lý do từ chối (tối thiểu 10 ký tự)') }}"></textarea>
             <div class="modal-action mt-4">
-                <button type="submit" class="btn btn-error btn-sm">Từ chối</button>
-                <button type="button" class="btn btn-ghost btn-sm" onclick="rejectRealEstateModal.close()">Hủy</button>
+                <button type="submit" class="btn btn-error btn-sm">{{ __('Từ chối') }}</button>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="rejectRealEstateModal.close()">{{ __('Hủy') }}</button>
             </div>
         </form>
     </div>

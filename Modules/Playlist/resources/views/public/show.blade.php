@@ -65,7 +65,7 @@
         {{-- Playlist còn active nhưng MỌI item đã bị ẩn/xoá nguồn — tránh trang trắng gây hiểu
              nhầm là lỗi, cùng cách Video xử lý empty state ở /videos (spec §7.2). --}}
         <div class="text-center py-16 text-base-content/60">
-            <p>Playlist này hiện chưa có nội dung khả dụng.</p>
+            <p>{{ __('Playlist này hiện chưa có nội dung khả dụng.') }}</p>
         </div>
     @else
     <div x-data="{ open: false, activeUrl: null, activeTitle: '' }">
@@ -117,7 +117,7 @@
              @keydown.escape.window="open = false">
             <div class="absolute inset-0" @click="open = false"></div>
             <div class="relative w-full max-w-3xl aspect-video mx-4">
-                <button type="button" @click="open = false" aria-label="Đóng video"
+                <button type="button" @click="open = false" aria-label="{{ __('Đóng video') }}"
                         class="absolute -top-10 right-0 text-white text-2xl leading-none">&times;</button>
                 <template x-if="open">
                     <iframe :src="activeUrl + '?autoplay=1'" :title="activeTitle"

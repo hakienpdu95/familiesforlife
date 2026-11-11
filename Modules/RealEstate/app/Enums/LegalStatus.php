@@ -18,11 +18,11 @@ enum LegalStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::PinkBookPrivate  => 'Sổ hồng riêng',
-            self::PinkBookShared   => 'Sổ hồng chung',
-            self::PendingHandover  => 'Đang làm hoàn công',
-            self::SalesContract    => 'Hợp đồng mua bán',
-            self::PendingBookIssue => 'Đang chờ cấp sổ',
+            self::PinkBookPrivate  => __('Sổ hồng riêng'),
+            self::PinkBookShared   => __('Sổ hồng chung'),
+            self::PendingHandover  => __('Đang làm hoàn công'),
+            self::SalesContract    => __('Hợp đồng mua bán'),
+            self::PendingBookIssue => __('Đang chờ cấp sổ'),
         };
     }
 

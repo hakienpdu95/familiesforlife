@@ -9,14 +9,14 @@
     <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div>
             <h1 class="text-2xl font-bold text-base-content">Activity Log</h1>
-            <p class="text-sm text-base-content/50 mt-0.5">Lịch sử hoạt động hệ thống</p>
+            <p class="text-sm text-base-content/50 mt-0.5">{{ __('Lịch sử hoạt động hệ thống') }}</p>
         </div>
         <div class="flex items-center gap-2">
             {{-- Summary badges --}}
             <template x-if="stats">
                 <div class="flex items-center gap-2">
                     <span class="badge badge-ghost gap-1">
-                        Hôm nay: <b x-text="stats.total_today"></b>
+                        {{ __('Hôm nay:') }} <b x-text="stats.total_today"></b>
                     </span>
                     <span class="badge badge-warning gap-1" x-show="stats.warnings > 0">
                         Warning: <b x-text="stats.warnings"></b>
@@ -35,7 +35,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                 </svg>
-                Xuất Excel
+                {{ __('Xuất Excel') }}
             </button>
         </div>
     </div>
@@ -47,21 +47,21 @@
 
                 <div class="form-control min-w-32">
                     <label class="label py-0.5">
-                        <span class="label-text text-xs font-medium">Từ ngày</span>
+                        <span class="label-text text-xs font-medium">{{ __('Từ ngày') }}</span>
                     </label>
                     <input type="date" class="input input-sm input-bordered"
                            x-model="f.date_from" @change="reload()">
                 </div>
                 <div class="form-control min-w-32">
                     <label class="label py-0.5">
-                        <span class="label-text text-xs font-medium">Đến ngày</span>
+                        <span class="label-text text-xs font-medium">{{ __('Đến ngày') }}</span>
                     </label>
                     <input type="date" class="input input-sm input-bordered"
                            x-model="f.date_to" @change="reload()">
                 </div>
 
                 <div class="form-control self-end">
-                    <button @click="reset()" class="btn btn-ghost btn-sm">Xóa lọc</button>
+                    <button @click="reset()" class="btn btn-ghost btn-sm">{{ __('Xóa lọc') }}</button>
                 </div>
             </div>
         </div>

@@ -28,7 +28,7 @@ class QrReportSubmittedNotification extends Notification implements ShouldQueue
     {
         return NotificationData::make(
             type: 'qr_report_submitted',
-            title: 'Phản ánh '.$this->report->ref().' về mã QR '.$this->report->identity?->qr_code.' — '.$this->targetLabel,
+            title: __('Phản ánh :ref về mã QR :code — :target', ['ref' => $this->report->ref(), 'code' => $this->report->identity?->qr_code, 'target' => $this->targetLabel]),
             body: $this->report->reasonLabel().': '.Str::limit($this->report->content, 140),
             url: route('backend.qr-reports.index'),
             icon: 'warning',

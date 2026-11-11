@@ -36,7 +36,7 @@
                     </p>
                 @endif
                 @if ($map_url)
-                    <a href="{{ $map_url }}" target="_blank" rel="noopener" class="ml-auto inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary text-primary-content text-[13.5px] font-semibold [&>svg]:w-4 [&>svg]:h-4">@include('traceability.partials.icon', ['name' => 'map']) Chỉ đường</a>
+                    <a href="{{ $map_url }}" target="_blank" rel="noopener" class="ml-auto inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-primary text-primary-content text-[13.5px] font-semibold [&>svg]:w-4 [&>svg]:h-4">@include('traceability.partials.icon', ['name' => 'map']) {{ __('Chỉ đường') }}</a>
                 @endif
             </div>
         @else
@@ -45,19 +45,19 @@
     </div>
 
     <section class="tx-section">
-        <h2 class="tx-section-title">Thông tin di tích</h2>
+        <h2 class="tx-section-title">{{ __('Thông tin di tích') }}</h2>
         @include('traceability.partials.spec', ['rows' => [
-            $rank ? ['label' => 'Xếp hạng', 'value' => $rank] : null,
-            $type ? ['label' => 'Loại hình', 'value' => $type] : null,
-            $era ? ['label' => 'Niên đại', 'value' => $era] : null,
-            $address ? ['label' => 'Địa chỉ', 'value' => $address] : null,
-            $coordinates ? ['label' => 'Toạ độ', 'value' => $coordinates] : null,
+            $rank ? ['label' => __('Xếp hạng'), 'value' => $rank] : null,
+            $type ? ['label' => __('Loại hình'), 'value' => $type] : null,
+            $era ? ['label' => __('Niên đại'), 'value' => $era] : null,
+            $address ? ['label' => __('Địa chỉ'), 'value' => $address] : null,
+            $coordinates ? ['label' => __('Toạ độ'), 'value' => $coordinates] : null,
         ]])
     </section>
 
     @if ($intro || filled($content_html))
         <section class="tx-section">
-            <h2 class="tx-section-title">Lịch sử và giá trị</h2>
+            <h2 class="tx-section-title">{{ __('Lịch sử và giá trị') }}</h2>
             <div class="tx-card px-4 py-5">
                 @if ($intro)
                     <p class="text-[17px] leading-[1.7] font-medium text-[#44403c]">{{ $intro }}</p>
@@ -66,13 +66,13 @@
                     <div @class(['tx-prose', 'mt-5 pt-5 border-t border-[var(--tx-line)]' => $intro])>{!! $content_html !!}</div>
                 @endif
                 @if ($detail_url && ($cta['url'] ?? null) !== $detail_url)
-                    <a href="{{ $detail_url }}" class="mt-4 inline-flex items-center gap-1 text-[14px] font-medium text-primary">Xem trang giới thiệu đầy đủ <span class="w-4 h-4 [&>svg]:w-4 [&>svg]:h-4">@include('traceability.partials.icon', ['name' => 'chevron'])</span></a>
+                    <a href="{{ $detail_url }}" class="mt-4 inline-flex items-center gap-1 text-[14px] font-medium text-primary">{{ __('Xem trang giới thiệu đầy đủ') }} <span class="w-4 h-4 [&>svg]:w-4 [&>svg]:h-4">@include('traceability.partials.icon', ['name' => 'chevron'])</span></a>
                 @endif
             </div>
         </section>
     @elseif ($detail_url && ($cta['url'] ?? null) !== $detail_url)
         <div class="tx-section">
-            <a href="{{ $detail_url }}" class="tx-card tx-row group"><span class="flex-1 text-[15px] font-medium group-hover:text-primary">Xem trang giới thiệu đầy đủ</span><span class="tx-chevron">@include('traceability.partials.icon', ['name' => 'chevron'])</span></a>
+            <a href="{{ $detail_url }}" class="tx-card tx-row group"><span class="flex-1 text-[15px] font-medium group-hover:text-primary">{{ __('Xem trang giới thiệu đầy đủ') }}</span><span class="tx-chevron">@include('traceability.partials.icon', ['name' => 'chevron'])</span></a>
         </div>
     @endif
 

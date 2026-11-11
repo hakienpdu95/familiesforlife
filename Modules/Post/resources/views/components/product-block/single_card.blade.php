@@ -1,8 +1,8 @@
 @php($item = $block->items->first())
 @php($price = $item?->ocop_stars && blank($item?->price_label_override) ? null : $item?->display_price_label)
-<aside class="not-prose @container my-7 rounded-lg border border-base-300 bg-base-100 overflow-hidden" aria-label="{{ $block->heading ?: 'Sản phẩm' }}">
+<aside class="not-prose @container my-7 rounded-lg border border-base-300 bg-base-100 overflow-hidden" aria-label="{{ $block->heading ?: __('Sản phẩm') }}">
     <div class="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-base-300 bg-base-200/50">
-        <span class="text-[11px] font-semibold uppercase tracking-[.12em] text-base-content/60 truncate">{{ $block->heading ?: ($block->isOcop() ? 'Sản phẩm OCOP' : 'Sản phẩm') }}</span>
+        <span class="text-[11px] font-semibold uppercase tracking-[.12em] text-base-content/60 truncate">{{ $block->heading ?: ($block->isOcop() ? __('Sản phẩm OCOP') : __('Sản phẩm')) }}</span>
         @include('post::components.product-block.partials.stars', ['class' => 'text-[12px]'])
     </div>
     <div class="flex gap-4 p-4">

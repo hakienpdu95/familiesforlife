@@ -16,16 +16,14 @@ final class KnowledgeDocumentSlotGuard
     {
         if (! KnowledgeSlotRegistry::isValidKnowledgeType($type, $subjectType)) {
             throw new InvalidKnowledgeDocumentException(
-                "Loại tri thức \"{$type}\" không hợp lệ với subject_type "
-                . ($subjectType ?? '(DNA chung — không gắn subject)') . '.'
+                __('Loại tri thức ":type" không hợp lệ với subject_type :subject.', ['type' => $type, 'subject' => $subjectType ?? __('(DNA chung — không gắn subject)')])
             );
         }
 
         // Tầng DNA (mục 5.1) — subject_type null luôn áp dụng chung, không được kèm scope.
         if ($subjectType === null && $scope !== null) {
             throw new InvalidKnowledgeDocumentException(
-                'Tri thức DNA chung toàn tổ chức (không gắn subject_type) không được đặt scope — '
-                . 'scope chỉ áp dụng cho tri thức gắn với 1 subject_type cụ thể.'
+                __('Tri thức DNA chung toàn tổ chức (không gắn subject_type) không được đặt scope — scope chỉ áp dụng cho tri thức gắn với 1 subject_type cụ thể.')
             );
         }
 
@@ -35,8 +33,7 @@ final class KnowledgeDocumentSlotGuard
 
             if (! empty($invalidKeys)) {
                 throw new InvalidKnowledgeDocumentException(
-                    'scope chứa key không hợp lệ cho subject_type ' . $subjectType . ': '
-                    . implode(', ', $invalidKeys) . '. Key hợp lệ: ' . implode(', ', $allowedKeys) . '.'
+                    __('scope chứa key không hợp lệ cho subject_type :type: :invalid. Key hợp lệ: :allowed.', ['type' => $subjectType, 'invalid' => implode(', ', $invalidKeys), 'allowed' => implode(', ', $allowedKeys)])
                 );
             }
         }

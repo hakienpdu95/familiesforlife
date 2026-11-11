@@ -32,7 +32,7 @@ class AppMailMessage
     public static function make(): MailMessage
     {
         return (new MailMessage)->salutation(
-            'Trân trọng, ' . config('app.name')
+            __('Trân trọng, :app', ['app' => config('app.name')])
         );
     }
 
@@ -52,7 +52,7 @@ class AppMailMessage
     public static function system(): MailMessage
     {
         return static::make()->line(
-            '_Email này được gửi tự động bởi hệ thống. Vui lòng không trả lời trực tiếp._'
+            __('_Email này được gửi tự động bởi hệ thống. Vui lòng không trả lời trực tiếp._')
         );
     }
 
@@ -63,8 +63,8 @@ class AppMailMessage
     public static function invite(string $recipientName = ''): MailMessage
     {
         $greeting = $recipientName
-            ? "Xin chào {$recipientName},"
-            : 'Xin chào,';
+            ? __('Xin chào :recipient_name,', ['recipient_name' => $recipientName])
+            : __('Xin chào,');
 
         return static::make()->greeting($greeting);
     }

@@ -1,14 +1,14 @@
 @extends('layouts.backend')
-@section('title', 'Thêm tài khoản')
+@section('title', __('Thêm tài khoản'))
 
 @section('content')
 <div class="max-w-3xl">
     <div class="flex items-center justify-between mt-4 mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-base-content">Thêm tài khoản</h1>
-            <p class="text-sm text-base-content/50 mt-0.5">Tạo tài khoản nội bộ và gửi email mời đặt mật khẩu.</p>
+            <h1 class="text-2xl font-bold text-base-content">{{ __('Thêm tài khoản') }}</h1>
+            <p class="text-sm text-base-content/50 mt-0.5">{{ __('Tạo tài khoản nội bộ và gửi email mời đặt mật khẩu.') }}</p>
         </div>
-        <a href="{{ route('backend.users.index') }}" class="btn btn-ghost btn-sm">Quay lại</a>
+        <a href="{{ route('backend.users.index') }}" class="btn btn-ghost btn-sm">{{ __('Quay lại') }}</a>
     </div>
 
     @if ($errors->any())
@@ -25,10 +25,10 @@
         @include('user::partials.account-fields')
 
         <div class="flex flex-wrap items-center justify-between gap-3 px-6 py-4">
-            <p class="text-xs text-base-content/50">Hệ thống không đặt mật khẩu thay người dùng — họ tự đặt qua link trong email.</p>
+            <p class="text-xs text-base-content/50">{{ __('Hệ thống không đặt mật khẩu thay người dùng — họ tự đặt qua link trong email.') }}</p>
             <div class="flex gap-2">
-                <a href="{{ route('backend.users.index') }}" class="btn btn-ghost btn-sm">Huỷ</a>
-                <button type="submit" class="btn btn-primary btn-sm">Tạo tài khoản</button>
+                <a href="{{ route('backend.users.index') }}" class="btn btn-ghost btn-sm">{{ __('Huỷ') }}</a>
+                <button type="submit" class="btn btn-primary btn-sm">{{ __('Tạo tài khoản') }}</button>
             </div>
         </div>
     </form>

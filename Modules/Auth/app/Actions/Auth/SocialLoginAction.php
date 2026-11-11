@@ -42,7 +42,7 @@ class SocialLoginAction
                 // Guard: social account này thuộc user khác với người đang đăng nhập
                 if ($authenticatedUserId !== null && $social->user_id !== $authenticatedUserId) {
                     throw ValidationException::withMessages([
-                        'social' => 'Tài khoản ' . ucfirst($provider) . ' này đã được liên kết với tài khoản khác.',
+                        'social' => __('Tài khoản :provider này đã được liên kết với tài khoản khác.', ['provider' => ucfirst($provider)]),
                     ]);
                 }
 
@@ -70,7 +70,7 @@ class SocialLoginAction
             // Guard: email này thuộc user khác với người đang đăng nhập
             if ($authenticatedUserId !== null && $user->id !== $authenticatedUserId) {
                 throw ValidationException::withMessages([
-                    'social' => 'Email này đã được liên kết với tài khoản khác.',
+                    'social' => __('Email này đã được liên kết với tài khoản khác.'),
                 ]);
             }
 
@@ -80,9 +80,7 @@ class SocialLoginAction
             // Không áp dụng khi user đã đăng nhập ($authenticatedUserId !== null) vì họ đã được xác thực.
             if ($authenticatedUserId === null && ! $user->email_verified_at) {
                 throw ValidationException::withMessages([
-                    'email' => 'Email này chưa được xác minh trong hệ thống. '
-                             . 'Vui lòng đăng nhập bằng mật khẩu và xác minh email trước khi liên kết '
-                             . 'tài khoản ' . ucfirst($provider) . '.',
+                    'email' => __('Email này chưa được xác minh trong hệ thống. Vui lòng đăng nhập bằng mật khẩu và xác minh email trước khi liên kết tài khoản :provider.', ['provider' => ucfirst($provider)]),
                 ]);
             }
 
@@ -104,7 +102,7 @@ class SocialLoginAction
         // bất kỳ user nào → social account này không thuộc về user hiện tại
         if ($authenticatedUserId !== null) {
             throw ValidationException::withMessages([
-                'social' => 'Email của tài khoản ' . ucfirst($provider) . ' không khớp với email tài khoản đang đăng nhập.',
+                'social' => __('Email của tài khoản :provider không khớp với email tài khoản đang đăng nhập.', ['provider' => ucfirst($provider)]),
             ]);
         }
 
@@ -117,7 +115,7 @@ class SocialLoginAction
     {
         if (! array_key_exists($provider, config('services.social_providers', []))) {
             throw ValidationException::withMessages([
-                'provider' => "Provider '{$provider}' chưa được hỗ trợ.",
+                'provider' => __('Provider \':provider\' chưa được hỗ trợ.', ['provider' => $provider]),
             ]);
         }
     }
@@ -128,8 +126,7 @@ class SocialLoginAction
 
         if (blank($email)) {
             throw ValidationException::withMessages([
-                'email' => 'Tài khoản ' . ucfirst($provider) . ' không có địa chỉ email. '
-                         . 'Vui lòng đăng nhập bằng email và mật khẩu.',
+                'email' => __('Tài khoản :provider không có địa chỉ email. Vui lòng đăng nhập bằng email và mật khẩu.', ['provider' => ucfirst($provider)]),
             ]);
         }
 

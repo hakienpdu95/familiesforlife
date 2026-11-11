@@ -1,3 +1,5 @@
+import { t } from '../../../../../../resources/js/shared/i18n.js';
+
 /**
  * pages/broadcast-log-index.js
  * Alpine component + Tabulator cho dashboard/newsletter/broadcast/logs — bảng chỉ đọc
@@ -15,22 +17,22 @@ function esc(v) {
 
 const COLUMNS = [
     {
-        title: 'Chủ đề', field: 'subject', minWidth: 240, sorter: 'string',
+        title: t('Chủ đề'), field: 'subject', minWidth: 240, sorter: 'string',
         formatter(cell) { return '<span class="font-medium text-sm">' + esc(cell.getValue()) + '</span>'; },
     },
     {
-        title: 'Thời điểm gửi/lên lịch', field: 'created_at', width: 220, sorter: 'string',
+        title: t('Thời điểm gửi/lên lịch'), field: 'created_at', width: 220, sorter: 'string',
         formatter(cell) {
             const d = cell.getRow().getData();
             return d.scheduled_at
-                ? '<span class="text-xs">Lên lịch: ' + esc(d.scheduled_at) + '</span>'
+                ? ('<span class="text-xs">' + t('Lên lịch:') + ' ') + esc(d.scheduled_at) + '</span>'
                 : '<span class="text-xs">' + esc(d.created_at) + '</span>';
         },
     },
     {
-        title: 'Người gửi', field: 'sent_by_name', width: 160, headerSort: false,
+        title: t('Người gửi'), field: 'sent_by_name', width: 160, headerSort: false,
         formatter(cell) {
-            return '<span class="text-xs">' + (esc(cell.getValue()) || 'Hệ thống') + '</span>';
+            return '<span class="text-xs">' + (esc(cell.getValue()) || t('Hệ thống')) + '</span>';
         },
     },
     {
@@ -57,7 +59,7 @@ document.addEventListener('alpine:init', () => {
 
             get activeChips() {
                 const chips = [];
-                if (this.filters.search) chips.push({ key: 'search', label: 'Tìm: ' + this.filters.search });
+                if (this.filters.search) chips.push({ key: 'search', label: (t('Tìm:') + ' ') + this.filters.search });
                 return chips;
             },
 
@@ -97,11 +99,11 @@ document.addEventListener('alpine:init', () => {
                     langs: {
                         'vi-VN': {
                             pagination: {
-                                page_size: 'Dòng/trang', page_title: 'Trang',
+                                page_size: t('Dòng/trang'), page_title: t('Trang'),
                                 first: '«', last: '»', prev: '‹', next: '›',
-                                first_title: 'Trang đầu', last_title: 'Trang cuối',
-                                prev_title: 'Trang trước', next_title: 'Trang sau',
-                                counter: { showing: '', of: 'trong', rows: 'dòng', pages: 'trang' },
+                                first_title: t('Trang đầu'), last_title: t('Trang cuối'),
+                                prev_title: t('Trang trước'), next_title: t('Trang sau'),
+                                counter: { showing: '', of: t('trong'), rows: t('dòng'), pages: t('trang') },
                             },
                         },
                     },
@@ -109,7 +111,7 @@ document.addEventListener('alpine:init', () => {
                     columns: COLUMNS,
                     placeholder: '<div class="py-16 text-center opacity-40">'
                         + '<svg class="w-12 h-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>'
-                        + '<p class="text-sm">Chưa gửi bản tin nào</p></div>',
+                        + ('<p class="text-sm">' + t('Chưa gửi bản tin nào') + '</p></div>'),
                 });
 
                 window.broadcastLogTable = tableInst;

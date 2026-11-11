@@ -150,7 +150,7 @@ class NotificationController extends Controller
         return [
             'uuid'       => $n->uuid ?? $n->id,
             'type'       => $data['type']     ?? 'unknown',
-            'title'      => $data['title']    ?? $data['message'] ?? '(Thông báo)',
+            'title'      => $data['title']    ?? $data['message'] ?? __('(Thông báo)'),
             'body'       => $data['body']     ?? $data['message'] ?? '',
             'url'        => $data['url']      ?? '',
             'icon'       => $data['icon']     ?? 'bell',

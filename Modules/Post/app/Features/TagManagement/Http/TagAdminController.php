@@ -44,7 +44,7 @@ class TagAdminController extends Controller
         $tag  = $action->handle($data);
 
         return redirect()->route('backend.post.tags.index')
-            ->with('success', "Tag \"{$tag->name}\" đã được tạo.");
+            ->with('success', __('Tag ":name" đã được tạo.', ['name' => $tag->name]));
     }
 
     public function edit(PostTag $tag): View
@@ -58,7 +58,7 @@ class TagAdminController extends Controller
         $action->handle($tag, $data);
 
         return redirect()->route('backend.post.tags.index')
-            ->with('success', 'Cập nhật tag thành công.');
+            ->with('success', __('Cập nhật tag thành công.'));
     }
 
     public function destroy(Request $request, PostTag $tag, DeleteTagAction $action): RedirectResponse|JsonResponse
@@ -76,11 +76,11 @@ class TagAdminController extends Controller
         }
 
         if ($request->expectsJson()) {
-            return response()->json(['message' => "Đã xoá tag \"{$name}\"."]);
+            return response()->json(['message' => __('Đã xoá tag ":name".', ['name' => $name])]);
         }
 
         return redirect()->route('backend.post.tags.index')
-            ->with('success', "Đã xoá tag \"{$name}\".");
+            ->with('success', __('Đã xoá tag ":name".', ['name' => $name]));
     }
 
     public function merge(Request $request, PostTag $tag, MergeTagsAction $action): RedirectResponse|JsonResponse
@@ -108,11 +108,11 @@ class TagAdminController extends Controller
         }
 
         if ($request->expectsJson()) {
-            return response()->json(['message' => "Đã gộp tag \"{$sourceName}\" vào \"{$targetTag->name}\"."]);
+            return response()->json(['message' => __('Đã gộp tag ":source_name" vào ":name".', ['source_name' => $sourceName, 'name' => $targetTag->name])]);
         }
 
         return redirect()->route('backend.post.tags.index')
-            ->with('success', "Đã gộp tag \"{$sourceName}\" vào \"{$targetTag->name}\".");
+            ->with('success', __('Đã gộp tag ":source_name" vào ":name".', ['source_name' => $sourceName, 'name' => $targetTag->name]));
     }
 
     private function validated(Request $request): array

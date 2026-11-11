@@ -10,8 +10,8 @@ enum ProvincePlaceType: string
     public function label(): string
     {
         return match ($this) {
-            self::ThanhPho => 'Thành phố TW',
-            self::Tinh => 'Tỉnh',
+            self::ThanhPho => __('Thành phố TW'),
+            self::Tinh => __('Tỉnh'),
         };
     }
 

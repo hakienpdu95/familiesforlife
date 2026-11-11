@@ -43,7 +43,7 @@ class ChangeCalendarEntryStatusAction
         // 2 vế (không chỉ ngày) để tên trạng thái không nói dối.
         if ($target === CalendarEntryStatus::Planned && (! $entry->target_publish_date || ! $entry->assigned_to)) {
             throw ValidationException::withMessages([
-                'status' => 'Cần có ngày dự kiến đăng và người phụ trách trước khi chuyển sang Planned.',
+                'status' => __('Cần có ngày dự kiến đăng và người phụ trách trước khi chuyển sang Planned.'),
             ]);
         }
 

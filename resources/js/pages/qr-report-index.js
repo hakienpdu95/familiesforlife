@@ -6,6 +6,7 @@
 
 import { createTs } from '@shared/tom-select-factory.js';
 
+import { t } from '../shared/i18n.js';
 function esc(v) {
     if (v == null) return '';
     return String(v)
@@ -24,11 +25,11 @@ const REASON_BADGE = {
 
 const COLUMNS = [
     {
-        title: 'Thời gian', field: 'created_at', width: 140, sorter: 'string',
+        title: t('Thời gian'), field: 'created_at', width: 140, sorter: 'string',
         formatter: (cell) => '<div class="text-xs whitespace-nowrap leading-tight"><span class="font-mono font-semibold">' + esc(cell.getRow().getData().ref) + '</span><br><span class="text-base-content/50">' + esc(cell.getValue()) + '</span></div>',
     },
     {
-        title: 'Mã QR', field: 'qr_code', width: 110, headerSort: false,
+        title: t('Mã QR'), field: 'qr_code', width: 110, headerSort: false,
         formatter(cell) {
             const d = cell.getRow().getData();
             return d.qr_code
@@ -37,37 +38,37 @@ const COLUMNS = [
         },
     },
     {
-        title: 'Đối tượng', field: 'target_title', minWidth: 200, headerSort: false,
+        title: t('Đối tượng'), field: 'target_title', minWidth: 200, headerSort: false,
         formatter(cell) {
             const d = cell.getRow().getData();
             return '<div class="text-xs text-base-content/50">' + esc(d.target_kind) + '</div>'
                 + '<div class="text-sm font-medium">' + esc(d.target_title)
-                + (d.target_trashed ? ' <span class="badge badge-ghost badge-xs">đã xoá</span>' : '') + '</div>';
+                + (d.target_trashed ? (' <span class="badge badge-ghost badge-xs">' + t('đã xoá') + '</span>') : '') + '</div>';
         },
     },
     {
-        title: 'Lý do', field: 'reason', width: 190, sorter: 'string',
+        title: t('Lý do'), field: 'reason', width: 190, sorter: 'string',
         formatter(cell) {
             const d = cell.getRow().getData();
             return '<span class="badge badge-sm whitespace-nowrap ' + (REASON_BADGE[d.reason] || 'badge-ghost') + '">' + esc(d.reason_label) + '</span>';
         },
     },
     {
-        title: 'Nội dung', field: 'content', minWidth: 260, headerSort: false, formatter: 'textarea',
+        title: t('Nội dung'), field: 'content', minWidth: 260, headerSort: false, formatter: 'textarea',
     },
     {
-        title: 'Liên hệ', field: 'contact', width: 150, headerSort: false,
+        title: t('Liên hệ'), field: 'contact', width: 150, headerSort: false,
         formatter: (cell) => cell.getValue() ? '<span class="text-sm">' + esc(cell.getValue()) + '</span>' : EMPTY,
     },
     {
-        title: 'Xử lý', field: 'resolved_at', width: 170, hozAlign: 'center', sorter: 'string',
+        title: t('Xử lý'), field: 'resolved_at', width: 170, hozAlign: 'center', sorter: 'string',
         formatter(cell) {
             const d = cell.getRow().getData();
             if (d.resolve_url) {
                 return '<button type="button" class="btn btn-success btn-xs"'
-                    + ' data-resolve-url="' + esc(d.resolve_url) + '" data-resolve-title="' + esc(d.ref) + '">Đã xử lý</button>';
+                    + ' data-resolve-url="' + esc(d.resolve_url) + '" data-resolve-title="' + esc(d.ref) + ('">' + t('Đã xử lý') + '</button>');
             }
-            return '<div class="text-xs leading-tight"><span class="badge badge-success badge-xs mb-0.5">Đã xử lý</span><br>'
+            return ('<div class="text-xs leading-tight"><span class="badge badge-success badge-xs mb-0.5">' + t('Đã xử lý') + '</span><br>')
                 + esc(d.resolved_by || '—') + '<br><span class="text-base-content/50">' + esc(d.resolved_at || '') + '</span></div>';
         },
     },
@@ -99,12 +100,12 @@ document.addEventListener('click', async (e) => {
             headers: { 'X-CSRF-TOKEN': csrf, 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
         });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.message || 'Cập nhật thất bại.');
+        if (!res.ok) throw new Error(data.message || t('Cập nhật thất bại.'));
         document.getElementById('resolveModal')?.close();
         window.qrReportTable?.replaceData();
-        window.Toast?.success?.(data.message || 'Đã xử lý phản ánh.');
+        window.Toast?.success?.(data.message || t('Đã xử lý phản ánh.'));
     } catch (err) {
-        alert(err.message || 'Lỗi kết nối. Vui lòng thử lại.');
+        alert(err.message || t('Lỗi kết nối. Vui lòng thử lại.'));
     } finally {
         confirmBtn.disabled = false;
         pendingResolveUrl = null;
@@ -136,7 +137,7 @@ document.addEventListener('alpine:init', () => {
                 const el = document.getElementById('ts-reason');
                 if (!el) return;
                 tsReason = createTs(el, {
-                    placeholder: 'Tất cả lý do',
+                    placeholder: t('Tất cả lý do'),
                     onChange() { el.dispatchEvent(new Event('change', { bubbles: true })); },
                 });
             },
@@ -176,17 +177,17 @@ document.addEventListener('alpine:init', () => {
                     langs: {
                         'vi-VN': {
                             pagination: {
-                                page_size: 'Dòng/trang', page_title: 'Trang',
+                                page_size: t('Dòng/trang'), page_title: t('Trang'),
                                 first: '«', last: '»', prev: '‹', next: '›',
-                                first_title: 'Trang đầu', last_title: 'Trang cuối',
-                                prev_title: 'Trang trước', next_title: 'Trang sau',
-                                counter: { showing: '', of: 'trong', rows: 'dòng', pages: 'trang' },
+                                first_title: t('Trang đầu'), last_title: t('Trang cuối'),
+                                prev_title: t('Trang trước'), next_title: t('Trang sau'),
+                                counter: { showing: '', of: t('trong'), rows: t('dòng'), pages: t('trang') },
                             },
                         },
                     },
 
                     columns: COLUMNS,
-                    placeholder: '<div class="py-16 text-center opacity-40"><p class="text-sm">Không có phản ánh nào</p></div>',
+                    placeholder: ('<div class="py-16 text-center opacity-40"><p class="text-sm">' + t('Không có phản ánh nào') + '</p></div>'),
                 });
 
                 window.qrReportTable = tableInst;

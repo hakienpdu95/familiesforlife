@@ -16,7 +16,7 @@ class DeleteOcopSubjectAction
 
         if ($count > 0) {
             throw ValidationException::withMessages([
-                'ocop_subject' => "Không thể xoá — chủ thể đang có {$count} sản phẩm OCOP. Chuyển các sản phẩm sang chủ thể khác trước.",
+                'ocop_subject' => __('Không thể xoá — chủ thể đang có :count sản phẩm OCOP. Chuyển các sản phẩm sang chủ thể khác trước.', ['count' => $count]),
             ]);
         }
 

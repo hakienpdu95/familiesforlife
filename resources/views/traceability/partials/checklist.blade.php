@@ -3,7 +3,7 @@
 @php($missing = $items->filter(fn ($i) => $i['count'] === 0)->pluck('label'))
 @php($requiredMissing = $items->filter(fn ($i) => $i['count'] === 0 && ! empty($i['required']))->pluck('label'))
 @php($hasFiles = $items->contains(fn ($i) => ! empty($i['files'])))
-@php($request = 'Đề nghị bổ sung '.mb_strtolower($label).' còn thiếu: '.$missing->implode(', ').'.')
+@php($request = __('Đề nghị bổ sung :label còn thiếu: :missing.', ['label' => mb_strtolower($label), 'missing' => $missing->implode(', ')]))
 @php($prefill = fn (string $reason, string $text) => "var d=document.getElementById('phan-anh');d.open=true;var r=d.querySelector('[name=reason][value='+".\Illuminate\Support\Js::from($reason)."+']'),c=d.querySelector('[name=content]');if(r&&!d.querySelector('[name=reason]:checked')){r.checked=true;r.form.dispatchEvent(new Event('change'))}if(c&&!c.value){c.value=".\Illuminate\Support\Js::from($text).";c.form.dispatchEvent(new Event('input'))}")
 @php($ask = $prefill('other', $request))
 @php($stale = $items->filter(fn ($i) => ! empty($i['stale']))->pluck('label'))
@@ -21,15 +21,15 @@
                     </span>
                 </span>
                 @if ($requiredMissing->isNotEmpty())
-                    <span class="block text-[12.5px] font-medium text-[#b45309] line-clamp-2">Thiếu hồ sơ bắt buộc: {{ $requiredMissing->implode(', ') }}</span>
+                    <span class="block text-[12.5px] font-medium text-[#b45309] line-clamp-2">{{ __('Thiếu hồ sơ bắt buộc: :implode', ['implode' => $requiredMissing->implode(', ')]) }}</span>
                 @elseif ($stale->isNotEmpty())
-                    <span class="block text-[12.5px] font-medium text-[#b45309] line-clamp-2">Cần cập nhật: {{ $stale->implode(', ') }}</span>
+                    <span class="block text-[12.5px] font-medium text-[#b45309] line-clamp-2">{{ __('Cần cập nhật: :implode', ['implode' => $stale->implode(', ')]) }}</span>
                 @elseif ($missing->isNotEmpty())
-                    <span class="block text-[12.5px] text-[#78716c] line-clamp-2">Chưa công bố: {{ $missing->implode(', ') }}</span>
+                    <span class="block text-[12.5px] text-[#78716c] line-clamp-2">{{ __('Chưa công bố: :implode', ['implode' => $missing->implode(', ')]) }}</span>
                 @endif
             </span>
             <span class="shrink-0 flex items-center gap-1 text-[12.5px] font-semibold text-primary">
-                <span class="group-open/doc:hidden">Xem</span><span class="hidden group-open/doc:inline">Thu gọn</span>
+                <span class="group-open/doc:hidden">Xem</span><span class="hidden group-open/doc:inline">{{ __('Thu gọn') }}</span>
                 <span class="tx-chevron text-current transition-transform group-open/doc:rotate-90">@include('traceability.partials.icon', ['name' => 'chevron'])</span>
             </span>
         </summary>
@@ -50,7 +50,7 @@
                             <span @class(['text-[13.5px] font-semibold leading-snug', 'text-[#78716c]' => ! $has])>{{ $item['label'] }}</span>
                             <span @class(['text-[12px] shrink-0', 'text-[#78716c]' => $has, 'text-[#a8a29e]' => ! $has && empty($item['required']), 'text-[#b45309] font-semibold' => ! $has && ! empty($item['required'])])>
                                 @unless ($has)
-                                    Chưa công bố
+                                    {{ __('Chưa công bố') }}
                                 @endunless
                             </span>
                         </div>
@@ -68,13 +68,13 @@
                                 @foreach ($files as $file)
                                     <li class="flex items-center gap-2">
                                         <a href="{{ \App\Shared\Traceability\TraceabilityService::documentUrl($qr_code, $file['uuid']) }}" target="_blank" rel="noopener nofollow"
-                                           data-doc data-doc-type="{{ $file['type'] }}" data-doc-title="{{ $item['label'] }}{{ count($files) > 1 ? ' · tệp '.$loop->iteration : '' }}"
-                                           data-doc-meta="{{ implode(' · ', array_filter([$file['type'], $file['size'], ! empty($file['uploaded_at']) ? 'đăng '.$file['uploaded_at'] : null, ! empty($file['ref']) ? 'mã '.$file['ref'] : null])) }}"
-                                           aria-label="Xem {{ $item['label'] }}{{ count($files) > 1 ? ', tệp '.$loop->iteration.' trên '.count($files) : '' }} ({{ $file['type'] }}, {{ $file['size'] }}, mã {{ $file['ref'] ?? '' }})"
+                                           data-doc data-doc-type="{{ $file['type'] }}" data-doc-title="{{ $item['label'] }}{{ count($files) > 1 ? ' · '.__('tệp :number', ['number' => $loop->iteration]) : '' }}"
+                                           data-doc-meta="{{ implode(' · ', array_filter([$file['type'], $file['size'], ! empty($file['uploaded_at']) ? __('đăng :date', ['date' => $file['uploaded_at']]) : null, ! empty($file['ref']) ? __('mã :code', ['code' => $file['ref']]) : null])) }}"
+                                           aria-label="{{ __('Xem :item:files (:file, :file2, mã :file3)', ['item' => $item['label'], 'files' => count($files) > 1 ? ', '.__('tệp :number trên :total', ['number' => $loop->iteration, 'total' => count($files)]) : '', 'file' => $file['type'], 'file2' => $file['size'], 'file3' => $file['ref'] ?? '']) }}"
                                            class="group/file flex flex-1 min-w-0 items-center gap-2 pl-2.5 py-1.5 min-h-10 hover:text-primary transition-colors">
                                             <span @class(['inline-flex items-center justify-center h-[18px] px-1 rounded-[4px] text-[10px] font-bold text-white shrink-0', 'bg-[#dc2626]' => $file['type'] === 'PDF', 'bg-[#2563eb]' => $file['type'] !== 'PDF'])>{{ $file['type'] }}</span>
                                             <span class="min-w-0 leading-tight">
-                                                <span class="block text-[12.5px] font-semibold leading-tight group-hover/file:underline">Xem{{ count($files) > 1 ? ' tệp '.$loop->iteration : '' }}@if ($loop->first && count($files) > 1)<span class="ml-1 font-normal text-[#15803d]">mới nhất</span>@endif</span>
+                                                <span class="block text-[12.5px] font-semibold leading-tight group-hover/file:underline">{{ count($files) > 1 ? __('Xem tệp :number', ['number' => $loop->iteration]) : __('Xem') }}@if ($loop->first && count($files) > 1)<span class="ml-1 font-normal text-[#15803d]">{{ __('mới nhất') }}</span>@endif</span>
                                                 <span class="flex flex-wrap gap-x-1 text-[11.5px] leading-snug text-[#a8a29e]">@foreach (array_values(array_filter([$file['size'], ! empty($file['uploaded_at']) ? 'đăng '.$file['uploaded_at'] : null, ! empty($file['ref']) ? 'mã '.$file['ref'] : null])) as $part)<span class="whitespace-nowrap">{{ $loop->first ? '' : '· ' }}{{ $part }}</span>@endforeach</span>
                                             </span>
                                         </a>
@@ -82,7 +82,7 @@
                                 @endforeach
                             </ul>
                         @elseif ($has)
-                            <p class="mt-1 text-[12px] text-[#a8a29e]">Đã cập nhật trên hệ thống, tệp không mở xem công khai.</p>
+                            <p class="mt-1 text-[12px] text-[#a8a29e]">{{ __('Đã cập nhật trên hệ thống, tệp không mở xem công khai.') }}</p>
                         @endif
                     </div>
                 </li>
@@ -90,7 +90,7 @@
         </ul>
         @if ($missing->isNotEmpty())
             <div class="flex justify-end px-3.5 py-2 border-t border-[var(--tx-line)] bg-[#fafaf9]">
-                <a href="#phan-anh" onclick="{{ $ask }}" class="text-[12.5px] font-semibold text-primary hover:underline">Đề nghị bổ sung</a>
+                <a href="#phan-anh" onclick="{{ $ask }}" class="text-[12.5px] font-semibold text-primary hover:underline">{{ __('Đề nghị bổ sung') }}</a>
             </div>
         @endif
     </details>
@@ -98,41 +98,41 @@
     <div class="flex items-center gap-3 px-3.5 py-2.5 border-t border-[#ead9a8] bg-base-100">
         <span class="flex-1 min-w-0 leading-snug">
             <span class="block text-[12px] text-[#78716c]">{{ $label }}</span>
-            <span class="block text-[13.5px] font-semibold text-[#57534e]">Chưa công bố hồ sơ nào</span>
+            <span class="block text-[13.5px] font-semibold text-[#57534e]">{{ __('Chưa công bố hồ sơ nào') }}</span>
             @if ($requiredMissing->isNotEmpty())
-                <span class="block text-[12.5px] font-medium text-[#b45309] line-clamp-2">Thiếu hồ sơ bắt buộc: {{ $requiredMissing->implode(', ') }}</span>
+                <span class="block text-[12.5px] font-medium text-[#b45309] line-clamp-2">{{ __('Thiếu hồ sơ bắt buộc: :implode', ['implode' => $requiredMissing->implode(', ')]) }}</span>
             @endif
         </span>
-        <a href="#phan-anh" onclick="{{ $ask }}" class="tx-pill shrink-0">Đề nghị bổ sung</a>
+        <a href="#phan-anh" onclick="{{ $ask }}" class="tx-pill shrink-0">{{ __('Đề nghị bổ sung') }}</a>
     </div>
 @endif
 
 @if ($hasFiles)
     @once
-        <dialog id="tx-doc-viewer" aria-label="Xem hồ sơ" class="m-0 w-full h-dvh max-w-none max-h-none p-0 bg-[#0c0a09] text-white backdrop:bg-black/80 open:flex flex-col overscroll-contain">
+        <dialog id="tx-doc-viewer" aria-label="{{ __('Xem hồ sơ') }}" class="m-0 w-full h-dvh max-w-none max-h-none p-0 bg-[#0c0a09] text-white backdrop:bg-black/80 open:flex flex-col overscroll-contain">
             <div class="flex items-start gap-3 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-[max(.75rem,env(safe-area-inset-top))] pb-3 border-b border-white/10">
                 <div class="flex-1 min-w-0">
                     <p data-v-title class="text-[15px] font-semibold leading-snug truncate"></p>
                     <p class="mt-0.5 text-[12px] text-white/55 truncate"><span data-v-count class="tabular-nums"></span><span data-v-meta></span></p>
                 </div>
-                <button type="button" data-v-close class="shrink-0 w-10 h-10 -mr-2 rounded-full flex items-center justify-center text-white/80 hover:bg-white/10 hover:text-white" aria-label="Đóng">
+                <button type="button" data-v-close class="shrink-0 w-10 h-10 -mr-2 rounded-full flex items-center justify-center text-white/80 hover:bg-white/10 hover:text-white" aria-label="{{ __('Đóng') }}">
                     <svg viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path d="M5.3 5.3a1 1 0 0 1 1.4 0L10 8.6l3.3-3.3a1 1 0 1 1 1.4 1.4L11.4 10l3.3 3.3a1 1 0 0 1-1.4 1.4L10 11.4l-3.3 3.3a1 1 0 0 1-1.4-1.4L8.6 10 5.3 6.7a1 1 0 0 1 0-1.4Z"/></svg>
                 </button>
             </div>
             <div data-v-stage class="relative flex-1 min-h-0 flex items-center justify-center select-none touch-pan-y">
                 <img data-v-img alt="" class="hidden max-w-full max-h-full object-contain" decoding="async">
-                <iframe data-v-frame title="Tệp PDF" class="hidden w-full h-full bg-white"></iframe>
+                <iframe data-v-frame title="{{ __('Tệp PDF') }}" class="hidden w-full h-full bg-white"></iframe>
                 <div data-v-pdf class="hidden flex-col items-center gap-3 px-6 text-center">
                     <span class="inline-flex items-center justify-center w-14 h-16 rounded-md bg-[#dc2626] text-[13px] font-bold">PDF</span>
-                    <p class="text-[14px] text-white/75">Trình duyệt trên thiết bị này không hiển thị PDF trong trang.</p>
-                    <a data-v-open href="#" target="_blank" rel="noopener nofollow" class="inline-flex items-center h-10 px-4 rounded-lg bg-white text-[#1c1917] text-[14px] font-semibold">Mở tệp PDF</a>
+                    <p class="text-[14px] text-white/75">{{ __('Trình duyệt trên thiết bị này không hiển thị PDF trong trang.') }}</p>
+                    <a data-v-open href="#" target="_blank" rel="noopener nofollow" class="inline-flex items-center h-10 px-4 rounded-lg bg-white text-[#1c1917] text-[14px] font-semibold">{{ __('Mở tệp PDF') }}</a>
                 </div>
-                <p data-v-error class="hidden px-6 text-center text-[14px] text-white/75">Không tải được tệp. Liên kết xem có hạn 30 phút — vui lòng tải lại trang.</p>
+                <p data-v-error class="hidden px-6 text-center text-[14px] text-white/75">{{ __('Không tải được tệp. Liên kết xem có hạn 30 phút — vui lòng tải lại trang.') }}</p>
                 <span data-v-loading class="hidden absolute inset-0 m-auto w-8 h-8 rounded-full border-2 border-white/25 border-t-white animate-spin"></span>
-                <button type="button" data-v-step="-1" class="absolute left-2 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/45 backdrop-blur flex items-center justify-center hover:bg-black/70 disabled:opacity-0" aria-label="Tệp trước">
+                <button type="button" data-v-step="-1" class="absolute left-2 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/45 backdrop-blur flex items-center justify-center hover:bg-black/70 disabled:opacity-0" aria-label="{{ __('Tệp trước') }}">
                     <svg viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 rotate-180" aria-hidden="true"><path fill-rule="evenodd" d="M7.2 4.2a1 1 0 0 1 1.4 0l5.1 5.1a1 1 0 0 1 0 1.4l-5.1 5.1a1 1 0 1 1-1.4-1.4L11.6 10 7.2 5.6a1 1 0 0 1 0-1.4Z" clip-rule="evenodd"/></svg>
                 </button>
-                <button type="button" data-v-step="1" class="absolute right-2 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/45 backdrop-blur flex items-center justify-center hover:bg-black/70 disabled:opacity-0" aria-label="Tệp sau">
+                <button type="button" data-v-step="1" class="absolute right-2 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/45 backdrop-blur flex items-center justify-center hover:bg-black/70 disabled:opacity-0" aria-label="{{ __('Tệp sau') }}">
                     <svg viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M7.2 4.2a1 1 0 0 1 1.4 0l5.1 5.1a1 1 0 0 1 0 1.4l-5.1 5.1a1 1 0 1 1-1.4-1.4L11.6 10 7.2 5.6a1 1 0 0 1 0-1.4Z" clip-rule="evenodd"/></svg>
                 </button>
             </div>

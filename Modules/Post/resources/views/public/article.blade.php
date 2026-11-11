@@ -91,7 +91,7 @@
                     @if($authorIsLinkable)
                         <a href="{{ route('post.public.author-hub.show', $authorProfile) }}" class="hover:underline">{{ $authorProfile->displayName() }}</a>
                     @else
-                        <strong>{{ $article->createdBy?->name ?? 'Ban biên tập' }}</strong>
+                        <strong>{{ $article->createdBy?->name ?? __('Ban biên tập') }}</strong>
                     @endif
                 </div>
                 <div class="detail__share">

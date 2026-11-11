@@ -39,8 +39,8 @@ class EventSubmittedNotification extends Notification implements ShouldQueue
     {
         return NotificationData::make(
             type:     'event_submitted',
-            title:    "Sự kiện mới chờ duyệt: \"{$this->event->title}\"",
-            body:     "Độc giả vừa nộp sự kiện \"{$this->event->title}\" qua cổng thông tin, đang chờ sơ duyệt.",
+            title:    __('Sự kiện mới chờ duyệt: ":title"', ['title' => $this->event->title]),
+            body:     __('Độc giả vừa nộp sự kiện ":title" qua cổng thông tin, đang chờ sơ duyệt.', ['title' => $this->event->title]),
             url:      route('backend.event.index', ['status' => 'submitted']),
             icon:     'bell',
             severity: 'info',
@@ -50,8 +50,8 @@ class EventSubmittedNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("Sự kiện mới chờ duyệt: \"{$this->event->title}\"")
-            ->line("Độc giả vừa nộp sự kiện \"{$this->event->title}\" qua cổng thông tin.")
-            ->action('Xem hàng chờ duyệt', route('backend.event.index', ['status' => 'submitted']));
+            ->subject(__('Sự kiện mới chờ duyệt: ":title"', ['title' => $this->event->title]))
+            ->line(__('Độc giả vừa nộp sự kiện ":title" qua cổng thông tin.', ['title' => $this->event->title]))
+            ->action(__('Xem hàng chờ duyệt'), route('backend.event.index', ['status' => 'submitted']));
     }
 }

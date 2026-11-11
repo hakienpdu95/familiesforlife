@@ -61,7 +61,7 @@ class PromptGenerationController extends Controller
         );
 
         return redirect()->route('backend.promptstudio.prompts.show', $prompt)
-            ->with('success', 'Đã sinh prompt — sao chép bên dưới để dùng.');
+            ->with('success', __('Đã sinh prompt — sao chép bên dưới để dùng.'));
     }
 
     public function show(GeneratedPrompt $prompt): View
@@ -84,7 +84,7 @@ class PromptGenerationController extends Controller
 
         if (! $framework) {
             return redirect()->route('backend.promptstudio.prompts.show', $prompt)
-                ->with('error', "Framework \"{$prompt->framework_key}\" đã bị gỡ khỏi hệ thống — không thể sửa hoặc sinh lại. Bạn vẫn có thể xem và sao chép nội dung đã lưu, hoặc xoá bản ghi này.");
+                ->with('error', __('Framework ":framework_key" đã bị gỡ khỏi hệ thống — không thể sửa hoặc sinh lại. Bạn vẫn có thể xem và sao chép nội dung đã lưu, hoặc xoá bản ghi này.', ['framework_key' => $prompt->framework_key]));
         }
 
         $prompt->load('category');
@@ -107,7 +107,7 @@ class PromptGenerationController extends Controller
         );
 
         return redirect()->route('backend.promptstudio.prompts.show', $prompt)
-            ->with('success', 'Đã sinh lại prompt.');
+            ->with('success', __('Đã sinh lại prompt.'));
     }
 
     public function destroy(GeneratedPrompt $prompt): RedirectResponse
@@ -115,7 +115,7 @@ class PromptGenerationController extends Controller
         // §5.4 — destroy hoạt động bình thường kể cả khi orphaned, không cản việc dọn dữ liệu cũ.
         $prompt->delete();
 
-        return redirect()->route('backend.promptstudio.prompts.index')->with('success', 'Đã xoá prompt.');
+        return redirect()->route('backend.promptstudio.prompts.index')->with('success', __('Đã xoá prompt.'));
     }
 
     /**

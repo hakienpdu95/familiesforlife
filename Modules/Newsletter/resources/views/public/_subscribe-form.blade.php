@@ -3,8 +3,8 @@
      @include('newsletter::public._subscribe-form') --}}
 <div class="card bg-base-100 border border-base-200 shadow-sm max-w-md">
     <div class="card-body p-5">
-        <h3 class="font-bold text-base-content mb-1">Đăng ký nhận bản tin</h3>
-        <p class="text-sm text-base-content/60 mb-4">Nhận bài viết mới nhất qua email, không spam.</p>
+        <h3 class="font-bold text-base-content mb-1">{{ __('Đăng ký nhận bản tin') }}</h3>
+        <p class="text-sm text-base-content/60 mb-4">{{ __('Nhận bài viết mới nhất qua email, không spam.') }}</p>
 
         @if(session('success'))
         <div class="alert alert-success text-sm py-2 px-3 mb-3">{{ session('success') }}</div>
@@ -12,7 +12,7 @@
 
         <form method="POST" action="{{ route('newsletter.public.subscribe') }}" class="space-y-2">
             @csrf
-            <input type="text" name="full_name" value="{{ old('full_name') }}" placeholder="Họ và tên" required maxlength="150"
+            <input type="text" name="full_name" value="{{ old('full_name') }}" placeholder="{{ __('Họ và tên') }}" required maxlength="150"
                    class="input input-bordered input-sm w-full @error('full_name') input-error @enderror">
             @error('full_name')<p class="text-xs text-error">{{ $message }}</p>@enderror
 
@@ -20,7 +20,7 @@
                    class="input input-bordered input-sm w-full @error('email') input-error @enderror">
             @error('email')<p class="text-xs text-error">{{ $message }}</p>@enderror
 
-            <button type="submit" class="btn btn-primary btn-sm w-full">Đăng ký</button>
+            <button type="submit" class="btn btn-primary btn-sm w-full">{{ __('Đăng ký') }}</button>
         </form>
     </div>
 </div>

@@ -57,6 +57,6 @@ class QrReport extends Model
 
     public function reasonLabel(): string
     {
-        return self::REASONS[$this->reason] ?? $this->reason;
+        return isset(self::REASONS[$this->reason]) ? __(self::REASONS[$this->reason]) : $this->reason;
     }
 }

@@ -15,13 +15,13 @@ enum ContentBlockType: string
     public function label(): string
     {
         return match ($this) {
-            self::Text => 'Đoạn văn bản',
-            self::Product => 'Khối sản phẩm',
-            self::Faq => 'Câu hỏi thường gặp',
-            self::Citation => 'Trích dẫn có nguồn',
-            self::Howto => 'Hướng dẫn từng bước',
-            self::Comparison => 'Bảng so sánh',
-            self::Testimonial => 'Lời chứng thực khách hàng',
+            self::Text => __('Đoạn văn bản'),
+            self::Product => __('Khối sản phẩm'),
+            self::Faq => __('Câu hỏi thường gặp'),
+            self::Citation => __('Trích dẫn có nguồn'),
+            self::Howto => __('Hướng dẫn từng bước'),
+            self::Comparison => __('Bảng so sánh'),
+            self::Testimonial => __('Lời chứng thực khách hàng'),
         };
     }
 }

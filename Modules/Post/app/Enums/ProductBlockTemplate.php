@@ -12,10 +12,10 @@ enum ProductBlockTemplate: string
     public function label(): string
     {
         return match ($this) {
-            self::SingleCard  => 'Thẻ đơn',
-            self::MultiGrid   => 'Lưới nhiều sản phẩm',
-            self::Banner      => 'Banner nổi bật',
-            self::CompactList => 'Danh sách gọn',
+            self::SingleCard  => __('Thẻ đơn'),
+            self::MultiGrid   => __('Lưới nhiều sản phẩm'),
+            self::Banner      => __('Banner nổi bật'),
+            self::CompactList => __('Danh sách gọn'),
         };
     }
 

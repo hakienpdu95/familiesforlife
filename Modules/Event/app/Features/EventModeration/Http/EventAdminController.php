@@ -62,7 +62,7 @@ class EventAdminController extends Controller
         $event = $action->handle($data);
 
         return redirect()->route('backend.event.index')
-            ->with('success', "Sự kiện \"{$event->title}\" đã được tạo, đang chờ duyệt.");
+            ->with('success', __('Sự kiện ":title" đã được tạo, đang chờ duyệt.', ['title' => $event->title]));
     }
 
     public function edit(Event $event, ListEventCategoriesForAdminHandler $handler): View
@@ -89,7 +89,7 @@ class EventAdminController extends Controller
         $action->handle($event, $data);
 
         return redirect()->route('backend.event.index')
-            ->with('success', 'Cập nhật sự kiện thành công.');
+            ->with('success', __('Cập nhật sự kiện thành công.'));
     }
 
     public function approve(Request $request, Event $event, ApproveEventAction $action, NotifyEventApprovalResultAction $notify): RedirectResponse|JsonResponse
@@ -99,7 +99,7 @@ class EventAdminController extends Controller
         $action->handle($event);
         $notify->handle($event);
 
-        $message = "Đã duyệt sự kiện \"{$event->title}\" — chờ platform_content_head xuất bản.";
+        $message = __('Đã duyệt sự kiện ":title" — chờ platform_content_head xuất bản.', ['title' => $event->title]);
 
         if ($request->expectsJson()) {
             return response()->json(['message' => $message]);
@@ -119,7 +119,7 @@ class EventAdminController extends Controller
         $action->handle($event, $validated['rejected_reason']);
         $notify->handle($event);
 
-        $message = "Đã từ chối sự kiện \"{$event->title}\".";
+        $message = __('Đã từ chối sự kiện ":title".', ['title' => $event->title]);
 
         if ($request->expectsJson()) {
             return response()->json(['message' => $message]);
@@ -136,7 +136,7 @@ class EventAdminController extends Controller
         // tài khoản để "thấy" thêm 1 thông báo khác khi sự kiện thật sự lên cổng thông tin.
         $action->handle($event);
 
-        $message = "Đã xuất bản sự kiện \"{$event->title}\".";
+        $message = __('Đã xuất bản sự kiện ":title".', ['title' => $event->title]);
 
         if ($request->expectsJson()) {
             return response()->json(['message' => $message]);
@@ -151,7 +151,7 @@ class EventAdminController extends Controller
 
         $action->handle($event);
 
-        $message = "Đã lưu trữ sự kiện \"{$event->title}\".";
+        $message = __('Đã lưu trữ sự kiện ":title".', ['title' => $event->title]);
 
         if ($request->expectsJson()) {
             return response()->json(['message' => $message]);

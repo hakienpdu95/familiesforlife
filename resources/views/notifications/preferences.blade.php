@@ -1,21 +1,21 @@
 {{-- resources/views/notifications/preferences.blade.php --}}
 @extends('layouts.backend')
 
-@section('title', 'Cài đặt thông báo')
+@section('title', __('Cài đặt thông báo'))
 
 @section('content')
 
 {{-- Header --}}
 <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
     <div>
-        <h1 class="text-2xl font-bold text-base-content leading-tight">Cài đặt thông báo</h1>
-        <p class="text-sm text-base-content/50 mt-0.5">Tuỳ chỉnh kênh nhận thông báo cho từng loại sự kiện</p>
+        <h1 class="text-2xl font-bold text-base-content leading-tight">{{ __('Cài đặt thông báo') }}</h1>
+        <p class="text-sm text-base-content/50 mt-0.5">{{ __('Tuỳ chỉnh kênh nhận thông báo cho từng loại sự kiện') }}</p>
     </div>
     <a href="{{ route('backend.notifications.index') }}" class="btn btn-ghost btn-sm gap-1.5">
         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="w-4 h-4">
             <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
         </svg>
-        Quay lại thông báo
+        {{ __('Quay lại thông báo') }}
     </a>
 </div>
 
@@ -31,7 +31,7 @@
     </div>
     <div class="flex items-center gap-1.5">
         <span class="w-3 h-3 rounded-full {{ $pushAvailable ? 'bg-accent' : 'bg-base-300' }} inline-block"></span>
-        <span>Push{{ !$pushAvailable ? ' (chưa cấu hình)' : '' }}</span>
+        <span>{{ $pushAvailable ? 'Push' : __('Push (chưa cấu hình)') }}</span>
     </div>
 </div>
 
@@ -45,7 +45,7 @@
 
     {{-- Column headers --}}
     <div class="pref-row pref-header">
-        <span class="pref-label text-xs font-medium text-base-content/40 uppercase tracking-wide">Loại thông báo</span>
+        <span class="pref-label text-xs font-medium text-base-content/40 uppercase tracking-wide">{{ __('Loại thông báo') }}</span>
         <span class="pref-ch text-xs font-medium text-base-content/40 text-center uppercase tracking-wide">Trong app</span>
         <span class="pref-ch text-xs font-medium text-base-content/40 text-center uppercase tracking-wide">Email</span>
         <span class="pref-ch text-xs font-medium text-base-content/40 text-center uppercase tracking-wide">Push</span>
@@ -105,7 +105,7 @@
             <input type="checkbox" class="toggle toggle-accent toggle-sm"
                    x-model="push" @change="save()"
                    :disabled="{{ $pushAvailable ? 'false' : 'true' }}"
-                   title="{{ $pushAvailable ? '' : 'Chưa cấu hình VAPID keys' }}">
+                   title="{{ $pushAvailable ? '' : __('Chưa cấu hình VAPID keys') }}">
         </label>
 
         {{-- Status --}}
@@ -122,7 +122,7 @@
 @endforeach
 
 <p class="text-xs text-base-content/35 mt-2 text-center">
-    Thay đổi được lưu tự động. Cài đặt áp dụng riêng cho từng tài khoản.
+    {{ __('Thay đổi được lưu tự động. Cài đặt áp dụng riêng cho từng tài khoản.') }}
 </p>
 
 @endsection

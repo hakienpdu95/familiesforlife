@@ -29,7 +29,7 @@ class ArticleTakenDownNotification extends Notification implements ShouldQueue
     {
         return NotificationData::make(
             type:     'post_article_taken_down',
-            title:    "Bài viết \"{$this->translation->title}\" ({$this->translation->locale}) đã bị gỡ khẩn cấp",
+            title:    __('Bài viết ":title" (:locale) đã bị gỡ khẩn cấp', ['title' => $this->translation->title, 'locale' => $this->translation->locale]),
             body:     $this->reason,
             url:      route('backend.post.articles.edit', $this->translation->article),
             icon:     'warning',
@@ -40,8 +40,8 @@ class ArticleTakenDownNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("Bài viết \"{$this->translation->title}\" ({$this->translation->locale}) đã bị gỡ khẩn cấp")
+            ->subject(__('Bài viết ":title" (:locale) đã bị gỡ khẩn cấp', ['title' => $this->translation->title, 'locale' => $this->translation->locale]))
             ->line($this->reason)
-            ->action('Xem bài viết', route('backend.post.articles.edit', $this->translation->article));
+            ->action(__('Xem bài viết'), route('backend.post.articles.edit', $this->translation->article));
     }
 }

@@ -1,3 +1,5 @@
+import { t } from './i18n.js';
+
 /**
  * resources/js/shared/form-controller.js
  * ─────────────────────────────────────────────────────────────────────
@@ -49,7 +51,7 @@ export function makeFormController(serverData = {}, opts = {}) {
             // required
             requiredFields.forEach(field => {
                 const val = String(this[field] ?? '').trim();
-                if (!val) errs[field] = errs[field] || 'Trường này là bắt buộc';
+                if (!val) errs[field] = errs[field] || t('Trường này là bắt buộc');
             });
 
             // custom rules

@@ -71,10 +71,10 @@ class HeritageSiteTracePresenter implements TracePresenter
         $sections = [];
         $intro = $live ? (filled($live->description) ? trim(strip_tags($live->description)) : null) : ($payload['intro'] ?? null);
         if ($intro) {
-            $sections[] = ['title' => 'Giới thiệu', 'icon' => 'fa-book-open', 'text' => $intro];
+            $sections[] = ['title' => __('Giới thiệu'), 'icon' => 'fa-book-open', 'text' => $intro];
         }
         if ($live && T::hasContent($live->content)) {
-            $sections[] = ['title' => 'Lịch sử & giá trị di tích', 'icon' => 'fa-landmark', 'html' => $live->content];
+            $sections[] = ['title' => __('Lịch sử & giá trị di tích'), 'icon' => 'fa-landmark', 'html' => $live->content];
         }
 
         $related = [];
@@ -82,8 +82,8 @@ class HeritageSiteTracePresenter implements TracePresenter
             $live->loadMissing(['articles.translations', 'articles.media']);
             $products = OcopProduct::query()->with('media')->published()->where('heritage_site_id', $live->id)->latest()->limit(8)->get();
             $related = [
-                ['title' => 'Sản phẩm OCOP của làng nghề / di tích', 'icon' => 'fa-certificate', 'items' => $this->ocopCards($products)],
-                ['title' => 'Bài viết về di tích', 'icon' => 'fa-newspaper', 'items' => $this->articleCards($live->articles)],
+                ['title' => __('Sản phẩm OCOP của làng nghề / di tích'), 'icon' => 'fa-certificate', 'items' => $this->ocopCards($products)],
+                ['title' => __('Bài viết về di tích'), 'icon' => 'fa-newspaper', 'items' => $this->articleCards($live->articles)],
             ];
         }
 
@@ -116,10 +116,10 @@ class HeritageSiteTracePresenter implements TracePresenter
             'related' => $related,
             'detail_url' => $live ? route('heritage.public.show', ['slug' => $live->slug, 'id' => $live->id]) : null,
             'cta' => $live && $lat && $lng
-                ? ['url' => 'https://www.google.com/maps/dir/?api=1&destination='.$lat.','.$lng, 'label' => 'Chỉ đường tới di tích', 'external' => true]
+                ? ['url' => 'https://www.google.com/maps/dir/?api=1&destination='.$lat.','.$lng, 'label' => __('Chỉ đường tới di tích'), 'external' => true]
                 : ($live
-                    ? ['url' => route('heritage.public.show', ['slug' => $live->slug, 'id' => $live->id]), 'label' => 'Xem trang giới thiệu']
-                    : ['url' => route('heritage.public.index'), 'label' => 'Khám phá di sản khác']),
+                    ? ['url' => route('heritage.public.show', ['slug' => $live->slug, 'id' => $live->id]), 'label' => __('Xem trang giới thiệu')]
+                    : ['url' => route('heritage.public.index'), 'label' => __('Khám phá di sản khác')]),
 
         ]);
     }
@@ -152,7 +152,7 @@ class HeritageSiteTracePresenter implements TracePresenter
     private function base(array $page): array
     {
         return T::page([
-            'heading' => 'Thông tin di tích',
+            'heading' => __('Thông tin di tích'),
             'icon' => 'fa-landmark',
             'kind' => 'Di tích, di sản',
             'visiting' => null,
@@ -166,7 +166,7 @@ class HeritageSiteTracePresenter implements TracePresenter
             'address' => null,
             'map_url' => null,
             'coordinates' => null,
-            'cta' => ['url' => route('heritage.public.index'), 'label' => 'Khám phá di sản khác', 'icon' => 'fa-arrow-right'],
+            'cta' => ['url' => route('heritage.public.index'), 'label' => __('Khám phá di sản khác'), 'icon' => 'fa-arrow-right'],
             ...$page,
         ]);
     }

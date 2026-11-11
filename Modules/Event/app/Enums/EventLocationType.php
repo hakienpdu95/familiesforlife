@@ -10,8 +10,8 @@ enum EventLocationType: string
     public function label(): string
     {
         return match ($this) {
-            self::Physical => 'Trực tiếp',
-            self::Online   => 'Trực tuyến',
+            self::Physical => __('Trực tiếp'),
+            self::Online   => __('Trực tuyến'),
         };
     }
 }

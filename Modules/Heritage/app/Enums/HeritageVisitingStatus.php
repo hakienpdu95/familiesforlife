@@ -16,10 +16,10 @@ enum HeritageVisitingStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Open => 'Đang mở cửa',
-            self::Restoring => 'Đang trùng tu',
-            self::Closed => 'Tạm đóng cửa',
-            self::Unknown => 'Chưa xác nhận',
+            self::Open => __('Đang mở cửa'),
+            self::Restoring => __('Đang trùng tu'),
+            self::Closed => __('Tạm đóng cửa'),
+            self::Unknown => __('Chưa xác nhận'),
         };
     }
 }

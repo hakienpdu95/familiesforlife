@@ -59,9 +59,9 @@ class ComputeExtractionConfidenceAction
             }
 
             if ($wordCount < $errorMaxWords) {
-                $parts[] = "Nội dung quá ngắn/rời rạc (~{$wordCount} từ) — hầu như không trích được gì đáng kể.";
+                $parts[] = __('Nội dung quá ngắn/rời rạc (~:word_count từ) — hầu như không trích được gì đáng kể.', ['word_count' => $wordCount]);
             } elseif ($wordCount < 200) {
-                $parts[] = "Nội dung chưa đủ dày (~{$wordCount} từ, cần tối thiểu 200 từ).";
+                $parts[] = __('Nội dung chưa đủ dày (~:word_count từ, cần tối thiểu 200 từ).', ['word_count' => $wordCount]);
             }
         }
 

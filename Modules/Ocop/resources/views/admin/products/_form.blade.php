@@ -36,7 +36,7 @@
                         :class="tab === 'basic'
                             ? 'border-primary text-primary'
                             : 'border-transparent text-base-content/50 hover:text-base-content hover:border-base-content/20'">
-                    Thông tin sản phẩm
+                    {{ __('Thông tin sản phẩm') }}
                     <span x-show="errCount('basic') > 0" x-text="errCount('basic')"
                           class="badge badge-error badge-xs"></span>
                 </button>
@@ -47,7 +47,7 @@
                         :class="tab === 'producer'
                             ? 'border-primary text-primary'
                             : 'border-transparent text-base-content/50 hover:text-base-content hover:border-base-content/20'">
-                    Nhà sản xuất
+                    {{ __('Nhà sản xuất') }}
                     <span x-show="errCount('producer') > 0" x-text="errCount('producer')"
                           class="badge badge-error badge-xs"></span>
                 </button>
@@ -58,7 +58,7 @@
                         :class="tab === 'details'
                             ? 'border-primary text-primary'
                             : 'border-transparent text-base-content/50 hover:text-base-content hover:border-base-content/20'">
-                    Chi tiết &amp; Câu chuyện
+                    {{ __('Chi tiết') }} &amp; {{ __('Câu chuyện') }}
                     <span x-show="errCount('details') > 0" x-text="errCount('details')"
                           class="badge badge-error badge-xs"></span>
                 </button>
@@ -69,7 +69,7 @@
                         :class="tab === 'documents'
                             ? 'border-primary text-primary'
                             : 'border-transparent text-base-content/50 hover:text-base-content hover:border-base-content/20'">
-                    Hồ sơ &amp; Tiêu chuẩn
+                    {{ __('Hồ sơ') }} &amp; {{ __('Tiêu chuẩn') }}
                     <span x-show="errCount('documents') > 0" x-text="errCount('documents')"
                           class="badge badge-error badge-xs"></span>
                 </button>
@@ -92,7 +92,7 @@
         <div class="p-3">
 
             {{-- Panel: Thông tin sản phẩm --}}
-            <div x-show="tab === 'basic'" data-tab-label="Thông tin sản phẩm" class="space-y-4">
+            <div x-show="tab === 'basic'" data-tab-label="{{ __('Thông tin sản phẩm') }}" class="space-y-4">
 
                 @php($selectedSubjectId = (string) old('ocop_subject_id', $selectedSubjectId ?? $product?->ocop_subject_id ?? ''))
                 <div class="form-control"
@@ -102,19 +102,19 @@
                         get selected() { return this.subjects[this.selectedId] ?? null; },
                      }">
                     <label class="label py-0 pb-1.5">
-                        <span class="label-text font-medium">Chủ thể sản xuất <span class="text-error">*</span></span>
+                        <span class="label-text font-medium">{{ __('Chủ thể sản xuất') }} <span class="text-error">*</span></span>
                         @if(Route::has('backend.ocop-subjects.create'))
                         @can('create', \Modules\OcopSubject\Models\OcopSubject::class)
                         <a href="{{ route('backend.ocop-subjects.create') }}" target="_blank" rel="noopener"
-                           class="label-text-alt link link-primary text-xs">+ Thêm chủ thể mới</a>
+                           class="label-text-alt link link-primary text-xs">{{ __('+ Thêm chủ thể mới') }}</a>
                         @endcan
                         @endif
                     </label>
                     <select id="ts-ocop_subject_id" name="ocop_subject_id"
-                            data-req="Vui lòng chọn chủ thể sản xuất"
+                            data-req="{{ __('Vui lòng chọn chủ thể sản xuất') }}"
                             @change="selectedId = $event.target.value"
                             class="select select-bordered select-sm w-full ts-init @error('ocop_subject_id') select-error @enderror"
-                            data-ts-placeholder="— Tìm theo tên hoặc mã số định danh —">
+                            data-ts-placeholder="{{ __('— Tìm theo tên hoặc mã số định danh —') }}">
                         <option value=""></option>
                         @foreach($ocopSubjects as $p)
                         <option value="{{ $p['id'] }}" @selected($selectedSubjectId === (string) $p['id'])>
@@ -131,35 +131,35 @@
                             <span class="badge badge-ghost badge-sm shrink-0" x-text="selected?.type"></span>
                         </div>
                         <dl class="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
-                            <dt class="text-base-content/50">Mã số định danh</dt>
+                            <dt class="text-base-content/50">{{ __('Mã số định danh') }}</dt>
                             <dd class="font-mono" x-text="selected?.tax_code"></dd>
-                            <dt class="text-base-content/50">Địa chỉ</dt>
+                            <dt class="text-base-content/50">{{ __('Địa chỉ') }}</dt>
                             <dd x-text="selected?.address || '—'"></dd>
                         </dl>
-                        <p class="mt-2 text-xs text-base-content/40">Tỉnh/thành và địa chỉ của sản phẩm lấy theo chủ thể này.</p>
+                        <p class="mt-2 text-xs text-base-content/40">{{ __('Tỉnh/thành và địa chỉ của sản phẩm lấy theo chủ thể này.') }}</p>
                     </div>
 
                     @if($ocopSubjects->isEmpty())
-                    <p class="mt-2 text-xs text-warning">Chưa có chủ thể nào — tạo chủ thể trước khi thêm sản phẩm.</p>
+                    <p class="mt-2 text-xs text-warning">{{ __('Chưa có chủ thể nào — tạo chủ thể trước khi thêm sản phẩm.') }}</p>
                     @endif
                 </div>
 
                 <div class="form-control">
                     <label class="label py-0 pb-1.5">
-                        <span class="label-text font-medium">Tên sản phẩm <span class="text-error">*</span></span>
+                        <span class="label-text font-medium">{{ __('Tên sản phẩm') }} <span class="text-error">*</span></span>
                     </label>
                     <input type="text" name="name" value="{{ old('name', $product?->name) }}"
-                           data-req="Vui lòng nhập tên sản phẩm"
+                           data-req="{{ __('Vui lòng nhập tên sản phẩm') }}"
                            data-val-maxlength="150"
                            class="input input-bordered input-sm w-full @error('name') input-error @enderror"
-                           placeholder="VD: Mè xửng Huế" maxlength="150" autofocus>
+                           placeholder="{{ __('VD: Mè xửng Huế') }}" maxlength="150" autofocus>
                     @error('name')<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Danh mục</span>
+                            <span class="label-text font-medium">{{ __('Danh mục') }}</span>
                         </label>
                         {{-- spec/danhmuc.html — danh mục OCOP chính thức 3 cấp (Nhóm lớn → Nhóm →
                              Phân nhóm), $categoryTree đã phẳng hóa kèm depth (OcopCategory::flatTree()),
@@ -168,8 +168,8 @@
                              bị disable — sản phẩm chỉ được gán vào đúng phân nhóm cụ thể nhất. --}}
                         <select id="ts-category_id" name="category_id"
                                 class="select select-bordered select-sm w-full ts-init @error('category_id') select-error @enderror"
-                                data-ts-placeholder="— Chọn danh mục —">
-                            <option value="">— Chọn danh mục —</option>
+                                data-ts-placeholder="{{ __('— Chọn danh mục —') }}">
+                            <option value="">{{ __('— Chọn danh mục —') }}</option>
                             @foreach($categoryTree as $row)
                             @php($cat = $row['category'])
                             <option value="{{ $cat->id }}"
@@ -185,14 +185,14 @@
 
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Hạng sao <span class="text-error">*</span></span>
-                            <span class="label-text-alt text-xs text-base-content/40">OCOP quốc gia: 3–5 sao</span>
+                            <span class="label-text font-medium">{{ __('Hạng sao') }} <span class="text-error">*</span></span>
+                            <span class="label-text-alt text-xs text-base-content/40">{{ __('OCOP quốc gia: 3–5 sao') }}</span>
                         </label>
                         <select id="ts-star_rating" name="star_rating"
-                                data-req="Vui lòng chọn hạng sao"
+                                data-req="{{ __('Vui lòng chọn hạng sao') }}"
                                 class="select select-bordered select-sm w-full ts-init @error('star_rating') select-error @enderror"
-                                data-ts-placeholder="— Chọn —">
-                            <option value="">— Chọn —</option>
+                                data-ts-placeholder="{{ __('— Chọn —') }}">
+                            <option value="">{{ __('— Chọn —') }}</option>
                             @foreach([3, 4, 5] as $star)
                             <option value="{{ $star }}" {{ (string) old('star_rating', $product?->star_rating) === (string) $star ? 'selected' : '' }}>{{ $star }} sao</option>
                             @endforeach
@@ -203,18 +203,18 @@
                     @php($shelfUnit = old('shelf_life_unit', $product?->shelf_life_unit))
                     <div class="form-control">
                         <label class="label py-0 pb-1.5" for="shelf_life_value">
-                            <span class="label-text font-medium">Hạn sử dụng</span>
-                            <span class="label-text-alt text-xs text-base-content/40">kể từ ngày sản xuất</span>
+                            <span class="label-text font-medium">{{ __('Hạn sử dụng') }}</span>
+                            <span class="label-text-alt text-xs text-base-content/40">{{ __('kể từ ngày sản xuất') }}</span>
                         </label>
                         <div class="grid grid-cols-[minmax(0,1fr)_7.5rem] gap-2">
                             <input type="number" id="shelf_life_value" name="shelf_life_value" inputmode="numeric" min="1" max="9999" step="1"
                                    value="{{ old('shelf_life_value', $product?->shelf_life_value) }}" placeholder="VD: 12"
                                    class="input input-bordered input-sm w-full @error('shelf_life_value') input-error @enderror">
-                            <select id="ts-shelf_life_unit" name="shelf_life_unit" aria-label="Đơn vị hạn sử dụng"
+                            <select id="ts-shelf_life_unit" name="shelf_life_unit" aria-label="{{ __('Đơn vị hạn sử dụng') }}"
                                     class="select select-bordered select-sm w-full ts-init @error('shelf_life_unit') select-error @enderror"
-                                    data-ts-placeholder="Đơn vị">
-                                <option value="">Đơn vị</option>
-                                @foreach(\Modules\Ocop\Models\OcopProduct::SHELF_LIFE_UNITS as $unit => $unitLabel)
+                                    data-ts-placeholder="{{ __('Đơn vị') }}">
+                                <option value="">{{ __('Đơn vị') }}</option>
+                                @foreach(array_map('__', \Modules\Ocop\Models\OcopProduct::SHELF_LIFE_UNITS) as $unit => $unitLabel)
                                 <option value="{{ $unit }}" @selected($shelfUnit === $unit)>{{ $unitLabel }}</option>
                                 @endforeach
                             </select>
@@ -226,8 +226,8 @@
 
                 <div class="form-control">
                     <label class="label py-0 pb-1.5">
-                        <span class="label-text font-medium">Mô tả</span>
-                        <span class="label-text-alt text-xs text-base-content/40">Không bắt buộc</span>
+                        <span class="label-text font-medium">{{ __('Mô tả') }}</span>
+                        <span class="label-text-alt text-xs text-base-content/40">{{ __('Không bắt buộc') }}</span>
                     </label>
                     <textarea id="ocop-description" name="description" class="jodit-editor" data-jodit-preset="standard" data-jodit-height="220">{{ old('description', \Modules\Ocop\Models\OcopProduct::richText($product?->description)) }}</textarea>
                     @error('description')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
@@ -235,19 +235,19 @@
 
                 <div class="form-control">
                     <label class="label py-0 pb-1.5">
-                        <span class="label-text font-medium">Ảnh sản phẩm</span>
+                        <span class="label-text font-medium">{{ __('Ảnh sản phẩm') }}</span>
                     </label>
                     @php($images = $product?->getMedia(\Modules\Ocop\Models\OcopProduct::IMAGE_COLLECTION) ?? collect())
                     @if($images->isNotEmpty())
                     <div class="flex flex-wrap gap-2 mb-2">
                         @foreach($images as $image)
-                        <label class="relative cursor-pointer group" title="Đánh dấu để xoá ảnh này khi lưu">
+                        <label class="relative cursor-pointer group" title="{{ __('Đánh dấu để xoá ảnh này khi lưu') }}">
                             <input type="checkbox" name="remove_media_uuids[]" value="{{ $image->uuid }}" class="peer sr-only"
                                    @checked(in_array($image->uuid, old('remove_media_uuids', []), true))>
                             <img src="{{ app(\App\Services\Media\MediaUrlService::class)->url($image, 'thumb') }}" alt=""
                                  class="h-20 w-20 rounded border border-base-300 object-cover peer-checked:opacity-30 peer-checked:border-error">
                             @if($loop->first)
-                            <span class="badge badge-primary badge-xs absolute bottom-1 left-1">Ảnh chính</span>
+                            <span class="badge badge-primary badge-xs absolute bottom-1 left-1">{{ __('Ảnh chính') }}</span>
                             @endif
                             <span class="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-base-100/90 text-xs text-error shadow peer-checked:bg-error peer-checked:text-white">✕</span>
                         </label>
@@ -257,11 +257,11 @@
                     @if($product)
                     <div id="gallery-filepond" data-context-type="ocop_product" data-context-id="{{ $product->id }}"
                          data-max-files="{{ max(1, \Modules\Ocop\Models\OcopProduct::MAX_IMAGES - $images->count()) }}"></div>
-                    <p class="text-xs text-base-content/40 mt-1.5">Tối đa {{ \Modules\Ocop\Models\OcopProduct::MAX_IMAGES }} ảnh. Ảnh đầu tiên là ảnh chính. Bấm ✕ trên ảnh để xoá khi lưu.</p>
+                    <p class="text-xs text-base-content/40 mt-1.5">{{ __('Tối đa :m_a_x__i_m_a_g_e_s ảnh. Ảnh đầu tiên là ảnh chính. Bấm ✕ trên ảnh để xoá khi lưu.', ['m_a_x__i_m_a_g_e_s' => \Modules\Ocop\Models\OcopProduct::MAX_IMAGES]) }}</p>
                     @else
                     <div id="gallery-filepond"></div>
                     <input type="hidden" name="media_uuids" id="gallery-media-uuids" value="">
-                    <p class="text-xs text-base-content/40 mt-1.5">Tối đa {{ \Modules\Ocop\Models\OcopProduct::MAX_IMAGES }} ảnh. Ảnh đầu tiên là ảnh chính.</p>
+                    <p class="text-xs text-base-content/40 mt-1.5">{{ __('Tối đa :m_a_x__i_m_a_g_e_s ảnh. Ảnh đầu tiên là ảnh chính.', ['m_a_x__i_m_a_g_e_s' => \Modules\Ocop\Models\OcopProduct::MAX_IMAGES]) }}</p>
                     @endif
                     @error('media_uuids')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                 </div>
@@ -269,7 +269,7 @@
                 {{-- Tab footer: next --}}
                 <div class="flex justify-end pt-2">
                     <button type="button" @click="tab = 'producer'" class="btn btn-ghost btn-sm gap-1.5">
-                        Tiếp theo: Nhà sản xuất
+                        {{ __('Tiếp theo: Nhà sản xuất') }}
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                         </svg>
@@ -279,18 +279,18 @@
             </div>
 
             {{-- Panel: Nhà sản xuất --}}
-            <div x-show="tab === 'producer'" data-tab-label="Nhà sản xuất" class="space-y-4">
+            <div x-show="tab === 'producer'" data-tab-label="{{ __('Nhà sản xuất') }}" class="space-y-4">
 
                 {{-- spec/Heritage_Technical_Specification.md §8.2 — tuỳ chọn, ưu tiên hiện di
                      tích/làng nghề (intangible/historical_monument) đầu danh sách. --}}
                 <div class="form-control">
                     <label class="label py-0 pb-1.5">
-                        <span class="label-text font-medium">Làng nghề/di tích liên quan</span>
-                        <span class="label-text-alt text-xs text-base-content/40">Không bắt buộc</span>
+                        <span class="label-text font-medium">{{ __('Làng nghề/di tích liên quan') }}</span>
+                        <span class="label-text-alt text-xs text-base-content/40">{{ __('Không bắt buộc') }}</span>
                     </label>
                     <select id="ts-heritage_site_id" name="heritage_site_id"
                             class="select select-bordered select-sm w-full ts-init @error('heritage_site_id') select-error @enderror"
-                            data-ts-placeholder="— Không gắn di tích —">
+                            data-ts-placeholder="{{ __('— Không gắn di tích —') }}">
                         <option value=""></option>
                         @foreach($heritageSites as $s)
                         <option value="{{ $s->id }}" {{ (string) old('heritage_site_id', $product?->heritage_site_id) === (string) $s->id ? 'selected' : '' }}>
@@ -307,10 +307,10 @@
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                         </svg>
-                        Thông tin sản phẩm
+                        {{ __('Thông tin sản phẩm') }}
                     </button>
                     <button type="button" @click="tab = 'details'" class="btn btn-ghost btn-sm gap-1.5">
-                        Tiếp theo: Chi tiết &amp; Câu chuyện
+                        {{ __('Tiếp theo: Chi tiết') }} &amp; {{ __('Câu chuyện') }}
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                         </svg>
@@ -320,18 +320,18 @@
             </div>
 
             {{-- Panel: Chi tiết & Câu chuyện --}}
-            <div x-show="tab === 'details'" x-cloak data-tab-label="Chi tiết &amp; Câu chuyện" class="space-y-4">
+            <div x-show="tab === 'details'" x-cloak data-tab-label="{{ __('Chi tiết & Câu chuyện') }}" class="space-y-4">
 
                 <div class="form-control">
                     <label class="label py-0 pb-1.5">
-                        <span class="label-text font-medium">Câu chuyện sản phẩm</span>
-                        <span class="label-text-alt text-xs text-base-content/40">Nguồn gốc, truyền thống, điểm khác biệt</span>
+                        <span class="label-text font-medium">{{ __('Câu chuyện sản phẩm') }}</span>
+                        <span class="label-text-alt text-xs text-base-content/40">{{ __('Nguồn gốc, truyền thống, điểm khác biệt') }}</span>
                     </label>
                     <textarea id="ocop-story" name="story" class="jodit-editor" data-jodit-preset="standard">{{ old('story', $product?->story) }}</textarea>
                     @error('story')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                 </div>
 
-                <div class="divider my-1 text-xs text-base-content/40">Thông số kỹ thuật</div>
+                <div class="divider my-1 text-xs text-base-content/40">{{ __('Thông số kỹ thuật') }}</div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @foreach(['origin' => ['Xuất xứ', 255, 'VD: Phú Vang, Thừa Thiên Huế'], 'production_date' => ['Ngày sản xuất', 100, 'VD: Xem trên bao bì']] as $field => [$label, $max, $placeholder])
@@ -362,10 +362,10 @@
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                         </svg>
-                        Nhà sản xuất
+                        {{ __('Nhà sản xuất') }}
                     </button>
                     <button type="button" @click="tab = 'documents'" class="btn btn-ghost btn-sm gap-1.5">
-                        Tiếp theo: Hồ sơ &amp; Tiêu chuẩn
+                        {{ __('Tiếp theo: Hồ sơ') }} &amp; {{ __('Tiêu chuẩn') }}
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                         </svg>
@@ -375,36 +375,36 @@
             </div>
 
             {{-- Panel: Hồ sơ & Tiêu chuẩn --}}
-            <div x-show="tab === 'documents'" x-cloak data-tab-label="Hồ sơ &amp; Tiêu chuẩn" class="space-y-5">
+            <div x-show="tab === 'documents'" x-cloak data-tab-label="{{ __('Hồ sơ & Tiêu chuẩn') }}" class="space-y-5">
 
                 <div>
-                    <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">Nhãn mác &amp; Bao bì</p>
+                    <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">{{ __('Nhãn mác') }} &amp; {{ __('Bao bì') }}</p>
                     @include('ocop::admin.products._document-field', [
                         'collection' => 'ocop_label_docs',
-                        'label' => 'Tài liệu thiết kế nhãn mác, bao bì',
-                        'hint' => 'Tài liệu thiết kế nhãn sản phẩm đúng quy định pháp luật (thể hiện rõ tên, logo OCOP, hạn sử dụng, hướng dẫn bảo quản) và quy cách bao bì phù hợp với thị trường.',
+                        'label' => __('Tài liệu thiết kế nhãn mác, bao bì'),
+                        'hint' => __('Tài liệu thiết kế nhãn sản phẩm đúng quy định pháp luật (thể hiện rõ tên, logo OCOP, hạn sử dụng, hướng dẫn bảo quản) và quy cách bao bì phù hợp với thị trường.'),
                     ])
                 </div>
 
                 <div class="divider my-1"></div>
 
                 <div class="space-y-5">
-                    <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide">Chất lượng &amp; Tiêu chuẩn kỹ thuật</p>
+                    <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide">{{ __('Chất lượng') }} &amp; {{ __('Tiêu chuẩn kỹ thuật') }}</p>
                     @include('ocop::admin.products._document-field', [
                         'collection' => 'ocop_quality_declaration',
-                        'label' => 'Hồ sơ công bố chất lượng',
-                        'hint' => 'Bản tự công bố sản phẩm hoặc số công bố tiêu chuẩn chất lượng (TCCS, TCVN, QCVN...).',
+                        'label' => __('Hồ sơ công bố chất lượng'),
+                        'hint' => __('Bản tự công bố sản phẩm hoặc số công bố tiêu chuẩn chất lượng (TCCS, TCVN, QCVN...).'),
                     ])
                     @include('ocop::admin.products._document-field', [
                         'collection' => 'ocop_test_reports',
-                        'label' => 'Phiếu kiểm nghiệm định kỳ',
-                        'hint' => 'Kết quả kiểm nghiệm các chỉ tiêu an toàn thực phẩm, sinh học, hóa lý còn thời hạn.',
+                        'label' => __('Phiếu kiểm nghiệm định kỳ'),
+                        'hint' => __('Kết quả kiểm nghiệm các chỉ tiêu an toàn thực phẩm, sinh học, hóa lý còn thời hạn.'),
                     ])
                     @include('ocop::admin.products._document-field', [
                         'collection' => 'ocop_quality_certs',
-                        'label' => 'Chứng nhận quản lý chất lượng',
-                        'badge' => 'Bắt buộc với sản phẩm 4–5 sao',
-                        'hint' => 'Hồ sơ chứng minh cơ sở đạt điều kiện ATTP, hoặc các tiêu chuẩn nâng cao như ISO, HACCP, GMP. Đặc biệt bắt buộc đối với sản phẩm hướng tới 4–5 sao.',
+                        'label' => __('Chứng nhận quản lý chất lượng'),
+                        'badge' => __('Bắt buộc với sản phẩm 4–5 sao'),
+                        'hint' => __('Hồ sơ chứng minh cơ sở đạt điều kiện ATTP, hoặc các tiêu chuẩn nâng cao như ISO, HACCP, GMP. Đặc biệt bắt buộc đối với sản phẩm hướng tới 4–5 sao.'),
                     ])
                 </div>
 
@@ -413,10 +413,10 @@
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                         </svg>
-                        Chi tiết &amp; Câu chuyện
+                        {{ __('Chi tiết') }} &amp; {{ __('Câu chuyện') }}
                     </button>
                     <button type="button" @click="tab = 'affiliate'" class="btn btn-ghost btn-sm gap-1.5">
-                        Tiếp theo: Link affiliate
+                        {{ __('Tiếp theo: Link affiliate') }}
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                         </svg>
@@ -433,7 +433,7 @@
             <div x-show="tab === 'affiliate'" x-cloak data-tab-label="Link affiliate" class="space-y-4">
 
                 <p class="text-xs text-base-content/50">
-                    Cấu hình 1 lần ở đây — trang chi tiết sản phẩm OCOP hiển thị các nút mua tương ứng, không cần nhập lại ở nơi khác.
+                    {{ __('Cấu hình 1 lần ở đây — trang chi tiết sản phẩm OCOP hiển thị các nút mua tương ứng, không cần nhập lại ở nơi khác.') }}
                 </p>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -445,12 +445,12 @@
                         </label>
                         <div class="join w-full">
                             <input type="url" name="{{ $field }}" value="{{ old($field, $product?->{$field}) }}"
-                                   data-val-url="URL phải bắt đầu bằng https://"
+                                   data-val-url="{{ __('URL phải bắt đầu bằng https://') }}"
                                    data-affiliate-input
                                    class="input input-bordered input-sm join-item flex-1 min-w-0 @error($field) input-error @enderror"
                                    placeholder="{{ $placeholder }}" maxlength="500">
                             <a href="#" target="_blank" rel="noopener noreferrer" data-affiliate-open
-                               class="btn btn-sm join-item btn-disabled" aria-disabled="true" title="Mở link để kiểm tra">↗</a>
+                               class="btn btn-sm join-item btn-disabled" aria-disabled="true" title="{{ __('Mở link để kiểm tra') }}">↗</a>
                         </div>
                         @error($field)<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
                     </div>
@@ -462,9 +462,9 @@
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                         </svg>
-                        Hồ sơ &amp; Tiêu chuẩn
+                        {{ __('Hồ sơ') }} &amp; {{ __('Tiêu chuẩn') }}
                     </button>
-                    <span class="text-xs text-base-content/40">Điền xong? Nhấn <strong>{{ $product ? 'Lưu thay đổi' : 'Tạo mới' }}</strong> ở bên phải</span>
+                    <span class="text-xs text-base-content/40">{{ __('Điền xong? Nhấn') }} <strong>{{ $product ? __('Lưu thay đổi') : __('Tạo mới') }}</strong> {{ __('ở bên phải') }}</span>
                 </div>
 
             </div>
@@ -477,23 +477,23 @@
         <div class="card bg-base-100 shadow-sm border border-base-200">
             <div class="card-body p-3">
 
-                <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">Xuất bản</p>
+                <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">{{ __('Xuất bản') }}</p>
 
                 @if($product?->qrIdentity)
                 <p class="text-xs text-base-content/50 mb-4">
-                    Mã tem QR: <span class="font-mono font-semibold text-base-content">{{ $product->qrIdentity->qr_code }}</span><br>
+                    {{ __('Mã tem QR:') }} <span class="font-mono font-semibold text-base-content">{{ $product->qrIdentity->qr_code }}</span><br>
                     <a href="{{ $product->qrIdentity->publicUrl() }}" target="_blank" rel="noopener" class="link link-primary break-all">{{ $product->qrIdentity->publicUrl() }}</a>
                 </p>
                 @endif
 
                 <div class="form-control mb-4">
                     <label class="label py-0 pb-1">
-                        <span class="label-text text-xs font-medium">Trạng thái <span class="text-error">*</span></span>
+                        <span class="label-text text-xs font-medium">{{ __('Trạng thái') }} <span class="text-error">*</span></span>
                     </label>
                     <select id="ts-status" name="status"
-                            data-req="Vui lòng chọn trạng thái"
+                            data-req="{{ __('Vui lòng chọn trạng thái') }}"
                             class="select select-bordered select-sm w-full ts-init @error('status') select-error @enderror"
-                            data-ts-placeholder="— Chọn trạng thái —">
+                            data-ts-placeholder="{{ __('— Chọn trạng thái —') }}">
                         @foreach($statuses as $s)
                         <option value="{{ $s->value }}" {{ old('status', $product?->status?->value ?? 'draft') === $s->value ? 'selected' : '' }}>{{ $s->label() }}</option>
                         @endforeach
@@ -505,12 +505,12 @@
                     <input type="hidden" name="is_featured" value="0">
                     <input type="checkbox" name="is_featured" value="1"
                            class="checkbox checkbox-sm checkbox-primary mt-0.5 shrink-0" {{ old('is_featured', $product?->is_featured) ? 'checked' : '' }}>
-                    <span class="text-sm font-medium group-hover:text-primary transition-colors">Sản phẩm nổi bật</span>
+                    <span class="text-sm font-medium group-hover:text-primary transition-colors">{{ __('Sản phẩm nổi bật') }}</span>
                 </label>
 
                 <div class="form-control mb-3">
                     <label class="label py-0 pb-1">
-                        <span class="label-text text-xs font-medium">Thứ tự hiển thị</span>
+                        <span class="label-text text-xs font-medium">{{ __('Thứ tự hiển thị') }}</span>
                     </label>
                     <input type="number" name="sort_order" min="0" value="{{ old('sort_order', $product?->sort_order ?? 0) }}"
                            class="input input-bordered input-sm w-full @error('sort_order') input-error @enderror">
@@ -518,7 +518,7 @@
                 </div>
 
                 <div class="flex gap-2">
-                    <a href="{{ route('backend.ocop.products.index') }}" class="btn btn-ghost btn-sm flex-1">Hủy</a>
+                    <a href="{{ route('backend.ocop.products.index') }}" class="btn btn-ghost btn-sm flex-1">{{ __('Hủy') }}</a>
                     <button type="submit" class="btn btn-primary btn-sm flex-1 gap-1.5">
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             @if($product)
@@ -527,12 +527,12 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                             @endif
                         </svg>
-                        {{ $product ? 'Lưu thay đổi' : 'Tạo mới' }}
+                        {{ $product ? __('Lưu thay đổi') : __('Tạo mới') }}
                     </button>
                 </div>
 
                 <p class="text-center text-xs text-base-content/30 mt-2.5">
-                    <span class="text-error">*</span> là trường bắt buộc
+                    <span class="text-error">*</span> {{ __('là trường bắt buộc') }}
                 </p>
 
             </div>

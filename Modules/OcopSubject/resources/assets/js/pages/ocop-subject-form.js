@@ -1,5 +1,6 @@
 import { initAllTomSelects } from '@shared/tom-select-factory.js';
 
+import { t } from '../../../../../../resources/js/shared/i18n.js';
 const FORM_SEL = '[data-ocop-subject-form]';
 const RE_TAB_XSHOW = /tab\s*===\s*['"](\w+)['"]/;
 const GALLERY_COLLECTION = 'ocop_subject_gallery';
@@ -60,7 +61,7 @@ function setupTabGuard(form) {
 
         if (window.Toast) {
             const lines = Array.from(missing.values(), ({ label, fields }) => `${label}: ${fields.join(', ')}`);
-            Toast.warning(`Còn thiếu thông tin bắt buộc:\n${lines.join('\n')}`, { duration: 5000 });
+            Toast.warning(`${t('Còn thiếu thông tin bắt buộc:\\n:n', { n: (lines.join('\n')) })}`, { duration: 5000 });
         }
     }, true);
 }

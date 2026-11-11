@@ -34,9 +34,9 @@ class DashboardController extends Controller
     {
         $hour = (int) now()->format('H');
         return match(true) {
-            $hour < 12 => 'Chào buổi sáng',
-            $hour < 18 => 'Chào buổi chiều',
-            default    => 'Chào buổi tối',
+            $hour < 12 => __('Chào buổi sáng'),
+            $hour < 18 => __('Chào buổi chiều'),
+            default    => __('Chào buổi tối'),
         };
     }
 }

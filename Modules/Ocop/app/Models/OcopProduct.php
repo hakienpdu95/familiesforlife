@@ -56,7 +56,7 @@ class OcopProduct extends Model implements HasMedia
             return null;
         }
 
-        return $value.' '.mb_strtolower(self::SHELF_LIFE_UNITS[$unit]);
+        return $value.' '.mb_strtolower(__(self::SHELF_LIFE_UNITS[$unit]));
     }
 
     protected $table = 'ocop_products';

@@ -23,7 +23,7 @@ class UpdateEventAction
         abort_if(
             ! in_array($event->status, [EventStatus::Submitted, EventStatus::Approved], true),
             422,
-            'Không thể sửa sự kiện đã xuất bản.'
+            __('Không thể sửa sự kiện đã xuất bản.')
         );
 
         $attributes = $this->buildAttributes->handle($data);

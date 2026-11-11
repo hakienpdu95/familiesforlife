@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 /**
  * resources/js/shared/tom-select-factory.js
  * ─────────────────────────────────────────────────────────────────────
@@ -25,7 +26,7 @@ const DEFAULTS = {
     render: {
         no_results: () =>
             `<div class="no-results" style="padding:.75rem;font-size:.875rem;color:#94a3b8;text-align:center">
-                Không tìm thấy kết quả
+                ${t('Không tìm thấy kết quả')}
              </div>`,
     },
 };
@@ -39,7 +40,7 @@ const DEFAULTS = {
  */
 export function createTs(selector, opts = {}) {
     if (!window.TomSelect) {
-        console.warn('[TS] TomSelect chưa load. Thêm @vite tom-select.js vào trang.');
+        console.warn(t('[TS] TomSelect chưa load. Thêm @vite tom-select.js vào trang.'));
         return null;
     }
     const el = _resolve(selector);
@@ -70,7 +71,7 @@ export function createTsRemote(selector, opts = {}) {
     } = opts;
 
     if (!url) {
-        console.warn('[TS] createTsRemote: thiếu opts.url');
+        console.warn(t('[TS] createTsRemote: thiếu opts.url'));
         return null;
     }
 
@@ -104,7 +105,7 @@ export function createTsAssignee(selector, apiUrl, onChange) {
         valueField: 'id',
         labelField: 'text',
         searchField: ['text', 'email'],
-        placeholder: '— Chưa phân công —',
+        placeholder: t('— Chưa phân công —'),
         // Mặc định TomSelect chỉ load() khi có ký tự gõ vào (shouldLoad yêu cầu
         // query.length > 0) — danh sách nhân viên theo org sẽ trống cho tới khi
         // gõ. preload: true gọi load('') ngay khi khởi tạo để hiện đủ danh sách.
@@ -122,7 +123,7 @@ export function createTsAssignee(selector, apiUrl, onChange) {
                  </div>`,
             no_results: () =>
                 `<div class="no-results" style="padding:.75rem;font-size:.875rem;color:#94a3b8;text-align:center">
-                    Không tìm thấy nhân viên
+                    ${t('Không tìm thấy nhân viên')}
                  </div>`,
         },
     });
@@ -149,14 +150,14 @@ export function createTsAssignee(selector, apiUrl, onChange) {
  */
 export function initAllTomSelects(container = document, afterInit) {
     if (!window.TomSelect) {
-        console.warn('[TS] TomSelect chưa load. Thêm @vite tom-select.js trước module JS.');
+        console.warn(t('[TS] TomSelect chưa load. Thêm @vite tom-select.js trước module JS.'));
         return;
     }
     for (const el of container.querySelectorAll('select.ts-init, select[data-ts-remote-url]')) {
         if (el.tomselect) continue;
         const placeholder = el.dataset.tsPlaceholder
             || el.querySelector('option[value=""]')?.textContent.trim()
-            || '— Chọn —';
+            || t('— Chọn —');
         const remoteUrl = el.dataset.tsRemoteUrl;
         const opts = { placeholder };
         if (!remoteUrl && !el.multiple && !el.querySelector('option[value=""]')) {
@@ -198,7 +199,7 @@ function _resolve(selector) {
         ? document.querySelector(selector)
         : selector;
     if (!el) {
-        console.warn('[TS] Element không tìm thấy:', selector);
+        console.warn(t('[TS] Element không tìm thấy:'), selector);
         return null;
     }
     return el;

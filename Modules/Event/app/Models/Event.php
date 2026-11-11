@@ -184,7 +184,7 @@ class Event extends Model
     public function priceLabel(): string
     {
         return match ($this->price_type) {
-            EventPriceType::Free => 'Miễn phí',
+            EventPriceType::Free => __('Miễn phí'),
             EventPriceType::Single => number_format((float) $this->price_amount, 0, ',', '.').'đ',
             EventPriceType::Range => number_format((float) $this->price_min, 0, ',', '.').'đ – '.number_format((float) $this->price_max, 0, ',', '.').'đ',
         };
@@ -200,7 +200,7 @@ class Event extends Model
     public function locationLabel(): string
     {
         return $this->location_type === EventLocationType::Online
-            ? 'Trực tuyến'
+            ? __('Trực tuyến')
             : trim(($this->venue_name ?? '').($this->ward?->name ? ", {$this->ward->name}" : '').($this->province?->name ? ", {$this->province->name}" : ''), ', ');
     }
 }

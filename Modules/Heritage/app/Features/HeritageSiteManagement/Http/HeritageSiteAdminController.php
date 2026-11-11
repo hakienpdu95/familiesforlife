@@ -48,8 +48,8 @@ class HeritageSiteAdminController extends Controller
         $site = $action->handle($data);
 
         $message = $site->status === HeritageSiteStatus::Published
-            ? "Đã tạo và xuất bản di tích \"{$site->name}\"."
-            : "Đã lưu nháp di tích \"{$site->name}\".";
+            ? __('Đã tạo và xuất bản di tích ":name".', ['name' => $site->name])
+            : __('Đã lưu nháp di tích ":name".', ['name' => $site->name]);
 
         return redirect()->route('backend.heritage.sites.index')->with('success', $message);
     }
@@ -71,9 +71,9 @@ class HeritageSiteAdminController extends Controller
         $isPublished = $site->status === HeritageSiteStatus::Published;
 
         $message = match (true) {
-            ! $wasPublished && $isPublished => "Đã xuất bản di tích \"{$site->name}\".",
-            $wasPublished && ! $isPublished => "Đã chuyển di tích \"{$site->name}\" về nháp — không còn hiển thị công khai.",
-            default => 'Cập nhật di tích thành công.',
+            ! $wasPublished && $isPublished => __('Đã xuất bản di tích ":name".', ['name' => $site->name]),
+            $wasPublished && ! $isPublished => __('Đã chuyển di tích ":name" về nháp — không còn hiển thị công khai.', ['name' => $site->name]),
+            default => __('Cập nhật di tích thành công.'),
         };
 
         return redirect()->route('backend.heritage.sites.index')->with('success', $message);
@@ -83,11 +83,11 @@ class HeritageSiteAdminController extends Controller
     {
         $this->authorize('restore', $site);
 
-        abort_unless($site->trashed(), 422, 'Mục này chưa bị xoá.');
+        abort_unless($site->trashed(), 422, __('Mục này chưa bị xoá.'));
 
         $action->handle($site);
 
-        $message = 'Đã khôi phục di tích "'.$site->name.'".';
+        $message = __('Đã khôi phục di tích ":name".', ['name' => $site->name]);
 
         if ($request->expectsJson()) {
             return response()->json(['message' => $message]);
@@ -101,11 +101,11 @@ class HeritageSiteAdminController extends Controller
         $action->handle($site);
 
         if ($request->expectsJson()) {
-            return response()->json(['message' => 'Đã xoá di tích.']);
+            return response()->json(['message' => __('Đã xoá di tích.')]);
         }
 
         return redirect()->route('backend.heritage.sites.index')
-            ->with('success', 'Đã xoá di tích.');
+            ->with('success', __('Đã xoá di tích.'));
     }
 
     private function validated(Request $request, ?HeritageSite $site = null): array
@@ -137,31 +137,31 @@ class HeritageSiteAdminController extends Controller
             'is_featured' => ['boolean'],
             'sort_order' => ['integer', 'min:0'],
         ], [
-            'name.required' => 'Vui lòng nhập tên di tích.',
-            'name.max' => 'Tên di tích không được vượt quá :max ký tự.',
-            'slug.unique' => 'Đường dẫn (slug) này đã được dùng — vui lòng chọn giá trị khác hoặc để trống để tự sinh.',
-            'slug.max' => 'Đường dẫn (slug) không được vượt quá :max ký tự.',
-            'slug.alpha_dash' => 'Đường dẫn (slug) chỉ được chứa chữ, số, dấu - và _.',
-            'heritage_type.required' => 'Vui lòng chọn loại hình di tích.',
-            'heritage_type.in' => 'Loại hình di tích không hợp lệ.',
-            'rank.required' => 'Vui lòng chọn xếp hạng.',
-            'rank.in' => 'Xếp hạng không hợp lệ.',
-            'era.max' => 'Niên đại không được vượt quá :max ký tự.',
-            'description.max' => 'Mô tả không được vượt quá :max ký tự.',
-            'content.max' => 'Nội dung quá dài (tối đa :max ký tự, tính cả mã HTML).',
-            'province_code.exists' => 'Tỉnh/thành được chọn không hợp lệ.',
-            'ward_code.exists' => 'Phường/xã được chọn không hợp lệ.',
-            'address.max' => 'Địa chỉ chi tiết không được vượt quá :max ký tự.',
-            'latitude.numeric' => 'Vĩ độ phải là số.',
-            'latitude.between' => 'Vĩ độ phải trong khoảng -90 đến 90.',
-            'longitude.numeric' => 'Kinh độ phải là số.',
-            'longitude.between' => 'Kinh độ phải trong khoảng -180 đến 180.',
-            'visiting_status.in' => 'Tình trạng tham quan không hợp lệ.',
-            'status.required' => 'Vui lòng chọn trạng thái.',
-            'status.in' => 'Trạng thái không hợp lệ.',
-            'is_featured.boolean' => 'Giá trị "Di tích nổi bật" không hợp lệ.',
-            'sort_order.integer' => 'Thứ tự hiển thị phải là số nguyên.',
-            'sort_order.min' => 'Thứ tự hiển thị không được âm.',
+            'name.required' => __('Vui lòng nhập tên di tích.'),
+            'name.max' => __('Tên di tích không được vượt quá :max ký tự.'),
+            'slug.unique' => __('Đường dẫn (slug) này đã được dùng — vui lòng chọn giá trị khác hoặc để trống để tự sinh.'),
+            'slug.max' => __('Đường dẫn (slug) không được vượt quá :max ký tự.'),
+            'slug.alpha_dash' => __('Đường dẫn (slug) chỉ được chứa chữ, số, dấu - và _.'),
+            'heritage_type.required' => __('Vui lòng chọn loại hình di tích.'),
+            'heritage_type.in' => __('Loại hình di tích không hợp lệ.'),
+            'rank.required' => __('Vui lòng chọn xếp hạng.'),
+            'rank.in' => __('Xếp hạng không hợp lệ.'),
+            'era.max' => __('Niên đại không được vượt quá :max ký tự.'),
+            'description.max' => __('Mô tả không được vượt quá :max ký tự.'),
+            'content.max' => __('Nội dung quá dài (tối đa :max ký tự, tính cả mã HTML).'),
+            'province_code.exists' => __('Tỉnh/thành được chọn không hợp lệ.'),
+            'ward_code.exists' => __('Phường/xã được chọn không hợp lệ.'),
+            'address.max' => __('Địa chỉ chi tiết không được vượt quá :max ký tự.'),
+            'latitude.numeric' => __('Vĩ độ phải là số.'),
+            'latitude.between' => __('Vĩ độ phải trong khoảng -90 đến 90.'),
+            'longitude.numeric' => __('Kinh độ phải là số.'),
+            'longitude.between' => __('Kinh độ phải trong khoảng -180 đến 180.'),
+            'visiting_status.in' => __('Tình trạng tham quan không hợp lệ.'),
+            'status.required' => __('Vui lòng chọn trạng thái.'),
+            'status.in' => __('Trạng thái không hợp lệ.'),
+            'is_featured.boolean' => __('Giá trị "Di tích nổi bật" không hợp lệ.'),
+            'sort_order.integer' => __('Thứ tự hiển thị phải là số nguyên.'),
+            'sort_order.min' => __('Thứ tự hiển thị không được âm.'),
         ]);
     }
 }

@@ -85,27 +85,27 @@ class OcopSubjectRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Vui lòng nhập tên chủ thể.',
-            'name.max' => 'Tên chủ thể không được vượt quá :max ký tự.',
-            'tax_code.regex' => 'Mã số định danh không hợp lệ — MST 10 số (hoặc 10 số kèm -XXX), hoặc CCCD 12 số với hộ kinh doanh.',
-            'tax_code.unique' => 'Mã số định danh này đã được dùng cho một chủ thể khác.',
-            'organization_type.enum' => 'Loại hình tổ chức không hợp lệ.',
-            'province_code.required' => 'Vui lòng chọn tỉnh/thành.',
-            'province_code.exists' => 'Tỉnh/thành được chọn không hợp lệ.',
-            'ward_code.required' => 'Vui lòng chọn phường/xã.',
-            'ward_code.exists' => 'Phường/xã không thuộc tỉnh/thành đã chọn.',
-            'ocop_star.required' => 'Hộ kinh doanh bắt buộc khai báo hạng sao OCOP.',
-            'ocop_star.in' => 'Hạng sao không hợp lệ — chỉ chấp nhận 3, 4 hoặc 5 sao.',
-            'ocop_cert_expiry.required_with' => 'Vui lòng nhập ngày hết hạn chứng nhận OCOP.',
-            'ocop_cert_expiry.date' => 'Ngày hết hạn không hợp lệ.',
-            'hotline.regex' => 'Số điện thoại không hợp lệ.',
-            'email.email' => 'Email không hợp lệ.',
-            'website.url' => 'Website không hợp lệ — phải bắt đầu bằng https://',
-            'media_uuids.max' => 'Tối đa :max ảnh cho mỗi chủ thể.',
-            'documents.*.max' => 'Tối đa :max tệp cho mỗi loại hồ sơ.',
-            'documents.*.*.file' => 'Tệp tải lên không hợp lệ.',
-            'documents.*.*.mimes' => 'Chỉ chấp nhận tệp PDF, JPG, PNG hoặc WEBP.',
-            'documents.*.*.max' => 'Mỗi tệp tối đa 20MB.',
+            'name.required' => __('Vui lòng nhập tên chủ thể.'),
+            'name.max' => __('Tên chủ thể không được vượt quá :max ký tự.'),
+            'tax_code.regex' => __('Mã số định danh không hợp lệ — MST 10 số (hoặc 10 số kèm -XXX), hoặc CCCD 12 số với hộ kinh doanh.'),
+            'tax_code.unique' => __('Mã số định danh này đã được dùng cho một chủ thể khác.'),
+            'organization_type.enum' => __('Loại hình tổ chức không hợp lệ.'),
+            'province_code.required' => __('Vui lòng chọn tỉnh/thành.'),
+            'province_code.exists' => __('Tỉnh/thành được chọn không hợp lệ.'),
+            'ward_code.required' => __('Vui lòng chọn phường/xã.'),
+            'ward_code.exists' => __('Phường/xã không thuộc tỉnh/thành đã chọn.'),
+            'ocop_star.required' => __('Hộ kinh doanh bắt buộc khai báo hạng sao OCOP.'),
+            'ocop_star.in' => __('Hạng sao không hợp lệ — chỉ chấp nhận 3, 4 hoặc 5 sao.'),
+            'ocop_cert_expiry.required_with' => __('Vui lòng nhập ngày hết hạn chứng nhận OCOP.'),
+            'ocop_cert_expiry.date' => __('Ngày hết hạn không hợp lệ.'),
+            'hotline.regex' => __('Số điện thoại không hợp lệ.'),
+            'email.email' => __('Email không hợp lệ.'),
+            'website.url' => __('Website không hợp lệ — phải bắt đầu bằng https://'),
+            'media_uuids.max' => __('Tối đa :max ảnh cho mỗi chủ thể.'),
+            'documents.*.max' => __('Tối đa :max tệp cho mỗi loại hồ sơ.'),
+            'documents.*.*.file' => __('Tệp tải lên không hợp lệ.'),
+            'documents.*.*.mimes' => __('Chỉ chấp nhận tệp PDF, JPG, PNG hoặc WEBP.'),
+            'documents.*.*.max' => __('Mỗi tệp tối đa 20MB.'),
         ];
     }
 
@@ -118,13 +118,13 @@ class OcopSubjectRequest extends FormRequest
     {
         return function (string $attribute, mixed $value, Closure $fail): void {
             if (! preg_match(self::GPS_REGEX, (string) $value, $m)) {
-                $fail('Toạ độ GPS phải có dạng "vĩ độ, kinh độ" — vd 16.4637, 107.5909.');
+                $fail(__('Toạ độ GPS phải có dạng "vĩ độ, kinh độ" — vd 16.4637, 107.5909.'));
 
                 return;
             }
 
             if (abs((float) $m[1]) > 90 || abs((float) $m[2]) > 180) {
-                $fail('Toạ độ GPS nằm ngoài phạm vi hợp lệ (vĩ độ ±90, kinh độ ±180).');
+                $fail(__('Toạ độ GPS nằm ngoài phạm vi hợp lệ (vĩ độ ±90, kinh độ ±180).'));
             }
         };
     }
@@ -145,16 +145,16 @@ class OcopSubjectRequest extends FormRequest
     {
         foreach (OcopSubject::DOCUMENT_COLLECTIONS as $collection) {
             if ($this->documentCountAfterSave($collection) > OcopSubject::MAX_DOCUMENTS) {
-                $validator->errors()->add("documents.$collection", 'Tối đa '.OcopSubject::MAX_DOCUMENTS.' tệp cho mỗi loại hồ sơ.');
+                $validator->errors()->add("documents.$collection", __('Tối đa :max tệp cho mỗi loại hồ sơ.', ['max' => OcopSubject::MAX_DOCUMENTS]));
             }
         }
 
         if ($this->organizationType()?->requiresOcopDecision() && $this->documentCountAfterSave(OcopSubject::DOC_OCOP_CERT) === 0) {
-            $validator->errors()->add('documents.'.OcopSubject::DOC_OCOP_CERT, 'Hộ kinh doanh bắt buộc tải lên Quyết định phê duyệt hạng sao OCOP.');
+            $validator->errors()->add('documents.'.OcopSubject::DOC_OCOP_CERT, __('Hộ kinh doanh bắt buộc tải lên Quyết định phê duyệt hạng sao OCOP.'));
         }
 
         if ($this->boolean('is_food_business') && $this->documentCountAfterSave(OcopSubject::DOC_FOOD_SAFETY_CERT) === 0) {
-            $validator->errors()->add('documents.'.OcopSubject::DOC_FOOD_SAFETY_CERT, 'Chủ thể ngành thực phẩm bắt buộc tải lên Giấy chứng nhận ATTP.');
+            $validator->errors()->add('documents.'.OcopSubject::DOC_FOOD_SAFETY_CERT, __('Chủ thể ngành thực phẩm bắt buộc tải lên Giấy chứng nhận ATTP.'));
         }
     }
 }

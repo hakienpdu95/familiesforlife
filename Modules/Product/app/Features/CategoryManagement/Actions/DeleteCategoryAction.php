@@ -19,7 +19,7 @@ class DeleteCategoryAction
     public function handle(ProductCategory $category): void
     {
         if ($category->children()->exists()) {
-            throw new \RuntimeException('Không thể xoá danh mục còn danh mục con — hãy chuyển/xoá danh mục con trước.');
+            throw new \RuntimeException(__('Không thể xoá danh mục còn danh mục con — hãy chuyển/xoá danh mục con trước.'));
         }
 
         $category->delete();

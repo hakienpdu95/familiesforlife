@@ -23,7 +23,7 @@
         <img src="{{ $province->logoUrl() }}" alt="Logo {{ $province->name }}"
              class="mx-auto mb-5 h-20 w-20 rounded-full bg-white object-contain p-2 shadow-lg sm:h-24 sm:w-24">
         @endif
-        <span class="text-xs font-black uppercase tracking-[0.3em] text-white/70">Chuyên đề địa phương</span>
+        <span class="text-xs font-black uppercase tracking-[0.3em] text-white/70">{{ __('Chuyên đề địa phương') }}</span>
         <h1 class="text-3xl sm:text-4xl font-extrabold text-white mt-3">{{ $province->name }}</h1>
         <p class="text-white/90 mt-2 max-w-xl mx-auto text-lg">{{ $tagline }}</p>
 
@@ -45,14 +45,14 @@
             <a href="{{ $province->tvc_video_url }}" target="_blank" rel="noopener"
                class="inline-flex items-center gap-2 bg-white px-6 py-3 text-xs font-bold uppercase tracking-widest text-gray-900 transition hover:bg-white/90">
                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                Xem video quảng bá
+                {{ __('Xem video quảng bá') }}
             </a>
             @endif
             @if($province->vr360_map_url)
             <a href="{{ $province->vr360_map_url }}" target="_blank" rel="noopener"
                class="inline-flex items-center gap-2 border border-white px-6 py-3 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-white hover:text-gray-900">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                Trải nghiệm VR 360
+                {{ __('Trải nghiệm VR 360') }}
             </a>
             @endif
         </div>

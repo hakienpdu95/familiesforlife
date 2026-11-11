@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', 'Tin nóng')
+@section('title', __('Tin nóng'))
 
 @section('content')
 <div x-data="breakingNewsListPage({{ Js::from([
@@ -19,8 +19,8 @@
 
     <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div>
-            <h1 class="text-2xl font-bold text-base-content">Tin nóng</h1>
-            <p class="text-sm text-base-content/50 mt-0.5">Dải ticker "tin nóng" ghim đầu trang chủ</p>
+            <h1 class="text-2xl font-bold text-base-content">{{ __('Tin nóng') }}</h1>
+            <p class="text-sm text-base-content/50 mt-0.5">{{ __('Dải ticker "tin nóng" ghim đầu trang chủ') }}</p>
         </div>
         <div class="flex items-center gap-2">
             @can('create', \Modules\Post\Models\PostBreakingNews::class)
@@ -28,7 +28,7 @@
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Đánh dấu tin nóng
+                {{ __('Đánh dấu tin nóng') }}
             </a>
             @endcan
         </div>
@@ -44,11 +44,11 @@
 
 <dialog id="breakingNewsDeleteModal" class="modal">
     <div class="modal-box max-w-sm">
-        <h3 class="font-bold text-lg text-error">Xác nhận gỡ</h3>
-        <p class="py-3 text-sm text-base-content/70">Bạn có chắc muốn gỡ tin nóng này?</p>
+        <h3 class="font-bold text-lg text-error">{{ __('Xác nhận gỡ') }}</h3>
+        <p class="py-3 text-sm text-base-content/70">{{ __('Bạn có chắc muốn gỡ tin nóng này?') }}</p>
         <div class="modal-action mt-4">
-            <button id="breakingNewsConfirmDeleteBtn" class="btn btn-error btn-sm">Xoá</button>
-            <button class="btn btn-ghost btn-sm" onclick="breakingNewsDeleteModal.close()">Hủy</button>
+            <button id="breakingNewsConfirmDeleteBtn" class="btn btn-error btn-sm">{{ __('Xoá') }}</button>
+            <button class="btn btn-ghost btn-sm" onclick="breakingNewsDeleteModal.close()">{{ __('Hủy') }}</button>
         </div>
     </div>
     <form method="dialog" class="modal-backdrop"><button>close</button></form>

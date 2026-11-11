@@ -60,7 +60,7 @@ class MediaJoditUploadController extends Controller
 
                 return response()->json([
                     'error'   => true,
-                    'message' => 'Upload thất bại: ' . $e->getMessage(),
+                    'message' => __('Upload thất bại: :error', ['error' => $e->getMessage()]),
                     'data'    => ['baseurl' => '', 'files' => []],
                 ], 422);
             }

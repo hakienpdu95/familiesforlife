@@ -48,7 +48,7 @@ class ImportOcopSubjectsAction
                 }
 
                 if ($name === '') {
-                    $errors[] = "Dòng {$rowNumber}: thiếu tên cơ sở sản xuất.";
+                    $errors[] = __('Dòng :row_number: thiếu tên cơ sở sản xuất.', ['row_number' => $rowNumber]);
 
                     continue;
                 }
@@ -57,7 +57,7 @@ class ImportOcopSubjectsAction
                 $ward = $wardsByName[$normalized] ?? $wardsByShortName[$this->stripPrefix($normalized)] ?? null;
 
                 if (! $ward) {
-                    $errors[] = "Dòng {$rowNumber}: không tìm thấy phường/xã \"{$wardInput}\" thuộc {$provinceName} ({$name}).";
+                    $errors[] = __('Dòng :row_number: không tìm thấy phường/xã ":ward_input" thuộc :province_name (:name).', ['row_number' => $rowNumber, 'ward_input' => $wardInput, 'province_name' => $provinceName, 'name' => $name]);
 
                     continue;
                 }

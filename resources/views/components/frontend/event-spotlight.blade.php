@@ -10,8 +10,8 @@
 <section class="vgd-events bg-neutral text-neutral-content pt-10 pb-10">
     <div class="container">
         <div class="flex flex-col items-center text-center">
-            <h2 class="font-normal text-3xl tracking-wide">Sự kiện sắp diễn ra</h2>
-            <h3 class="subtitle">Sự kiện nổi bật</h3>
+            <h2 class="font-normal text-3xl tracking-wide">{{ __('Sự kiện sắp diễn ra') }}</h2>
+            <h3 class="subtitle">{{ __('Sự kiện nổi bật') }}</h3>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-[5fr_7fr] gap-3">
@@ -38,14 +38,14 @@
 
 @php
     $eventFilters = [
-        ['label' => 'Tất cả sự kiện', 'url' => route('event.public.home')],
-        ['label' => 'Tuần này', 'url' => route('event.public.home', ['thoi-gian' => 'tuan-nay'])],
-        ['label' => 'Tháng này', 'url' => route('event.public.home', ['thoi-gian' => 'thang-nay'])],
-        ['label' => 'Đăng sự kiện', 'url' => route('event.public.submit.form')],
-        ['label' => 'Tìm kiếm sự kiện', 'url' => route('event.public.home').'#tim-su-kien'],
+        ['label' => __('Tất cả sự kiện'), 'url' => route('event.public.home')],
+        ['label' => __('Tuần này'), 'url' => route('event.public.home', ['thoi-gian' => 'tuan-nay'])],
+        ['label' => __('Tháng này'), 'url' => route('event.public.home', ['thoi-gian' => 'thang-nay'])],
+        ['label' => __('Đăng sự kiện'), 'url' => route('event.public.submit.form')],
+        ['label' => __('Tìm kiếm sự kiện'), 'url' => route('event.public.home').'#tim-su-kien'],
     ];
 @endphp
-<nav class="vgd-events-filters bg-neutral" aria-label="Lọc sự kiện">
+<nav class="vgd-events-filters bg-neutral" aria-label="{{ __('Lọc sự kiện') }}">
     <div class="container">
         <div class="flex justify-between flex-wrap">
             @foreach($eventFilters as $i => $filter)

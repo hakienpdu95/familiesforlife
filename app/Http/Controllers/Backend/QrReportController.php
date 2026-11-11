@@ -29,7 +29,7 @@ class QrReportController extends Controller
         $this->authorize('manageQrReports');
 
         return view('backend.qr-reports.index', [
-            'reasons' => QrReport::REASONS,
+            'reasons' => array_map('__', QrReport::REASONS),
         ]);
     }
 
@@ -80,7 +80,7 @@ class QrReportController extends Controller
 
         $report->update(['status' => 'resolved', 'resolved_by' => auth()->id(), 'resolved_at' => now()]);
 
-        $message = 'Đã đánh dấu phản ánh #'.$report->id.' là đã xử lý.';
+        $message = __('Đã đánh dấu phản ánh #:id là đã xử lý.', ['id' => $report->id]);
 
         if ($request->expectsJson()) {
             return response()->json(['message' => $message]);
@@ -104,8 +104,8 @@ class QrReportController extends Controller
             'created_at' => format_datetime($report->created_at),
             'qr_code' => $identity?->qr_code,
             'qr_url' => $identity?->publicUrl(),
-            'target_kind' => self::KIND_LABELS[$class] ?? $class,
-            'target_title' => $title ?: '(đã xoá)',
+            'target_kind' => isset(self::KIND_LABELS[$class]) ? __(self::KIND_LABELS[$class]) : $class,
+            'target_title' => $title ?: __('(đã xoá)'),
             'target_trashed' => $target && method_exists($target, 'trashed') && $target->trashed(),
             'reason' => $report->reason,
             'reason_label' => $report->reasonLabel(),

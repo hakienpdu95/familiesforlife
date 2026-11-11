@@ -17,11 +17,11 @@ class DeleteEventCategoryAction
     public function handle(EventCategory $category): void
     {
         if ($category->children()->exists()) {
-            throw new \RuntimeException('Không thể xoá danh mục còn danh mục con — hãy chuyển/xoá danh mục con trước.');
+            throw new \RuntimeException(__('Không thể xoá danh mục còn danh mục con — hãy chuyển/xoá danh mục con trước.'));
         }
 
         if ($category->events()->exists()) {
-            throw new \RuntimeException('Không thể xoá danh mục còn sự kiện gán trực tiếp — hãy chuyển sự kiện sang danh mục khác trước.');
+            throw new \RuntimeException(__('Không thể xoá danh mục còn sự kiện gán trực tiếp — hãy chuyển sự kiện sang danh mục khác trước.'));
         }
 
         $category->delete();

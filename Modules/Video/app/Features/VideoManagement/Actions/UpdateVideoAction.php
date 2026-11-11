@@ -32,7 +32,7 @@ class UpdateVideoAction
         if ($urlChanged || $embedChanged) {
             if ($data->video_url && ! $this->resolveYoutubeVideoId->isWhitelistedHost($data->video_url)) {
                 throw ValidationException::withMessages([
-                    'video_url' => 'Link URL Video phải là 1 đường dẫn YouTube hợp lệ (youtube.com, youtu.be, m.youtube.com, music.youtube.com).',
+                    'video_url' => __('Link URL Video phải là 1 đường dẫn YouTube hợp lệ (youtube.com, youtu.be, m.youtube.com, music.youtube.com).'),
                 ]);
             }
 
@@ -40,7 +40,7 @@ class UpdateVideoAction
 
             if (! $resolved) {
                 throw ValidationException::withMessages([
-                    'embed_code' => 'Không nhận diện được video YouTube hợp lệ từ Mã Embed hoặc Link URL Video đã nhập. Vui lòng dán lại URL hoặc mã nhúng lấy trực tiếp từ YouTube.',
+                    'embed_code' => __('Không nhận diện được video YouTube hợp lệ từ Mã Embed hoặc Link URL Video đã nhập. Vui lòng dán lại URL hoặc mã nhúng lấy trực tiếp từ YouTube.'),
                 ]);
             }
 

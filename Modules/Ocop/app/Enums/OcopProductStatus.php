@@ -15,8 +15,8 @@ enum OcopProductStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Draft     => 'Nháp',
-            self::Published => 'Đã xuất bản',
+            self::Draft     => __('Nháp'),
+            self::Published => __('Đã xuất bản'),
         };
     }
 }

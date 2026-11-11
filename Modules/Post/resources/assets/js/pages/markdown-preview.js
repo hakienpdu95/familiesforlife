@@ -10,6 +10,7 @@
  */
 import { createTsRemote } from '@shared/tom-select-factory.js';
 
+import { t } from '../../../../../../resources/js/shared/i18n.js';
 document.addEventListener('DOMContentLoaded', () => {
     const picker = document.getElementById('markdown-preview-picker');
     if (!picker) return;
@@ -21,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         valueField:  'id',
         labelField:  'text',
         searchField: ['text'],
-        placeholder: 'Tìm bài viết theo tiêu đề...',
+        placeholder: t('Tìm bài viết theo tiêu đề...'),
         preload:     true,
         render: {
             option: (data) => `
@@ -29,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="text-sm font-medium">${data.text}</div>
                     ${data.published_at ? `<div class="text-xs opacity-60">${data.published_at}</div>` : ''}
                 </div>`,
-            no_results: () => `<div class="no-results" style="padding:.75rem;font-size:.875rem;color:#94a3b8;text-align:center">Không tìm thấy bài viết</div>`,
+            no_results: () => `<div class="no-results" style="padding:.75rem;font-size:.875rem;color:#94a3b8;text-align:center">${t('Không tìm thấy bài viết')}</div>`,
         },
         onChange(value) {
             if (value) form?.submit();

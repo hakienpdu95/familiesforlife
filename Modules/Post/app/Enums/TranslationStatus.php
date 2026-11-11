@@ -19,13 +19,13 @@ enum TranslationStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Draft       => 'Nháp',
-            self::Submitted   => 'Chờ duyệt',
-            self::Approved    => 'Đã duyệt',
-            self::Scheduled   => 'Đã lên lịch',
-            self::Published   => 'Đã xuất bản',
-            self::Unpublished => 'Đã gỡ',
-            self::Archived    => 'Lưu trữ',
+            self::Draft       => __('Nháp'),
+            self::Submitted   => __('Chờ duyệt'),
+            self::Approved    => __('Đã duyệt'),
+            self::Scheduled   => __('Đã lên lịch'),
+            self::Published   => __('Đã xuất bản'),
+            self::Unpublished => __('Đã gỡ'),
+            self::Archived    => __('Lưu trữ'),
         };
     }
 

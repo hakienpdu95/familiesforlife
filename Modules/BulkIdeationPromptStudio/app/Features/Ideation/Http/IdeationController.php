@@ -54,12 +54,12 @@ class IdeationController extends Controller
             'business_goal' => ['nullable', 'string', 'max:'.($limits['business_goal_max'] ?? 500)],
             'post_category_uuid' => ['nullable', 'string', 'uuid', 'exists:post_categories,uuid'],
         ], [
-            'label.required' => 'Vui lòng nhập tên gọi cho prompt.',
-            'label.max' => 'Tên gọi không được vượt quá :max ký tự.',
-            'raw_inputs.required' => 'Vui lòng dán ít nhất 1 từ khóa/ý tưởng vào kho nguyên liệu.',
-            'raw_inputs.max' => 'Kho nguyên liệu không được vượt quá :max ký tự.',
-            'business_goal.max' => 'Mục tiêu bài viết không được vượt quá :max ký tự.',
-            'post_category_uuid.exists' => 'Chuyên mục được chọn không hợp lệ.',
+            'label.required' => __('Vui lòng nhập tên gọi cho prompt.'),
+            'label.max' => __('Tên gọi không được vượt quá :max ký tự.'),
+            'raw_inputs.required' => __('Vui lòng dán ít nhất 1 từ khóa/ý tưởng vào kho nguyên liệu.'),
+            'raw_inputs.max' => __('Kho nguyên liệu không được vượt quá :max ký tự.'),
+            'business_goal.max' => __('Mục tiêu bài viết không được vượt quá :max ký tự.'),
+            'post_category_uuid.exists' => __('Chuyên mục được chọn không hợp lệ.'),
         ]);
 
         $categoryId = isset($data['post_category_uuid'])
@@ -75,7 +75,7 @@ class IdeationController extends Controller
         );
 
         return redirect()->route('backend.bulkideationpromptstudio.show', $prompt)
-            ->with('success', 'Đã sinh prompt — sao chép bên dưới để dùng.');
+            ->with('success', __('Đã sinh prompt — sao chép bên dưới để dùng.'));
     }
 
     public function show(BulkIdeationPrompt $prompt): View
@@ -92,6 +92,6 @@ class IdeationController extends Controller
         $prompt->delete();
 
         return redirect()->route('backend.bulkideationpromptstudio.index')
-            ->with('success', 'Đã xoá prompt.');
+            ->with('success', __('Đã xoá prompt.'));
     }
 }

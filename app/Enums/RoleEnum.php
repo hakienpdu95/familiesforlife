@@ -17,13 +17,13 @@ enum RoleEnum: string
     {
         return match ($this) {
             self::SUPER_ADMIN => 'Super Admin',
-            self::CONTENT_HEAD => 'Tổng biên tập',
-            self::CONTENT_EDITOR => 'Biên tập viên',
-            self::CONTENT_CREATOR => 'Phóng viên / Biên tập viết bài',
-            self::SECTION_EDITOR => 'Biên tập viên trưởng chuyên mục',
-            self::CONTENT_MODERATOR => 'Kiểm duyệt viên (Legal)',
-            self::OPS => 'Vận hành Platform',
-            self::VIEWER => 'Giám sát / Viewer',
+            self::CONTENT_HEAD => __('Tổng biên tập'),
+            self::CONTENT_EDITOR => __('Biên tập viên'),
+            self::CONTENT_CREATOR => __('Phóng viên / Biên tập viết bài'),
+            self::SECTION_EDITOR => __('Biên tập viên trưởng chuyên mục'),
+            self::CONTENT_MODERATOR => __('Kiểm duyệt viên (Legal)'),
+            self::OPS => __('Vận hành Platform'),
+            self::VIEWER => __('Giám sát / Viewer'),
         };
     }
 

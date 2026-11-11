@@ -14,7 +14,7 @@
             @if ($price || $availability)
                 <div class="mt-4 flex flex-wrap items-center gap-2">
                     @if ($price)
-                        <span class="inline-flex items-baseline gap-1.5 h-9 px-3 rounded-lg bg-[#f5f5f4] text-[13px] text-[#78716c]">Giá tham khảo <strong class="text-[16px] font-bold text-[#1c1917] tabular-nums">{{ $price }}</strong></span>
+                        <span class="inline-flex items-baseline gap-1.5 h-9 px-3 rounded-lg bg-[#f5f5f4] text-[13px] text-[#78716c]">{{ __('Giá tham khảo') }} <strong class="text-[16px] font-bold text-[#1c1917] tabular-nums">{{ $price }}</strong></span>
                     @endif
                     @if ($availability)
                         <span @class([
@@ -33,12 +33,12 @@
 
     @if ($channels)
         <section id="mua-hang" class="tx-section">
-            <h2 class="tx-section-title">Nơi mua <small>{{ count($channels) }} kênh</small></h2>
+            <h2 class="tx-section-title">{{ __('Nơi mua') }} <small>{{ __(':channels kênh', ['channels' => count($channels)]) }}</small></h2>
             <ul class="tx-card tx-rows">
                 @foreach ($channels as $channel)
                     <li>
                         <a href="{{ $channel['url'] }}" target="_blank" rel="noopener nofollow sponsored" class="tx-row gap-3.5 py-3.5"
-                           aria-label="Mua {{ $title }} tại {{ $channel['name'] }} (mở trang mới)">
+                           aria-label="{{ __('Mua :title tại :channel (mở trang mới)', ['title' => $title, 'channel' => $channel['name']]) }}">
                             <span class="w-11 h-11 rounded-[10px] bg-white ring-1 ring-[rgb(28_25_23/.08)] flex items-center justify-center shrink-0 text-[#57534e] [&>svg]:w-5 [&>svg]:h-5">
                                 @if ($channel['logo'])
                                     <img src="{{ $channel['logo'] }}" alt="" width="32" height="32" loading="lazy" decoding="async" class="w-8 h-8 object-contain">
@@ -57,7 +57,7 @@
                                     <span @class(['truncate', 'text-[#b45309]' => $channel['mismatch']])>{{ $channel['host'] }}</span>
                                 </span>
                                 @if ($channel['mismatch'])
-                                    <span class="mt-0.5 block text-[12px] leading-4 font-medium text-[#b45309]">Không phải tên miền {{ $channel['name'] }}</span>
+                                    <span class="mt-0.5 block text-[12px] leading-4 font-medium text-[#b45309]">{{ __('Không phải tên miền :channel', ['channel' => $channel['name']]) }}</span>
                                 @endif
                             </span>
                             <span class="shrink-0 inline-flex items-center gap-1.5 h-10 pl-3.5 pr-3 max-[359.98px]:pl-3 max-[359.98px]:pr-2.5 rounded-lg text-white text-[13.5px] font-semibold transition-colors {{ $channel['button'] }} [&>svg]:w-3.5 [&>svg]:h-3.5 [&>svg]:opacity-80 max-[389.98px]:[&>svg]:hidden">Mua ngay @include('traceability.partials.icon', ['name' => 'external'])</span>
@@ -70,7 +70,7 @@
 
     @if ($description || $content_html)
         <section id="gioi-thieu" class="tx-section">
-            <h2 class="tx-section-title">Giới thiệu</h2>
+            <h2 class="tx-section-title">{{ __('Giới thiệu') }}</h2>
             <div class="tx-card">
                 @if ($description)
                     <div class="tx-prose text-[15px] px-4 py-3.5 [overflow-wrap:anywhere]">{!! $description !!}</div>
@@ -78,7 +78,7 @@
                 @if ($content_html)
                     <details class="tx-details group/acc @if ($description) border-t border-[var(--tx-line)] @endif" @unless ($description) open @endunless>
                         <summary class="tx-row-link flex items-center gap-4 px-4 min-h-[3.25rem] py-3">
-                            <span class="flex-1 text-[15px] font-semibold">Thông tin chi tiết</span>
+                            <span class="flex-1 text-[15px] font-semibold">{{ __('Thông tin chi tiết') }}</span>
                             <span class="tx-chevron transition-transform group-open/acc:rotate-90">@include('traceability.partials.icon', ['name' => 'chevron'])</span>
                         </summary>
                         <div class="tx-prose text-[15px] px-4 pb-4">{!! $content_html !!}</div>

@@ -42,7 +42,7 @@ class EventCategoryAdminController extends Controller
         $category = $action->handle($data);
 
         return redirect()->route('backend.event.categories.index')
-            ->with('success', "Danh mục \"{$category->name}\" đã được tạo.");
+            ->with('success', __('Danh mục ":name" đã được tạo.', ['name' => $category->name]));
     }
 
     public function edit(EventCategory $category, ListEventCategoriesForAdminHandler $handler): View
@@ -58,7 +58,7 @@ class EventCategoryAdminController extends Controller
         $action->handle($category, $data);
 
         return redirect()->route('backend.event.categories.index')
-            ->with('success', 'Cập nhật danh mục thành công.');
+            ->with('success', __('Cập nhật danh mục thành công.'));
     }
 
     public function destroy(Request $request, EventCategory $category, DeleteEventCategoryAction $action): RedirectResponse|JsonResponse
@@ -76,11 +76,11 @@ class EventCategoryAdminController extends Controller
         }
 
         if ($request->expectsJson()) {
-            return response()->json(['message' => "Đã xoá danh mục \"{$name}\"."]);
+            return response()->json(['message' => __('Đã xoá danh mục ":name".', ['name' => $name])]);
         }
 
         return redirect()->route('backend.event.categories.index')
-            ->with('success', "Đã xoá danh mục \"{$name}\".");
+            ->with('success', __('Đã xoá danh mục ":name".', ['name' => $name]));
     }
 
     public function reorder(Request $request, ReorderEventCategoriesAction $action): RedirectResponse
@@ -89,7 +89,7 @@ class EventCategoryAdminController extends Controller
 
         $action->handle($request->array('order'));
 
-        return back()->with('success', 'Đã cập nhật thứ tự danh mục.');
+        return back()->with('success', __('Đã cập nhật thứ tự danh mục.'));
     }
 
     private function validated(Request $request): array

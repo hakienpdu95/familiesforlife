@@ -69,7 +69,7 @@ class ProductSubjectResolver implements AicemSubjectResolver
         } catch (ValidationException $e) {
             $firstField = array_key_first($e->errors()) ?? '?';
             throw new AicemSuggestionApplyException(
-                "Dữ liệu sản phẩm hiện không hợp lệ ở field \"{$firstField}\" — sửa field đó trước khi áp dụng gợi ý cho \"{$field}\"."
+                __('Dữ liệu sản phẩm hiện không hợp lệ ở field ":first_field" — sửa field đó trước khi áp dụng gợi ý cho ":field".', ['first_field' => $firstField, 'field' => $field])
             );
         } catch (QueryException $e) {
             // Trường hợp biên (mục 11.1): 1 field KHÔNG liên quan đang có giá trị vi phạm ràng
@@ -78,15 +78,14 @@ class ProductSubjectResolver implements AicemSubjectResolver
             // có thể trúng lỗi dù ta chỉ đang muốn đổi field khác. Dịch sang thông báo rõ ràng
             // thay vì để lộ QueryException thô ra UI.
             throw new AicemSuggestionApplyException(
-                "Không thể áp dụng gợi ý cho \"{$field}\" — dữ liệu sản phẩm hiện có 1 field khác đang vi phạm ràng buộc dữ liệu "
-                . '(VD quá dài so với giới hạn cột). Hãy sửa dữ liệu sản phẩm hiện có trước, sau đó thử lại.'
+                __('Không thể áp dụng gợi ý cho ":field" — dữ liệu sản phẩm hiện có 1 field khác đang vi phạm ràng buộc dữ liệu (VD quá dài so với giới hạn cột). Hãy sửa dữ liệu sản phẩm hiện có trước, sau đó thử lại.', ['field' => $field])
             );
         }
     }
 
     public function applyBlockSuggestion(Model $subject, int $blockId, string $suggestedText, int $userId): void
     {
-        throw new \LogicException('Product không hỗ trợ block suggestion (has_blocks=false trong registry).');
+        throw new \LogicException(__('Product không hỗ trợ block suggestion (has_blocks=false trong registry).'));
     }
 
     public function taxonomy(Model $subject): array

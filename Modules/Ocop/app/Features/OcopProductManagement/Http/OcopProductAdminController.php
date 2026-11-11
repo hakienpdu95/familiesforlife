@@ -51,17 +51,17 @@ class OcopProductAdminController extends Controller
             'province_code' => ['required', 'string', 'size:2', 'exists:provinces,province_code'],
             'file' => ['required', 'file', 'mimes:xlsx,csv,txt', 'max:10240'],
         ], [
-            'province_code.required' => 'Vui lòng chọn tỉnh/thành.',
-            'province_code.exists' => 'Tỉnh/thành được chọn không hợp lệ.',
-            'file.required' => 'Vui lòng chọn file Excel.',
-            'file.mimes' => 'Chỉ chấp nhận file .xlsx hoặc .csv.',
-            'file.max' => 'File tối đa 10MB.',
+            'province_code.required' => __('Vui lòng chọn tỉnh/thành.'),
+            'province_code.exists' => __('Tỉnh/thành được chọn không hợp lệ.'),
+            'file.required' => __('Vui lòng chọn file Excel.'),
+            'file.mimes' => __('Chỉ chấp nhận file .xlsx hoặc .csv.'),
+            'file.max' => __('File tối đa 10MB.'),
         ]);
 
         $result = $action->handle($request->file('file')->getRealPath(), $validated['province_code']);
 
         return redirect()->route('backend.ocop.products.index')
-            ->with('success', "Import xong: thêm mới {$result['created']}, cập nhật hạng sao {$result['updated']}, không đổi {$result['unchanged']} sản phẩm, ".count($result['errors']).' dòng lỗi.')
+            ->with('success', __('Import xong: thêm mới :created, cập nhật hạng sao :updated, không đổi :unchanged sản phẩm, :errors dòng lỗi.', ['created' => $result['created'], 'updated' => $result['updated'], 'unchanged' => $result['unchanged'], 'errors' => count($result['errors'])]))
             ->with('import_errors', $result['errors']);
     }
 
@@ -88,7 +88,7 @@ class OcopProductAdminController extends Controller
         $storeDocuments->handle($product, $validated['document_uuids'] ?? [], (int) $request->user()->id);
 
         return redirect()->route('backend.ocop.products.index')
-            ->with('success', "Đã tạo sản phẩm OCOP \"{$product->name}\".");
+            ->with('success', __('Đã tạo sản phẩm OCOP ":name".', ['name' => $product->name]));
     }
 
     public function edit(OcopProduct $product, ListOcopSubjectsForPickerHandler $ocopSubjectPicker): View
@@ -111,18 +111,18 @@ class OcopProductAdminController extends Controller
         $storeDocuments->handle($product, $validated['document_uuids'] ?? [], (int) $request->user()->id);
 
         return redirect()->route('backend.ocop.products.index')
-            ->with('success', 'Cập nhật sản phẩm thành công.');
+            ->with('success', __('Cập nhật sản phẩm thành công.'));
     }
 
     public function restore(Request $request, OcopProduct $product, RestoreOcopProductAction $action): RedirectResponse|JsonResponse
     {
         $this->authorize('restore', $product);
 
-        abort_unless($product->trashed(), 422, 'Mục này chưa bị xoá.');
+        abort_unless($product->trashed(), 422, __('Mục này chưa bị xoá.'));
 
         $action->handle($product);
 
-        $message = 'Đã khôi phục sản phẩm "'.$product->name.'".';
+        $message = __('Đã khôi phục sản phẩm ":name".', ['name' => $product->name]);
 
         if ($request->expectsJson()) {
             return response()->json(['message' => $message]);
@@ -136,11 +136,11 @@ class OcopProductAdminController extends Controller
         $action->handle($product);
 
         if ($request->expectsJson()) {
-            return response()->json(['message' => 'Đã xoá sản phẩm.']);
+            return response()->json(['message' => __('Đã xoá sản phẩm.')]);
         }
 
         return redirect()->route('backend.ocop.products.index')
-            ->with('success', 'Đã xoá sản phẩm.');
+            ->with('success', __('Đã xoá sản phẩm.'));
     }
 
     /**
@@ -166,7 +166,7 @@ class OcopProductAdminController extends Controller
 
             if ($kept + count($files) > OcopProduct::MAX_DOCUMENTS) {
                 throw ValidationException::withMessages([
-                    "document_uuids.$collection" => 'Tối đa '.OcopProduct::MAX_DOCUMENTS." tệp cho mỗi loại hồ sơ (hiện có {$kept} tệp).",
+                    "document_uuids.$collection" => __('Tối đa :max tệp cho mỗi loại hồ sơ (hiện có :kept tệp).', ['max' => OcopProduct::MAX_DOCUMENTS, 'kept' => $kept]),
                 ]);
             }
         }
@@ -229,34 +229,34 @@ class OcopProductAdminController extends Controller
             'is_featured' => ['boolean'],
             'sort_order' => ['integer', 'min:0'],
         ], [
-            'category_id.exists' => 'Danh mục được chọn không hợp lệ.',
-            'name.required' => 'Vui lòng nhập tên sản phẩm.',
-            'name.max' => 'Tên sản phẩm không được vượt quá :max ký tự.',
-            'star_rating.required' => 'Vui lòng chọn hạng sao.',
-            'star_rating.in' => 'Hạng sao không hợp lệ — chỉ chấp nhận 3, 4 hoặc 5 sao.',
-            'ocop_subject_id.required' => 'Vui lòng chọn chủ thể sản xuất.',
-            'ocop_subject_id.exists' => 'Chủ thể được chọn không hợp lệ.',
-            'media_uuids.max' => 'Tối đa :max ảnh cho mỗi sản phẩm.',
-            'document_uuids.*.max' => 'Tối đa :max tệp cho mỗi loại hồ sơ.',
-            'document_uuids.*.*.uuid' => 'Tệp hồ sơ tải lên không hợp lệ, vui lòng tải lại.',
-            'origin.max' => 'Xuất xứ không được vượt quá :max ký tự.',
-            'production_date.max' => 'Ngày sản xuất không được vượt quá :max ký tự.',
-            'shelf_life_value.integer' => 'Hạn sử dụng phải là số nguyên.',
-            'shelf_life_value.min' => 'Hạn sử dụng phải lớn hơn 0.',
-            'shelf_life_value.max' => 'Hạn sử dụng tối đa :max.',
-            'shelf_life_value.required_with' => 'Vui lòng nhập số cho hạn sử dụng.',
-            'shelf_life_unit.in' => 'Đơn vị hạn sử dụng không hợp lệ.',
-            'shelf_life_unit.required_with' => 'Vui lòng chọn đơn vị cho hạn sử dụng.',
-            'shopee_url.url' => 'Link Shopee không đúng định dạng URL.',
-            'shopee_url.regex' => 'Link Shopee phải bắt đầu bằng http:// hoặc https://.',
-            'shopee_url.max' => 'Link Shopee không được vượt quá :max ký tự.',
-            'tiktok_url.url' => 'Link TikTok Shop không đúng định dạng URL.',
-            'tiktok_url.regex' => 'Link TikTok Shop phải bắt đầu bằng http:// hoặc https://.',
-            'tiktok_url.max' => 'Link TikTok Shop không được vượt quá :max ký tự.',
-            'status.required' => 'Vui lòng chọn trạng thái.',
-            'status.in' => 'Trạng thái không hợp lệ.',
-            'sort_order.integer' => 'Thứ tự hiển thị phải là số nguyên.',
-            'sort_order.min' => 'Thứ tự hiển thị không được âm.',
+            'category_id.exists' => __('Danh mục được chọn không hợp lệ.'),
+            'name.required' => __('Vui lòng nhập tên sản phẩm.'),
+            'name.max' => __('Tên sản phẩm không được vượt quá :max ký tự.'),
+            'star_rating.required' => __('Vui lòng chọn hạng sao.'),
+            'star_rating.in' => __('Hạng sao không hợp lệ — chỉ chấp nhận 3, 4 hoặc 5 sao.'),
+            'ocop_subject_id.required' => __('Vui lòng chọn chủ thể sản xuất.'),
+            'ocop_subject_id.exists' => __('Chủ thể được chọn không hợp lệ.'),
+            'media_uuids.max' => __('Tối đa :max ảnh cho mỗi sản phẩm.'),
+            'document_uuids.*.max' => __('Tối đa :max tệp cho mỗi loại hồ sơ.'),
+            'document_uuids.*.*.uuid' => __('Tệp hồ sơ tải lên không hợp lệ, vui lòng tải lại.'),
+            'origin.max' => __('Xuất xứ không được vượt quá :max ký tự.'),
+            'production_date.max' => __('Ngày sản xuất không được vượt quá :max ký tự.'),
+            'shelf_life_value.integer' => __('Hạn sử dụng phải là số nguyên.'),
+            'shelf_life_value.min' => __('Hạn sử dụng phải lớn hơn 0.'),
+            'shelf_life_value.max' => __('Hạn sử dụng tối đa :max.'),
+            'shelf_life_value.required_with' => __('Vui lòng nhập số cho hạn sử dụng.'),
+            'shelf_life_unit.in' => __('Đơn vị hạn sử dụng không hợp lệ.'),
+            'shelf_life_unit.required_with' => __('Vui lòng chọn đơn vị cho hạn sử dụng.'),
+            'shopee_url.url' => __('Link Shopee không đúng định dạng URL.'),
+            'shopee_url.regex' => __('Link Shopee phải bắt đầu bằng http:// hoặc https://.'),
+            'shopee_url.max' => __('Link Shopee không được vượt quá :max ký tự.'),
+            'tiktok_url.url' => __('Link TikTok Shop không đúng định dạng URL.'),
+            'tiktok_url.regex' => __('Link TikTok Shop phải bắt đầu bằng http:// hoặc https://.'),
+            'tiktok_url.max' => __('Link TikTok Shop không được vượt quá :max ký tự.'),
+            'status.required' => __('Vui lòng chọn trạng thái.'),
+            'status.in' => __('Trạng thái không hợp lệ.'),
+            'sort_order.integer' => __('Thứ tự hiển thị phải là số nguyên.'),
+            'sort_order.min' => __('Thứ tự hiển thị không được âm.'),
         ]);
 
         $validated['shelf_life'] = OcopProduct::composeShelfLife($validated['shelf_life_value'] ?? null, $validated['shelf_life_unit'] ?? null);

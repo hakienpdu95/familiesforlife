@@ -56,7 +56,7 @@ class RealEstateListingAdminController extends Controller
         $listing = $action->handle($data);
 
         return redirect()->route('backend.real-estate.edit', $listing)
-            ->with('success', "Đã tạo tin \"{$listing->title}\" (bản nháp) — hoàn thiện rồi bấm \"Gửi duyệt\".");
+            ->with('success', __('Đã tạo tin ":title" (bản nháp) — hoàn thiện rồi bấm "Gửi duyệt".', ['title' => $listing->title]));
     }
 
     public function edit(RealEstateListing $listing): View
@@ -73,10 +73,10 @@ class RealEstateListingAdminController extends Controller
         try {
             $action->handle($listing, $data);
         } catch (InvalidTransitionException $e) {
-            return back()->withInput()->with('error', 'Không thể sửa nội dung tin đã lưu trữ. Các trường khác đã được lưu — chỉ phần nội dung bị bỏ qua.');
+            return back()->withInput()->with('error', __('Không thể sửa nội dung tin đã lưu trữ. Các trường khác đã được lưu — chỉ phần nội dung bị bỏ qua.'));
         }
 
-        return redirect()->route('backend.real-estate.index')->with('success', 'Cập nhật tin bất động sản thành công.');
+        return redirect()->route('backend.real-estate.index')->with('success', __('Cập nhật tin bất động sản thành công.'));
     }
 
     public function destroy(RealEstateListing $listing, DeleteRealEstateListingAction $action): RedirectResponse
@@ -84,7 +84,7 @@ class RealEstateListingAdminController extends Controller
         $title = $listing->title;
         $action->handle($listing);
 
-        return redirect()->route('backend.real-estate.index')->with('success', "Đã xoá tin \"{$title}\".");
+        return redirect()->route('backend.real-estate.index')->with('success', __('Đã xoá tin ":title".', ['title' => $title]));
     }
 
     public function reorderGallery(Request $request, RealEstateListing $listing, ReorderGalleryMediaAction $action): RedirectResponse
@@ -94,7 +94,7 @@ class RealEstateListingAdminController extends Controller
         $uuids = $request->validate(['uuids' => ['required', 'array', 'max:6'], 'uuids.*' => ['string', 'uuid']])['uuids'];
         $action->handle($listing, $uuids);
 
-        return back()->with('success', 'Đã sắp lại thứ tự ảnh.');
+        return back()->with('success', __('Đã sắp lại thứ tự ảnh.'));
     }
 
     // ── Approval workflow — copy đúng cấu trúc ProductAdminController (§5.5/§6 spec Bán) ──
@@ -103,14 +103,14 @@ class RealEstateListingAdminController extends Controller
     {
         $this->authorize('submitForApproval', $listing);
 
-        return $this->runApprovalTransition($listing, fn () => $action->handle($listing), 'Đã gửi tin để chờ duyệt.');
+        return $this->runApprovalTransition($listing, fn () => $action->handle($listing), __('Đã gửi tin để chờ duyệt.'));
     }
 
     public function approveContent(RealEstateListing $listing, ApproveAction $action): RedirectResponse
     {
         $this->authorize('approve', $listing);
 
-        return $this->runApprovalTransition($listing, fn () => $action->handle($listing), 'Đã duyệt nội dung tin.');
+        return $this->runApprovalTransition($listing, fn () => $action->handle($listing), __('Đã duyệt nội dung tin.'));
     }
 
     public function rejectContent(Request $request, RealEstateListing $listing, RejectAction $action): RedirectResponse
@@ -119,21 +119,21 @@ class RealEstateListingAdminController extends Controller
 
         $reason = $request->validate(['reason' => ['required', 'string', 'min:10']])['reason'];
 
-        return $this->runApprovalTransition($listing, fn () => $action->handle($listing, $reason), 'Đã từ chối duyệt.');
+        return $this->runApprovalTransition($listing, fn () => $action->handle($listing, $reason), __('Đã từ chối duyệt.'));
     }
 
     public function publishContent(RealEstateListing $listing, PublishAction $action): RedirectResponse
     {
         $this->authorize('publishApproval', $listing);
 
-        return $this->runApprovalTransition($listing, fn () => $action->handle($listing), 'Đã xuất bản tin bất động sản.');
+        return $this->runApprovalTransition($listing, fn () => $action->handle($listing), __('Đã xuất bản tin bất động sản.'));
     }
 
     public function archiveContent(RealEstateListing $listing, ArchiveAction $action): RedirectResponse
     {
         $this->authorize('archiveApproval', $listing);
 
-        return $this->runApprovalTransition($listing, fn () => $action->handle($listing), 'Đã lưu trữ tin.');
+        return $this->runApprovalTransition($listing, fn () => $action->handle($listing), __('Đã lưu trữ tin.'));
     }
 
     private function runApprovalTransition(RealEstateListing $listing, \Closure $callback, string $successMessage): RedirectResponse
@@ -167,7 +167,7 @@ class RealEstateListingAdminController extends Controller
                     $type = ListingType::tryFrom((string) $listingType);
                     $valid = $type ? array_column(\Modules\RealEstate\Enums\PropertyType::validFor($type), 'value') : [];
                     if (! in_array($value, $valid, true)) {
-                        $fail('Loại hình không hợp lệ với loại tin đã chọn.');
+                        $fail(__('Loại hình không hợp lệ với loại tin đã chọn.'));
                     }
                 },
             ],
@@ -218,28 +218,28 @@ class RealEstateListingAdminController extends Controller
             'gallery_media_uuids'   => ['nullable', 'array', 'max:6'],
             'gallery_media_uuids.*' => ['string', 'uuid'],
         ], [
-            'listing_type.required'       => 'Vui lòng chọn loại tin (Bán hoặc Thuê).',
-            'listing_type.in'             => 'Loại tin không hợp lệ.',
-            'property_type.required'      => 'Vui lòng chọn loại hình bất động sản.',
-            'title.required'               => 'Vui lòng nhập tiêu đề tin.',
-            'title.max'                    => 'Tiêu đề không được vượt quá :max ký tự.',
-            'slug.regex'                   => 'Slug chỉ được chứa chữ thường, số và dấu gạch ngang.',
-            'slug.unique'                  => 'Slug này đã được dùng cho tin khác, vui lòng chọn slug khác.',
-            'slug.max'                     => 'Slug không được vượt quá :max ký tự.',
-            'address_detail.max'           => 'Địa chỉ không được vượt quá :max ký tự.',
-            'province_code.required'       => 'Vui lòng chọn Tỉnh/Thành phố.',
-            'province_code.exists'         => 'Tỉnh/Thành phố không hợp lệ.',
-            'ward_code.required'           => 'Vui lòng chọn Phường/Xã.',
-            'ward_code.exists'             => 'Phường/Xã không hợp lệ.',
-            'area.required'                => 'Vui lòng nhập diện tích.',
-            'area.numeric'                 => 'Diện tích phải là số.',
-            'area.min'                     => 'Diện tích phải lớn hơn 0.',
-            'price.required'               => 'Vui lòng nhập giá bán (hoặc chọn "Giá thoả thuận").',
-            'price.numeric'                => 'Giá bán phải là số.',
-            'monthly_rent.required'        => 'Vui lòng nhập giá thuê/tháng (hoặc chọn "Giá thoả thuận").',
-            'monthly_rent.numeric'         => 'Giá thuê/tháng phải là số.',
-            'rental_period_months.min'     => 'Thời hạn thuê tối thiểu :min tháng.',
-            'gallery_media_uuids.max'      => 'Tối đa :max ảnh cho mỗi tin.',
+            'listing_type.required'       => __('Vui lòng chọn loại tin (Bán hoặc Thuê).'),
+            'listing_type.in'             => __('Loại tin không hợp lệ.'),
+            'property_type.required'      => __('Vui lòng chọn loại hình bất động sản.'),
+            'title.required'               => __('Vui lòng nhập tiêu đề tin.'),
+            'title.max'                    => __('Tiêu đề không được vượt quá :max ký tự.'),
+            'slug.regex'                   => __('Slug chỉ được chứa chữ thường, số và dấu gạch ngang.'),
+            'slug.unique'                  => __('Slug này đã được dùng cho tin khác, vui lòng chọn slug khác.'),
+            'slug.max'                     => __('Slug không được vượt quá :max ký tự.'),
+            'address_detail.max'           => __('Địa chỉ không được vượt quá :max ký tự.'),
+            'province_code.required'       => __('Vui lòng chọn Tỉnh/Thành phố.'),
+            'province_code.exists'         => __('Tỉnh/Thành phố không hợp lệ.'),
+            'ward_code.required'           => __('Vui lòng chọn Phường/Xã.'),
+            'ward_code.exists'             => __('Phường/Xã không hợp lệ.'),
+            'area.required'                => __('Vui lòng nhập diện tích.'),
+            'area.numeric'                 => __('Diện tích phải là số.'),
+            'area.min'                     => __('Diện tích phải lớn hơn 0.'),
+            'price.required'               => __('Vui lòng nhập giá bán (hoặc chọn "Giá thoả thuận").'),
+            'price.numeric'                => __('Giá bán phải là số.'),
+            'monthly_rent.required'        => __('Vui lòng nhập giá thuê/tháng (hoặc chọn "Giá thoả thuận").'),
+            'monthly_rent.numeric'         => __('Giá thuê/tháng phải là số.'),
+            'rental_period_months.min'     => __('Thời hạn thuê tối thiểu :min tháng.'),
+            'gallery_media_uuids.max'      => __('Tối đa :max ảnh cho mỗi tin.'),
         ]);
     }
 }

@@ -54,7 +54,7 @@ class KnowledgeDocumentAdminController extends Controller
         }
 
         return redirect()->route('backend.aicem.knowledge-documents.edit', $document)
-            ->with('success', "Đã tạo tri thức \"{$document->title}\".");
+            ->with('success', __('Đã tạo tri thức ":title".', ['title' => $document->title]));
     }
 
     public function edit(AicemKnowledgeDocument $document): View
@@ -78,7 +78,7 @@ class KnowledgeDocumentAdminController extends Controller
         }
 
         return redirect()->route('backend.aicem.knowledge-documents.edit', $document)
-            ->with('success', 'Cập nhật tri thức thành công.');
+            ->with('success', __('Cập nhật tri thức thành công.'));
     }
 
     public function destroy(Request $request, AicemKnowledgeDocument $document, DeleteKnowledgeDocumentAction $action): RedirectResponse|JsonResponse
@@ -88,11 +88,11 @@ class KnowledgeDocumentAdminController extends Controller
         $action->handle($document);
 
         if ($request->expectsJson()) {
-            return response()->json(['message' => "Đã xoá tri thức \"{$title}\"."]);
+            return response()->json(['message' => __('Đã xoá tri thức ":title".', ['title' => $title])]);
         }
 
         return redirect()->route('backend.aicem.knowledge-documents.index')
-            ->with('success', "Đã xoá tri thức \"{$title}\".");
+            ->with('success', __('Đã xoá tri thức ":title".', ['title' => $title]));
     }
 
     public function restoreVersion(
@@ -109,7 +109,7 @@ class KnowledgeDocumentAdminController extends Controller
         $action->handle($document, $version);
 
         return redirect()->route('backend.aicem.knowledge-documents.edit', $document)
-            ->with('success', "Đã khôi phục về phiên bản #{$version->version}.");
+            ->with('success', __('Đã khôi phục về phiên bản #:version.', ['version' => $version->version]));
     }
 
     /**
@@ -163,7 +163,7 @@ class KnowledgeDocumentAdminController extends Controller
             $decoded = json_decode($validated['scope_json'], true);
             if (json_last_error() !== JSON_ERROR_NONE || ! is_array($decoded)) {
                 throw ValidationException::withMessages([
-                    'scope_json' => 'Scope phải là JSON object hợp lệ, VD: {"category_slugs": ["an-toan-giac-ngu"]}',
+                    'scope_json' => __('Scope phải là JSON object hợp lệ, VD: {"category_slugs": ["an-toan-giac-ngu"]}'),
                 ]);
             }
             $scope = $decoded;

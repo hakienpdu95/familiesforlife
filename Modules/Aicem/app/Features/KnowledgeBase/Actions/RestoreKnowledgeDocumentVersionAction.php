@@ -20,7 +20,7 @@ class RestoreKnowledgeDocumentVersionAction
     public function handle(AicemKnowledgeDocument $document, AicemKnowledgeDocumentVersion $version): AicemKnowledgeDocument
     {
         if ($version->knowledge_document_id !== $document->id) {
-            throw new \InvalidArgumentException('Version này không thuộc về knowledge document đang thao tác.');
+            throw new \InvalidArgumentException(__('Version này không thuộc về knowledge document đang thao tác.'));
         }
 
         return DB::transaction(function () use ($document, $version) {

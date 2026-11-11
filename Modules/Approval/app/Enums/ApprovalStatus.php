@@ -13,11 +13,11 @@ enum ApprovalStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Draft     => 'Nháp',
-            self::Pending   => 'Chờ duyệt',
-            self::Approved  => 'Đã duyệt',
-            self::Published => 'Đã xuất bản',
-            self::Archived  => 'Lưu trữ',
+            self::Draft     => __('Nháp'),
+            self::Pending   => __('Chờ duyệt'),
+            self::Approved  => __('Đã duyệt'),
+            self::Published => __('Đã xuất bản'),
+            self::Archived  => __('Lưu trữ'),
         };
     }
 

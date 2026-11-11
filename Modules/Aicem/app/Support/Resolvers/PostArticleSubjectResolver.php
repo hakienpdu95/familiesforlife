@@ -74,13 +74,13 @@ class PostArticleSubjectResolver implements AicemSubjectResolver
         $targetIndex   = $currentBlocks->search(fn ($block) => $block->id === $blockId);
 
         if ($targetIndex === false) {
-            throw new \InvalidArgumentException("Block #{$blockId} không tồn tại trên bản dịch này.");
+            throw new \InvalidArgumentException(__('Block #:block_id không tồn tại trên bản dịch này.', ['block_id' => $blockId]));
         }
 
         $blocksPayload = $this->renderer->toComposerPayload($translation);
 
         if (($blocksPayload[$targetIndex]['type'] ?? null) !== 'text') {
-            throw new \InvalidArgumentException("Block #{$blockId} không phải block text — không thể áp dụng gợi ý AI.");
+            throw new \InvalidArgumentException(__('Block #:block_id không phải block text — không thể áp dụng gợi ý AI.', ['block_id' => $blockId]));
         }
 
         $blocksPayload[$targetIndex]['html'] = $suggestedText;

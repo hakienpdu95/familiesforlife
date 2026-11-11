@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', 'Bài viết chờ duyệt')
+@section('title', __('Bài viết chờ duyệt'))
 
 @section('content')
 <div>
@@ -15,10 +15,9 @@
     @endforeach
 
     <div class="mb-5">
-        <h1 class="text-2xl font-bold text-base-content">Bài viết chờ duyệt</h1>
+        <h1 class="text-2xl font-bold text-base-content">{{ __('Bài viết chờ duyệt') }}</h1>
         <p class="text-sm text-base-content/50 mt-0.5">
-            Bài viết đang chờ bạn duyệt trên toàn nền tảng
-            (spec/Workflow_Approval_Technical_Specification.md §18.10).
+            {{ __('Bài viết đang chờ bạn duyệt trên toàn nền tảng (spec/Workflow_Approval_Technical_Specification.md §18.10).') }}
         </p>
     </div>
 
@@ -27,10 +26,10 @@
             <table class="table table-sm">
                 <thead class="bg-base-200/60 text-xs uppercase tracking-wide">
                     <tr>
-                        <th>Bài viết</th>
-                        <th>Tài trợ</th>
-                        <th class="text-center">Trạng thái</th>
-                        <th class="text-center">Gửi lúc</th>
+                        <th>{{ __('Bài viết') }}</th>
+                        <th>{{ __('Tài trợ') }}</th>
+                        <th class="text-center">{{ __('Trạng thái') }}</th>
+                        <th class="text-center">{{ __('Gửi lúc') }}</th>
                         <th class="w-32"></th>
                     </tr>
                 </thead>
@@ -53,14 +52,14 @@
                         <td>
                             <a href="{{ route('backend.post.articles.edit', $translation->article) }}?locale={{ $translation->locale }}"
                                class="btn btn-sm btn-primary">
-                                Xem &amp; duyệt
+                                Xem &amp; {{ __('duyệt') }}
                             </a>
                         </td>
                     </tr>
                 @empty
                     <tr>
                         <td colspan="5" class="text-center py-8 text-base-content/40">
-                            Không có bài viết nào đang chờ bạn duyệt.
+                            {{ __('Không có bài viết nào đang chờ bạn duyệt.') }}
                         </td>
                     </tr>
                 @endforelse

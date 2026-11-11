@@ -21,7 +21,7 @@ class LinkCalendarEntryToArticleAction
     {
         if (ContentCalendarEntry::where('post_article_id', $article->id)->exists()) {
             throw ValidationException::withMessages([
-                'post_article_id' => 'Bài viết này đã được gắn với 1 kế hoạch khác.',
+                'post_article_id' => __('Bài viết này đã được gắn với 1 kế hoạch khác.'),
             ]);
         }
 
@@ -33,7 +33,7 @@ class LinkCalendarEntryToArticleAction
         $article->loadMissing('categories');
         if (! $article->categories->pluck('id')->contains($entry->post_category_id)) {
             throw ValidationException::withMessages([
-                'post_article_id' => 'Bài viết không thuộc category của kế hoạch này — kiểm tra lại trước khi gắn.',
+                'post_article_id' => __('Bài viết không thuộc category của kế hoạch này — kiểm tra lại trước khi gắn.'),
             ]);
         }
 

@@ -42,12 +42,12 @@
     </div>
     @endif
     <div class="relative max-w-4xl mx-auto px-4 py-24 text-center">
-        <span class="badge badge-outline badge-lg mb-4">Sự kiện</span>
+        <span class="badge badge-outline badge-lg mb-4">{{ __('Sự kiện') }}</span>
         <h1 class="text-4xl md:text-5xl font-bold mb-4">{{ $page->title }}</h1>
         @if($page->excerpt)
         <p class="text-lg opacity-90 max-w-2xl mx-auto">{{ $page->excerpt }}</p>
         @endif
-        <a href="#noi-dung" class="btn btn-neutral btn-wide mt-8">Xem chi tiết</a>
+        <a href="#noi-dung" class="btn btn-neutral btn-wide mt-8">{{ __('Xem chi tiết') }}</a>
     </div>
 </section>
 

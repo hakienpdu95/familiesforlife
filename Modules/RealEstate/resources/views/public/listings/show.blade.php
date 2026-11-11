@@ -24,7 +24,7 @@
 
     <div class="flex items-center gap-2 mb-2">
         @if($listing->is_urgent)
-        <span class="badge badge-error">Bán gấp</span>
+        <span class="badge badge-error">{{ __('Bán gấp') }}</span>
         @endif
         <span class="badge badge-ghost">{{ $listing->property_type->label() }}</span>
     </div>
@@ -33,7 +33,7 @@
     <p class="text-2xl font-bold text-primary mb-4">{{ $listing->display_price }}</p>
 
     @if($listing->isRent() && $listing->total_monthly_cost)
-    <p class="text-sm text-base-content/60 mb-4">Tổng chi phí/tháng (kèm phí quản lý): <strong>{{ number_format($listing->total_monthly_cost) }} đ</strong></p>
+    <p class="text-sm text-base-content/60 mb-4">{{ __('Tổng chi phí/tháng (kèm phí quản lý):') }} <strong>{{ __(':total_monthly_cost đ', ['total_monthly_cost' => number_format($listing->total_monthly_cost)]) }}</strong></p>
     @endif
 
     @if($content['address_detail'])
@@ -43,49 +43,49 @@
     {{-- ── Bảng thông tin chi tiết — chỉ hiện cột có giá trị (§7.3 spec Bán) ────────── --}}
     <div class="card bg-base-100 border border-base-200 shadow-sm mb-6">
         <div class="card-body">
-            <h2 class="font-semibold mb-3">Thông tin chi tiết</h2>
+            <h2 class="font-semibold mb-3">{{ __('Thông tin chi tiết') }}</h2>
             <dl class="grid sm:grid-cols-2 gap-3 text-sm">
                 @if($listing->area)
-                <div><dt class="text-base-content/50">Diện tích</dt><dd class="font-medium">{{ number_format((float) $listing->area, 1) }} m²</dd></div>
+                <div><dt class="text-base-content/50">{{ __('Diện tích') }}</dt><dd class="font-medium">{{ number_format((float) $listing->area, 1) }} m²</dd></div>
                 @endif
                 @if($listing->bedrooms)
-                <div><dt class="text-base-content/50">Phòng ngủ</dt><dd class="font-medium">{{ $listing->bedrooms }}</dd></div>
+                <div><dt class="text-base-content/50">{{ __('Phòng ngủ') }}</dt><dd class="font-medium">{{ $listing->bedrooms }}</dd></div>
                 @endif
                 @if($listing->bathrooms)
-                <div><dt class="text-base-content/50">Phòng tắm</dt><dd class="font-medium">{{ $listing->bathrooms }}</dd></div>
+                <div><dt class="text-base-content/50">{{ __('Phòng tắm') }}</dt><dd class="font-medium">{{ $listing->bathrooms }}</dd></div>
                 @endif
                 @if($listing->floors)
-                <div><dt class="text-base-content/50">Số tầng</dt><dd class="font-medium">{{ $listing->floors }}</dd></div>
+                <div><dt class="text-base-content/50">{{ __('Số tầng') }}</dt><dd class="font-medium">{{ $listing->floors }}</dd></div>
                 @endif
                 @if($listing->interior_status)
-                <div><dt class="text-base-content/50">Nội thất</dt><dd class="font-medium">{{ $listing->interior_status->label() }}</dd></div>
+                <div><dt class="text-base-content/50">{{ __('Nội thất') }}</dt><dd class="font-medium">{{ $listing->interior_status->label() }}</dd></div>
                 @endif
                 @if($content['direction'] ?? null)
-                <div><dt class="text-base-content/50">Hướng</dt><dd class="font-medium">{{ \Modules\RealEstate\Enums\CompassDirection::from($content['direction'])->label() }}</dd></div>
+                <div><dt class="text-base-content/50">{{ __('Hướng') }}</dt><dd class="font-medium">{{ \Modules\RealEstate\Enums\CompassDirection::from($content['direction'])->label() }}</dd></div>
                 @endif
                 @if($content['legal_status'] ?? null)
-                <div><dt class="text-base-content/50">Pháp lý</dt><dd class="font-medium">{{ \Modules\RealEstate\Enums\LegalStatus::from($content['legal_status'])->label() }}</dd></div>
+                <div><dt class="text-base-content/50">{{ __('Pháp lý') }}</dt><dd class="font-medium">{{ \Modules\RealEstate\Enums\LegalStatus::from($content['legal_status'])->label() }}</dd></div>
                 @endif
                 @if($isSale && $listing->house_subtype)
-                <div><dt class="text-base-content/50">Loại nhà</dt><dd class="font-medium">{{ $listing->house_subtype->label() }}</dd></div>
+                <div><dt class="text-base-content/50">{{ __('Loại nhà') }}</dt><dd class="font-medium">{{ $listing->house_subtype->label() }}</dd></div>
                 @endif
                 @if($isSale && $listing->apartment_subtype)
-                <div><dt class="text-base-content/50">Loại căn hộ</dt><dd class="font-medium">{{ $listing->apartment_subtype->label() }}</dd></div>
+                <div><dt class="text-base-content/50">{{ __('Loại căn hộ') }}</dt><dd class="font-medium">{{ $listing->apartment_subtype->label() }}</dd></div>
                 @endif
                 @if($content['project_name'] ?? null)
-                <div><dt class="text-base-content/50">Dự án</dt><dd class="font-medium">{{ $content['project_name'] }}</dd></div>
+                <div><dt class="text-base-content/50">{{ __('Dự án') }}</dt><dd class="font-medium">{{ $content['project_name'] }}</dd></div>
                 @endif
                 @if($listing->usage_status)
-                <div><dt class="text-base-content/50">Tình trạng</dt><dd class="font-medium">{{ $listing->usage_status->label() }}</dd></div>
+                <div><dt class="text-base-content/50">{{ __('Tình trạng') }}</dt><dd class="font-medium">{{ $listing->usage_status->label() }}</dd></div>
                 @endif
                 @if($listing->isRent() && $listing->deposit)
-                <div><dt class="text-base-content/50">Tiền cọc</dt><dd class="font-medium">{{ number_format((float) $listing->deposit) }} đ</dd></div>
+                <div><dt class="text-base-content/50">{{ __('Tiền cọc') }}</dt><dd class="font-medium">{{ __(':deposit đ', ['deposit' => number_format((float) $listing->deposit)]) }}</dd></div>
                 @endif
                 @if($listing->isRent() && $listing->rental_period_months)
-                <div><dt class="text-base-content/50">Thời hạn thuê</dt><dd class="font-medium">{{ $listing->rental_period_months }} tháng</dd></div>
+                <div><dt class="text-base-content/50">{{ __('Thời hạn thuê') }}</dt><dd class="font-medium">{{ __(':rental_period_months tháng', ['rental_period_months' => $listing->rental_period_months]) }}</dd></div>
                 @endif
                 @if($listing->isRent() && $listing->management_fee)
-                <div><dt class="text-base-content/50">Phí quản lý/tháng</dt><dd class="font-medium">{{ number_format((float) $listing->management_fee) }} đ</dd></div>
+                <div><dt class="text-base-content/50">{{ __('Phí quản lý/tháng') }}</dt><dd class="font-medium">{{ __(':management_fee đ', ['management_fee' => number_format((float) $listing->management_fee)]) }}</dd></div>
                 @endif
             </dl>
         </div>

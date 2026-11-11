@@ -1,3 +1,5 @@
+import { t } from '../shared/i18n.js';
+
 /**
  * resources/js/modules/form-validation.js
  * Form validation helper — standalone, không phụ thuộc thư viện nào.
@@ -43,7 +45,7 @@ function _getFirstError(field) {
 
     // Required
     if ('req' in field.dataset) {
-        if (empty) return field.dataset.req || 'Trường này là bắt buộc';
+        if (empty) return field.dataset.req || t('Trường này là bắt buộc');
     }
 
     // Format checks — bỏ qua nếu field rỗng (required đã bắt ở trên)
@@ -52,33 +54,33 @@ function _getFirstError(field) {
     // Email
     if (field.type === 'email' || 'valEmail' in field.dataset) {
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
-            return field.dataset.valEmail || 'Email không đúng định dạng';
+            return field.dataset.valEmail || t('Email không đúng định dạng');
         }
     }
 
     // URL
     if (field.type === 'url' || 'valUrl' in field.dataset) {
         try { new URL(val); } catch {
-            return field.dataset.valUrl || 'URL không hợp lệ (VD: https://example.com)';
+            return field.dataset.valUrl || t('URL không hợp lệ (VD: https://example.com)');
         }
     }
 
     // Max length
     if ('valMaxlength' in field.dataset) {
         const max = Number(field.dataset.valMaxlength);
-        if (val.length > max) return `Tối đa ${max} ký tự (hiện tại: ${val.length})`;
+        if (val.length > max) return `${t('Tối đa :max ký tự (hiện tại: :val)', { max: (max), val: (val.length) })}`;
     }
 
     // Min length
     if ('valMinlength' in field.dataset) {
         const min = Number(field.dataset.valMinlength);
-        if (val.length < min) return `Tối thiểu ${min} ký tự`;
+        if (val.length < min) return `${t('Tối thiểu :min ký tự', { min: (min) })}`;
     }
 
     // Pattern
     if ('valPattern' in field.dataset) {
         if (!new RegExp(field.dataset.valPattern).test(val)) {
-            return field.dataset.valPatternMsg || 'Giá trị không đúng định dạng';
+            return field.dataset.valPatternMsg || t('Giá trị không đúng định dạng');
         }
     }
 

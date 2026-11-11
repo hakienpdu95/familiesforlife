@@ -24,14 +24,14 @@
                     <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5h16v10H4z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 19h16"/>
                     </svg>
-                    Thông tin banner
+                    {{ __('Thông tin banner') }}
                 </h2>
 
                 <div class="space-y-4">
 
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Vị trí (placement) <span class="text-error">*</span></span>
+                            <span class="label-text font-medium">{{ __('Vị trí (placement)') }} <span class="text-error">*</span></span>
                         </label>
                         <select name="placement" x-model="placement"
                                 class="select select-bordered select-sm w-full @error('placement') select-error @enderror">
@@ -41,14 +41,14 @@
                         </select>
                         @error('placement')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                         <p class="text-xs text-base-content/40 mt-1.5">
-                            Kích thước gợi ý: <span x-text="recommendedSize"></span>
+                            {{ __('Kích thước gợi ý:') }} <span x-text="recommendedSize"></span>
                         </p>
                     </div>
 
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
                             <span class="label-text font-medium">
-                                Ảnh banner
+                                {{ __('Ảnh banner') }}
                                 @if(! $banner?->getFirstMediaUrl('banner'))<span class="text-error">*</span>@endif
                             </span>
                         </label>
@@ -58,7 +58,7 @@
                         @endif
                         @if($banner)
                         <div id="cover-filepond" data-context-type="banner" data-context-id="{{ $banner->id }}"></div>
-                        <p class="text-xs text-base-content/40 mt-1.5">Tải ảnh mới sẽ tự động thay ảnh hiện tại.</p>
+                        <p class="text-xs text-base-content/40 mt-1.5">{{ __('Tải ảnh mới sẽ tự động thay ảnh hiện tại.') }}</p>
                         @else
                         <div id="cover-filepond"></div>
                         <input type="hidden" name="cover_media_uuid" id="cover-media-uuid" value="{{ old('cover_media_uuid') }}">
@@ -79,12 +79,12 @@
 
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Ghi chú nội bộ</span>
-                            <span class="label-text-alt text-xs text-base-content/40">Không hiển thị công khai</span>
+                            <span class="label-text font-medium">{{ __('Ghi chú nội bộ') }}</span>
+                            <span class="label-text-alt text-xs text-base-content/40">{{ __('Không hiển thị công khai') }}</span>
                         </label>
                         <input type="text" name="title" value="{{ old('title', $banner?->title) }}"
                                class="input input-bordered input-sm w-full @error('title') input-error @enderror"
-                               maxlength="150" placeholder="Vd: Banner đối tác ABC — Q3/2026">
+                               maxlength="150" placeholder="{{ __('Vd: Banner đối tác ABC — Q3/2026') }}">
                         @error('title')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                     </div>
 
@@ -92,7 +92,7 @@
 
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Hiển thị cho <span class="text-error">*</span></span>
+                            <span class="label-text font-medium">{{ __('Hiển thị cho') }} <span class="text-error">*</span></span>
                         </label>
                         <div class="flex flex-col gap-2">
                             @foreach($targetTypes as $key => $label)
@@ -111,36 +111,36 @@
                          loại field disabled khỏi payload, tránh 2 select cùng tên ghi đè nhau). --}}
                     <div class="form-control" x-show="needsCategory" x-cloak>
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Danh mục bài viết <span class="text-error">*</span></span>
+                            <span class="label-text font-medium">{{ __('Danh mục bài viết') }} <span class="text-error">*</span></span>
                         </label>
                         <select name="target_value" x-model="targetValue" :disabled="!needsCategory"
                                 class="select select-bordered select-sm w-full @error('target_value') select-error @enderror">
-                            <option value="">— Chọn danh mục —</option>
+                            <option value="">{{ __('— Chọn danh mục —') }}</option>
                             @foreach($categories as $category)
                             <option value="{{ $category->slug }}">{{ $category->name }}</option>
                             @endforeach
                         </select>
                         @error('target_value')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                         <p class="text-xs text-warning mt-1.5" x-show="needsCategory && !isValid" x-cloak>
-                            Vui lòng chọn danh mục khi hiển thị theo danh mục.
+                            {{ __('Vui lòng chọn danh mục khi hiển thị theo danh mục.') }}
                         </p>
                     </div>
 
                     {{-- spec/Province_Showcase_Technical_Specification.md §3.5 — cùng cơ chế khối category ở trên. --}}
                     <div class="form-control" x-show="needsProvince" x-cloak>
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Tỉnh/thành <span class="text-error">*</span></span>
+                            <span class="label-text font-medium">{{ __('Tỉnh/thành') }} <span class="text-error">*</span></span>
                         </label>
                         <select name="target_value" x-model="targetValue" :disabled="!needsProvince"
                                 class="select select-bordered select-sm w-full @error('target_value') select-error @enderror">
-                            <option value="">— Chọn tỉnh/thành —</option>
+                            <option value="">{{ __('— Chọn tỉnh/thành —') }}</option>
                             @foreach($provinces as $province)
                             <option value="{{ $province->province_code }}">{{ $province->name }}</option>
                             @endforeach
                         </select>
                         @error('target_value')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                         <p class="text-xs text-warning mt-1.5" x-show="needsProvince && !isValid" x-cloak>
-                            Vui lòng chọn tỉnh/thành khi hiển thị theo tỉnh/thành.
+                            {{ __('Vui lòng chọn tỉnh/thành khi hiển thị theo tỉnh/thành.') }}
                         </p>
                     </div>
 
@@ -148,8 +148,8 @@
 
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Link đích</span>
-                            <span class="label-text-alt text-xs text-base-content/40">Để trống nếu banner chỉ trang trí/thông báo</span>
+                            <span class="label-text font-medium">{{ __('Link đích') }}</span>
+                            <span class="label-text-alt text-xs text-base-content/40">{{ __('Để trống nếu banner chỉ trang trí/thông báo') }}</span>
                         </label>
                         <input type="url" name="link_url" value="{{ old('link_url', $banner?->link_url) }}"
                                class="input input-bordered input-sm w-full @error('link_url') input-error @enderror"
@@ -162,13 +162,13 @@
                         <input type="checkbox" name="open_in_new_tab" value="1"
                                class="checkbox checkbox-sm checkbox-primary mt-0.5 shrink-0"
                                {{ old('open_in_new_tab', $banner?->open_in_new_tab) ? 'checked' : '' }}>
-                        <span class="text-sm font-medium group-hover:text-primary transition-colors">Mở link trong tab mới</span>
+                        <span class="text-sm font-medium group-hover:text-primary transition-colors">{{ __('Mở link trong tab mới') }}</span>
                     </label>
 
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Nhãn minh bạch quảng cáo</span>
-                            <span class="label-text-alt text-xs text-base-content/40">Vd "Quảng cáo", "Tài trợ"</span>
+                            <span class="label-text font-medium">{{ __('Nhãn minh bạch quảng cáo') }}</span>
+                            <span class="label-text-alt text-xs text-base-content/40">{{ __('Vd "Quảng cáo", "Tài trợ"') }}</span>
                         </label>
                         <input type="text" name="badge_label" value="{{ old('badge_label', $banner?->badge_label) }}"
                                class="input input-bordered input-sm w-full @error('badge_label') input-error @enderror"
@@ -181,8 +181,8 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="form-control">
                             <label class="label py-0 pb-1.5">
-                                <span class="label-text font-medium">Bắt đầu chạy</span>
-                                <span class="label-text-alt text-xs text-base-content/40">Để trống = chạy ngay</span>
+                                <span class="label-text font-medium">{{ __('Bắt đầu chạy') }}</span>
+                                <span class="label-text-alt text-xs text-base-content/40">{{ __('Để trống = chạy ngay') }}</span>
                             </label>
                             <input type="date" name="start_date" value="{{ old('start_date', $banner?->start_date?->toDateString()) }}"
                                    class="input input-bordered input-sm w-full @error('start_date') input-error @enderror">
@@ -190,8 +190,8 @@
                         </div>
                         <div class="form-control">
                             <label class="label py-0 pb-1.5">
-                                <span class="label-text font-medium">Kết thúc chạy</span>
-                                <span class="label-text-alt text-xs text-base-content/40">Để trống = không giới hạn</span>
+                                <span class="label-text font-medium">{{ __('Kết thúc chạy') }}</span>
+                                <span class="label-text-alt text-xs text-base-content/40">{{ __('Để trống = không giới hạn') }}</span>
                             </label>
                             <input type="date" name="end_date" value="{{ old('end_date', $banner?->end_date?->toDateString()) }}"
                                    class="input input-bordered input-sm w-full @error('end_date') input-error @enderror">
@@ -201,7 +201,7 @@
 
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">Thứ tự hiển thị</span>
+                            <span class="label-text font-medium">{{ __('Thứ tự hiển thị') }}</span>
                         </label>
                         <input type="number" name="sort_order" min="0"
                                value="{{ old('sort_order', $banner?->sort_order ?? 0) }}"
@@ -215,8 +215,8 @@
                                class="checkbox checkbox-sm checkbox-primary mt-0.5 shrink-0"
                                {{ old('is_active', $banner?->is_active ?? true) ? 'checked' : '' }}>
                         <div>
-                            <span class="text-sm font-medium group-hover:text-primary transition-colors">Hiển thị banner</span>
-                            <p class="text-xs text-base-content/50 mt-0.5">Tắt để tạm ẩn khỏi mọi trang, không cần xoá</p>
+                            <span class="text-sm font-medium group-hover:text-primary transition-colors">{{ __('Hiển thị banner') }}</span>
+                            <p class="text-xs text-base-content/50 mt-0.5">{{ __('Tắt để tạm ẩn khỏi mọi trang, không cần xoá') }}</p>
                         </div>
                     </label>
 
@@ -231,21 +231,21 @@
             <div class="card-body p-3">
 
                 <p class="text-xs font-semibold text-base-content/40 uppercase tracking-wide mb-3">
-                    Xuất bản
+                    {{ __('Xuất bản') }}
                 </p>
 
                 <div class="flex gap-2">
-                    <a href="{{ route('backend.banner.items.index') }}" class="btn btn-ghost btn-sm flex-1">Hủy</a>
+                    <a href="{{ route('backend.banner.items.index') }}" class="btn btn-ghost btn-sm flex-1">{{ __('Hủy') }}</a>
                     <button type="submit" class="btn btn-primary btn-sm flex-1 gap-1.5" :disabled="!isValid">
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
-                        {{ $banner ? 'Lưu thay đổi' : 'Tạo mới' }}
+                        {{ $banner ? __('Lưu thay đổi') : __('Tạo mới') }}
                     </button>
                 </div>
 
                 <p class="text-center text-xs text-base-content/30 mt-2.5">
-                    <span class="text-error">*</span> là trường bắt buộc
+                    <span class="text-error">*</span> {{ __('là trường bắt buộc') }}
                 </p>
 
             </div>

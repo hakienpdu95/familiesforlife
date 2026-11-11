@@ -43,7 +43,7 @@ class PageAdminController extends Controller
         $page = $action->handle($data);
 
         return redirect()->route('backend.page.items.edit', $page)
-            ->with('success', "Trang \"{$page->title}\" đã được tạo (Nháp).");
+            ->with('success', __('Trang ":title" đã được tạo (Nháp).', ['title' => $page->title]));
     }
 
     public function edit(Page $page): View
@@ -60,7 +60,7 @@ class PageAdminController extends Controller
         $action->handle($page, $data);
 
         return redirect()->route('backend.page.items.edit', $page)
-            ->with('success', 'Cập nhật trang thành công.');
+            ->with('success', __('Cập nhật trang thành công.'));
     }
 
     public function destroy(Request $request, Page $page, DeletePageAction $action): RedirectResponse|JsonResponse
@@ -78,11 +78,11 @@ class PageAdminController extends Controller
         }
 
         if ($request->expectsJson()) {
-            return response()->json(['message' => "Đã xoá trang \"{$title}\"."]);
+            return response()->json(['message' => __('Đã xoá trang ":title".', ['title' => $title])]);
         }
 
         return redirect()->route('backend.page.items.index')
-            ->with('success', "Đã xoá trang \"{$title}\".");
+            ->with('success', __('Đã xoá trang ":title".', ['title' => $title]));
     }
 
     public function publish(Request $request, Page $page, PublishPageAction $action): RedirectResponse|JsonResponse
@@ -100,10 +100,10 @@ class PageAdminController extends Controller
         }
 
         if ($request->expectsJson()) {
-            return response()->json(['message' => "Đã xuất bản trang \"{$page->title}\"."]);
+            return response()->json(['message' => __('Đã xuất bản trang ":title".', ['title' => $page->title])]);
         }
 
-        return back()->with('success', "Đã xuất bản trang \"{$page->title}\".");
+        return back()->with('success', __('Đã xuất bản trang ":title".', ['title' => $page->title]));
     }
 
     public function unpublish(Request $request, Page $page, UnpublishPageAction $action): RedirectResponse|JsonResponse
@@ -113,10 +113,10 @@ class PageAdminController extends Controller
         $action->handle($page);
 
         if ($request->expectsJson()) {
-            return response()->json(['message' => "Đã chuyển trang \"{$page->title}\" về Nháp."]);
+            return response()->json(['message' => __('Đã chuyển trang ":title" về Nháp.', ['title' => $page->title])]);
         }
 
-        return back()->with('success', "Đã chuyển trang \"{$page->title}\" về Nháp.");
+        return back()->with('success', __('Đã chuyển trang ":title" về Nháp.', ['title' => $page->title]));
     }
 
     /**
@@ -140,8 +140,8 @@ class PageAdminController extends Controller
             'seo_noindex'       => ['boolean'],
             'sort_order'        => ['integer', 'min:0'],
         ], [
-            'slug.not_in' => 'Đường dẫn này đã được hệ thống sử dụng, vui lòng chọn đường dẫn khác.',
-            'template.in' => 'Thiết kế đã chọn không tồn tại.',
+            'slug.not_in' => __('Đường dẫn này đã được hệ thống sử dụng, vui lòng chọn đường dẫn khác.'),
+            'template.in' => __('Thiết kế đã chọn không tồn tại.'),
         ]);
     }
 }

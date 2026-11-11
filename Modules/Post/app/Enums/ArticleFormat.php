@@ -15,12 +15,12 @@ enum ArticleFormat: string
     public function label(): string
     {
         return match ($this) {
-            self::Article    => 'Bài viết',
+            self::Article    => __('Bài viết'),
             self::Video      => 'Video',
-            self::Activity   => 'Hoạt động',
-            self::Tip        => 'Mẹo hay',
-            self::StepByStep => 'Hướng dẫn từng bước',
-            self::Redirect   => 'Liên kết ngoài (redirect)',
+            self::Activity   => __('Hoạt động'),
+            self::Tip        => __('Mẹo hay'),
+            self::StepByStep => __('Hướng dẫn từng bước'),
+            self::Redirect   => __('Liên kết ngoài (redirect)'),
         };
     }
 }

@@ -7,5 +7,5 @@
         @endforeach
     </div>
 @elseif ($item?->display_url)
-    <a href="{{ $item->display_url }}" @class(['btn btn-outline w-full rounded-lg font-medium shadow-none', $size ?? 'h-11 min-h-11', $class ?? ''])>Xem chi tiết sản phẩm →</a>
+    <a href="{{ $item->display_url }}" @class(['btn btn-outline w-full rounded-lg font-medium shadow-none', $size ?? 'h-11 min-h-11', $class ?? ''])>{{ __('Xem chi tiết sản phẩm →') }}</a>
 @endif

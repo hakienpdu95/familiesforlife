@@ -1,5 +1,5 @@
 @extends('layouts.backend')
-@section('title', 'Content Foundation theo chuyên mục')
+@section('title', __('Content Foundation theo chuyên mục'))
 
 @section('content')
 <div x-data="categoryFoundationsPage({{ Js::from([
@@ -14,16 +14,14 @@
 
     <div class="mb-3 flex items-center justify-between flex-wrap gap-2">
         <div>
-            <h1 class="text-2xl font-bold text-base-content">Content Foundation theo chuyên mục</h1>
+            <h1 class="text-2xl font-bold text-base-content">{{ __('Content Foundation theo chuyên mục') }}</h1>
             <p class="text-sm text-base-content/50 mt-0.5">
-                Ngữ cảnh biên tập bền vững cho từng chuyên mục — 1 bộ tiêu chí có thể dùng chung cho nhiều chuyên mục.
-                Dùng chung bởi mọi công cụ nghiên cứu ý tưởng nội dung (trích xuất bài viết, trích xuất video...).
-                Chọn 1 chuyên mục bên trái để xem/chỉnh sửa.
+                {{ __('Ngữ cảnh biên tập bền vững cho từng chuyên mục — 1 bộ tiêu chí có thể dùng chung cho nhiều chuyên mục. Dùng chung bởi mọi công cụ nghiên cứu ý tưởng nội dung (trích xuất bài viết, trích xuất video...). Chọn 1 chuyên mục bên trái để xem/chỉnh sửa.') }}
             </p>
         </div>
     </div>
 
-    <p x-show="loading" class="text-sm text-base-content/50">Đang tải danh sách chuyên mục...</p>
+    <p x-show="loading" class="text-sm text-base-content/50">{{ __('Đang tải danh sách chuyên mục...') }}</p>
     <p x-show="errorMessage" x-cloak class="text-error text-sm mb-3" x-text="errorMessage"></p>
 
     <div x-show="!loading" x-cloak class="flex gap-4 items-start flex-col lg:flex-row">
@@ -35,7 +33,7 @@
         --}}
         <div class="w-full lg:w-72 shrink-0 flex flex-col border border-base-200 rounded-lg bg-base-100 max-h-[75vh]">
             <div class="p-2 border-b border-base-200">
-                <input type="text" x-model="search" placeholder="Tìm chuyên mục..."
+                <input type="text" x-model="search" placeholder="{{ __('Tìm chuyên mục...') }}"
                        class="input input-sm input-bordered w-full">
             </div>
             <div class="flex-1 min-h-0 overflow-y-auto p-1">
@@ -52,15 +50,15 @@
                         <span class="truncate flex-1" x-text="cat.name"></span>
                         <span class="w-1.5 h-1.5 rounded-full shrink-0"
                               :class="cat.foundation ? 'bg-success' : 'bg-base-300'"
-                              :title="cat.foundation ? 'Đã có foundation' : 'Chưa có foundation'"></span>
+                              :title="cat.foundation ? @js(__('Đã có foundation')) : @js(__('Chưa có foundation'))"></span>
                         <span x-show="cat.foundation?.shared_with?.length" x-cloak
                               class="badge badge-info badge-xs shrink-0"
-                              :title="`Dùng chung với: ${(cat.foundation?.shared_with || []).map(c => c.name).join(', ')}`"
+                              :title="`${@js(__('Dùng chung với: :name')).replace(':name', () => ((cat.foundation?.shared_with || []).map(c => c.name).join(', ')))}`"
                               x-text="cat.foundation?.shared_with?.length"></span>
                     </div>
                 </template>
                 <p x-show="visibleCategories().length === 0" class="text-xs text-base-content/40 text-center py-6">
-                    Không tìm thấy chuyên mục nào.
+                    {{ __('Không tìm thấy chuyên mục nào.') }}
                 </p>
             </div>
         </div>
@@ -68,7 +66,7 @@
         <div class="flex-1 min-w-0 w-full border border-base-200 rounded-lg bg-base-100 p-4">
             <template x-if="!selectedCategory()">
                 <p class="text-sm text-base-content/40 text-center py-16">
-                    Chọn 1 chuyên mục ở bên trái để xem/chỉnh sửa Content Foundation.
+                    {{ __('Chọn 1 chuyên mục ở bên trái để xem/chỉnh sửa Content Foundation.') }}
                 </p>
             </template>
 
@@ -78,45 +76,45 @@
                         <h2 class="font-semibold text-base" x-text="cat.name"></h2>
                         <span class="flex items-center gap-2">
                             <span class="badge badge-xs" :class="cat.foundation ? 'badge-success' : 'badge-ghost'"
-                                  x-text="cat.foundation ? 'Đã có foundation' : 'Chưa có'"></span>
+                                  x-text="cat.foundation ? @js(__('Đã có foundation')) : @js(__('Chưa có'))"></span>
                             <span x-show="cat.foundation?.shared_with?.length" x-cloak
                                   class="badge badge-info badge-xs"
-                                  x-text="`Dùng chung: ${cat.foundation?.shared_with?.length || 0}`"></span>
+                                  x-text="`${@js(__('Dùng chung: :shared_with')).replace(':shared_with', () => (cat.foundation?.shared_with?.length || 0))}`"></span>
                             <span x-show="cat.foundation?.updated_at" x-cloak
                                   class="badge badge-xs"
                                   :class="isFoundationStale(cat.foundation?.updated_at) ? 'badge-warning' : 'badge-ghost'"
-                                  :title="isFoundationStale(cat.foundation?.updated_at) ? `Đã hơn ${staleAfterDays} ngày chưa cập nhật — cân nhắc ôn lại ngữ cảnh này` : ''"
+                                  :title="isFoundationStale(cat.foundation?.updated_at) ? `${@js(__('Đã hơn :stale_after_days ngày chưa cập nhật — cân nhắc ôn lại ngữ cảnh này')).replace(':stale_after_days', () => (staleAfterDays))}` : ''"
                                   x-text="formatFoundationAge(cat.foundation?.updated_at)"></span>
                         </span>
                     </div>
 
                     <div class="form-control">
-                        <label class="label py-0.5"><span class="label-text text-xs font-medium">Trọng tâm nội dung chuyên mục</span></label>
-                        <textarea x-model="cat._form.core_focus" rows="2" placeholder="VD: Kiến thức ăn dặm khoa học cho trẻ 6-24 tháng"
+                        <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Trọng tâm nội dung chuyên mục') }}</span></label>
+                        <textarea x-model="cat._form.core_focus" rows="2" placeholder="{{ __('VD: Kiến thức ăn dặm khoa học cho trẻ 6-24 tháng') }}"
                                   class="textarea textarea-bordered textarea-sm w-full"></textarea>
                     </div>
                     <div class="form-control">
                         <label class="label py-0.5">
-                            <span class="label-text text-xs font-medium">Key insights for writers (5-7 gạch đầu dòng tóm tắt nhanh — đọc trước khi đọc hết core_focus/unique_angle)</span>
+                            <span class="label-text text-xs font-medium">{{ __('Key insights for writers (5-7 gạch đầu dòng tóm tắt nhanh — đọc trước khi đọc hết core_focus/unique_angle)') }}</span>
                         </label>
-                        <textarea x-model="cat._form.writer_insights" rows="3" placeholder="VD: - Không viết về X, chỉ viết về Y&#10;- Motif lặp cần tránh: ..."
+                        <textarea x-model="cat._form.writer_insights" rows="3" placeholder="{{ __('VD: - Không viết về X, chỉ viết về Y - Motif lặp cần tránh: ...') }}"
                                   class="textarea textarea-bordered textarea-sm w-full"></textarea>
                     </div>
                     <div class="form-control">
-                        <label class="label py-0.5"><span class="label-text text-xs font-medium">Góc nhìn khác biệt (điều chỉ chuyên mục này viết được)</span></label>
-                        <textarea x-model="cat._form.unique_angle" rows="2" placeholder="VD: Có đội ngũ chuyên gia dinh dưỡng nội bộ kiểm duyệt, không chỉ dịch lại nguồn ngoại"
+                        <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Góc nhìn khác biệt (điều chỉ chuyên mục này viết được)') }}</span></label>
+                        <textarea x-model="cat._form.unique_angle" rows="2" placeholder="{{ __('VD: Có đội ngũ chuyên gia dinh dưỡng nội bộ kiểm duyệt, không chỉ dịch lại nguồn ngoại') }}"
                                   class="textarea textarea-bordered textarea-sm w-full"></textarea>
                     </div>
                     <div class="form-control">
-                        <label class="label py-0.5"><span class="label-text text-xs font-medium">Mục tiêu nội dung</span></label>
-                        <textarea x-model="cat._form.content_goals" rows="2" placeholder="VD: Tăng traffic tìm kiếm dài hạn, xây uy tín chuyên gia"
+                        <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Mục tiêu nội dung') }}</span></label>
+                        <textarea x-model="cat._form.content_goals" rows="2" placeholder="{{ __('VD: Tăng traffic tìm kiếm dài hạn, xây uy tín chuyên gia') }}"
                                   class="textarea textarea-bordered textarea-sm w-full"></textarea>
                     </div>
                     <div class="form-control border border-base-200 rounded-md p-2.5 bg-base-200/30">
                         <label class="label py-0.5">
                             <span class="label-text text-xs font-medium">
-                                Hệ giá trị gia đình chuyên mục này ưu tiên phục vụ
-                                <span class="text-base-content/40 font-normal">(chuẩn nền tảng cố định — <span x-text="familyValuesRef"></span>, không phải văn bản tự viết)</span>
+                                {{ __('Hệ giá trị gia đình chuyên mục này ưu tiên phục vụ') }}
+                                <span class="text-base-content/40 font-normal">{{ __('(chuẩn nền tảng cố định —') }} <span x-text="familyValuesRef"></span>{{ __(', không phải văn bản tự viết)') }}</span>
                             </span>
                         </label>
                         <div class="flex flex-wrap gap-x-4 gap-y-1.5 mt-0.5">
@@ -133,8 +131,8 @@
                     <div class="form-control border border-base-200 rounded-md p-2.5 bg-base-200/30">
                         <label class="label py-0.5">
                             <span class="label-text text-xs font-medium">
-                                Bộ tiêu chí ứng xử trong gia đình chuyên mục này ưu tiên
-                                <span class="text-base-content/40 font-normal">(chuẩn nền tảng cố định — <span x-text="familyConductStandardsRef"></span>, không phải văn bản tự viết)</span>
+                                {{ __('Bộ tiêu chí ứng xử trong gia đình chuyên mục này ưu tiên') }}
+                                <span class="text-base-content/40 font-normal">{{ __('(chuẩn nền tảng cố định —') }} <span x-text="familyConductStandardsRef"></span>{{ __(', không phải văn bản tự viết)') }}</span>
                             </span>
                         </label>
                         <div class="flex flex-wrap gap-x-4 gap-y-1.5 mt-0.5">
@@ -150,68 +148,68 @@
                     </div>
                     <div class="form-control">
                         <label class="label py-0.5">
-                            <span class="label-text text-xs font-medium">Pain points / câu hỏi thường gặp của độc giả (dựa trên nghiên cứu thực tế — khảo sát, feedback, câu hỏi lặp lại)</span>
+                            <span class="label-text text-xs font-medium">{{ __('Pain points / câu hỏi thường gặp của độc giả (dựa trên nghiên cứu thực tế — khảo sát, feedback, câu hỏi lặp lại)') }}</span>
                         </label>
-                        <textarea x-model="cat._form.pain_points" rows="2" placeholder="VD: Con hay bị táo bón khi đổi sữa, mẹ không biết phân biệt sữa mát thật/giả"
+                        <textarea x-model="cat._form.pain_points" rows="2" placeholder="{{ __('VD: Con hay bị táo bón khi đổi sữa, mẹ không biết phân biệt sữa mát thật/giả') }}"
                                   class="textarea textarea-bordered textarea-sm w-full"></textarea>
                     </div>
                     <div class="form-control">
                         <label class="label py-0.5">
-                            <span class="label-text text-xs font-medium">Nghi ngờ / lý do chưa hành động (objections — khác pain_points, đây là điều khiến độc giả CHƯA TIN)</span>
+                            <span class="label-text text-xs font-medium">{{ __('Nghi ngờ / lý do chưa hành động (objections — khác pain_points, đây là điều khiến độc giả CHƯA TIN)') }}</span>
                         </label>
-                        <textarea x-model="cat._form.objections" rows="2" placeholder="VD: Sợ tốn tiền mà không hiệu quả, nghe nhiều quảng cáo sai sự thật nên cảnh giác"
+                        <textarea x-model="cat._form.objections" rows="2" placeholder="{{ __('VD: Sợ tốn tiền mà không hiệu quả, nghe nhiều quảng cáo sai sự thật nên cảnh giác') }}"
                                   class="textarea textarea-bordered textarea-sm w-full"></textarea>
                     </div>
                     <div class="form-control">
                         <label class="label py-0.5">
-                            <span class="label-text text-xs font-medium">Tiêu chí quyết định (điều độc giả dùng để so sánh/chọn giữa các lựa chọn)</span>
+                            <span class="label-text text-xs font-medium">{{ __('Tiêu chí quyết định (điều độc giả dùng để so sánh/chọn giữa các lựa chọn)') }}</span>
                         </label>
-                        <textarea x-model="cat._form.decision_criteria" rows="2" placeholder="VD: Giá cả, có bác sĩ/chuyên gia tư vấn hay không, đánh giá thật từ người dùng khác"
+                        <textarea x-model="cat._form.decision_criteria" rows="2" placeholder="{{ __('VD: Giá cả, có bác sĩ/chuyên gia tư vấn hay không, đánh giá thật từ người dùng khác') }}"
                                   class="textarea textarea-bordered textarea-sm w-full"></textarea>
                     </div>
                     <div class="form-control">
                         <label class="label py-0.5">
-                            <span class="label-text text-xs font-medium">Ý tưởng đã cân nhắc và quyết định KHÔNG viết (kèm lý do — Decision Log)</span>
+                            <span class="label-text text-xs font-medium">{{ __('Ý tưởng đã cân nhắc và quyết định KHÔNG viết (kèm lý do — Decision Log)') }}</span>
                         </label>
-                        <textarea x-model="cat._form.rejected_ideas" rows="2" placeholder="VD: 'So sánh giá sữa mát các hãng' — đã bỏ vì đối thủ đã làm rất kỹ, khó cạnh tranh"
+                        <textarea x-model="cat._form.rejected_ideas" rows="2" placeholder="{{ __('VD: \'So sánh giá sữa mát các hãng\' — đã bỏ vì đối thủ đã làm rất kỹ, khó cạnh tranh') }}"
                                   class="textarea textarea-bordered textarea-sm w-full"></textarea>
                     </div>
                     <div class="flex flex-wrap gap-3">
                         <div class="form-control flex-1 min-w-64">
-                            <label class="label py-0.5"><span class="label-text text-xs font-medium">Đối tượng độc giả</span></label>
-                            <input type="text" x-model="cat._form.audience" placeholder="VD: mẹ mới sinh con đầu lòng"
+                            <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Đối tượng độc giả') }}</span></label>
+                            <input type="text" x-model="cat._form.audience" placeholder="{{ __('VD: mẹ mới sinh con đầu lòng') }}"
                                    class="input input-sm input-bordered w-full">
                         </div>
                         <div class="form-control flex-1 min-w-64">
-                            <label class="label py-0.5"><span class="label-text text-xs font-medium">Ràng buộc / không muốn</span></label>
-                            <input type="text" x-model="cat._form.constraints" placeholder="VD: không viết giọng hàn lâm"
+                            <label class="label py-0.5"><span class="label-text text-xs font-medium">{{ __('Ràng buộc / không muốn') }}</span></label>
+                            <input type="text" x-model="cat._form.constraints" placeholder="{{ __('VD: không viết giọng hàn lâm') }}"
                                    class="input input-sm input-bordered w-full">
                         </div>
                     </div>
                     <div class="form-control">
                         <label class="label py-0.5">
-                            <span class="label-text text-xs font-medium">Hành vi thực tế của độc giả (khác "Đối tượng độc giả" ở trên — đây là ngày của họ trông thế nào, họ tìm kiếm/đọc nội dung ở đâu, khi nào; dựa trên QUAN SÁT THẬT — bình luận, từ khoá tìm kiếm, giờ truy cập — không phải suy đoán)</span>
+                            <span class="label-text text-xs font-medium">{{ __('Hành vi thực tế của độc giả (khác "Đối tượng độc giả" ở trên — đây là ngày của họ trông thế nào, họ tìm kiếm/đọc nội dung ở đâu, khi nào; dựa trên QUAN SÁT THẬT — bình luận, từ khoá tìm kiếm, giờ truy cập — không phải suy đoán)') }}</span>
                         </label>
-                        <textarea x-model="cat._form.audience_behavior" rows="2" placeholder="VD: Lướt điện thoại lúc con ngủ trưa/tối muộn, hay tìm trên Google/TikTok bằng câu hỏi cụ thể (VD 'trẻ mấy tháng ăn dặm được'), ít khi bình luận công khai nhưng đọc kỹ và lưu bài"
+                        <textarea x-model="cat._form.audience_behavior" rows="2" placeholder="{{ __('VD: Lướt điện thoại lúc con ngủ trưa/tối muộn, hay tìm trên Google/TikTok bằng câu hỏi cụ thể (VD \'trẻ mấy tháng ăn dặm được\'), ít khi bình luận công khai nhưng đọc kỹ và lưu bài') }}"
                                   class="textarea textarea-bordered textarea-sm w-full"></textarea>
                     </div>
                     <div class="form-control">
                         <label class="label py-0.5">
-                            <span class="label-text text-xs font-medium">Đoạn văn mẫu (giọng văn) — dán NGUYÊN VĂN 1-2 đoạn đã viết thật, KHÔNG mô tả bằng tính từ (VD "gần gũi, thân thiện" không giúp AI viết đúng giọng bằng 1 đoạn văn mẫu thật)</span>
+                            <span class="label-text text-xs font-medium">{{ __('Đoạn văn mẫu (giọng văn) — dán NGUYÊN VĂN 1-2 đoạn đã viết thật, KHÔNG mô tả bằng tính từ (VD "gần gũi, thân thiện" không giúp AI viết đúng giọng bằng 1 đoạn văn mẫu thật)') }}</span>
                         </label>
                         <textarea x-model="cat._form.style_sample" rows="3"
                                   class="textarea textarea-bordered textarea-sm w-full text-xs"></textarea>
                     </div>
                     <div class="form-control">
                         <label class="label py-0.5">
-                            <span class="label-text text-xs font-medium">Tài liệu mô tả chi tiết sản phẩm/dịch vụ (thành phần, công dụng, thông số, đối tượng dùng, lưu ý khi dùng...) — dùng làm nguồn sự thật khi nội dung nhắc tới sản phẩm/dịch vụ cụ thể</span>
+                            <span class="label-text text-xs font-medium">{{ __('Tài liệu mô tả chi tiết sản phẩm/dịch vụ (thành phần, công dụng, thông số, đối tượng dùng, lưu ý khi dùng...) — dùng làm nguồn sự thật khi nội dung nhắc tới sản phẩm/dịch vụ cụ thể') }}</span>
                         </label>
                         <textarea x-model="cat._form.product_service_docs" rows="3"
                                   class="textarea textarea-bordered textarea-sm w-full text-xs"></textarea>
                     </div>
                     <div class="form-control">
                         <label class="label py-0.5">
-                            <span class="label-text text-xs font-medium">Ví dụ nội dung/dàn ý mẫu TỐT NHẤT đã có (dán nguyên văn 1 bài/dàn ý bạn coi là chuẩn mực cho chuyên mục này) — khác đoạn văn mẫu giọng văn ở trên, đây là 1 bài/dàn ý HOÀN CHỈNH để AI học cấu trúc/độ sâu/cách triển khai</span>
+                            <span class="label-text text-xs font-medium">{{ __('Ví dụ nội dung/dàn ý mẫu TỐT NHẤT đã có (dán nguyên văn 1 bài/dàn ý bạn coi là chuẩn mực cho chuyên mục này) — khác đoạn văn mẫu giọng văn ở trên, đây là 1 bài/dàn ý HOÀN CHỈNH để AI học cấu trúc/độ sâu/cách triển khai') }}</span>
                         </label>
                         <textarea x-model="cat._form.best_example_content" rows="3"
                                   class="textarea textarea-bordered textarea-sm w-full text-xs"></textarea>
@@ -224,7 +222,7 @@
                     --}}
                     <div class="form-control">
                         <label class="label py-0.5">
-                            <span class="label-text text-xs font-medium">Áp dụng bộ tiêu chí này cho các chuyên mục khác (dùng chung)</span>
+                            <span class="label-text text-xs font-medium">{{ __('Áp dụng bộ tiêu chí này cho các chuyên mục khác (dùng chung)') }}</span>
                         </label>
                         <div class="flex flex-wrap gap-1.5 mb-1.5" x-show="cat._sharedWith.length" x-cloak>
                             <template x-for="uuid in cat._sharedWith" :key="uuid">
@@ -235,7 +233,7 @@
                             </template>
                         </div>
                         <div class="relative">
-                            <input type="text" x-model="shareQuery" placeholder="Tìm chuyên mục để thêm vào nhóm dùng chung..."
+                            <input type="text" x-model="shareQuery" placeholder="{{ __('Tìm chuyên mục để thêm vào nhóm dùng chung...') }}"
                                    class="input input-sm input-bordered w-full">
                             <ul x-show="shareQuery.trim() && shareSuggestions(cat).length" x-cloak
                                 class="absolute z-10 mt-1 w-full bg-base-100 border border-base-300 rounded-md shadow-md max-h-48 overflow-y-auto text-sm">
@@ -243,26 +241,25 @@
                                     <li class="px-3 py-1.5 hover:bg-base-200 cursor-pointer flex items-center justify-between gap-2"
                                         @click="addShared(cat, s.uuid)">
                                         <span x-text="s.name"></span>
-                                        <span x-show="s.foundation" class="badge badge-ghost badge-xs shrink-0">đang có bộ khác</span>
+                                        <span x-show="s.foundation" class="badge badge-ghost badge-xs shrink-0">{{ __('đang có bộ khác') }}</span>
                                     </li>
                                 </template>
                             </ul>
                             <p x-show="shareQuery.trim() && !shareSuggestions(cat).length" x-cloak class="text-xs text-base-content/40 mt-1">
-                                Không tìm thấy chuyên mục phù hợp.
+                                {{ __('Không tìm thấy chuyên mục phù hợp.') }}
                             </p>
                         </div>
                         <p class="text-xs text-base-content/40 mt-1">
-                            Thêm chuyên mục đang có bộ tiêu chí riêng sẽ THAY THẾ bộ cũ của chuyên mục đó bằng bộ này. Bấm ✕
-                            để gỡ khỏi nhóm dùng chung (chuyên mục đó sẽ hết foundation nếu không thuộc nhóm nào khác).
+                            {{ __('Thêm chuyên mục đang có bộ tiêu chí riêng sẽ THAY THẾ bộ cũ của chuyên mục đó bằng bộ này. Bấm ✕ để gỡ khỏi nhóm dùng chung (chuyên mục đó sẽ hết foundation nếu không thuộc nhóm nào khác).') }}
                         </p>
                     </div>
 
                     <div class="flex items-center gap-2 mt-1">
                         <button type="button" class="btn btn-primary btn-xs" :disabled="cat._saving" @click="save(cat)">
-                            <span x-show="!cat._saving">Lưu</span>
-                            <span x-show="cat._saving" x-cloak>Đang lưu...</span>
+                            <span x-show="!cat._saving">{{ __('Lưu') }}</span>
+                            <span x-show="cat._saving" x-cloak>{{ __('Đang lưu...') }}</span>
                         </button>
-                        <span x-show="cat._saved" x-cloak class="text-success text-xs">Đã lưu!</span>
+                        <span x-show="cat._saved" x-cloak class="text-success text-xs">{{ __('Đã lưu!') }}</span>
                         <span x-show="cat._error" x-cloak class="text-error text-xs" x-text="cat._error"></span>
                     </div>
                 </div>
@@ -344,7 +341,7 @@ document.addEventListener('alpine:init', () => {
                     }
                 } catch (e) {
                     console.error('[content-foundation] failed to load categories', e);
-                    this.errorMessage = 'Không tải được danh sách chuyên mục.';
+                    this.errorMessage = @js(__('Không tải được danh sách chuyên mục.'));
                 }
             },
 
@@ -469,14 +466,14 @@ document.addEventListener('alpine:init', () => {
                 const days = this.foundationAgeDays(updatedAt);
 
                 if (days === null) return '';
-                if (days < 1) return 'Cập nhật: hôm nay';
-                if (days === 1) return 'Cập nhật: 1 ngày trước';
-                if (days < 30) return `Cập nhật: ${days} ngày trước`;
+                if (days < 1) return @js(__('Cập nhật: hôm nay'));
+                if (days === 1) return @js(__('Cập nhật: 1 ngày trước'));
+                if (days < 30) return `${@js(__('Cập nhật: :days ngày trước')).replace(':days', () => (days))}`;
 
                 const months = Math.floor(days / 30);
-                if (months < 12) return `Cập nhật: ${months} tháng trước`;
+                if (months < 12) return `${@js(__('Cập nhật: :months tháng trước')).replace(':months', () => (months))}`;
 
-                return `Cập nhật: ${Math.floor(months / 12)} năm trước`;
+                return `${@js(__('Cập nhật: :months năm trước')).replace(':months', () => (Math.floor(months / 12)))}`;
             },
 
             isFoundationStale(updatedAt) {
@@ -508,7 +505,7 @@ document.addEventListener('alpine:init', () => {
                     const data = await res.json().catch(() => ({}));
 
                     if (!res.ok) {
-                        cat._error = data.message || 'Không lưu được, vui lòng thử lại.';
+                        cat._error = data.message || @js(__('Không lưu được, vui lòng thử lại.'));
                         return;
                     }
 
@@ -523,7 +520,7 @@ document.addEventListener('alpine:init', () => {
                     }
                 } catch (e) {
                     console.error('[content-foundation] failed to save foundation', e);
-                    cat._error = 'Lỗi kết nối. Vui lòng thử lại.';
+                    cat._error = @js(__('Lỗi kết nối. Vui lòng thử lại.'));
                 } finally {
                     cat._saving = false;
                 }

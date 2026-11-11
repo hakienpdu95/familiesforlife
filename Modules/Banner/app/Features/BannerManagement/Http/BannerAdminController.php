@@ -52,7 +52,7 @@ class BannerAdminController extends Controller
         $banner = $action->handle($data);
 
         return redirect()->route('backend.banner.items.index')
-            ->with('success', 'Đã tạo banner mới.' . ($banner->title ? " (\"{$banner->title}\")" : ''));
+            ->with('success', ($banner->title ? __('Đã tạo banner mới. (":title")', ['title' => $banner->title]) : __('Đã tạo banner mới.')));
     }
 
     public function edit(Banner $banner): View
@@ -71,7 +71,7 @@ class BannerAdminController extends Controller
         app(UpdateBannerAction::class)->handle($banner, $data);
 
         return redirect()->route('backend.banner.items.index')
-            ->with('success', 'Cập nhật banner thành công.');
+            ->with('success', __('Cập nhật banner thành công.'));
     }
 
     public function destroy(Request $request, Banner $banner, DeleteBannerAction $action): RedirectResponse|JsonResponse
@@ -79,11 +79,11 @@ class BannerAdminController extends Controller
         $action->handle($banner);
 
         if ($request->expectsJson()) {
-            return response()->json(['message' => 'Đã xoá banner.']);
+            return response()->json(['message' => __('Đã xoá banner.')]);
         }
 
         return redirect()->route('backend.banner.items.index')
-            ->with('success', 'Đã xoá banner.');
+            ->with('success', __('Đã xoá banner.'));
     }
 
     private function validated(Request $request, bool $imageRequired): array

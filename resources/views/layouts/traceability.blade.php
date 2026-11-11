@@ -15,6 +15,7 @@
     <meta property="og:url" content="{{ url()->current() }}">
     @if (! empty($images[0]))<meta property="og:image" content="{{ $images[0] }}">@endif
     @include('layouts.partials.font-preload', ['fonts' => ['inter'], 'build' => 'build/frontend'])
+    @include('layouts.partials.i18n-script')
     @vite(['resources/css/frontend.css'], 'build/frontend')
     @stack('head')
 </head>
@@ -53,7 +54,7 @@
                         <a href="{{ $channel['url'] }}" target="_blank" rel="noopener nofollow sponsored"
                            class="btn flex-1 min-w-0 h-12 min-h-12 px-2 rounded-lg border-0 shadow-none text-white text-[15px] max-[359.98px]:text-[14px] font-semibold gap-2 {{ $channel['button'] }}">
                             @if (! empty($channel['logo']))<span class="w-7 h-7 rounded-md bg-white flex items-center justify-center shrink-0" aria-hidden="true"><img src="{{ $channel['logo'] }}" alt="" width="22" height="22" class="w-[22px] h-[22px] object-contain"></span>@endif
-                            <span class="truncate">{{ count($buy) === 1 ? 'Mua trên '.$channel['name'] : ($channel['short'] ?? $channel['name']) }}</span>
+                            <span class="truncate">{{ count($buy) === 1 ? __('Mua trên :channel', ['channel' => $channel['name']]) : ($channel['short'] ?? $channel['name']) }}</span>
                         </a>
                     @empty
                         @if ($cta)
@@ -62,7 +63,7 @@
                         @endif
                     @endforelse
                     <a href="#phan-anh" onclick="document.getElementById('phan-anh').open = true"
-                       class="btn w-12 h-12 min-h-12 p-0 rounded-lg bg-base-100 border border-[rgb(28_25_23/.14)] shadow-none text-[#57534e] hover:border-primary hover:text-primary [&>svg]:w-5 [&>svg]:h-5" aria-label="Phản ánh thông tin chưa đúng">@include('traceability.partials.icon', ['name' => 'flag'])</a>
+                       class="btn w-12 h-12 min-h-12 p-0 rounded-lg bg-base-100 border border-[rgb(28_25_23/.14)] shadow-none text-[#57534e] hover:border-primary hover:text-primary [&>svg]:w-5 [&>svg]:h-5" aria-label="{{ __('Phản ánh thông tin chưa đúng') }}">@include('traceability.partials.icon', ['name' => 'flag'])</a>
                 </div>
             </div>
         @endif
