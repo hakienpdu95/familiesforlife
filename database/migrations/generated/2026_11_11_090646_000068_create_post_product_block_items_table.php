@@ -21,7 +21,7 @@ return new class extends Migration
             $table->unsignedInteger('order_column')->nullable()->index()->comment('Thứ tự sắp xếp — Spatie Sortable / ORDER BY');
             $table->foreignId('block_id')->constrained('post_product_blocks')->cascadeOnDelete();
             $table->string('item_key', 20);
-            $table->foreignId('product_id')->constrained('products')->restrictOnDelete();
+            $table->foreignId('product_id')->nullable()->constrained('products')->restrictOnDelete();
             $table->string('title_override', 200)->nullable();
             $table->string('price_label_override', 100)->nullable();
             $table->text('description_override')->nullable();

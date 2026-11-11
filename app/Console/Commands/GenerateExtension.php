@@ -145,6 +145,7 @@ class GenerateExtension extends Command
         $upLines     = [];
         $fkCols      = [];
         $prevColName = $firstAfter !== '__' ? $firstAfter : null;
+        $seenIndexes = [];
 
         foreach ($rows as $row) {
             $p = explode('///', $row);
@@ -152,7 +153,7 @@ class GenerateExtension extends Command
             [$colName, $colType, $colLen, $colNull, $colDefault, $colMod, $colComment] = $p;
 
             if (in_array($colName, self::SPECIAL_DIRECTIVES)) {
-                $this->buildIdempotentIndexDirective($colMod, $colType, $tableName, $upLines);
+                $this->buildIdempotentIndexDirective($colMod, $colType, $tableName, $upLines, $seenIndexes);
                 continue;
             }
 
@@ -198,7 +199,7 @@ class GenerateExtension extends Command
     // Giống buildIndexDirective nhưng wrap mỗi index trong Schema::hasIndex check
     // để tránh "Duplicate key name" khi migration chạy lại trên DB đã có index.
 
-    private function buildIdempotentIndexDirective(string $colMod, string $indexType, string $tableName, array &$lines): void
+    private function buildIdempotentIndexDirective(string $colMod, string $indexType, string $tableName, array &$lines, array &$seen = []): void
     {
         $method = match (strtolower($indexType)) {
             'fulltext' => 'fullText',
@@ -227,6 +228,12 @@ class GenerateExtension extends Command
 
             // Tính tên index: custom name ưu tiên, fallback về tên Laravel auto-generate
             $idxName = $name ?? ($tableName . '_' . implode('_', $colList) . '_' . strtolower($method));
+
+            if (isset($seen[strtolower($idxName)])) {
+                $this->warn("  ⚠ Bỏ qua index trùng tên '$idxName' trong cùng block $tableName: " . implode(',', $colList));
+                continue;
+            }
+            $seen[strtolower($idxName)] = true;
 
             $lines[] = "if (!Schema::hasIndex('$tableName', '$idxName')) {";
             $lines[] = "    $line";

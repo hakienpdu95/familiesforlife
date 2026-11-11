@@ -26,8 +26,14 @@ return new class extends Migration {
             if (!Schema::hasColumn('ocop_products', 'shelf_life')) {
                 $table->string('shelf_life', 100)->nullable()->after('production_date')->comment('Hạn sử dụng');
             }
+            if (!Schema::hasColumn('ocop_products', 'shelf_life_value')) {
+                $table->unsignedSmallInteger('shelf_life_value')->nullable()->after('shelf_life')->comment('Hạn sử dụng — giá trị số (1–9999)');
+            }
+            if (!Schema::hasColumn('ocop_products', 'shelf_life_unit')) {
+                $table->string('shelf_life_unit', 10)->nullable()->after('shelf_life_value')->comment('Đơn vị hạn sử dụng: hour | day | week | month | year');
+            }
             if (!Schema::hasColumn('ocop_products', 'ingredients')) {
-                $table->text('ingredients')->nullable()->after('shelf_life')->comment('Thành phần');
+                $table->text('ingredients')->nullable()->after('shelf_life_unit')->comment('Thành phần');
             }
             if (!Schema::hasColumn('ocop_products', 'usage_instructions')) {
                 $table->text('usage_instructions')->nullable()->after('ingredients')->comment('Hướng dẫn sử dụng');
@@ -38,6 +44,12 @@ return new class extends Migration {
             if (!Schema::hasColumn('ocop_products', 'ocop_subject_id')) {
                 $table->foreignId('ocop_subject_id')->nullable()->constrained('ocop_subjects')->restrictOnDelete()->after('storage_instructions');
             }
+            if (!Schema::hasColumn('ocop_products', 'shopee_url')) {
+                $table->string('shopee_url', 500)->nullable()->after('ocop_subject_id')->comment('Link affiliate Shopee');
+            }
+            if (!Schema::hasColumn('ocop_products', 'tiktok_url')) {
+                $table->string('tiktok_url', 500)->nullable()->after('shopee_url')->comment('Link affiliate TikTok Shop');
+            }
         });
     }
 
@@ -46,7 +58,7 @@ return new class extends Migration {
         Schema::table('ocop_products', function (Blueprint $table) {
             if (Schema::hasColumn('ocop_products', 'heritage_site_id')) $table->dropForeign(['heritage_site_id']);
             if (Schema::hasColumn('ocop_products', 'ocop_subject_id')) $table->dropForeign(['ocop_subject_id']);
-            $cols = array_filter(['heritage_site_id', 'story', 'origin', 'production_date', 'shelf_life', 'ingredients', 'usage_instructions', 'storage_instructions', 'ocop_subject_id'], fn($c) => Schema::hasColumn('ocop_products', $c));
+            $cols = array_filter(['heritage_site_id', 'story', 'origin', 'production_date', 'shelf_life', 'shelf_life_value', 'shelf_life_unit', 'ingredients', 'usage_instructions', 'storage_instructions', 'ocop_subject_id', 'shopee_url', 'tiktok_url'], fn($c) => Schema::hasColumn('ocop_products', $c));
             if (!empty($cols)) $table->dropColumn(array_values($cols));
         });
     }

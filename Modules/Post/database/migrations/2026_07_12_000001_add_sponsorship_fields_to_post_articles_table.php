@@ -24,7 +24,7 @@ return new class extends Migration
 
             // §13 hiệu suất — job hết hạn (chạy daily) + màn hình danh sách lọc "chỉ bài tài trợ"
             // đều query theo is_sponsored + sponsored_end_date, cần composite index.
-            $table->index(['organization_id', 'is_sponsored', 'sponsored_end_date'], 'idx_post_article_sponsored');
+            $table->index(['is_sponsored', 'sponsored_end_date'], 'idx_post_article_sponsored');
         });
     }
 

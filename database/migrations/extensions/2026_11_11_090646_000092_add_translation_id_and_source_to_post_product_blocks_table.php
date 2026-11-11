@@ -17,13 +17,16 @@ return new class extends Migration {
             if (!Schema::hasIndex('post_product_blocks', 'idx_post_pb_translation')) {
                 $table->index('translation_id', 'idx_post_pb_translation');
             }
+            if (!Schema::hasColumn('post_product_blocks', 'source')) {
+                $table->string('source', 20)->default('product')->after('translation_id')->comment('product|ocop');
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('post_product_blocks', function (Blueprint $table) {
-            $cols = array_filter(['translation_id'], fn($c) => Schema::hasColumn('post_product_blocks', $c));
+            $cols = array_filter(['translation_id', 'source'], fn($c) => Schema::hasColumn('post_product_blocks', $c));
             if (!empty($cols)) $table->dropColumn(array_values($cols));
         });
     }
