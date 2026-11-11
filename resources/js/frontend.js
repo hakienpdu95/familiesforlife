@@ -286,18 +286,36 @@ document.addEventListener('alpine:init', () => {
         loading: false,
         success: false,
         errorMessage: '',
+        errorField: '',
 
-        get canSubmit() {
-            return this.email !== '' && this.agreed;
+        setError(field, message) {
+            this.errorField = field;
+            this.errorMessage = message;
+        },
+
+        clearError() {
+            this.errorField = '';
+            this.errorMessage = '';
         },
 
         async submit() {
-            if (!this.canSubmit || this.loading) {
+            if (this.loading) {
+                return;
+            }
+
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email)) {
+                this.setError('email', 'Vui lòng nhập địa chỉ email hợp lệ.');
+                this.$refs.email?.focus();
+                return;
+            }
+
+            if (!this.agreed) {
+                this.setError('agreed', 'Vui lòng đồng ý với chính sách bảo mật để đăng ký.');
                 return;
             }
 
             this.loading = true;
-            this.errorMessage = '';
+            this.clearError();
 
             try {
                 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
@@ -321,7 +339,7 @@ document.addEventListener('alpine:init', () => {
                 }
 
                 if (response.status === 422 && data.errors) {
-                    this.errorMessage = Object.values(data.errors).flat()[0] ?? 'Vui lòng kiểm tra lại thông tin đã nhập.';
+                    this.setError('email', Object.values(data.errors).flat()[0] ?? 'Vui lòng kiểm tra lại thông tin đã nhập.');
                 } else if (response.status === 429) {
                     this.errorMessage = 'Bạn thao tác quá nhanh, vui lòng thử lại sau ít phút.';
                 } else {

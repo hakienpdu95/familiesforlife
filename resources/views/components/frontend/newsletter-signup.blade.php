@@ -1,43 +1,50 @@
 <div class="container">
-    <div class="news-letter homepage-row homepage-news-letter wrapper"
-         style="background-image: url('{{ asset('images/banner.jpg') }}');"
-         x-data="newsletterSignup({ endpoint: '{{ route('newsletter.public.subscribe') }}' })">
+    <section class="news-letter homepage-row homepage-news-letter wrapper"
+             style="background-image: url('{{ asset('images/banner.jpg') }}');"
+             aria-labelledby="nl-title"
+             x-data="newsletterSignup({ endpoint: '{{ route('newsletter.public.subscribe') }}' })">
 
         <div class="nl-panel">
             <div class="nl-content" x-show="!success">
-                <h4 class="homepage-mobile-small-title">Newsletter</h4>
-                <h3 class="nl_title">Cập Nhật Hoạt Động<br>Mẹo Hay Cho Cả Nhà</h3>
-                <h2>Đăng ký để không bỏ lỡ điều gì mới từ {{ config('app.site_name') }}!</h2>
+                <p class="nl-eyebrow">Bản tin</p>
+                <h3 class="nl_title" id="nl-title">Cập nhật hoạt động,<br>mẹo hay cho cả nhà</h3>
+                <p class="nl-subtitle">Đăng ký để không bỏ lỡ điều gì mới từ {{ config('app.site_name') }}.</p>
 
-                <div class="nl-form">
-                    <form @submit.prevent="submit()" novalidate>
-                        <div class="clear-float">
-                            <input type="email" class="email" x-model.trim="email" name="email"
-                                   placeholder="Email address" required :disabled="loading">
-                            <input type="submit" value="đăng ký ngay" :disabled="!canSubmit || loading">
-                        </div>
-                        <div class="checkbox-wrapper">
-                            <input type="checkbox" class="checkbox" x-model="agreed" required :disabled="loading">
-                            <div class="label">
-                                Tôi đã đọc và đồng ý với
-                                <a href="/chinh-sach-bao-mat" target="_blank" rel="noopener">chính sách bảo mật</a>
-                                của {{ config('app.site_name') }}.
-                            </div>
-                        </div>
-                        <p class="error-newsletter" x-show="errorMessage" x-cloak x-text="errorMessage"></p>
-                    </form>
-                </div>
+                <form class="nl-form" @submit.prevent="submit()" novalidate>
+                    <label for="nl-email" class="sr-only">Địa chỉ email</label>
+                    <div class="nl-field">
+                        <input type="email" id="nl-email" class="email" x-ref="email" x-model.trim="email" @input="clearError()" name="email"
+                               placeholder="Email của bạn" autocomplete="email" inputmode="email"
+                               required :disabled="loading"
+                               :class="{ 'is-error': errorField === 'email' }"
+                               :aria-invalid="errorField === 'email' ? 'true' : 'false'"
+                               aria-describedby="nl-error">
+                        <button type="submit" class="nl-submit" :disabled="loading">
+                            <span class="loading loading-spinner loading-xs" x-show="loading" x-cloak></span>
+                            <span>Đăng ký</span>
+                        </button>
+                    </div>
+
+                    <label class="nl-consent">
+                        <input type="checkbox" x-model="agreed" @change="clearError()" required :disabled="loading"
+                               :class="{ 'is-error': errorField === 'agreed' }">
+                        <span>
+                            Tôi đồng ý với
+                            <a href="/chinh-sach-bao-mat" target="_blank" rel="noopener">chính sách bảo mật</a>
+                            của {{ config('app.site_name') }}.
+                        </span>
+                    </label>
+
+                    <p class="nl-error" id="nl-error" role="alert" x-show="errorMessage" x-cloak x-text="errorMessage"></p>
+                </form>
             </div>
 
-            <div class="loading-newsletter" x-show="loading" x-cloak>
-                <span class="loading loading-spinner loading-lg"></span>
-            </div>
-
-            <div class="callback-newsletter" x-show="success" x-cloak>
-                <h3>Cảm ơn bạn đã đăng ký!</h3>
-                <h4>Theo dõi hộp thư để nhận bản tin mới nhất</h4>
+            <div class="nl-done" x-show="success" x-cloak role="status">
+                <p class="nl-eyebrow">Đã đăng ký</p>
+                <h3 class="nl_title">Cảm ơn bạn!</h3>
+                <p class="nl-subtitle">Bản tin mới nhất từ {{ config('app.site_name') }} sẽ được gửi tới hộp thư của bạn.</p>
             </div>
         </div>
 
-    </div>
+    </section>
 </div>
