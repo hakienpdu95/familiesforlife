@@ -16,7 +16,7 @@ class ApprovalHistoryResource extends JsonResource
 
         return [
             'id' => $this->id,
-            'created_at' => $this->created_at?->format('d/m/Y H:i'),
+            'created_at' => format_datetime($this->created_at),
             'entity_label' => $entity ? class_basename($entity).' #'.$entity->id : null,
             'entity_name' => $entity->name ?? null,
             'entity_url' => $entity?->approvalDashboardUrl ?? null,

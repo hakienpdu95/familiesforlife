@@ -27,7 +27,7 @@ class ProjectListResource extends JsonResource
             'shots_count' => $this->shots_count,
 
             'created_by_name' => $this->createdBy?->name,
-            'created_at' => $this->created_at?->format('d/m/Y H:i'),
+            'created_at' => format_datetime($this->created_at),
 
             'show_url' => route('backend.aivideostudiotemplate.show', $this->resource),
             'edit_url' => route('backend.aivideostudiotemplate.edit', $this->resource),

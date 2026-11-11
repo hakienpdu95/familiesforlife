@@ -85,15 +85,15 @@
                         </div>
                         <div class="flex justify-between gap-3 py-2">
                             <dt class="text-base-content/50">Ngày tạo</dt>
-                            <dd>{{ $account->created_at?->format('d/m/Y H:i') ?? '—' }}</dd>
+                            <dd>{{ format_datetime($account->created_at) ?? '—' }}</dd>
                         </div>
                         <div class="flex justify-between gap-3 py-2">
                             <dt class="text-base-content/50">Hoạt động cuối</dt>
-                            <dd title="{{ $account->last_active_at?->format('d/m/Y H:i') }}">{{ $account->last_active_at?->diffForHumans() ?? 'Chưa đăng nhập' }}</dd>
+                            <dd title="{{ format_datetime($account->last_active_at) }}">{{ $account->last_active_at?->diffForHumans() ?? 'Chưa đăng nhập' }}</dd>
                         </div>
                         <div class="flex justify-between gap-3 py-2">
                             <dt class="text-base-content/50">Cập nhật</dt>
-                            <dd>{{ $account->updated_at?->format('d/m/Y H:i') ?? '—' }}</dd>
+                            <dd>{{ format_datetime($account->updated_at) ?? '—' }}</dd>
                         </div>
                     </dl>
                 </div>

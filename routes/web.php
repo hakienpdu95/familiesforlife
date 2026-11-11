@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\MediaUploadController;
 use App\Http\Controllers\Backend\Api\DashboardChartController;
 use App\Http\Controllers\Backend\DashboardController;
 use App\Http\Controllers\Backend\SystemMonitorController;
+use App\Http\Controllers\Backend\SystemSettingController;
 use App\Http\Controllers\Backend\NotificationCenterController;
 use App\Http\Controllers\Backend\NotificationPreferenceController;
 use App\Http\Controllers\Backend\QrReportController;
@@ -66,6 +67,9 @@ Route::middleware(['auth'])->prefix('dashboard')->name('backend.')->group(functi
     Route::get('qr-reports/data', [QrReportController::class, 'data'])->name('qr-reports.data');
     Route::post('qr-reports/{report}/resolve', [QrReportController::class, 'resolve'])->name('qr-reports.resolve');
 
+    Route::get('settings', [SystemSettingController::class, 'index'])->name('settings.index');
+    Route::put('settings', [SystemSettingController::class, 'update'])->name('settings.update');
+
     Route::get('system-monitor', [SystemMonitorController::class, 'index'])->name('system-monitor');
     Route::get('system-monitor/data', [SystemMonitorController::class, 'data'])->name('system-monitor.data');
 
@@ -79,7 +83,6 @@ Route::middleware(['auth'])->prefix('dashboard')->name('backend.')->group(functi
     Route::get('/orders',           fn () => abort(503, 'Module đang phát triển'))->name('orders.index');
     Route::get('/categories',       fn () => abort(503, 'Module đang phát triển'))->name('categories.index');
     Route::get('/categories/create',fn () => abort(503, 'Module đang phát triển'))->name('categories.create');
-    Route::get('/settings',         fn () => abort(503, 'Module đang phát triển'))->name('settings.index');
 
     // ── Notification Center ───────────────────────────────────────────────
     Route::prefix('notifications')->name('notifications.')->group(function () {

@@ -322,7 +322,7 @@
             @endif
             @if($site)
             <span class="text-xs text-base-content/40">
-                Tạo {{ $site->created_at?->format('d/m/Y') }} · Sửa {{ $site->updated_at?->diffForHumans() }}
+                Tạo {{ format_date($site->created_at) }} · Sửa {{ $site->updated_at?->diffForHumans() }}
             </span>
             @endif
             @error('status')<p class="w-full text-xs text-error">{{ $message }}</p>@enderror

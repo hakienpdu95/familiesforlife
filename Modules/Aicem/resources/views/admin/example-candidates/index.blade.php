@@ -50,9 +50,9 @@
                         </div>
                         <p class="text-xs text-base-content/40">
                             {{ $candidate->subject_type }}#{{ $candidate->subject_id }} ·
-                            tạo lúc {{ $candidate->created_at->format('d/m/Y H:i') }}
+                            tạo lúc {{ format_datetime($candidate->created_at) }}
                             @if($candidate->reviewer)
-                                · duyệt bởi {{ $candidate->reviewer->name }} lúc {{ $candidate->reviewed_at?->format('d/m/Y H:i') }}
+                                · duyệt bởi {{ $candidate->reviewer->name }} lúc {{ format_datetime($candidate->reviewed_at) }}
                             @endif
                         </p>
                         @if($candidate->suggested_scope)

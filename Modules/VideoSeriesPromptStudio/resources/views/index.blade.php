@@ -48,7 +48,7 @@
                                 <td class="text-base-content/60">{{ $prompt->platformLabel() }}</td>
                                 <td class="text-base-content/60">{{ $prompt->category?->name ?? '—' }}</td>
                                 <td>{{ $prompt->episode_count }}</td>
-                                <td class="text-base-content/60">{{ $prompt->created_at->format('d/m/Y H:i') }}</td>
+                                <td class="text-base-content/60">{{ format_datetime($prompt->created_at) }}</td>
                                 <td class="text-right">
                                     <div class="flex items-center justify-end gap-1">
                                         <a href="{{ route('backend.videoseriespromptstudio.show', $prompt) }}" class="btn btn-ghost btn-xs">Xem</a>

@@ -1207,6 +1207,15 @@
         "updated_at///timestamp///__///_NULL///NULL///__///__"
     ],
     [
+        "system_settings///__///__///Cấu hình hệ thống dùng chung (1 dòng) — spec/I18n_Specification.md",
+        "locale///string///10///NOT_NULL///'vi'///__///Ngôn ngữ giao diện admin + portal: vi | en",
+        "timezone///string///64///NOT_NULL///'Asia/Ho_Chi_Minh'///__///Múi giờ hiển thị (chỉ dùng khi format, không đổi múi giờ lưu DB)",
+        "date_format///string///20///NOT_NULL///'d/m/Y'///__///Định dạng ngày (PHP date format)",
+        "time_format///string///20///NOT_NULL///'H:i'///__///Định dạng giờ (PHP date format)",
+        "created_at///timestamp///__///_NULL///NULL///__///__",
+        "updated_at///timestamp///__///_NULL///NULL///__///__"
+    ],
+    [
         "qr_identities///__///__///",
         "qr_code///string///15///NOT_NULL///__///->unique()///Mã in trên tem — chuỗi Base62 ngẫu nhiên, bất biến",
         "target_type///string///100///NOT_NULL///__///__///Morph type của đối tượng gốc (ocop_product, ...)",

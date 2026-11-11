@@ -85,7 +85,7 @@ class ArticleApiController extends Controller
             $translations->map(fn (PostArticleTranslation $t) => [
                 'id' => $t->id,
                 'text' => $t->title,
-                'published_at' => $t->published_at?->format('d/m/Y'),
+                'published_at' => format_date($t->published_at),
             ])->values()
         );
     }

@@ -1,7 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 return [
-    'failed'   => 'Thông tin đăng nhập hoặc mật khẩu không đúng.',
-    'password' => 'Mật khẩu không đúng.',
-    'throttle' => 'Đăng nhập thất bại quá nhiều lần. Vui lòng thử lại sau :seconds giây.',
+    'failed'   => 'These credentials do not match our records.',
+    'password' => 'The provided password is incorrect.',
+    'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
 ];

@@ -36,7 +36,7 @@ class ArticleListResource extends JsonResource
             'sponsor_badge'   => $this->sponsor_label?->badgeClass() ?? 'badge-warning',
 
             'created_by_name' => $this->createdBy?->name,
-            'created_at'      => $this->created_at?->format('d/m/Y'),
+            'created_at'      => format_date($this->created_at),
 
             // spec/ga-dashboard-statistics.md §2.2 — cột denormalized đã đồng bộ sẵn
             // (SyncGoogleAnalyticsStatsCommand), null khi bài chưa từng sync/ngoài top 1000 GA.
@@ -55,7 +55,7 @@ class ArticleListResource extends JsonResource
             'can_manage' => (bool) $canManage && ! $trashed,
 
             'is_trashed' => $trashed,
-            'deleted_at' => $this->deleted_at?->format('d/m/Y H:i'),
+            'deleted_at' => format_datetime($this->deleted_at),
             'is_public' => $trashed && $main?->status === \Modules\Post\Enums\TranslationStatus::Published,
             'restore_url' => $trashed && $canDelete ? route('backend.post.articles.restore', $this->resource) : null,
         ];

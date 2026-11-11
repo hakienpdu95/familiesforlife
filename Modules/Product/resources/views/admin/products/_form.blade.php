@@ -376,7 +376,7 @@
             </div>
             @if($product)
             <span class="text-xs text-base-content/40">
-                Tạo {{ $product->created_at?->format('d/m/Y') }} · Sửa {{ $product->updated_at?->diffForHumans() }}
+                Tạo {{ format_date($product->created_at) }} · Sửa {{ $product->updated_at?->diffForHumans() }}
             </span>
             @if($product->isApproved() || $product->isApprovalPublished())
             @can('publishApproval', $product)

@@ -18,7 +18,7 @@ class PendingApprovalResource extends JsonResource
             'entity_label' => class_basename($entity).' #'.$entity->id,
             'name' => $entity->name ?? null,
             'submitted_at' => $this->updated_at?->toIso8601String(),
-            'submitted_at_label' => $this->updated_at?->format('d/m/Y H:i'),
+            'submitted_at_label' => format_datetime($this->updated_at),
             'submitted_ago' => $this->updated_at?->locale('vi')->diffForHumans(),
             'review_url' => $entity->approvalDashboardUrl ?? null,
         ];

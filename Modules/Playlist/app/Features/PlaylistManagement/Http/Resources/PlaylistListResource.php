@@ -21,7 +21,7 @@ class PlaylistListResource extends JsonResource
             'items_count' => $this->items_count ?? $this->items->count(),
             'is_active' => (bool) $this->is_active,
             'sort_order' => $this->sort_order,
-            'created_at' => $this->created_at?->format('d/m/Y H:i'),
+            'created_at' => format_datetime($this->created_at),
 
             'public_url' => route('playlist.public.show', $this->resource),
             'edit_url' => route('backend.playlist.items.edit', $this->resource),

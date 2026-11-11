@@ -22,7 +22,7 @@ class GeneratedPromptListResource extends JsonResource
             // §4.4 (v2.7) — null = prompt không gắn chuyên mục (không có khối ngữ cảnh biên tập).
             'category_name' => $this->category?->name,
             'created_by_name' => $this->createdBy?->name,
-            'updated_at' => $this->updated_at?->format('d/m/Y H:i'),
+            'updated_at' => format_datetime($this->updated_at),
             'show_url' => route('backend.promptstudio.prompts.show', $this->uuid),
             'edit_url' => $framework ? route('backend.promptstudio.prompts.edit', $this->uuid) : null,
             'delete_url' => route('backend.promptstudio.prompts.destroy', $this->uuid),

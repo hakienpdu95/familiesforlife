@@ -18,10 +18,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission'         => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         ]);
+        $middleware->redirectUsersTo(fn () => route('backend.dashboard'));
         // InjectRequestId phải chạy đầu tiên để tất cả request đều có X-Request-Id
         $middleware->prepend(\App\Http\Middleware\RemoveServerHeaders::class);
         $middleware->append(\App\Http\Middleware\RecordRequestMetrics::class);
         $middleware->prepend(\Modules\ActivityLog\Http\Middleware\InjectRequestId::class);
+        $middleware->appendToGroup('web', \App\Http\Middleware\ApplySystemLocale::class);
         $middleware->appendToGroup('web', \Modules\ActivityLog\Http\Middleware\CaptureHttpContext::class);
         $middleware->appendToGroup('web', \App\Http\Middleware\SecurityHeaders::class);
         $middleware->appendToGroup('web', \App\Http\Middleware\EnsureUserIsActive::class);
@@ -30,6 +32,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Không có middleware này, sanctum chỉ nhận Bearer token → 401.
         $middleware->prependToGroup('api', \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class);
         $middleware->appendToGroup('api', \Illuminate\Routing\Middleware\ThrottleRequests::class . ':api');
+        $middleware->appendToGroup('api', \App\Http\Middleware\ApplySystemLocale::class);
         $middleware->appendToGroup('api', \Modules\ActivityLog\Http\Middleware\CaptureHttpContext::class);
         $middleware->appendToGroup('api', \App\Http\Middleware\EnsureUserIsActive::class);
     })

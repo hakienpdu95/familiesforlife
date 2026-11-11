@@ -20,7 +20,7 @@ class ContentOutlineListResource extends JsonResource
             'category_name' => $this->category?->name,
             'created_by_name' => $this->createdBy?->name,
             'linked_article_title' => $this->linkedArticle?->mainTranslation()?->title,
-            'created_at' => $this->created_at?->format('d/m/Y H:i'),
+            'created_at' => format_datetime($this->created_at),
             // §4.1 (v1.1) — badge "dài" ở danh sách, cùng ngưỡng cảnh báo ở trang show.
             'is_long_prompt' => BuildContentOutlinePromptAction::estimateWordCount($this->generated_prompt) > BuildContentOutlinePromptAction::WORD_COUNT_WARNING_THRESHOLD,
             'show_url' => route('backend.contentoutlines.show', $this->uuid),

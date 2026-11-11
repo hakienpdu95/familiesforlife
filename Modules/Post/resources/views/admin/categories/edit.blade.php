@@ -161,7 +161,7 @@
                     </p>
 
                     <div class="flex justify-between text-xs text-base-content/40 mb-4 px-0.5">
-                        <span>Tạo {{ $category->created_at->format('d/m/Y') }}</span>
+                        <span>Tạo {{ format_date($category->created_at) }}</span>
                         <span>Sửa {{ $category->updated_at->diffForHumans() }}</span>
                     </div>
 

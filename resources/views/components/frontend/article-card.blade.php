@@ -44,7 +44,7 @@
         @if($styles['excerpt'] && $translation->excerpt)
         <p class="mt-2 text-sm text-base-content/60 line-clamp-2">{{ $translation->excerpt }}</p>
         @endif
-        <p class="mt-1 text-xs font-semibold text-secondary">{{ $translation->published_at?->format('d/m/Y') }}</p>
+        <p class="mt-1 text-xs font-semibold text-secondary">{{ format_date($translation->published_at) }}</p>
     </div>
 </a>
 @endif

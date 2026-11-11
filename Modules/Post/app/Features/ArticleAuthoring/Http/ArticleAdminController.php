@@ -83,7 +83,7 @@ class ArticleAdminController extends Controller
                 'locale' => strtoupper($t->locale),
                 'view_count' => (int) $t->view_count,
                 'updated_at' => $t->updated_at->toIso8601String(),
-                'updated_at_label' => $t->updated_at->format('d/m/Y'),
+                'updated_at_label' => format_date($t->updated_at),
                 'updated_at_human' => $t->updated_at->diffForHumans(),
                 'edit_url' => route('backend.post.articles.edit', $t->article).'?locale='.$t->locale,
             ])

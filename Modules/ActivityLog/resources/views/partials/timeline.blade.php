@@ -70,7 +70,7 @@
 
                         {{-- Timestamp --}}
                         <time class="text-xs text-base-content/40 whitespace-nowrap"
-                              title="{{ $log->created_at?->format('d/m/Y H:i:s') }}">
+                              title="{{ format_datetime($log->created_at, true) }}">
                             {{ $log->created_at?->diffForHumans() }}
                         </time>
                     </div>

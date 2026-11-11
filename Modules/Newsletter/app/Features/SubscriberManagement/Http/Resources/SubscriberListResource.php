@@ -19,7 +19,7 @@ class SubscriberListResource extends JsonResource
             'status_value'  => $this->status->value,
             'status_label'  => $this->status->label(),
             'status_badge'  => $this->status->badgeClass(),
-            'subscribed_at' => $this->subscribed_at?->format('d/m/Y H:i'),
+            'subscribed_at' => format_datetime($this->subscribed_at),
 
             'destroy_url' => route('backend.newsletter.subscribers.destroy', $this->resource),
             'can_remove'  => $user?->can('removeSubscriber', $this->resource) ?? false,

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" data-theme="portal" class="scroll-smooth scroll-pt-20">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="portal" class="scroll-smooth scroll-pt-20">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">

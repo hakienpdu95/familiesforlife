@@ -16,7 +16,7 @@
             <p class="text-sm text-base-content/50 mt-0.5">
                 @if ($prompt->business_goal) Mục tiêu: {{ $prompt->business_goal }} — @endif
                 @if ($prompt->category) Chuyên mục: {{ $prompt->category->name }} — @endif
-                Tạo lúc {{ $prompt->created_at->format('d/m/Y H:i') }}
+                Tạo lúc {{ format_datetime($prompt->created_at) }}
             </p>
         </div>
         <a href="{{ route('backend.bulkideationpromptstudio.index') }}" class="btn btn-ghost btn-xs">← Danh sách</a>

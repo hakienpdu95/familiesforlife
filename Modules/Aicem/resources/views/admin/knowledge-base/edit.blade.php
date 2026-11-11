@@ -156,7 +156,7 @@
                     <div class="min-w-0">
                         <div class="flex items-center gap-2">
                             <span class="badge badge-sm badge-outline">v{{ $version->version }}</span>
-                            <span class="text-xs text-base-content/50">{{ $version->changed_at?->format('d/m/Y H:i') }}</span>
+                            <span class="text-xs text-base-content/50">{{ format_datetime($version->changed_at) }}</span>
                             <span class="text-xs text-base-content/40">bởi {{ $version->changer?->name ?? '—' }}</span>
                         </div>
                         <p class="text-xs text-base-content/60 mt-1 line-clamp-2">{{ \Illuminate\Support\Str::limit($version->content, 160) }}</p>

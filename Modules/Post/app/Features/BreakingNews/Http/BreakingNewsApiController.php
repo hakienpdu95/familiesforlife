@@ -83,7 +83,7 @@ class BreakingNewsApiController extends Controller
                 'id'           => $t->article_id,
                 'text'         => $t->title,
                 'category'     => $t->article?->categories->first()?->name,
-                'published_at' => $t->published_at?->format('d/m/Y'),
+                'published_at' => format_date($t->published_at),
             ])->values()
         );
     }

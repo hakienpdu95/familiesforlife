@@ -13,8 +13,8 @@ class BroadcastLogListResource extends JsonResource
         return [
             'id'                  => $this->id,
             'subject'             => $this->subject,
-            'scheduled_at'        => $this->scheduled_at?->format('d/m/Y H:i'),
-            'created_at'          => $this->created_at->format('d/m/Y H:i'),
+            'scheduled_at'        => format_datetime($this->scheduled_at),
+            'created_at'          => format_datetime($this->created_at),
             'sent_by_name'        => $this->sentBy?->name,
             'resend_broadcast_id' => $this->resend_broadcast_id,
         ];

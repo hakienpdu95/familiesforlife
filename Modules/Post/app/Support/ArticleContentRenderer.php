@@ -104,7 +104,7 @@ class ArticleContentRenderer
         }
         $header .= "Nguồn: {$canonicalUrl}\n";
         if ($translation->updated_at) {
-            $header .= 'Cập nhật: '.$translation->updated_at->format('d/m/Y')."\n";
+            $header .= 'Cập nhật: '.format_date($translation->updated_at)."\n";
         }
         $header .= "\n---\n\n";
 

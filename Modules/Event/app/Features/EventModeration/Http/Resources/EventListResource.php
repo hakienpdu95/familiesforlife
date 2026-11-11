@@ -20,8 +20,8 @@ class EventListResource extends JsonResource
             'category_name'  => $this->category?->name,
             'category_color' => $this->category?->color_hex,
 
-            'start_date' => $this->start_date?->format('d/m/Y'),
-            'end_date'   => $this->end_date?->format('d/m/Y'),
+            'start_date' => format_date($this->start_date),
+            'end_date'   => format_date($this->end_date),
 
             'status_value' => $this->status->value,
             'status_label' => $this->status->label(),

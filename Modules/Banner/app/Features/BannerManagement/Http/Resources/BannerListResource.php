@@ -29,8 +29,8 @@ class BannerListResource extends JsonResource
             'target_label' => $this->targetLabel(),
             'target_kind'  => $this->target_type?->value, // null|category|province — dùng để chọn màu badge
 
-            'start_date' => $this->start_date?->format('d/m/Y'),
-            'end_date'   => $this->end_date?->format('d/m/Y'),
+            'start_date' => format_date($this->start_date),
+            'end_date'   => format_date($this->end_date),
 
             'click_count' => (int) $this->click_count,
             'is_active'   => (bool) $this->is_active,

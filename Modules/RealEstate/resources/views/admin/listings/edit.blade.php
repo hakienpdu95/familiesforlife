@@ -542,9 +542,9 @@
                     </div>
 
                     <p class="text-xs text-base-content/40 mb-4">
-                        Tạo: {{ $listing->created_at?->format('d/m/Y H:i') }}
+                        Tạo: {{ format_datetime($listing->created_at) }}
                         @if($listing->updated_at && $listing->updated_at != $listing->created_at)
-                        · Sửa: {{ $listing->updated_at->format('d/m/Y H:i') }}
+                        · Sửa: {{ format_datetime($listing->updated_at) }}
                         @endif
                     </p>
 

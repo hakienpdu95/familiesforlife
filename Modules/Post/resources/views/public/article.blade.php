@@ -84,7 +84,7 @@
                 $authorIsLinkable = $authorProfile?->is_public
                     && \Modules\Post\Features\AuthorHub\Support\AuthorRoleResolver::isEligible($article->createdBy);
             @endphp
-            <div class="detail__meta">{{ $translation->published_at?->format('d/m/Y') }}</div>
+            <div class="detail__meta">{{ format_date($translation->published_at) }}</div>
             <h1 id="btn_exp_edit" class="detail__title"> {{ $translation->title }} </h1>
             <div class="detail__tools print-hide">
                 <div class="detail__author">

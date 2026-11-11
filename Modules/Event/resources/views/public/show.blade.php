@@ -26,8 +26,8 @@
     $placeholder = asset(\Modules\Event\Models\Event::DEFAULT_POSTER);
     $posterUrl = $event->posterUrl();
 
-    $dateLabel = $event->start_date?->format('d/m/Y')
-        .(! $event->start_date?->isSameDay($event->end_date) ? ' – '.$event->end_date?->format('d/m/Y') : '');
+    $dateLabel = format_date($event->start_date)
+        .(! $event->start_date?->isSameDay($event->end_date) ? ' – '.format_date($event->end_date) : '');
     $timeLabel = $event->start_time
         ? \Illuminate\Support\Carbon::parse($event->start_time)->format('H:i').($event->end_time ? ' – '.\Illuminate\Support\Carbon::parse($event->end_time)->format('H:i') : '')
         : null;

@@ -37,7 +37,7 @@ class HeritageSiteListResource extends JsonResource
 
             'is_trashed' => $trashed,
             'is_public' => $this->status === HeritageSiteStatus::Published,
-            'deleted_at' => $this->deleted_at?->format('d/m/Y H:i'),
+            'deleted_at' => format_datetime($this->deleted_at),
             'restore_url' => $trashed && ($user?->can('restore', $this->resource) ?? false) ? route('backend.heritage.sites.restore', $this->resource) : null,
         ];
     }

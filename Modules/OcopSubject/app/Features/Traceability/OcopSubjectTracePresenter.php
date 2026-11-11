@@ -92,12 +92,12 @@ class OcopSubjectTracePresenter implements TracePresenter
             'type' => $payload['type'] ?? null,
             'products_count' => $payload['products_count'] ?? null,
             'is_food_business' => ! empty($payload['is_food_business']),
-            'cert' => $expiry ? ['label' => $expiry->format('d/m/Y'), 'valid' => $expiry->endOfDay()->isFuture()] : null,
+            'cert' => $expiry ? ['label' => format_date($expiry), 'valid' => $expiry->endOfDay()->isFuture()] : null,
             'facts' => [
                 T::fact('fa-building', 'Loại hình', $payload['type'] ?? null),
                 T::fact('fa-star', 'Hạng OCOP cao nhất', $stars ? $stars.' sao' : null),
                 T::fact('fa-boxes-stacked', 'Sản phẩm OCOP', isset($payload['products_count']) ? $payload['products_count'].' sản phẩm' : null),
-                T::fact('fa-calendar-check', 'Hiệu lực chứng nhận', $expiry?->format('d/m/Y')),
+                T::fact('fa-calendar-check', 'Hiệu lực chứng nhận', format_date($expiry)),
             ],
             'contact' => [
                 'address' => $payload['address'] ?? null,

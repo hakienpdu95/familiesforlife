@@ -101,7 +101,7 @@ class QrReportController extends Controller
         return [
             'id' => $report->id,
             'ref' => $report->ref(),
-            'created_at' => $report->created_at?->format('d/m/Y H:i'),
+            'created_at' => format_datetime($report->created_at),
             'qr_code' => $identity?->qr_code,
             'qr_url' => $identity?->publicUrl(),
             'target_kind' => self::KIND_LABELS[$class] ?? $class,
@@ -113,7 +113,7 @@ class QrReportController extends Controller
             'contact' => $report->contact,
             'status' => $report->status,
             'resolved_by' => $report->resolvedBy?->name,
-            'resolved_at' => $report->resolved_at?->format('d/m/Y H:i'),
+            'resolved_at' => format_datetime($report->resolved_at),
             'resolve_url' => $report->status === 'new' ? route('backend.qr-reports.resolve', $report) : null,
         ];
     }

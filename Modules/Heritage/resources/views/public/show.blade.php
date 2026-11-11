@@ -90,7 +90,7 @@
                     <img src="{{ $event->posterUrl() }}" alt="{{ $event->title }}" class="h-full w-full object-cover" loading="lazy">
                 </div>
                 <h3 class="font-bold text-sm leading-snug group-hover:text-primary line-clamp-2">{{ $event->title }}</h3>
-                <p class="text-xs text-base-content/50">{{ $event->start_date?->format('d/m/Y') }}</p>
+                <p class="text-xs text-base-content/50">{{ format_date($event->start_date) }}</p>
             </a>
             @endforeach
         </div>

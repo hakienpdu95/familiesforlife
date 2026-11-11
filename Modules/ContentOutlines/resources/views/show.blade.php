@@ -123,8 +123,8 @@
         <div class="card bg-base-100 shadow-sm border border-base-200">
             <div class="card-body p-4 text-xs text-base-content/60 space-y-1.5">
                 <p><b>Tạo bởi:</b> {{ $outline->createdBy?->name ?? '—' }}</p>
-                <p><b>Ngày tạo:</b> {{ $outline->created_at?->format('d/m/Y H:i') }}</p>
-                <p><b>Cập nhật gần nhất:</b> {{ $outline->updated_at?->format('d/m/Y H:i') }}</p>
+                <p><b>Ngày tạo:</b> {{ format_datetime($outline->created_at) }}</p>
+                <p><b>Cập nhật gần nhất:</b> {{ format_datetime($outline->updated_at) }}</p>
                 <p><b>Ngôn ngữ đầu ra:</b> {{ $outline->language === 'en' ? 'English' : 'Tiếng Việt' }}</p>
                 <p><b>Độ chi tiết:</b> {{ ['brief' => 'Rút gọn', 'standard' => 'Chuẩn', 'detailed' => 'Chi tiết'][$outline->outline_depth] ?? $outline->outline_depth }}</p>
                 @if($outline->content_role)

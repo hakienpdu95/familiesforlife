@@ -21,7 +21,7 @@ class VideoListResource extends JsonResource
             'video_url'     => $this->video_url,
             'is_active'     => (bool) $this->is_active,
             'sort_order'    => $this->sort_order,
-            'created_at'    => $this->created_at?->format('d/m/Y H:i'),
+            'created_at'    => format_datetime($this->created_at),
 
             'edit_url'          => route('backend.video.items.edit', $this->resource),
             'delete_url'        => route('backend.video.items.destroy', $this->resource),

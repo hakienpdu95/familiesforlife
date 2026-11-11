@@ -24,7 +24,7 @@ class PageListResource extends JsonResource
             'status_label' => $this->status->label(),
             'is_published' => $isPublished,
 
-            'updated_at' => $this->updated_at->format('d/m/Y H:i'),
+            'updated_at' => format_datetime($this->updated_at),
 
             'menu_placements' => $this->menu_placements ?? [],
 

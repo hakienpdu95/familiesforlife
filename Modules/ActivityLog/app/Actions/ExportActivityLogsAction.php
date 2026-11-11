@@ -30,7 +30,7 @@ class ExportActivityLogsAction
             ->lazy(500)
             ->map(fn (ActivityLog $log) => [
                 'ID'          => $log->id,
-                'Thời gian'   => $log->created_at?->format('d/m/Y H:i:s'),
+                'Thời gian'   => format_datetime($log->created_at, true),
                 'Cấp độ'      => $log->level?->label() ?? $log->level,
                 'Module'      => $log->module,
                 'Action'      => $log->action,

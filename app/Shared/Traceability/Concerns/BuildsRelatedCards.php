@@ -63,7 +63,7 @@ trait BuildsRelatedCards
                 return $t ? [
                     'url' => route('post.public.article', ['slug' => $t->slug, 'id' => $t->id]),
                     'title' => $t->title,
-                    'subtitle' => $t->published_at?->format('d/m/Y'),
+                    'subtitle' => format_date($t->published_at),
                     'image' => $a->getFirstMediaUrl('cover', 'thumb') ?: null,
                 ] : null;
             })->filter()->values()->all();
@@ -90,7 +90,7 @@ trait BuildsRelatedCards
             return [
                 'label' => $label,
                 'count' => $media->count(),
-                'updated_at' => $media->max('updated_at')?->format('d/m/Y'),
+                'updated_at' => format_date($media->max('updated_at')),
             ];
         })->values()->all();
     }

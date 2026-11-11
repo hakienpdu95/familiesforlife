@@ -70,11 +70,11 @@ class TraceabilityService
             'qr_code' => $identity->qr_code,
             'status' => $status,
             'revoked' => $status === 'revoked',
-            'revoked_at' => $identity->revoked_at?->format('d/m/Y'),
+            'revoked_at' => format_date($identity->revoked_at),
             'archived' => $archived,
-            'archived_at' => $archived ? $identity->snapshot_at?->format('d/m/Y') : null,
-            'issued_at' => $identity->created_at?->format('d/m/Y'),
-            'data_updated_at' => ($archived ? $identity->snapshot_at : ($live ? $target->updated_at : null))?->format('d/m/Y'),
+            'archived_at' => $archived ? format_date($identity->snapshot_at) : null,
+            'issued_at' => format_date($identity->created_at),
+            'data_updated_at' => format_date($archived ? $identity->snapshot_at : ($live ? $target->updated_at : null)),
             'official_host' => parse_url((string) config('app.url'), PHP_URL_HOST) ?: request()->getHost(),
         ];
     }

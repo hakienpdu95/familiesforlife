@@ -20,8 +20,8 @@ class BreakingNewsListResource extends JsonResource
             'article_title'     => (string) $translation?->title,
             'has_override'      => $this->headline_override !== null,
 
-            'starts_at' => $this->starts_at?->format('d/m/Y H:i'),
-            'ends_at'   => $this->ends_at?->format('d/m/Y H:i'),
+            'starts_at' => format_datetime($this->starts_at),
+            'ends_at'   => format_datetime($this->ends_at),
 
             'is_active'  => (bool) $this->is_active,
             'is_running' => $this->isCurrentlyBreaking(),

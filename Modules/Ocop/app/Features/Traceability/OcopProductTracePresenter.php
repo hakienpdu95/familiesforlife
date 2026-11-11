@@ -153,7 +153,7 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
             'gallery' => $live ? $this->gallery($live) : array_map(fn ($url) => ['src' => $url, 'srcset' => null, 'zoom' => $url], array_values(array_filter([$payload['image']['url'] ?? null]))),
             'description_html' => $description && T::hasContent($description) ? $description : null,
             'product_code' => $live ? 'OP'.$live->id : null,
-            'updated_label' => $live?->updated_at?->format('d/m/Y'),
+            'updated_label' => format_date($live?->updated_at),
             'info' => $this->info($payload, $live, $sections, $description),
             'badges' => array_values(array_filter([
                 ['label' => $stars ? 'OCOP '.$stars.' sao' : 'Chưa xếp hạng OCOP', 'icon' => 'fa-star', 'class' => $stars ? 'badge-warning' : 'badge-ghost'],
@@ -169,7 +169,7 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
             ],
             'subject' => [
                 ...$subject,
-                'cert_expiry_label' => $expiry?->format('d/m/Y'),
+                'cert_expiry_label' => format_date($expiry),
                 'cert_valid' => $expiry ? $expiry->endOfDay()->isFuture() : null,
                 'url' => $this->subjectUrl($live?->ocopSubject),
             ],
@@ -330,7 +330,7 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
                 'hint' => $doc[1],
                 'required' => $minStars && (int) $product->star_rating >= $minStars ? 'Bắt buộc với OCOP '.$minStars.'–5 sao' : null,
                 'count' => $media->count(),
-                'updated_at' => $latest?->format('d/m/Y'),
+                'updated_at' => format_date($latest),
                 'stale' => $refresh && $latest && $latest->lt(now()->subMonths($refresh)) ? 'Tệp mới nhất đăng hơn '.$refresh.' tháng trước — hồ sơ định kỳ có thể đã hết hạn' : null,
                 'files' => $media->filter(fn ($m) => in_array($m->mime_type, T::DOCUMENT_MIMES, true))
                     ->map(fn ($m) => [
@@ -338,7 +338,7 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
                         'ref' => strtoupper(substr(str_replace('-', '', $m->uuid), 0, 8)),
                         'type' => $m->mime_type === 'application/pdf' ? 'PDF' : 'Ảnh',
                         'size' => Number::fileSize((int) $m->size, precision: $m->size >= 1048576 ? 1 : 0),
-                        'uploaded_at' => $m->created_at?->format('d/m/Y'),
+                        'uploaded_at' => format_date($m->created_at),
                     ])->values()->all(),
             ];
         })->values()->all();

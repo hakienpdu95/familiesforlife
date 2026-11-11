@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Notifications\Channels\WebPushChannel;
 use App\Services\Monitoring\MetricsRecorder;
 use App\Services\WebPushService;
+use App\Support\SystemLocale;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Database\Eloquent\Model;
@@ -14,6 +15,7 @@ use Illuminate\Notifications\ChannelManager;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
@@ -47,6 +49,14 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\Media::deleted($refreshQrSnapshot);
 
         Model::shouldBeStrict(!app()->isProduction());
+
+        Queue::before(fn () => SystemLocale::apply());
+
+        if ($this->app->runningInConsole()) {
+            SystemLocale::apply();
+        }
+
+        Gate::define('manageSystemSettings', fn (User $user) => $user->hasGlobalRole('super-admin'));
 
         if (app()->isProduction()) {
             DB::disableQueryLog();
