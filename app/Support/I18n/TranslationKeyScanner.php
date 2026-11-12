@@ -26,6 +26,10 @@ class TranslationKeyScanner
             $keys[$key][] = $source;
         }
 
+        foreach ($this->configKeys() as $key => $source) {
+            $keys[$key][] = $source;
+        }
+
         return $keys;
     }
 
@@ -55,6 +59,23 @@ class TranslationKeyScanner
             array_walk_recursive($value, function ($item) use (&$keys, $ref) {
                 if (is_string($item) && self::isSourceText($item)) {
                     $keys[$item] = $ref;
+                }
+            });
+        }
+
+        return $keys;
+    }
+
+    /** @return array<string, string> */
+    public function configKeys(): array
+    {
+        $keys = [];
+        foreach (config('i18n.translatable_config', []) as $path) {
+            $value = data_get(config()->all(), $path);
+            $value = is_array($value) ? $value : [$value];
+            array_walk_recursive($value, function ($item) use (&$keys, $path) {
+                if (is_string($item) && self::isSourceText($item)) {
+                    $keys[$item] = 'config:'.$path;
                 }
             });
         }

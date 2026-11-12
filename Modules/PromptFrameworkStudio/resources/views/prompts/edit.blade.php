@@ -3,11 +3,11 @@
 
 @section('content')
 
-<div class="flex items-center justify-between mb-6">
+<div class="flex flex-wrap items-center justify-between gap-2 mb-6">
     <div>
         <h1 class="text-2xl font-bold text-base-content">{{ __('Sửa') }} &amp; {{ __('sinh lại prompt') }}</h1>
         <p class="text-sm text-base-content/50 mt-0.5">
-            {{ __('Mẫu đang dùng:') }} <span class="badge badge-primary badge-outline font-mono">{{ $framework['name'] }}</span>
+            {{ __('Mẫu đang dùng:') }} <span class="badge badge-primary badge-outline font-mono">{{ __($framework['name']) }}</span>
             {{ __('— không đổi sang mẫu khác được (bấm "Tạo prompt mới" ở danh sách nếu muốn dùng mẫu khác)') }}
         </p>
     </div>
@@ -20,7 +20,7 @@
 {{-- §5.3 — data-confirm-regenerate: submit sẽ GHI ĐÈ rendered_prompt cũ, không versioning. --}}
 <form method="POST" action="{{ route('backend.promptstudio.prompts.update', $prompt) }}" data-confirm-regenerate
       x-data="promptGenerator(
-          @js(config('prompt_framework_studio.frameworks')),
+          @js($frameworks),
           @js($prompt->framework_key),
           @js($prompt->field_values),
           {{ Js::from([

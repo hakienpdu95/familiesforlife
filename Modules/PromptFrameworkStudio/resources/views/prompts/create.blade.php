@@ -3,7 +3,7 @@
 
 @section('content')
 
-<div class="flex items-center justify-between mb-2">
+<div class="flex flex-wrap items-center justify-between gap-2 mb-2">
     <div>
         <h1 class="text-2xl font-bold text-base-content">{{ __('Tạo yêu cầu mới cho AI') }}</h1>
         <p class="text-sm text-base-content/50 mt-0.5">{{ __('Chọn 1 mẫu phù hợp, điền vào từng ô như đang mô tả công việc cho một trợ lý — hệ thống tự ghép thành 1 yêu cầu hoàn chỉnh, kèm sẵn ngữ cảnh biên tập của chuyên mục bạn chọn (độc giả, nỗi đau, giọng văn) nên bạn không phải gõ lại mỗi lần') }}</p>
@@ -16,7 +16,7 @@
 
 <form method="POST" action="{{ route('backend.promptstudio.prompts.store') }}"
       x-data="promptGenerator(
-          @js(config('prompt_framework_studio.frameworks')),
+          @js($frameworks),
           @js($preselectedKey),
           null,
           {{ Js::from([
@@ -38,10 +38,10 @@
                             class="text-left p-3 rounded-lg border-2 transition-colors hover:border-primary/50"
                             :class="selectedKey === key ? 'border-primary bg-primary/5' : 'border-base-200'">
                         <div class="flex items-center justify-between gap-2">
-                            <span class="badge badge-primary badge-outline badge-sm font-mono" x-text="fw.name"></span>
+                            <span class="badge badge-primary badge-outline badge-sm font-mono" x-text="fw.ui.name"></span>
                             <svg x-show="selectedKey === key" class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         </div>
-                        <p class="text-xs font-medium text-base-content mt-2" x-text="fw.best_for"></p>
+                        <p class="text-xs font-medium text-base-content mt-2" x-text="fw.ui.best_for"></p>
                     </button>
                 </template>
             </div>
@@ -52,12 +52,12 @@
     <template x-if="selectedKey">
         <div class="card bg-base-100 shadow-sm border border-base-200">
             <div class="card-body p-5 space-y-4">
-                <div class="flex items-center justify-between">
-                    <h2 class="card-title text-base">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <h2 class="card-title text-base flex-wrap">
                         {{ __('2. Điền nội dung —') }}
-                        <span class="badge badge-primary badge-outline font-mono" x-text="selectedFramework.name"></span>
+                        <span class="badge badge-primary badge-outline font-mono" x-text="selectedFramework.ui.name"></span>
                     </h2>
-                    <div class="flex items-center gap-1">
+                    <div class="flex flex-wrap items-center gap-1">
                         {{-- spec/AIIdeaMatrixGenerator.md §3 — chỉ có ý nghĩa ở trang TẠO MỚI (edit
                              đã có sẵn giá trị thật của chính bản ghi đang sửa). --}}
                         <button type="button" class="btn btn-ghost btn-xs" @click="reuseLastPromptValues()">
@@ -66,7 +66,7 @@
                         <button type="button" class="btn btn-ghost btn-xs" @click="showFrameworkPicker = true">{{ __('Đổi mẫu khác') }}</button>
                     </div>
                 </div>
-                <p class="text-xs text-base-content/40 -mt-2" x-text="selectedFramework.description"></p>
+                <p class="text-xs text-base-content/40 -mt-2" x-text="selectedFramework.ui.description"></p>
 
                 <div class="form-control">
                     <label class="label py-0 pb-1.5">

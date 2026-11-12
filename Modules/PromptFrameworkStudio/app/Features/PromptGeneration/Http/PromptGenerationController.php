@@ -9,6 +9,7 @@ use Illuminate\View\View;
 use Modules\ContentFoundation\Actions\ListCategoryFoundationsAction;
 use Modules\Post\Models\PostCategory;
 use Modules\PromptFrameworkStudio\Features\PromptGeneration\Actions\CreateGeneratedPromptAction;
+use Modules\PromptFrameworkStudio\Features\PromptGeneration\Actions\LocalizeFrameworksForDisplayAction;
 use Modules\PromptFrameworkStudio\Features\PromptGeneration\Actions\RegenerateGeneratedPromptAction;
 use Modules\PromptFrameworkStudio\Features\PromptGeneration\Http\Requests\StoreGeneratedPromptRequest;
 use Modules\PromptFrameworkStudio\Features\PromptGeneration\Http\Requests\UpdateGeneratedPromptRequest;
@@ -41,7 +42,7 @@ class PromptGenerationController extends Controller
             : null;
 
         return view('promptframeworkstudio::prompts.create', [
-            'frameworks' => $frameworks,
+            'frameworks' => LocalizeFrameworksForDisplayAction::run($frameworks),
             'preselectedKey' => $preselectedKey,
             // §4.4 (v2.7) — `withFoundationDetails: false` = chỉ nạp bản rút gọn đủ dựng picker;
             // nội dung ngữ cảnh đầy đủ lấy sau qua editorialContext() khi người dùng chọn 1 mục
@@ -92,6 +93,7 @@ class PromptGenerationController extends Controller
         return view('promptframeworkstudio::prompts.edit', [
             'prompt' => $prompt,
             'framework' => $framework,
+            'frameworks' => LocalizeFrameworksForDisplayAction::run(),
             'categories' => $listCategoryFoundations->handle(withFoundationDetails: false),
         ]);
     }

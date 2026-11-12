@@ -182,7 +182,7 @@
                 <h2 class="font-semibold text-sm text-base-content">{{ __('Bài viết của tôi') }}</h2>
             </div>
             <div class="grid grid-cols-3 divide-x divide-base-200 border-b border-base-200">
-                @foreach([['Tổng bài viết', $myStats['articles']], ['Đã xuất bản', $myStats['published']], ['Tổng lượt xem', $myStats['views']]] as [$label, $value])
+                @foreach([[__('Tổng bài viết'), $myStats['articles']], [__('Đã xuất bản'), $myStats['published']], [__('Tổng lượt xem'), $myStats['views']]] as [$label, $value])
                 <div class="px-4 py-4 text-center">
                     <p class="text-2xl font-bold text-base-content tabular-nums">{{ number_format($value) }}</p>
                     <p class="text-xs text-base-content/50 mt-0.5">{{ $label }}</p>
@@ -245,10 +245,10 @@
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-4 divide-x divide-base-200 border-b border-base-200">
                 @foreach([
-                    ['Tài khoản hoạt động', $system['users_active'], ''],
-                    ['Đang online (15 phút)', $system['users_online'] ?? '—', ''],
-                    ['Job đang chờ', $system['jobs_pending'], ''],
-                    ['Job lỗi', $system['jobs_failed'], $system['jobs_failed'] > 0 ? 'text-error' : ''],
+                    [__('Tài khoản hoạt động'), $system['users_active'], ''],
+                    [__('Đang online (15 phút)'), $system['users_online'] ?? '—', ''],
+                    [__('Job đang chờ'), $system['jobs_pending'], ''],
+                    [__('Job lỗi'), $system['jobs_failed'], $system['jobs_failed'] > 0 ? 'text-error' : ''],
                 ] as [$label, $value, $class])
                 <div class="px-4 py-4 text-center">
                     <p class="text-2xl font-bold tabular-nums {{ $class ?: 'text-base-content' }}">{{ is_numeric($value) ? number_format($value) : $value }}</p>
@@ -268,7 +268,7 @@
                 </div>
                 @endif
                 <div class="flex flex-wrap gap-1.5">
-                    @foreach(['PHP ' . $system['php_version'], 'Laravel ' . $system['laravel'], 'Môi trường: ' . $system['environment'], 'Queue: ' . $system['queue'], 'Cache: ' . $system['cache']] as $tag)
+                    @foreach(['PHP ' . $system['php_version'], 'Laravel ' . $system['laravel'], __('Môi trường: :environment', ['environment' => $system['environment']]), 'Queue: ' . $system['queue'], 'Cache: ' . $system['cache']] as $tag)
                     <span class="badge badge-ghost badge-sm">{{ $tag }}</span>
                     @endforeach
                 </div>

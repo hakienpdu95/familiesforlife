@@ -20,7 +20,7 @@ class ApprovalHistoryResource extends JsonResource
             'entity_label' => $entity ? class_basename($entity).' #'.$entity->id : null,
             'entity_name' => $entity->name ?? null,
             'entity_url' => $entity?->approvalDashboardUrl ?? null,
-            'type_label' => $this->subject ? config("approval.subjects.{$this->subject->subject_type}.label", $this->subject->subject_type) : null,
+            'type_label' => $this->subject ? __(config("approval.subjects.{$this->subject->subject_type}.label", $this->subject->subject_type)) : null,
             'action_label' => $this->actionLabel(),
             'from_status_label' => $this->from_status ? ($from?->label() ?? $this->from_status) : null,
             'to_status_label' => $to?->label() ?? $this->to_status,

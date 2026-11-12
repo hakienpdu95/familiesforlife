@@ -27,7 +27,7 @@
 
         <div class="border-b border-base-200 px-3">
             <nav class="flex -mb-px overflow-x-auto" role="tablist" aria-label="{{ __('Các nhóm thông tin di tích') }}">
-                @foreach(['basic' => 'Thông tin cơ bản', 'location' => 'Địa điểm', 'display' => 'Ảnh & hiển thị'] as $key => $label)
+                @foreach(['basic' => __('Thông tin cơ bản'), 'location' => __('Địa điểm'), 'display' => __('Ảnh & hiển thị')] as $key => $label)
                 <button type="button" role="tab" :aria-selected="tab === '{{ $key }}'"
                         @click="tab = '{{ $key }}'"
                         class="flex items-center gap-1.5 px-1 py-4 mr-6 text-sm font-medium border-b-2 whitespace-nowrap transition-colors"

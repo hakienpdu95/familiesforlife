@@ -17,7 +17,7 @@
         <p class="text-sm text-base-content/50 mt-0.5 flex flex-wrap items-center gap-1.5">
             <span>{{ __('Mẫu đã dùng:') }}</span>
             @if($framework)
-                <span class="badge badge-primary badge-outline font-mono">{{ $framework['name'] }}</span>
+                <span class="badge badge-primary badge-outline font-mono">{{ __($framework['name']) }}</span>
             @else
                 <span class="badge badge-warning font-mono">{{ __(':framework_key — đã gỡ', ['framework_key' => $prompt->framework_key]) }}</span>
             @endif

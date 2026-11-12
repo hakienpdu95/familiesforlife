@@ -50,4 +50,18 @@ return [
         ActivityLogApiController::class.'::FIELD_LABELS',
     ],
 
+    'translatable_config' => [
+        'breadcrumbs.segments',
+        'approval.subjects.*.label',
+        'prompt_framework_studio.frameworks.*.name',
+        'prompt_framework_studio.frameworks.*.description',
+        'prompt_framework_studio.frameworks.*.best_for',
+        'prompt_framework_studio.frameworks.*.group',
+        'prompt_framework_studio.frameworks.*.fields.*.label',
+        'prompt_framework_studio.frameworks.*.fields.*.hint',
+        'prompt_framework_studio.frameworks.*.fields.*.tip',
+        'prompt_framework_studio.frameworks.*.fields.*.options',
+        'prompt_framework_studio.frameworks.*.example',
+    ],
+
 ];

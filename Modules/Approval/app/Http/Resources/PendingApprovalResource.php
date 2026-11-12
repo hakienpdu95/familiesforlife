@@ -14,7 +14,7 @@ class PendingApprovalResource extends JsonResource
         return [
             'id' => $this->id,
             'subject_type' => $this->subject_type,
-            'type_label' => config("approval.subjects.{$this->subject_type}.label", $this->subject_type),
+            'type_label' => __(config("approval.subjects.{$this->subject_type}.label", $this->subject_type)),
             'entity_label' => class_basename($entity).' #'.$entity->id,
             'name' => $entity->name ?? null,
             'submitted_at' => $this->updated_at?->toIso8601String(),

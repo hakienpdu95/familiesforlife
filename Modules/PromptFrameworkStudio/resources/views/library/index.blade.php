@@ -27,14 +27,14 @@
     <div class="card bg-base-100 shadow-sm border border-base-200 hover:border-primary/40 hover:shadow-md transition-all">
         <div class="card-body p-5">
             <div class="flex items-start justify-between gap-2 mb-1">
-                <span class="badge badge-primary badge-outline font-mono text-xs">{{ $framework['name'] }}</span>
+                <span class="badge badge-primary badge-outline font-mono text-xs">{{ __($framework['name']) }}</span>
                 <span class="badge badge-ghost badge-sm">{{ __(':framework câu hỏi', ['framework' => count($framework['fields'])]) }}</span>
             </div>
 
             <p class="text-sm font-medium text-base-content mt-2">{{ __('Phù hợp khi:') }}</p>
-            <p class="text-sm text-base-content/70">{{ $framework['best_for'] }}</p>
+            <p class="text-sm text-base-content/70">{{ __($framework['best_for']) }}</p>
 
-            <p class="text-xs text-base-content/40 mt-2">{{ $framework['description'] }}</p>
+            <p class="text-xs text-base-content/40 mt-2">{{ __($framework['description']) }}</p>
 
             <details class="mt-3 group">
                 <summary class="cursor-pointer text-xs font-medium text-primary select-none flex items-center gap-1">

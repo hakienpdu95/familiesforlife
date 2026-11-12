@@ -14,7 +14,7 @@ class ApprovalDashboardController extends Controller
     {
         $this->authorize('viewDashboard'); // Gate::define riêng — permission approval.view_dashboard HOẶC content_moderator
 
-        $subjectTypes = collect(config('approval.subjects'))->map(fn (array $config) => $config['label']);
+        $subjectTypes = collect(config('approval.subjects'))->map(fn (array $config) => __($config['label']));
 
         return view('approval::dashboard.index', compact('subjectTypes'));
     }

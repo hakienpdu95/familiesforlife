@@ -62,7 +62,7 @@
                 <span class="text-base-content/20 text-xs" x-show="idx > 0">→</span>
                 <span class="badge badge-xs font-mono transition-colors"
                       :class="focusedKey === field.key ? 'badge-primary' : 'badge-ghost text-base-content/40'"
-                      x-text="field.label"></span>
+                      x-text="field.ui.label"></span>
             </div>
         </template>
     </div>
@@ -130,13 +130,13 @@
         <div class="form-control" :class="field.type === 'textarea' ? 'md:col-span-2' : ''">
             <label class="label py-0 pb-0.5">
                 <span class="label-text font-medium">
-                    <span x-text="field.label"></span>
+                    <span x-text="field.ui.label"></span>
                     <span x-show="field.required" class="text-error">&nbsp;*</span>
                 </span>
             </label>
             {{-- Hint: câu giải thích/gợi ý hiển thị THƯỜNG TRỰC, không phải placeholder — placeholder
                  biến mất ngay khi gõ ký tự đầu tiên nên không thể là nơi mang hướng dẫn cách điền. --}}
-            <p class="text-xs text-base-content/45 mb-1 leading-snug" x-text="field.hint"></p>
+            <p class="text-xs text-base-content/45 mb-1 leading-snug" x-text="field.ui.hint"></p>
 
             {{-- Tip: chỉ có ở field ẢNH HƯỞNG NHIỀU NHẤT đến chất lượng prompt trong framework này
                  (1 field/framework, xem config §"tip") — nêu hệ quả nếu điền mơ hồ + 1 phép thử cụ
@@ -144,17 +144,17 @@
                  CoreIdeaExtractor. Tách hẳn kiểu dáng khỏi hint để không đánh đồng field nào cũng
                  quan trọng như nhau. --}}
             <p class="text-xs text-info/80 bg-info/5 border-l-2 border-info/30 pl-2 py-1 mb-1 leading-snug"
-               x-show="field.tip">
-                <span class="font-medium">💡</span> <span x-text="field.tip"></span>
+               x-show="field.ui.tip">
+                <span class="font-medium">💡</span> <span x-text="field.ui.tip"></span>
             </p>
 
             <textarea x-show="field.type === 'textarea'" x-model="values[field.key]" rows="3"
                       @focus="focusedKey = field.key" @blur="focusedKey = null" @input="onFieldInput(field)"
-                      :placeholder="'VD: ' + (selectedFramework.example[field.key] || '')"
+                      :placeholder="@js(__('Ví dụ:')) + ' ' + (selectedFramework.ui.example[field.key] || '')"
                       class="textarea textarea-bordered textarea-sm w-full placeholder:text-base-content/30"></textarea>
             <input x-show="field.type === 'text'" x-model="values[field.key]" type="text"
                    @focus="focusedKey = field.key" @blur="focusedKey = null" @input="onFieldInput(field)"
-                   :placeholder="'VD: ' + (selectedFramework.example[field.key] || '')"
+                   :placeholder="@js(__('Ví dụ:')) + ' ' + (selectedFramework.ui.example[field.key] || '')"
                    class="input input-bordered input-sm w-full placeholder:text-base-content/30">
             {{-- spec/AIIdeaMatrixGenerator.md §2.1 — field type MỚI `select`, dùng chung cho mọi
                  framework (không riêng `heritage_idea_matrix`) khi cần giới hạn lựa chọn thay vì
@@ -170,7 +170,7 @@
                     @focus="focusedKey = field.key" @blur="focusedKey = null"
                     class="select select-bordered select-sm w-full">
                 <option value="">{{ __('— Chưa chọn —') }}</option>
-                <template x-for="[optKey, optLabel] in Object.entries(field.options || {})" :key="optKey">
+                <template x-for="[optKey, optLabel] in Object.entries(field.ui.options || {})" :key="optKey">
                     <option :value="optKey" x-text="optLabel"></option>
                 </template>
                 <template x-if="field.allow_custom">

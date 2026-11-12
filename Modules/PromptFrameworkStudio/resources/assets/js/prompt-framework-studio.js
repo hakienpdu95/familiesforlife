@@ -81,13 +81,13 @@ document.addEventListener('alpine:init', () => {
         get exampleRows() {
             if (!this.selectedFramework) return [];
 
-            const example = this.selectedFramework.example || {};
+            const example = this.selectedFramework.ui?.example || {};
 
             return this.selectedFramework.fields
                 .filter((field) => !!example[field.key])
                 .map((field) => ({
-                    label: field.label,
-                    value: field.type === 'select' ? (field.options?.[example[field.key]] ?? example[field.key]) : example[field.key],
+                    label: field.ui?.label ?? field.label,
+                    value: field.type === 'select' ? (field.ui?.options?.[example[field.key]] ?? example[field.key]) : example[field.key],
                 }));
         },
 

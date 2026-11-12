@@ -21,7 +21,7 @@ class ApprovalHistoryController extends Controller
         $this->authorize('viewApprovalHistory');
 
         return view('approval::history.index', [
-            'subjectTypes' => collect(config('approval.subjects'))->map(fn (array $config) => $config['label']),
+            'subjectTypes' => collect(config('approval.subjects'))->map(fn (array $config) => __($config['label'])),
             'actions' => array_map('__', ApprovalLog::ACTION_LABELS),
         ]);
     }

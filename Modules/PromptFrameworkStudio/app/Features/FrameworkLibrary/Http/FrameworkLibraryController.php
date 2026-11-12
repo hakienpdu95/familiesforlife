@@ -31,7 +31,7 @@ class FrameworkLibraryController extends Controller
 
                 return $framework;
             })
-            ->groupBy(fn (array $framework) => $framework['group'] ?? __('Framework prompt engineering tổng quát'))
+            ->groupBy(fn (array $framework) => isset($framework['group']) ? __($framework['group']) : __('Framework prompt engineering tổng quát'))
             ->all();
 
         return view('promptframeworkstudio::library.index', [

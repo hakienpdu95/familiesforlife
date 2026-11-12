@@ -73,6 +73,7 @@ Quy ước: **không** viết `->format('d/m/Y')` / `'d/m/Y H:i'` mới để hi
 | PHP (controller, action, request, notification, exception) | `__('…')`, tham số dùng `:placeholder` |
 | Enum | `label()` trả `__('…')` |
 | Hằng số mảng (PHP không cho gọi `__()` trong `const`) | giữ câu gốc trong hằng, dịch tại chỗ hiển thị (`__(self::LABELS[$k])`, `array_map('__', X::LABELS)`) và **khai báo hằng trong `config/i18n.php` → `translatable_constants`** để lệnh quét nhận ra |
+| Nhãn nằm trong file config (`config/breadcrumbs.php`, `approval.subjects.*.label`, `prompt_framework_studio.frameworks…`) | giữ câu gốc trong config, dịch tại chỗ hiển thị (`__($config['label'])`) và **khai báo đường dẫn (cho phép `*`) trong `config/i18n.php` → `translatable_config`**. Config vừa hiển thị vừa ghép vào prompt AI (Prompt Studio) thì chỉ dịch bản hiển thị — `LocalizeFrameworksForDisplayAction` thêm khoá `ui` cho view, prompt vẫn dùng bản gốc |
 | File JS (`resources/js`, `Modules/*/resources/assets/js`) | `import { t } from '…/shared/i18n.js'` rồi `t('…')` / `t('Tối đa :max ký tự', { max })` |
 
 Không dịch: prompt gửi cho AI (CoreIdeaExtractor, VideoIdeaExtractor, các `Build*PromptAction`, `ProductFormulaCatalog`, `PersonaCatalog`, phần `lines.push` trong `prompt-framework-studio.js`), từ khoá dùng để phân tích nội dung (`ExtractRawContentAction`), log kỹ thuật, dữ liệu seed.
@@ -90,7 +91,7 @@ php artisan i18n:missing --untranslated   # liệt kê key chưa dịch (giá tr
 php artisan i18n:missing --unused --prune # liệt kê / xoá key không còn dùng
 ```
 
-Quét `__()`, `trans()`, `trans_choice()`, `@lang`, `t()` trong `config('i18n.scan_paths' | 'js_paths')` và các hằng trong `translatable_constants`. Chạy `--write` trước khi merge; việc dịch giá trị trong `en.json` do team Content/BA làm.
+Quét `__()`, `trans()`, `trans_choice()`, `@lang`, `t()` trong `config('i18n.scan_paths' | 'js_paths')` các hằng trong `translatable_constants` và các đường dẫn config trong `translatable_config`. Chạy `--write` trước khi merge; việc dịch giá trị trong `en.json` do team Content/BA làm.
 
 ### 4.5 Còn lại sau Giai đoạn 2
 

@@ -182,7 +182,7 @@ class ContentDashboardService
         $items = collect(config('approval.subjects', []))
             ->map(fn (array $subject, string $type) => [
                 'type' => $type,
-                'label' => $subject['label'] ?? $type,
+                'label' => isset($subject['label']) ? __($subject['label']) : $type,
                 'total' => $counts[$type] ?? 0,
             ])
             ->values();

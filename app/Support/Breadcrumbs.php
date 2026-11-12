@@ -34,8 +34,8 @@ class Breadcrumbs
         $routeName = $route->getName() ?? '';
 
         $homeCrumb = [
-            'label'  => __('Trang chủ'),
-            'url'    => route('backend.dashboard'),
+            'label' => __('Trang chủ'),
+            'url' => route('backend.dashboard'),
             'active' => false,
         ];
 
@@ -46,13 +46,13 @@ class Breadcrumbs
         $crumbs = [$homeCrumb];
 
         // Strip configured root prefixes (e.g. 'backend')
-        $skipRoots    = (array) config('breadcrumbs.skip_root_segments', ['backend']);
-        $parts        = explode('.', $routeName);
-        $routePrefix  = '';
+        $skipRoots = (array) config('breadcrumbs.skip_root_segments', ['backend']);
+        $parts = explode('.', $routeName);
+        $routePrefix = '';
 
         foreach ($skipRoots as $skip) {
             if (! empty($parts) && $parts[0] === $skip) {
-                $routePrefix = $routePrefix ? $routePrefix . '.' . $skip : $skip;
+                $routePrefix = $routePrefix ? $routePrefix.'.'.$skip : $skip;
                 array_shift($parts);
             }
         }
@@ -61,29 +61,30 @@ class Breadcrumbs
             return [array_merge($homeCrumb, ['active' => true])];
         }
 
-        $labels     = config('breadcrumbs.segments', []);
+        $labels = config('breadcrumbs.segments', []);
         $modelAttrs = config('breadcrumbs.model_name_attributes', ['full_name', 'name', 'title', 'subject', 'label']);
-        $params     = $route->parameters();
+        $params = $route->parameters();
 
         // Classify last segment as CRUD action or just a named page
-        $lastPart      = end($parts);
-        $isAction      = in_array($lastPart, self::CRUD_ACTIONS, true);
+        $lastPart = end($parts);
+        $isAction = in_array($lastPart, self::CRUD_ACTIONS, true);
         $resourceParts = $isAction ? array_slice($parts, 0, -1) : $parts;
-        $actionPart    = $isAction ? $lastPart : null;
+        $actionPart = $isAction ? $lastPart : null;
 
         $currentPrefix = $routePrefix;
-        $count         = count($resourceParts);
+        $count = count($resourceParts);
 
         foreach ($resourceParts as $idx => $part) {
-            $currentPrefix = $currentPrefix ? $currentPrefix . '.' . $part : $part;
-            $isLast        = ($idx === $count - 1);
-            $label         = $labels[$part] ?? Str::title(str_replace(['-', '_'], ' ', $part));
+            $currentPrefix = $currentPrefix ? $currentPrefix.'.'.$part : $part;
+            $isLast = ($idx === $count - 1);
+            $label = isset($labels[$part]) ? __($labels[$part]) : Str::title(str_replace(['-', '_'], ' ', $part));
 
             if (! $isLast) {
                 // Intermediate segment – link to its .index route if available
-                $indexRoute = $currentPrefix . '.index';
-                $url        = Route::has($indexRoute) ? $this->safeRoute($indexRoute, $params) : null;
-                $crumbs[]   = ['label' => $label, 'url' => $url, 'active' => false];
+                $indexRoute = $currentPrefix.'.index';
+                $url = Route::has($indexRoute) ? $this->safeRoute($indexRoute, $params) : null;
+                $crumbs[] = ['label' => $label, 'url' => $url, 'active' => false];
+
                 continue;
             }
 
@@ -93,17 +94,17 @@ class Breadcrumbs
 
             if ($needsModel) {
                 // Link the resource list, then show model display name
-                $indexRoute = $currentPrefix . '.index';
+                $indexRoute = $currentPrefix.'.index';
                 if (Route::has($indexRoute)) {
                     $crumbs[] = ['label' => $label, 'url' => $this->safeRoute($indexRoute, $params), 'active' => false];
                 }
-                $modelName    = $this->extractModelName($params, $modelAttrs) ?? $label;
-                $modelIsLast  = ! in_array($actionPart, ['edit', 'update'], true);
-                $crumbs[]     = ['label' => $modelName, 'url' => null, 'active' => $modelIsLast];
+                $modelName = $this->extractModelName($params, $modelAttrs) ?? $label;
+                $modelIsLast = ! in_array($actionPart, ['edit', 'update'], true);
+                $crumbs[] = ['label' => $modelName, 'url' => null, 'active' => $modelIsLast];
 
             } elseif ($actionPart === 'create') {
                 // Link the resource list, add 'Tạo mới' after the loop
-                $indexRoute = $currentPrefix . '.index';
+                $indexRoute = $currentPrefix.'.index';
                 if (Route::has($indexRoute)) {
                     $crumbs[] = ['label' => $label, 'url' => $this->safeRoute($indexRoute, $params), 'active' => false];
                 } else {
@@ -121,7 +122,7 @@ class Breadcrumbs
             && array_key_exists($actionPart, $labels)
             && $labels[$actionPart] !== null
         ) {
-            $crumbs[] = ['label' => $labels[$actionPart], 'url' => null, 'active' => true];
+            $crumbs[] = ['label' => __($labels[$actionPart]), 'url' => null, 'active' => true];
         }
 
         // Guarantee the last crumb is always marked active
@@ -141,6 +142,7 @@ class Breadcrumbs
             }
             // Only pass params the target route actually declares, avoiding extra query-string pollution
             $needed = array_intersect_key($currentParams, array_flip($routeObj->parameterNames()));
+
             return route($name, $needed);
         } catch (\Throwable) {
             return null;
