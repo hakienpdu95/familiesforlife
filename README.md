@@ -162,3 +162,16 @@ CREATE USER 'vgd_kiendh'@'localhost' IDENTIFIED BY 'KienDH@2026!';
 #4: AI Video Is the Biggest Untapped Opportunity
 #5: AI Agents Are Coming — and They Could Be a Game-Changer for Small Teams
 AI agents — tools that can handle tasks autonomously, without you guiding every step
+
+  ------------------------------------------------
+
+php artisan migrate --path=Modules/Post/database/migrations/2026_11_12_100000_create_post_category_translations_table.php
+php artisan migrate --path=Modules/Page/database/migrations/2026_11_12_100000_create_page_translations_table.php
+php artisan migrate --path=Modules/Menu/database/migrations/2026_11_12_100000_create_menu_item_translations_table.php
+php artisan migrate --path=Modules/Event/database/migrations/2026_11_12_200000_create_event_category_translations_table.php
+php artisan migrate --path=Modules/Banner/database/migrations/2026_11_12_200000_create_banner_translations_table.php
+php artisan migrate --path=Modules/Ocop/database/migrations/2026_11_12_200000_create_ocop_category_translations_table.php
+php artisan migrate --path=Modules/Ocop/database/migrations/2026_11_12_200100_create_ocop_product_translations_table.php
+php artisan migrate --path=Modules/OcopSubject/database/migrations/2026_11_12_200000_create_ocop_subject_translations_table.php
+
+php artisan db:seed --class="Modules\Ocop\Database\Seeders\OcopCategorySeeder"
