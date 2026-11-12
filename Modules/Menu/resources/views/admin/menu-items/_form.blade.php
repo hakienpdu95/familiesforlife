@@ -1,6 +1,21 @@
 {{-- Dùng chung create/edit — spec/Menu_Navigation_Technical_Specification.md §6.2. --}}
 @php
     $linkType = old('link_type', $menuItem?->link_type?->value ?? 'none');
+    $linkedTarget = match ($linkType) {
+        'category' => $categoryOptions->firstWhere('id', (int) old('category_id', $menuItem?->category_id)),
+        'page' => $pageOptions->firstWhere('id', (int) old('page_id', $menuItem?->page_id)),
+        default => null,
+    };
+    $labelFallbacks = [];
+    foreach (\App\Support\I18n\PortalLocale::prefixed() as $locale) {
+        $value = $linkedTarget->translations[$locale] ?? null;
+        $labelFallbacks[$locale] = $value ? [
+            'value' => $value,
+            'from' => $linkType === 'category'
+                ? __('danh mục “:name”', ['name' => $linkedTarget->name])
+                : __('trang “:name”', ['name' => $linkedTarget->title]),
+        ] : null;
+    }
 @endphp
 
 <div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-6 items-start">
@@ -69,7 +84,8 @@
 
                     <x-admin.translation-fields :model="$menuItem" :fields="[
                         'label' => ['label' => __('Nhãn hiển thị'), 'maxlength' => 150],
-                    ]" />
+                    ]" :fallbacks="['label' => $labelFallbacks]" :description="__('Nhãn trên menu ở trang /en/')"
+                       :note="__('Để trống: mục trỏ tới danh mục hoặc trang tĩnh tự dùng tên tiếng Anh của đích; mục khác hiển thị nhãn gốc.')" />
 
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
@@ -110,7 +126,7 @@
                                 data-ts-placeholder="{{ __('— Chọn danh mục —') }}">
                             <option value="">{{ __('— Chọn danh mục —') }}</option>
                             @foreach($categoryOptions as $category)
-                            <option value="{{ $category->id }}" {{ (string) old('category_id', $menuItem?->category_id) === (string) $category->id ? 'selected' : '' }}>
+                            <option value="{{ $category->id }}" data-target-name="{{ $category->name }}" data-target-translations='@json((object) $category->translations)' {{ (string) old('category_id', $menuItem?->category_id) === (string) $category->id ? 'selected' : '' }}>
                                 {{ $category->name }}
                             </option>
                             @endforeach
@@ -128,7 +144,7 @@
                                 data-ts-placeholder="{{ __('— Tìm và chọn trang —') }}">
                             <option value="">{{ __('— Tìm và chọn trang —') }}</option>
                             @foreach($pageOptions as $page)
-                            <option value="{{ $page->id }}" data-title="{{ $page->title }}"
+                            <option value="{{ $page->id }}" data-title="{{ $page->title }}" data-target-name="{{ $page->title }}" data-target-translations='@json((object) $page->translations)'
                                     {{ (string) old('page_id', $menuItem?->page_id) === (string) $page->id ? 'selected' : '' }}>
                                 {{ $page->title }} — /{{ $page->slug }}{{ $page->is_published ? '' : ' ('.__('Nháp').')' }}
                             </option>
@@ -218,3 +234,41 @@
     </div>
 
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const group = document.querySelector('[data-link-type-group]');
+    const form = group?.closest('form');
+    if (! form) {
+        return;
+    }
+    const locales = @js(\App\Support\I18n\PortalLocale::prefixed());
+    const fromText = {
+        category: @js(__('danh mục “:name”')),
+        page: @js(__('trang “:name”')),
+    };
+    const emit = () => {
+        const type = form.querySelector('[name="link_type"]:checked')?.value;
+        const select = type === 'category' || type === 'page' ? form.querySelector(`[name="${type}_id"]`) : null;
+        const option = select?.selectedOptions?.[0];
+        let names = {};
+        try { names = JSON.parse(option?.dataset.targetTranslations || '{}'); } catch { names = {}; }
+        locales.forEach((locale) => {
+            const value = option && option.value ? names[locale] || null : null;
+            window.dispatchEvent(new CustomEvent('translation-fallback', { detail: {
+                key: 'label',
+                locale,
+                value,
+                from: value ? fromText[type].replace(':name', option.dataset.targetName || '') : '',
+            } }));
+        });
+    };
+    form.addEventListener('change', (e) => {
+        if (['link_type', 'category_id', 'page_id'].includes(e.target.name)) {
+            emit();
+        }
+    });
+});
+</script>
+@endpush

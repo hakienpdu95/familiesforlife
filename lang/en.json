@@ -4512,7 +4512,6 @@
     "Bản gốc": "Original",
     "Chép bản gốc": "Copy original",
     "Chép bản gốc vào ô dịch": "Copy the original into the translation field",
-    "Chưa lưu bản dịch nào": "No translation saved yet",
     "Một phần": "Partial",
     "Xoá bản dịch": "Clear translation",
     "Xoá toàn bộ nội dung bản dịch :language? Bản dịch chỉ bị xoá khi bạn lưu lại.": "Clear all :language translation content? It is only deleted once you save.",
@@ -4539,5 +4538,14 @@
     "Tìm theo tên, đường dẫn hoặc tên tiếng Anh": "Search by name, slug or English name",
     "Xoá danh mục": "Delete category",
     "Đã dịch :language: :done/:total": "Translated to :language: :done/:total",
-    "Tìm danh mục...": "Search categories..."
+    "Tìm danh mục...": "Search categories...",
+    "Hiển thị tại /:locale/": "Shown on /:locale/",
+    "Nhãn trên menu ở trang /en/": "Menu label on /en/ pages",
+    "Đã dịch": "Translated",
+    "Để trống: mục trỏ tới danh mục hoặc trang tĩnh tự dùng tên tiếng Anh của đích; mục khác hiển thị nhãn gốc.": "Leave empty: items linking to a category or static page use the target's English name; other items show the original label.",
+    "Dùng làm nhãn riêng": "Use as custom label",
+    "Tự động": "Automatic",
+    "danh mục “:name”": "category “:name”",
+    "Đang tự dùng :value từ :from": "Automatically using :value from :from",
+    "trang “:name”": "page “:name”"
 }

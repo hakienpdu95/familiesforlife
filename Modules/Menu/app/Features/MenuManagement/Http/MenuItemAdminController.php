@@ -4,6 +4,7 @@ namespace Modules\Menu\Features\MenuManagement\Http;
 
 use App\Actions\I18n\SaveModelTranslationsAction;
 use App\Http\Controllers\Controller;
+use App\Support\I18n\PortalLocale;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -173,18 +174,28 @@ class MenuItemAdminController extends Controller
 
     private function categoryOptions(): Collection
     {
-        return PostCategory::active()->orderBy('name')->get(['id', 'name']);
+        return PostCategory::active()->orderBy('name')
+            ->with(['translations' => fn ($q) => $q->whereIn('locale', PortalLocale::prefixed())])
+            ->get(['id', 'name'])
+            ->map(fn (PostCategory $category) => (object) [
+                'id' => $category->id,
+                'name' => $category->name,
+                'translations' => $category->translations->pluck('name', 'locale')->filter()->all(),
+            ]);
     }
 
     /** Liệt kê cả trang Nháp — mục menu tự ẩn trên nav công khai cho tới khi trang được xuất bản. */
     private function pageOptions(): Collection
     {
-        return Page::query()->orderBy('title')->get(['id', 'title', 'slug', 'status', 'published_at'])
+        return Page::query()->orderBy('title')
+            ->with(['translations' => fn ($q) => $q->whereIn('locale', PortalLocale::prefixed())])
+            ->get(['id', 'title', 'slug', 'status', 'published_at'])
             ->map(fn (Page $page) => (object) [
                 'id' => $page->id,
                 'title' => $page->title,
                 'slug' => $page->slug,
                 'is_published' => $page->status === PageStatus::Published && $page->published_at !== null,
+                'translations' => $page->translations->pluck('title', 'locale')->filter()->all(),
             ]);
     }
 }
