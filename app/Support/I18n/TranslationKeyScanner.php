@@ -51,11 +51,15 @@ class TranslationKeyScanner
     {
         $keys = [];
         foreach (config('i18n.translatable_constants', []) as $ref) {
-            [$class, $name] = explode('::', $ref, 2);
+            [$constant, $paths] = array_pad(explode('|', $ref, 2), 2, null);
+            [$class, $name] = explode('::', $constant, 2);
             if (! class_exists($class) || ! (new \ReflectionClass($class))->hasConstant($name)) {
                 continue;
             }
             $value = (new ReflectionClassConstant($class, $name))->getValue();
+            if ($paths !== null) {
+                $value = array_map(fn (string $path) => data_get($value, trim($path)), explode(',', $paths));
+            }
             array_walk_recursive($value, function ($item) use (&$keys, $ref) {
                 if (is_string($item) && self::isSourceText($item)) {
                     $keys[$item] = $ref;
@@ -86,6 +90,16 @@ class TranslationKeyScanner
     public static function isSourceText(string $value): bool
     {
         return preg_match('/[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/iu', $value) === 1;
+    }
+
+    public static function isContextKey(string $key): bool
+    {
+        return preg_match('/\S_[A-Z][A-Za-z]+$/u', $key) === 1 && self::isSourceText($key);
+    }
+
+    public static function stripContext(string $key): string
+    {
+        return preg_replace('/_[A-Z][A-Za-z]+$/u', '', $key);
     }
 
     public static function isGroupKey(string $key): bool

@@ -62,7 +62,7 @@
                                 class="select select-sm select-bordered w-full">
                             <option value="">{{ __('Tất cả') }}</option>
                             @foreach(\Modules\AIVideoStudioTemplate\Models\AiVideoStudioProject::STATUSES as $key => $label)
-                            <option value="{{ $key }}">{{ $label }}</option>
+                            <option value="{{ $key }}">{{ __($label) }}</option>
                             @endforeach
                         </select>
                     </div>

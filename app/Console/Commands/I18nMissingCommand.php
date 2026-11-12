@@ -23,6 +23,7 @@ class I18nMissingCommand extends Command
         foreach ($scanner->jsKeys() as $key => $files) {
             $keys[$key] = array_merge($keys[$key] ?? [], $files);
         }
+        $unaccented = array_filter($keys, fn ($files, $key) => ! TranslationKeyScanner::isSourceText((string) $key) && ! TranslationKeyScanner::isGroupKey((string) $key), ARRAY_FILTER_USE_BOTH);
         $keys = array_filter($keys, fn ($files, $key) => TranslationKeyScanner::isSourceText((string) $key), ARRAY_FILTER_USE_BOTH);
         ksort($keys, SORT_STRING);
 
@@ -85,8 +86,61 @@ class I18nMissingCommand extends Command
             }
         }
 
+        $exit = $this->checkContextKeys(array_keys($keys)) ?: $exit;
+        $this->warnUnaccented($unaccented);
+
         JsTranslations::flush();
 
         return $exit;
+    }
+
+    private function checkContextKeys(array $keys): int
+    {
+        $contextKeys = array_values(array_filter($keys, fn (string $key) => TranslationKeyScanner::isContextKey($key)));
+        $path = lang_path(config('i18n.source_locale', 'vi').'.json');
+        $dictionary = is_file($path) ? json_decode(file_get_contents($path), true, flags: JSON_THROW_ON_ERROR) : [];
+        $missing = array_values(array_diff($contextKeys, array_keys($dictionary)));
+
+        $this->newLine();
+        $this->line('<comment>[ngữ cảnh]</comment> '.$path);
+        $this->line(sprintf('  Key có hậu tố ngữ cảnh: %d  ·  Thiếu trong %s: <fg=%s>%d</>', count($contextKeys), basename($path), $missing ? 'red' : 'green', count($missing)));
+
+        if (! $missing) {
+            return self::SUCCESS;
+        }
+
+        if (! $this->option('write')) {
+            foreach ($missing as $key) {
+                $this->line('  - '.$key);
+            }
+
+            return self::FAILURE;
+        }
+
+        foreach ($missing as $key) {
+            $dictionary[$key] = TranslationKeyScanner::stripContext($key);
+        }
+        file_put_contents($path, json_encode($dictionary, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES).PHP_EOL);
+        $this->info(sprintf('  Đã thêm %d key ngữ cảnh vào %s.', count($missing), basename($path)));
+
+        return self::SUCCESS;
+    }
+
+    private function warnUnaccented(array $keys): void
+    {
+        foreach (config('i18n.target_locales', ['en']) as $locale) {
+            $path = lang_path($locale.'.json');
+            $dictionary = is_file($path) ? json_decode(file_get_contents($path), true, flags: JSON_THROW_ON_ERROR) : [];
+            $missing = array_diff_key($keys, $dictionary);
+            if (! $missing) {
+                continue;
+            }
+
+            $this->newLine();
+            $this->line(sprintf('<comment>[%s] Key không dấu chưa có bản dịch: %d</comment> — tiếng Việt không dấu cần thêm tay, câu vốn là tiếng Anh thì bỏ qua', $locale, count($missing)));
+            foreach (array_slice($missing, 0, 30, true) as $key => $files) {
+                $this->line('  ? '.$key.'  <fg=gray>('.$files[0].')</>');
+            }
+        }
     }
 }

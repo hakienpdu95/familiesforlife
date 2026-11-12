@@ -95,7 +95,7 @@ class PostArticleTracePresenter implements TracePresenter
         $updated = ! empty($payload['updated_at']) ? Carbon::parse($payload['updated_at']) : null;
 
         return $this->base([
-            'title' => $payload['title'] ?? __('Bài viết'),
+            'title' => $payload['title'] ?? __('Bài viết_Single'),
             'images' => array_filter([$payload['image']['url'] ?? null]),
             'image_srcsets' => $live ? array_slice($this->mediaSrcsets($live, 'cover'), 0, 1) : [],
             'badges' => array_values(array_filter([
@@ -140,7 +140,7 @@ class PostArticleTracePresenter implements TracePresenter
         return T::page([
             'heading' => __('Thông tin bài viết'),
             'icon' => 'fa-newspaper',
-            'kind' => __('Bài viết'),
+            'kind' => __('Bài viết_Single'),
             'category' => null,
             'published_label' => null,
             'updated_label' => null,

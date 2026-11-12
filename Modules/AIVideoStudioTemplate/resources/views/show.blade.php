@@ -68,13 +68,13 @@
                      v1.7 — hiển thị nhãn thay vì slug thô (`testimonial`) qua hằng số Model. --}}
                 <div>
                     <p class="text-xs font-medium text-base-content/50 mb-1">{{ __('Loại video') }}</p>
-                    <p>{{ $project->videoTypeLabel() ?: '—' }}</p>
+                    <p>{{ $project->videoTypeLabel() ? __($project->videoTypeLabel()) : '—' }}</p>
                 </div>
                 {{-- v1.16 (tulsainternetmarketingservice.com) — công thức kịch bản, trục khác với
                      Loại video ở trên (cấu trúc kể chuyện, không phải loại nội dung). --}}
                 <div>
                     <p class="text-xs font-medium text-base-content/50 mb-1">{{ __('Công thức kịch bản') }}</p>
-                    <p>{{ $project->videoFormulaLabel() ?: '—' }}</p>
+                    <p>{{ $project->videoFormulaLabel() ? __($project->videoFormulaLabel()) : '—' }}</p>
                 </div>
                 <div>
                     <p class="text-xs font-medium text-base-content/50 mb-1">{{ __('Thông điệp cốt lõi') }}</p>
@@ -157,7 +157,7 @@
         <summary class="collapse-title text-sm font-medium py-3">{{ __('🎯 Gợi ý mô tả theo Loại video') }} &amp; {{ __('Công thức kịch bản đã chọn') }}</summary>
         <div class="collapse-content text-xs">
             @if($aivsTypeTip)
-            <p class="text-base-content/70 mb-3"><b>{{ $project->videoTypeLabel() }}:</b> {{ $aivsTypeTip }}</p>
+            <p class="text-base-content/70 mb-3"><b>{{ __($project->videoTypeLabel()) }}:</b> {{ $aivsTypeTip }}</p>
             @endif
             @if($aivsFormulaBeats)
             <div class="overflow-x-auto">

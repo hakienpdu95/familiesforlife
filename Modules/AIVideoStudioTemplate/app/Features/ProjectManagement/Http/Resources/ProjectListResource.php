@@ -17,7 +17,7 @@ class ProjectListResource extends JsonResource
             'description' => $this->description,
 
             'status' => $this->status,
-            'status_label' => AiVideoStudioProject::STATUSES[$this->status] ?? $this->status,
+            'status_label' => __(AiVideoStudioProject::STATUSES[$this->status] ?? $this->status),
             'status_badge' => match ($this->status) {
                 'active' => 'badge-success',
                 'archived' => 'badge-ghost',

@@ -7,7 +7,7 @@
      sang AI ngoài (ChatGPT/Claude); AI ngoài mới là nơi chọn công thức + viết kịch bản. --}}
 @php
     /** @var \Illuminate\Support\Collection|array $catalog */
-    $formulaLabels = \Modules\AIVideoStudioTemplate\Models\AiVideoStudioProject::VIDEO_FORMULAS;
+    $formulaLabels = array_map(fn (string $label) => __($label), \Modules\AIVideoStudioTemplate\Models\AiVideoStudioProject::VIDEO_FORMULAS);
     $tierLabels = ['S' => __('Tier S — ưu tiên cao nhất'), 'A' => 'Tier A', 'B' => 'Tier B', 'C' => 'Tier C', 'D' => 'Tier D'];
     /*
      * v1.26 (sửa lỗi — "Xem chi tiết" luôn ra rỗng): groupBy() mặc định KHÔNG giữ khoá gốc (slug)
@@ -56,13 +56,13 @@
                           placeholder="{{ __('VD: Giá 1,9 triệu, đối tượng mẹ đi làm trở lại sau sinh, ưu điểm hút êm và nhanh') }}">{{ $description }}</textarea>
             </div>
             <div class="form-control">
-                <label class="label cursor-pointer justify-start gap-2 py-0">
-                    <input type="checkbox" name="is_mother_baby" value="1" class="checkbox checkbox-sm" @checked($isMotherBaby)>
-                    <span class="label-text text-sm">{{ __('Đây là sản phẩm ngách Mẹ') }} &amp; {{ __('Bé (chèn thêm ranh giới pháp lý riêng của ngách này vào prompt)') }}</span>
+                <label class="label cursor-pointer justify-start items-start gap-2 py-0 whitespace-normal">
+                    <input type="checkbox" name="is_mother_baby" value="1" class="checkbox checkbox-sm shrink-0" @checked($isMotherBaby)>
+                    <span class="label-text text-sm whitespace-normal min-w-0">{{ __('Đây là sản phẩm ngách Mẹ & Bé (chèn thêm ranh giới pháp lý riêng của ngách này vào prompt)') }}</span>
                 </label>
             </div>
             <div class="card-actions">
-                <button type="submit" class="btn btn-primary btn-sm">Sinh Master Prompt</button>
+                <button type="submit" class="btn btn-primary btn-sm">{{ __('Sinh Master Prompt') }}</button>
                 @if($topic !== '')
                 <a href="{{ route('backend.aivideostudiotemplate.formula-advisor') }}" class="btn btn-ghost btn-sm">{{ __('Đặt lại') }}</a>
                 @endif
@@ -107,7 +107,7 @@
              trình duyệt tự cuộn xuống panel sau khi tải lại trang — không cần JS. --}}
         <div id="aivsSelectedProduct" class="border border-primary/30 bg-primary/5 rounded-lg p-4 mb-4 scroll-mt-4">
             <div class="flex items-center justify-between gap-2 flex-wrap">
-                <h3 class="font-bold text-base">{{ $selected['name'] }} <span class="badge badge-ghost badge-sm ml-1">{{ $tierLabels[$selected['tier']] ?? $selected['tier'] }}</span></h3>
+                <h3 class="font-bold text-base">{{ __($selected['name']) }} <span class="badge badge-ghost badge-sm ml-1">{{ $tierLabels[$selected['tier']] ?? $selected['tier'] }}</span></h3>
                 <a href="{{ route('backend.aivideostudiotemplate.formula-advisor', ['q' => $search]) }}" class="text-xs text-base-content/40 hover:text-base-content">{{ __('✕ Đóng') }}</a>
             </div>
 
@@ -130,7 +130,7 @@
                 @endforeach
             </div>
 
-            <p class="text-sm mt-2">{{ $selected['note'] }}</p>
+            <p class="text-sm mt-2">{{ __($selected['note']) }}</p>
 
             {{-- spec §13.1 (v1.27) — chân dung diễn giải đầy đủ qua PersonaCatalog (spec/chan-dung-
                  nguoi-review.md, người dùng cung cấp) — trước v1.27 chỉ hiện mã thô kèm ghi chú
@@ -144,20 +144,20 @@
                     <div class="flex items-start gap-2 text-xs">
                         <span class="badge {{ $i === 0 ? 'badge-primary' : 'badge-outline' }} badge-sm shrink-0">{{ $code }}</span>
                         @if($persona)
-                        <span><b>{{ $persona['name'] }}</b> — {{ $persona['trust_driver'] }}</span>
+                        <span><b>{{ __($persona['name']) }}</b> — {{ __($persona['trust_driver']) }}</span>
                         @else
                         <span class="text-base-content/40">{{ __('Mã chưa có trong Bộ Chân dung Người Review.') }}</span>
                         @endif
                     </div>
                     @if($persona && $persona['warning'])
-                    <div class="alert alert-warning py-1.5 px-3 text-xs ml-7"><span>{{ $persona['warning'] }}</span></div>
+                    <div class="alert alert-warning py-1.5 px-3 text-xs ml-7"><span>{{ __($persona['warning']) }}</span></div>
                     @endif
                 @endforeach
             </div>
 
             @if($selected['warning'])
             <div class="alert alert-error py-2 px-3 text-xs mt-2">
-                <span>{{ $selected['warning'] }}</span>
+                <span>{{ __($selected['warning']) }}</span>
             </div>
             @endif
 
@@ -175,7 +175,7 @@
                     fn ($code) => (\Modules\AIVideoStudioTemplate\Features\FormulaAdvisor\Support\PersonaCatalog::find($code)['name'] ?? $code),
                     \Modules\AIVideoStudioTemplate\Features\FormulaAdvisor\Support\PersonaCatalog::parseCodes($selected['personas'])
                 );
-                $selectedContext = trim($selected['note'].' ('.__('Chân dung tham khảo').': '.implode(' → ', $personaNames).($selected['warning'] ? '; '.$selected['warning'] : '').')');
+                $selectedContext = trim($selected['note'].' (Chân dung tham khảo: '.implode(' → ', $personaNames).($selected['warning'] ? '; '.$selected['warning'] : '').')');
             @endphp
             <div class="card-actions justify-end mt-3">
                 <a href="{{ route('backend.aivideostudiotemplate.formula-advisor', [
@@ -202,7 +202,7 @@
                     <tr class="bg-base-200/50"><td colspan="4" class="font-semibold text-xs">{{ $tierLabels[$tier] ?? $tier }}</td></tr>
                     @foreach($items as $slug => $item)
                     <tr>
-                        <td>{{ $item['name'] }}</td>
+                        <td>{{ __($item['name']) }}</td>
                         <td>
                             @if($item['primary'])
                             <span class="badge badge-outline badge-sm">{{ $formulaLabels[$item['primary']] ?? $item['primary'] }}</span>
@@ -235,7 +235,7 @@
                     <tbody>
                         @foreach($bannedCategories as $cat)
                         <tr>
-                            <td class="font-medium">{{ $cat['name'] }}</td>
+                            <td class="font-medium">{{ __($cat['name']) }}</td>
                             <td>
                                 @if($cat['no_affiliate'])
                                 <span class="badge badge-error badge-sm">{{ __('Không làm affiliate') }}</span>
@@ -243,7 +243,7 @@
                                 <span class="badge badge-sm">{{ __(':cat (bỏ CTA)', ['cat' => $formulaLabels[$cat['allowed_formula']] ?? $cat['allowed_formula']]) }}</span>
                                 @endif
                             </td>
-                            <td class="text-xs text-base-content/60">{{ $cat['note'] }}</td>
+                            <td class="text-xs text-base-content/60">{{ __($cat['note']) }}</td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -261,8 +261,8 @@
                     <tbody>
                         @foreach($forbiddenCombos as $combo)
                         <tr>
-                            <td class="font-medium">{{ $combo['pair'] }}</td>
-                            <td class="text-xs text-base-content/60">{{ $combo['consequence'] }}</td>
+                            <td class="font-medium">{{ __($combo['pair']) }}</td>
+                            <td class="text-xs text-base-content/60">{{ __($combo['consequence']) }}</td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -284,9 +284,9 @@
                     @foreach($productionBudget as $key => $b)
                     <tr>
                         <td class="font-medium">{{ $formulaLabels[$key] ?? $key }}</td>
-                        <td class="text-xs">{{ $b['time'] }}</td>
+                        <td class="text-xs">{{ __($b['time']) }}</td>
                         <td><span class="badge badge-sm">{{ $b['share'] }}</span></td>
-                        <td class="text-xs text-base-content/60">{{ $b['role'] }}</td>
+                        <td class="text-xs text-base-content/60">{{ __($b['role']) }}</td>
                     </tr>
                     @endforeach
                 </tbody>

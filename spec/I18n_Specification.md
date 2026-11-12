@@ -74,9 +74,12 @@ Quy ước: **không** viết `->format('d/m/Y')` / `'d/m/Y H:i'` mới để hi
 | Enum | `label()` trả `__('…')` |
 | Hằng số mảng (PHP không cho gọi `__()` trong `const`) | giữ câu gốc trong hằng, dịch tại chỗ hiển thị (`__(self::LABELS[$k])`, `array_map('__', X::LABELS)`) và **khai báo hằng trong `config/i18n.php` → `translatable_constants`** để lệnh quét nhận ra |
 | Nhãn nằm trong file config (`config/breadcrumbs.php`, `approval.subjects.*.label`, `prompt_framework_studio.frameworks…`) | giữ câu gốc trong config, dịch tại chỗ hiển thị (`__($config['label'])`) và **khai báo đường dẫn (cho phép `*`) trong `config/i18n.php` → `translatable_config`**. Config vừa hiển thị vừa ghép vào prompt AI (Prompt Studio) thì chỉ dịch bản hiển thị — `LocalizeFrameworksForDisplayAction` thêm khoá `ui` cho view, prompt vẫn dùng bản gốc |
+| Hằng số chỉ có 1 phần là nhãn (VD `ProductFormulaCatalog::PRODUCTS` chứa cả kịch bản mẫu) | khai báo kèm đường dẫn: `X::class.'::PRODUCTS|*.name,*.note,*.warning'` — bộ quét chỉ lấy các trường đó |
+| Cùng 1 từ tiếng Việt cần nghĩa tiếng Anh khác nhau theo ngữ cảnh (VD "Bài viết" = menu "Articles" / loại đối tượng "Article") | key có hậu tố ngữ cảnh `__('Bài viết_Single')`; `lang/en.json` dịch theo ngữ cảnh, `lang/vi.json` **bắt buộc** có `"Bài viết_Single": "Bài viết"` (thiếu thì giao diện tiếng Việt hiện nguyên hậu tố). `i18n:missing` báo thiếu và `--write` tự thêm vào `vi.json` |
+| Nhãn vừa hiển thị vừa ghép vào prompt AI (catalog AI Video Studio, `AiVideoStudioProject::VIDEO_TYPES`…) | model/catalog trả bản gốc (dùng cho prompt), **view** mới bọc `__()` — không bao giờ gọi `__()` trong code dựng prompt |
 | File JS (`resources/js`, `Modules/*/resources/assets/js`) | `import { t } from '…/shared/i18n.js'` rồi `t('…')` / `t('Tối đa :max ký tự', { max })` |
 
-Không dịch: prompt gửi cho AI (CoreIdeaExtractor, VideoIdeaExtractor, các `Build*PromptAction`, `ProductFormulaCatalog`, `PersonaCatalog`, phần `lines.push` trong `prompt-framework-studio.js`), từ khoá dùng để phân tích nội dung (`ExtractRawContentAction`), log kỹ thuật, dữ liệu seed.
+Không dịch: prompt gửi cho AI (CoreIdeaExtractor, VideoIdeaExtractor, các `Build*PromptAction`, nội dung `ProductFormulaCatalog`/`PersonaCatalog` khi ghép vào prompt (bản hiển thị thì dịch), kịch bản mẫu `sample_script`, phần `lines.push` trong `prompt-framework-studio.js`), từ khoá dùng để phân tích nội dung (`ExtractRawContentAction`), log kỹ thuật, dữ liệu seed.
 
 ### 4.3 JS — `window.TRANSLATIONS`
 
@@ -95,7 +98,7 @@ Quét `__()`, `trans()`, `trans_choice()`, `@lang`, `t()` trong `config('i18n.sc
 
 ### 4.5 Còn lại sau Giai đoạn 2
 
-- Chuỗi tiếng Việt **không dấu** (VD "Trang", "Tin") không bị công cụ tự động bắt — rà tay khi gặp.
+- Chuỗi tiếng Việt **không dấu** (VD "Trang", "Sinh Master Prompt") không được tính là key nguồn — `i18n:missing` liệt kê riêng các key không dấu đã bọc `__()`/`t()` mà chưa có trong `en.json` (cảnh báo, không fail); thêm tay bản dịch. Chuỗi không dấu **chưa bọc** `__()` thì không công cụ nào bắt được — rà tay.
 - Mô tả activity log lưu sẵn chuỗi lúc ghi; trang log dịch lúc hiển thị bằng `__($description)` nên chỉ dịch được mô tả tĩnh.
 - Thông báo database (notification `toArray`) lưu chuỗi theo locale lúc gửi.
 

@@ -88,7 +88,7 @@ class HeritageSiteTracePresenter implements TracePresenter
         }
 
         return $this->base([
-            'title' => $payload['name'] ?? __('Di tích'),
+            'title' => $payload['name'] ?? __('Di tích_Single'),
             'subtitle' => $payload['era'] ?? null,
             'images' => $live ? (array_slice($this->mediaUrls($live, 'cover'), 0, 1) ?: array_filter([$payload['image']['url'] ?? null])) : array_filter([$payload['image']['url'] ?? null]),
             'image_srcsets' => $live ? array_slice($this->mediaSrcsets($live, 'cover'), 0, 1) : [],

@@ -25,7 +25,7 @@
             <label class="label py-0 pb-1.5"><span class="label-text font-medium">{{ __('Trạng thái') }}</span></label>
             <select name="status" class="select select-bordered select-sm w-full max-w-xs">
                 @foreach(\Modules\AIVideoStudioTemplate\Models\AiVideoStudioProject::STATUSES as $key => $label)
-                <option value="{{ $key }}" @selected(old('status', $project->status) === $key)>{{ $label }}</option>
+                <option value="{{ $key }}" @selected(old('status', $project->status) === $key)>{{ __($label) }}</option>
                 @endforeach
             </select>
         </div>
@@ -56,7 +56,7 @@
             <select name="video_type" class="select select-bordered select-sm w-full max-w-xs">
                 <option value="">{{ __('— Chưa chọn —') }}</option>
                 @foreach(\Modules\AIVideoStudioTemplate\Models\AiVideoStudioProject::VIDEO_TYPES as $key => $label)
-                <option value="{{ $key }}" @selected(old('video_type', $project?->video_type) === $key)>{{ $label }}</option>
+                <option value="{{ $key }}" @selected(old('video_type', $project?->video_type) === $key)>{{ __($label) }}</option>
                 @endforeach
             </select>
         </div>
@@ -69,7 +69,7 @@
             <select name="video_formula" class="select select-bordered select-sm w-full max-w-xs">
                 <option value="">{{ __('— Chưa chọn —') }}</option>
                 @foreach(\Modules\AIVideoStudioTemplate\Models\AiVideoStudioProject::VIDEO_FORMULAS as $key => $label)
-                <option value="{{ $key }}" @selected(old('video_formula', $project?->video_formula) === $key)>{{ $label }}</option>
+                <option value="{{ $key }}" @selected(old('video_formula', $project?->video_formula) === $key)>{{ __($label) }}</option>
                 @endforeach
             </select>
             <p class="text-xs text-base-content/40 mt-1">{{ __('Cấu trúc trình tự kể chuyện cho toàn bộ shot của project — VD PSA: shot đầu nêu vấn đề, shot giữa cho thấy giải pháp, shot cuối là CTA.') }}</p>
@@ -86,7 +86,7 @@
             <select name="aspect_ratio" class="select select-bordered select-sm w-full max-w-xs">
                 <option value="">{{ __('— Chưa chọn —') }}</option>
                 @foreach(\Modules\AIVideoStudioTemplate\Models\AiVideoStudioProject::ASPECT_RATIOS as $key => $label)
-                <option value="{{ $key }}" @selected(old('aspect_ratio', $project?->aspect_ratio) === $key)>{{ $label }}</option>
+                <option value="{{ $key }}" @selected(old('aspect_ratio', $project?->aspect_ratio) === $key)>{{ __($label) }}</option>
                 @endforeach
             </select>
             <p class="text-xs text-base-content/40 mt-1">{{ __('Chọn trước để khớp kênh phân phối — tránh phải quay/dựng lại vì sai định dạng. Giá trị này được ghi thẳng vào prompt của mọi Shot (§3.1).') }}</p>
@@ -99,7 +99,7 @@
             <select name="resolution" class="select select-bordered select-sm w-full max-w-xs">
                 <option value="">{{ __('— Chưa chọn —') }}</option>
                 @foreach(\Modules\AIVideoStudioTemplate\Models\AiVideoStudioProject::RESOLUTIONS as $key => $label)
-                <option value="{{ $key }}" @selected(old('resolution', $project?->resolution) === $key)>{{ $label }}</option>
+                <option value="{{ $key }}" @selected(old('resolution', $project?->resolution) === $key)>{{ __($label) }}</option>
                 @endforeach
             </select>
         </div>

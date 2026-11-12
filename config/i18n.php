@@ -3,6 +3,9 @@
 use App\Http\Controllers\Backend\QrReportController;
 use App\Shared\Traceability\Models\QrReport;
 use Modules\ActivityLog\Http\Controllers\ActivityLogApiController;
+use Modules\AIVideoStudioTemplate\Features\FormulaAdvisor\Support\PersonaCatalog;
+use Modules\AIVideoStudioTemplate\Features\FormulaAdvisor\Support\ProductFormulaCatalog;
+use Modules\AIVideoStudioTemplate\Models\AiVideoStudioProject;
 use Modules\Approval\Models\ApprovalLog;
 use Modules\Ocop\Features\Traceability\OcopProductTracePresenter;
 use Modules\Ocop\Models\OcopProduct;
@@ -48,6 +51,16 @@ return [
         OcopProductTracePresenter::class.'::QUALITY_DOCS',
         OcopProductTracePresenter::class.'::SECTIONS',
         ActivityLogApiController::class.'::FIELD_LABELS',
+        AiVideoStudioProject::class.'::VIDEO_TYPES',
+        AiVideoStudioProject::class.'::VIDEO_FORMULAS',
+        AiVideoStudioProject::class.'::ASPECT_RATIOS',
+        AiVideoStudioProject::class.'::RESOLUTIONS',
+        AiVideoStudioProject::class.'::STATUSES',
+        PersonaCatalog::class.'::PERSONAS|*.name,*.trust_driver,*.warning',
+        ProductFormulaCatalog::class.'::PRODUCTS|*.name,*.note,*.warning',
+        ProductFormulaCatalog::class.'::BANNED_CATEGORIES|*.name,*.note',
+        ProductFormulaCatalog::class.'::FORBIDDEN_COMBOS|*.pair,*.consequence',
+        ProductFormulaCatalog::class.'::PRODUCTION_BUDGET|*.time,*.role',
     ],
 
     'translatable_config' => [

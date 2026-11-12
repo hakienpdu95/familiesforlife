@@ -145,7 +145,7 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
             : ['url' => route('ocop.public.index'), 'label' => __('Xem sản phẩm OCOP khác'), 'icon' => 'fa-arrow-right'];
 
         return $this->base([
-            'title' => $payload['name'] ?? __('Sản phẩm OCOP'),
+            'title' => $payload['name'] ?? __('Sản phẩm OCOP_Single'),
             'description' => $payload['description'] ?? null,
             'subtitle' => ! empty($subject['name']) ? __('Chủ thể: :name', ['name' => $subject['name']]) : null,
             'images' => $live ? ($this->mediaUrls($live, OcopProduct::IMAGE_COLLECTION) ?: array_filter([$payload['image']['url'] ?? null])) : array_filter([$payload['image']['url'] ?? null]),
@@ -195,7 +195,7 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
         return T::page([
             'heading' => __('Truy xuất sản phẩm OCOP'),
             'icon' => 'fa-certificate',
-            'kind' => __('Sản phẩm OCOP'),
+            'kind' => __('Sản phẩm OCOP_Single'),
             'stars' => null,
             'subject' => [],
             'category' => null,
