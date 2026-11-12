@@ -1,6 +1,6 @@
 # Đặc tả kỹ thuật — Phân hệ Ngôn ngữ (i18n)
 
-Trạng thái: Giai đoạn 0, 1, 2 đã triển khai (Giai đoạn 2: bóc tách xong, `lang/en.json` đã dịch đủ — `i18n:missing` báo 0 thiếu/0 chưa dịch). Giai đoạn 3: đã chốt thiết kế (§5), chưa triển khai.
+Trạng thái: Giai đoạn 0, 1, 2 đã triển khai (nhánh `feature/i18n-phase-2`, chờ review) (Giai đoạn 2: bóc tách xong, `lang/en.json` đã dịch đủ — `i18n:missing` báo 0 thiếu/0 chưa dịch). Giai đoạn 3: đã chốt thiết kế (§5), chưa triển khai.
 
 ## 1. Hai khái niệm tách biệt
 
@@ -134,12 +134,13 @@ Quyết định đã chốt (2026-11-12): portal phục vụ **song song** 2 ng�
 | 3c | `EventCategory`, `Banner`, `OcopCategory`, `OcopProduct`, `OcopSubject` | name, slug, mô tả, câu chuyện, SEO; banner: title, alt, nhãn CTA |
 | Ngoài phạm vi (giữ dữ liệu `vi`) | Heritage, Province, Event, RealEstate, Playlist, Video, Tag, AuthorProfile | — |
 
-Trang `/en/...` của entity ngoài phạm vi vẫn render (giao diện tiếng Anh, dữ liệu tiếng Việt) nhưng `noindex` và không phát `hreflang="en"`.
+Trang `/en/...` của entity ngoài phạm vi vẫn render (giao diện tiếng Anh, dữ liệu tiếng Việt) kèm banner "Bản tiếng Anh chưa sẵn sàng", `noindex` và không phát `hreflang="en"` — cùng cơ chế fallback §5.5.
 
 ### 5.5 Bài viết
 
 - `post.default_locale` không còn quyết định ngôn ngữ phục vụ: portal dùng locale theo URL.
-- `/en/{slug}-d{id}.html` chỉ phục vụ khi bài có bản dịch `en` đã xuất bản; không có → 302 về URL `vi` của bài. Slug sai locale → 301 về slug đúng.
+- `/en/{slug}-d{id}.html` khi bài **chưa có** bản `en` đã xuất bản: **không redirect** (302 làm hỏng tín hiệu SEO của URL `/en/`). Giữ nguyên URL, render bản `main_locale`, hiện banner "Bản tiếng Anh chưa sẵn sàng" (kèm link sang bản gốc) và thêm `<meta name="robots" content="noindex">`; trang này không phát `hreflang="en"`. Slug sai (khác slug của bản đang render) → 301 về slug đúng, vẫn trong `/en/`.
+- Cùng quy tắc cho entity dịch được ở §5.4 (chuyên mục, trang tĩnh, OCOP…): thiếu bản `en` → render bản `vi` + banner + `noindex`, không redirect.
 - Danh sách (trang chủ, chuyên mục, tác giả, tải thêm, tin nóng) ở `/en` chỉ lấy bài có bản `en` đã xuất bản.
 
 ### 5.6 SEO
