@@ -279,3 +279,9 @@ details[open] > .nav-summary .nav-arrow { transform: rotate(90deg); }
 .textarea:focus-within {
     --input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000) !important;
 }
+
+.label:has(> .label-text-alt) {
+    flex-wrap: wrap;
+    white-space: normal;
+    column-gap: 0.5rem;
+}

@@ -80,9 +80,9 @@
                             <div class="bg-error" :style="`width: ${funnelGapPercent('hot')}%`" title="{{ __('Nóng') }}"></div>
                         </div>
                         <span class="text-xs text-base-content/50">
-                            <span x-text="funnelGap.counts?.cold ?? 0"></span>L ·
-                            <span x-text="funnelGap.counts?.warm ?? 0"></span>{{ __('Ấ ·') }}
-                            <span x-text="funnelGap.counts?.hot ?? 0"></span>N
+                            <span x-text="funnelGap.counts?.cold ?? 0"></span>{{ mb_substr(__('Lạnh'), 0, 1) }} ·
+                            <span x-text="funnelGap.counts?.warm ?? 0"></span>{{ mb_substr(__('Ấm'), 0, 1) }} ·
+                            <span x-text="funnelGap.counts?.hot ?? 0"></span>{{ mb_substr(__('Nóng'), 0, 1) }}
                             <template x-if="(funnelGap.counts?.unclassified ?? 0) > 0">
                                 <span>· <span x-text="funnelGap.counts.unclassified"></span> {{ __('chưa phân loại') }}</span>
                             </template>
