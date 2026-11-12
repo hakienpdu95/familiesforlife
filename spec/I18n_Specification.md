@@ -1,6 +1,6 @@
 # Đặc tả kỹ thuật — Phân hệ Ngôn ngữ (i18n)
 
-Trạng thái: Giai đoạn 0, 1, 2 đã triển khai (Giai đoạn 2: bóc tách xong, bản dịch tiếng Anh mới phủ phần dùng chung). Giai đoạn 3 chưa làm.
+Trạng thái: Giai đoạn 0, 1, 2 đã triển khai (Giai đoạn 2: bóc tách xong, `lang/en.json` đã dịch đủ — `i18n:missing` báo 0 thiếu/0 chưa dịch). Giai đoạn 3 chưa làm.
 
 ## 1. Hai khái niệm tách biệt
 
