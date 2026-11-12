@@ -121,3 +121,91 @@
     border-color: var(--color-error, #ef4444);
     box-shadow: 0 0 0 1px var(--color-error, #ef4444);
 }
+
+.category-tree-table {
+    .tabulator-header {
+        border-bottom: 1px solid var(--color-base-200);
+    }
+
+    .tabulator-row {
+        border-bottom: 1px solid color-mix(in oklch, var(--color-base-200) 70%, transparent);
+
+        &.tabulator-row-even {
+            background: var(--color-base-100);
+        }
+
+        &:hover {
+            background: color-mix(in oklch, var(--color-base-200) 55%, transparent) !important;
+        }
+
+        &.category-row-root {
+            border-top: 1px solid var(--color-base-200);
+        }
+    }
+
+    .tabulator-row .tabulator-cell {
+        display: inline-flex;
+        align-items: center;
+        min-height: 3rem;
+        padding-top: .4rem;
+        padding-bottom: .4rem;
+        border-right: 0;
+
+        &[style*="text-align: right"] {
+            justify-content: flex-end;
+        }
+    }
+
+    .tabulator-cell:first-child {
+        white-space: nowrap;
+    }
+
+    .category-name-cell {
+        max-width: calc(100% - 2rem);
+        vertical-align: middle;
+
+        &.is-inactive {
+            opacity: .55;
+        }
+    }
+
+    .tabulator-data-tree-branch {
+        border-color: color-mix(in oklch, var(--color-base-content) 18%, transparent) !important;
+        border-radius: 0 0 0 4px;
+        vertical-align: middle;
+    }
+
+    .category-tree-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.5rem;
+        height: 1.5rem;
+        margin-right: .25rem;
+        border-radius: .375rem;
+        color: color-mix(in oklch, var(--color-base-content) 55%, transparent);
+        transition: transform .15s ease, background-color .15s ease;
+        cursor: pointer;
+
+        &:hover {
+            background: var(--color-base-300);
+            color: var(--color-base-content);
+        }
+
+        &.is-open {
+            transform: rotate(90deg);
+        }
+    }
+
+    @media (hover: hover) {
+        .category-actions {
+            opacity: .35;
+            transition: opacity .15s ease;
+        }
+
+        .tabulator-row:hover .category-actions,
+        .category-actions:focus-within {
+            opacity: 1;
+        }
+    }
+}

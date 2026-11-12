@@ -4,10 +4,12 @@ namespace Modules\Post\Features\CategoryManagement\Http;
 
 use App\Actions\I18n\SaveModelTranslationsAction;
 use App\Http\Controllers\Controller;
+use App\Support\I18n\PortalLocale;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Modules\Post\Features\CategoryManagement\Actions\BuildCategoryAdminTreeAction;
 use Modules\Post\Features\CategoryManagement\Actions\CreateCategoryAction;
 use Modules\Post\Features\CategoryManagement\Actions\DeleteCategoryAction;
 use Modules\Post\Features\CategoryManagement\Actions\ReorderCategoriesAction;
@@ -24,10 +26,12 @@ class CategoryAdminController extends Controller
         $this->authorizeResource(PostCategory::class, 'category');
     }
 
-    /** Dữ liệu bảng lấy qua CategoryApiController (Tabulator dataTree, xem §CategoryApiController). */
-    public function index(): View
+    public function index(Request $request): View
     {
-        return view('post::admin.categories.index');
+        return view('post::admin.categories.index', [
+            'tree' => BuildCategoryAdminTreeAction::run($request->user()),
+            'locales' => PortalLocale::prefixed(),
+        ]);
     }
 
     public function create(GetCategoryTreeHandler $handler): View

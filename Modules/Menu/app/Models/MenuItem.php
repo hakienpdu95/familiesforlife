@@ -25,7 +25,9 @@ use Spatie\Activitylog\Support\LogOptions;
  */
 class MenuItem extends Model
 {
-    use HasTranslations;
+    use HasTranslations {
+        getAttributeValue as translatedAttributeValue;
+    }
     use LogsActivity;
     use SoftDeletes;
 
@@ -37,6 +39,37 @@ class MenuItem extends Model
     public static function translationModel(): string
     {
         return MenuItemTranslation::class;
+    }
+
+    public function getAttributeValue($key)
+    {
+        if ($key !== 'label') {
+            return $this->translatedAttributeValue($key);
+        }
+
+        $portal = app(PortalLocale::class);
+        if (! $portal->active() || $portal->isDefault() || ! $this->exists || filled($this->translationFor($portal->current())?->label)) {
+            return $this->translatedAttributeValue($key);
+        }
+
+        $targetLabel = $this->linkedTargetLabel($portal->current());
+
+        return filled($targetLabel) ? $targetLabel : $this->translatedAttributeValue($key);
+    }
+
+    private function linkedTargetLabel(string $locale): ?string
+    {
+        [$relation, $attribute] = match ($this->getAttributeFromArray('link_type')) {
+            MenuLinkType::Category->value => ['category', 'name'],
+            MenuLinkType::Page->value => ['page', 'title'],
+            default => [null, null],
+        };
+
+        if ($relation === null || ! $this->relationLoaded($relation)) {
+            return null;
+        }
+
+        return $this->getRelation($relation)?->translationFor($locale)?->{$attribute};
     }
 
     protected $table = 'menu_items';
@@ -142,7 +175,7 @@ class MenuItem extends Model
      */
     public static function tree(string $location = 'header'): Collection
     {
-        $targets = ['category:id,slug,is_active', 'page:id,slug,status,published_at'];
+        $targets = ['category:id,slug,name,is_active', 'page:id,slug,title,status,published_at'];
 
         return static::active()->visible()->root()->location($location)
             ->with([...$targets, 'children' => fn ($q) => $q->active()->visible()

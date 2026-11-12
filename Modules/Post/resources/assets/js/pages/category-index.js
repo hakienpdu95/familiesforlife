@@ -1,14 +1,6 @@
 import { t } from '../../../../../../resources/js/shared/i18n.js';
 
-/**
- * pages/category-index.js
- * Alpine component + Tabulator (dataTree) cho dashboard/posts/categories — cùng pattern
- * article-index.js nhưng KHÔNG phân trang remote: cây danh mục luôn tải
- * toàn bộ 1 lượt (CategoryApiController trả cây lồng nhau qua field "children", hoặc danh sách
- * phẳng khi có tìm kiếm — Tabulator tự hiển thị tree/phẳng tương ứng, không cần toggle JS).
- *
- * Server data truyền vào qua x-data="categoryListPage({{ Js::from([...]) }})".
- */
+const COLLAPSED_KEY = 'post-category-tree:collapsed';
 
 function esc(v) {
     if (v == null) return '';
@@ -17,58 +9,110 @@ function esc(v) {
         .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-const COLUMNS = [
-    {
-        title: t('Tên danh mục'), field: 'name', minWidth: 260,
-        formatter(cell) {
-            const d = cell.getRow().getData();
-            const dot = '<span class="inline-block size-2.5 rounded-full mr-1.5 align-middle" style="background:' + esc(d.color_hex || '#94a3b8') + '"></span>';
-            return '<div>' + dot + '<span class="font-medium text-sm">' + esc(d.name) + '</span>'
-                + '<div class="text-xs text-base-content/40 font-mono ml-4">' + esc(d.slug) + '</div></div>';
-        },
-    },
-    {
-        title: t('Danh mục cha'), field: 'parent_name', width: 160, headerSort: false,
-        formatter(cell) {
-            return esc(cell.getValue()) || '<span class="text-base-content/25 text-xs">—</span>';
-        },
-    },
-    {
-        title: t('Số bài viết'), field: 'articles_count', width: 120, hozAlign: 'center', sorter: 'number',
-    },
-    {
-        title: t('Trạng thái'), field: 'is_active', width: 110, hozAlign: 'center', headerSort: false,
-        formatter(cell) {
-            const active = cell.getValue();
-            return '<span class="badge badge-sm ' + (active ? 'badge-success' : 'badge-ghost') + '">' + (active ? t('Hiện') : t('Ẩn')) + '</span>';
-        },
-    },
-    {
-        title: '', field: 'id', width: 90, hozAlign: 'center', headerSort: false,
-        formatter(cell) {
-            const d = cell.getRow().getData();
-            let html = '<div class="flex items-center justify-center gap-1">';
+function foldChar(c) {
+    return c.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase();
+}
 
-            if (d.can_update) {
-                html += '<a href="' + esc(d.edit_url) + ('" class="btn btn-ghost btn-xs btn-square" title="' + t('Sửa') + '">')
-                    + '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>'
-                    + '</a>';
-            }
-            if (d.can_delete) {
-                html += ('<button class="btn btn-ghost btn-xs btn-square text-error" title="' + t('Xoá') + '"')
-                    + ' data-url="' + esc(d.destroy_url) + '" data-name="' + esc(d.name) + '"'
-                    + ' onclick="window.categoryDeleteConfirm(this.dataset.url, this.dataset.name)">'
-                    + '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>'
-                    + '</button>';
-            }
+function fold(text) {
+    return [...String(text ?? '')].map(foldChar).join('');
+}
 
-            html += '</div>';
-            return html;
+function highlight(text, needle) {
+    const raw = String(text ?? '');
+    if (!needle) return esc(raw);
+    const chars = [...raw];
+    const folded = chars.map(foldChar);
+    if (folded.some((c) => c.length !== 1)) return esc(raw);
+    const start = folded.join('').indexOf(needle);
+    if (start < 0) return esc(raw);
+    const end = start + needle.length;
+    return esc(chars.slice(0, start).join(''))
+        + '<mark class="rounded bg-warning/40 px-0.5 text-inherit">' + esc(chars.slice(start, end).join('')) + '</mark>'
+        + esc(chars.slice(end).join(''));
+}
+
+const ICON = {
+    chevron: '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>',
+    add: '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>',
+    edit: '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>',
+    more: '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.75"/><circle cx="12" cy="12" r="1.75"/><circle cx="19" cy="12" r="1.75"/></svg>',
+};
+
+function buildColumns(state) {
+    return [
+        {
+            title: t('Danh mục'), field: 'name', minWidth: 240, headerSort: false, responsive: 0,
+            formatter(cell) {
+                const d = cell.getRow().getData();
+                const root = d.depth === 0;
+                const context = state.filtering && !state.matchedIds.has(d.id);
+                const name = d.can_update
+                    ? '<a href="' + esc(d.edit_url) + '" title="' + esc(d.slug) + '" class="truncate hover:text-primary hover:underline underline-offset-2">' + highlight(d.name, state.needle) + '</a>'
+                    : '<span class="truncate" title="' + esc(d.slug) + '">' + highlight(d.name, state.needle) + '</span>';
+                const kids = d.children_count
+                    ? '<span class="shrink-0 text-xs text-base-content/40">' + esc(t(':count mục con').replace(':count', d.children_count)) + '</span>'
+                    : '';
+                const hidden = d.is_active ? '' : '<span class="badge badge-xs badge-ghost shrink-0">' + esc(t('Đang ẩn')) + '</span>';
+                const translated = Object.entries(d.translations || {}).filter(([, v]) => v);
+                const sub = translated.length
+                    ? '<div class="truncate text-xs text-base-content/45">' + translated.map(([locale, v]) =>
+                        '<span class="mr-1 text-[10px] font-semibold uppercase tracking-wide text-base-content/35">' + esc(locale) + '</span>' + highlight(v, state.needle)).join(' · ') + '</div>'
+                    : '';
+
+                return '<div class="category-name-cell inline-flex items-center gap-2.5 min-w-0' + (context ? ' opacity-45' : '') + (d.is_active ? '' : ' is-inactive') + '">'
+                    + '<span class="size-2.5 shrink-0 rounded-full" style="background:' + esc(d.color_hex || '#94a3b8') + '"></span>'
+                    + '<div class="min-w-0"><div class="flex items-center gap-2 min-w-0 ' + (root ? 'text-[15px] font-semibold' : 'text-sm font-medium') + '">' + name + kids + hidden + '</div>' + sub + '</div>'
+                    + '</div>';
+            },
         },
-    },
-];
+        {
+            title: t('Bài viết'), field: 'subtree_articles', width: 110, hozAlign: 'right', headerHozAlign: 'right', headerSort: false, responsive: 1,
+            formatter(cell) {
+                const d = cell.getRow().getData();
+                const total = d.subtree_articles;
+                const tip = total > d.articles_count
+                    ? ' title="' + esc(t(':own bài trực tiếp, :total bài tính cả danh mục con').replace(':own', d.articles_count).replace(':total', total)) + '"'
+                    : '';
+                return '<span class="text-xs tabular-nums ' + (total ? 'text-base-content/70' : 'text-base-content/30') + '"' + tip + '>'
+                    + esc(t(':count bài').replace(':count', total)) + '</span>';
+            },
+        },
+        {
+            title: '', field: 'id', width: state.compact ? 76 : 108, hozAlign: 'right', headerSort: false, responsive: 0,
+            formatter(cell) {
+                const d = cell.getRow().getData();
+                let html = '<div class="category-actions flex items-center justify-end gap-0.5">';
+                if (d.create_child_url && !state.compact) {
+                    html += '<a href="' + esc(d.create_child_url) + '" class="btn btn-ghost btn-xs btn-square text-base-content/60" title="' + esc(t('Thêm danh mục con')) + '">' + ICON.add + '</a>';
+                }
+                if (d.can_update) {
+                    html += '<a href="' + esc(d.edit_url) + '" class="btn btn-ghost btn-xs btn-square text-base-content/60" title="' + esc(t('Sửa')) + '">' + ICON.edit + '</a>';
+                }
+                html += '<button type="button" class="btn btn-ghost btn-xs btn-square text-base-content/60" data-row-menu="' + d.id + '" title="' + esc(t('Thao tác khác')) + '">' + ICON.more + '</button>';
+                return html + '</div>';
+            },
+        },
+    ];
+}
 
-// ── AJAX delete ──────────────────────────────────────────────────────────────
+function menuItems(d, labels) {
+    const items = [];
+    if (d.public_url) items.push('<li><a href="' + esc(d.public_url) + '" target="_blank" rel="noopener">' + esc(t('Xem trên cổng thông tin')) + '</a></li>');
+    if (d.create_child_url) items.push('<li><a href="' + esc(d.create_child_url) + '">' + esc(t('Thêm danh mục con')) + '</a></li>');
+    if (d.can_update) {
+        Object.entries(d.translations || {}).forEach(([locale, value]) => {
+            const label = (value ? t('Sửa bản dịch :language') : t('Dịch sang :language')).replace(':language', labels[locale] || locale.toUpperCase());
+            items.push('<li><a href="' + esc(d.edit_url) + '#translation-' + esc(locale) + '">' + esc(label) + '</a></li>');
+        });
+    }
+    if (d.can_delete) {
+        items.push(d.delete_blocker
+            ? '<li class="menu-disabled mt-1 border-t border-base-200 pt-1"><span class="block"><span class="block">' + esc(t('Xoá danh mục')) + '</span><span class="block text-[11px]">'
+                + esc(t('Không thể xoá: :reason').replace(':reason', d.delete_blocker)) + '</span></span></li>'
+            : '<li class="mt-1 border-t border-base-200 pt-1"><button type="button" class="text-error" data-delete-url="' + esc(d.destroy_url) + '" data-delete-name="' + esc(d.name) + '">' + esc(t('Xoá danh mục')) + '</button></li>');
+    }
+    return items.join('');
+}
 
 let pendingDeleteUrl = null;
 
@@ -87,121 +131,221 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!pendingDeleteUrl) return;
 
         const csrf = document.querySelector('meta[name=csrf-token]')?.content ?? '';
-        this.disabled    = true;
+        this.disabled = true;
         this.textContent = t('Đang xoá...');
 
         try {
             const res = await fetch(pendingDeleteUrl, {
                 method: 'POST',
                 headers: {
-                    'X-CSRF-TOKEN':     csrf,
+                    'X-CSRF-TOKEN': csrf,
                     'X-Requested-With': 'XMLHttpRequest',
-                    'Accept':           'application/json',
-                    'Content-Type':     'application/x-www-form-urlencoded',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded',
                 },
                 body: '_method=DELETE',
             });
-
             const data = await res.json().catch(() => ({}));
 
             if (res.ok) {
-                document.getElementById('categoryDeleteModal')?.close();
-                window.categoryTable?.replaceData();
-            } else {
-                alert(data.message || t('Xoá thất bại. Vui lòng thử lại.'));
+                window.location.reload();
+                return;
             }
+            alert(data.message || t('Xoá thất bại. Vui lòng thử lại.'));
         } catch (e) {
             console.error('[post-category] delete failed', e);
             alert(t('Lỗi kết nối. Vui lòng thử lại.'));
         } finally {
-            this.disabled    = false;
+            this.disabled = false;
             this.textContent = t('Xoá');
             pendingDeleteUrl = null;
         }
     });
 });
 
-// ── Alpine component ──────────────────────────────────────────────────────────
-
 document.addEventListener('alpine:init', () => {
-    Alpine.data('categoryListPage', (serverData = {}) => {
-        const { apiUrl = '' } = serverData;
+    Alpine.data('categoryTreePage', (labels = {}) => {
+        let table = null;
+        const collapsed = (() => {
+            try { return new Set(JSON.parse(localStorage.getItem(COLLAPSED_KEY) || '[]')); } catch { return new Set(); }
+        })();
+        const saveCollapsed = () => localStorage.setItem(COLLAPSED_KEY, JSON.stringify([...collapsed]));
+        const state = {
+            needle: '',
+            filtering: false,
+            matchedIds: new Set(),
+            compact: window.matchMedia('(max-width: 639px)').matches,
+        };
+        let rows = [];
+        let visibleIds = new Set();
+        const byId = new Map();
 
-        let tableInst = null;
+        const walk = (nodes, fn, parent = null) => nodes.forEach((n) => {
+            fn(n, parent);
+            if (n.children) walk(n.children, fn, n);
+        });
+        const eachRow = (list, fn) => list.forEach((row) => {
+            fn(row);
+            eachRow(row.getTreeChildren(), fn);
+        });
 
         return {
-            filters: { search: '' },
-
-            get hasFilters() {
-                return !!this.filters.search;
-            },
-
-            get activeChips() {
-                const chips = [];
-                if (this.filters.search) chips.push({ key: 'search', label: (t('Tìm:') + ' ') + this.filters.search });
-                return chips;
-            },
+            search: '',
+            status: '',
+            matched: 0,
+            filtering: false,
 
             init() {
+                rows = JSON.parse(document.getElementById('category-tree-data')?.textContent || '[]');
+                walk(rows, (n, parent) => byId.set(n.id, { node: n, parent }));
+
                 const p = new URLSearchParams(location.search);
-                if (p.has('q')) this.filters.search = p.get('q');
-                this.$nextTick(() => this._setup());
+                this.search = p.get('q') || '';
+                this.status = p.get('status') || '';
+
+                this.$nextTick(() => this.setup());
+
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) {
+                        e.preventDefault();
+                        this.$refs.search?.focus();
+                    }
+                });
             },
 
-            _setup() {
-                const self = this;
-
-                tableInst = new window.Tabulator('#category-table', {
-                    ajaxURL:    apiUrl,
-                    ajaxConfig: { headers: { 'X-Requested-With': 'XMLHttpRequest' } },
-                    ajaxParams() {
-                        const p = {};
-                        if (self.filters.search) p.search = self.filters.search;
-                        return p;
+            setup() {
+                table = new window.Tabulator('#category-table', {
+                    data: rows,
+                    index: 'id',
+                    dataTree: true,
+                    dataTreeChildField: 'children',
+                    dataTreeChildIndent: 24,
+                    dataTreeStartExpanded: (row) => !collapsed.has(row.getData().id),
+                    dataTreeCollapseElement: '<span class="category-tree-toggle is-open">' + ICON.chevron + '</span>',
+                    dataTreeExpandElement: '<span class="category-tree-toggle">' + ICON.chevron + '</span>',
+                    dataTreeFilter: true,
+                    layout: 'fitColumns',
+                    responsiveLayout: 'hide',
+                    headerVisible: true,
+                    rowFormatter(row) {
+                        const d = row.getData();
+                        row.getElement().classList.toggle('category-row-root', d.depth === 0);
+                        row.getElement().classList.toggle('category-row-inactive', !d.is_active);
                     },
-                    ajaxResponse: (_u, _p, res) => res.data,
-                    ajaxError: (error) => console.error('[post-category] API error', error),
-
-                    dataTree:              true,
-                    dataTreeChildField:    'children',
-                    dataTreeStartExpanded: true,
-                    dataTreeChildIndent:   20,
-
-                    pagination:       false,
-                    layout:           'fitColumns',
-                    responsiveLayout: 'collapse',
-
-                    columns: COLUMNS,
-                    placeholder: '<div class="py-16 text-center opacity-40">'
-                        + '<svg class="w-12 h-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'
-                        + ('<p class="text-sm">' + t('Chưa có danh mục nào') + '</p></div>'),
+                    columns: buildColumns(state),
+                    placeholder: '<div class="py-14 text-center text-sm opacity-50">' + esc(t('Không có danh mục nào khớp bộ lọc')) + '</div>',
                 });
 
-                window.categoryTable = tableInst;
+                table.on('dataTreeRowCollapsed', (row) => {
+                    if (state.filtering) return;
+                    collapsed.add(row.getData().id);
+                    saveCollapsed();
+                });
+                table.on('dataTreeRowExpanded', (row) => {
+                    if (state.filtering) return;
+                    collapsed.delete(row.getData().id);
+                    saveCollapsed();
+                });
+                table.on('tableBuilt', () => this.apply(false));
+
+                this.setupMenu();
+                window.categoryTable = table;
             },
 
-            onFilterChange() {
-                const p = new URLSearchParams();
-                if (this.filters.search) p.set('q', this.filters.search);
-                const qs = p.toString();
-                history.replaceState(null, '', qs ? '?' + qs : location.pathname);
-                tableInst?.replaceData();
+            setupMenu() {
+                const menu = document.getElementById('categoryRowMenu');
+                if (!menu) return;
+                const close = () => menu.classList.add('hidden');
+
+                document.addEventListener('click', (e) => {
+                    const trigger = e.target.closest('[data-row-menu]');
+                    if (trigger) {
+                        e.preventDefault();
+                        const entry = byId.get(Number(trigger.dataset.rowMenu));
+                        if (!entry) return;
+                        menu.innerHTML = menuItems(entry.node, labels);
+                        menu.classList.remove('hidden');
+                        const rect = trigger.getBoundingClientRect();
+                        const top = rect.bottom + 4 + menu.offsetHeight > window.innerHeight ? rect.top - menu.offsetHeight - 4 : rect.bottom + 4;
+                        menu.style.top = Math.max(8, top) + 'px';
+                        menu.style.left = Math.max(8, rect.right - menu.offsetWidth) + 'px';
+                        return;
+                    }
+                    const del = e.target.closest('[data-delete-url]');
+                    if (del) {
+                        close();
+                        window.categoryDeleteConfirm(del.dataset.deleteUrl, del.dataset.deleteName);
+                        return;
+                    }
+                    if (!menu.contains(e.target)) close();
+                });
+                document.addEventListener('keydown', (e) => e.key === 'Escape' && close());
+                window.addEventListener('scroll', close, { passive: true });
+                window.addEventListener('resize', close);
             },
 
-            clearSearch() {
-                this.filters.search = '';
-                this.onFilterChange();
+            matches(n) {
+                if (state.needle && !n.search_text.includes(state.needle)) return false;
+                if (this.status === 'inactive') return !n.is_active;
+                if (this.status === 'untranslated') return !n.is_translated;
+                return true;
             },
 
-            removeChip(key) {
-                if (key === 'search') this.filters.search = '';
-                this.onFilterChange();
+            apply(syncUrl = true) {
+                state.needle = fold(this.search.trim());
+                state.filtering = !!(state.needle || this.status);
+                state.matchedIds = new Set();
+                visibleIds = new Set();
+
+                if (state.filtering) {
+                    walk(rows, (n) => {
+                        if (!this.matches(n)) return;
+                        state.matchedIds.add(n.id);
+                        for (let e = byId.get(n.id); e; e = e.parent ? byId.get(e.parent.id) : null) visibleIds.add(e.node.id);
+                    });
+                }
+
+                this.filtering = state.filtering;
+                this.matched = state.matchedIds.size;
+
+                if (syncUrl) {
+                    const p = new URLSearchParams();
+                    if (this.search.trim()) p.set('q', this.search.trim());
+                    if (this.status) p.set('status', this.status);
+                    history.replaceState(null, '', p.toString() ? '?' + p : location.pathname);
+                }
+
+                if (!table) return;
+                if (state.filtering) {
+                    table.setFilter((data) => visibleIds.has(data.id));
+                    eachRow(table.getRows(), (row) => row.getTreeChildren().length && row.treeExpand());
+                } else {
+                    table.clearFilter();
+                    eachRow(table.getRows(), (row) => {
+                        if (!row.getTreeChildren().length) return;
+                        collapsed.has(row.getData().id) ? row.treeCollapse() : row.treeExpand();
+                    });
+                }
+                table.getRows().forEach((row) => eachRow([row], (r) => r.reformat()));
             },
 
-            reset() {
-                this.filters = { search: '' };
-                history.replaceState(null, '', location.pathname);
-                tableInst?.replaceData();
+            setStatus(value) {
+                this.status = value;
+                this.apply();
+            },
+
+            clearFilters() {
+                this.search = '';
+                this.status = '';
+                this.apply();
+            },
+
+            setAll(open) {
+                if (!table) return;
+                eachRow(table.getRows(), (row) => {
+                    if (!row.getTreeChildren().length) return;
+                    open ? row.treeExpand() : row.treeCollapse();
+                });
             },
         };
     });

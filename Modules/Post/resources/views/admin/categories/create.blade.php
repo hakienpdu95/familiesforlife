@@ -75,7 +75,7 @@
                                 <option value="">{{ __('— Danh mục gốc —') }}</option>
                                 @foreach($categoryTree as $row)
                                 @php($c = $row['category'])
-                                <option value="{{ $c->id }}" {{ old('parent_id') == $c->id ? 'selected' : '' }}>
+                                <option value="{{ $c->id }}" {{ old('parent_id', request('parent_id')) == $c->id ? 'selected' : '' }}>
                                     {{ str_repeat('　', $row['depth']) }}{{ $row['depth'] > 0 ? '– ' : '' }}{{ $c->name }}
                                 </option>
                                 @endforeach

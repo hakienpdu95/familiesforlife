@@ -2,14 +2,22 @@
 @section('title', __('Danh mục bài viết'))
 
 @section('content')
-<div x-data="categoryListPage({{ Js::from([
-    'apiUrl' => route('backend.api.post.categories'),
-]) }})">
+@php
+    $stats = $tree['stats'];
+    $localeLabel = collect($locales)->map(fn ($l) => \App\Support\I18n\PortalLocale::label($l))->implode(', ');
+    $coverage = $stats['total'] ? round($stats['translated'] / $stats['total'] * 100) : 0;
+    $tabs = [
+        '' => [__('Tất cả'), $stats['total']],
+        'inactive' => [__('Đang ẩn'), $stats['inactive']],
+        'untranslated' => [__('Chưa dịch :language', ['language' => $localeLabel]), $stats['untranslated']],
+    ];
+@endphp
+<div x-data="categoryTreePage(@js(collect($locales)->mapWithKeys(fn ($l) => [$l => \App\Support\I18n\PortalLocale::label($l)])))">
+    <script type="application/json" id="category-tree-data">@json($tree['data'])</script>
 
     @foreach(['success','error'] as $type)
         @if(session($type))
-        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
-             x-transition.opacity.duration.500ms
+        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)" x-transition.opacity.duration.500ms
              class="alert alert-{{ $type }} mb-4 text-sm">
             <span>{{ session($type) }}</span>
             <button @click="show = false" class="btn btn-ghost btn-xs ml-auto">✕</button>
@@ -25,86 +33,68 @@
     </div>
     @endif
 
-    <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
-        <div>
+    <div class="flex flex-wrap items-end justify-between gap-3 mb-5">
+        <div class="min-w-0">
             <h1 class="text-2xl font-bold text-base-content">{{ __('Danh mục bài viết') }}</h1>
-            <p class="text-sm text-base-content/50 mt-0.5">{{ __('Cây danh mục dùng để phân loại bài viết') }}</p>
+            <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-base-content/60">
+                <span>{{ __(':total danh mục, :roots nhóm chính', ['total' => $stats['total'], 'roots' => $stats['roots']]) }}</span>
+                <span class="hidden sm:inline text-base-content/20">|</span>
+                <span class="inline-flex items-center gap-2">
+                    {{ __('Đã dịch :language: :done/:total', ['language' => $localeLabel, 'done' => $stats['translated'], 'total' => $stats['total']]) }}
+                    <span class="w-20 h-1.5 rounded-full bg-base-300 overflow-hidden" aria-hidden="true">
+                        <span class="block h-full rounded-full {{ $coverage === 100 ? 'bg-success' : 'bg-warning' }}" style="width: {{ $coverage }}%"></span>
+                    </span>
+                </span>
+            </div>
         </div>
         <div class="flex items-center gap-2">
             <a href="{{ route('backend.post.articles.index') }}" class="btn btn-ghost btn-sm">{{ __('← Bài viết') }}</a>
             @can('create', \Modules\Post\Models\PostCategory::class)
             <a href="{{ route('backend.post.categories.create') }}" class="btn btn-primary btn-sm gap-1.5">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 {{ __('Thêm danh mục') }}
             </a>
             @endcan
         </div>
     </div>
 
-    <div class="section-page">
-        <div class="card bg-base-100 mb-4">
-            <div class="card-body py-3 px-3">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
+    <div class="card bg-base-100 border border-base-200 shadow-sm">
+        <div class="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-base-200">
+            <label class="input input-sm input-bordered flex items-center gap-2 w-full md:w-80">
+                <svg class="w-3.5 h-3.5 text-base-content/40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="search" x-ref="search" x-model="search" @input.debounce.150ms="apply()" @keydown.escape="search = ''; apply()"
+                       placeholder="{{ __('Tìm danh mục...') }}" title="{{ __('Tìm theo tên, đường dẫn hoặc tên tiếng Anh') }}" class="grow bg-transparent outline-none text-sm">
+                <kbd class="kbd kbd-xs hidden md:inline-flex" x-show="!search">/</kbd>
+            </label>
 
-                    <div class="form-control lg:col-span-2">
-                        <label class="label py-0.5">
-                            <span class="label-text text-xs font-medium">{{ __('Tìm kiếm') }}</span>
-                            <span class="label-text-alt text-xs text-base-content/40">{{ __('Có tìm kiếm sẽ hiện danh sách phẳng, không giữ cây') }}</span>
-                        </label>
-                        <div class="input input-sm input-bordered flex items-center gap-2 bg-base-100">
-                            <svg class="w-3.5 h-3.5 text-base-content/40 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                            </svg>
-                            <input type="text" x-model="filters.search" @input.debounce.350ms="onFilterChange()"
-                                   placeholder="{{ __('Nhập tên danh mục...') }}" class="grow bg-transparent outline-none text-sm">
-                            <button x-show="filters.search" @click="clearSearch()"
-                                    class="text-base-content/30 hover:text-base-content transition-colors">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
+            <div role="tablist" class="tabs tabs-box tabs-sm bg-base-200/60">
+                @foreach($tabs as $value => [$label, $count])
+                <button type="button" role="tab" class="tab gap-1.5" :class="status === @js($value) && 'tab-active'" @click="setStatus(@js($value))">
+                    {{ $label }}<span class="text-xs tabular-nums opacity-60">{{ $count }}</span>
+                </button>
+                @endforeach
+            </div>
 
-                </div>
-
-                <div class="flex justify-end">
-                    <button @click="reset()" x-show="hasFilters" x-cloak x-transition
-                            class="btn btn-ghost btn-sm gap-1.5 text-error mt-1">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                        </svg>
-                        {{ __('Đặt lại') }}
-                    </button>
-                </div>
-
-                <div x-show="activeChips.length > 0" x-cloak x-transition
-                     class="flex flex-wrap gap-2 pt-3 mt-3 border-t border-base-200">
-                    <span class="text-xs text-base-content/40 self-center">{{ __('Đang lọc:') }}</span>
-                    <template x-for="chip in activeChips" :key="chip.key">
-                        <span class="badge badge-sm gap-1 cursor-pointer hover:badge-error transition-colors"
-                              @click="removeChip(chip.key)">
-                            <span x-text="chip.label"></span>
-                            <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
-                        </span>
-                    </template>
-                </div>
+            <div class="ml-auto flex items-center gap-1">
+                <button type="button" class="btn btn-ghost btn-xs" @click="setAll(true)">{{ __('Mở rộng tất cả') }}</button>
+                <button type="button" class="btn btn-ghost btn-xs" @click="setAll(false)">{{ __('Thu gọn tất cả') }}</button>
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-body p-0 overflow-hidden tabulator-daisy">
-                <div id="category-table"></div>
-            </div>
+        <div class="tabulator-daisy category-tree-table">
+            <div id="category-table"></div>
         </div>
+
+        <div x-show="filtering" x-cloak class="flex items-center justify-between gap-3 px-4 py-2.5 border-t border-base-200 text-xs text-base-content/60">
+            <span x-text="@js(__(':count danh mục khớp')).replace(':count', matched)"></span>
+            <button type="button" class="btn btn-ghost btn-xs" @click="clearFilters()">{{ __('Xoá bộ lọc') }}</button>
+        </div>
+
     </div>
 
 </div>
+
+<ul id="categoryRowMenu" class="menu menu-sm fixed z-50 hidden w-60 rounded-box border border-base-200 bg-base-100 p-1 shadow-lg" role="menu"></ul>
 
 {{-- ── Delete confirm modal ─────────────────────────────────────────────── --}}
 <dialog id="categoryDeleteModal" class="modal">
