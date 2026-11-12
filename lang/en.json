@@ -1150,7 +1150,6 @@
     "Ghim nổi bật": "Pin as featured",
     "Ghép sai": "Wrong match",
     "Ghép sẵn 1 câu lệnh (prompt) hoàn chỉnh để bạn copy sang ChatGPT/Claude — thiết kế concept, khung 1 tập chuẩn lặp lại, và dàn ý liền mạch cho 5-10 tập đầu tiên của cả chuỗi video. Công cụ này KHÔNG gọi AI trong app, chỉ sinh và lưu lại câu lệnh để bạn tự dán sang công cụ AI đang dùng.": "Assembles a complete prompt for you to copy into ChatGPT/Claude — designing the concept, a repeatable standard episode frame, and a seamless outline for the first 5-10 episodes of the whole video series. This tool does NOT call AI in the app; it only generates and saves the prompt for you to paste into the AI tool you use.",
-    "Gia đình": "Family",
     "Giai đoạn hành trình": "Journey stage",
     "Giai đoạn hành trình không hợp lệ.": "Invalid journey stage.",
     "Giai đoạn hành trình độc giả": "Reader journey stage",
@@ -3001,7 +3000,6 @@
     "Vui lòng nhập địa chỉ email hợp lệ.": "Please enter a valid email address.",
     "Vui lòng đăng nhập để tiếp tục vào Hệ thống Quản trị Nội dung.": "Please sign in to continue to the Content Management System.",
     "Vui lòng đồng ý với chính sách bảo mật để đăng ký.": "Please agree to the privacy policy to sign up.",
-    "Vì": "Because",
     "Ví dụ nội dung/dàn ý mẫu TỐT NHẤT đã có (dán nguyên văn 1 bài/dàn ý bạn coi là chuẩn mực cho chuyên mục này) — khác đoạn văn mẫu giọng văn ở trên, đây là 1 bài/dàn ý HOÀN CHỈNH để AI học cấu trúc/độ sâu/cách triển khai": "The BEST existing sample content/outline (paste verbatim 1 article/outline you consider the benchmark for this category) — unlike the voice sample above, this is a COMPLETE article/outline for the AI to learn structure/depth/development from",
     "Ví dụ: 12 Nguyễn Văn A": "E.g.: 12 Nguyen Van A",
     "Ví dụ: Ngày hội gia đình mùa thu 2026": "E.g.: Autumn Family Day 2026",
@@ -4480,5 +4478,7 @@
     "trong": "of",
     "trang": "pages",
     "Sinh Master Prompt": "Generate Master Prompt",
-    "Đây là sản phẩm ngách Mẹ & Bé (chèn thêm ranh giới pháp lý riêng của ngách này vào prompt)": "This is a Mother & Baby niche product (inserts this niche's own legal boundaries into the prompt)"
+    "Đây là sản phẩm ngách Mẹ & Bé (chèn thêm ranh giới pháp lý riêng của ngách này vào prompt)": "This is a Mother & Baby niche product (inserts this niche's own legal boundaries into the prompt)",
+    "Bản tiếng Anh của trang này chưa sẵn sàng — nội dung bên dưới đang hiển thị bằng ngôn ngữ gốc.": "The English version of this page isn't ready yet — the content below is shown in its original language.",
+    "Xem bản gốc": "View original"
 }

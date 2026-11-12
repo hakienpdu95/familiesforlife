@@ -102,7 +102,7 @@ Quét `__()`, `trans()`, `trans_choice()`, `@lang`, `t()` trong `config('i18n.sc
 - Mô tả activity log lưu sẵn chuỗi lúc ghi; trang log dịch lúc hiển thị bằng `__($description)` nên chỉ dịch được mô tả tĩnh.
 - Thông báo database (notification `toArray`) lưu chuỗi theo locale lúc gửi.
 
-## 5. Giai đoạn 3 — portal song ngữ (đang thiết kế)
+## 5. Giai đoạn 3 — portal song ngữ (3a đã triển khai)
 
 Quyết định đã chốt (2026-11-12): portal phục vụ **song song** 2 ngôn ngữ bằng tiền tố URL + `hreflang`; bản dịch dữ liệu lưu ở **bảng `*_translations` riêng** (cùng mô hình `post_article_translations`), không dùng `spatie/laravel-translatable`.
 
@@ -155,6 +155,14 @@ Trang `/en/...` của entity ngoài phạm vi vẫn render (giao diện tiếng 
 ### 5.7 Admin
 
 Form của entity trong phạm vi có tab theo locale (`Tiếng Việt` = cột gốc, `English` = dòng `_translations`). Lưu tab `en` rỗng toàn bộ = xoá dòng dịch. Danh sách admin hiển thị cột "EN" (có/chưa có bản dịch).
+
+### 5.7b Hiện thực 3a
+
+- `App\Support\I18n\PortalLocale` (scoped): locale portal, `using()` để sinh URL theo locale khác, `markTranslated()`, `setAlternates()`, `hreflangs()`, `switcherLinks()`, `localizeInternalUrl()` (URL nội bộ dạng chuỗi — menu `link_type=url`/`page`).
+- Route thuộc portal khai báo bằng **mẫu tên** trong `config('i18n.portal_routes')` (trừ `portal_routes_except`: sitemap/robots/llms) — không sửa file route từng module. Route công khai mới phải có tên khớp mẫu.
+- `StripPortalLocalePrefix` (middleware toàn cục) bỏ `/en` và ghi attribute; listener `RouteMatched` kích hoạt locale cho route portal, route không thuộc portal mà có tiền tố → 404 (`/en/dashboard`). `ApplySystemLocale` nhường cho locale portal khi đã kích hoạt.
+- `App\Routing\LocalizedUrlGenerator` (thay binding `url`): chèn `/en` cho route portal khi đang ở `/en`; `url()->current()`/`full()` và path của paginator cũng giữ tiền tố. Ngoài portal (admin, email, queue) luôn sinh URL `vi`.
+- Layout `frontend`: `<html lang>` theo locale portal, partial `portal-locale-head` (`hreflang` + `noindex`), `portal-fallback-notice` (banner), `portal-locale-switcher` (header). Mặc định mọi trang portal ở `/en` là **fallback**; controller gọi `markTranslated()` khi trang thực sự có bản `en` (hiện: trang chủ) hoặc `setAlternates()` khi slug khác nhau theo locale (bài viết).
 
 ### 5.8 Thứ tự triển khai
 

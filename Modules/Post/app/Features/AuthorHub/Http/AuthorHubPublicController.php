@@ -3,6 +3,7 @@
 namespace Modules\Post\Features\AuthorHub\Http;
 
 use App\Http\Controllers\Controller;
+use App\Support\I18n\PortalLocale;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\Post\Features\AuthorHub\Queries\ListAuthorArticlesHandler;
@@ -36,7 +37,7 @@ class AuthorHubPublicController extends Controller
 
         $articles = $handler->handle(new ListAuthorArticlesQuery(
             userId: $authorProfile->user_id,
-            locale: config('post.default_locale'),
+            locale: app(PortalLocale::class)->current(),
             page: max(1, $request->integer('page', 1)),
             perPage: config('post.author_hub.articles_per_page'),
         ));

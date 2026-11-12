@@ -3,6 +3,7 @@
 namespace Modules\Post\Features\PublicReading\Http;
 
 use App\Http\Controllers\Controller;
+use App\Support\I18n\PortalLocale;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -19,10 +20,8 @@ use Modules\Post\Support\ArticleStructuredDataBuilder;
 use Modules\Post\Support\NegotiatesMarkdown;
 
 /**
- * Cổng thông tin công khai chỉ phục vụ 1 locale (config('post.default_locale')) — không còn
- * {locale} trong URL, nên bỏ toàn bộ cơ chế fallback/redirect theo locale khác (bản dịch ở
- * locale khác chưa publish thì không có nghĩa gì với route công khai vì không có URL nào
- * public trỏ tới locale đó) — slug không khớp bản dịch locale mặc định đang published → 404.
+ * Locale phục vụ theo tiền tố URL (spec/I18n_Specification.md §5.5): thiếu bản dịch của locale
+ * đang xem thì render bản gốc kèm banner + noindex, không redirect; slug thuộc bản dịch khác → 301.
  *
  * spec/Markdown_Content_Negotiation_Technical_Specification.md v2.1 — CÙNG 1 URL
  * (`{slug}-d{id}.html`) tự chọn representation (HTML/Markdown) theo header `Accept`, đúng nghĩa
@@ -44,21 +43,50 @@ class PublicArticleController extends Controller
         ArticleStructuredDataBuilder $structuredDataBuilder,
         ResolveArticleCategoryHeaderAction $categoryHeaderAction,
     ): View|RedirectResponse|Response {
+        $portal = app(PortalLocale::class);
+        $relations = [
+            'article.categories', 'article.tags', 'article.createdBy.authorProfile',
+            'contentBlocks.productBlock.items.product', 'contentBlocks.productBlock.items.ocopProduct.media',
+            'contentBlocks.productBlock.items.buttons', 'contentBlocks.productBlock.buttons',
+            'contentBlocks.faqBlock.items', 'faqBlocks.items',
+            'contentBlocks.howtoBlock.steps', 'howtoBlocks.steps',
+        ];
+
         $translation = PostArticleTranslation::published()
-            ->where('locale', config('post.default_locale'))
+            ->where('locale', $portal->current())
             ->where('slug', $slug)
-            ->with([
-                'article.categories', 'article.tags', 'article.createdBy.authorProfile',
-                'contentBlocks.productBlock.items.product', 'contentBlocks.productBlock.items.ocopProduct.media',
-                'contentBlocks.productBlock.items.buttons', 'contentBlocks.productBlock.buttons',
-                'contentBlocks.faqBlock.items', 'faqBlocks.items',
-                'contentBlocks.howtoBlock.steps', 'howtoBlocks.steps',
-            ])
+            ->with($relations)
             ->first();
 
-        abort_unless($translation, 404);
+        if (! $translation) {
+            $other = PostArticleTranslation::published()
+                ->where('slug', $slug)
+                ->whereIn('locale', PortalLocale::supported())
+                ->orderByRaw('locale = ? desc', [PortalLocale::default()])
+                ->first();
+
+            abort_unless($other, 404);
+
+            $sibling = PostArticleTranslation::published()
+                ->where('article_id', $other->article_id)
+                ->where('locale', $portal->current())
+                ->first();
+
+            if ($sibling) {
+                return redirect()->route('post.public.article', ['slug' => $sibling->slug, 'id' => $sibling->id], 301);
+            }
+
+            if ($portal->isDefault()) {
+                return redirect()->to($portal->using($other->locale, fn () => route('post.public.article', ['slug' => $other->slug, 'id' => $other->id])), 301);
+            }
+
+            $translation = $other->load($relations);
+        }
 
         $article = $translation->article;
+
+        $portal->markTranslated($translation->locale === $portal->current())
+            ->setAlternates($this->alternateUrls($article->id));
 
         // format=redirect — bài không có nội dung riêng, mọi nơi đang link tới route này
         // (article-card/hero/hero-story/category/search...) không cần đổi gì, vẫn trỏ vào
@@ -117,6 +145,20 @@ class PublicArticleController extends Controller
             'leftCategory' => $categoryHeader['left'],
             'rightCategories' => $categoryHeader['right'],
         ])->header('Vary', 'Accept');
+    }
+
+    private function alternateUrls(int $articleId): array
+    {
+        $portal = app(PortalLocale::class);
+
+        return PostArticleTranslation::published()
+            ->where('article_id', $articleId)
+            ->whereIn('locale', PortalLocale::supported())
+            ->get(['id', 'locale', 'slug'])
+            ->mapWithKeys(fn (PostArticleTranslation $t) => [
+                $t->locale => $portal->using($t->locale, fn () => route('post.public.article', ['slug' => $t->slug, 'id' => $t->id])),
+            ])
+            ->all();
     }
 
     /**

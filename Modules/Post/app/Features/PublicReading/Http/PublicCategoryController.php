@@ -3,6 +3,7 @@
 namespace Modules\Post\Features\PublicReading\Http;
 
 use App\Http\Controllers\Controller;
+use App\Support\I18n\PortalLocale;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -20,16 +21,15 @@ use Modules\ProvinceShowcase\Features\PublicShowcase\Queries\ListFeaturedProvinc
 use Modules\ProvinceShowcase\Features\PublicShowcase\Queries\ListFeaturedProvincesQuery;
 
 /**
- * Cổng thông tin công khai chỉ phục vụ 1 locale (config('post.default_locale')) — không còn
- * {locale} trong URL (trước đây /{locale}/bai-viet, đổi vì mọi nội dung thực tế chỉ có tiếng
- * Việt và ghép "/en/bai-viet" không hợp lý). Bản dịch locale khác (nếu biên tập viên có tạo)
- * vẫn tồn tại trong DB cho quản trị nội bộ, chỉ không có route công khai nào trỏ tới.
+ * Danh sách bài lấy theo locale của tiền tố URL (spec/I18n_Specification.md §5.1, §5.5): ở `/en`
+ * chỉ hiện bài đã có bản dịch `en` xuất bản. Trang danh mục chưa dịch tên/mô tả (đợt 3b) nên ở
+ * `/en` vẫn là trang fallback (banner + noindex).
  */
 class PublicCategoryController extends Controller
 {
     public function index(Request $request, ListPublishedArticlesHandler $handler, ListFeaturedProvincesHandler $featuredProvincesHandler): View
     {
-        $locale = config('post.default_locale');
+        $locale = app(PortalLocale::class)->markTranslated()->current();
         $search = $request->string('q')->trim()->value() ?: null;
 
         // Hero 5 tin (x-frontend.hero, cấu trúc theo spec/hero.html) — 1 bài ghim (is_featured)
@@ -119,7 +119,7 @@ class PublicCategoryController extends Controller
         $limit = min(24, max(1, $requestedLimit), $remaining);
 
         $result = $handler->handle(new LoadMoreArticlesQuery(
-            locale: config('post.default_locale'),
+            locale: app(PortalLocale::class)->current(),
             afterPublishedAt: $this->cursorTime($request),
             afterId: $request->filled('after_id') ? $request->integer('after_id') : null,
             excludeArticleIds: $excludeArticleIds,
@@ -194,7 +194,7 @@ class PublicCategoryController extends Controller
 
     public function show(Request $request, PostCategory $category, ListPublishedArticlesHandler $handler): View
     {
-        $locale = config('post.default_locale');
+        $locale = app(PortalLocale::class)->current();
         $search = $request->string('q')->trim()->value() ?: null;
         $page = max(1, $request->integer('page', 1));
         $isMagazine = ! $search && $page === 1;

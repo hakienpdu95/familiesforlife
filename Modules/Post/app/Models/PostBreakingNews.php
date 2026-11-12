@@ -3,6 +3,7 @@
 namespace Modules\Post\Models;
 
 use App\Models\User;
+use App\Support\I18n\PortalLocale;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,8 +19,8 @@ use Spatie\Activitylog\Support\LogOptions;
  */
 class PostBreakingNews extends Model
 {
-    use SoftDeletes;
     use LogsActivity;
+    use SoftDeletes;
 
     protected $table = 'post_breaking_news';
 
@@ -30,10 +31,10 @@ class PostBreakingNews extends Model
     ];
 
     protected $casts = [
-        'starts_at'   => 'datetime',
-        'ends_at'     => 'datetime',
-        'sort_order'  => 'integer',
-        'is_active'   => 'boolean',
+        'starts_at' => 'datetime',
+        'ends_at' => 'datetime',
+        'sort_order' => 'integer',
+        'is_active' => 'boolean',
     ];
 
     public function getActivitylogOptions(): LogOptions
@@ -125,7 +126,7 @@ class PostBreakingNews extends Model
      */
     public static function currentList(int $limit): Collection
     {
-        $locale = (string) config('post.default_locale');
+        $locale = app(PortalLocale::class)->current();
 
         return static::active()
             ->whereHas('article', fn ($q) => $q->whereHas(
@@ -145,7 +146,7 @@ class PostBreakingNews extends Model
     /** Bản dịch published đúng locale công khai — dùng để build URL/tiêu đề, xem currentList(). */
     public function publicTranslation(): ?PostArticleTranslation
     {
-        return $this->article?->translation((string) config('post.default_locale'));
+        return $this->article?->translation(app(PortalLocale::class)->current());
     }
 
     /** Tiêu đề hiển thị trên ticker — ưu tiên override, fallback title thật của bài. */

@@ -2,6 +2,8 @@
 
 namespace Modules\Menu\Models;
 
+use App\Models\User;
+use App\Support\I18n\PortalLocale;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -22,8 +24,8 @@ use Spatie\Activitylog\Support\LogOptions;
  */
 class MenuItem extends Model
 {
-    use SoftDeletes;
     use LogsActivity;
+    use SoftDeletes;
 
     protected $table = 'menu_items';
 
@@ -34,11 +36,11 @@ class MenuItem extends Model
     ];
 
     protected $casts = [
-        'is_active'       => 'boolean',
+        'is_active' => 'boolean',
         'open_in_new_tab' => 'boolean',
-        'sort_order'      => 'integer',
-        'depth'           => 'integer',
-        'link_type'       => MenuLinkType::class,
+        'sort_order' => 'integer',
+        'depth' => 'integer',
+        'link_type' => MenuLinkType::class,
     ];
 
     public function getActivitylogOptions(): LogOptions
@@ -87,12 +89,12 @@ class MenuItem extends Model
 
     public function createdBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'created_by');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function updatedBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'updated_by');
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     // ── Scopes ───────────────────────────────────────────────────────
@@ -148,9 +150,9 @@ class MenuItem extends Model
                 ? route('post.public.category', ['category' => $this->category->slug])
                 : null,
             MenuLinkType::Page => $this->page?->status === PageStatus::Published && $this->page->published_at
-                ? url($this->page->slug)
+                ? app(PortalLocale::class)->localizeInternalUrl(url($this->page->slug))
                 : null,
-            MenuLinkType::Url  => $this->url,
+            MenuLinkType::Url => app(PortalLocale::class)->localizeInternalUrl($this->url),
             MenuLinkType::None => null,
         };
     }

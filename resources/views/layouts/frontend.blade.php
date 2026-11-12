@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', $locale ?? app()->getLocale()) }}" data-theme="portal">
+<html lang="{{ str_replace('_', '-', app(\App\Support\I18n\PortalLocale::class)->active() ? app()->getLocale() : ($locale ?? app()->getLocale())) }}" data-theme="portal">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +9,7 @@
     <meta name="description" content="@yield('meta_description')">
     @endif
     @stack('meta')
+    @include('layouts.partials.portal-locale-head')
 
     @php
         $homeUrl = route('post.public.home');
@@ -74,6 +75,7 @@
 
 <div x-data="frontendNav" class="flex flex-col min-h-screen">
     @include('layouts.partials.frontend-header')
+    @include('layouts.partials.portal-fallback-notice')
 
     <main class="site-content flex-1 mb-6">
         @yield('content')

@@ -19,6 +19,36 @@ return [
 
     'target_locales' => ['en'],
 
+    'portal_locales' => ['vi', 'en'],
+
+    'portal_default_locale' => 'vi',
+
+    'portal_locale_labels' => [
+        'vi' => 'Tiếng Việt',
+        'en' => 'English',
+    ],
+
+    'portal_routes' => [
+        'post.public.*',
+        'event.public.*',
+        'heritage.public.*',
+        'ocop.public.*',
+        'ocop-subject.public.*',
+        'province.public.*',
+        'playlist.public.*',
+        'real-estate.public.*',
+        'page.public.*',
+        'newsletter.public.subscribe',
+        'video.index',
+    ],
+
+    'portal_routes_except' => [
+        'post.public.sitemap',
+        'post.public.robots',
+        'post.public.llms',
+        'event.public.sitemap',
+    ],
+
     'scan_paths' => [
         'app',
         'Modules',

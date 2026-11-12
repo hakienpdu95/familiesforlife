@@ -12,6 +12,7 @@
                 <a href="{{ route('post.public.sitemap') }}" title="RSS">
                     <i class="icon-rss"></i>
                 </a>
+                @include('layouts.partials.portal-locale-switcher')
                 <a href="#" title="{{ __('Tìm kiếm') }}" id="searchDesktop" :class="search ? 'is-active' : ''" @click.prevent="search = !search">
                     <i class="icon-search"></i>
                     <i class="icon-times"></i>
@@ -41,8 +42,8 @@
                             <div class="inline-flex flex-col relative" style="left: -12px;">
                                 <p class="logo first relative">
                                     <strong class="brand-name relative">
-                                        <span class="br-1">{{ __('Vì') }}</span>
-                                        <span class="br-2">{{ __('Gia đình') }}</span>
+                                        <span class="br-1">Vì</span>
+                                        <span class="br-2">Gia đình</span>
                                         <span class="br-3 absolute">.com.vn</span>
                                     </strong>
                                 </p>
