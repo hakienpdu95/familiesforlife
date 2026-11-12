@@ -1,6 +1,6 @@
 # Đặc tả kỹ thuật — Phân hệ Ngôn ngữ (i18n)
 
-Trạng thái: Giai đoạn 0, 1, 2 đã triển khai (Giai đoạn 2: bóc tách xong, `lang/en.json` đã dịch đủ — `i18n:missing` báo 0 thiếu/0 chưa dịch). Giai đoạn 3 chưa làm.
+Trạng thái: Giai đoạn 0, 1, 2 đã triển khai (Giai đoạn 2: bóc tách xong, `lang/en.json` đã dịch đủ — `i18n:missing` báo 0 thiếu/0 chưa dịch). Giai đoạn 3: đã chốt thiết kế (§5), chưa triển khai.
 
 ## 1. Hai khái niệm tách biệt
 
@@ -99,6 +99,62 @@ Quét `__()`, `trans()`, `trans_choice()`, `@lang`, `t()` trong `config('i18n.sc
 - Mô tả activity log lưu sẵn chuỗi lúc ghi; trang log dịch lúc hiển thị bằng `__($description)` nên chỉ dịch được mô tả tĩnh.
 - Thông báo database (notification `toArray`) lưu chuỗi theo locale lúc gửi.
 
-## 5. Giai đoạn 3 — dữ liệu danh mục song ngữ (chưa làm)
+## 5. Giai đoạn 3 — portal song ngữ (đang thiết kế)
 
-`spatie/laravel-translatable` cho category, menu, banner, page, OCOP; bỏ cột lẻ kiểu `name_en`. `post.default_locale` chuyển sang đọc theo UI locale, có fallback `main_locale`. Cân nhắc route có tiền tố locale + `hreflang`.
+Quyết định đã chốt (2026-11-12): portal phục vụ **song song** 2 ngôn ngữ bằng tiền tố URL + `hreflang`; bản dịch dữ liệu lưu ở **bảng `*_translations` riêng** (cùng mô hình `post_article_translations`), không dùng `spatie/laravel-translatable`.
+
+### 5.1 Locale theo request
+
+| Khu vực | Locale lấy từ |
+|---|---|
+| Portal (route gắn middleware `localized`) | Tiền tố URL: không tiền tố = `vi`, `/en/...` = `en` |
+| Admin, API, email/notification, queue, console | `system_settings.locale` như Giai đoạn 1 |
+
+`vi` là ngôn ngữ gốc, URL tiếng Việt giữ nguyên như hiện tại (không đổi URL đã index). Danh sách locale portal: `config('i18n.portal_locales')` = `['vi', 'en']`, `config('i18n.portal_default_locale')` = `'vi'`.
+
+### 5.2 Định tuyến — không nhân đôi route
+
+- Middleware toàn cục `StripLocalePrefix` (chạy trước khi router so khớp): request `/en/...` → bỏ `/en` khỏi path, ghi `request()->attributes['portal_locale'] = 'en'`. `/en` → `/`.
+- Middleware nhóm `localized` (gắn vào các nhóm route công khai): `App::setLocale(portal_locale ?? 'vi')`, `Carbon::setLocale`, `URL::defaults` không cần.
+- `LocalizedUrlGenerator` (thay `url` binding): khi sinh URL cho route có middleware `localized` và locale hiện tại ≠ `vi` → chèn `/en`. Route admin/API/asset không bị đụng. Nhờ vậy 93 lời gọi `route()` trong view công khai giữ nguyên.
+- Helper `localized_url(string $locale, ?string $url = null)`: URL của trang hiện tại (hoặc `$url`) ở locale khác — dùng cho `hreflang` và nút đổi ngôn ngữ.
+- Route có slug dịch được (`{category:slug}`, trang tĩnh, OCOP…): binding tra slug theo locale hiện tại, không có thì thử slug `vi` rồi 301 sang slug đúng của locale.
+
+### 5.3 Lưu trữ bản dịch
+
+- Bảng gốc giữ nguyên = bản `vi`. Bảng `{bảng}_translations`: `id`, `{model}_id` (FK cascade), `locale`, các cột dịch được (nullable), `timestamps`, `unique({model}_id, locale)`; cột `slug` (nếu có) `unique(locale, slug)`.
+- Trait `App\Foundation\Concerns\HasTranslations`: khai báo `$translatable = ['name', 'slug', ...]`; quan hệ `translations()`, `translation(?string $locale)`; `translated('name')` trả bản theo `App::getLocale()`, rỗng thì fallback cột gốc. Eager load `translations` theo locale hiện tại để tránh N+1.
+- Bỏ cột lẻ `ocop_subjects.name_en` → migration chuyển giá trị sang `ocop_subject_translations(locale='en', name)`, sau đó drop cột.
+
+### 5.4 Phạm vi dữ liệu
+
+| Đợt | Entity | Cột dịch |
+|---|---|---|
+| 3b | `PostCategory`, `Page`, `MenuItem` | name/title, slug, description/excerpt/content, SEO title/description; label menu |
+| 3c | `EventCategory`, `Banner`, `OcopCategory`, `OcopProduct`, `OcopSubject` | name, slug, mô tả, câu chuyện, SEO; banner: title, alt, nhãn CTA |
+| Ngoài phạm vi (giữ dữ liệu `vi`) | Heritage, Province, Event, RealEstate, Playlist, Video, Tag, AuthorProfile | — |
+
+Trang `/en/...` của entity ngoài phạm vi vẫn render (giao diện tiếng Anh, dữ liệu tiếng Việt) nhưng `noindex` và không phát `hreflang="en"`.
+
+### 5.5 Bài viết
+
+- `post.default_locale` không còn quyết định ngôn ngữ phục vụ: portal dùng locale theo URL.
+- `/en/{slug}-d{id}.html` chỉ phục vụ khi bài có bản dịch `en` đã xuất bản; không có → 302 về URL `vi` của bài. Slug sai locale → 301 về slug đúng.
+- Danh sách (trang chủ, chuyên mục, tác giả, tải thêm, tin nóng) ở `/en` chỉ lấy bài có bản `en` đã xuất bản.
+
+### 5.6 SEO
+
+- `<html lang>` theo locale portal. `<link rel="alternate" hreflang>` cho mọi locale **thực sự có** nội dung của trang + `x-default` = bản `vi`. Canonical trỏ chính locale đang xem.
+- Sitemap: mỗi URL kèm `xhtml:link` alternate; `llms.txt` và Markdown negotiation phục vụ theo locale của URL.
+- Nút đổi ngôn ngữ ở header portal: trỏ bản tương ứng nếu có, không có thì về trang chủ của locale đó.
+
+### 5.7 Admin
+
+Form của entity trong phạm vi có tab theo locale (`Tiếng Việt` = cột gốc, `English` = dòng `_translations`). Lưu tab `en` rỗng toàn bộ = xoá dòng dịch. Danh sách admin hiển thị cột "EN" (có/chưa có bản dịch).
+
+### 5.8 Thứ tự triển khai
+
+1. **3a** — hạ tầng định tuyến (§5.1, §5.2), `<html lang>`, nút đổi ngôn ngữ, `hreflang` cho trang chủ/bài viết; bài viết theo §5.5.
+2. **3b** — trait + bảng dịch + admin cho `PostCategory`, `Page`, `MenuItem`.
+3. **3c** — `EventCategory`, `Banner`, OCOP (kèm migrate `name_en`).
+4. **3d** — sitemap, `llms.txt`, Markdown negotiation, `noindex` cho trang ngoài phạm vi.
