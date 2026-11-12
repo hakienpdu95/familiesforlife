@@ -2,6 +2,7 @@
 
 namespace Modules\Post\Support;
 
+use App\Support\I18n\PortalLocale;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -95,20 +96,22 @@ class ArticleContentRenderer
      */
     public function renderMarkdownDocument(PostArticleTranslation $translation): string
     {
-        $canonicalUrl = route('post.public.article', ['slug' => $translation->slug, 'id' => $translation->id]);
-        $description = $translation->seo_description ?: $translation->direct_answer ?: $translation->excerpt;
+        return app(PortalLocale::class)->within($translation->locale, function () use ($translation): string {
+            $canonicalUrl = route('post.public.article', ['slug' => $translation->slug, 'id' => $translation->id]);
+            $description = $translation->seo_description ?: $translation->direct_answer ?: $translation->excerpt;
 
-        $header = "# {$translation->title}\n\n";
-        if ($description) {
-            $header .= "> {$description}\n\n";
-        }
-        $header .= "Nguồn: {$canonicalUrl}\n";
-        if ($translation->updated_at) {
-            $header .= __('Cập nhật: :date', ['date' => format_date($translation->updated_at)])."\n";
-        }
-        $header .= "\n---\n\n";
+            $header = "# {$translation->title}\n\n";
+            if ($description) {
+                $header .= "> {$description}\n\n";
+            }
+            $header .= __('Nguồn: :url', ['url' => $canonicalUrl])."\n";
+            if ($translation->updated_at) {
+                $header .= __('Cập nhật: :date', ['date' => format_date($translation->updated_at)])."\n";
+            }
+            $header .= "\n---\n\n";
 
-        return $header.$this->renderMarkdown($translation);
+            return $header.$this->renderMarkdown($translation);
+        });
     }
 
     /**

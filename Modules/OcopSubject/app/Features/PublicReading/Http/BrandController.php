@@ -4,6 +4,7 @@ namespace Modules\OcopSubject\Features\PublicReading\Http;
 
 use App\Http\Controllers\Controller;
 use App\Services\Media\MediaUrlService;
+use App\Support\I18n\PortalLocale;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\OcopSubject\Features\PublicReading\Queries\ListBrandProductsHandler;
@@ -19,6 +20,12 @@ class BrandController extends Controller
         $subject = OcopSubject::active()->where('slug', $slug)->with('media')->first();
 
         abort_unless($subject, 404);
+
+        $portal = app(PortalLocale::class);
+        $portal->availableIn(array_filter(PortalLocale::prefixed(), fn (string $locale) => $subject->hasTranslation($locale)));
+        $altName = $portal->isDefault()
+            ? collect(PortalLocale::prefixed())->map(fn (string $locale) => $subject->translationFor($locale)?->name)->filter()->first()
+            : ($subject->hasTranslation($portal->current()) ? $subject->originalAttribute('name') : null);
 
         $filters = [
             'q' => $request->string('q')->trim()->value(),
@@ -66,6 +73,7 @@ class BrandController extends Controller
 
         return view('ocopsubject::public.show', [
             'subject' => $subject,
+            'altName' => $altName !== $subject->name ? $altName : null,
             'products' => $products,
             'filters' => $filters,
             'sorts' => array_map('__', ListBrandProductsQuery::SORTS),

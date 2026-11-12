@@ -111,6 +111,10 @@
                             </div>
                         </div>
 
+                        <x-admin.translation-fields :model="null" :fields="[
+                            'name' => ['label' => __('Tên danh mục'), 'maxlength' => 100],
+                        ]" />
+
                         <label class="flex items-start gap-2.5 cursor-pointer select-none group">
                             <input type="hidden" name="is_active" value="0">
                             <input type="checkbox" name="is_active" value="1"

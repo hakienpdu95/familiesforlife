@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Province;
 use App\Models\Ward;
 use App\Services\Media\MediaUrlService;
+use App\Support\I18n\PortalLocale;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\Heritage\Models\HeritageSite;
@@ -123,15 +125,20 @@ class PublicOcopController extends Controller
         return $ids;
     }
 
-    /** Slug không phải route key (getRouteKeyName()='uuid') — resolve thủ công, cùng lý do PublicEventController::show(). */
-    public function show(string $slug): View
+    /** spec/I18n_Specification.md §5.4 — tra theo id, slug sai locale/đã đổi → 301 về slug đúng của locale đang xem. */
+    public function show(string $slug, string $id): View|RedirectResponse
     {
-        $product = OcopProduct::where('status', OcopProductStatus::Published)
-            ->where('slug', $slug)
-            ->with(['category.parent.parent', 'ocopSubject.media'])
-            ->first();
+        $relations = ['category.parent.parent', 'ocopSubject.media'];
+        $product = OcopProduct::where('status', OcopProductStatus::Published)->with($relations)->find((int) $id)
+            ?? OcopProduct::where('status', OcopProductStatus::Published)->where('slug', $slug)->with($relations)->first();
 
         abort_unless($product, 404);
+
+        if ($slug !== $product->slug || (int) $id !== $product->id) {
+            return redirect()->route('ocop.public.show', ['slug' => $product->slug, 'id' => $product->id], 301);
+        }
+
+        $this->declareAlternates($product);
 
         // spec/Heritage_Technical_Specification.md §5.2 "Quy tắc bắt buộc" — luôn qua
         // HeritageSite::published(), KHÔNG find() thẳng (cùng lý do PublicEventController::show()).
@@ -158,5 +165,21 @@ class PublicOcopController extends Controller
             : collect();
 
         return view('ocop::public.show', compact('product', 'heritageSite', 'images', 'subject', 'subjectImages'));
+    }
+
+    private function declareAlternates(OcopProduct $product): void
+    {
+        $portal = app(PortalLocale::class);
+        $default = PortalLocale::default();
+        $alternates = [$default => $portal->using($default, fn () => route('ocop.public.show', ['slug' => $product->originalAttribute('slug'), 'id' => $product->id]))];
+
+        foreach (PortalLocale::prefixed() as $locale) {
+            if ($product->hasTranslation($locale)) {
+                $slug = $product->translationFor($locale)->slug ?: $product->originalAttribute('slug');
+                $alternates[$locale] = $portal->using($locale, fn () => route('ocop.public.show', ['slug' => $slug, 'id' => $product->id]));
+            }
+        }
+
+        $portal->setAlternates($alternates)->markTranslated(isset($alternates[$portal->current()]));
     }
 }

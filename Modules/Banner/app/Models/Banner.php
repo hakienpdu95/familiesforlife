@@ -2,6 +2,7 @@
 
 namespace Modules\Banner\Models;
 
+use App\Foundation\Concerns\HasTranslations;
 use App\Models\User;
 use App\Traits\HasManagedMedia;
 use Illuminate\Database\Eloquent\Builder;
@@ -25,9 +26,20 @@ use Spatie\MediaLibrary\HasMedia;
  */
 class Banner extends Model implements HasMedia
 {
-    use SoftDeletes;
-    use LogsActivity;
     use HasManagedMedia;
+    use HasTranslations;
+    use LogsActivity;
+    use SoftDeletes;
+
+    public static function translatable(): array
+    {
+        return ['alt_text', 'badge_label'];
+    }
+
+    public static function translationModel(): string
+    {
+        return BannerTranslation::class;
+    }
 
     protected $table = 'banners';
 
@@ -39,13 +51,13 @@ class Banner extends Model implements HasMedia
     ];
 
     protected $casts = [
-        'target_type'     => BannerTargetType::class,
+        'target_type' => BannerTargetType::class,
         'open_in_new_tab' => 'boolean',
-        'is_active'       => 'boolean',
-        'start_date'      => 'date',
-        'end_date'        => 'date',
-        'sort_order'      => 'integer',
-        'click_count'     => 'integer',
+        'is_active' => 'boolean',
+        'start_date' => 'date',
+        'end_date' => 'date',
+        'sort_order' => 'integer',
+        'click_count' => 'integer',
         // target_value KHÔNG cast — string phẳng (slug category khi target_type=category).
         // Chỉ cần cast 'array' nếu sau này target_value chứa JSON (ngoài phạm vi v1.1 — xem
         // spec §9), ép cast sớm sẽ vỡ khi target_value=null.

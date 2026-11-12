@@ -2,6 +2,7 @@
 
 namespace Modules\Event\Features\EventCategoryManagement\Http;
 
+use App\Actions\I18n\SaveModelTranslationsAction;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -31,15 +32,17 @@ class EventCategoryAdminController extends Controller
 
     public function create(ListEventCategoriesForAdminHandler $handler): View
     {
-        $categories = $handler->handle(new ListEventCategoriesForAdminQuery());
+        $categories = $handler->handle(new ListEventCategoriesForAdminQuery);
 
         return view('event::admin.categories.create', compact('categories'));
     }
 
     public function store(Request $request, CreateEventCategoryAction $action): RedirectResponse
     {
-        $data     = EventCategoryData::from($this->validated($request));
+        $translations = $this->validatedTranslations($request);
+        $data = EventCategoryData::from($this->validated($request));
         $category = $action->handle($data);
+        SaveModelTranslationsAction::run($category, $translations);
 
         return redirect()->route('backend.event.categories.index')
             ->with('success', __('Danh mục ":name" đã được tạo.', ['name' => $category->name]));
@@ -47,15 +50,17 @@ class EventCategoryAdminController extends Controller
 
     public function edit(EventCategory $category, ListEventCategoriesForAdminHandler $handler): View
     {
-        $categories = $handler->handle(new ListEventCategoriesForAdminQuery());
+        $categories = $handler->handle(new ListEventCategoriesForAdminQuery);
 
         return view('event::admin.categories.edit', compact('category', 'categories'));
     }
 
     public function update(Request $request, EventCategory $category, UpdateEventCategoryAction $action): RedirectResponse
     {
+        $translations = $this->validatedTranslations($request);
         $data = EventCategoryData::from($this->validated($request));
         $action->handle($category, $data);
+        SaveModelTranslationsAction::run($category, $translations);
 
         return redirect()->route('backend.event.categories.index')
             ->with('success', __('Cập nhật danh mục thành công.'));
@@ -92,14 +97,21 @@ class EventCategoryAdminController extends Controller
         return back()->with('success', __('Đã cập nhật thứ tự danh mục.'));
     }
 
+    private function validatedTranslations(Request $request): ?array
+    {
+        return $request->validate(SaveModelTranslationsAction::rules([
+            'name' => ['nullable', 'string', 'max:100'],
+        ]))['translations'] ?? null;
+    }
+
     private function validated(Request $request): array
     {
         return $request->validate([
-            'parent_id'  => ['nullable', 'integer', 'exists:event_categories,id'],
-            'name'       => ['required', 'string', 'max:100'],
-            'icon'       => ['nullable', 'string', 'max:50'],
-            'color_hex'  => ['nullable', 'string', 'max:7'],
-            'is_active'  => ['boolean'],
+            'parent_id' => ['nullable', 'integer', 'exists:event_categories,id'],
+            'name' => ['required', 'string', 'max:100'],
+            'icon' => ['nullable', 'string', 'max:50'],
+            'color_hex' => ['nullable', 'string', 'max:7'],
+            'is_active' => ['boolean'],
             'sort_order' => ['integer', 'min:0'],
         ]);
     }

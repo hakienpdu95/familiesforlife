@@ -20,7 +20,6 @@ class BuildOcopSubjectAttributesAction
     {
         return [
             'name' => $data->name,
-            'name_en' => $data->name_en,
             'tax_code' => $data->tax_code,
             'organization_type' => $data->organization_type,
             'legal_representative' => $data->legal_representative,

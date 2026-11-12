@@ -2,6 +2,7 @@
 
 namespace Modules\OcopSubject\Features\OcopSubjectManagement\Http;
 
+use App\Actions\I18n\SaveModelTranslationsAction;
 use App\Http\Controllers\Controller;
 use App\Models\Province;
 use Illuminate\Http\JsonResponse;
@@ -56,8 +57,9 @@ class OcopSubjectAdminController extends Controller
     public function store(OcopSubjectRequest $request, CreateOcopSubjectAction $action, StoreOcopSubjectDocumentsAction $storeDocuments): RedirectResponse
     {
         $validated = $request->validated();
-        $ocopSubject = $action->handle(OcopSubjectData::from(Arr::except($validated, 'documents')));
+        $ocopSubject = $action->handle(OcopSubjectData::from(Arr::except($validated, ['documents', 'translations'])));
         $storeDocuments->handle($ocopSubject, $validated['documents'] ?? []);
+        SaveModelTranslationsAction::run($ocopSubject, $validated['translations'] ?? null);
 
         return redirect()->route('backend.ocop-subjects.index')
             ->with('success', __('Đã tạo chủ thể ":name".', ['name' => $ocopSubject->name]));
@@ -73,8 +75,9 @@ class OcopSubjectAdminController extends Controller
     public function update(OcopSubjectRequest $request, OcopSubject $ocopSubject, UpdateOcopSubjectAction $action, StoreOcopSubjectDocumentsAction $storeDocuments): RedirectResponse
     {
         $validated = $request->validated();
-        $action->handle($ocopSubject, OcopSubjectData::from(Arr::except($validated, 'documents')));
+        $action->handle($ocopSubject, OcopSubjectData::from(Arr::except($validated, ['documents', 'translations'])));
         $storeDocuments->handle($ocopSubject, $validated['documents'] ?? []);
+        SaveModelTranslationsAction::run($ocopSubject, $validated['translations'] ?? null);
 
         return redirect()->route('backend.ocop-subjects.index')
             ->with('success', __('Cập nhật chủ thể thành công.'));

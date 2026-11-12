@@ -45,7 +45,6 @@ return [
     'portal_routes_except' => [
         'post.public.sitemap',
         'post.public.robots',
-        'post.public.llms',
         'event.public.sitemap',
     ],
 

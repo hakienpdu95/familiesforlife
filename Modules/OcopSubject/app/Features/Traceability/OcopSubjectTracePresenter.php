@@ -43,7 +43,7 @@ class OcopSubjectTracePresenter implements TracePresenter
 
         return [
             'name' => $target->name,
-            'name_en' => $target->name_en,
+            'name_en' => $target->translationFor('en')?->name,
             'type' => $target->organization_type?->label(),
             'stars' => $target->ocop_star,
             'cert_expiry' => $target->ocop_cert_expiry?->toDateString(),

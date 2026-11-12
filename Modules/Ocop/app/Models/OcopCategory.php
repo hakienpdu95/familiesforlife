@@ -2,6 +2,7 @@
 
 namespace Modules\Ocop\Models;
 
+use App\Foundation\Concerns\HasTranslations;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,8 +24,19 @@ use Spatie\Activitylog\Support\LogOptions;
  */
 class OcopCategory extends Model
 {
+    use HasTranslations;
     use LogsActivity;
     use SoftDeletes;
+
+    public static function translatable(): array
+    {
+        return ['name'];
+    }
+
+    public static function translationModel(): string
+    {
+        return OcopCategoryTranslation::class;
+    }
 
     protected $table = 'ocop_categories';
 

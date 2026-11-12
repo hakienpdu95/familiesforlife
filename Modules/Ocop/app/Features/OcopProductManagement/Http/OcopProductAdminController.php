@@ -2,6 +2,7 @@
 
 namespace Modules\Ocop\Features\OcopProductManagement\Http;
 
+use App\Actions\I18n\SaveModelTranslationsAction;
 use App\Http\Controllers\Controller;
 use App\Models\Province;
 use Illuminate\Http\JsonResponse;
@@ -82,10 +83,12 @@ class OcopProductAdminController extends Controller
 
     public function store(Request $request, CreateOcopProductAction $action, StoreOcopProductDocumentsAction $storeDocuments): RedirectResponse
     {
+        $translations = $this->validatedTranslations($request);
         $validated = $this->validated($request);
         $data = OcopProductData::from(Arr::except($validated, 'document_uuids'));
         $product = $action->handle($data);
         $storeDocuments->handle($product, $validated['document_uuids'] ?? [], (int) $request->user()->id);
+        SaveModelTranslationsAction::run($product, $translations, 'name');
 
         return redirect()->route('backend.ocop.products.index')
             ->with('success', __('Đã tạo sản phẩm OCOP ":name".', ['name' => $product->name]));
@@ -104,11 +107,13 @@ class OcopProductAdminController extends Controller
 
     public function update(Request $request, OcopProduct $product, UpdateOcopProductAction $action, StoreOcopProductDocumentsAction $storeDocuments): RedirectResponse
     {
+        $translations = $this->validatedTranslations($request);
         $validated = $this->validated($request);
         $this->ensureDocumentLimit($product, $validated);
         $data = OcopProductData::from(Arr::except($validated, 'document_uuids'));
         $action->handle($product, $data);
         $storeDocuments->handle($product, $validated['document_uuids'] ?? [], (int) $request->user()->id);
+        SaveModelTranslationsAction::run($product, $translations, 'name');
 
         return redirect()->route('backend.ocop.products.index')
             ->with('success', __('Cập nhật sản phẩm thành công.'));
@@ -170,6 +175,19 @@ class OcopProductAdminController extends Controller
                 ]);
             }
         }
+    }
+
+    private function validatedTranslations(Request $request): ?array
+    {
+        return $request->validate(SaveModelTranslationsAction::rules([
+            'name' => ['nullable', 'string', 'max:150'],
+            'description' => ['nullable', 'string'],
+            'story' => ['nullable', 'string', 'max:65000'],
+            'origin' => ['nullable', 'string', 'max:255'],
+            'ingredients' => ['nullable', 'string', 'max:20000'],
+            'usage_instructions' => ['nullable', 'string', 'max:20000'],
+            'storage_instructions' => ['nullable', 'string', 'max:20000'],
+        ]))['translations'] ?? null;
     }
 
     private function validated(Request $request): array

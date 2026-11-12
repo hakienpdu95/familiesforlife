@@ -76,6 +76,49 @@ class OcopCategorySeeder extends Seeder
         ]],
     ];
 
+    /** spec/I18n_Specification.md §5.4 — tên tiếng Anh của bảng phân loại, ghi vào ocop_category_translations mỗi lần chạy. */
+    private const EN_NAMES = [
+        'SẢN PHẨM THỰC PHẨM' => 'FOOD PRODUCTS',
+        'Nhóm: Thực phẩm tươi sống' => 'Group: Fresh food',
+        'Phân nhóm: Rau, củ, quả, hạt tươi' => 'Subgroup: Fresh vegetables, tubers, fruits and nuts',
+        'Phân nhóm: Thịt, thủy sản, trứng, sữa tươi' => 'Subgroup: Meat, seafood, eggs and fresh milk',
+        'Nhóm: Thực phẩm thô, sơ chế' => 'Group: Raw and minimally processed food',
+        'Phân nhóm: Gạo, ngũ cốc, hạt sơ chế khác' => 'Subgroup: Rice, cereals and other minimally processed grains',
+        'Phân nhóm: Mật ong, mật khác và nông sản thực phẩm khác' => 'Subgroup: Honey, other syrups and other agricultural food products',
+        'Nhóm: Thực phẩm chế biến' => 'Group: Processed food',
+        'Phân nhóm: Đồ ăn nhanh' => 'Subgroup: Fast food',
+        'Phân nhóm: Chế biến từ gạo, ngũ cốc' => 'Subgroup: Processed rice and cereal products',
+        'Phân nhóm: Chế biến từ rau, củ, quả, hạt' => 'Subgroup: Processed vegetable, tuber, fruit and nut products',
+        'Phân nhóm: Chế biến từ thịt, trứng, sữa, thủy sản, các sản phẩm từ mật ong, mật khác và nông sản thực phẩm khác' => 'Subgroup: Processed meat, egg, dairy and seafood products, honey and syrup products and other agricultural food products',
+        'Nhóm: Gia vị' => 'Group: Spices and condiments',
+        'Phân nhóm: Tương, nước mắm, gia vị dạng lỏng khác' => 'Subgroup: Sauces, fish sauce and other liquid condiments',
+        'Phân nhóm: Gia vị khác' => 'Subgroup: Other spices and condiments',
+        'Nhóm: Chè' => 'Group: Tea',
+        'Phân nhóm: Chè tươi, chế biến' => 'Subgroup: Fresh and processed tea',
+        'Phân nhóm: Sản phẩm chè từ thực vật khác' => 'Subgroup: Herbal teas from other plants',
+        'Nhóm: Cà phê, ca cao' => 'Group: Coffee and cocoa',
+        'SẢN PHẨM ĐỒ UỐNG' => 'BEVERAGE PRODUCTS',
+        'Nhóm: Đồ uống có cồn' => 'Group: Alcoholic beverages',
+        'Phân nhóm: Rượu trắng' => 'Subgroup: White liquor',
+        'Phân nhóm: Đồ uống có cồn khác' => 'Subgroup: Other alcoholic beverages',
+        'Nhóm: Đồ uống không cồn' => 'Group: Non-alcoholic beverages',
+        'Phân nhóm: Nước khoáng thiên nhiên, nước uống đóng chai' => 'Subgroup: Natural mineral water and bottled drinking water',
+        'Phân nhóm: Đồ uống không cồn' => 'Subgroup: Non-alcoholic beverages',
+        'SẢN PHẨM DƯỢC LIỆU VÀ SẢN PHẨM TỪ DƯỢC LIỆU' => 'MEDICINAL HERBS AND HERBAL PRODUCTS',
+        'Nhóm: Thực phẩm chức năng, thuốc dược liệu, thuốc cổ truyền' => 'Group: Dietary supplements, herbal medicines and traditional medicines',
+        'Nhóm: Mỹ phẩm có thành phần từ dược liệu' => 'Group: Cosmetics with herbal ingredients',
+        'Nhóm: Tinh dầu và dược liệu khác' => 'Group: Essential oils and other medicinal herbs',
+        'SẢN PHẨM HÀNG THỦ CÔNG MỸ NGHỆ' => 'HANDICRAFT PRODUCTS',
+        'Nhóm: Thủ công mỹ nghệ gia dụng, trang trí' => 'Group: Household and decorative handicrafts',
+        'Nhóm: Vải, may mặc' => 'Group: Textiles and garments',
+        'SẢN PHẨM SINH VẬT CẢNH' => 'ORNAMENTAL PLANTS AND ANIMALS',
+        'Nhóm: Hoa' => 'Group: Flowers',
+        'Nhóm: Cây cảnh' => 'Group: Ornamental plants',
+        'Nhóm: Động vật cảnh' => 'Group: Ornamental animals',
+        'SẢN PHẨM DỊCH VỤ DU LỊCH CỘNG ĐỒNG, DU LỊCH SINH THÁI VÀ ĐIỂM DU LỊCH' => 'COMMUNITY TOURISM, ECO-TOURISM SERVICES AND TOURIST DESTINATIONS',
+        'Nhóm: Dịch vụ du lịch cộng đồng, du lịch sinh thái và điểm du lịch' => 'Group: Community tourism, eco-tourism services and tourist destinations',
+    ];
+
     public function run(): void
     {
         $creatorId = User::withoutGlobalScopes()->where('email', 'haidang.pv@vigiadinh.vn')->value('id')
@@ -107,17 +150,21 @@ class OcopCategorySeeder extends Seeder
 
         if (! $category) {
             $category = OcopCategory::create([
-                'parent_id'  => $parentId,
-                'depth'      => $depth,
-                'name'       => $node['name'],
-                'slug'       => $this->uniqueSlug($node['code'] . ' ' . $node['name']),
-                'code'       => $node['code'],
-                'authority'  => $node['authority'] ?? null,
+                'parent_id' => $parentId,
+                'depth' => $depth,
+                'name' => $node['name'],
+                'slug' => $this->uniqueSlug($node['code'].' '.$node['name']),
+                'code' => $node['code'],
+                'authority' => $node['authority'] ?? null,
                 'sort_order' => $sortOrder,
-                'is_active'  => true,
+                'is_active' => true,
                 'created_by' => $creatorId,
             ]);
             $created++;
+        }
+
+        if (isset(self::EN_NAMES[$node['name']])) {
+            $category->translations()->updateOrCreate(['locale' => 'en'], ['name' => self::EN_NAMES[$node['name']]]);
         }
 
         foreach ($node['children'] ?? [] as $childIndex => $child) {
@@ -131,7 +178,7 @@ class OcopCategorySeeder extends Seeder
     {
         $base = Str::slug($seed);
         $slug = $base;
-        $i    = 2;
+        $i = 2;
 
         while (OcopCategory::withTrashed()->where('slug', $slug)->exists()) {
             $slug = "{$base}-{$i}";

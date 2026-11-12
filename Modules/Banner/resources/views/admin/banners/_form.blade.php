@@ -176,6 +176,11 @@
                         @error('badge_label')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                     </div>
 
+                    <x-admin.translation-fields :model="$banner" :fields="[
+                        'alt_text' => ['label' => 'Alt text', 'maxlength' => 255],
+                        'badge_label' => ['label' => __('Nhãn minh bạch quảng cáo'), 'maxlength' => 40],
+                    ]" />
+
                     <div class="divider my-1"></div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

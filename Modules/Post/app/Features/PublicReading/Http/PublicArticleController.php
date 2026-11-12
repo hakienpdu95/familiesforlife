@@ -171,9 +171,16 @@ class PublicArticleController extends Controller
      */
     private function showMarkdown(PostArticleTranslation $translation, ArticleContentRenderer $renderer): Response
     {
-        return response($renderer->renderMarkdownDocument($translation), 200)
+        $response = response($renderer->renderMarkdownDocument($translation), 200)
             ->header('Content-Type', 'text/markdown; charset=UTF-8')
+            ->header('Content-Language', $translation->locale)
             ->header('Vary', 'Accept')
             ->header('Cache-Control', 'public, max-age=3600');
+
+        if (! app(PortalLocale::class)->isTranslated()) {
+            $response->header('X-Robots-Tag', 'noindex');
+        }
+
+        return $response;
     }
 }

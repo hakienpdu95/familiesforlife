@@ -2,6 +2,7 @@
 
 namespace Modules\OcopSubject\Features\OcopSubjectManagement\Http\Requests;
 
+use App\Actions\I18n\SaveModelTranslationsAction;
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -38,7 +39,6 @@ class OcopSubjectRequest extends FormRequest
 
         return [
             'name' => ['required', 'string', 'max:255'],
-            'name_en' => ['nullable', 'string', 'max:255'],
             'tax_code' => [
                 'nullable', 'string', 'regex:'.self::TAX_CODE_REGEX,
                 Rule::unique('ocop_subjects', 'tax_code')->ignore($ocopSubject?->id)->withoutTrashed(),
@@ -74,7 +74,10 @@ class OcopSubjectRequest extends FormRequest
             'documents' => ['nullable', 'array:'.implode(',', OcopSubject::DOCUMENT_COLLECTIONS)],
             'documents.*' => ['array', 'max:'.OcopSubject::MAX_DOCUMENTS],
             'documents.*.*' => ['file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:20480'],
-        ];
+        ] + SaveModelTranslationsAction::rules([
+            'name' => ['nullable', 'string', 'max:255'],
+            'story' => ['nullable', 'string'],
+        ]);
     }
 
     public function after(): array

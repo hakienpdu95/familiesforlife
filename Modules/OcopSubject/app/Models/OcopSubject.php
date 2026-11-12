@@ -2,6 +2,7 @@
 
 namespace Modules\OcopSubject\Models;
 
+use App\Foundation\Concerns\HasTranslations;
 use App\Models\User;
 use App\Shared\Traceability\Traits\HasQrIdentity;
 use App\Traits\HasManagedMedia;
@@ -21,8 +22,19 @@ class OcopSubject extends Model implements HasMedia
 {
     use HasManagedMedia;
     use HasQrIdentity;
+    use HasTranslations;
     use LogsActivity;
     use SoftDeletes;
+
+    public static function translatable(): array
+    {
+        return ['name', 'story'];
+    }
+
+    public static function translationModel(): string
+    {
+        return OcopSubjectTranslation::class;
+    }
 
     public const IMAGE_COLLECTION = 'ocop_subject_gallery';
 
@@ -55,7 +67,7 @@ class OcopSubject extends Model implements HasMedia
     protected $table = 'ocop_subjects';
 
     protected $fillable = [
-        'uuid', 'name', 'name_en', 'slug', 'tax_code', 'organization_type',
+        'uuid', 'name', 'slug', 'tax_code', 'organization_type',
         'legal_representative', 'position',
         'address', 'province_code', 'province_name', 'ward_code', 'ward_name',
         'gps_coordinates', 'factory_code', 'is_food_business',

@@ -1172,7 +1172,6 @@
     [
         "ocop_subjects///__///__///",
         "name///string///255///NOT_NULL///__///__///__",
-        "name_en///string///255///_NULL///NULL///__///__",
         "tax_code///string///20///_NULL///NULL///->index()///__",
         "organization_type///string///20///_NULL///NULL///__///__",
         "legal_representative///string///150///_NULL///NULL///__///__",

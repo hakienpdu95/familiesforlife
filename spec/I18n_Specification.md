@@ -102,7 +102,7 @@ Quét `__()`, `trans()`, `trans_choice()`, `@lang`, `t()` trong `config('i18n.sc
 - Mô tả activity log lưu sẵn chuỗi lúc ghi; trang log dịch lúc hiển thị bằng `__($description)` nên chỉ dịch được mô tả tĩnh.
 - Thông báo database (notification `toArray`) lưu chuỗi theo locale lúc gửi.
 
-## 5. Giai đoạn 3 — portal song ngữ (3a, 3b đã triển khai)
+## 5. Giai đoạn 3 — portal song ngữ (đã triển khai 3a–3d)
 
 Quyết định đã chốt (2026-11-12): portal phục vụ **song song** 2 ngôn ngữ bằng tiền tố URL + `hreflang`; bản dịch dữ liệu lưu ở **bảng `*_translations` riêng** (cùng mô hình `post_article_translations`), không dùng `spatie/laravel-translatable`.
 
@@ -127,7 +127,7 @@ Quyết định đã chốt (2026-11-12): portal phục vụ **song song** 2 ng�
 
 - Bảng gốc giữ nguyên = bản `vi`. Bảng `{bảng}_translations`: `id`, `{model}_id` (FK cascade), `locale`, các cột dịch được (nullable), `timestamps`, `unique({model}_id, locale)`; cột `slug` (nếu có) `unique(locale, slug)`.
 - Trait `App\Foundation\Concerns\HasTranslations`: khai báo `$translatable = ['name', 'slug', ...]`; quan hệ `translations()`, `translation(?string $locale)`; `translated('name')` trả bản theo `App::getLocale()`, rỗng thì fallback cột gốc. Eager load `translations` theo locale hiện tại để tránh N+1.
-- Bỏ cột lẻ `ocop_subjects.name_en` → migration chuyển giá trị sang `ocop_subject_translations(locale='en', name)`, sau đó drop cột.
+- Bỏ cột lẻ `ocop_subjects.name_en` → migration chuyển giá trị sang `ocop_subject_translations(locale='en', name)`, sau đó drop cột (đã làm ở 3c, xem 5.7d).
 
 ### 5.4 Phạm vi dữ liệu
 
@@ -159,7 +159,7 @@ Form của entity trong phạm vi có tab theo locale (`Tiếng Việt` = cột 
 ### 5.7b Hiện thực 3a
 
 - `App\Support\I18n\PortalLocale` (scoped): locale portal, `using()` để sinh URL theo locale khác, `markTranslated()`, `setAlternates()`, `hreflangs()`, `switcherLinks()`, `localizeInternalUrl()` (URL nội bộ dạng chuỗi — menu `link_type=url`/`page`).
-- Route thuộc portal khai báo bằng **mẫu tên** trong `config('i18n.portal_routes')` (trừ `portal_routes_except`: sitemap/robots/llms) — không sửa file route từng module. Route công khai mới phải có tên khớp mẫu.
+- Route thuộc portal khai báo bằng **mẫu tên** trong `config('i18n.portal_routes')` (trừ `portal_routes_except`: sitemap/robots — `llms.txt` là route portal từ 3d) — không sửa file route từng module. Route công khai mới phải có tên khớp mẫu.
 - `StripPortalLocalePrefix` (middleware toàn cục) bỏ `/en` và ghi attribute; listener `RouteMatched` kích hoạt locale cho route portal, route không thuộc portal mà có tiền tố → 404 (`/en/dashboard`). `ApplySystemLocale` nhường cho locale portal khi đã kích hoạt.
 - `App\Routing\LocalizedUrlGenerator` (thay binding `url`): chèn `/en` cho route portal khi đang ở `/en`; `url()->current()`/`full()` và path của paginator cũng giữ tiền tố. Ngoài portal (admin, email, queue) luôn sinh URL `vi`.
 - Layout `frontend`: `<html lang>` theo locale portal, partial `portal-locale-head` (`hreflang` + `noindex`), `portal-fallback-notice` (banner), `portal-locale-switcher` (header). Mặc định mọi trang portal ở `/en` là **fallback**; controller gọi `markTranslated()` khi trang thực sự có bản `en` (hiện: trang chủ) hoặc `setAlternates()` khi slug khác nhau theo locale (bài viết).
@@ -172,9 +172,34 @@ Form của entity trong phạm vi có tab theo locale (`Tiếng Việt` = cột 
 - Admin: `<x-admin.translation-fields :model :fields>` (khối "Bản dịch English" trong form) + `App\Actions\I18n\SaveModelTranslationsAction` (`rules()` sinh rule `translations.{locale}.{field}`, `run()` lưu/xoá). Controller validate bản dịch **trước** khi gọi Action chính để không lưu dở. Slug trang `en` để trống thì tự sinh từ tiêu đề.
 - Portal: trang tĩnh ở `/en` tra slug bản dịch trước, vào bằng slug `vi` khi đã có slug `en` → 301; chuyên mục/trang dùng `PortalLocale::availableIn()` để chỉ khai báo `hreflang` cho locale thực sự có bản dịch.
 
+### 5.7d Hiện thực 3c
+
+- Bảng `event_category_translations` (name), `banner_translations` (alt_text, badge_label), `ocop_category_translations` (name), `ocop_product_translations` (name, slug, description, story, origin, ingredients, usage_instructions, storage_instructions — `unique(locale, slug)`), `ocop_subject_translations` (name, story).
+- `ocop_subjects.name_en` → migration chép giá trị (trim, bỏ chuỗi rỗng) sang `ocop_subject_translations(locale=en, name)`, đối chiếu số dòng rồi mới drop cột; `down()` khôi phục cột và dữ liệu. `render_migration_file.json` đã bỏ `name_en`. Snapshot truy xuất QR vẫn giữ key `name_en` (đọc từ bản dịch) để tương thích snapshot cũ.
+- **Lệch so với §5.4:**
+  - Banner: `title` là ghi chú nội bộ (không hiển thị công khai) nên không dịch; ảnh banner dùng chung mọi ngôn ngữ.
+  - Slug danh mục sự kiện và slug chủ thể OCOP (`/brands/{slug}`, tên riêng) **không** dịch — cùng lý do slug chuyên mục ở 5.7c. Slug sản phẩm OCOP **có** dịch, tự sinh từ tên `en` (`SaveModelTranslationsAction::run($model, $input, slugFrom: 'name')`).
+  - Danh mục OCOP là bảng phân loại nhà nước cố định (không có form admin) — tên tiếng Anh nằm trong `OcopCategorySeeder::EN_NAMES`, ghi lại mỗi lần chạy seeder.
+- Portal: `/{slug}-op{id}.html` tra theo **id**, slug sai/khác locale → 301 về slug đúng của locale đang xem (trước đây tra theo slug, bỏ qua id); `hreflang` theo locale có bản dịch. Trang thương hiệu và danh mục sự kiện dùng `availableIn()`. `/en/ocop` (danh sách) giữ trạng thái fallback vì trộn sản phẩm đã/chưa dịch.
+- Admin: tab "Bản dịch" (sản phẩm, chủ thể OCOP), khối bản dịch trong form danh mục sự kiện và banner. `<x-admin.translation-fields>` tự khởi tạo Jodit cho trường `editor` (bỏ qua textarea đã được trang khởi tạo). `SaveModelTranslationsAction` với `$input === null` (request không gửi khối bản dịch, VD API) **không** xoá bản dịch.
+
+### 5.7e Hiện thực 3d
+
+- `post-sitemap.xml`: mỗi phiên bản ngôn ngữ là 1 `<url>`, kèm `xhtml:link rel="alternate" hreflang` cho mọi phiên bản thực sự có + `x-default` (bản `vi`); chỉ liệt kê URL `/en/...` khi có bản dịch (trang chủ luôn có; chuyên mục khi có tên `en`; bài viết theo bản dịch đã xuất bản). Trang tác giả và `event-sitemap.xml` chỉ có bản `vi` (ngoài phạm vi). Partial dùng chung: `resources/views/partials/sitemap-urls.blade.php`.
+- `llms.txt` là route portal: `/en/llms.txt` phục vụ bản tiếng Anh (chỉ liệt kê chuyên mục đã có tên `en`), header `Content-Language`, mục "Ngôn ngữ khác" trỏ chéo giữa các bản. View viết từng đoạn 1 key và in thô (`{!! !!}`, text/plain) — sửa lỗi Giai đoạn 2 đã dồn cả khối Markdown thành 1 dòng.
+- Markdown negotiation (`Accept: text/markdown`): render theo ngôn ngữ **của nội dung** (`PortalLocale::within($translation->locale)` — nhãn "Nguồn"/"Cập nhật", URL nguồn và tên sản phẩm OCOP trong khối sản phẩm), header `Content-Language`; bản fallback ở `/en` kèm `X-Robots-Tag: noindex` và dòng "Nguồn" trỏ URL gốc.
+- Trang ngoài phạm vi (sự kiện, di tích, tỉnh, BĐS, video, tác giả…) ở `/en`: fallback mặc định của 3a (banner + `noindex`, không `hreflang="en"`) — không cần code riêng.
+
+### 5.7f Nợ kỹ thuật (xử lý sau go-live)
+
+- **Slug chuyên mục/danh mục không dịch** (`/en/danh-muc/{slug-vi}`, `/en/su-kien/danh-muc/{slug-vi}`, `/en/brands/{slug}`): chấp nhận ở Giai đoạn 3 (duyệt 2026-11-12) để không phải sửa hàng chục lời gọi `route()` truyền slug dạng chuỗi. Hướng xử lý: thêm cột `slug` vào `*_translations`, đổi các lời gọi sang truyền model (`route(..., $category)`) + `getRouteKey()` theo locale, binding tra slug locale rồi 301 từ slug `vi`.
+- Sitemap chưa có trang tĩnh, sản phẩm/chủ thể OCOP, danh mục sự kiện.
+- Danh sách `/en/ocop`, `/en/su-kien` chưa lọc theo bản dịch (đang fallback + noindex).
+- Tìm kiếm (Meilisearch) chỉ index bản `vi`.
+
 ### 5.8 Thứ tự triển khai
 
 1. **3a** — hạ tầng định tuyến (§5.1, §5.2), `<html lang>`, nút đổi ngôn ngữ, `hreflang` cho trang chủ/bài viết; bài viết theo §5.5.
 2. **3b** — trait + bảng dịch + admin cho `PostCategory`, `Page`, `MenuItem`.
-3. **3c** — `EventCategory`, `Banner`, OCOP (kèm migrate `name_en`).
-4. **3d** — sitemap, `llms.txt`, Markdown negotiation, `noindex` cho trang ngoài phạm vi.
+3. **3c** — `EventCategory`, `Banner`, OCOP (kèm migrate `name_en`). ✅
+4. **3d** — sitemap, `llms.txt`, Markdown negotiation, `noindex` cho trang ngoài phạm vi. ✅

@@ -19,7 +19,7 @@
             @if(($field['type'] ?? 'text') === 'textarea')
             <textarea name="{{ $name }}" rows="{{ $field['rows'] ?? 3 }}" lang="{{ $locale }}" class="textarea textarea-bordered textarea-sm w-full">{{ $value }}</textarea>
             @elseif(($field['type'] ?? 'text') === 'editor')
-            <textarea name="{{ $name }}" lang="{{ $locale }}" class="jodit-editor" data-jodit-preset="{{ $field['preset'] ?? 'full' }}" data-jodit-context-type="{{ $field['context'] ?? '' }}">{{ $value }}</textarea>
+            <textarea name="{{ $name }}" lang="{{ $locale }}" class="jodit-editor" data-translation-editor data-jodit-preset="{{ $field['preset'] ?? 'full' }}" data-jodit-context-type="{{ $field['context'] ?? '' }}">{{ $value }}</textarea>
             @else
             <input type="text" name="{{ $name }}" value="{{ $value }}" lang="{{ $locale }}" class="input input-bordered input-sm w-full" @if(! empty($field['maxlength'])) maxlength="{{ $field['maxlength'] }}" @endif>
             @endif
@@ -29,3 +29,20 @@
     </div>
 </details>
 @endforeach
+@once
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    if (! window.initJodit || ! window.Jodit) {
+        return;
+    }
+    const initialized = (el) => Object.values(window.Jodit.instances || {}).some((editor) => editor.element === el);
+    document.querySelectorAll('textarea[data-translation-editor]').forEach((el) => {
+        if (! initialized(el)) {
+            window.initJodit(el);
+        }
+    });
+});
+</script>
+@endpush
+@endonce

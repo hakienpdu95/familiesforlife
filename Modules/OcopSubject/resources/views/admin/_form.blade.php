@@ -6,6 +6,7 @@
         'certs' => __('Chứng nhận & Hồ sơ'),
         'story' => __('Câu chuyện'),
         'contact' => __('Liên hệ'),
+        'translation' => __('Bản dịch'),
     ];
     $tabKeys = array_keys($tabs);
 @endphp
@@ -15,11 +16,12 @@
         orgType: {{ Js::from(old('organization_type', $ocopSubject?->organization_type?->value ?? '')) }},
         isFood: {{ Js::from((bool) old('is_food_business', $ocopSubject?->is_food_business ?? false)) }},
         tabFields: {
-            basic: ['name', 'name_en', 'tax_code', 'organization_type', 'legal_representative', 'position'],
+            basic: ['name', 'tax_code', 'organization_type', 'legal_representative', 'position'],
             location: ['address', 'province_code', 'ward_code', 'gps_coordinates', 'factory_code'],
             certs: ['is_food_business', 'ocop_star', 'ocop_cert_expiry', 'documents', 'media_uuids'],
             story: ['story'],
             contact: ['hotline', 'email', 'website'],
+            translation: ['translations'],
         },
         errs: {{ Js::from($errors->keys()) }},
         errCount(t) {
@@ -65,15 +67,6 @@
                                placeholder="{{ __('VD: HTX Nông nghiệp Thủy Thanh') }}"
                                class="input input-bordered input-sm w-full @error('name') input-error @enderror">
                         @error('name')<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
-                    </div>
-                    <div class="form-control">
-                        <label class="label py-0 pb-1.5">
-                            <span class="label-text font-medium">{{ __('Tên tiếng Anh') }}</span>
-                            <span class="label-text-alt text-xs text-base-content/40">{{ __('Không bắt buộc') }}</span>
-                        </label>
-                        <input type="text" name="name_en" value="{{ old('name_en', $ocopSubject?->name_en) }}" maxlength="255"
-                               class="input input-bordered input-sm w-full @error('name_en') input-error @enderror">
-                        @error('name_en')<p class="mt-1 text-xs text-error form-val-msg">{{ $message }}</p>@enderror
                     </div>
                 </div>
 
@@ -306,12 +299,19 @@
                 </div>
             </div>
 
+            <div x-show="tab === 'translation'" x-cloak data-tab-label="{{ __('Bản dịch') }}" class="space-y-4">
+                <x-admin.translation-fields :model="$ocopSubject" :fields="[
+                    'name' => ['label' => __('Tên chủ thể'), 'maxlength' => 255],
+                    'story' => ['label' => __('Câu chuyện thương hiệu'), 'type' => 'editor', 'preset' => 'standard'],
+                ]" />
+            </div>
+
             <div class="flex items-center justify-between pt-4">
                 <button type="button" x-show="tab !== 'basic'"
                         @click="tab = {{ Js::from($tabKeys) }}[{{ Js::from($tabKeys) }}.indexOf(tab) - 1]"
                         class="btn btn-ghost btn-sm">{{ __('‹ Quay lại') }}</button>
                 <span></span>
-                <button type="button" x-show="tab !== 'contact'"
+                <button type="button" x-show="tab !== {{ Js::from(last($tabKeys)) }}"
                         @click="tab = {{ Js::from($tabKeys) }}[{{ Js::from($tabKeys) }}.indexOf(tab) + 1]"
                         class="btn btn-ghost btn-sm">{{ __('Tiếp theo ›') }}</button>
             </div>

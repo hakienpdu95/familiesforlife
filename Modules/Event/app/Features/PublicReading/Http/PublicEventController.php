@@ -3,6 +3,7 @@
 namespace Modules\Event\Features\PublicReading\Http;
 
 use App\Http\Controllers\Controller;
+use App\Support\I18n\PortalLocale;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -51,6 +52,7 @@ class PublicEventController extends Controller
 
     public function category(Request $request, EventCategory $category, ListPublishedEventsHandler $handler): View
     {
+        app(PortalLocale::class)->availableIn(array_filter(PortalLocale::prefixed(), fn (string $locale) => $category->hasTranslation($locale)));
         $search = $request->string('q')->trim()->value() ?: null;
         $page = max(1, $request->integer('page', 1));
         $isMagazine = ! $search && $page === 1;

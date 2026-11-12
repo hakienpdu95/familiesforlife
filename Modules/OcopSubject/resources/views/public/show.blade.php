@@ -16,8 +16,8 @@
         <main class="lg:col-span-9 min-w-0">
 
             <h1 class="text-2xl lg:text-3xl font-bold uppercase leading-tight text-[#117a3a]">{{ $subject->name }}</h1>
-            @if($subject->name_en)
-            <p class="mt-1 text-sm text-base-content/60">{{ $subject->name_en }}</p>
+            @if($altName)
+            <p class="mt-1 text-sm text-base-content/60">{{ $altName }}</p>
             @endif
 
             @php

@@ -3,6 +3,7 @@
 namespace Modules\Post\Features\PublicReading\Http;
 
 use App\Http\Controllers\Controller;
+use App\Support\I18n\PortalLocale;
 use Illuminate\Http\Response;
 use Modules\Menu\Models\MenuItem;
 use Modules\Post\Enums\ArticleFormat;
@@ -14,37 +15,66 @@ use Modules\Post\Models\PostCategory;
 class SitemapController extends Controller
 {
     /**
-     * Chỉ liệt kê bản dịch published CỦA LOCALE MẶC ĐỊNH — route công khai /{slug}-d{id}.html
-     * không còn {locale}, nên bản dịch ở locale khác (nếu có) không có URL public nào để liệt kê.
+     * spec/I18n_Specification.md §5.6 — mỗi phiên bản ngôn ngữ là 1 `<url>` riêng, kèm
+     * `xhtml:link rel="alternate"` tới mọi phiên bản thực sự có (+ `x-default` = bản vi). Chỉ liệt
+     * kê URL `/en/...` khi trang có bản dịch (trang fallback bị noindex, không đưa vào sitemap).
      *
-     * format=redirect bị loại — URL này chỉ bounce (302) ra domain khác, không có nội dung
-     * riêng để Google index, đưa vào sitemap của CHÍNH MÌNH không có ý nghĩa.
-     *
-     * GEO (2026-07-28) — trước đây sitemap CHỈ có bài viết (không priority/changefreq). Mở rộng
-     * thêm trang chủ/danh mục/tác giả — cùng nhóm trang vừa được thêm JSON-LD/OG lần này, đúng
-     * tinh thần "Crawlability" các bài GEO nhấn mạnh (sitemap đầy đủ giúp AI crawler/Googlebot
-     * khám phá hết các loại trang, không chỉ bài viết).
+     * format=redirect bị loại — URL này chỉ bounce (302) ra domain khác, không có nội dung riêng.
      */
     public function index(): Response
     {
-        $translations = PostArticleTranslation::published()
-            ->where('locale', config('post.default_locale'))
+        $portal = app(PortalLocale::class);
+        $default = PortalLocale::default();
+        $entries = [];
+
+        $entries[] = [
+            'urls' => collect(PortalLocale::supported())->mapWithKeys(fn (string $locale) => [$locale => $portal->using($locale, fn () => route('post.public.home'))])->all(),
+            'changefreq' => 'daily',
+            'priority' => '1.0',
+        ];
+
+        foreach (PostCategory::active()->with('translations')->get(['id', 'slug', 'updated_at']) as $category) {
+            $locales = [$default, ...array_filter(PortalLocale::prefixed(), fn (string $locale) => $category->hasTranslation($locale))];
+            $entries[] = [
+                'urls' => collect($locales)->mapWithKeys(fn (string $locale) => [$locale => $portal->using($locale, fn () => route('post.public.category', ['category' => $category->slug]))])->all(),
+                'lastmod' => $category->updated_at,
+                'changefreq' => 'daily',
+                'priority' => '0.7',
+            ];
+        }
+
+        PostArticleTranslation::published()
+            ->whereIn('locale', PortalLocale::supported())
             ->whereHas('article', fn ($q) => $q->where('format', '!=', ArticleFormat::Redirect))
             ->orderBy('updated_at', 'desc')
-            ->get(['id', 'locale', 'slug', 'updated_at']);
-
-        $categories = PostCategory::active()->get(['slug', 'updated_at']);
+            ->get(['id', 'article_id', 'locale', 'slug', 'updated_at'])
+            ->groupBy('article_id')
+            ->each(function ($translations) use (&$entries, $portal): void {
+                $entries[] = [
+                    'urls' => $translations->mapWithKeys(fn (PostArticleTranslation $t) => [$t->locale => $portal->using($t->locale, fn () => route('post.public.article', ['slug' => $t->slug, 'id' => $t->id]))])->all(),
+                    'lastmod' => $translations->max('updated_at'),
+                    'changefreq' => 'weekly',
+                    'priority' => '0.8',
+                ];
+            });
 
         // is_public chưa đủ — cùng điều kiện route thật (AuthorHubPublicController::show()):
         // user phải còn isPlatform() (§0 v1.2), tránh liệt kê URL sẽ 404 nếu điều kiện đổi sau.
-        $authorProfiles = PostAuthorProfile::where('is_public', true)
+        PostAuthorProfile::where('is_public', true)
             ->with('user')
             ->get(['id', 'uuid', 'slug', 'user_id', 'updated_at'])
             ->filter(fn (PostAuthorProfile $profile) => $profile->user && AuthorRoleResolver::isEligible($profile->user))
-            ->values();
+            ->each(function (PostAuthorProfile $profile) use (&$entries, $default): void {
+                $entries[] = [
+                    'urls' => [$default => route('post.public.author-hub.show', $profile)],
+                    'lastmod' => $profile->updated_at,
+                    'changefreq' => 'weekly',
+                    'priority' => '0.5',
+                ];
+            });
 
         return response()
-            ->view('post::public.sitemap', compact('translations', 'categories', 'authorProfiles'))
+            ->view('post::public.sitemap', ['entries' => $entries, 'defaultLocale' => $default])
             ->header('Content-Type', 'text/xml');
     }
 
@@ -109,13 +139,20 @@ class SitemapController extends Controller
         // sitemap.xml (vẫn cố tình liệt kê MỌI category active, kể cả không có trong menu, vì
         // sitemap tồn tại chính để giúp crawler tìm trang KHÔNG có link điều hướng tới).
         $menuCategoryIds = MenuItem::query()->where('location', 'header')->whereNotNull('category_id')->pluck('category_id');
+        $portal = app(PortalLocale::class);
 
         $categories = PostCategory::active()->root()
             ->whereIn('id', $menuCategoryIds)
-            ->get(['name', 'slug']);
+            ->get(['id', 'name', 'slug'])
+            ->when(! $portal->isDefault(), fn ($categories) => $categories->filter(fn (PostCategory $category) => $category->hasTranslation($portal->current())));
+
+        $otherLocales = collect(PortalLocale::supported())
+            ->reject(fn (string $locale) => $locale === $portal->current())
+            ->mapWithKeys(fn (string $locale) => [$locale => $portal->using($locale, fn () => route('post.public.llms'))]);
 
         return response()
-            ->view('post::public.llms', compact('categories'))
-            ->header('Content-Type', 'text/plain; charset=UTF-8');
+            ->view('post::public.llms', compact('categories', 'otherLocales'))
+            ->header('Content-Type', 'text/plain; charset=UTF-8')
+            ->header('Content-Language', $portal->current());
     }
 }

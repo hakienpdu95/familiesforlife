@@ -2,6 +2,8 @@
 
 namespace Modules\Event\Models;
 
+use App\Foundation\Concerns\HasTranslations;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,8 +23,19 @@ use Spatie\Activitylog\Support\LogOptions;
 class EventCategory extends Model
 {
     use HasFactory;
-    use SoftDeletes;
+    use HasTranslations;
     use LogsActivity;
+    use SoftDeletes;
+
+    public static function translatable(): array
+    {
+        return ['name'];
+    }
+
+    public static function translationModel(): string
+    {
+        return EventCategoryTranslation::class;
+    }
 
     protected $table = 'event_categories';
 
@@ -48,7 +61,7 @@ class EventCategory extends Model
     ];
 
     protected $casts = [
-        'is_active'  => 'boolean',
+        'is_active' => 'boolean',
         'sort_order' => 'integer',
     ];
 
@@ -85,12 +98,12 @@ class EventCategory extends Model
 
     public function createdBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'created_by');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function updatedBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'updated_by');
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     // ── Scopes ───────────────────────────────────────────────────────

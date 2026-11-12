@@ -2,6 +2,7 @@
 
 namespace Modules\Ocop\Models;
 
+use App\Foundation\Concerns\HasTranslations;
 use App\Models\User;
 use App\Shared\Traceability\Traits\HasQrIdentity;
 use App\Traits\HasManagedMedia;
@@ -23,9 +24,20 @@ class OcopProduct extends Model implements HasMedia
 {
     use HasManagedMedia;
     use HasQrIdentity;
+    use HasTranslations;
     use LogsActivity;
     use Searchable;
     use SoftDeletes;
+
+    public static function translatable(): array
+    {
+        return ['name', 'slug', 'description', 'story', 'origin', 'ingredients', 'usage_instructions', 'storage_instructions'];
+    }
+
+    public static function translationModel(): string
+    {
+        return OcopProductTranslation::class;
+    }
 
     public const IMAGE_COLLECTION = 'ocop_gallery';
 

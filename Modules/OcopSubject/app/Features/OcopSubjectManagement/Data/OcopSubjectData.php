@@ -17,7 +17,6 @@ class OcopSubjectData extends Data
         public readonly ?string $address = null,
         public readonly ?string $gps_coordinates = null,
 
-        public readonly ?string $name_en = null,
         public readonly ?string $position = null,
         public readonly ?string $factory_code = null,
         public readonly bool $is_food_business = false,

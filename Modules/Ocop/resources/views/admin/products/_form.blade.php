@@ -10,13 +10,14 @@
             details:  ['story', 'origin', 'production_date', 'ingredients', 'usage_instructions', 'storage_instructions'],
             documents: {{ Js::from(collect(\Modules\Ocop\Models\OcopProduct::DOCUMENT_COLLECTIONS)->map(fn ($c) => "documents.$c")->values()) }},
             affiliate: ['shopee_url', 'tiktok_url'],
+            translation: ['translations'],
         },
         errs: {{ Js::from($errors->keys()) }},
         errCount(t) {
             return this.tabFields[t].filter(f => this.errs.some(e => e === f || e.startsWith(f + '.'))).length;
         },
         init() {
-            const order = ['basic', 'producer', 'details', 'documents', 'affiliate'];
+            const order = ['basic', 'producer', 'details', 'documents', 'affiliate', 'translation'];
             for (const t of order) {
                 if (this.errCount(t) > 0) { this.tab = t; break; }
             }
@@ -76,12 +77,23 @@
 
                 <button type="button" role="tab" :aria-selected="tab === 'affiliate'"
                         @click="tab = 'affiliate'"
-                        class="flex items-center gap-1.5 px-1 py-4 text-sm font-medium border-b-2 transition-colors"
+                        class="flex items-center gap-1.5 px-1 py-4 mr-6 text-sm font-medium border-b-2 transition-colors"
                         :class="tab === 'affiliate'
                             ? 'border-primary text-primary'
                             : 'border-transparent text-base-content/50 hover:text-base-content hover:border-base-content/20'">
                     Link affiliate
                     <span x-show="errCount('affiliate') > 0" x-text="errCount('affiliate')"
+                          class="badge badge-error badge-xs"></span>
+                </button>
+
+                <button type="button" role="tab" :aria-selected="tab === 'translation'"
+                        @click="tab = 'translation'"
+                        class="flex items-center gap-1.5 px-1 py-4 text-sm font-medium border-b-2 transition-colors"
+                        :class="tab === 'translation'
+                            ? 'border-primary text-primary'
+                            : 'border-transparent text-base-content/50 hover:text-base-content hover:border-base-content/20'">
+                    {{ __('Bản dịch') }}
+                    <span x-show="errCount('translation') > 0" x-text="errCount('translation')"
                           class="badge badge-error badge-xs"></span>
                 </button>
 
@@ -467,6 +479,18 @@
                     <span class="text-xs text-base-content/40">{{ __('Điền xong? Nhấn') }} <strong>{{ $product ? __('Lưu thay đổi') : __('Tạo mới') }}</strong> {{ __('ở bên phải') }}</span>
                 </div>
 
+            </div>
+
+            <div x-show="tab === 'translation'" x-cloak data-tab-label="{{ __('Bản dịch') }}" class="space-y-4">
+                <x-admin.translation-fields :model="$product" :fields="[
+                    'name' => ['label' => __('Tên sản phẩm'), 'maxlength' => 150, 'hint' => __('Đường dẫn /en/ tự sinh từ tên')],
+                    'description' => ['label' => __('Mô tả'), 'type' => 'editor', 'preset' => 'standard'],
+                    'story' => ['label' => __('Câu chuyện sản phẩm'), 'type' => 'editor', 'preset' => 'standard'],
+                    'origin' => ['label' => __('Xuất xứ'), 'maxlength' => 255],
+                    'ingredients' => ['label' => __('Thành phần'), 'type' => 'editor', 'preset' => 'standard'],
+                    'usage_instructions' => ['label' => __('Hướng dẫn sử dụng'), 'type' => 'editor', 'preset' => 'standard'],
+                    'storage_instructions' => ['label' => __('Hướng dẫn bảo quản'), 'type' => 'editor', 'preset' => 'standard'],
+                ]" />
             </div>
 
         </div>{{-- /tab panels --}}

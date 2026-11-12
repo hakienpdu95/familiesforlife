@@ -94,6 +94,27 @@ class PortalLocale
         }
     }
 
+    public function within(string $locale, Closure $callback): mixed
+    {
+        $previousLocale = $this->locale;
+        $previousUrlLocale = $this->urlLocale;
+        $previousApp = App::getLocale();
+
+        if ($previousLocale !== null) {
+            $this->locale = in_array($locale, self::supported(), true) ? $locale : self::default();
+        }
+        $this->urlLocale = $locale;
+        App::setLocale($locale);
+
+        try {
+            return $callback();
+        } finally {
+            $this->locale = $previousLocale;
+            $this->urlLocale = $previousUrlLocale;
+            App::setLocale($previousApp);
+        }
+    }
+
     public function prefix(?string $locale = null): string
     {
         $locale ??= $this->urlLocale();
