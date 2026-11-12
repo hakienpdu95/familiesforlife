@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Backend;
 
+use App\Actions\BuildTimezoneOptionsAction;
 use App\Actions\UpdateSystemSettingsAction;
 use App\Http\Controllers\Controller;
 use App\Models\SystemSetting;
@@ -19,7 +20,7 @@ class SystemSettingController extends Controller
 
         return view('backend.settings.index', [
             'settings' => SystemSetting::current(),
-            'timezones' => timezone_identifiers_list(),
+            'timezoneGroups' => BuildTimezoneOptionsAction::run(),
         ]);
     }
 

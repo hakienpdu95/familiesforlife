@@ -4494,5 +4494,20 @@
     "Trang chính": "Main pages",
     "Đường dẫn /en/ tự sinh từ tên": "The /en/ URL is generated from the name",
     "Sitemap XML": "XML Sitemap",
-    "Chuyên mục_List": "Categories"
+    "Chuyên mục_List": "Categories",
+    "Chưa lưu": "Unsaved",
+    "Cập nhật lần cuối :time": "Last updated :time",
+    "Dành cho đối tác và người dùng quốc tế": "For partners and international users",
+    "Dùng cho bảng dữ liệu, bộ lọc, email và trang công khai.": "Used in data tables, filters, emails and public pages.",
+    "Email, thông báo và tác vụ hàng đợi": "Emails, notifications and queued jobs",
+    "Không đổi ngôn ngữ nội dung bài viết": "Article content language is not changed",
+    "Múi giờ": "Time zone",
+    "Mặc định cho người dùng trong nước": "Default for domestic users",
+    "Mọi thời điểm lưu trong hệ thống được quy đổi sang múi giờ này khi hiển thị.": "All stored timestamps are converted to this time zone when displayed.",
+    "Ngày giờ đầy đủ": "Full date & time",
+    "Phạm vi áp dụng": "Applies to",
+    "Trang quản trị và cổng thông tin": "Admin dashboard and public portal",
+    "Tìm theo thành phố hoặc UTC...": "Search by city or UTC...",
+    "Xem trước": "Preview",
+    "Định dạng ngày giờ": "Date & time format"
 }
