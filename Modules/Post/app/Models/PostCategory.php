@@ -2,12 +2,15 @@
 
 namespace Modules\Post\Models;
 
+use App\Foundation\Concerns\HasTranslations;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
@@ -19,8 +22,19 @@ use Spatie\Activitylog\Support\LogOptions;
 class PostCategory extends Model
 {
     use HasFactory;
-    use SoftDeletes;
+    use HasTranslations;
     use LogsActivity;
+    use SoftDeletes;
+
+    public static function translatable(): array
+    {
+        return ['name', 'description'];
+    }
+
+    public static function translationModel(): string
+    {
+        return PostCategoryTranslation::class;
+    }
 
     protected $table = 'post_categories';
 
@@ -47,7 +61,7 @@ class PostCategory extends Model
     ];
 
     protected $casts = [
-        'is_active'  => 'boolean',
+        'is_active' => 'boolean',
         'sort_order' => 'integer',
     ];
 
@@ -85,18 +99,18 @@ class PostCategory extends Model
 
     public function createdBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'created_by');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function updatedBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'updated_by');
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     /** platform_section_editor được gán phụ trách category này (§4.2). */
     public function editors(): BelongsToMany
     {
-        return $this->belongsToMany(\App\Models\User::class, 'post_category_editors', 'post_category_id', 'user_id');
+        return $this->belongsToMany(User::class, 'post_category_editors', 'post_category_id', 'user_id');
     }
 
     // ── Scopes ───────────────────────────────────────────────────────
@@ -118,7 +132,7 @@ class PostCategory extends Model
      * home.blade.php (x-frontend.promo-bar) — section trang chủ độc lập với nav,
      * xem spec §2/§9.
      */
-    public static function navTree(): \Illuminate\Support\Collection
+    public static function navTree(): Collection
     {
         return static::active()->root()
             ->with(['children' => fn ($q) => $q->active()->orderBy('sort_order')])
@@ -133,14 +147,14 @@ class PostCategory extends Model
      * toàn bộ hậu duệ của nó — dùng khi sửa 1 category, tránh chọn con/cháu làm cha của chính nó
      * (cycle).
      *
-     * @param \Illuminate\Support\Collection<int, self> $tree
+     * @param  Collection<int, self>  $tree
      * @return array<int, array{category: self, depth: int}>
      */
-    public static function flatten(\Illuminate\Support\Collection $tree, ?int $excludeSubtreeRootId = null): array
+    public static function flatten(Collection $tree, ?int $excludeSubtreeRootId = null): array
     {
         $flat = [];
 
-        $walk = function (\Illuminate\Support\Collection $nodes, int $depth) use (&$walk, &$flat, $excludeSubtreeRootId): void {
+        $walk = function (Collection $nodes, int $depth) use (&$walk, &$flat, $excludeSubtreeRootId): void {
             foreach ($nodes as $node) {
                 if ($node->id === $excludeSubtreeRootId) {
                     continue; // bỏ cả node này VÀ mọi hậu duệ (không đệ quy tiếp vào $node->children)
@@ -156,11 +170,11 @@ class PostCategory extends Model
     }
 
     /** Id của node $id và toàn bộ hậu duệ — dùng để chặn cycle ở validation (parent_id). */
-    public static function subtreeIds(\Illuminate\Support\Collection $tree, int $id): array
+    public static function subtreeIds(Collection $tree, int $id): array
     {
         $ids = [];
 
-        $walk = function (\Illuminate\Support\Collection $nodes, bool $collecting) use (&$walk, &$ids, $id): void {
+        $walk = function (Collection $nodes, bool $collecting) use (&$walk, &$ids, $id): void {
             foreach ($nodes as $node) {
                 $inSubtree = $collecting || $node->id === $id;
                 if ($inSubtree) {

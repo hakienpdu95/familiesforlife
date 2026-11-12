@@ -102,7 +102,7 @@ Quét `__()`, `trans()`, `trans_choice()`, `@lang`, `t()` trong `config('i18n.sc
 - Mô tả activity log lưu sẵn chuỗi lúc ghi; trang log dịch lúc hiển thị bằng `__($description)` nên chỉ dịch được mô tả tĩnh.
 - Thông báo database (notification `toArray`) lưu chuỗi theo locale lúc gửi.
 
-## 5. Giai đoạn 3 — portal song ngữ (3a đã triển khai)
+## 5. Giai đoạn 3 — portal song ngữ (3a, 3b đã triển khai)
 
 Quyết định đã chốt (2026-11-12): portal phục vụ **song song** 2 ngôn ngữ bằng tiền tố URL + `hreflang`; bản dịch dữ liệu lưu ở **bảng `*_translations` riêng** (cùng mô hình `post_article_translations`), không dùng `spatie/laravel-translatable`.
 
@@ -163,6 +163,14 @@ Form của entity trong phạm vi có tab theo locale (`Tiếng Việt` = cột 
 - `StripPortalLocalePrefix` (middleware toàn cục) bỏ `/en` và ghi attribute; listener `RouteMatched` kích hoạt locale cho route portal, route không thuộc portal mà có tiền tố → 404 (`/en/dashboard`). `ApplySystemLocale` nhường cho locale portal khi đã kích hoạt.
 - `App\Routing\LocalizedUrlGenerator` (thay binding `url`): chèn `/en` cho route portal khi đang ở `/en`; `url()->current()`/`full()` và path của paginator cũng giữ tiền tố. Ngoài portal (admin, email, queue) luôn sinh URL `vi`.
 - Layout `frontend`: `<html lang>` theo locale portal, partial `portal-locale-head` (`hreflang` + `noindex`), `portal-fallback-notice` (banner), `portal-locale-switcher` (header). Mặc định mọi trang portal ở `/en` là **fallback**; controller gọi `markTranslated()` khi trang thực sự có bản `en` (hiện: trang chủ) hoặc `setAlternates()` khi slug khác nhau theo locale (bài viết).
+
+### 5.7c Hiện thực 3b
+
+- Bảng `post_category_translations` (name, description), `page_translations` (title, slug, excerpt, content, seo_title, seo_description — `unique(locale, slug)`), `menu_item_translations` (label). FK cascade, `unique({model}_id, locale)`.
+- Trait `App\Foundation\Concerns\HasTranslations`: model khai báo `translatable()` + `translationModel()`. Override `getAttributeValue()` — **chỉ khi portal đang ở locale khác `vi`** mới trả giá trị bản dịch (rỗng thì fallback cột gốc); admin/API/console và lúc lưu luôn đọc cột gốc, nên mọi view portal đang in `$category->name`/`$page->title`/`$item->label` tự hiển thị đúng. Global scope eager-load `translations` của đúng locale (bắt buộc vì `Model::shouldBeStrict()` chặn lazy load). `originalAttribute()` lấy cột gốc khi cần (VD URL bản `vi`).
+- **Lệch so với §5.4:** slug chuyên mục **không** dịch ở 3b — hàng chục nơi truyền `->slug` (chuỗi) vào `route('post.public.category')`, dịch slug sẽ thêm 1 bước 301 cho mọi link; URL `/en/danh-muc/{slug-vi}` vẫn hợp lệ. Slug trang tĩnh **có** dịch (URL gốc `/{slug}` là nội dung chính của trang).
+- Admin: `<x-admin.translation-fields :model :fields>` (khối "Bản dịch English" trong form) + `App\Actions\I18n\SaveModelTranslationsAction` (`rules()` sinh rule `translations.{locale}.{field}`, `run()` lưu/xoá). Controller validate bản dịch **trước** khi gọi Action chính để không lưu dở. Slug trang `en` để trống thì tự sinh từ tiêu đề.
+- Portal: trang tĩnh ở `/en` tra slug bản dịch trước, vào bằng slug `vi` khi đã có slug `en` → 301; chuyên mục/trang dùng `PortalLocale::availableIn()` để chỉ khai báo `hreflang` cho locale thực sự có bản dịch.
 
 ### 5.8 Thứ tự triển khai
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\I18n\PortalLocale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Modules\Page\Features\PageManagement\Http\PageAdminController;
@@ -40,7 +41,21 @@ Route::fallback(function (Request $request) {
     }
 
     $slug = trim($request->path(), '/');
-    $page = Page::published()->where('slug', $slug)->first();
+    $portal = app(PortalLocale::class);
+
+    if (! $portal->isDefault()) {
+        $page = Page::published()->whereHas('translations', fn ($q) => $q->where('locale', $portal->current())->where('slug', $slug))->first();
+
+        if (! $page) {
+            $page = Page::published()->where('slug', $slug)->first();
+            $translatedSlug = $page?->translationFor($portal->current())?->slug;
+            if ($translatedSlug && $translatedSlug !== $slug) {
+                return redirect()->to($portal->applyPrefix(url($translatedSlug)), 301);
+            }
+        }
+    } else {
+        $page = Page::published()->where('slug', $slug)->first();
+    }
 
     abort_unless($page, 404);
 

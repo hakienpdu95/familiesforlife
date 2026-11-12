@@ -100,6 +100,11 @@
                                       placeholder="{{ __('Mô tả ngắn về danh mục...') }}">{{ old('description', $category->description) }}</textarea>
                         </div>
 
+                        <x-admin.translation-fields :model="$category" :fields="[
+                            'name' => ['label' => __('Tên danh mục'), 'maxlength' => 150],
+                            'description' => ['label' => __('Mô tả'), 'type' => 'textarea'],
+                        ]" />
+
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div class="form-control">
                                 <label class="label py-0 pb-1.5">

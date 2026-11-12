@@ -4480,5 +4480,8 @@
     "Sinh Master Prompt": "Generate Master Prompt",
     "Đây là sản phẩm ngách Mẹ & Bé (chèn thêm ranh giới pháp lý riêng của ngách này vào prompt)": "This is a Mother & Baby niche product (inserts this niche's own legal boundaries into the prompt)",
     "Bản tiếng Anh của trang này chưa sẵn sàng — nội dung bên dưới đang hiển thị bằng ngôn ngữ gốc.": "The English version of this page isn't ready yet — the content below is shown in its original language.",
-    "Xem bản gốc": "View original"
+    "Xem bản gốc": "View original",
+    "Bản dịch :language": ":language translation",
+    "Đã có": "Available",
+    "Để trống toàn bộ = chưa có bản dịch: trang /:locale/ sẽ hiển thị bản gốc kèm thông báo và noindex. Ô nào để trống sẽ dùng giá trị bản gốc.": "Leave everything blank = no translation yet: the /:locale/ page will show the original with a notice and noindex. Any blank field falls back to the original value."
 }

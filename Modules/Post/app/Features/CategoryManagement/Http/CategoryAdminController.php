@@ -2,6 +2,7 @@
 
 namespace Modules\Post\Features\CategoryManagement\Http;
 
+use App\Actions\I18n\SaveModelTranslationsAction;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -31,15 +32,17 @@ class CategoryAdminController extends Controller
 
     public function create(GetCategoryTreeHandler $handler): View
     {
-        $categoryTree = PostCategory::flatten($handler->handle(new GetCategoryTreeQuery()));
+        $categoryTree = PostCategory::flatten($handler->handle(new GetCategoryTreeQuery));
 
         return view('post::admin.categories.create', compact('categoryTree'));
     }
 
     public function store(Request $request, CreateCategoryAction $action): RedirectResponse
     {
-        $data     = CategoryData::from($this->validated($request));
+        $translations = $this->validatedTranslations($request);
+        $data = CategoryData::from($this->validated($request));
         $category = $action->handle($data);
+        SaveModelTranslationsAction::run($category, $translations);
 
         return redirect()->route('backend.post.categories.index')
             ->with('success', __('Danh mục ":name" đã được tạo.', ['name' => $category->name]));
@@ -49,15 +52,17 @@ class CategoryAdminController extends Controller
     {
         // Loại chính category này VÀ toàn bộ hậu duệ khỏi dropdown "Danh mục cha" — chọn 1 danh
         // mục con/cháu làm cha của chính tổ tiên nó sẽ tạo vòng lặp (cycle) trong cây.
-        $categoryTree = PostCategory::flatten($handler->handle(new GetCategoryTreeQuery()), excludeSubtreeRootId: $category->id);
+        $categoryTree = PostCategory::flatten($handler->handle(new GetCategoryTreeQuery), excludeSubtreeRootId: $category->id);
 
         return view('post::admin.categories.edit', compact('category', 'categoryTree'));
     }
 
     public function update(Request $request, PostCategory $category, GetCategoryTreeHandler $handler, UpdateCategoryAction $action): RedirectResponse
     {
+        $translations = $this->validatedTranslations($request);
         $data = CategoryData::from($this->validated($request, $category->id, $handler));
         $action->handle($category, $data);
+        SaveModelTranslationsAction::run($category, $translations);
 
         return redirect()->route('backend.post.categories.index')
             ->with('success', __('Cập nhật danh mục thành công.'));
@@ -94,6 +99,14 @@ class CategoryAdminController extends Controller
         return back()->with('success', __('Đã cập nhật thứ tự danh mục.'));
     }
 
+    private function validatedTranslations(Request $request): ?array
+    {
+        return $request->validate(SaveModelTranslationsAction::rules([
+            'name' => ['nullable', 'string', 'max:150'],
+            'description' => ['nullable', 'string'],
+        ]))['translations'] ?? null;
+    }
+
     private function validated(Request $request, ?int $ignoreId = null, ?GetCategoryTreeHandler $treeHandler = null): array
     {
         return $request->validate([
@@ -106,18 +119,18 @@ class CategoryAdminController extends Controller
                         return;
                     }
 
-                    $tree = $treeHandler->handle(new GetCategoryTreeQuery());
+                    $tree = $treeHandler->handle(new GetCategoryTreeQuery);
                     if (in_array((int) $value, PostCategory::subtreeIds($tree, $ignoreId), true)) {
                         $fail(__('Không thể chọn chính danh mục này hoặc danh mục con/cháu của nó làm cha (tạo vòng lặp).'));
                     }
                 },
             ],
-            'name'        => ['required', 'string', 'max:150'],
+            'name' => ['required', 'string', 'max:150'],
             'description' => ['nullable', 'string'],
-            'icon'        => ['nullable', 'string', 'max:80'],
-            'color_hex'   => ['nullable', 'string', 'max:7'],
-            'is_active'   => ['boolean'],
-            'sort_order'  => ['integer', 'min:0'],
+            'icon' => ['nullable', 'string', 'max:80'],
+            'color_hex' => ['nullable', 'string', 'max:7'],
+            'is_active' => ['boolean'],
+            'sort_order' => ['integer', 'min:0'],
         ]);
     }
 }

@@ -67,6 +67,10 @@
                         @error('label')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
                     </div>
 
+                    <x-admin.translation-fields :model="$menuItem" :fields="[
+                        'label' => ['label' => __('Nhãn hiển thị'), 'maxlength' => 150],
+                    ]" />
+
                     <div class="form-control">
                         <label class="label py-0 pb-1.5">
                             <span class="label-text font-medium">Icon</span>

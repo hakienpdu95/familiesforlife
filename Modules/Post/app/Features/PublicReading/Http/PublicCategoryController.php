@@ -22,8 +22,8 @@ use Modules\ProvinceShowcase\Features\PublicShowcase\Queries\ListFeaturedProvinc
 
 /**
  * Danh sách bài lấy theo locale của tiền tố URL (spec/I18n_Specification.md §5.1, §5.5): ở `/en`
- * chỉ hiện bài đã có bản dịch `en` xuất bản. Trang danh mục chưa dịch tên/mô tả (đợt 3b) nên ở
- * `/en` vẫn là trang fallback (banner + noindex).
+ * chỉ hiện bài đã có bản dịch `en` xuất bản. Trang danh mục chưa có tên bản `en` là trang
+ * fallback (banner + noindex).
  */
 class PublicCategoryController extends Controller
 {
@@ -194,7 +194,9 @@ class PublicCategoryController extends Controller
 
     public function show(Request $request, PostCategory $category, ListPublishedArticlesHandler $handler): View
     {
-        $locale = app(PortalLocale::class)->current();
+        $portal = app(PortalLocale::class);
+        $locale = $portal->current();
+        $portal->availableIn(array_filter(PortalLocale::prefixed(), fn (string $l) => $category->hasTranslation($l)));
         $search = $request->string('q')->trim()->value() ?: null;
         $page = max(1, $request->integer('page', 1));
         $isMagazine = ! $search && $page === 1;

@@ -165,6 +165,15 @@
                 </div>
             </div>
         </div>
+
+        <x-admin.translation-fields :model="$page" :fields="[
+            'title' => ['label' => __('Tiêu đề'), 'maxlength' => 200],
+            'slug' => ['label' => __('Đường dẫn (slug)'), 'hint' => __('Để trống sẽ tự sinh từ tiêu đề'), 'maxlength' => 160],
+            'excerpt' => ['label' => __('Tóm tắt ngắn'), 'type' => 'textarea', 'rows' => 2],
+            'content' => ['label' => __('Nội dung (WYSIWYG)'), 'type' => 'editor', 'context' => 'page'],
+            'seo_title' => ['label' => __('Tiêu đề SEO...'), 'maxlength' => 200],
+            'seo_description' => ['label' => __('Mô tả SEO...'), 'type' => 'textarea', 'rows' => 2],
+        ]" />
     </div>
 
     {{-- ── Sidebar ──────────────────────────────────────────────────── --}}

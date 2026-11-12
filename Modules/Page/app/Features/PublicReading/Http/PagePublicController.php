@@ -2,6 +2,7 @@
 
 namespace Modules\Page\Features\PublicReading\Http;
 
+use App\Support\I18n\PortalLocale;
 use Illuminate\View\View;
 use Modules\Page\Enums\PageStatus;
 use Modules\Page\Models\Page;
@@ -18,6 +19,16 @@ class PagePublicController
         abort_unless($page->status === PageStatus::Published, 404);
 
         $page->increment('view_count');
+
+        $portal = app(PortalLocale::class);
+        $alternates = [PortalLocale::default() => url($page->originalAttribute('slug'))];
+        foreach (PortalLocale::prefixed() as $locale) {
+            $translation = $page->translationFor($locale);
+            if (filled($translation?->title) && filled($translation?->slug)) {
+                $alternates[$locale] = $portal->applyPrefix(url($translation->slug), $locale);
+            }
+        }
+        $portal->setAlternates($alternates)->markTranslated(isset($alternates[$portal->current()]));
 
         return view($page->resolveView(), ['page' => $page]);
     }

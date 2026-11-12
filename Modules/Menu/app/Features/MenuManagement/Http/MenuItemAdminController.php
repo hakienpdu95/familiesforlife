@@ -2,10 +2,12 @@
 
 namespace Modules\Menu\Features\MenuManagement\Http;
 
+use App\Actions\I18n\SaveModelTranslationsAction;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Modules\Menu\Enums\MenuLinkType;
@@ -35,16 +37,18 @@ class MenuItemAdminController extends Controller
     public function create(): View
     {
         return view('menu::admin.menu-items.create', [
-            'parentOptions'   => $this->parentOptions(),
+            'parentOptions' => $this->parentOptions(),
             'categoryOptions' => $this->categoryOptions(),
-            'pageOptions'     => $this->pageOptions(),
+            'pageOptions' => $this->pageOptions(),
         ]);
     }
 
     public function store(Request $request, CreateMenuItemAction $action): RedirectResponse
     {
-        $data     = MenuItemData::from($this->validated($request));
+        $translations = $this->validatedTranslations($request);
+        $data = MenuItemData::from($this->validated($request));
         $menuItem = $action->handle($data);
+        SaveModelTranslationsAction::run($menuItem, $translations);
 
         return redirect()->route('backend.menu.items.index')
             ->with('success', __('Mục menu ":menu_item_label" đã được tạo.', ['menu_item_label' => $menuItem->label]));
@@ -53,17 +57,19 @@ class MenuItemAdminController extends Controller
     public function edit(MenuItem $menuItem): View
     {
         return view('menu::admin.menu-items.edit', [
-            'menuItem'        => $menuItem,
-            'parentOptions'   => $this->parentOptions($menuItem),
+            'menuItem' => $menuItem,
+            'parentOptions' => $this->parentOptions($menuItem),
             'categoryOptions' => $this->categoryOptions(),
-            'pageOptions'     => $this->pageOptions(),
+            'pageOptions' => $this->pageOptions(),
         ]);
     }
 
     public function update(Request $request, MenuItem $menuItem, UpdateMenuItemAction $action): RedirectResponse
     {
+        $translations = $this->validatedTranslations($request);
         $data = MenuItemData::from($this->validated($request, $menuItem));
         $action->handle($menuItem, $data);
+        SaveModelTranslationsAction::run($menuItem, $translations);
 
         return redirect()->route('backend.menu.items.index')
             ->with('success', __('Cập nhật mục menu thành công.'));
@@ -108,48 +114,55 @@ class MenuItemAdminController extends Controller
      * §5.2/§6.2 — UI filter (chỉ liệt kê parent hợp lệ) + §5.3 Action validate là 2 lớp
      * double-check độc lập, lớp này không thay thế lớp kia.
      */
+    private function validatedTranslations(Request $request): ?array
+    {
+        return $request->validate(SaveModelTranslationsAction::rules([
+            'label' => ['nullable', 'string', 'max:150'],
+        ]))['translations'] ?? null;
+    }
+
     private function validated(Request $request, ?MenuItem $ignoring = null): array
     {
         return $request->validate([
-            'location'        => ['required', Rule::in(array_keys(config('menu.locations')))],
-            'parent_id'       => [
+            'location' => ['required', Rule::in(array_keys(config('menu.locations')))],
+            'parent_id' => [
                 'nullable', 'integer',
                 Rule::exists('menu_items', 'id')->using(fn ($query) => $query
                     ->where('depth', '<', config('menu.max_depth'))
                     ->when($ignoring, fn ($q) => $q->whereKeyNot($ignoring->id))),
             ],
-            'label'           => ['required', 'string', 'max:150'],
-            'icon'            => ['nullable', 'string', 'max:80'],
-            'sort_order'      => ['integer', 'min:0'],
-            'is_active'       => ['boolean'],
+            'label' => ['required', 'string', 'max:150'],
+            'icon' => ['nullable', 'string', 'max:80'],
+            'sort_order' => ['integer', 'min:0'],
+            'is_active' => ['boolean'],
             'open_in_new_tab' => ['boolean'],
-            'link_type'       => ['required', Rule::in(array_column(MenuLinkType::cases(), 'value'))],
-            'category_id'     => [
+            'link_type' => ['required', Rule::in(array_column(MenuLinkType::cases(), 'value'))],
+            'category_id' => [
                 'nullable', 'integer',
-                'required_if:link_type,' . MenuLinkType::Category->value,
-                'prohibited_unless:link_type,' . MenuLinkType::Category->value,
+                'required_if:link_type,'.MenuLinkType::Category->value,
+                'prohibited_unless:link_type,'.MenuLinkType::Category->value,
                 Rule::exists('post_categories', 'id')->where('is_active', true),
             ],
-            'page_id'         => [
+            'page_id' => [
                 'nullable', 'integer',
-                'required_if:link_type,' . MenuLinkType::Page->value,
-                'prohibited_unless:link_type,' . MenuLinkType::Page->value,
+                'required_if:link_type,'.MenuLinkType::Page->value,
+                'prohibited_unless:link_type,'.MenuLinkType::Page->value,
                 Rule::exists('pages', 'id')->whereNull('deleted_at'),
             ],
-            'url'             => [
+            'url' => [
                 'nullable', 'string', 'max:2048',
-                'required_if:link_type,' . MenuLinkType::Url->value,
-                'prohibited_unless:link_type,' . MenuLinkType::Url->value,
+                'required_if:link_type,'.MenuLinkType::Url->value,
+                'prohibited_unless:link_type,'.MenuLinkType::Url->value,
             ],
         ], [
-            'page_id.required_if'       => __('Vui lòng chọn trang tĩnh.'),
+            'page_id.required_if' => __('Vui lòng chọn trang tĩnh.'),
             'page_id.prohibited_unless' => __('Chỉ chọn trang tĩnh khi đích liên kết là "Trang tĩnh".'),
-            'page_id.exists'            => __('Trang tĩnh được chọn không hợp lệ hoặc đã bị xoá.'),
+            'page_id.exists' => __('Trang tĩnh được chọn không hợp lệ hoặc đã bị xoá.'),
         ]);
     }
 
     /** Chỉ liệt kê MenuItem có depth < max_depth — không cho chọn 1 item cấp 2 làm cha (§5.2). */
-    private function parentOptions(?MenuItem $editing = null): \Illuminate\Support\Collection
+    private function parentOptions(?MenuItem $editing = null): Collection
     {
         return MenuItem::query()
             ->where('depth', '<', config('menu.max_depth'))
@@ -158,19 +171,19 @@ class MenuItemAdminController extends Controller
             ->get(['id', 'label', 'location', 'depth']);
     }
 
-    private function categoryOptions(): \Illuminate\Support\Collection
+    private function categoryOptions(): Collection
     {
         return PostCategory::active()->orderBy('name')->get(['id', 'name']);
     }
 
     /** Liệt kê cả trang Nháp — mục menu tự ẩn trên nav công khai cho tới khi trang được xuất bản. */
-    private function pageOptions(): \Illuminate\Support\Collection
+    private function pageOptions(): Collection
     {
         return Page::query()->orderBy('title')->get(['id', 'title', 'slug', 'status', 'published_at'])
             ->map(fn (Page $page) => (object) [
-                'id'           => $page->id,
-                'title'        => $page->title,
-                'slug'         => $page->slug,
+                'id' => $page->id,
+                'title' => $page->title,
+                'slug' => $page->slug,
                 'is_published' => $page->status === PageStatus::Published && $page->published_at !== null,
             ]);
     }

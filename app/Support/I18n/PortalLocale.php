@@ -17,6 +17,8 @@ class PortalLocale
 
     private bool $translated = false;
 
+    private ?array $availableLocales = null;
+
     private ?array $alternates = null;
 
     private array $routeCache = [];
@@ -142,6 +144,14 @@ class PortalLocale
         return $this;
     }
 
+    public function availableIn(array $locales): static
+    {
+        $this->availableLocales = array_values(array_unique([self::default(), ...$locales]));
+        $this->translated = in_array($this->current(), $this->availableLocales, true);
+
+        return $this;
+    }
+
     public function isTranslated(): bool
     {
         return $this->isDefault() || $this->translated;
@@ -176,7 +186,7 @@ class PortalLocale
             return $this->alternates;
         }
 
-        $locales = $this->translated ? self::supported() : [self::default()];
+        $locales = $this->availableLocales ?? ($this->translated ? self::supported() : [self::default()]);
         $urls = [];
         foreach ($locales as $locale) {
             $urls[$locale] = $this->urlFor($locale);

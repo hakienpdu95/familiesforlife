@@ -2,6 +2,7 @@
 
 namespace Modules\Page\Models;
 
+use App\Foundation\Concerns\HasTranslations;
 use App\Models\User;
 use App\Traits\HasManagedMedia;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,9 +22,20 @@ use Spatie\MediaLibrary\HasMedia;
  */
 class Page extends Model implements HasMedia
 {
-    use SoftDeletes;
-    use LogsActivity;
     use HasManagedMedia;
+    use HasTranslations;
+    use LogsActivity;
+    use SoftDeletes;
+
+    public static function translatable(): array
+    {
+        return ['title', 'slug', 'excerpt', 'content', 'seo_title', 'seo_description'];
+    }
+
+    public static function translationModel(): string
+    {
+        return PageTranslation::class;
+    }
 
     protected $table = 'pages';
 
@@ -35,12 +47,12 @@ class Page extends Model implements HasMedia
     ];
 
     protected $casts = [
-        'status'        => PageStatus::class,
-        'published_at'  => 'datetime',
-        'is_system'     => 'boolean',
-        'seo_noindex'   => 'boolean',
-        'view_count'    => 'integer',
-        'sort_order'    => 'integer',
+        'status' => PageStatus::class,
+        'published_at' => 'datetime',
+        'is_system' => 'boolean',
+        'seo_noindex' => 'boolean',
+        'view_count' => 'integer',
+        'sort_order' => 'integer',
     ];
 
     public function getActivitylogOptions(): LogOptions

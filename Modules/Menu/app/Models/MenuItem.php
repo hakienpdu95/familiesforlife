@@ -2,6 +2,7 @@
 
 namespace Modules\Menu\Models;
 
+use App\Foundation\Concerns\HasTranslations;
 use App\Models\User;
 use App\Support\I18n\PortalLocale;
 use Illuminate\Database\Eloquent\Model;
@@ -24,8 +25,19 @@ use Spatie\Activitylog\Support\LogOptions;
  */
 class MenuItem extends Model
 {
+    use HasTranslations;
     use LogsActivity;
     use SoftDeletes;
+
+    public static function translatable(): array
+    {
+        return ['label'];
+    }
+
+    public static function translationModel(): string
+    {
+        return MenuItemTranslation::class;
+    }
 
     protected $table = 'menu_items';
 
