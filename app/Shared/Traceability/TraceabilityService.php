@@ -206,7 +206,7 @@ class TraceabilityService
         return [
             'heading' => __('Thông tin truy xuất nguồn gốc'),
             'icon' => 'fa-qrcode',
-            'kind' => 'Đối tượng',
+            'kind' => __('Đối tượng'),
             'title' => __('Không xác định'),
             'subtitle' => null,
             'images' => [],

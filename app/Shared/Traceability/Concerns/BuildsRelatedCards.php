@@ -48,7 +48,7 @@ trait BuildsRelatedCards
             ->map(fn (OcopProduct $p) => [
                 'url' => ($linkToQr ? $p->qrIdentity?->publicUrl() : null) ?? route('ocop.public.show', ['slug' => $p->slug, 'id' => $p->id]),
                 'title' => $p->name,
-                'subtitle' => $p->star_rating ? str_repeat('★', $p->star_rating).' OCOP '.$p->star_rating.' sao' : 'Sản phẩm OCOP',
+                'subtitle' => $p->star_rating ? str_repeat('★', $p->star_rating).' '.__('OCOP :count sao', ['count' => $p->star_rating]) : __('Sản phẩm OCOP'),
                 'image' => $p->imageUrl('thumb') ?: null,
             ])->values()->all();
     }
@@ -88,7 +88,7 @@ trait BuildsRelatedCards
             $media = $model->getMedia($collection);
 
             return [
-                'label' => __($label),
+                'label' => $label,
                 'count' => $media->count(),
                 'updated_at' => format_date($media->max('updated_at')),
             ];

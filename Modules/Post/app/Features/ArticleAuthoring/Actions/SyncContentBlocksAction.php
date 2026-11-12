@@ -262,7 +262,7 @@ class SyncContentBlocksAction
 
         foreach ($blocksData as $i => $block) {
             $isOcop = ($block['source'] ?? PostProductBlock::SOURCE_PRODUCT) === PostProductBlock::SOURCE_OCOP;
-            $label = ($isOcop ? 'Khối sản phẩm OCOP #' : 'Khối sản phẩm #').($i + 1);
+            $label = $isOcop ? __('Khối sản phẩm OCOP #:number', ['number' => $i + 1]) : __('Khối sản phẩm #:number', ['number' => $i + 1]);
 
             if (! in_array($block['source'] ?? PostProductBlock::SOURCE_PRODUCT, [PostProductBlock::SOURCE_PRODUCT, PostProductBlock::SOURCE_OCOP], true)) {
                 $errors[] = __(':label: nguồn sản phẩm không hợp lệ.', ['label' => $label]);

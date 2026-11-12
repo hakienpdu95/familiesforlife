@@ -79,7 +79,7 @@ class OcopSubjectTracePresenter implements TracePresenter
             : collect();
 
         return $this->base([
-            'title' => $payload['name'] ?? 'Chủ thể OCOP',
+            'title' => $payload['name'] ?? __('Chủ thể OCOP'),
             'subtitle' => $payload['name_en'] ?? null,
             'images' => $live ? ($this->mediaUrls($live, OcopSubject::IMAGE_COLLECTION) ?: array_filter([$payload['image']['url'] ?? null])) : array_filter([$payload['image']['url'] ?? null]),
             'image_srcsets' => $live ? $this->mediaSrcsets($live, OcopSubject::IMAGE_COLLECTION) : [],
@@ -94,10 +94,10 @@ class OcopSubjectTracePresenter implements TracePresenter
             'is_food_business' => ! empty($payload['is_food_business']),
             'cert' => $expiry ? ['label' => format_date($expiry), 'valid' => $expiry->endOfDay()->isFuture()] : null,
             'facts' => [
-                T::fact('fa-building', 'Loại hình', $payload['type'] ?? null),
-                T::fact('fa-star', 'Hạng OCOP cao nhất', $stars ? $stars.' sao' : null),
-                T::fact('fa-boxes-stacked', 'Sản phẩm OCOP', isset($payload['products_count']) ? $payload['products_count'].' sản phẩm' : null),
-                T::fact('fa-calendar-check', 'Hiệu lực chứng nhận', format_date($expiry)),
+                T::fact('fa-building', __('Loại hình'), $payload['type'] ?? null),
+                T::fact('fa-star', __('Hạng OCOP cao nhất'), $stars ? __(':count sao', ['count' => $stars]) : null),
+                T::fact('fa-boxes-stacked', __('Sản phẩm OCOP'), isset($payload['products_count']) ? __(':count sản phẩm', ['count' => $payload['products_count']]) : null),
+                T::fact('fa-calendar-check', __('Hiệu lực chứng nhận'), format_date($expiry)),
             ],
             'contact' => [
                 'address' => $payload['address'] ?? null,
@@ -106,7 +106,7 @@ class OcopSubjectTracePresenter implements TracePresenter
                 'website' => $payload['website'] ?? null,
                 'map_url' => $gps ? 'https://www.google.com/maps/dir/?api=1&destination='.$gps : null,
             ],
-            'docs' => $payload['docs'] ?? [],
+            'docs' => array_map(fn ($d) => is_array($d) ? [...$d, 'label' => __($d['label'] ?? '')] : $d, $payload['docs'] ?? []),
             'sections' => $sections,
             'related' => [
                 ['title' => __('Sản phẩm OCOP của chủ thể'), 'icon' => 'fa-certificate', 'items' => $this->ocopCards($products, linkToQr: true)],
@@ -122,7 +122,7 @@ class OcopSubjectTracePresenter implements TracePresenter
     {
         return $this->base([
             'title' => $target->name,
-            'notice' => 'Hồ sơ chủ thể đang được cập nhật.',
+            'notice' => __('Hồ sơ chủ thể đang được cập nhật.'),
         ]);
     }
 
@@ -131,7 +131,7 @@ class OcopSubjectTracePresenter implements TracePresenter
         return T::page([
             'heading' => __('Hồ sơ chủ thể OCOP'),
             'icon' => 'fa-building',
-            'kind' => 'Chủ thể OCOP',
+            'kind' => __('Chủ thể OCOP'),
             'stars' => null,
             'type' => null,
             'products_count' => null,

@@ -25,6 +25,7 @@ use Nwidart\Modules\Support\ModuleServiceProvider;
 class AuthServiceProvider extends ModuleServiceProvider
 {
     protected string $name = 'Auth';
+
     protected string $nameLower = 'auth';
 
     protected array $providers = [
@@ -78,14 +79,14 @@ class AuthServiceProvider extends ModuleServiceProvider
 
         VerifyEmail::toMailUsing(function (object $notifiable, string $url): MailMessage {
             return (new MailMessage)
-                ->subject('Xác minh email của bạn — ' . config('app.name'))
-                ->greeting('Xin chào ' . ($notifiable->name ?? 'bạn') . ' 👋')
-                ->line('Cảm ơn bạn đã đăng ký tài khoản tại **' . config('app.name') . '**.')
-                ->line('Nhấn vào nút **"Xác minh địa chỉ email"** bên dưới để hoàn tất xác minh và kích hoạt tài khoản của bạn.')
-                ->action('Xác minh địa chỉ email', $url)
-                ->line('⏱️ Đường liên kết này có hiệu lực trong **60 phút** kể từ khi email được gửi.')
-                ->line('Nếu bạn không tạo tài khoản này, bạn có thể bỏ qua email — không cần thực hiện thêm hành động nào.')
-                ->salutation('Trân trọng,  ' . "\n" . config('app.name'));
+                ->subject(__('Xác minh email của bạn — :app', ['app' => config('app.name')]))
+                ->greeting(__('Xin chào :name 👋', ['name' => $notifiable->name ?? __('bạn')]))
+                ->line(__('Cảm ơn bạn đã đăng ký tài khoản tại **:app**.', ['app' => config('app.name')]))
+                ->line(__('Nhấn vào nút **"Xác minh địa chỉ email"** bên dưới để hoàn tất xác minh và kích hoạt tài khoản của bạn.'))
+                ->action(__('Xác minh địa chỉ email'), $url)
+                ->line(__('⏱️ Đường liên kết này có hiệu lực trong **60 phút** kể từ khi email được gửi.'))
+                ->line(__('Nếu bạn không tạo tài khoản này, bạn có thể bỏ qua email — không cần thực hiện thêm hành động nào.'))
+                ->salutation(__('Trân trọng,').'  '."\n".config('app.name'));
         });
     }
 

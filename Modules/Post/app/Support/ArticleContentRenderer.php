@@ -6,6 +6,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use League\HTMLToMarkdown\HtmlConverter;
+use Modules\Ocop\Models\OcopProduct;
 use Modules\Post\Enums\ContentBlockType;
 use Modules\Post\Models\PostArticleTranslation;
 use Modules\Post\Models\PostComparisonBlock;
@@ -20,7 +21,6 @@ use Modules\Post\Models\PostProductBlock;
 use Modules\Post\Models\PostProductBlockButton;
 use Modules\Post\Models\PostProductBlockItem;
 use Modules\Product\Enums\ProductLinkType;
-use Modules\Ocop\Models\OcopProduct;
 use Modules\Product\Models\Product;
 
 /**
@@ -104,7 +104,7 @@ class ArticleContentRenderer
         }
         $header .= "Nguồn: {$canonicalUrl}\n";
         if ($translation->updated_at) {
-            $header .= 'Cập nhật: '.format_date($translation->updated_at)."\n";
+            $header .= __('Cập nhật: :date', ['date' => format_date($translation->updated_at)])."\n";
         }
         $header .= "\n---\n\n";
 
@@ -195,7 +195,7 @@ class ArticleContentRenderer
         }
 
         foreach ($pb->items as $item) {
-            $title = $item->display_title ?: 'Sản phẩm';
+            $title = $item->display_title ?: __('Sản phẩm');
             $line = "- **{$title}**";
             if ($item->display_price_label) {
                 $line .= " — {$item->display_price_label}";
@@ -828,7 +828,7 @@ class ArticleContentRenderer
             // set relation = null NGAY để accessor display_* không bao giờ kích hoạt query.
             $item->setRelation('product', null);
             $item->setRelation('ocopProduct', null);
-            $item->title_override = $item->title_override ?? 'Sản phẩm không còn tồn tại';
+            $item->title_override = $item->title_override ?? __('Sản phẩm không còn tồn tại');
             $item->image_url_override = $item->image_url_override ?? self::MISSING_PRODUCT_PLACEHOLDER_IMAGE;
         } else {
             $item->setRelation('product', $isOcop || ! $productId ? null : $existingProducts->get($productId));

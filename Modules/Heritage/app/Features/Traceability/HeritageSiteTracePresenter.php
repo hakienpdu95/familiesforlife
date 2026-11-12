@@ -88,7 +88,7 @@ class HeritageSiteTracePresenter implements TracePresenter
         }
 
         return $this->base([
-            'title' => $payload['name'] ?? 'Di tích',
+            'title' => $payload['name'] ?? __('Di tích'),
             'subtitle' => $payload['era'] ?? null,
             'images' => $live ? (array_slice($this->mediaUrls($live, 'cover'), 0, 1) ?: array_filter([$payload['image']['url'] ?? null])) : array_filter([$payload['image']['url'] ?? null]),
             'image_srcsets' => $live ? array_slice($this->mediaSrcsets($live, 'cover'), 0, 1) : [],
@@ -97,10 +97,10 @@ class HeritageSiteTracePresenter implements TracePresenter
                 ! empty($payload['type']) ? ['label' => $payload['type'], 'icon' => 'fa-landmark', 'class' => 'badge-outline'] : null,
             ])),
             'facts' => [
-                T::fact('fa-award', 'Cấp xếp hạng', $payload['rank'] ?? null),
-                T::fact('fa-landmark', 'Loại hình', $payload['type'] ?? null),
-                T::fact('fa-clock', 'Niên đại', $payload['era'] ?? null),
-                T::fact('fa-door-open', 'Tham quan', $visiting['label'] ?? null),
+                T::fact('fa-award', __('Cấp xếp hạng'), $payload['rank'] ?? null),
+                T::fact('fa-landmark', __('Loại hình'), $payload['type'] ?? null),
+                T::fact('fa-clock', __('Niên đại'), $payload['era'] ?? null),
+                T::fact('fa-door-open', __('Tham quan'), $visiting['label'] ?? null),
             ],
             'visiting' => $visiting,
             'rank' => $payload['rank'] ?? null,
@@ -129,7 +129,7 @@ class HeritageSiteTracePresenter implements TracePresenter
     {
         return $this->base([
             'title' => $target->name,
-            'notice' => 'Thông tin chi tiết đang được cập nhật.',
+            'notice' => __('Thông tin chi tiết đang được cập nhật.'),
         ]);
     }
 
@@ -154,7 +154,7 @@ class HeritageSiteTracePresenter implements TracePresenter
         return T::page([
             'heading' => __('Thông tin di tích'),
             'icon' => 'fa-landmark',
-            'kind' => 'Di tích, di sản',
+            'kind' => __('Di tích, di sản'),
             'visiting' => null,
             'rank' => null,
             'is_ranked' => false,

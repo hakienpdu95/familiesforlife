@@ -21,7 +21,7 @@ trait EnforcesCategoryScope
             && ! $actor->isPlatformContentHead()
             && ! $actor->postCategoryEditorships()->where('post_categories.id', $categoryId)->exists()
         ) {
-            throw new AuthorizationException('Category ngoài phạm vi phụ trách.');
+            throw new AuthorizationException(__('Category ngoài phạm vi phụ trách.'));
         }
     }
 }

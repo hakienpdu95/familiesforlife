@@ -193,7 +193,7 @@ class ArticleStructuredDataBuilder
     private function buildBreadcrumbList(PostArticle $article, PostArticleTranslation $translation, string $canonicalUrl): array
     {
         $items = [
-            ['@type' => 'ListItem', 'position' => 1, 'name' => 'Trang Chủ', 'item' => route('post.public.home')],
+            ['@type' => 'ListItem', 'position' => 1, 'name' => __('Trang chủ'), 'item' => route('post.public.home')],
         ];
 
         $category = $article->categories->first();

@@ -95,20 +95,20 @@ class PostArticleTracePresenter implements TracePresenter
         $updated = ! empty($payload['updated_at']) ? Carbon::parse($payload['updated_at']) : null;
 
         return $this->base([
-            'title' => $payload['title'] ?? 'Bài viết',
+            'title' => $payload['title'] ?? __('Bài viết'),
             'images' => array_filter([$payload['image']['url'] ?? null]),
             'image_srcsets' => $live ? array_slice($this->mediaSrcsets($live, 'cover'), 0, 1) : [],
             'badges' => array_values(array_filter([
                 ! empty($payload['category']) ? ['label' => $payload['category'], 'icon' => 'fa-layer-group', 'class' => 'badge-primary'] : null,
-                ! empty($payload['sponsor']) ? ['label' => $payload['sponsor']['label'] ?: 'Nội dung tài trợ', 'icon' => 'fa-handshake', 'class' => 'badge-warning'] : null,
+                ! empty($payload['sponsor']) ? ['label' => $payload['sponsor']['label'] ?: __('Nội dung tài trợ'), 'icon' => 'fa-handshake', 'class' => 'badge-warning'] : null,
             ])),
             'facts' => [
-                T::fact('fa-calendar-check', 'Ngày xuất bản', format_date($published)),
-                T::fact('fa-pen-to-square', 'Cập nhật', format_date($updated)),
-                T::fact('fa-clock', 'Thời gian đọc', ! empty($payload['reading_minutes']) ? $payload['reading_minutes'].' phút' : null),
-                T::fact('fa-layer-group', 'Chuyên mục', $payload['category'] ?? null),
-                T::fact('fa-circle-info', 'Hỏi đáp', ! empty($payload['faq_count']) ? $payload['faq_count'].' câu hỏi' : null),
-                T::fact('fa-list-check', 'Hướng dẫn', ! empty($payload['howto_count']) ? $payload['howto_count'].' bước' : null),
+                T::fact('fa-calendar-check', __('Ngày xuất bản'), format_date($published)),
+                T::fact('fa-pen-to-square', __('Cập nhật'), format_date($updated)),
+                T::fact('fa-clock', __('Thời gian đọc'), ! empty($payload['reading_minutes']) ? __(':count phút', ['count' => $payload['reading_minutes']]) : null),
+                T::fact('fa-layer-group', __('Chuyên mục'), $payload['category'] ?? null),
+                T::fact('fa-circle-info', __('Hỏi đáp'), ! empty($payload['faq_count']) ? __(':count câu hỏi', ['count' => $payload['faq_count']]) : null),
+                T::fact('fa-list-check', __('Hướng dẫn'), ! empty($payload['howto_count']) ? __(':count bước', ['count' => $payload['howto_count']]) : null),
             ],
             'category' => $payload['category'] ?? null,
             'published_label' => format_date($published),
@@ -131,7 +131,7 @@ class PostArticleTracePresenter implements TracePresenter
     {
         return $this->base([
             'title' => __('Bài viết'),
-            'notice' => 'Bài viết hiện chưa được xuất bản.',
+            'notice' => __('Bài viết hiện chưa được xuất bản.'),
         ]);
     }
 
@@ -140,7 +140,7 @@ class PostArticleTracePresenter implements TracePresenter
         return T::page([
             'heading' => __('Thông tin bài viết'),
             'icon' => 'fa-newspaper',
-            'kind' => 'Bài viết',
+            'kind' => __('Bài viết'),
             'category' => null,
             'published_label' => null,
             'updated_label' => null,

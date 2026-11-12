@@ -29,7 +29,7 @@ class GeoChecklist
     public static function groups(): array
     {
         return [
-            'Cấu trúc & câu trả lời' => [
+            __('Cấu trúc & câu trả lời') => [
                 [
                     'label' => __('Mở đầu bằng câu trả lời trực tiếp, tự thân đầy đủ (~40–80 từ) trước khi đi vào bối cảnh'),
                     'hint' => __('Đây chính là mục đích của trường "Câu trả lời trực tiếp (AEO)" ở tab Nội dung — kiểm tra lại độ dài và tính tự thân của câu trả lời đó.'),
@@ -91,7 +91,7 @@ class GeoChecklist
                     'hint' => __('Áp dụng cả khi bài có tài trợ — dùng đúng khối CTA/công bố tài trợ sẵn có (tab Nội dung) thay vì lồng quảng cáo vào giữa đoạn văn, tránh làm loãng phần trả lời AI có thể trích.'),
                 ],
             ],
-            'Uy tín & bằng chứng' => [
+            __('Uy tín & bằng chứng') => [
                 [
                     'label' => __('Dùng tên riêng cụ thể (thương hiệu/sản phẩm/chuyên gia) thay vì từ ngữ chung chung'),
                     'hint' => __('Giúp AI gắn nội dung với thực thể (entity) đã biết, dễ được nhắc tới trong câu trả lời.'),
@@ -125,7 +125,7 @@ class GeoChecklist
                     'hint' => __('Nội dung nhóm chủ đề này nếu sai sẽ ảnh hưởng trực tiếp tới quyết định thật của độc giả, không chỉ là 1 bài viết dở.'),
                 ],
             ],
-            'Liên kết & cập nhật' => [
+            __('Liên kết & cập nhật') => [
                 [
                     'label' => __('Đã liên kết tới bài viết liên quan cùng chủ đề (topic cluster)'),
                     'hint' => __('Giúp AI hiểu chuyên mục có chiều sâu chủ đề, không phải 1 bài viết đơn lẻ.'),

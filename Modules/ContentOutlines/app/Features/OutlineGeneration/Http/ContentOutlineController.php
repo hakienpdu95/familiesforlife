@@ -120,7 +120,7 @@ class ContentOutlineController extends Controller
         $action->handle($outline, $request->validated('approved_outline'), $request->user()->id);
 
         return redirect()->route('backend.contentoutlines.show', $outline)
-            ->with('success', 'Đã sinh prompt viết bài — sao chép bên dưới để dán sang 1 lượt chat AI mới.');
+            ->with('success', __('Đã sinh prompt viết bài — sao chép bên dưới để dán sang 1 lượt chat AI mới.'));
     }
 
     /**
@@ -133,7 +133,7 @@ class ContentOutlineController extends Controller
         $action->handle($outline, $request->validated('drafted_article'), $request->user()->id);
 
         return redirect()->route('backend.contentoutlines.show', $outline)
-            ->with('success', 'Đã sinh prompt soát lỗi/sửa bài — sao chép bên dưới để dán sang 1 lượt chat AI mới.');
+            ->with('success', __('Đã sinh prompt soát lỗi/sửa bài — sao chép bên dưới để dán sang 1 lượt chat AI mới.'));
     }
 
     /**

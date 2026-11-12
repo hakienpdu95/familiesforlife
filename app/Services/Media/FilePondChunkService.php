@@ -89,12 +89,12 @@ class FilePondChunkService
         $current = filesize($partPath);
 
         if ($offset !== $current) {
-            throw new HttpException(409, 'Upload-Offset không khớp.', null, ['Upload-Offset' => $current]);
+            throw new HttpException(409, __('Upload-Offset không khớp.'), null, ['Upload-Offset' => $current]);
         }
 
         if (strlen($chunk) > self::chunkSize() || $current + strlen($chunk) > $meta['length']) {
             $this->discard($id);
-            throw new HttpException(413, 'Chunk vượt kích thước cho phép.');
+            throw new HttpException(413, __('Chunk vượt kích thước cho phép.'));
         }
 
         file_put_contents($partPath, $chunk, FILE_APPEND | LOCK_EX);
@@ -155,14 +155,14 @@ class FilePondChunkService
     private function meta(string $id, int $userId): array
     {
         if (! Str::isUuid($id)) {
-            throw new HttpException(404, 'Phiên upload không tồn tại.');
+            throw new HttpException(404, __('Phiên upload không tồn tại.'));
         }
 
         $raw = Storage::disk(self::DISK)->get($this->metaPath($id));
         $meta = $raw ? json_decode($raw, true) : null;
 
         if (! $meta || (int) $meta['user_id'] !== $userId) {
-            throw new HttpException(404, 'Phiên upload không tồn tại.');
+            throw new HttpException(404, __('Phiên upload không tồn tại.'));
         }
 
         return $meta;

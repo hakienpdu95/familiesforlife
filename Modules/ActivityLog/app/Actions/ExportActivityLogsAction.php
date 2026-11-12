@@ -12,8 +12,9 @@ class ExportActivityLogsAction
 {
     use AsAction;
 
-    public string $jobQueue   = 'actlog';
-    public int    $jobTimeout = 300;
+    public string $jobQueue = 'actlog';
+
+    public int $jobTimeout = 300;
 
     public const ALLOWED_FILTERS = [
         'module', 'action', 'level_min', 'actor_id',
@@ -29,19 +30,19 @@ class ExportActivityLogsAction
             ->orderByDesc('created_at')
             ->lazy(500)
             ->map(fn (ActivityLog $log) => [
-                'ID'          => $log->id,
-                'Thời gian'   => format_datetime($log->created_at, true),
-                'Cấp độ'      => $log->level?->label() ?? $log->level,
-                'Module'      => $log->module,
-                'Action'      => $log->action,
-                'Actor'       => $log->actor_name ?? ($log->causer_id ? "User#{$log->causer_id}" : 'system'),
-                'Actor IP'    => $log->actor_ip,
-                'Subject'     => $log->subject_type ? "{$log->subject_type}#{$log->subject_id}" : null,
-                'Label'       => $log->subject_label,
-                'Mô tả'       => $log->description,
-                'Request ID'  => $log->request_id,
-                'URL'         => $log->http?->url,
-                'Status'      => $log->http?->status_code,
+                'ID' => $log->id,
+                __('Thời gian') => format_datetime($log->created_at, true),
+                __('Cấp độ') => $log->level?->label() ?? $log->level,
+                'Module' => $log->module,
+                'Action' => $log->action,
+                'Actor' => $log->actor_name ?? ($log->causer_id ? "User#{$log->causer_id}" : 'system'),
+                'Actor IP' => $log->actor_ip,
+                'Subject' => $log->subject_type ? "{$log->subject_type}#{$log->subject_id}" : null,
+                'Label' => $log->subject_label,
+                __('Mô tả') => $log->description,
+                'Request ID' => $log->request_id,
+                'URL' => $log->http?->url,
+                'Status' => $log->http?->status_code,
                 'Duration ms' => $log->http?->duration_ms,
             ]);
 
@@ -52,16 +53,28 @@ class ExportActivityLogsAction
 
     private function applyFilters(Builder $q, array $filters): void
     {
-        if (!empty($filters['module']))          $q->where('module', $filters['module']);
-        if (!empty($filters['action']))          $q->where('action', $filters['action']);
-        if (!empty($filters['level_min']))       $q->where('level', '>=', $filters['level_min']);
-        if (!empty($filters['actor_id']))        $q->where('causer_id', $filters['actor_id']);
-        if (!empty($filters['date_from']))       $q->where('created_at', '>=', $filters['date_from'] . ' 00:00:00');
-        if (!empty($filters['date_to']))         $q->where('created_at', '<=', $filters['date_to'] . ' 23:59:59');
-        if (!empty($filters['search'])) {
-            $t = '%' . $filters['search'] . '%';
+        if (! empty($filters['module'])) {
+            $q->where('module', $filters['module']);
+        }
+        if (! empty($filters['action'])) {
+            $q->where('action', $filters['action']);
+        }
+        if (! empty($filters['level_min'])) {
+            $q->where('level', '>=', $filters['level_min']);
+        }
+        if (! empty($filters['actor_id'])) {
+            $q->where('causer_id', $filters['actor_id']);
+        }
+        if (! empty($filters['date_from'])) {
+            $q->where('created_at', '>=', $filters['date_from'].' 00:00:00');
+        }
+        if (! empty($filters['date_to'])) {
+            $q->where('created_at', '<=', $filters['date_to'].' 23:59:59');
+        }
+        if (! empty($filters['search'])) {
+            $t = '%'.$filters['search'].'%';
             $q->where(fn ($q2) => $q2->where('description', 'like', $t)
-                                     ->orWhere('action', 'like', $t));
+                ->orWhere('action', 'like', $t));
         }
     }
 }

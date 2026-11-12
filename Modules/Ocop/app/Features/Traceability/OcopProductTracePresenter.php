@@ -99,7 +99,7 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
     public function page(array $payload, ?Model $live): array
     {
         $subject = is_array($payload['subject'] ?? null) ? $payload['subject'] : ['name' => $payload['subject'] ?? null];
-        $payload['quality_docs'] = array_map(fn ($d) => is_array($d) ? $d : ['label' => $d, 'count' => 1, 'updated_at' => null], $payload['quality_docs'] ?? []);
+        $payload['quality_docs'] = array_map(fn ($d) => is_array($d) ? [...$d, 'label' => __($d['label'] ?? '')] : ['label' => __($d), 'count' => 1, 'updated_at' => null], $payload['quality_docs'] ?? []);
         if ($live) {
             $payload['quality_docs'] = $this->publicDocs($live);
         }
@@ -145,9 +145,9 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
             : ['url' => route('ocop.public.index'), 'label' => __('Xem sản phẩm OCOP khác'), 'icon' => 'fa-arrow-right'];
 
         return $this->base([
-            'title' => $payload['name'] ?? 'Sản phẩm OCOP',
+            'title' => $payload['name'] ?? __('Sản phẩm OCOP'),
             'description' => $payload['description'] ?? null,
-            'subtitle' => ! empty($subject['name']) ? 'Chủ thể: '.$subject['name'] : null,
+            'subtitle' => ! empty($subject['name']) ? __('Chủ thể: :name', ['name' => $subject['name']]) : null,
             'images' => $live ? ($this->mediaUrls($live, OcopProduct::IMAGE_COLLECTION) ?: array_filter([$payload['image']['url'] ?? null])) : array_filter([$payload['image']['url'] ?? null]),
             'image_srcsets' => $live ? $this->mediaSrcsets($live, OcopProduct::IMAGE_COLLECTION) : [],
             'gallery' => $live ? $this->gallery($live) : array_map(fn ($url) => ['src' => $url, 'srcset' => null, 'zoom' => $url], array_values(array_filter([$payload['image']['url'] ?? null]))),
@@ -156,7 +156,7 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
             'updated_label' => format_date($live?->updated_at),
             'info' => $this->info($payload, $live, $sections, $description),
             'badges' => array_values(array_filter([
-                ['label' => $stars ? 'OCOP '.$stars.' sao' : 'Chưa xếp hạng OCOP', 'icon' => 'fa-star', 'class' => $stars ? 'badge-warning' : 'badge-ghost'],
+                ['label' => $stars ? __('OCOP :count sao', ['count' => $stars]) : __('Chưa xếp hạng OCOP'), 'icon' => 'fa-star', 'class' => $stars ? 'badge-warning' : 'badge-ghost'],
                 ! empty($payload['category']) ? ['label' => $payload['category'], 'icon' => 'fa-layer-group', 'class' => 'badge-outline'] : null,
             ])),
             'stars' => $stars,
@@ -165,7 +165,7 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
             'area' => $payload['area'] ?? null,
             'facts' => [
                 ['icon' => 'fa-hourglass-half', 'label' => __('Hạn sử dụng'), 'value' => self::shelfLife($payload['shelf_life'] ?? null)],
-                T::fact('fa-industry', 'Nhà sản xuất', $payload['producer'] ?? null),
+                T::fact('fa-industry', __('Nhà sản xuất'), $payload['producer'] ?? null),
             ],
             'subject' => [
                 ...$subject,
@@ -177,7 +177,7 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
             'sections' => $sections,
             'related' => $related,
             'channels' => $channels,
-            'cta' => $channels ? ['url' => '#mua-hang', 'label' => __('Mua sản phẩm chính hãng')] : ['url' => $detail['url'], 'label' => $live ? 'Xem trang sản phẩm' : $detail['label']],
+            'cta' => $channels ? ['url' => '#mua-hang', 'label' => __('Mua sản phẩm chính hãng')] : ['url' => $detail['url'], 'label' => $live ? __('Xem trang sản phẩm') : $detail['label']],
         ]);
     }
 
@@ -186,7 +186,7 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
     {
         return $this->base([
             'title' => $target->name,
-            'notice' => 'Thông tin sản phẩm đang được cập nhật.',
+            'notice' => __('Thông tin sản phẩm đang được cập nhật.'),
         ]);
     }
 
@@ -195,7 +195,7 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
         return T::page([
             'heading' => __('Truy xuất sản phẩm OCOP'),
             'icon' => 'fa-certificate',
-            'kind' => 'Sản phẩm OCOP',
+            'kind' => __('Sản phẩm OCOP'),
             'stars' => null,
             'subject' => [],
             'category' => null,
@@ -265,9 +265,9 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
 
         $groups = [
             ['key' => 'nguon-goc', 'title' => __('Định danh & nguồn gốc'), 'rows' => array_values(array_filter([
-                $live ? $row('Mã sản phẩm', 'OP'.$live->id, ['mono' => true, 'required' => true, 'verified' => true]) : null,
-                $row('Cơ sở sản xuất', $producer, ['note' => $producerAddress, 'required' => true, 'verified' => $subjectLinked, 'source' => $subjectLinked ? null : $selfDeclared]),
-                $row('Hạn sử dụng', self::shelfLife($payload['shelf_life'] ?? null), ['required' => true, 'source' => $label ?? $selfDeclared]),
+                $live ? $row(__('Mã sản phẩm'), 'OP'.$live->id, ['mono' => true, 'required' => true, 'verified' => true]) : null,
+                $row(__('Cơ sở sản xuất'), $producer, ['note' => $producerAddress, 'required' => true, 'verified' => $subjectLinked, 'source' => $subjectLinked ? null : $selfDeclared]),
+                $row(__('Hạn sử dụng'), self::shelfLife($payload['shelf_life'] ?? null), ['required' => true, 'source' => $label ?? $selfDeclared]),
             ]))],
         ];
 
@@ -360,6 +360,6 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
             return null;
         }
 
-        return preg_match('/sản xuất|nsx/iu', $value) ? $value : $value.' kể từ ngày sản xuất';
+        return preg_match('/sản xuất|nsx/iu', $value) ? $value : __(':value kể từ ngày sản xuất', ['value' => $value]);
     }
 }

@@ -3,12 +3,14 @@
 namespace Modules\RealEstate\Models;
 
 use App\Foundation\Models\BaseModel;
+use App\Models\Province;
+use App\Models\User;
+use App\Services\Media\MediaUrlService;
 use App\Traits\HasManagedMedia;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 use Laravel\Scout\Searchable;
 use Modules\Approval\Concerns\HasApproval;
-use Modules\Approval\Enums\ApprovalStatus;
 use Modules\RealEstate\Enums\ApartmentSubtype;
 use Modules\RealEstate\Enums\CompassDirection;
 use Modules\RealEstate\Enums\HouseSubtype;
@@ -46,31 +48,31 @@ class RealEstateListing extends BaseModel implements HasMedia
     ];
 
     protected $casts = [
-        'listing_type'          => ListingType::class,
-        'property_type'         => PropertyType::class,
-        'house_subtype'         => HouseSubtype::class,
-        'apartment_subtype'     => ApartmentSubtype::class,
-        'interior_status'       => InteriorStatus::class,
-        'legal_status'          => LegalStatus::class,
-        'direction'             => CompassDirection::class,
-        'balcony_direction'     => CompassDirection::class,
-        'usage_status'          => UsageStatus::class,
-        'area'                  => 'decimal:2',
-        'width'                 => 'decimal:2',
-        'length'                => 'decimal:2',
-        'land_area'             => 'decimal:2',
-        'usable_area'           => 'decimal:2',
-        'net_area'              => 'decimal:2',
-        'front_road_width'      => 'decimal:2',
-        'price'                 => 'decimal:0',
-        'monthly_rent'          => 'decimal:0',
-        'deposit'               => 'decimal:0',
+        'listing_type' => ListingType::class,
+        'property_type' => PropertyType::class,
+        'house_subtype' => HouseSubtype::class,
+        'apartment_subtype' => ApartmentSubtype::class,
+        'interior_status' => InteriorStatus::class,
+        'legal_status' => LegalStatus::class,
+        'direction' => CompassDirection::class,
+        'balcony_direction' => CompassDirection::class,
+        'usage_status' => UsageStatus::class,
+        'area' => 'decimal:2',
+        'width' => 'decimal:2',
+        'length' => 'decimal:2',
+        'land_area' => 'decimal:2',
+        'usable_area' => 'decimal:2',
+        'net_area' => 'decimal:2',
+        'front_road_width' => 'decimal:2',
+        'price' => 'decimal:0',
+        'monthly_rent' => 'decimal:0',
+        'deposit' => 'decimal:0',
         'current_rental_income' => 'decimal:0',
-        'management_fee'        => 'decimal:0',
-        'is_urgent'             => 'boolean',
-        'is_price_negotiable'   => 'boolean',
-        'is_featured'           => 'boolean',
-        'sort_order'            => 'integer',
+        'management_fee' => 'decimal:0',
+        'is_urgent' => 'boolean',
+        'is_price_negotiable' => 'boolean',
+        'is_featured' => 'boolean',
+        'sort_order' => 'integer',
     ];
 
     protected static function booted(): void
@@ -91,17 +93,17 @@ class RealEstateListing extends BaseModel implements HasMedia
 
     public function createdBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'created_by');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function updatedBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'updated_by');
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     public function province(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\Province::class, 'province_code', 'province_code');
+        return $this->belongsTo(Province::class, 'province_code', 'province_code');
     }
 
     // ── HasApproval contract ─────────────────────────────────────────
@@ -142,10 +144,10 @@ class RealEstateListing extends BaseModel implements HasMedia
         }
 
         if ($this->isSale()) {
-            return $this->price ? number_format((float) $this->price / 1_000_000_000, 1) . ' tỷ' : '—';
+            return $this->price ? __(':amount tỷ', ['amount' => number_format((float) $this->price / 1_000_000_000, 1)]) : '—';
         }
 
-        return $this->monthly_rent ? number_format((float) $this->monthly_rent) . ' đ/tháng' : '—';
+        return $this->monthly_rent ? __(':amount đ/tháng', ['amount' => number_format((float) $this->monthly_rent)]) : '—';
     }
 
     /** spec/RealEstateForRent_Technical_Specification.md §2.2 — giá thuê + phí quản lý, chỉ có nghĩa khi isRent(). */
@@ -167,7 +169,7 @@ class RealEstateListing extends BaseModel implements HasMedia
      */
     public function galleryUrls(string $conversion = 'medium'): array
     {
-        $urlService = app(\App\Services\Media\MediaUrlService::class);
+        $urlService = app(MediaUrlService::class);
 
         return $this->getMedia('real_estate_gallery')->map(
             fn ($media) => $urlService->url($media, $conversion)
@@ -178,7 +180,7 @@ class RealEstateListing extends BaseModel implements HasMedia
 
     public function searchableAs(): string
     {
-        return config('scout.prefix') . 'real_estate_listings';
+        return config('scout.prefix').'real_estate_listings';
     }
 
     /** Chỉ đẩy vào Meilisearch tin đã publiclyVisible() — SoftDeletes tự gọi unsearchable() khi bị xoá. */
@@ -190,22 +192,22 @@ class RealEstateListing extends BaseModel implements HasMedia
     public function toSearchableArray(): array
     {
         return [
-            'id'             => $this->id,
-            'uuid'           => $this->uuid,
-            'listing_type'   => $this->listing_type->value,
-            'property_type'  => $this->property_type->value,
-            'title'          => $this->title,
-            'description'    => (string) $this->description,
-            'slug'           => $this->slug,
-            'province_code'  => $this->province_code,
-            'ward_code'      => $this->ward_code,
-            'price'          => $this->price !== null ? (float) $this->price : null,
-            'monthly_rent'   => $this->monthly_rent !== null ? (float) $this->monthly_rent : null,
-            'area'           => $this->area !== null ? (float) $this->area : null,
-            'bedrooms'       => $this->bedrooms,
-            'bathrooms'      => $this->bathrooms,
-            'is_featured'    => (bool) $this->is_featured,
-            'published_at'   => $this->created_at?->timestamp,
+            'id' => $this->id,
+            'uuid' => $this->uuid,
+            'listing_type' => $this->listing_type->value,
+            'property_type' => $this->property_type->value,
+            'title' => $this->title,
+            'description' => (string) $this->description,
+            'slug' => $this->slug,
+            'province_code' => $this->province_code,
+            'ward_code' => $this->ward_code,
+            'price' => $this->price !== null ? (float) $this->price : null,
+            'monthly_rent' => $this->monthly_rent !== null ? (float) $this->monthly_rent : null,
+            'area' => $this->area !== null ? (float) $this->area : null,
+            'bedrooms' => $this->bedrooms,
+            'bathrooms' => $this->bathrooms,
+            'is_featured' => (bool) $this->is_featured,
+            'published_at' => $this->created_at?->timestamp,
         ];
     }
 }

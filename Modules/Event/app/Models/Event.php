@@ -185,8 +185,8 @@ class Event extends Model
     {
         return match ($this->price_type) {
             EventPriceType::Free => __('Miễn phí'),
-            EventPriceType::Single => number_format((float) $this->price_amount, 0, ',', '.').'đ',
-            EventPriceType::Range => number_format((float) $this->price_min, 0, ',', '.').'đ – '.number_format((float) $this->price_max, 0, ',', '.').'đ',
+            EventPriceType::Single => __(':amountđ', ['amount' => number_format((float) $this->price_amount, 0, ',', '.')]),
+            EventPriceType::Range => __(':minđ – :maxđ', ['min' => number_format((float) $this->price_min, 0, ',', '.'), 'max' => number_format((float) $this->price_max, 0, ',', '.')]),
         };
     }
 

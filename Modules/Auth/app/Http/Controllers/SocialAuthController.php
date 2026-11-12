@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Facades\Socialite;
 use Modules\Auth\Actions\Auth\SocialLoginAction;
 use Throwable;
@@ -29,14 +30,14 @@ class SocialAuthController extends Controller
         // Facebook không request email by default — phải khai báo scope rõ ràng
         return match ($provider) {
             'facebook' => Socialite::driver($driver)->scopes(['email'])->redirect(),
-            default    => Socialite::driver($driver)->redirect(),
+            default => Socialite::driver($driver)->redirect(),
         };
     }
 
     public function callback(string $provider): RedirectResponse
     {
-        $driver       = $this->resolveDriver($provider);
-        $wasLoggedIn  = Auth::check();
+        $driver = $this->resolveDriver($provider);
+        $wasLoggedIn = Auth::check();
 
         try {
             $socialUser = Socialite::driver($driver)->user();
@@ -48,11 +49,12 @@ class SocialAuthController extends Controller
         try {
             // Truyền Auth::id() để Action có thể abort trước khi write DB nếu conflict
             $result = SocialLoginAction::run($provider, $socialUser, Auth::id());
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             return redirect()->route($wasLoggedIn ? 'auth.profile' : 'login')
                 ->withErrors($e->errors());
         } catch (Throwable $e) {
             report($e);
+
             return redirect()->route($wasLoggedIn ? 'auth.profile' : 'login')
                 ->withErrors(['social' => __('Đã xảy ra lỗi khi xác thực. Vui lòng thử lại.')]);
         }
@@ -84,13 +86,9 @@ class SocialAuthController extends Controller
         }
 
         $message = match (true) {
-            $result->isNewUser => self::LOGIN_MESSAGES['new_user'],
-            $result->isNewLink => str_replace(
-                ':provider',
-                ucfirst($provider),
-                self::LOGIN_MESSAGES['new_link']
-            ),
-            default            => null,
+            $result->isNewUser => __(self::LOGIN_MESSAGES['new_user']),
+            $result->isNewLink => __(self::LOGIN_MESSAGES['new_link'], ['provider' => ucfirst($provider)]),
+            default => null,
         };
 
         // Khi redirect về profile (linking flow), dùng key riêng 'social_success'
@@ -119,18 +117,18 @@ class SocialAuthController extends Controller
 
                 abort_unless($social, 404);
 
-                $hasPassword      = ! is_null($user->password);
+                $hasPassword = ! is_null($user->password);
                 $otherSocialCount = $accounts->where('provider', '!=', $provider)->count();
 
                 if (! $hasPassword && $otherSocialCount === 0) {
-                    throw \Illuminate\Validation\ValidationException::withMessages([
+                    throw ValidationException::withMessages([
                         'social' => __('Không thể bỏ liên kết — đây là phương thức đăng nhập duy nhất. Hãy đặt mật khẩu trước.'),
                     ]);
                 }
 
                 $social->delete();
             });
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             return back()->withErrors($e->errors());
         }
 
@@ -139,7 +137,7 @@ class SocialAuthController extends Controller
 
     private function resolveDriver(string $provider): string
     {
-        $driver = config('services.social_providers.' . $provider);
+        $driver = config('services.social_providers.'.$provider);
 
         if (! $driver) {
             abort(404);

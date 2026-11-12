@@ -74,7 +74,7 @@ class RenderPromptFromFrameworkAction
         ?string $categoryName = null,
     ): string {
         $framework = config("prompt_framework_studio.frameworks.{$frameworkKey}");
-        abort_if(! $framework, 422, 'Framework không tồn tại.');
+        abort_if(! $framework, 422, __('Framework không tồn tại.'));
 
         $blocks = [];
 
