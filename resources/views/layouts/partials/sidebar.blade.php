@@ -75,12 +75,7 @@
         </x-sidebar-section>
 
         <x-sidebar-section :title="__('Nội dung (CMS)')">
-        {{-- spec/ga-dashboard-statistics.md §9.9 — mở rộng thêm 'post_analytics.view': không role
-             nào trong 5 role được cấp quyền này (platform_ops/viewer/content_editor/content_head/
-             section_editor) có sẵn POST_ARTICLE_VIEW (đã kiểm tra trực tiếp), nên nếu chỉ gate
-             theo POST_ARTICLE_VIEW như cũ thì cả nhóm menu "Bài viết" sẽ ẩn với họ, khiến link
-             "Thống kê traffic" không bao giờ hiển thị được dù đã có quyền xem trang đó. --}}
-        @if(auth()->user()?->can(\App\Enums\PermissionEnum::POST_ARTICLE_VIEW->value) || auth()->user()?->can('post_analytics.view'))
+        @if(auth()->user()?->can(\App\Enums\PermissionEnum::POST_ARTICLE_VIEW->value))
         <details {{ request()->routeIs('backend.post.*') ? 'open' : '' }}>
             <summary class="nav-summary {{ request()->routeIs('backend.post.*') ? 'active' : '' }}">
                 <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l6 6v10a2 2 0 01-2 2z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 13h6M9 17h6M9 9h1"/></svg>
@@ -92,10 +87,6 @@
                    class="sub-link {{ request()->routeIs('backend.post.articles.*') ? 'active' : '' }}">{{ __('Danh sách bài viết') }}</a>
                 <a href="{{ route('backend.post.articles.needs-freshness-review') }}"
                    class="sub-link {{ request()->routeIs('backend.post.articles.needs-freshness-review') ? 'active' : '' }}">{{ __('Cần rà soát nội dung') }}</a>
-                @can('post_analytics.view')
-                <a href="{{ route('backend.post.articles.analytics') }}"
-                   class="sub-link {{ request()->routeIs('backend.post.articles.analytics') ? 'active' : '' }}">{{ __('Thống kê traffic') }}</a>
-                @endcan
                 @can('create', \Modules\Post\Models\PostArticle::class)
                 <a href="{{ route('backend.post.articles.create') }}"
                    class="sub-link {{ request()->routeIs('backend.post.articles.create') ? 'active' : '' }}">{{ __('Thêm bài viết') }}</a>
@@ -108,11 +99,6 @@
                 <a href="{{ route('backend.post.tags.index') }}"
                    class="sub-link {{ request()->routeIs('backend.post.tags.*') ? 'active' : '' }}">{{ __('Quản lý tag') }}</a>
                 @endcan
-                {{-- spec/Markdown_Content_Negotiation_Technical_Specification.md — công cụ QA
-                     xem trước bản Markdown mà content negotiation trả về, gate riêng
-                     POST_ARTICLE_VIEW (không dùng chung điều kiện post_analytics.view của khối
-                     @if bên ngoài — người chỉ có quyền xem thống kê traffic không cần thấy mục
-                     này). --}}
                 @can(\App\Enums\PermissionEnum::POST_ARTICLE_VIEW->value)
                 <a href="{{ route('backend.post.markdown-preview.index') }}"
                    class="sub-link {{ request()->routeIs('backend.post.markdown-preview.*') ? 'active' : '' }}">{{ __('Xem trước Markdown (AI)') }}</a>

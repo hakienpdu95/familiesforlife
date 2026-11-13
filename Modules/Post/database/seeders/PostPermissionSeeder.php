@@ -30,7 +30,6 @@ class PostPermissionSeeder extends Seeder
         'post_article.unpublish',
         'post_article.manage_sponsorship',
         'post_media.upload',
-        'post_analytics.view',
     ];
 
     /** 8 role Lớp B — thu hồi toàn bộ permission Post đã cấp trước đây (không chỉ ngừng cấp mới, mà revoke tường minh permission cũ). */
@@ -73,20 +72,6 @@ class PostPermissionSeeder extends Seeder
         'post_tag.manage',
     ];
 
-    /**
-     * spec/ga-dashboard-statistics.md §1 — trang "Thống kê traffic" (GA4), tính năng CHỈ ĐỌC.
-     * Cấp rộng cho đội biên tập + vận hành; KHÔNG cấp `platform_content_creator`/
-     * `platform_content_moderator` (không cần xem traffic để viết/duyệt bài), và KHÔNG cấp 8
-     * role Lớp B (Post là tài sản nền tảng, xem đầu file).
-     */
-    private const ANALYTICS_VIEWER_ROLES = [
-        'platform_content_editor',
-        'platform_content_head',
-        'platform_section_editor',
-        'platform_ops',
-        'platform_viewer',
-    ];
-
     public function run(): void
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
@@ -113,13 +98,6 @@ class PostPermissionSeeder extends Seeder
         $contentHead = Role::where('name', 'platform_content_head')->where('guard_name', 'web')->first();
         if ($contentHead) {
             $contentHead->givePermissionTo(self::PLATFORM_CONTENT_HEAD_PERMISSIONS);
-        }
-
-        foreach (self::ANALYTICS_VIEWER_ROLES as $roleName) {
-            $role = Role::where('name', $roleName)->where('guard_name', 'web')->first();
-            if ($role) {
-                $role->givePermissionTo('post_analytics.view');
-            }
         }
 
         // super-admin: sync toàn bộ permissions (bao gồm permissions mới)

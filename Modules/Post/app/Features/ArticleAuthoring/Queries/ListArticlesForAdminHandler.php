@@ -12,10 +12,10 @@ use Modules\Post\Models\PostCategory;
 
 class ListArticlesForAdminHandler implements QueryHandlerInterface
 {
-    private const SORTABLE = ['title', 'format', 'created_at', 'deleted_at', 'ga_views_30d'];
+    private const SORTABLE = ['title', 'format', 'created_at', 'deleted_at'];
 
     /** Cột sống ở post_article_translations (bản dịch main_locale), cần leftJoin để sort — xem dưới. */
-    private const SORTABLE_VIA_TRANSLATION = ['title', 'ga_views_30d'];
+    private const SORTABLE_VIA_TRANSLATION = ['title'];
 
     public function handle(QueryInterface $query): LengthAwarePaginator
     {
@@ -54,7 +54,7 @@ class ListArticlesForAdminHandler implements QueryHandlerInterface
         $sortField = in_array($query->sortField, self::SORTABLE, true) ? $query->sortField : ($query->trashed ? 'deleted_at' : 'created_at');
         $sortDir = $query->sortDir === 'asc' ? 'asc' : 'desc';
 
-        // 'title'/'ga_views_30d' sống ở post_article_translations (bản dịch main_locale), không
+        // 'title' sống ở post_article_translations (bản dịch main_locale), không
         // phải post_articles — dùng leftJoin+orderBy khi cột sort không nằm trên bảng chính.
         if (in_array($sortField, self::SORTABLE_VIA_TRANSLATION, true)) {
             $q->leftJoin('post_article_translations as sort_trans', function ($join): void {

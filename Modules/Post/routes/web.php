@@ -11,7 +11,6 @@ use Modules\Post\Features\BreakingNews\Http\BreakingNewsApiController;
 use Modules\Post\Features\BreakingNews\Http\BreakingNewsPublicController;
 use Modules\Post\Features\CategoryManagement\Http\CategoryAdminController;
 use Modules\Post\Features\CategoryManagement\Http\CategoryApiController;
-use Modules\Post\Features\ContentAnalytics\Http\ContentAnalyticsDashboardController;
 use Modules\Post\Features\MarkdownPreview\Http\MarkdownPreviewController;
 use Modules\Post\Features\PublicReading\Http\ProductBlockClickController;
 use Modules\Post\Features\PublicReading\Http\PublicArticleController;
@@ -47,9 +46,6 @@ Route::middleware(['auth'])
         // Content Freshness (2026-08-01) — cùng lý do đặt TRƯỚC Route::resource bên dưới như
         // 'pending-review' ở trên (tránh khớp nhầm "articles/{article}").
         Route::get('articles/needs-freshness-review', [ArticleAdminController::class, 'needsFreshnessReview'])->name('articles.needs-freshness-review');
-
-        // spec/ga-dashboard-statistics.md §1 — cùng lý do đặt TRƯỚC Route::resource bên dưới.
-        Route::get('articles/analytics', [ContentAnalyticsDashboardController::class, 'index'])->name('articles.analytics');
 
         // spec/Markdown_Content_Negotiation_Technical_Specification.md — công cụ QA nội bộ,
         // KHÔNG thuộc spec (spec chỉ sửa PublicArticleController), bổ sung theo yêu cầu người
