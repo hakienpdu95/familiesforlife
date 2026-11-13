@@ -65,7 +65,7 @@
                     <span class="text-[12px] text-[#a8a29e] tabular-nums shrink-0"><span data-count>{{ mb_strlen(trim((string) old('content'))) }}</span>/1000</span>
                 </span>
                 <textarea name="content" rows="4" minlength="10" aria-describedby="rp-min" maxlength="1000" required class="textarea tx-field w-full"
-                          placeholder="{{ $hints[$oldReason][1] ?? __('Nơi mua, thời điểm, điều bạn thấy chưa đúng…') }}">{{ old('content') }}</textarea>
+                          placeholder="{{ $hints[(string) $oldReason][1] ?? __('Nơi mua, thời điểm, điều bạn thấy chưa đúng…') }}">{{ old('content') }}</textarea>
                 <span id="rp-min" class="block mt-1 text-[12px] text-[#a8a29e]">{{ __('Tối thiểu 10 ký tự.') }}</span>
                 @error('content')<span class="block mt-1 text-xs text-error">{{ $message }}</span>@enderror
             </label>
