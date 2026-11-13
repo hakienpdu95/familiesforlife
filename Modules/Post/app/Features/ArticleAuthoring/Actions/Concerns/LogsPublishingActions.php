@@ -10,10 +10,10 @@ trait LogsPublishingActions
     private function log(PostArticleTranslation $translation, string $action, ?string $reason = null): void
     {
         PostPublishingLog::create([
-            'translation_id'  => $translation->id,
-            'action'          => $action,
-            'reason'          => $reason,
-            'performed_by'    => auth()->id(), // null nếu chạy từ Job hệ thống
+            'translation_id' => $translation->id,
+            'action' => $action,
+            'reason' => $reason,
+            'performed_by' => auth()->id(), // null nếu chạy từ Job hệ thống
         ]);
     }
 }

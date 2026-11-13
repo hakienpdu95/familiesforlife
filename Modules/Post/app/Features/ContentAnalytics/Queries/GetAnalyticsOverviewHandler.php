@@ -5,6 +5,7 @@ namespace Modules\Post\Features\ContentAnalytics\Queries;
 use App\Shared\Contracts\QueryHandlerInterface;
 use App\Shared\Contracts\QueryInterface;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Spatie\Analytics\Facades\Analytics;
 use Spatie\Analytics\Period;
 
@@ -19,11 +20,11 @@ class GetAnalyticsOverviewHandler implements QueryHandlerInterface
      * @return array{
      *     summary: array{activeUsers: int, pageViews: int, sessions: int, activeUsersChangePct: ?float, pageViewsChangePct: ?float, sessionsChangePct: ?float},
      *     timeseries: array<int, array{date: string, activeUsers: int, screenPageViews: int}>,
-     *     referrers: \Illuminate\Support\Collection,
-     *     countries: \Illuminate\Support\Collection,
-     *     browsers: \Illuminate\Support\Collection,
-     *     devices: \Illuminate\Support\Collection,
-     *     userTypes: \Illuminate\Support\Collection,
+     *     referrers: Collection,
+     *     countries: Collection,
+     *     browsers: Collection,
+     *     devices: Collection,
+     *     userTypes: Collection,
      * }
      */
     public function handle(QueryInterface $query): array
@@ -35,11 +36,11 @@ class GetAnalyticsOverviewHandler implements QueryHandlerInterface
 
         // So sánh kỳ trước (§2.1) — lùi thêm 1 ngày so với điểm bắt đầu kỳ hiện tại để không đếm
         // trùng ranh giới (Period::days() coi cả 2 mốc là NGÀY, inclusive 2 đầu).
-        $previousEnd    = Carbon::today()->subDays($days + 1);
-        $previousStart  = $previousEnd->copy()->subDays($days);
+        $previousEnd = Carbon::today()->subDays($days + 1);
+        $previousStart = $previousEnd->copy()->subDays($days);
         $previousPeriod = Period::create($previousStart, $previousEnd);
 
-        $currentRows  = Analytics::get(
+        $currentRows = Analytics::get(
             period: $currentPeriod,
             metrics: ['activeUsers', 'screenPageViews', 'sessions'],
             dimensions: ['date'],
@@ -51,35 +52,35 @@ class GetAnalyticsOverviewHandler implements QueryHandlerInterface
         );
 
         $activeUsers = (int) $currentRows->sum('activeUsers');
-        $pageViews   = (int) $currentRows->sum('screenPageViews');
-        $sessions    = (int) $currentRows->sum(fn ($row) => (int) $row['sessions']);
+        $pageViews = (int) $currentRows->sum('screenPageViews');
+        $sessions = (int) $currentRows->sum(fn ($row) => (int) $row['sessions']);
 
         $previousActiveUsers = (int) $previousRows->sum('activeUsers');
-        $previousPageViews   = (int) $previousRows->sum('screenPageViews');
-        $previousSessions    = (int) $previousRows->sum(fn ($row) => (int) $row['sessions']);
+        $previousPageViews = (int) $previousRows->sum('screenPageViews');
+        $previousSessions = (int) $previousRows->sum(fn ($row) => (int) $row['sessions']);
 
         return [
             'summary' => [
-                'activeUsers'          => $activeUsers,
-                'pageViews'            => $pageViews,
-                'sessions'             => $sessions,
+                'activeUsers' => $activeUsers,
+                'pageViews' => $pageViews,
+                'sessions' => $sessions,
                 'activeUsersChangePct' => $this->percentChange($activeUsers, $previousActiveUsers),
-                'pageViewsChangePct'   => $this->percentChange($pageViews, $previousPageViews),
-                'sessionsChangePct'    => $this->percentChange($sessions, $previousSessions),
+                'pageViewsChangePct' => $this->percentChange($pageViews, $previousPageViews),
+                'sessionsChangePct' => $this->percentChange($sessions, $previousSessions),
             ],
             'timeseries' => $currentRows
                 ->sortBy('date')
                 ->map(fn ($row) => [
-                    'date'            => $row['date']->format('Y-m-d'),
-                    'activeUsers'     => $row['activeUsers'],
+                    'date' => $row['date']->format('Y-m-d'),
+                    'activeUsers' => $row['activeUsers'],
                     'screenPageViews' => $row['screenPageViews'],
                 ])
                 ->values()
                 ->all(),
             'referrers' => Analytics::fetchTopReferrers($currentPeriod),
             'countries' => Analytics::fetchTopCountries($currentPeriod),
-            'browsers'  => Analytics::fetchTopBrowsers($currentPeriod),
-            'devices'   => Analytics::get(
+            'browsers' => Analytics::fetchTopBrowsers($currentPeriod),
+            'devices' => Analytics::get(
                 period: $currentPeriod,
                 metrics: ['screenPageViews'],
                 dimensions: ['deviceCategory'],

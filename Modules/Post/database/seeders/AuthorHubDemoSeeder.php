@@ -4,6 +4,7 @@ namespace Modules\Post\Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
 use Modules\Post\Models\PostArticle;
 use Modules\Post\Models\PostAuthorProfile;
 
@@ -22,23 +23,23 @@ class AuthorHubDemoSeeder extends Seeder
     /** email user demo (đã có sẵn từ seeder platform user) => hồ sơ tác giả muốn gán. */
     private const PROFILES = [
         'haidang.pv@vigiadinh.vn' => [
-            'pen_name'     => 'Hải Đăng',
-            'bio'          => 'Phóng viên mảng đời sống - xã hội, chuyên viết tin tức gia đình và giáo dục con cái.',
+            'pen_name' => 'Hải Đăng',
+            'bio' => 'Phóng viên mảng đời sống - xã hội, chuyên viết tin tức gia đình và giáo dục con cái.',
             'social_links' => ['facebook' => 'https://facebook.com/haidang.reporter'],
         ],
         'thuha.btv@vigiadinh.vn' => [
-            'pen_name'     => 'Thu Hà',
-            'bio'          => 'Biên tập viên — duyệt sơ bộ bài viết trước khi chuyển lãnh đạo nội dung xuất bản.',
+            'pen_name' => 'Thu Hà',
+            'bio' => 'Biên tập viên — duyệt sơ bộ bài viết trước khi chuyển lãnh đạo nội dung xuất bản.',
             'social_links' => ['facebook' => 'https://facebook.com/thuha.editor', 'x' => 'https://x.com/thuha_editor'],
         ],
         'quockhanh.tbt@vigiadinh.vn' => [
-            'pen_name'     => 'Lê Quốc Khánh',
-            'bio'          => 'Trưởng phòng nội dung nền tảng — phụ trách duyệt cuối và xuất bản bài viết.',
+            'pen_name' => 'Lê Quốc Khánh',
+            'bio' => 'Trưởng phòng nội dung nền tảng — phụ trách duyệt cuối và xuất bản bài viết.',
             'social_links' => ['linkedin' => 'https://linkedin.com/in/lequockhanh'],
         ],
         'thanhtung.tcm@vigiadinh.vn' => [
-            'pen_name'     => 'Vũ Thanh Tùng',
-            'bio'          => 'Biên tập viên trưởng chuyên mục Sức khỏe & Dinh dưỡng.',
+            'pen_name' => 'Vũ Thanh Tùng',
+            'bio' => 'Biên tập viên trưởng chuyên mục Sức khỏe & Dinh dưỡng.',
             'social_links' => ['website' => 'https://vuthanhtung.vn'],
         ],
     ];
@@ -61,11 +62,11 @@ class AuthorHubDemoSeeder extends Seeder
             PostAuthorProfile::updateOrCreate(
                 ['user_id' => $user->id],
                 [
-                    'slug'         => PostAuthorProfile::slugFor($user, $data['pen_name']),
-                    'pen_name'     => $data['pen_name'],
-                    'bio'          => $data['bio'],
+                    'slug' => PostAuthorProfile::slugFor($user, $data['pen_name']),
+                    'pen_name' => $data['pen_name'],
+                    'bio' => $data['bio'],
                     'social_links' => $data['social_links'],
-                    'is_public'    => true,
+                    'is_public' => true,
                 ]
             );
         }
@@ -74,7 +75,7 @@ class AuthorHubDemoSeeder extends Seeder
     }
 
     /** Chia đều bài viết published sẵn có cho các user demo — không tạo bài mới. */
-    private function redistributePublishedArticles(\Illuminate\Support\Collection $users): void
+    private function redistributePublishedArticles(Collection $users): void
     {
         $articleIds = PostArticle::query()
             ->whereHas('translations', fn ($q) => $q->published())

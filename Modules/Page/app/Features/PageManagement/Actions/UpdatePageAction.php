@@ -18,16 +18,16 @@ class UpdatePageAction
     public function handle(Page $page, PageData $data): Page
     {
         $page->update([
-            'slug'             => $data->slug !== null && $data->slug !== '' ? $data->slug : $page->slug,
-            'title'            => $data->title,
-            'template'         => $data->template,
-            'content'          => $data->content,
-            'excerpt'          => $data->excerpt,
-            'seo_title'        => $data->seo_title,
-            'seo_description'  => $data->seo_description,
-            'seo_noindex'      => $data->seo_noindex,
-            'sort_order'       => $data->sort_order,
-            'updated_by'       => auth()->id(),
+            'slug' => $data->slug !== null && $data->slug !== '' ? $data->slug : $page->slug,
+            'title' => $data->title,
+            'template' => $data->template,
+            'content' => $data->content,
+            'excerpt' => $data->excerpt,
+            'seo_title' => $data->seo_title,
+            'seo_description' => $data->seo_description,
+            'seo_noindex' => $data->seo_noindex,
+            'sort_order' => $data->sort_order,
+            'updated_by' => auth()->id(),
         ]);
 
         return $page;

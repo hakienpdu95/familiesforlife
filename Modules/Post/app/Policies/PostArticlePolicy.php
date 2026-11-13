@@ -84,8 +84,8 @@ class PostArticlePolicy
     {
         return match ($translation->status) {
             TranslationStatus::Submitted => $this->approve($user, $translation),
-            TranslationStatus::Approved  => $this->publish($user, $translation),
-            default                      => false,
+            TranslationStatus::Approved => $this->publish($user, $translation),
+            default => false,
         };
     }
 

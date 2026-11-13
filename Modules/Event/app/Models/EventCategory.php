@@ -52,8 +52,6 @@ class EventCategory extends Model
         'parent_id',
         'name',
         'slug',
-        'icon',
-        'color_hex',
         'sort_order',
         'is_active',
         'created_by',

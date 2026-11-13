@@ -43,18 +43,18 @@ class BackfillMenuFromCategoriesCommand extends Command
                 $this->line("Skip: category #{$category->id} ({$category->name}) đã có menu item — bỏ qua.");
                 $skipped++;
             } else {
-                $this->line("Tạo cấp 1: {$category->name}" . ($dryRun ? ' (dry-run)' : ''));
+                $this->line("Tạo cấp 1: {$category->name}".($dryRun ? ' (dry-run)' : ''));
                 $created++;
 
                 $parent = $dryRun ? null : MenuItem::create([
-                    'location'    => 'header',
-                    'link_type'   => MenuLinkType::Category,
+                    'location' => 'header',
+                    'link_type' => MenuLinkType::Category,
                     'category_id' => $category->id,
-                    'label'       => $category->name,
-                    'sort_order'  => $category->sort_order,
-                    'depth'       => 0,
-                    'is_active'   => $category->is_active,
-                    'created_by'  => $userId,
+                    'label' => $category->name,
+                    'sort_order' => $category->sort_order,
+                    'depth' => 0,
+                    'is_active' => $category->is_active,
+                    'created_by' => $userId,
                 ]);
             }
 
@@ -72,20 +72,20 @@ class BackfillMenuFromCategoriesCommand extends Command
                     ? null
                     : ($parent?->id ?? MenuItem::where('location', 'header')->where('category_id', $category->id)->value('id'));
 
-                $this->line("  Tạo cấp 2: {$child->name}" . ($dryRun ? ' (dry-run)' : ''));
+                $this->line("  Tạo cấp 2: {$child->name}".($dryRun ? ' (dry-run)' : ''));
                 $created++;
 
                 if (! $dryRun) {
                     MenuItem::create([
-                        'location'    => 'header',
-                        'parent_id'   => $parentId,
-                        'link_type'   => MenuLinkType::Category,
+                        'location' => 'header',
+                        'parent_id' => $parentId,
+                        'link_type' => MenuLinkType::Category,
                         'category_id' => $child->id,
-                        'label'       => $child->name,
-                        'sort_order'  => $child->sort_order,
-                        'depth'       => 1,
-                        'is_active'   => $child->is_active,
-                        'created_by'  => $userId,
+                        'label' => $child->name,
+                        'sort_order' => $child->sort_order,
+                        'depth' => 1,
+                        'is_active' => $child->is_active,
+                        'created_by' => $userId,
                     ]);
                 }
             }
@@ -94,7 +94,7 @@ class BackfillMenuFromCategoriesCommand extends Command
         $this->backfillEventLink($userId, $dryRun, $created, $skipped);
 
         $this->newLine();
-        $this->info("Hoàn tất — tạo mới: {$created}, bỏ qua (đã map): {$skipped}." . ($dryRun ? ' (dry-run — chưa ghi DB)' : ''));
+        $this->info("Hoàn tất — tạo mới: {$created}, bỏ qua (đã map): {$skipped}.".($dryRun ? ' (dry-run — chưa ghi DB)' : ''));
 
         return self::SUCCESS;
     }
@@ -115,18 +115,18 @@ class BackfillMenuFromCategoriesCommand extends Command
             return;
         }
 
-        $this->line('Tạo mục "Sự Kiện"' . ($dryRun ? ' (dry-run)' : ''));
+        $this->line('Tạo mục "Sự Kiện"'.($dryRun ? ' (dry-run)' : ''));
         $created++;
 
         if (! $dryRun) {
             MenuItem::create([
-                'location'   => 'header',
-                'link_type'  => MenuLinkType::Url,
-                'url'        => $url,
-                'label'      => 'Sự Kiện',
+                'location' => 'header',
+                'link_type' => MenuLinkType::Url,
+                'url' => $url,
+                'label' => 'Sự Kiện',
                 'sort_order' => 999, // sau cùng — đúng vị trí hard-code cũ (luôn ở cuối thanh nav)
-                'depth'      => 0,
-                'is_active'  => true,
+                'depth' => 0,
+                'is_active' => true,
                 'created_by' => $userId,
             ]);
         }

@@ -56,34 +56,33 @@ class MenuItemApiController extends Controller
     private function mapNode(MenuItem $item, User $user, ?MenuItem $prev, ?MenuItem $next): array
     {
         return [
-            'id'              => $item->id,
-            'label'           => $item->label,
-            'icon'            => $item->icon,
-            'location'        => $item->location,
-            'location_label'  => config('menu.locations')[$item->location] ?? $item->location,
-            'link_type'       => $item->link_type->value,
-            'link_target'     => match ($item->link_type->value) {
+            'id' => $item->id,
+            'label' => $item->label,
+            'location' => $item->location,
+            'location_label' => config('menu.locations')[$item->location] ?? $item->location,
+            'link_type' => $item->link_type->value,
+            'link_target' => match ($item->link_type->value) {
                 'category' => $item->category ? __('Danh mục: :name', ['name' => $item->category->name]) : __('— (đã xoá) —'),
-                'page'     => match (true) {
-                    ! $item->page               => __('Trang: — (đã xoá) —'),
+                'page' => match (true) {
+                    ! $item->page => __('Trang: — (đã xoá) —'),
                     $item->resolveUrl() === null => __('Trang: :title (Nháp — đang ẩn)', ['title' => $item->page->title]),
-                    default                      => "Trang: {$item->page->title} (/{$item->page->slug})",
+                    default => "Trang: {$item->page->title} (/{$item->page->slug})",
                 },
-                'url'      => $item->url,
-                default    => null,
+                'url' => $item->url,
+                default => null,
             },
             'open_in_new_tab' => (bool) $item->open_in_new_tab,
-            'is_active'       => (bool) $item->is_active,
-            'sort_order'      => $item->sort_order,
-            'depth'           => $item->depth,
+            'is_active' => (bool) $item->is_active,
+            'sort_order' => $item->sort_order,
+            'depth' => $item->depth,
 
             // Hoán đổi sort_order với sibling liền trước/sau — xem MenuItemAdminController::reorder().
-            'prev_id'         => $prev?->id,
+            'prev_id' => $prev?->id,
             'prev_sort_order' => $prev?->sort_order ?? $item->sort_order,
-            'next_id'         => $next?->id,
+            'next_id' => $next?->id,
             'next_sort_order' => $next?->sort_order ?? $item->sort_order,
 
-            'edit_url'    => route('backend.menu.items.edit', $item),
+            'edit_url' => route('backend.menu.items.edit', $item),
             'destroy_url' => route('backend.menu.items.destroy', $item),
 
             'can_update' => $user->can('update', $item),

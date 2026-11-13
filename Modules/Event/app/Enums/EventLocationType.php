@@ -5,13 +5,13 @@ namespace Modules\Event\Enums;
 enum EventLocationType: string
 {
     case Physical = 'physical';
-    case Online   = 'online';
+    case Online = 'online';
 
     public function label(): string
     {
         return match ($this) {
             self::Physical => __('Trực tiếp'),
-            self::Online   => __('Trực tuyến'),
+            self::Online => __('Trực tuyến'),
         };
     }
 }

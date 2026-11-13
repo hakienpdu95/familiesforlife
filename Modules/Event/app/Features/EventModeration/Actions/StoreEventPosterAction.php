@@ -28,13 +28,13 @@ class StoreEventPosterAction
             __('Poster nên ở dạng ngang (landscape), không phải ảnh chân dung.')
         );
 
-        $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
-        $path     = $file->storeAs('events/posters', $filename, 'public');
+        $filename = Str::uuid().'.'.$file->getClientOriginalExtension();
+        $path = $file->storeAs('events/posters', $filename, 'public');
 
         return [
-            'poster_path'       => $path,
-            'poster_width'      => $width,
-            'poster_height'     => $height,
+            'poster_path' => $path,
+            'poster_width' => $width,
+            'poster_height' => $height,
             'poster_size_bytes' => $file->getSize(),
         ];
     }

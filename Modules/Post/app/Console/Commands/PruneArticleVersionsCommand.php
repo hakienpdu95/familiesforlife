@@ -29,7 +29,7 @@ class PruneArticleVersionsCommand extends Command
         }
 
         $cutoff = now()->subDays($retentionDays);
-        $count  = 0;
+        $count = 0;
 
         PostArticleVersion::where('trigger', VersionTrigger::Save)
             ->where('created_at', '<', $cutoff)

@@ -20,7 +20,6 @@ return new class extends Migration
             $table->unsignedTinyInteger('depth')->default(0); // 0=cấp1, 1=cấp2, 2=cấp3 — cache lại, không tính đệ quy mỗi lần
 
             $table->string('label', 150);
-            $table->string('icon', 80)->nullable();
             $table->unsignedSmallInteger('sort_order')->default(0);
             $table->boolean('is_active')->default(true);
             $table->boolean('open_in_new_tab')->default(false);

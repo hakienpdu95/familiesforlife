@@ -42,10 +42,10 @@ class MergeTagsAction
 
         Log::info('post_tag.merge', [
             'source_tag_id' => $sourceTag->id,
-            'source_name'   => $sourceTag->name,
+            'source_name' => $sourceTag->name,
             'target_tag_id' => $targetTag->id,
-            'target_name'   => $targetTag->name,
-            'actor_id'      => auth()->id(),
+            'target_name' => $targetTag->name,
+            'actor_id' => auth()->id(),
         ]);
 
         return $targetTag;

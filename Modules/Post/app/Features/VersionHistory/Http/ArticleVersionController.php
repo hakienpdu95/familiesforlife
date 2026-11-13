@@ -28,7 +28,7 @@ class ArticleVersionController extends Controller
 
         return view('post::admin.articles.history', [
             'translation' => $translation,
-            'canRestore'  => auth()->user()->can('restoreVersion', $translation),
+            'canRestore' => auth()->user()->can('restoreVersion', $translation),
         ]);
     }
 
@@ -59,19 +59,19 @@ class ArticleVersionController extends Controller
             $previous = $previousByNumber->get($version->version_number - 1);
 
             return [
-                'id'                            => $version->id,
-                'version_number'                => $version->version_number,
-                'trigger'                       => $version->trigger->value,
-                'trigger_label'                 => $version->trigger->label(),
-                'title_snapshot'                => $version->title_snapshot,
-                'char_count'                    => $version->char_count,
-                'block_count'                   => $version->block_count,
-                'char_delta'                    => $version->char_count - ($previous?->char_count ?? 0),
-                'block_delta'                   => $version->block_count - ($previous?->block_count ?? 0),
-                'restored_from_version_number'  => $version->restoredFrom?->version_number,
-                'created_by'                    => $version->createdBy ? ['id' => $version->createdBy->id, 'name' => $version->createdBy->name] : null,
-                'created_at'                    => $version->created_at?->toIso8601String(),
-                'created_at_human'              => $version->created_at?->diffForHumans(),
+                'id' => $version->id,
+                'version_number' => $version->version_number,
+                'trigger' => $version->trigger->value,
+                'trigger_label' => $version->trigger->label(),
+                'title_snapshot' => $version->title_snapshot,
+                'char_count' => $version->char_count,
+                'block_count' => $version->block_count,
+                'char_delta' => $version->char_count - ($previous?->char_count ?? 0),
+                'block_delta' => $version->block_count - ($previous?->block_count ?? 0),
+                'restored_from_version_number' => $version->restoredFrom?->version_number,
+                'created_by' => $version->createdBy ? ['id' => $version->createdBy->id, 'name' => $version->createdBy->name] : null,
+                'created_at' => $version->created_at?->toIso8601String(),
+                'created_at_human' => $version->created_at?->diffForHumans(),
             ];
         });
 
@@ -79,8 +79,8 @@ class ArticleVersionController extends Controller
             'data' => $data->values(),
             'meta' => [
                 'current_page' => $versions->currentPage(),
-                'last_page'    => $versions->lastPage(),
-                'total'        => $versions->total(),
+                'last_page' => $versions->lastPage(),
+                'total' => $versions->total(),
             ],
         ]);
     }
@@ -95,15 +95,15 @@ class ArticleVersionController extends Controller
 
         return response()->json([
             'version' => [
-                'id'             => $version->id,
+                'id' => $version->id,
                 'version_number' => $version->version_number,
-                'trigger'        => $version->trigger->value,
-                'created_by'     => $version->createdBy ? ['id' => $version->createdBy->id, 'name' => $version->createdBy->name] : null,
-                'created_at'     => $version->created_at?->toIso8601String(),
+                'trigger' => $version->trigger->value,
+                'created_by' => $version->createdBy ? ['id' => $version->createdBy->id, 'name' => $version->createdBy->name] : null,
+                'created_at' => $version->created_at?->toIso8601String(),
             ],
             'translation_snapshot' => $version->snapshot['translation'] ?? [],
-            'rendered_html'         => $rendered['html'],
-            'missing_products'      => $rendered['missing_products'],
+            'rendered_html' => $rendered['html'],
+            'missing_products' => $rendered['missing_products'],
         ]);
     }
 
@@ -113,11 +113,11 @@ class ArticleVersionController extends Controller
 
         $validated = $request->validate([
             'from' => ['required', 'integer'],
-            'to'   => ['required', 'integer'],
+            'to' => ['required', 'integer'],
         ]);
 
         $from = $translation->versions()->findOrFail($validated['from']);
-        $to   = $translation->versions()->findOrFail($validated['to']);
+        $to = $translation->versions()->findOrFail($validated['to']);
 
         return response()->json($action->handle($from, $to));
     }
@@ -135,7 +135,7 @@ class ArticleVersionController extends Controller
 
         // §13.3 — KHÔNG trả version_number của version restore vừa tạo (ghi bất đồng bộ, §9.4).
         return response()->json([
-            'message'          => __('Đã khôi phục nội dung từ phiên bản #:version_number.', ['version_number' => $version->version_number]),
+            'message' => __('Đã khôi phục nội dung từ phiên bản #:version_number.', ['version_number' => $version->version_number]),
             'translation_uuid' => $translation->uuid,
         ]);
     }

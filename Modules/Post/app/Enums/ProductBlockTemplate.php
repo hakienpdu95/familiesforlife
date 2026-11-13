@@ -4,17 +4,17 @@ namespace Modules\Post\Enums;
 
 enum ProductBlockTemplate: string
 {
-    case SingleCard  = 'single_card';   // 1 sản phẩm, ảnh lớn bên trái + nội dung bên phải
-    case MultiGrid   = 'multi_grid';    // lưới 2-4 sản phẩm, mỗi ô 1 ảnh/tên/giá/nút
-    case Banner      = 'banner';        // dải ngang full-width, nhấn mạnh 1 sản phẩm chủ đạo
+    case SingleCard = 'single_card';   // 1 sản phẩm, ảnh lớn bên trái + nội dung bên phải
+    case MultiGrid = 'multi_grid';    // lưới 2-4 sản phẩm, mỗi ô 1 ảnh/tên/giá/nút
+    case Banner = 'banner';        // dải ngang full-width, nhấn mạnh 1 sản phẩm chủ đạo
     case CompactList = 'compact_list';  // danh sách gọn (ảnh nhỏ + tên + 1 nút), nhiều sản phẩm liên tiếp
 
     public function label(): string
     {
         return match ($this) {
-            self::SingleCard  => __('Thẻ đơn'),
-            self::MultiGrid   => __('Lưới nhiều sản phẩm'),
-            self::Banner      => __('Banner nổi bật'),
+            self::SingleCard => __('Thẻ đơn'),
+            self::MultiGrid => __('Lưới nhiều sản phẩm'),
+            self::Banner => __('Banner nổi bật'),
             self::CompactList => __('Danh sách gọn'),
         };
     }

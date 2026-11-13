@@ -35,7 +35,7 @@ class ContentAnalyticsDashboardController extends Controller
         // §4 — điểm xử lý graceful degradation DUY NHẤT: mọi lỗi gọi Google Analytics API (thiếu
         // credentials, property ID sai, 403/429...) rơi vào đây, KHÔNG để lộ exception 500.
         $overview = null;
-        $error    = null;
+        $error = null;
 
         try {
             $overview = $overviewHandler->handle(new GetAnalyticsOverviewQuery(days: $days));
@@ -52,9 +52,9 @@ class ContentAnalyticsDashboardController extends Controller
         $topArticles = $topViewedHandler->handle(new GetTopViewedArticlesQuery(limit: 10));
 
         return view('post::admin.articles.analytics', [
-            'days'        => $days,
-            'overview'    => $overview,
-            'error'       => $error,
+            'days' => $days,
+            'overview' => $overview,
+            'error' => $error,
             'topArticles' => $topArticles,
         ]);
     }

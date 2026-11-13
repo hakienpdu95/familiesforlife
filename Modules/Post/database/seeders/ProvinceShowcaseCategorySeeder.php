@@ -2,6 +2,7 @@
 
 namespace Modules\Post\Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -19,10 +20,10 @@ use Modules\Post\Models\PostCategory;
  */
 class ProvinceShowcaseCategorySeeder extends Seeder
 {
-    /** @var array<int, array{name: string, icon: string}> */
+    /** @var array<int, array{name: string}> */
     private const CATEGORIES = [
-        ['name' => 'Di sản văn hóa', 'icon' => 'landmark'],
-        ['name' => 'Ẩm thực vùng miền', 'icon' => 'utensils'],
+        ['name' => 'Di sản văn hóa'],
+        ['name' => 'Ẩm thực vùng miền'],
     ];
 
     public function run(): void
@@ -35,7 +36,7 @@ class ProvinceShowcaseCategorySeeder extends Seeder
             return;
         }
 
-        $creator = \App\Models\User::withoutGlobalScopes()->where('email', 'haidang.pv@vigiadinh.vn')->first();
+        $creator = User::withoutGlobalScopes()->where('email', 'haidang.pv@vigiadinh.vn')->first();
         $previousUser = Auth::user();
         if ($creator) {
             Auth::login($creator);
@@ -50,9 +51,8 @@ class ProvinceShowcaseCategorySeeder extends Seeder
             }
 
             app(CreateCategoryAction::class)->handle(CategoryData::from([
-                'parent_id'  => $parent->id,
-                'name'       => $definition['name'],
-                'icon'       => $definition['icon'],
+                'parent_id' => $parent->id,
+                'name' => $definition['name'],
                 'sort_order' => $sortOrder,
             ]));
 

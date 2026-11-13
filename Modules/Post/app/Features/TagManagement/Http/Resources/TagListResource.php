@@ -13,14 +13,14 @@ class TagListResource extends JsonResource
         $user = $request->user();
 
         return [
-            'id'             => $this->id,
-            'name'           => $this->name,
-            'slug'           => $this->slug,
+            'id' => $this->id,
+            'name' => $this->name,
+            'slug' => $this->slug,
             'articles_count' => $this->articles_count,
 
-            'edit_url'    => route('backend.post.tags.edit', $this->resource),
+            'edit_url' => route('backend.post.tags.edit', $this->resource),
             'destroy_url' => route('backend.post.tags.destroy', $this->resource),
-            'merge_url'   => route('backend.post.tags.merge', $this->resource),
+            'merge_url' => route('backend.post.tags.merge', $this->resource),
 
             'can_update' => $user?->can('update', $this->resource) ?? false,
             'can_delete' => $user?->can('delete', $this->resource) ?? false,

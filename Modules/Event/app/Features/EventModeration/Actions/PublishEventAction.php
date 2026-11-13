@@ -20,7 +20,7 @@ class PublishEventAction
         );
 
         $event->update([
-            'status'       => EventStatus::Published,
+            'status' => EventStatus::Published,
             'published_at' => now(),
         ]);
 

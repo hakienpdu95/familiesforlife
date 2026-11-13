@@ -17,13 +17,13 @@ class RemoveSponsorshipAction
     public function handle(PostArticle $article): PostArticle
     {
         $article->update([
-            'is_sponsored'         => false,
-            'sponsor_name'         => null,
-            'sponsor_logo_url'     => null,
-            'sponsor_label'        => null,
-            'campaign_code'        => null,
+            'is_sponsored' => false,
+            'sponsor_name' => null,
+            'sponsor_logo_url' => null,
+            'sponsor_label' => null,
+            'campaign_code' => null,
             'sponsored_start_date' => null,
-            'sponsored_end_date'   => null,
+            'sponsored_end_date' => null,
             // sponsored_published_at CỐ TÌNH giữ nguyên — lịch sử "đã từng là bài tài trợ",
             // không xoá dấu vết dù đã gỡ (khác các field khác).
         ]);

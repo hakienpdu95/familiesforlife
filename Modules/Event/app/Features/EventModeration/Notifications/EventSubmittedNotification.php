@@ -38,11 +38,11 @@ class EventSubmittedNotification extends Notification implements ShouldQueue
     public function toDatabase(object $notifiable): array
     {
         return NotificationData::make(
-            type:     'event_submitted',
-            title:    __('Sự kiện mới chờ duyệt: ":title"', ['title' => $this->event->title]),
-            body:     __('Độc giả vừa nộp sự kiện ":title" qua cổng thông tin, đang chờ sơ duyệt.', ['title' => $this->event->title]),
-            url:      route('backend.event.index', ['status' => 'submitted']),
-            icon:     'bell',
+            type: 'event_submitted',
+            title: __('Sự kiện mới chờ duyệt: ":title"', ['title' => $this->event->title]),
+            body: __('Độc giả vừa nộp sự kiện ":title" qua cổng thông tin, đang chờ sơ duyệt.', ['title' => $this->event->title]),
+            url: route('backend.event.index', ['status' => 'submitted']),
+            icon: 'bell',
             severity: 'info',
         );
     }

@@ -44,9 +44,9 @@ class PageDatabaseSeeder extends Seeder
             $page = Page::firstOrCreate(
                 ['slug' => $attrs['slug']],
                 [
-                    'title'      => $attrs['title'],
-                    'template'   => $attrs['template'],
-                    'is_system'  => true,
+                    'title' => $attrs['title'],
+                    'template' => $attrs['template'],
+                    'is_system' => true,
                     'created_by' => $userId,
                 ]
             );

@@ -4,9 +4,12 @@ namespace Modules\Event\Features\EventCategoryManagement\Http;
 
 use App\Actions\I18n\SaveModelTranslationsAction;
 use App\Http\Controllers\Controller;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection as SupportCollection;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Modules\Event\Features\EventCategoryManagement\Actions\CreateEventCategoryAction;
 use Modules\Event\Features\EventCategoryManagement\Actions\DeleteEventCategoryAction;
@@ -32,9 +35,9 @@ class EventCategoryAdminController extends Controller
 
     public function create(ListEventCategoriesForAdminHandler $handler): View
     {
-        $categories = $handler->handle(new ListEventCategoriesForAdminQuery);
-
-        return view('event::admin.categories.create', compact('categories'));
+        return view('event::admin.categories.create', [
+            'parentOptions' => $this->parentOptions($handler->handle(new ListEventCategoriesForAdminQuery)),
+        ]);
     }
 
     public function store(Request $request, CreateEventCategoryAction $action): RedirectResponse
@@ -50,15 +53,18 @@ class EventCategoryAdminController extends Controller
 
     public function edit(EventCategory $category, ListEventCategoriesForAdminHandler $handler): View
     {
-        $categories = $handler->handle(new ListEventCategoriesForAdminQuery);
+        $category->load(['createdBy:id,name', 'updatedBy:id,name'])->loadCount(['events', 'children']);
 
-        return view('event::admin.categories.edit', compact('category', 'categories'));
+        return view('event::admin.categories.edit', [
+            'category' => $category,
+            'parentOptions' => $this->parentOptions($handler->handle(new ListEventCategoriesForAdminQuery), $category),
+        ]);
     }
 
     public function update(Request $request, EventCategory $category, UpdateEventCategoryAction $action): RedirectResponse
     {
         $translations = $this->validatedTranslations($request);
-        $data = EventCategoryData::from($this->validated($request));
+        $data = EventCategoryData::from($this->validated($request, $category));
         $action->handle($category, $data);
         SaveModelTranslationsAction::run($category, $translations);
 
@@ -104,15 +110,61 @@ class EventCategoryAdminController extends Controller
         ]))['translations'] ?? null;
     }
 
-    private function validated(Request $request): array
+    private function validated(Request $request, ?EventCategory $ignoring = null): array
     {
+        $blockedParentIds = $ignoring
+            ? $this->subtreeIds(EventCategory::query()->get(['id', 'parent_id']), $ignoring->id)
+            : [];
+
         return $request->validate([
-            'parent_id' => ['nullable', 'integer', 'exists:event_categories,id'],
+            'parent_id' => ['nullable', 'integer', 'exists:event_categories,id', Rule::notIn($blockedParentIds)],
             'name' => ['required', 'string', 'max:100'],
-            'icon' => ['nullable', 'string', 'max:50'],
-            'color_hex' => ['nullable', 'string', 'max:7'],
             'is_active' => ['boolean'],
             'sort_order' => ['integer', 'min:0'],
         ]);
+    }
+
+    private function parentOptions(Collection $categories, ?EventCategory $ignoring = null): SupportCollection
+    {
+        $blocked = $ignoring ? $this->subtreeIds($categories, $ignoring->id) : [];
+        $byParent = $categories->groupBy(fn (EventCategory $c) => $c->parent_id ?? 0);
+        $rows = collect();
+
+        $walk = function (int $parentId, int $depth, array $path) use (&$walk, $byParent, $blocked, $rows): void {
+            foreach ($byParent->get($parentId, []) as $category) {
+                if (in_array($category->id, $blocked, true)) {
+                    continue;
+                }
+                $trail = [...$path, $category->name];
+                $rows->push((object) [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'depth' => $depth,
+                    'path' => implode(' › ', $trail),
+                    'is_active' => $category->is_active,
+                ]);
+                $walk($category->id, $depth + 1, $trail);
+            }
+        };
+        $walk(0, 0, []);
+
+        return $rows;
+    }
+
+    private function subtreeIds(Collection $categories, int $rootId): array
+    {
+        $byParent = $categories->groupBy(fn (EventCategory $c) => $c->parent_id ?? 0);
+        $ids = [];
+        $stack = [$rootId];
+
+        while ($stack) {
+            $id = array_pop($stack);
+            $ids[] = $id;
+            foreach ($byParent->get($id, []) as $child) {
+                $stack[] = $child->id;
+            }
+        }
+
+        return $ids;
     }
 }

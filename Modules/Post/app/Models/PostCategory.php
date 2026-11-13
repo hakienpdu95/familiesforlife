@@ -52,8 +52,6 @@ class PostCategory extends Model
         'name',
         'slug',
         'description',
-        'icon',
-        'color_hex',
         'sort_order',
         'is_active',
         'created_by',

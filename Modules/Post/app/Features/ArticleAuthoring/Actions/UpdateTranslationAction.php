@@ -28,16 +28,16 @@ class UpdateTranslationAction
     {
         return DB::transaction(function () use ($translation, $data) {
             $translation->update([
-                'title'            => $data->title,
-                'slug'             => $data->slug ?: $translation->slug,
-                'excerpt'          => $data->excerpt,
-                'seo_title'        => $data->seo_title,
-                'seo_description'  => $data->seo_description,
-                'direct_answer'    => $data->direct_answer,
+                'title' => $data->title,
+                'slug' => $data->slug ?: $translation->slug,
+                'excerpt' => $data->excerpt,
+                'seo_title' => $data->seo_title,
+                'seo_description' => $data->seo_description,
+                'direct_answer' => $data->direct_answer,
                 // spec/dac-ta-ky-thuat-bai-viet-tai-tro.md §7 — field per-locale của sponsorship.
-                'disclosure_text'  => $data->disclosure_text,
-                'cta_text'         => $data->cta_text,
-                'cta_url'          => $data->cta_url,
+                'disclosure_text' => $data->disclosure_text,
+                'cta_text' => $data->cta_text,
+                'cta_url' => $data->cta_url,
             ]);
 
             $this->syncContentBlocks->handle($translation, $data->blocks);

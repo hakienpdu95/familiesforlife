@@ -22,9 +22,7 @@ const COLUMNS = [
     {
         title: t('Nhãn'), field: 'label', minWidth: 220,
         formatter(cell) {
-            const d = cell.getRow().getData();
-            const icon = d.icon ? '<i class="' + esc(d.icon) + ' mr-1.5 text-base-content/50"></i>' : '';
-            return icon + '<span class="font-medium text-sm">' + esc(d.label) + '</span>';
+            return '<span class="font-medium text-sm">' + esc(cell.getValue()) + '</span>';
         },
     },
     {

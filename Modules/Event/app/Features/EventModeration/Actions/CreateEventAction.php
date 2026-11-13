@@ -25,10 +25,10 @@ class CreateEventAction
     {
         return Event::create([
             ...$this->buildAttributes->handle($data),
-            'slug'        => $this->uniqueSlug($data->title),
+            'slug' => $this->uniqueSlug($data->title),
             'poster_path' => $data->poster_path,
-            'status'      => EventStatus::Submitted,
-            'created_by'  => auth()->id(),
+            'status' => EventStatus::Submitted,
+            'created_by' => auth()->id(),
         ]);
     }
 
@@ -36,7 +36,7 @@ class CreateEventAction
     {
         $base = Str::slug($title);
         $slug = $base;
-        $i    = 2;
+        $i = 2;
 
         while (Event::where('slug', $slug)->exists()) {
             $slug = "{$base}-{$i}";

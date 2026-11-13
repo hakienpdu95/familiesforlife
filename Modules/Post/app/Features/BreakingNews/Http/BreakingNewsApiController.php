@@ -21,29 +21,29 @@ class BreakingNewsApiController extends Controller
         $this->authorize('viewAny', PostBreakingNews::class);
 
         $validated = $request->validate([
-            'page'      => ['nullable', 'integer', 'min:1'],
-            'size'      => ['nullable', 'integer', 'min:5', 'max:100'],
+            'page' => ['nullable', 'integer', 'min:1'],
+            'size' => ['nullable', 'integer', 'min:5', 'max:100'],
             'is_active' => ['nullable', 'boolean'],
         ]);
 
-        $sortRaw   = $request->input('sort.0');
+        $sortRaw = $request->input('sort.0');
         $sortField = is_array($sortRaw) ? (string) ($sortRaw['field'] ?? 'sort_order') : 'sort_order';
-        $sortDir   = is_array($sortRaw) && ($sortRaw['dir'] ?? '') === 'desc' ? 'desc' : 'asc';
+        $sortDir = is_array($sortRaw) && ($sortRaw['dir'] ?? '') === 'desc' ? 'desc' : 'asc';
 
         $query = new ListBreakingNewsForAdminQuery(
             isActive: array_key_exists('is_active', $validated) ? (bool) $validated['is_active'] : null,
-            page:     max(1, (int) ($validated['page'] ?? 1)),
-            perPage:  min(100, max(5, (int) ($validated['size'] ?? 20))),
+            page: max(1, (int) ($validated['page'] ?? 1)),
+            perPage: min(100, max(5, (int) ($validated['size'] ?? 20))),
             sortField: $sortField,
-            sortDir:   $sortDir,
+            sortDir: $sortDir,
         );
 
         $paginator = $handler->handle($query);
 
         return response()->json([
-            'data'      => BreakingNewsListResource::collection($paginator->items()),
+            'data' => BreakingNewsListResource::collection($paginator->items()),
             'last_page' => $paginator->lastPage(),
-            'total'     => $paginator->total(),
+            'total' => $paginator->total(),
         ]);
     }
 
@@ -80,9 +80,9 @@ class BreakingNewsApiController extends Controller
 
         return response()->json(
             $translations->map(fn (PostArticleTranslation $t) => [
-                'id'           => $t->article_id,
-                'text'         => $t->title,
-                'category'     => $t->article?->categories->first()?->name,
+                'id' => $t->article_id,
+                'text' => $t->title,
+                'category' => $t->article?->categories->first()?->name,
                 'published_at' => format_date($t->published_at),
             ])->values()
         );

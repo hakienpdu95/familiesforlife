@@ -30,7 +30,7 @@ class PublishPageAction
         ]));
 
         $page->update([
-            'status'       => PageStatus::Published,
+            'status' => PageStatus::Published,
             'published_at' => $page->published_at ?? now(),
         ]);
 

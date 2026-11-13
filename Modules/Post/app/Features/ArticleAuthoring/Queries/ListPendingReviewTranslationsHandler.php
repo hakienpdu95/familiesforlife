@@ -32,7 +32,7 @@ class ListPendingReviewTranslationsHandler implements QueryHandlerInterface
 
         return $translations->filter(fn (PostArticleTranslation $t) => match ($t->status) {
             TranslationStatus::Submitted => Gate::forUser($user)->allows('approve', $t),
-            TranslationStatus::Approved  => Gate::forUser($user)->allows('publish', $t),
+            TranslationStatus::Approved => Gate::forUser($user)->allows('publish', $t),
             default => false,
         })->values();
     }

@@ -28,28 +28,28 @@ class AuthorProfileSelfController extends Controller
         // (Fortify updateProfileInformation/updatePassword cũng dùng bag riêng của chúng) —
         // tránh lỗi validate của form này đè lên các form khác khi redirect back.
         $validated = $request->validateWithBag('authorProfile', [
-            'pen_name'               => ['nullable', 'string', 'max:120'],
-            'bio'                    => ['nullable', 'string', 'max:500'],
-            'job_title'              => ['nullable', 'string', 'max:150'],
-            'credentials'            => ['nullable', 'string', 'max:255'],
-            'social_links'           => ['nullable', 'array'],
-            'social_links.facebook'  => ['nullable', 'url', 'max:255'],
-            'social_links.x'         => ['nullable', 'url', 'max:255'],
-            'social_links.linkedin'  => ['nullable', 'url', 'max:255'],
-            'social_links.website'   => ['nullable', 'url', 'max:255'],
-            'is_public'              => ['boolean'],
-            'avatar_media_uuid'      => ['nullable', 'string', 'uuid'],
+            'pen_name' => ['nullable', 'string', 'max:120'],
+            'bio' => ['nullable', 'string', 'max:500'],
+            'job_title' => ['nullable', 'string', 'max:150'],
+            'credentials' => ['nullable', 'string', 'max:255'],
+            'social_links' => ['nullable', 'array'],
+            'social_links.facebook' => ['nullable', 'url', 'max:255'],
+            'social_links.x' => ['nullable', 'url', 'max:255'],
+            'social_links.linkedin' => ['nullable', 'url', 'max:255'],
+            'social_links.website' => ['nullable', 'url', 'max:255'],
+            'is_public' => ['boolean'],
+            'avatar_media_uuid' => ['nullable', 'string', 'uuid'],
         ]);
 
         $socialLinks = array_filter($validated['social_links'] ?? []);
 
         $action->handle($user, AuthorProfileData::from([
-            'pen_name'          => $validated['pen_name'] ?? null,
-            'bio'               => $validated['bio'] ?? null,
-            'job_title'         => $validated['job_title'] ?? null,
-            'credentials'       => $validated['credentials'] ?? null,
-            'social_links'      => $socialLinks ?: null,
-            'is_public'         => $request->boolean('is_public'),
+            'pen_name' => $validated['pen_name'] ?? null,
+            'bio' => $validated['bio'] ?? null,
+            'job_title' => $validated['job_title'] ?? null,
+            'credentials' => $validated['credentials'] ?? null,
+            'social_links' => $socialLinks ?: null,
+            'is_public' => $request->boolean('is_public'),
             'avatar_media_uuid' => $validated['avatar_media_uuid'] ?? null,
         ]));
 

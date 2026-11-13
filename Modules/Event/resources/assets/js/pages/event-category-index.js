@@ -21,9 +21,8 @@ const COLUMNS = [
         title: t('Tên danh mục'), field: 'name', minWidth: 260,
         formatter(cell) {
             const d = cell.getRow().getData();
-            const dot = '<span class="inline-block size-2.5 rounded-full mr-1.5 align-middle" style="background:' + esc(d.color_hex || '#94a3b8') + '"></span>';
-            return '<div>' + dot + '<span class="font-medium text-sm">' + esc(d.name) + '</span>'
-                + '<div class="text-xs text-base-content/40 font-mono ml-4">' + esc(d.slug) + '</div></div>';
+            return '<div><span class="font-medium text-sm">' + esc(d.name) + '</span>'
+                + '<div class="text-xs text-base-content/40 font-mono">' + esc(d.slug) + '</div></div>';
         },
     },
     {

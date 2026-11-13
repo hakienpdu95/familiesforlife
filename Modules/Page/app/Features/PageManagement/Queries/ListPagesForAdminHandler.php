@@ -16,7 +16,7 @@ class ListPagesForAdminHandler implements QueryHandlerInterface
     {
         /** @var ListPagesForAdminQuery $query */
         $sortField = in_array($query->sortField, self::SORTABLE, true) ? $query->sortField : 'updated_at';
-        $sortDir   = $query->sortDir === 'asc' ? 'asc' : 'desc';
+        $sortDir = $query->sortDir === 'asc' ? 'asc' : 'desc';
 
         return Page::query()
             ->when($query->search, fn ($q) => $q->where(fn ($q2) => $q2

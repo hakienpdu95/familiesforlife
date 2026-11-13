@@ -16,8 +16,6 @@ return new class extends Migration
             $table->string('name', 150);
             $table->string('slug', 160);
             $table->text('description')->nullable();
-            $table->string('icon', 80)->nullable();
-            $table->char('color_hex', 7)->nullable();
             $table->unsignedSmallInteger('sort_order')->default(0);
             $table->boolean('is_active')->default(true);
             $table->foreignId('created_by')->constrained('users')->restrictOnDelete();

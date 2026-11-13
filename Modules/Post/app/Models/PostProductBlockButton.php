@@ -28,10 +28,10 @@ class PostProductBlockButton extends Model
     ];
 
     protected $casts = [
-        'url_type'    => ButtonUrlType::class,
-        'target'      => ButtonTarget::class,
-        'style'       => ButtonStyle::class,
-        'sort_order'  => 'integer',
+        'url_type' => ButtonUrlType::class,
+        'target' => ButtonTarget::class,
+        'style' => ButtonStyle::class,
+        'sort_order' => 'integer',
         'click_count' => 'integer',
     ];
 
@@ -96,10 +96,10 @@ class PostProductBlockButton extends Model
         }
 
         return match ($this->url_type) {
-            ButtonUrlType::Phone => $this->url ? ('tel:' . $this->url) : null,
-            ButtonUrlType::Zalo  => $this->url && ! str_starts_with($this->url, 'http') ? ('https://zalo.me/' . $this->url) : $this->url,
-            ButtonUrlType::Email => $this->url ? ('mailto:' . $this->url) : null,
-            default              => $this->url,
+            ButtonUrlType::Phone => $this->url ? ('tel:'.$this->url) : null,
+            ButtonUrlType::Zalo => $this->url && ! str_starts_with($this->url, 'http') ? ('https://zalo.me/'.$this->url) : $this->url,
+            ButtonUrlType::Email => $this->url ? ('mailto:'.$this->url) : null,
+            default => $this->url,
         };
     }
 }

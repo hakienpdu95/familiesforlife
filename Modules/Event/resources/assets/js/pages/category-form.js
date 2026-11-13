@@ -3,10 +3,10 @@
  *
  * Responsibilities:
  *   1. Inline validation — delegate to global initFormValidation
- *   2. TomSelect          — auto-init select.ts-init (danh mục cha)
+ *   2. TomSelect          — danh mục cha dạng cây (createTsTree)
  */
 
-import { initAllTomSelects } from '@shared/tom-select-factory.js';
+import { createTsTree, initAllTomSelects } from '@shared/tom-select-factory.js';
 
 const FORM_SEL = '[data-event-category-form]';
 
@@ -15,5 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!form) return;
 
     initFormValidation(FORM_SEL);
+    createTsTree(form.querySelector('#ts-parent'));
     initAllTomSelects(form);
 });

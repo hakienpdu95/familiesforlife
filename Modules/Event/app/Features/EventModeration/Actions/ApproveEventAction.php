@@ -20,7 +20,7 @@ class ApproveEventAction
         );
 
         $event->update([
-            'status'      => EventStatus::Approved,
+            'status' => EventStatus::Approved,
             'approved_by' => auth()->id(),
             'approved_at' => now(),
         ]);

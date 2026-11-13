@@ -25,7 +25,7 @@ class CancelScheduleAction
         }
 
         $translation->update([
-            'status'       => TranslationStatus::Draft,
+            'status' => TranslationStatus::Draft,
             'scheduled_at' => null,
         ]);
 

@@ -48,16 +48,16 @@ class PersistArticleVersionJob implements ShouldQueue
             }
 
             PostArticleVersion::create([
-                'translation_id'  => $this->translationId,
-                'version_number'  => ($latest?->version_number ?? 0) + 1,
-                'trigger'         => $this->trigger,
-                'snapshot'        => $this->snapshot,
-                'title_snapshot'  => $this->titleSnapshot,
-                'content_hash'    => $hash,
-                'char_count'      => $this->charCount(),
-                'block_count'     => count($this->snapshot['blocks']),
+                'translation_id' => $this->translationId,
+                'version_number' => ($latest?->version_number ?? 0) + 1,
+                'trigger' => $this->trigger,
+                'snapshot' => $this->snapshot,
+                'title_snapshot' => $this->titleSnapshot,
+                'content_hash' => $hash,
+                'char_count' => $this->charCount(),
+                'block_count' => count($this->snapshot['blocks']),
                 'restored_from_version_id' => $this->restoredFromVersionId,
-                'created_by'      => $this->userId,
+                'created_by' => $this->userId,
             ]);
         });
 
@@ -76,7 +76,7 @@ class PersistArticleVersionJob implements ShouldQueue
                 return mb_strlen(strip_tags($b['text_html']));
             }
 
-            $itemWeight   = count($b['items']) * 50;
+            $itemWeight = count($b['items']) * 50;
             $buttonWeight = (array_sum(array_map(fn ($i) => count($i['buttons']), $b['items']))
                 + count($b['block_buttons'])) * 10;
 

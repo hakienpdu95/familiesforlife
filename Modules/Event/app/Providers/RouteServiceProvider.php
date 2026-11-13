@@ -23,7 +23,7 @@ class RouteServiceProvider extends ServiceProvider
         // hơn survey-submit (60/phút theo token) vì sự kiện không cần submit nhiều lần liên
         // tục như khảo sát; kết hợp Turnstile (§10.1) là đủ cho quy mô 1 form submit sự kiện.
         RateLimiter::for('event-submit', function (Request $request) {
-            return Limit::perHour(5)->by('event_submit_' . $request->ip());
+            return Limit::perHour(5)->by('event_submit_'.$request->ip());
         });
 
         parent::boot();

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Modules\Post\Features\TagManagement\Actions\CreateTagAction;
 use Modules\Post\Features\TagManagement\Actions\DeleteTagAction;
@@ -41,7 +42,7 @@ class TagAdminController extends Controller
     public function store(Request $request, CreateTagAction $action): RedirectResponse
     {
         $data = TagData::from($this->validated($request));
-        $tag  = $action->handle($data);
+        $tag = $action->handle($data);
 
         return redirect()->route('backend.post.tags.index')
             ->with('success', __('Tag ":name" đã được tạo.', ['name' => $tag->name]));
@@ -99,7 +100,7 @@ class TagAdminController extends Controller
 
         try {
             $action->handle($tag, $targetTag);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => collect($e->errors())->flatten()->first() ?? $e->getMessage()], 422);
             }

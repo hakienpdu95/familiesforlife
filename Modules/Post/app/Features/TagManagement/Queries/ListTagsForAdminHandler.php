@@ -19,11 +19,11 @@ class ListTagsForAdminHandler implements QueryHandlerInterface
     {
         /** @var ListTagsForAdminQuery $query */
         $sortField = in_array($query->sortField, self::SORTABLE, true) ? $query->sortField : 'name';
-        $sortDir   = $query->sortDir === 'desc' ? 'desc' : 'asc';
+        $sortDir = $query->sortDir === 'desc' ? 'desc' : 'asc';
 
         return PostTag::query()
             ->withCount('articles')
-            ->when($query->search, fn ($q) => $q->where('name', 'like', '%' . $query->search . '%'))
+            ->when($query->search, fn ($q) => $q->where('name', 'like', '%'.$query->search.'%'))
             ->orderBy($sortField, $sortDir)
             ->orderBy('id')
             ->paginate($query->perPage, ['*'], 'page', $query->page);

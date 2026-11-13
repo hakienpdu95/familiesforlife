@@ -3,6 +3,7 @@
 namespace Modules\Post\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -45,13 +46,13 @@ class MonitorScoutFailedJobsCommand extends Command
         // bản ghi cũ nhất trong số đó đã quá 2 giờ — nghĩa là lỗi đã tồn tại liên tục ít nhất
         // 2 giờ mà không ai xử lý, bất kể trong 30 phút gần nhất có bao nhiêu lỗi mới.
         $oldestUnresolved = $this->scoutFailedJobsQuery()->min('failed_at');
-        $isDrifting        = $oldestUnresolved !== null
+        $isDrifting = $oldestUnresolved !== null
             && Carbon::parse($oldestUnresolved)->lte(now()->subHours(2));
 
         if ($isDrifting) {
             Log::critical('[Scout] failed_jobs drift kéo dài > 2 giờ — index Post có thể đang lệch (drift) tích luỹ, xem §4.3.1.', [
                 'oldest_unresolved_failure' => (string) $oldestUnresolved,
-                'count_last_30min'          => $recentCount,
+                'count_last_30min' => $recentCount,
             ]);
             $this->error("CRITICAL: job Scout thất bại liên tục từ {$oldestUnresolved} (> 2 giờ, chưa xử lý). Xem §4.3.1 để khắc phục.");
 
@@ -81,7 +82,7 @@ class MonitorScoutFailedJobsCommand extends Command
         return self::SUCCESS;
     }
 
-    private function scoutFailedJobsQuery(): \Illuminate\Database\Query\Builder
+    private function scoutFailedJobsQuery(): Builder
     {
         $placeholders = implode(',', array_fill(0, count(self::SCOUT_JOB_CLASSES), '?'));
 

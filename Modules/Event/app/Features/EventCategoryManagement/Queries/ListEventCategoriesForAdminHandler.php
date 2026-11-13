@@ -16,7 +16,7 @@ class ListEventCategoriesForAdminHandler implements QueryHandlerInterface
         return EventCategory::query()
             ->with('parent:id,name')
             ->withCount('events')
-            ->when($query->search, fn ($q) => $q->where('name', 'like', '%' . $query->search . '%'))
+            ->when($query->search, fn ($q) => $q->where('name', 'like', '%'.$query->search.'%'))
             ->orderBy('sort_order')
             ->get();
     }

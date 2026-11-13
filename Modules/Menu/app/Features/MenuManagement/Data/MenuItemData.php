@@ -19,7 +19,6 @@ class MenuItemData extends Data
 
         public readonly string $location = 'header',
         public readonly ?int $parent_id = null,
-        public readonly ?string $icon = null,
         public readonly int $sort_order = 0,
         public readonly bool $is_active = true,
         public readonly bool $open_in_new_tab = false,

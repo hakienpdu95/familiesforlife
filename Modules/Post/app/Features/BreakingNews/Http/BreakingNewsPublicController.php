@@ -20,7 +20,7 @@ class BreakingNewsPublicController extends Controller
         return response()->json([
             'items' => $items->map(fn (PostBreakingNews $n) => [
                 'headline' => $n->displayHeadline(),
-                'url'      => $n->publicTranslation()
+                'url' => $n->publicTranslation()
                     ? route('post.public.article', ['slug' => $n->publicTranslation()->slug, 'id' => $n->publicTranslation()->id])
                     : null,
             ])->filter(fn (array $item) => $item['url'] !== null)->values(),

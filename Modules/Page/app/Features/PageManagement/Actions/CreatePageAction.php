@@ -23,17 +23,17 @@ class CreatePageAction
             : self::uniqueSlug(Str::slug($data->title) ?: Str::random(8));
 
         return Page::create([
-            'slug'             => $slug,
-            'title'            => $data->title,
-            'template'         => $data->template,
-            'content'          => $data->content,
-            'excerpt'          => $data->excerpt,
-            'status'           => PageStatus::Draft,
-            'seo_title'        => $data->seo_title,
-            'seo_description'  => $data->seo_description,
-            'seo_noindex'      => $data->seo_noindex,
-            'sort_order'       => $data->sort_order,
-            'created_by'       => auth()->id(),
+            'slug' => $slug,
+            'title' => $data->title,
+            'template' => $data->template,
+            'content' => $data->content,
+            'excerpt' => $data->excerpt,
+            'status' => PageStatus::Draft,
+            'seo_title' => $data->seo_title,
+            'seo_description' => $data->seo_description,
+            'seo_noindex' => $data->seo_noindex,
+            'sort_order' => $data->sort_order,
+            'created_by' => auth()->id(),
         ]);
     }
 
@@ -44,8 +44,8 @@ class CreatePageAction
     public static function uniqueSlug(string $base): string
     {
         $reserved = config('page.reserved_slugs', []);
-        $slug     = $base;
-        $i        = 2;
+        $slug = $base;
+        $i = 2;
 
         while (in_array($slug, $reserved, true) || Page::withTrashed()->where('slug', $slug)->exists()) {
             $slug = "{$base}-{$i}";

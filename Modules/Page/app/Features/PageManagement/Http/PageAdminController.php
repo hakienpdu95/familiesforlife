@@ -55,6 +55,8 @@ class PageAdminController extends Controller
 
     public function edit(Page $page): View
     {
+        $page->load(['createdBy:id,name', 'updatedBy:id,name']);
+
         return view('page::admin.pages.edit', [
             'page' => $page,
             'templateOptions' => PageTemplate::options(),

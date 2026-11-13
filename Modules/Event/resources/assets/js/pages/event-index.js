@@ -36,8 +36,7 @@ const COLUMNS = [
         formatter(cell) {
             const d = cell.getRow().getData();
             if (!d.category_name) return '<span class="text-base-content/25 text-xs">—</span>';
-            const dot = '<span class="inline-block size-2.5 rounded-full mr-1.5 align-middle" style="background:' + esc(d.category_color || '#94a3b8') + '"></span>';
-            return dot + '<span class="text-sm">' + esc(d.category_name) + '</span>';
+            return '<span class="text-sm">' + esc(d.category_name) + '</span>';
         },
     },
     {

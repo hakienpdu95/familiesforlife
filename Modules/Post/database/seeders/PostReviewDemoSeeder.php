@@ -7,7 +7,6 @@ use App\Models\User;
 use Database\Seeders\Concerns\ResolvesPlatformAccounts;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Auth;
-use Modules\Post\Enums\TranslationStatus;
 use Modules\Post\Features\ArticleAuthoring\Actions\ApproveArticleTranslationAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\CreateArticleAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\CreateTranslationAction;
@@ -15,7 +14,6 @@ use Modules\Post\Features\ArticleAuthoring\Actions\PublishArticleAction;
 use Modules\Post\Features\ArticleAuthoring\Actions\SubmitArticleForReviewAction;
 use Modules\Post\Features\ArticleAuthoring\Data\ArticleData;
 use Modules\Post\Features\ArticleAuthoring\Data\TranslationData;
-use Modules\Post\Models\PostArticle;
 use Modules\Post\Models\PostArticleTranslation;
 
 /**
@@ -38,7 +36,7 @@ class PostReviewDemoSeeder extends Seeder
         $accounts = $this->platformAccounts([
             'author' => RoleEnum::CONTENT_CREATOR,
             'editor' => RoleEnum::CONTENT_EDITOR,
-            'head'   => RoleEnum::CONTENT_HEAD,
+            'head' => RoleEnum::CONTENT_HEAD,
         ]);
 
         if (! $accounts) {
@@ -70,17 +68,17 @@ class PostReviewDemoSeeder extends Seeder
         Auth::login($createdBy);
 
         $article = app(CreateArticleAction::class)->handle(ArticleData::from([
-            'format'          => 'article',
-            'is_featured'     => false,
-            'category_ids'    => [],
-            'is_sponsored'    => false,
+            'format' => 'article',
+            'is_featured' => false,
+            'category_ids' => [],
+            'is_sponsored' => false,
         ]));
 
         $translation = app(CreateTranslationAction::class)->handle($article, 'vi', TranslationData::from([
-            'title'           => $title,
-            'slug'            => $slug,
-            'excerpt'         => "Dữ liệu demo minh hoạ luồng duyệt bài viết 2 tầng — {$title}.",
-            'blocks'          => [],
+            'title' => $title,
+            'slug' => $slug,
+            'excerpt' => "Dữ liệu demo minh hoạ luồng duyệt bài viết 2 tầng — {$title}.",
+            'blocks' => [],
         ]));
 
         return [$translation, true];

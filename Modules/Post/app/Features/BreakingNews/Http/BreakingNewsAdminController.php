@@ -57,23 +57,23 @@ class BreakingNewsAdminController extends Controller
      */
     public function store(Request $request, CreateBreakingNewsAction $action): RedirectResponse
     {
-        $validated  = $this->validatedForStore($request);
+        $validated = $this->validatedForStore($request);
         $articleIds = $validated['article_ids'];
 
         $created = DB::transaction(function () use ($articleIds, $validated, $action) {
             $count = 0;
             foreach (array_values($articleIds) as $index => $articleId) {
                 $action->handle(BreakingNewsData::from([
-                    'article_id'         => $articleId,
+                    'article_id' => $articleId,
                     // Field nullable KHÔNG gửi trong request → Laravel validate() không trả về
                     // key đó luôn (không phải trả về null) — ?? null/mặc định để tránh
                     // "Undefined array key" khi form để trống các trường tuỳ chọn này.
-                    'headline_override'  => $validated['headline_override'] ?? null,
-                    'badge_label'        => $validated['badge_label'] ?? null,
-                    'starts_at'          => $validated['starts_at'] ?? null,
-                    'ends_at'            => $validated['ends_at'] ?? null,
-                    'sort_order'         => ($validated['sort_order'] ?? 0) + $index,
-                    'is_active'          => $validated['is_active'] ?? true,
+                    'headline_override' => $validated['headline_override'] ?? null,
+                    'badge_label' => $validated['badge_label'] ?? null,
+                    'starts_at' => $validated['starts_at'] ?? null,
+                    'ends_at' => $validated['ends_at'] ?? null,
+                    'sort_order' => ($validated['sort_order'] ?? 0) + $index,
+                    'is_active' => $validated['is_active'] ?? true,
                 ]));
                 $count++;
             }
@@ -131,11 +131,11 @@ class BreakingNewsAdminController extends Controller
             // (config('post.default_locale')), cùng điều kiện PostBreakingNews::currentList().
             'article_id' => ['required', 'integer', 'exists:post_articles,id', $this->publishedTranslationRule()],
             'headline_override' => ['nullable', 'string', 'max:300'],
-            'badge_label'       => ['nullable', 'string', 'max:40'],
-            'starts_at'         => ['nullable', 'date'],
-            'ends_at'           => ['nullable', 'date', 'after_or_equal:starts_at'],
-            'sort_order'        => ['integer', 'min:0'],
-            'is_active'         => ['boolean'],
+            'badge_label' => ['nullable', 'string', 'max:40'],
+            'starts_at' => ['nullable', 'date'],
+            'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
+            'sort_order' => ['integer', 'min:0'],
+            'is_active' => ['boolean'],
         ]);
     }
 
@@ -143,14 +143,14 @@ class BreakingNewsAdminController extends Controller
     private function validatedForStore(Request $request): array
     {
         return $request->validate([
-            'article_ids'   => ['required', 'array', 'min:1'],
+            'article_ids' => ['required', 'array', 'min:1'],
             'article_ids.*' => ['integer', 'distinct', 'exists:post_articles,id', $this->publishedTranslationRule()],
             'headline_override' => ['nullable', 'string', 'max:300'],
-            'badge_label'       => ['nullable', 'string', 'max:40'],
-            'starts_at'         => ['nullable', 'date'],
-            'ends_at'           => ['nullable', 'date', 'after_or_equal:starts_at'],
-            'sort_order'        => ['integer', 'min:0'],
-            'is_active'         => ['boolean'],
+            'badge_label' => ['nullable', 'string', 'max:40'],
+            'starts_at' => ['nullable', 'date'],
+            'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
+            'sort_order' => ['integer', 'min:0'],
+            'is_active' => ['boolean'],
         ]);
     }
 

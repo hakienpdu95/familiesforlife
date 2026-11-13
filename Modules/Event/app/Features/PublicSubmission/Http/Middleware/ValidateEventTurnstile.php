@@ -26,10 +26,10 @@ class ValidateEventTurnstile
         }
 
         $request->validate(
-            ['cf-turnstile-response' => ['required', new Turnstile()]],
+            ['cf-turnstile-response' => ['required', new Turnstile]],
             [
                 'cf-turnstile-response.required' => __('Vui lòng hoàn thành xác minh bảo mật.'),
-                'cf-turnstile-response.*'        => __('Xác thực bảo mật thất bại, vui lòng thử lại.'),
+                'cf-turnstile-response.*' => __('Xác thực bảo mật thất bại, vui lòng thử lại.'),
             ]
         );
 
@@ -52,6 +52,7 @@ class ValidateEventTurnstile
             if (app()->isProduction()) {
                 Log::warning('Turnstile: keys chưa cấu hình — form nộp sự kiện không có bot protection.');
             }
+
             return true;
         }
 

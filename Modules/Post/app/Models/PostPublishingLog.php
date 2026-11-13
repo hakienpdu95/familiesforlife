@@ -2,6 +2,7 @@
 
 namespace Modules\Post\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -29,6 +30,6 @@ class PostPublishingLog extends Model
 
     public function performedBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'performed_by');
+        return $this->belongsTo(User::class, 'performed_by');
     }
 }

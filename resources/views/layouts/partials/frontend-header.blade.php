@@ -93,7 +93,7 @@
                        rel="{{ trim(($item->open_in_new_tab ? 'noopener ' : '') . ($item->isExternalUrl() ? 'nofollow' : '')) }}"
                        @endif
                     >
-                        @if($item->icon)<i class="{{ $item->icon }} mr-1"></i>@endif{{ $item->label }}
+                        {{ $item->label }}
                     </a>
 
                     @if($hasChildren)
@@ -108,7 +108,7 @@
                                rel="{{ trim(($child->open_in_new_tab ? 'noopener ' : '') . ($child->isExternalUrl() ? 'nofollow' : '')) }}"
                                @endif
                             >
-                                @if($child->icon)<i class="{{ $child->icon }} mr-1"></i>@endif{{ $child->label }}
+                                {{ $child->label }}
                             </a>
                             @if($hasGrandchildren)
                             <ul class="nav-sub">
@@ -121,7 +121,7 @@
                                        rel="{{ trim(($grandchild->open_in_new_tab ? 'noopener ' : '') . ($grandchild->isExternalUrl() ? 'nofollow' : '')) }}"
                                        @endif
                                     >
-                                        @if($grandchild->icon)<i class="{{ $grandchild->icon }} mr-1"></i>@endif{{ $grandchild->label }}
+                                        {{ $grandchild->label }}
                                     </a>
                                 </li>
                                 @endforeach

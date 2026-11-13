@@ -10,7 +10,7 @@
  *   4. Chọn trang tĩnh khi "Nhãn hiển thị" còn trống → tự điền nhãn = tiêu đề trang
  */
 
-import { initAllTomSelects } from '@shared/tom-select-factory.js';
+import { createTsTree, initAllTomSelects } from '@shared/tom-select-factory.js';
 
 const FORM_SEL = '[data-menu-item-form]';
 
@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!form) return;
 
     initFormValidation(FORM_SEL);
+    createTsTree(form.querySelector('#ts-category'));
     initAllTomSelects(form);
     _bindLinkTypeToggle(form);
     _bindPageLabelAutofill(form);
@@ -57,3 +58,4 @@ function _bindPageLabelAutofill(form) {
         if (title) labelEl.value = title;
     });
 }
+

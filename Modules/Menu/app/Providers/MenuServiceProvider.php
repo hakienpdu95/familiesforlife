@@ -11,7 +11,8 @@ use Nwidart\Modules\Support\ModuleServiceProvider;
 
 class MenuServiceProvider extends ModuleServiceProvider
 {
-    protected string $name      = 'Menu';
+    protected string $name = 'Menu';
+
     protected string $nameLower = 'menu';
 
     protected array $providers = [

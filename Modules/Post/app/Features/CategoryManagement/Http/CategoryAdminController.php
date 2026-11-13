@@ -131,8 +131,6 @@ class CategoryAdminController extends Controller
             ],
             'name' => ['required', 'string', 'max:150'],
             'description' => ['nullable', 'string'],
-            'icon' => ['nullable', 'string', 'max:80'],
-            'color_hex' => ['nullable', 'string', 'max:7'],
             'is_active' => ['boolean'],
             'sort_order' => ['integer', 'min:0'],
         ]);

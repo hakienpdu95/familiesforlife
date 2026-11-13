@@ -28,11 +28,11 @@ class ArticleTakenDownNotification extends Notification implements ShouldQueue
     public function toDatabase(object $notifiable): array
     {
         return NotificationData::make(
-            type:     'post_article_taken_down',
-            title:    __('Bài viết ":title" (:locale) đã bị gỡ khẩn cấp', ['title' => $this->translation->title, 'locale' => $this->translation->locale]),
-            body:     $this->reason,
-            url:      route('backend.post.articles.edit', $this->translation->article),
-            icon:     'warning',
+            type: 'post_article_taken_down',
+            title: __('Bài viết ":title" (:locale) đã bị gỡ khẩn cấp', ['title' => $this->translation->title, 'locale' => $this->translation->locale]),
+            body: $this->reason,
+            url: route('backend.post.articles.edit', $this->translation->article),
+            icon: 'warning',
             severity: 'error',
         );
     }

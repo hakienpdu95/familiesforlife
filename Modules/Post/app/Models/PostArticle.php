@@ -118,7 +118,6 @@ class PostArticle extends Model implements HasMedia, PlaylistableContract
         return $this->getFirstMediaUrl('cover', 'medium');
     }
 
-
     // ── Relationships ────────────────────────────────────────────────
 
     public function categories(): BelongsToMany

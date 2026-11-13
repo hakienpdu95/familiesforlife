@@ -29,9 +29,9 @@ class EventSubmission extends Model
     ];
 
     protected $casts = [
-        'newsletter_consent'  => 'boolean',
-        'consented_at'        => 'datetime',
-        'turnstile_verified'  => 'boolean',
+        'newsletter_consent' => 'boolean',
+        'consented_at' => 'datetime',
+        'turnstile_verified' => 'boolean',
     ];
 
     public function event(): BelongsTo

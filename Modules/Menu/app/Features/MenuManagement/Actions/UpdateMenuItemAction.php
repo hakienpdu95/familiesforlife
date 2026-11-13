@@ -42,19 +42,18 @@ class UpdateMenuItemAction
         }
 
         $menuItem->update([
-            'location'        => $data->location,
-            'parent_id'       => $data->parent_id,
-            'depth'           => $depth,
-            'label'           => $data->label,
-            'icon'            => $data->icon,
-            'sort_order'      => $data->sort_order,
-            'is_active'       => $data->is_active,
+            'location' => $data->location,
+            'parent_id' => $data->parent_id,
+            'depth' => $depth,
+            'label' => $data->label,
+            'sort_order' => $data->sort_order,
+            'is_active' => $data->is_active,
             'open_in_new_tab' => $data->open_in_new_tab,
-            'link_type'       => $data->link_type,
-            'category_id'     => $data->category_id,
-            'page_id'         => $data->page_id,
-            'url'             => $data->url,
-            'updated_by'      => auth()->id(),
+            'link_type' => $data->link_type,
+            'category_id' => $data->category_id,
+            'page_id' => $data->page_id,
+            'url' => $data->url,
+            'updated_by' => auth()->id(),
         ]);
 
         if ($depth !== $originalDepth) {

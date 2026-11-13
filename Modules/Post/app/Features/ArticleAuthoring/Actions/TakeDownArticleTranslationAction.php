@@ -35,7 +35,7 @@ class TakeDownArticleTranslationAction
         }
 
         $translation->update([
-            'status'           => TranslationStatus::Archived,
+            'status' => TranslationStatus::Archived,
             'unpublish_reason' => $reason,
         ]);
 

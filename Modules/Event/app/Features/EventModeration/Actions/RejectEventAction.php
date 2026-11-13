@@ -24,9 +24,9 @@ class RejectEventAction
         );
 
         $event->update([
-            'status'          => EventStatus::Rejected,
-            'rejected_by'     => auth()->id(),
-            'rejected_at'     => now(),
+            'status' => EventStatus::Rejected,
+            'rejected_by' => auth()->id(),
+            'rejected_at' => now(),
             'rejected_reason' => $reason,
         ]);
 

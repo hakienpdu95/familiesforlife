@@ -2,6 +2,7 @@
 
 namespace Modules\Post\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Post\Enums\VersionTrigger;
@@ -20,7 +21,7 @@ class PostArticleVersion extends Model
     ];
 
     protected $casts = [
-        'trigger'  => VersionTrigger::class,
+        'trigger' => VersionTrigger::class,
         'snapshot' => 'array',
     ];
 
@@ -31,7 +32,7 @@ class PostArticleVersion extends Model
 
     public function createdBy(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'created_by');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     /** Chỉ non-null khi trigger=restore — version nguồn đã được khôi phục (§6.1, §18.1). */

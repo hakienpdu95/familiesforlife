@@ -24,7 +24,7 @@ class UnpublishArticleTranslationAction
         }
 
         $translation->update([
-            'status'           => TranslationStatus::Unpublished,
+            'status' => TranslationStatus::Unpublished,
             'unpublish_reason' => $reason,
         ]);
 

@@ -43,7 +43,7 @@ class ExpireSponsoredArticlesJob implements ShouldQueue
                     } catch (\Throwable $e) {
                         Log::error('ExpireSponsoredArticlesJob: lỗi xử lý article', [
                             'article_id' => $article->id,
-                            'exception'  => $e->getMessage(),
+                            'exception' => $e->getMessage(),
                         ]);
                         // Không rethrow — tiếp tục với bài tiếp theo trong chunk. Bài lỗi vẫn còn
                         // is_sponsored=true + sponsored_end_date cũ nên lần chạy job KẾ TIẾP (ngày

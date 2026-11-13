@@ -22,8 +22,6 @@ return new class extends Migration
             $table->foreignId('parent_id')->nullable()->constrained('event_categories')->nullOnDelete()->comment('Danh mục cha (cây không giới hạn cấp)');
             $table->string('name', 100)->comment('Tên danh mục');
             $table->string('slug', 120)->unique()->comment('Slug URL');
-            $table->string('icon', 50)->nullable()->comment('Icon hiển thị filter chip');
-            $table->char('color_hex', 7)->nullable()->comment('Màu chip/badge');
             $table->unsignedSmallInteger('sort_order')->default(0)->comment('Thứ tự sắp xếp');
             $table->boolean('is_active')->default(true)->comment('Đang hoạt động');
             $table->foreignId('created_by')->constrained('users')->restrictOnDelete()->comment('Người tạo');

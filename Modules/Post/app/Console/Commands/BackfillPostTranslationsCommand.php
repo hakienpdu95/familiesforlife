@@ -23,17 +23,17 @@ class BackfillPostTranslationsCommand extends Command
     protected $description = 'Backfill post_articles (title/slug/status/...) sang post_article_translations';
 
     private const STATUS_MAP = [
-        'draft'          => 'draft',
+        'draft' => 'draft',
         'pending_review' => 'submitted',   // đổi tên — KHÔNG copy thẳng chuỗi
-        'published'      => 'published',
-        'scheduled'      => 'scheduled',
-        'archived'       => 'archived',
+        'published' => 'published',
+        'scheduled' => 'scheduled',
+        'archived' => 'archived',
     ];
 
     public function handle(): void
     {
         $dryRun = (bool) $this->option('dry-run');
-        $count  = 0;
+        $count = 0;
 
         DB::table('post_articles')->whereNull('deleted_at')->orderBy('id')
             ->chunkById(200, function ($articles) use ($dryRun, &$count) {
@@ -44,7 +44,7 @@ class BackfillPostTranslationsCommand extends Command
                         continue;
                     }
 
-                    $newStatus   = self::STATUS_MAP[$a->status] ?? 'draft';
+                    $newStatus = self::STATUS_MAP[$a->status] ?? 'draft';
                     $isScheduled = $newStatus === 'scheduled';
 
                     if ($dryRun) {
@@ -55,24 +55,24 @@ class BackfillPostTranslationsCommand extends Command
                     }
 
                     $translationId = DB::table('post_article_translations')->insertGetId([
-                        'uuid'            => (string) Str::uuid(),
-                        'article_id'      => $a->id,
-                        'locale'          => $a->main_locale ?? 'vi',
-                        'title'           => $a->title,
-                        'slug'            => $a->slug,
-                        'excerpt'         => $a->excerpt,
-                        'seo_title'       => $a->seo_title,
+                        'uuid' => (string) Str::uuid(),
+                        'article_id' => $a->id,
+                        'locale' => $a->main_locale ?? 'vi',
+                        'title' => $a->title,
+                        'slug' => $a->slug,
+                        'excerpt' => $a->excerpt,
+                        'seo_title' => $a->seo_title,
                         'seo_description' => $a->seo_description,
-                        'status'          => $newStatus,
+                        'status' => $newStatus,
                         // 'scheduled' cũ dùng published_at để lưu ngày DỰ KIẾN (chưa publish
                         // thật) — chuyển vào scheduled_at, không copy thẳng sang published_at.
-                        'published_at'    => $isScheduled ? null : $a->published_at,
-                        'scheduled_at'    => $isScheduled ? $a->published_at : null,
-                        'approved_by'     => $a->approved_by,
-                        'approved_at'     => $a->approved_at,
-                        'view_count'      => $a->view_count,
-                        'created_at'      => $a->created_at,
-                        'updated_at'      => $a->updated_at,
+                        'published_at' => $isScheduled ? null : $a->published_at,
+                        'scheduled_at' => $isScheduled ? $a->published_at : null,
+                        'approved_by' => $a->approved_by,
+                        'approved_at' => $a->approved_at,
+                        'view_count' => $a->view_count,
+                        'created_at' => $a->created_at,
+                        'updated_at' => $a->updated_at,
                     ]);
 
                     $cbCount = DB::table('post_content_blocks')->where('article_id', $a->id)->update(['translation_id' => $translationId]);
@@ -86,6 +86,6 @@ class BackfillPostTranslationsCommand extends Command
                 }
             });
 
-        $this->info(($dryRun ? '[dry-run] ' : '') . "Đã xử lý {$count} bài viết.");
+        $this->info(($dryRun ? '[dry-run] ' : '')."Đã xử lý {$count} bài viết.");
     }
 }

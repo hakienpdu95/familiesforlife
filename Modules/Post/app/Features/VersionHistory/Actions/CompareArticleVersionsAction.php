@@ -36,10 +36,10 @@ class CompareArticleVersionsAction
     public function handle(PostArticleVersion $from, PostArticleVersion $to): array
     {
         return [
-            'from'           => ['id' => $from->id, 'version_number' => $from->version_number],
-            'to'             => ['id' => $to->id, 'version_number' => $to->version_number],
-            'field_changes'  => $this->diffFields($from->snapshot['translation'] ?? [], $to->snapshot['translation'] ?? []),
-            'block_changes'  => $this->diffBlocks($from->snapshot['blocks'] ?? [], $to->snapshot['blocks'] ?? []),
+            'from' => ['id' => $from->id, 'version_number' => $from->version_number],
+            'to' => ['id' => $to->id, 'version_number' => $to->version_number],
+            'field_changes' => $this->diffFields($from->snapshot['translation'] ?? [], $to->snapshot['translation'] ?? []),
+            'block_changes' => $this->diffBlocks($from->snapshot['blocks'] ?? [], $to->snapshot['blocks'] ?? []),
         ];
     }
 
@@ -49,7 +49,7 @@ class CompareArticleVersionsAction
 
         foreach (self::SCALAR_FIELDS as $field) {
             $beforeValue = $before[$field] ?? null;
-            $afterValue  = $after[$field] ?? null;
+            $afterValue = $after[$field] ?? null;
 
             if ($beforeValue !== $afterValue) {
                 $changes[] = ['field' => $field, 'before' => $beforeValue, 'after' => $afterValue];
@@ -129,6 +129,7 @@ class CompareArticleVersionsAction
                 $block = $before[$ops[$i]['before_index']];
                 $changes[] = ['index' => $outputIndex++, 'status' => 'unchanged', 'type' => $block['type']];
                 $i++;
+
                 continue;
             }
 
@@ -146,11 +147,11 @@ class CompareArticleVersionsAction
             $pairCount = min(count($deleteIndexes), count($insertIndexes));
             for ($k = 0; $k < $pairCount; $k++) {
                 $beforeBlock = $before[$deleteIndexes[$k]];
-                $afterBlock  = $after[$insertIndexes[$k]];
+                $afterBlock = $after[$insertIndexes[$k]];
                 $changes[] = [
-                    'index'  => $outputIndex++,
+                    'index' => $outputIndex++,
                     'status' => 'changed',
-                    'type'   => $afterBlock['type'],
+                    'type' => $afterBlock['type'],
                     ...$this->blockPayload($beforeBlock, 'before'),
                     ...$this->blockPayload($afterBlock, 'after'),
                     ...$this->productSummary($beforeBlock, $afterBlock),
@@ -187,13 +188,13 @@ class CompareArticleVersionsAction
     private function blockPayload(array $block, string $prefix): array
     {
         if ($block['type'] === 'text') {
-            return [$prefix . '_html' => $block['text_html'] ?? ''];
+            return [$prefix.'_html' => $block['text_html'] ?? ''];
         }
 
         return [
-            $prefix . '_template'    => $block['template'] ?? null,
-            $prefix . '_heading'     => $block['heading'] ?? null,
-            $prefix . '_product_ids' => collect($block['items'] ?? [])->pluck('product_id')->all(),
+            $prefix.'_template' => $block['template'] ?? null,
+            $prefix.'_heading' => $block['heading'] ?? null,
+            $prefix.'_product_ids' => collect($block['items'] ?? [])->pluck('product_id')->all(),
         ];
     }
 
@@ -205,10 +206,10 @@ class CompareArticleVersionsAction
         }
 
         $beforeIds = collect($before['items'] ?? [])->pluck('product_id')->all();
-        $afterIds  = collect($after['items'] ?? [])->pluck('product_id')->all();
+        $afterIds = collect($after['items'] ?? [])->pluck('product_id')->all();
 
         return [
-            'product_ids_added'   => array_values(array_diff($afterIds, $beforeIds)),
+            'product_ids_added' => array_values(array_diff($afterIds, $beforeIds)),
             'product_ids_removed' => array_values(array_diff($beforeIds, $afterIds)),
         ];
     }
@@ -225,7 +226,7 @@ class CompareArticleVersionsAction
         }
 
         $beforeWords = $this->splitWords($before['text_html'] ?? '');
-        $afterWords  = $this->splitWords($after['text_html'] ?? '');
+        $afterWords = $this->splitWords($after['text_html'] ?? '');
 
         if (count($beforeWords) * count($afterWords) > self::MAX_WORD_DIFF_CELLS) {
             return [];
@@ -280,19 +281,19 @@ class CompareArticleVersionsAction
                 $i++;
                 $j++;
             } elseif ($dp[$i + 1][$j] >= $dp[$i][$j + 1]) {
-                $html .= '<span class="bg-error/20 text-error line-through">' . e($beforeWords[$i]) . '</span>';
+                $html .= '<span class="bg-error/20 text-error line-through">'.e($beforeWords[$i]).'</span>';
                 $i++;
             } else {
-                $html .= '<span class="bg-success/20 text-success">' . e($afterWords[$j]) . '</span>';
+                $html .= '<span class="bg-success/20 text-success">'.e($afterWords[$j]).'</span>';
                 $j++;
             }
         }
         while ($i < $m) {
-            $html .= '<span class="bg-error/20 text-error line-through">' . e($beforeWords[$i]) . '</span>';
+            $html .= '<span class="bg-error/20 text-error line-through">'.e($beforeWords[$i]).'</span>';
             $i++;
         }
         while ($j < $n) {
-            $html .= '<span class="bg-success/20 text-success">' . e($afterWords[$j]) . '</span>';
+            $html .= '<span class="bg-success/20 text-success">'.e($afterWords[$j]).'</span>';
             $j++;
         }
 

@@ -15,10 +15,10 @@ class PageListResource extends JsonResource
         $isPublished = $this->status === PageStatus::Published;
 
         return [
-            'id'          => $this->id,
-            'title'       => $this->title,
-            'slug'        => $this->slug,
-            'is_system'   => (bool) $this->is_system,
+            'id' => $this->id,
+            'title' => $this->title,
+            'slug' => $this->slug,
+            'is_system' => (bool) $this->is_system,
 
             'status_value' => $this->status->value,
             'status_label' => $this->status->label(),
@@ -28,9 +28,9 @@ class PageListResource extends JsonResource
 
             'menu_placements' => $this->menu_placements ?? [],
 
-            'edit_url'      => route('backend.page.items.edit', $this->resource),
-            'destroy_url'   => route('backend.page.items.destroy', $this->resource),
-            'publish_url'   => route('backend.page.items.publish', $this->resource),
+            'edit_url' => route('backend.page.items.edit', $this->resource),
+            'destroy_url' => route('backend.page.items.destroy', $this->resource),
+            'publish_url' => route('backend.page.items.publish', $this->resource),
             'unpublish_url' => route('backend.page.items.unpublish', $this->resource),
 
             'can_update' => $user?->can('update', $this->resource) ?? false,

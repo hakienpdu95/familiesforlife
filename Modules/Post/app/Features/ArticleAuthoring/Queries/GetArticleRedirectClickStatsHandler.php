@@ -59,7 +59,7 @@ class GetArticleRedirectClickStatsHandler implements QueryHandlerInterface
                     $path = parse_url($url, PHP_URL_PATH) ?: '/';
                     $query = parse_url($url, PHP_URL_QUERY);
 
-                    return $path . ($query ? "?{$query}" : '');
+                    return $path.($query ? "?{$query}" : '');
                 }
 
                 return $host;
@@ -71,8 +71,8 @@ class GetArticleRedirectClickStatsHandler implements QueryHandlerInterface
             ->values();
 
         return [
-            'total'        => $total,
-            'byDay'        => $byDay,
+            'total' => $total,
+            'byDay' => $byDay,
             'topReferrers' => $topReferrers,
         ];
     }

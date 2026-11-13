@@ -13,8 +13,6 @@ class EventCategoryData extends Data
         public readonly string $name,
 
         public readonly ?int $parent_id = null,
-        public readonly ?string $icon = null,
-        public readonly ?string $color_hex = null,
         public readonly bool $is_active = true,
         public readonly int $sort_order = 0,
     ) {}

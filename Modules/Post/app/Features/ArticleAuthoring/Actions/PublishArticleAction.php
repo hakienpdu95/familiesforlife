@@ -33,10 +33,10 @@ class PublishArticleAction
         }
 
         $translation->update([
-            'status'       => TranslationStatus::Published,
+            'status' => TranslationStatus::Published,
             'published_at' => $translation->published_at ?? now(),
-            'approved_by'  => $translation->approved_by ?? auth()->id(),
-            'approved_at'  => $translation->approved_at ?? now(),
+            'approved_by' => $translation->approved_by ?? auth()->id(),
+            'approved_at' => $translation->approved_at ?? now(),
         ]);
 
         // spec/dac-ta-ky-thuat-bai-viet-tai-tro.md §7.3 — set 1 LẦN duy nhất trên PostArticle

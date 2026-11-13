@@ -15,7 +15,7 @@ class ListBreakingNewsForAdminHandler implements QueryHandlerInterface
     {
         /** @var ListBreakingNewsForAdminQuery $query */
         $sortField = in_array($query->sortField, self::SORTABLE, true) ? $query->sortField : 'sort_order';
-        $sortDir   = $query->sortDir === 'desc' ? 'desc' : 'asc';
+        $sortDir = $query->sortDir === 'desc' ? 'desc' : 'asc';
 
         return PostBreakingNews::query()
             ->with(['article.translations' => fn ($t) => $t->where('locale', config('post.default_locale'))])

@@ -60,7 +60,6 @@ function buildColumns(state) {
                     : '';
 
                 return '<div class="category-name-cell inline-flex items-center gap-2.5 min-w-0' + (context ? ' opacity-45' : '') + (d.is_active ? '' : ' is-inactive') + '">'
-                    + '<span class="size-2.5 shrink-0 rounded-full" style="background:' + esc(d.color_hex || '#94a3b8') + '"></span>'
                     + '<div class="min-w-0"><div class="flex items-center gap-2 min-w-0 ' + (root ? 'text-[15px] font-semibold' : 'text-sm font-medium') + '">' + name + kids + hidden + '</div>' + sub + '</div>'
                     + '</div>';
             },

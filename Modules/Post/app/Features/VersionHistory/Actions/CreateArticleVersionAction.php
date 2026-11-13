@@ -61,22 +61,22 @@ class CreateArticleVersionAction
                     $fb = $block->faqBlock;
 
                     return [
-                        'type'       => 'faq',
+                        'type' => 'faq',
                         'block_uuid' => $fb->uuid,
-                        'heading'    => $fb->heading,
-                        'items'      => $fb->items->map(fn ($item) => [
+                        'heading' => $fb->heading,
+                        'items' => $fb->items->map(fn ($item) => [
                             'question' => $item->question,
-                            'answer'   => $item->answer,
+                            'answer' => $item->answer,
                         ])->all(),
                     ];
                 }
 
                 if ($block->type === ContentBlockType::Citation) {
                     return [
-                        'type'                 => 'citation',
-                        'citation_text'        => $block->citation_text,
+                        'type' => 'citation',
+                        'citation_text' => $block->citation_text,
                         'citation_source_name' => $block->citation_source_name,
-                        'citation_source_url'  => $block->citation_source_url,
+                        'citation_source_url' => $block->citation_source_url,
                     ];
                 }
 
@@ -84,11 +84,11 @@ class CreateArticleVersionAction
                     $hb = $block->howtoBlock;
 
                     return [
-                        'type'        => 'howto',
-                        'block_uuid'  => $hb->uuid,
-                        'name'        => $hb->name,
+                        'type' => 'howto',
+                        'block_uuid' => $hb->uuid,
+                        'name' => $hb->name,
                         'description' => $hb->description,
-                        'steps'       => $hb->steps->map(fn ($step) => [
+                        'steps' => $hb->steps->map(fn ($step) => [
                             'name' => $step->name,
                             'text' => $step->text,
                         ])->all(),
@@ -98,19 +98,19 @@ class CreateArticleVersionAction
                 $pb = $block->productBlock;
 
                 return [
-                    'type'          => 'product',
-                    'source'        => $pb->source,
-                    'block_uuid'    => $pb->uuid,
-                    'template'      => $pb->template->value,
-                    'heading'       => $pb->heading,
-                    'items'         => $pb->items->map(fn ($item) => [
-                        'item_key'              => $item->item_key,
-                        'product_id'            => $item->referenceId(),
-                        'title_override'        => $item->title_override,
-                        'price_label_override'  => $item->price_label_override,
-                        'description_override'  => $item->description_override,
-                        'image_url_override'    => $item->image_url_override,
-                        'buttons'               => $item->buttons->map(fn ($b) => $this->buttonSnapshot($b))->all(),
+                    'type' => 'product',
+                    'source' => $pb->source,
+                    'block_uuid' => $pb->uuid,
+                    'template' => $pb->template->value,
+                    'heading' => $pb->heading,
+                    'items' => $pb->items->map(fn ($item) => [
+                        'item_key' => $item->item_key,
+                        'product_id' => $item->referenceId(),
+                        'title_override' => $item->title_override,
+                        'price_label_override' => $item->price_label_override,
+                        'description_override' => $item->description_override,
+                        'image_url_override' => $item->image_url_override,
+                        'buttons' => $item->buttons->map(fn ($b) => $this->buttonSnapshot($b))->all(),
                     ])->all(),
                     'block_buttons' => $pb->buttons->whereNull('block_item_id')
                         ->map(fn ($b) => $this->buttonSnapshot($b))->values()->all(),
@@ -122,13 +122,13 @@ class CreateArticleVersionAction
     private function buttonSnapshot($button): array
     {
         return [
-            'button_key'        => $button->button_key,
-            'label'             => $button->label,
-            'url_type'          => $button->url_type->value,
-            'url'               => $button->url,
+            'button_key' => $button->button_key,
+            'label' => $button->label,
+            'url_type' => $button->url_type->value,
+            'url' => $button->url,
             'product_link_type' => $button->product_link_type,
-            'target'            => $button->target->value,
-            'style'             => $button->style->value,
+            'target' => $button->target->value,
+            'style' => $button->style->value,
         ];
     }
 }

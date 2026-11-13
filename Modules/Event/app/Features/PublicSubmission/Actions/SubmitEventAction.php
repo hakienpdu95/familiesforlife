@@ -36,22 +36,22 @@ class SubmitEventAction
         return DB::transaction(function () use ($data, $submitter, $ipAddress, $userAgent) {
             $event = Event::create([
                 ...$this->buildAttributes->handle($data),
-                'slug'        => $this->uniqueSlug($data->title),
+                'slug' => $this->uniqueSlug($data->title),
                 'poster_path' => $data->poster_path,
-                'status'      => EventStatus::Submitted,
+                'status' => EventStatus::Submitted,
             ]);
 
             EventSubmission::create([
-                'event_id'             => $event->id,
+                'event_id' => $event->id,
                 'submitter_first_name' => $submitter->first_name,
-                'submitter_last_name'  => $submitter->last_name,
-                'submitter_email'      => $submitter->email,
-                'newsletter_consent'   => $submitter->newsletter_consent,
-                'consented_at'         => $submitter->newsletter_consent ? now() : null,
-                'source'               => 'public_form',
-                'ip_address'           => $ipAddress,
-                'user_agent'           => $userAgent,
-                'turnstile_verified'   => true, // đã qua ValidateEventTurnstile trước khi tới đây
+                'submitter_last_name' => $submitter->last_name,
+                'submitter_email' => $submitter->email,
+                'newsletter_consent' => $submitter->newsletter_consent,
+                'consented_at' => $submitter->newsletter_consent ? now() : null,
+                'source' => 'public_form',
+                'ip_address' => $ipAddress,
+                'user_agent' => $userAgent,
+                'turnstile_verified' => true, // đã qua ValidateEventTurnstile trước khi tới đây
             ]);
 
             NotifyEditorsOfNewSubmissionAction::run($event);
@@ -83,7 +83,7 @@ class SubmitEventAction
     {
         $base = Str::slug($title);
         $slug = $base;
-        $i    = 2;
+        $i = 2;
 
         while (Event::where('slug', $slug)->exists()) {
             $slug = "{$base}-{$i}";

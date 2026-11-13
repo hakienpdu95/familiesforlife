@@ -19,19 +19,19 @@ class PostArticleTranslationFactory extends Factory
         $title = fake()->sentence();
 
         return [
-            'uuid'    => (string) Str::uuid(),
-            'locale'  => 'vi',
-            'title'   => $title,
-            'slug'    => Str::slug($title) . '-' . fake()->unique()->numberBetween(1000, 9999),
+            'uuid' => (string) Str::uuid(),
+            'locale' => 'vi',
+            'title' => $title,
+            'slug' => Str::slug($title).'-'.fake()->unique()->numberBetween(1000, 9999),
             'excerpt' => fake()->paragraph(),
-            'status'  => TranslationStatus::Draft,
+            'status' => TranslationStatus::Draft,
         ];
     }
 
     public function published(): static
     {
         return $this->state(fn () => [
-            'status'       => TranslationStatus::Published,
+            'status' => TranslationStatus::Published,
             'published_at' => now(),
         ]);
     }
@@ -41,8 +41,8 @@ class PostArticleTranslationFactory extends Factory
     {
         return $this->state(fn () => [
             'disclosure_text' => "Nội dung tài trợ bởi {$sponsorName}",
-            'cta_text'        => 'Tìm hiểu thêm',
-            'cta_url'         => 'https://example.com',
+            'cta_text' => 'Tìm hiểu thêm',
+            'cta_url' => 'https://example.com',
         ]);
     }
 }

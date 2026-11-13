@@ -5,6 +5,7 @@ namespace Modules\Menu\Features\MenuManagement\Http;
 use App\Actions\I18n\SaveModelTranslationsAction;
 use App\Http\Controllers\Controller;
 use App\Support\I18n\PortalLocale;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,6 +21,8 @@ use Modules\Menu\Features\MenuManagement\Data\MenuItemData;
 use Modules\Menu\Models\MenuItem;
 use Modules\Page\Enums\PageStatus;
 use Modules\Page\Models\Page;
+use Modules\Post\Features\CategoryManagement\Queries\GetCategoryTreeHandler;
+use Modules\Post\Features\CategoryManagement\Queries\GetCategoryTreeQuery;
 use Modules\Post\Models\PostCategory;
 
 class MenuItemAdminController extends Controller
@@ -57,6 +60,13 @@ class MenuItemAdminController extends Controller
 
     public function edit(MenuItem $menuItem): View
     {
+        $menuItem->load([
+            'category:id,slug,name,is_active',
+            'page:id,slug,title,status,published_at',
+            'createdBy:id,name',
+            'updatedBy:id,name',
+        ])->loadCount('children');
+
         return view('menu::admin.menu-items.edit', [
             'menuItem' => $menuItem,
             'parentOptions' => $this->parentOptions($menuItem),
@@ -130,10 +140,9 @@ class MenuItemAdminController extends Controller
                 'nullable', 'integer',
                 Rule::exists('menu_items', 'id')->using(fn ($query) => $query
                     ->where('depth', '<', config('menu.max_depth'))
-                    ->when($ignoring, fn ($q) => $q->whereKeyNot($ignoring->id))),
+                    ->when($ignoring, fn ($q) => $q->where('id', '!=', $ignoring->id))),
             ],
             'label' => ['required', 'string', 'max:150'],
-            'icon' => ['nullable', 'string', 'max:80'],
             'sort_order' => ['integer', 'min:0'],
             'is_active' => ['boolean'],
             'open_in_new_tab' => ['boolean'],
@@ -174,14 +183,26 @@ class MenuItemAdminController extends Controller
 
     private function categoryOptions(): Collection
     {
-        return PostCategory::active()->orderBy('name')
-            ->with(['translations' => fn ($q) => $q->whereIn('locale', PortalLocale::prefixed())])
-            ->get(['id', 'name'])
-            ->map(fn (PostCategory $category) => (object) [
+        $rows = collect(PostCategory::flatten(
+            app(GetCategoryTreeHandler::class)->handle(new GetCategoryTreeQuery(activeOnly: true))
+        ));
+        (new EloquentCollection($rows->pluck('category')->all()))
+            ->load(['translations' => fn ($q) => $q->whereIn('locale', PortalLocale::prefixed())]);
+
+        $paths = [];
+
+        return $rows->map(function (array $row) use (&$paths) {
+            $category = $row['category'];
+            $paths[$category->id] = [...($category->parent_id ? $paths[$category->parent_id] ?? [] : []), $category->name];
+
+            return (object) [
                 'id' => $category->id,
                 'name' => $category->name,
+                'depth' => $row['depth'],
+                'path' => implode(' › ', $paths[$category->id]),
                 'translations' => $category->translations->pluck('name', 'locale')->filter()->all(),
-            ]);
+            ];
+        });
     }
 
     /** Liệt kê cả trang Nháp — mục menu tự ẩn trên nav công khai cho tới khi trang được xuất bản. */

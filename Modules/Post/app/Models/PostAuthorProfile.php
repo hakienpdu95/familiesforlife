@@ -26,7 +26,7 @@ class PostAuthorProfile extends Model implements HasMedia
 
     protected $casts = [
         'social_links' => 'array',
-        'is_public'    => 'boolean',
+        'is_public' => 'boolean',
     ];
 
     public function getRouteKeyName(): string
@@ -54,12 +54,12 @@ class PostAuthorProfile extends Model implements HasMedia
     {
         return $this->getFirstMediaUrl('avatar', 'thumb')
             ?: 'https://api.dicebear.com/9.x/initials/svg?seed='
-                . urlencode($this->displayName())
-                . '&backgroundColor=6366f1&fontFamily=Arial&fontSize=40&fontWeight=700';
+                .urlencode($this->displayName())
+                .'&backgroundColor=6366f1&fontFamily=Arial&fontSize=40&fontWeight=700';
     }
 
     public static function slugFor(User $user, ?string $penName = null): string
     {
-        return Str::slug($penName ?: $user->name) . '-' . $user->id;
+        return Str::slug($penName ?: $user->name).'-'.$user->id;
     }
 }

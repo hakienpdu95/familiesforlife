@@ -101,29 +101,6 @@
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div class="form-control">
                                 <label class="label py-0 pb-1.5">
-                                    <span class="label-text font-medium">Icon</span>
-                                </label>
-                                <input type="text" name="icon" value="{{ old('icon') }}"
-                                       class="input input-bordered input-sm w-full font-mono @error('icon') input-error @enderror"
-                                       placeholder="ti-baby-carriage">
-                                @error('icon')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
-                            </div>
-                            <div class="form-control">
-                                <label class="label py-0 pb-1.5">
-                                    <span class="label-text font-medium">{{ __('Màu') }}</span>
-                                </label>
-                                <div class="color-picker-combo">
-                                    <input type="color" id="colorPicker" value="{{ old('color_hex', '#94a3b8') }}">
-                                    <input type="text" name="color_hex" id="colorText"
-                                           value="{{ old('color_hex') }}"
-                                           maxlength="7"
-                                           class="input input-bordered input-sm flex-1 font-mono @error('color_hex') input-error @enderror"
-                                           placeholder="#94a3b8">
-                                </div>
-                                @error('color_hex')<p class="mt-1 text-xs text-error">{{ $message }}</p>@enderror
-                            </div>
-                            <div class="form-control">
-                                <label class="label py-0 pb-1.5">
                                     <span class="label-text font-medium">{{ __('Thứ tự hiển thị') }}</span>
                                 </label>
                                 <input type="number" name="sort_order" min="0"

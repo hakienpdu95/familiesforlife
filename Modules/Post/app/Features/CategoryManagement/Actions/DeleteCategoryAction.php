@@ -2,8 +2,8 @@
 
 namespace Modules\Post\Features\CategoryManagement\Actions;
 
-use Modules\Post\Models\PostCategory;
 use Lorisleiva\Actions\Concerns\AsAction;
+use Modules\Post\Models\PostCategory;
 
 class DeleteCategoryAction
 {
@@ -11,8 +11,8 @@ class DeleteCategoryAction
 
     /**
      * @throws \RuntimeException Nếu danh mục còn danh mục con hoặc còn bài viết gán trực tiếp
-     * (docs/post-module-spec.md §11.1) — khác `Product`, vì xoá ở đây sẽ cascade xoá luôn dòng
-     * pivot `post_article_categories`, có thể âm thầm làm bài viết mất hết phân loại.
+     *                           (docs/post-module-spec.md §11.1) — khác `Product`, vì xoá ở đây sẽ cascade xoá luôn dòng
+     *                           pivot `post_article_categories`, có thể âm thầm làm bài viết mất hết phân loại.
      */
     public function handle(PostCategory $category): void
     {

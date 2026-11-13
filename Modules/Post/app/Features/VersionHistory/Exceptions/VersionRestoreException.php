@@ -2,6 +2,4 @@
 
 namespace Modules\Post\Features\VersionHistory\Exceptions;
 
-class VersionRestoreException extends \RuntimeException
-{
-}
+class VersionRestoreException extends \RuntimeException {}

@@ -14,11 +14,11 @@ final class PageTemplate
 {
     private const MAP = [
         'default' => ['label' => 'Mặc định (nội dung WYSIWYG)', 'view' => 'page::public.show'],
-        'about'   => ['label' => 'Giới thiệu (thiết kế riêng)',  'view' => 'page::public.templates.about'],
+        'about' => ['label' => 'Giới thiệu (thiết kế riêng)',  'view' => 'page::public.templates.about'],
         'contact' => ['label' => 'Liên hệ (thiết kế riêng)',     'view' => 'page::public.templates.contact'],
         // Demo: minh hoạ quy trình thêm 1 template mới — xem hướng dẫn ở đầu view
         // page::public.templates.event. Xoá dòng này + file view nếu không dùng đến.
-        'event'   => ['label' => 'Sự kiện (thiết kế riêng — demo)', 'view' => 'page::public.templates.event'],
+        'event' => ['label' => 'Sự kiện (thiết kế riêng — demo)', 'view' => 'page::public.templates.event'],
     ];
 
     public static function viewFor(string $key): string

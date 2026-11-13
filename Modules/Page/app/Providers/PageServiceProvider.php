@@ -9,7 +9,8 @@ use Nwidart\Modules\Support\ModuleServiceProvider;
 
 class PageServiceProvider extends ModuleServiceProvider
 {
-    protected string $name      = 'Page';
+    protected string $name = 'Page';
+
     protected string $nameLower = 'page';
 
     protected array $providers = [

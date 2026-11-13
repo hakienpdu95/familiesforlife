@@ -48,7 +48,7 @@ class GetRelatedArticlesHandler implements QueryHandlerInterface
      * Truy vấn lại model thật theo đúng thứ tự id đã cache — whereIn() không đảm bảo thứ tự nên
      * phải tự sắp lại theo $translationIds; lọc bỏ id không còn published (đã unpublish/xoá).
      *
-     * @param int[] $translationIds
+     * @param  int[]  $translationIds
      * @return Collection<int, PostArticleTranslation>
      */
     private function hydrate(array $translationIds, string $locale): Collection
@@ -80,8 +80,8 @@ class GetRelatedArticlesHandler implements QueryHandlerInterface
         }
 
         $sourceCategoryIds = $article->categories->pluck('id')->all();
-        $sourceTagIds      = $article->tags->pluck('id')->all();
-        $weights           = (array) config('post.related_posts.weights', []);
+        $sourceTagIds = $article->tags->pluck('id')->all();
+        $weights = (array) config('post.related_posts.weights', []);
 
         $coOccurrenceCounts = $this->coOccurringArticleIds($article->id);
 
@@ -100,7 +100,7 @@ class GetRelatedArticlesHandler implements QueryHandlerInterface
         $scored = $pool
             ->map(fn (PostArticleTranslation $candidate) => [
                 'translation' => $candidate,
-                'score'       => $this->score($candidate, $sourceCategoryIds, $sourceTagIds, $coOccurrenceCounts, $weights),
+                'score' => $this->score($candidate, $sourceCategoryIds, $sourceTagIds, $coOccurrenceCounts, $weights),
             ])
             ->filter(fn (array $row) => $row['score'] > 0)
             // §5.4 — điểm cao hơn thắng; hoà điểm thì published_at mới hơn thắng (tie-break ổn
@@ -166,7 +166,7 @@ class GetRelatedArticlesHandler implements QueryHandlerInterface
     private function coOccurringArticleIds(int $articleId): Collection
     {
         $lookbackDays = (int) config('post.related_posts.behavior_lookback_days', 90);
-        $since        = now()->subDays($lookbackDays);
+        $since = now()->subDays($lookbackDays);
 
         return DB::table('post_article_view_events as e1')
             ->join('post_article_view_events as e2', 'e1.visitor_hash', '=', 'e2.visitor_hash')
@@ -198,16 +198,16 @@ class GetRelatedArticlesHandler implements QueryHandlerInterface
         $candidateArticle = $candidate->article;
 
         $sharedCategoryIds = $candidateArticle->categories->pluck('id')->intersect($sourceCategoryIds);
-        $hasPrimaryMatch   = $candidateArticle->categories
+        $hasPrimaryMatch = $candidateArticle->categories
             ->filter(fn ($category) => (bool) $category->pivot->is_primary)
             ->pluck('id')
             ->intersect($sourceCategoryIds)
             ->isNotEmpty();
 
         $categoryScore = match (true) {
-            $hasPrimaryMatch                => $weights['category_primary'],
+            $hasPrimaryMatch => $weights['category_primary'],
             $sharedCategoryIds->isNotEmpty() => $weights['category_secondary'],
-            default                          => 0,
+            default => 0,
         };
 
         $tagMatches = min(
@@ -216,7 +216,7 @@ class GetRelatedArticlesHandler implements QueryHandlerInterface
         );
         $tagScore = $tagMatches * $weights['tag_per_match'];
 
-        $coViews       = (int) ($coOccurrenceCounts[$candidateArticle->id] ?? 0);
+        $coViews = (int) ($coOccurrenceCounts[$candidateArticle->id] ?? 0);
         $behaviorScore = min($coViews, $weights['behavior_covisit_cap']) * $weights['behavior_per_covisit'];
 
         $popularityScore = log10(1 + $candidate->view_count) * $weights['popularity'];
@@ -225,7 +225,6 @@ class GetRelatedArticlesHandler implements QueryHandlerInterface
     }
 
     /**
-     *
      * @return Collection<int, PostArticleTranslation>
      */
     private function popularFallback(GetRelatedArticlesQuery $query, array $excludeArticleIds, int $remaining): Collection

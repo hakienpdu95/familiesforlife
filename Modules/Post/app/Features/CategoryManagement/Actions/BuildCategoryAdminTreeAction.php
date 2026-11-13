@@ -88,8 +88,6 @@ class BuildCategoryAdminTreeAction
             'id' => $category->id,
             'name' => $category->name,
             'slug' => $category->slug,
-            'color_hex' => $category->color_hex,
-            'icon' => $category->icon,
             'depth' => $depth,
             'children_count' => $childrenCount,
             'articles_count' => (int) $category->articles_count,

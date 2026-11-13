@@ -21,7 +21,7 @@ class ScheduleArticleAction
         }
 
         $translation->update([
-            'status'       => TranslationStatus::Scheduled,
+            'status' => TranslationStatus::Scheduled,
             'scheduled_at' => $publishAt,
         ]);
 

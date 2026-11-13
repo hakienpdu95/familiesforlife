@@ -4,14 +4,14 @@ namespace Modules\Post\Enums;
 
 enum VersionTrigger: string
 {
-    case Save    = 'save';     // UpdateTranslationAction — mỗi lần bấm "Cập nhật bài viết"
+    case Save = 'save';     // UpdateTranslationAction — mỗi lần bấm "Cập nhật bài viết"
     case Publish = 'publish';  // PublishArticleAction / PublishAllTranslationsAction — chốt "bản đã lên sóng"
     case Restore = 'restore';  // RestoreArticleVersionAction — khôi phục 1 bản cũ
 
     public function label(): string
     {
         return match ($this) {
-            self::Save    => __('Lưu chỉnh sửa'),
+            self::Save => __('Lưu chỉnh sửa'),
             self::Publish => __('Xuất bản'),
             self::Restore => __('Khôi phục từ phiên bản cũ'),
         };
@@ -20,7 +20,7 @@ enum VersionTrigger: string
     public function badgeClass(): string
     {
         return match ($this) {
-            self::Save    => 'badge-ghost',
+            self::Save => 'badge-ghost',
             self::Publish => 'badge-success',
             self::Restore => 'badge-warning',
         };

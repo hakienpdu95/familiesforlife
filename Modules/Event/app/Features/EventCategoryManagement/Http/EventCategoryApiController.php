@@ -27,13 +27,13 @@ class EventCategoryApiController extends Controller
         $this->authorize('viewAny', EventCategory::class);
 
         $search = $request->string('search')->value() ?: null;
-        $user   = $request->user();
+        $user = $request->user();
 
         if ($search) {
             $flat = $flatHandler->handle(new ListEventCategoriesForAdminQuery(search: $search));
             $data = $flat->map(fn (EventCategory $c) => $this->mapFlat($c, $user))->values();
         } else {
-            $tree = $treeHandler->handle(new GetEventCategoryTreeQuery());
+            $tree = $treeHandler->handle(new GetEventCategoryTreeQuery);
             $data = $tree->map(fn (EventCategory $c) => $this->mapNode($c, $user))->values();
         }
 
@@ -67,16 +67,15 @@ class EventCategoryApiController extends Controller
     private function baseFields(EventCategory $category, User $user): array
     {
         return [
-            'id'          => $category->id,
-            'name'        => $category->name,
-            'slug'        => $category->slug,
-            'color_hex'   => $category->color_hex,
+            'id' => $category->id,
+            'name' => $category->name,
+            'slug' => $category->slug,
             'events_count' => $category->events_count,
-            'is_active'   => (bool) $category->is_active,
-            'edit_url'    => route('backend.event.categories.edit', $category),
+            'is_active' => (bool) $category->is_active,
+            'edit_url' => route('backend.event.categories.edit', $category),
             'destroy_url' => route('backend.event.categories.destroy', $category),
-            'can_update'  => $user->can('update', $category),
-            'can_delete'  => $user->can('delete', $category),
+            'can_update' => $user->can('update', $category),
+            'can_delete' => $user->can('delete', $category),
         ];
     }
 }

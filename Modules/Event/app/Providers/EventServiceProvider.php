@@ -13,7 +13,8 @@ use Nwidart\Modules\Support\ModuleServiceProvider;
 
 class EventServiceProvider extends ModuleServiceProvider
 {
-    protected string $name      = 'Event';
+    protected string $name = 'Event';
+
     protected string $nameLower = 'event';
 
     protected array $providers = [
@@ -30,7 +31,7 @@ class EventServiceProvider extends ModuleServiceProvider
         // spec/Event_Management_Technical_Specification.md §11.1 — daily, cùng cách Post đăng
         // ký ExpireSponsoredArticlesJob (PostServiceProvider::boot()).
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
-            $schedule->job(new ExpirePastEventsJob(), 'low')->daily()->withoutOverlapping();
+            $schedule->job(new ExpirePastEventsJob, 'low')->daily()->withoutOverlapping();
         });
     }
 }

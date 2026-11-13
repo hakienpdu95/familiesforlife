@@ -49,6 +49,32 @@ export function createTs(selector, opts = {}) {
     return new window.TomSelect(el, { ...DEFAULTS, ...opts, render: { ...DEFAULTS.render, ...opts.render } });
 }
 
+const _escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+
+export function createTsTree(selector, opts = {}) {
+    const el = _resolve(selector);
+    if (!el) return null;
+
+    return createTs(el, {
+        placeholder: el.dataset.tsPlaceholder,
+        searchField: ['name', 'path'],
+        sortField: [{ field: '$order' }],
+        maxOptions: null,
+        ...opts,
+        render: {
+            option: (data) => {
+                const depth = Number(data.depth || 0);
+                const branch = depth > 0 ? '<span class="text-base-content/30 mr-1.5">└</span>' : '';
+                const weight = depth === 0 ? 'font-medium' : '';
+                const muted = data.inactive ? ` <span class="text-xs text-base-content/40">(${_escapeHtml(t('Ẩn'))})</span>` : '';
+                return `<div class="flex items-center" style="padding-left:${depth * 1.25}rem">${branch}<span class="${weight}">${_escapeHtml(data.name || data.text)}</span>${muted}</div>`;
+            },
+            item: (data) => `<div>${_escapeHtml(data.path || data.name || data.text)}</div>`,
+            ...opts.render,
+        },
+    });
+}
+
 /**
  * Tạo TomSelect với remote search.
  *

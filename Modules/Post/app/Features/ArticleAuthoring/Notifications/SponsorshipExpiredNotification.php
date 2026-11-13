@@ -40,11 +40,11 @@ class SponsorshipExpiredNotification extends Notification implements ShouldQueue
     public function toDatabase(object $notifiable): array
     {
         return NotificationData::make(
-            type:     'post_sponsorship_expired',
-            title:    $this->title(),
-            body:     __('Tài trợ của ":sponsor_name" (campaign ":campaign_code") đã hết hạn — bài viết vẫn giữ nguyên trạng thái xuất bản, chỉ tắt nhãn tài trợ. Liên hệ lại doanh nghiệp qua kênh sales/CRM nếu cần gia hạn.', ['sponsor_name' => $this->article->sponsor_name, 'campaign_code' => $this->article->campaign_code]),
-            url:      route('backend.post.articles.edit', $this->article),
-            icon:     'info',
+            type: 'post_sponsorship_expired',
+            title: $this->title(),
+            body: __('Tài trợ của ":sponsor_name" (campaign ":campaign_code") đã hết hạn — bài viết vẫn giữ nguyên trạng thái xuất bản, chỉ tắt nhãn tài trợ. Liên hệ lại doanh nghiệp qua kênh sales/CRM nếu cần gia hạn.', ['sponsor_name' => $this->article->sponsor_name, 'campaign_code' => $this->article->campaign_code]),
+            url: route('backend.post.articles.edit', $this->article),
+            icon: 'info',
             severity: 'warning',
         );
     }

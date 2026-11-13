@@ -30,7 +30,7 @@ class ExpirePastEventsJob implements ShouldQueue
                         $event->update(['status' => EventStatus::Expired]);
                     } catch (\Throwable $e) {
                         Log::error('ExpirePastEventsJob: lỗi xử lý event', [
-                            'event_id'  => $event->id,
+                            'event_id' => $event->id,
                             'exception' => $e->getMessage(),
                         ]);
                         // Không rethrow — event lỗi vẫn còn end_date cũ, job ngày mai tự thử lại.

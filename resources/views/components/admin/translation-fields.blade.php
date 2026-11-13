@@ -63,6 +63,13 @@
                 $inputId = "tr-{$locale}-{$key}-".($model?->getKey() ?? 'new');
             @endphp
             @php($fallback = $localeFallbacks[$key] ?? null)
+            @php($prefix = isset($field['prefix']) ? str_replace(':locale', $locale, $field['prefix']) : null)
+            @if(! empty($field['section']))
+            <div class="flex items-center gap-3 pt-2 text-[11px] font-semibold uppercase tracking-wide text-base-content/40">
+                <span>{{ $field['section'] }}</span>
+                <span class="h-px flex-1 bg-base-200"></span>
+            </div>
+            @endif
             <div x-data="translationField(@js($key), @js(is_string($source) ? $source : ''), @js($type), @js($locale), @js($fallback))">
                 <div class="flex items-center justify-between gap-2 mb-1.5">
                     <label for="{{ $inputId }}" class="text-sm font-medium text-base-content">
@@ -70,7 +77,7 @@
                         @if(! empty($field['hint']))<span class="ml-1 text-xs font-normal text-base-content/40">{{ $field['hint'] }}</span>@endif
                     </label>
                     <div class="flex items-center gap-2 shrink-0">
-                        @if($maxlength && $type === 'text')
+                        @if($maxlength && in_array($type, ['text', 'textarea'], true))
                         <span class="text-[11px] tabular-nums text-base-content/40" x-text="`${length}/{{ $maxlength }}`">{{ mb_strlen((string) $value) }}/{{ $maxlength }}</span>
                         @endif
                         @unless($compact && $type === 'text')
@@ -101,11 +108,13 @@
                 @elseif($type === 'editor')
                 <textarea id="{{ $inputId }}" name="{{ $name }}" lang="{{ $locale }}" data-tr-field x-ref="input" class="jodit-editor" data-translation-editor data-jodit-preset="{{ $field['preset'] ?? 'full' }}" data-jodit-context-type="{{ $field['context'] ?? '' }}">{{ $value }}</textarea>
                 @else
+                @if($prefix)<div class="join w-full"><span class="join-item hidden sm:inline-flex items-center px-3 border border-base-300 bg-base-200/60 text-xs font-mono text-base-content/50 whitespace-nowrap">{{ $prefix }}</span>@endif
                 <input id="{{ $inputId }}" type="text" name="{{ $name }}" value="{{ $value }}" lang="{{ $locale }}" data-tr-field x-ref="input"
                        @input="length = $event.target.value.length"
                        :placeholder="fallback?.value || source" placeholder="{{ $fallback['value'] ?? (is_string($source) ? $source : '') }}"
-                       class="input input-bordered input-sm w-full @error("translations.{$locale}.{$key}") input-error @enderror"
+                       @class(['input input-bordered input-sm w-full', 'join-item' => $prefix, 'font-mono' => ! empty($field['mono']), 'input-error' => $errors->has("translations.{$locale}.{$key}")])
                        @if($maxlength) maxlength="{{ $maxlength }}" @endif>
+                @if($prefix)</div>@endif
                 @endif
 
                 @if($compact)

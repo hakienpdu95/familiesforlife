@@ -43,7 +43,7 @@ class LoadMoreEventsHandler implements QueryHandlerInterface
             ->get();
 
         return [
-            'events'   => $rows->take($query->limit)->values(),
+            'events' => $rows->take($query->limit)->values(),
             'has_more' => $rows->count() > $query->limit,
         ];
     }

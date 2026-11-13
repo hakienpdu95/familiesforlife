@@ -14,12 +14,10 @@ class CreateEventCategoryAction
     public function handle(EventCategoryData $data): EventCategory
     {
         return EventCategory::create([
-            'parent_id'  => $data->parent_id,
-            'name'       => $data->name,
-            'slug'       => $this->uniqueSlug($data->name),
-            'icon'       => $data->icon,
-            'color_hex'  => $data->color_hex,
-            'is_active'  => $data->is_active,
+            'parent_id' => $data->parent_id,
+            'name' => $data->name,
+            'slug' => $this->uniqueSlug($data->name),
+            'is_active' => $data->is_active,
             'sort_order' => $data->sort_order,
             'created_by' => auth()->id(),
         ]);
@@ -29,7 +27,7 @@ class CreateEventCategoryAction
     {
         $base = Str::slug($name);
         $slug = $base;
-        $i    = 2;
+        $i = 2;
 
         while (EventCategory::where('slug', $slug)->exists()) {
             $slug = "{$base}-{$i}";

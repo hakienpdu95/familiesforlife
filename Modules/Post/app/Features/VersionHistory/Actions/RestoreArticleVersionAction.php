@@ -4,6 +4,7 @@ namespace Modules\Post\Features\VersionHistory\Actions;
 
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
+use Modules\Ocop\Models\OcopProduct;
 use Modules\Post\Enums\VersionTrigger;
 use Modules\Post\Features\ArticleAuthoring\Actions\SyncContentBlocksAction;
 use Modules\Post\Features\VersionHistory\Exceptions\VersionRestoreException;
@@ -28,7 +29,7 @@ class RestoreArticleVersionAction
     public function handle(PostArticleVersion $version, int $userId): PostArticleTranslation
     {
         $translation = $version->translation;
-        $snapshot    = $version->snapshot;
+        $snapshot = $version->snapshot;
 
         $this->assertProductsStillExist($snapshot['blocks']); // §11 — fail fast, không restore 1 phần
 
@@ -78,7 +79,7 @@ class RestoreArticleVersionAction
         $ocopIds = $idsFor(true);
 
         $missing = $productIds->diff(Product::whereIn('id', $productIds)->pluck('id'))
-            ->merge($ocopIds->diff(\Modules\Ocop\Models\OcopProduct::whereIn('id', $ocopIds)->pluck('id'))->map(fn ($id) => 'OCOP '.$id));
+            ->merge($ocopIds->diff(OcopProduct::whereIn('id', $ocopIds)->pluck('id'))->map(fn ($id) => 'OCOP '.$id));
 
         if ($missing->isNotEmpty()) {
             throw new VersionRestoreException(

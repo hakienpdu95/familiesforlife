@@ -4,10 +4,10 @@ namespace Modules\Post\Enums;
 
 enum SponsorLabel: string
 {
-    case Sponsored        = 'sponsored';
-    case SponsoredNews    = 'sponsored_news';
+    case Sponsored = 'sponsored';
+    case SponsoredNews = 'sponsored_news';
     case BrandPartnership = 'brand_partnership';
-    case Advertorial      = 'advertorial';
+    case Advertorial = 'advertorial';
 
     // Hard-code có chủ đích, nhất quán với 7 enum label() khác trong Modules/Post (không module
     // nào trong codebase có lang/) — nếu sau này toàn bộ 8 enum chuyển sang trans(), enum này
@@ -16,10 +16,10 @@ enum SponsorLabel: string
     public function label(): string
     {
         return match ($this) {
-            self::Sponsored        => 'Sponsored',
-            self::SponsoredNews    => __('Tin tài trợ'),
+            self::Sponsored => 'Sponsored',
+            self::SponsoredNews => __('Tin tài trợ'),
             self::BrandPartnership => __('Hợp tác thương hiệu'),
-            self::Advertorial      => 'Advertorial',
+            self::Advertorial => 'Advertorial',
         };
     }
 

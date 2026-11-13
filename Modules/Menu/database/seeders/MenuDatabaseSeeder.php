@@ -208,12 +208,12 @@ class MenuDatabaseSeeder extends Seeder
 
         if (! $parent) {
             $parent = MenuItem::create([
-                'location'   => 'footer',
-                'link_type'  => MenuLinkType::None,
-                'label'      => $label,
+                'location' => 'footer',
+                'link_type' => MenuLinkType::None,
+                'label' => $label,
                 'sort_order' => $sortOrder,
-                'depth'      => 0,
-                'is_active'  => true,
+                'depth' => 0,
+                'is_active' => true,
                 'created_by' => $userId,
             ]);
             $created++;
@@ -240,15 +240,15 @@ class MenuDatabaseSeeder extends Seeder
             }
 
             MenuItem::create([
-                'location'   => 'footer',
-                'parent_id'  => $parent->id,
-                'link_type'  => $pageId ? MenuLinkType::Page : MenuLinkType::Url,
-                'page_id'    => $pageId,
-                'url'        => $pageId ? null : $url,
-                'label'      => $childLabel,
+                'location' => 'footer',
+                'parent_id' => $parent->id,
+                'link_type' => $pageId ? MenuLinkType::Page : MenuLinkType::Url,
+                'page_id' => $pageId,
+                'url' => $pageId ? null : $url,
+                'label' => $childLabel,
                 'sort_order' => $childSortOrder,
-                'depth'      => 1,
-                'is_active'  => true,
+                'depth' => 1,
+                'is_active' => true,
                 'created_by' => $userId,
             ]);
             $created++;
@@ -269,12 +269,12 @@ class MenuDatabaseSeeder extends Seeder
     private function seedFlatUrlGroup(int $userId, string $label, int $sortOrder, array $children): int
     {
         $parent = MenuItem::create([
-            'location'   => 'header',
-            'link_type'  => MenuLinkType::None,
-            'label'      => $label,
+            'location' => 'header',
+            'link_type' => MenuLinkType::None,
+            'label' => $label,
             'sort_order' => $sortOrder,
-            'depth'      => 0,
-            'is_active'  => true,
+            'depth' => 0,
+            'is_active' => true,
             'created_by' => $userId,
         ]);
 
@@ -282,15 +282,15 @@ class MenuDatabaseSeeder extends Seeder
 
         foreach ($children as $childSortOrder => $childLabel) {
             MenuItem::create([
-                'location'    => 'header',
-                'parent_id'   => $parent->id,
-                'link_type'   => MenuLinkType::Category,
+                'location' => 'header',
+                'parent_id' => $parent->id,
+                'link_type' => MenuLinkType::Category,
                 'category_id' => $this->seedCategory($childLabel),
-                'label'       => $childLabel,
-                'sort_order'  => $childSortOrder,
-                'depth'       => 1,
-                'is_active'   => true,
-                'created_by'  => $userId,
+                'label' => $childLabel,
+                'sort_order' => $childSortOrder,
+                'depth' => 1,
+                'is_active' => true,
+                'created_by' => $userId,
             ]);
             $created++;
         }
@@ -314,45 +314,45 @@ class MenuDatabaseSeeder extends Seeder
     private function seedNestedUrlGroup(int $userId, string $label, int $sortOrder, array $subgroups): int
     {
         $parent = MenuItem::create([
-            'location'   => 'header',
-            'link_type'  => MenuLinkType::None,
-            'label'      => $label,
+            'location' => 'header',
+            'link_type' => MenuLinkType::None,
+            'label' => $label,
             'sort_order' => $sortOrder,
-            'depth'      => 0,
-            'is_active'  => true,
+            'depth' => 0,
+            'is_active' => true,
             'created_by' => $userId,
         ]);
 
-        $created      = 1;
+        $created = 1;
         $subSortOrder = 0;
 
         foreach ($subgroups as $subLabel => $leaves) {
             $subCategoryId = $this->seedCategory($subLabel);
 
             $subGroup = MenuItem::create([
-                'location'    => 'header',
-                'parent_id'   => $parent->id,
-                'link_type'   => MenuLinkType::Category,
+                'location' => 'header',
+                'parent_id' => $parent->id,
+                'link_type' => MenuLinkType::Category,
                 'category_id' => $subCategoryId,
-                'label'       => $subLabel,
-                'sort_order'  => $subSortOrder++,
-                'depth'       => 1,
-                'is_active'   => true,
-                'created_by'  => $userId,
+                'label' => $subLabel,
+                'sort_order' => $subSortOrder++,
+                'depth' => 1,
+                'is_active' => true,
+                'created_by' => $userId,
             ]);
             $created++;
 
             foreach ($leaves as $leafSortOrder => $leafLabel) {
                 MenuItem::create([
-                    'location'    => 'header',
-                    'parent_id'   => $subGroup->id,
-                    'link_type'   => MenuLinkType::Category,
+                    'location' => 'header',
+                    'parent_id' => $subGroup->id,
+                    'link_type' => MenuLinkType::Category,
                     'category_id' => $this->seedCategory($leafLabel, $subCategoryId),
-                    'label'       => $leafLabel,
-                    'sort_order'  => $leafSortOrder,
-                    'depth'       => 2,
-                    'is_active'   => true,
-                    'created_by'  => $userId,
+                    'label' => $leafLabel,
+                    'sort_order' => $leafSortOrder,
+                    'depth' => 2,
+                    'is_active' => true,
+                    'created_by' => $userId,
                 ]);
                 $created++;
             }
@@ -383,7 +383,7 @@ class MenuDatabaseSeeder extends Seeder
         }
 
         return app(CreateCategoryAction::class)->handle(CategoryData::from([
-            'name'      => $name,
+            'name' => $name,
             'parent_id' => $parentId,
         ]))->id;
     }

@@ -24,9 +24,9 @@ class RecordArticleViewEventAction
     public function handle(int $articleId): void
     {
         PostArticleViewEvent::create([
-            'article_id'   => $articleId,
+            'article_id' => $articleId,
             'visitor_hash' => $this->resolveVisitorHash(),
-            'viewed_at'    => now(),
+            'viewed_at' => now(),
         ]);
     }
 
@@ -39,7 +39,7 @@ class RecordArticleViewEventAction
     private function resolveVisitorHash(): string
     {
         $cookieName = config('post.related_posts.visitor_cookie_name', 'rp_vid');
-        $existing   = request()->cookie($cookieName);
+        $existing = request()->cookie($cookieName);
 
         if ($existing) {
             return $existing;

@@ -8,17 +8,17 @@ namespace Modules\Menu\Enums;
 enum MenuLinkType: string
 {
     case Category = 'category'; // trỏ post_categories.id — dùng MenuItem::resolveUrl()
-    case Page     = 'page';     // trỏ pages.id (trang tĩnh) — URL theo slug hiện tại, ẩn khi trang chưa xuất bản
-    case Url      = 'url';      // link tuỳ ý (nội bộ hoặc ngoài)
-    case None     = 'none';     // chỉ là nhãn mở dropdown/flyout, không tự link
+    case Page = 'page';     // trỏ pages.id (trang tĩnh) — URL theo slug hiện tại, ẩn khi trang chưa xuất bản
+    case Url = 'url';      // link tuỳ ý (nội bộ hoặc ngoài)
+    case None = 'none';     // chỉ là nhãn mở dropdown/flyout, không tự link
 
     public function label(): string
     {
         return match ($this) {
             self::Category => __('Danh mục bài viết'),
-            self::Page     => __('Trang tĩnh'),
-            self::Url      => __('URL tuỳ ý'),
-            self::None     => __('Không liên kết — chỉ mở submenu'),
+            self::Page => __('Trang tĩnh'),
+            self::Url => __('URL tuỳ ý'),
+            self::None => __('Không liên kết — chỉ mở submenu'),
         };
     }
 }

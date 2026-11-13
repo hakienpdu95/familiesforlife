@@ -75,7 +75,7 @@ class MenuItem extends Model
     protected $table = 'menu_items';
 
     protected $fillable = [
-        'uuid', 'location', 'parent_id', 'depth', 'label', 'icon',
+        'uuid', 'location', 'parent_id', 'depth', 'label',
         'sort_order', 'is_active', 'open_in_new_tab',
         'link_type', 'category_id', 'page_id', 'url', 'created_by', 'updated_by',
     ];

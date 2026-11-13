@@ -21,26 +21,26 @@ class PostArticleFactory extends Factory
     public function definition(): array
     {
         return [
-            'uuid'            => (string) Str::uuid(),
-            'main_locale'     => 'vi',
-            'format'          => ArticleFormat::Article,
-            'is_featured'     => false,
-            'sort_order'      => 0,
-            'is_sponsored'    => false, // mặc định KHÔNG sponsored — đúng dữ liệu thật sau migrate
-            'created_by'      => User::factory(),
+            'uuid' => (string) Str::uuid(),
+            'main_locale' => 'vi',
+            'format' => ArticleFormat::Article,
+            'is_featured' => false,
+            'sort_order' => 0,
+            'is_sponsored' => false, // mặc định KHÔNG sponsored — đúng dữ liệu thật sau migrate
+            'created_by' => User::factory(),
         ];
     }
 
     public function sponsored(): static
     {
         return $this->state(fn () => [
-            'is_sponsored'         => true,
-            'sponsor_name'         => fake()->company(),
-            'sponsor_logo_url'     => fake()->imageUrl(),
-            'sponsor_label'        => SponsorLabel::Sponsored,
-            'campaign_code'        => strtoupper(fake()->bothify('CAMP-####')),
+            'is_sponsored' => true,
+            'sponsor_name' => fake()->company(),
+            'sponsor_logo_url' => fake()->imageUrl(),
+            'sponsor_label' => SponsorLabel::Sponsored,
+            'campaign_code' => strtoupper(fake()->bothify('CAMP-####')),
             'sponsored_start_date' => now()->subDay()->toDateString(),
-            'sponsored_end_date'   => now()->addDays(30)->toDateString(),
+            'sponsored_end_date' => now()->addDays(30)->toDateString(),
         ]);
     }
 
@@ -65,7 +65,7 @@ class PostArticleFactory extends Factory
     {
         return $this->sponsored()
             ->withTranslation([
-                'status'       => TranslationStatus::Published,
+                'status' => TranslationStatus::Published,
                 'published_at' => now()->subDay(),
             ])
             ->afterCreating(function (PostArticle $article) {

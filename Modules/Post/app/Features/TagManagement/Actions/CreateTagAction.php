@@ -23,7 +23,7 @@ class CreateTagAction
     {
         $base = Str::slug($name);
         $slug = $base;
-        $i    = 2;
+        $i = 2;
 
         while (PostTag::where('slug', $slug)->exists()) {
             $slug = "{$base}-{$i}";

@@ -45,7 +45,7 @@ class TranslationController extends Controller
         }
 
         $locale = $request->validate([
-            'locale' => ['required', 'string', 'in:' . implode(',', array_keys(config('post.locales')))],
+            'locale' => ['required', 'string', 'in:'.implode(',', array_keys(config('post.locales')))],
         ])['locale'];
 
         abort_if($article->translation($locale), 422, __('Bản dịch ":locale" đã tồn tại.', ['locale' => $locale]));
@@ -85,7 +85,7 @@ class TranslationController extends Controller
         $this->authorize('delete', $translation);
 
         $article = $translation->article;
-        $locale  = $translation->locale;
+        $locale = $translation->locale;
 
         try {
             $action->handle($translation);
@@ -210,18 +210,18 @@ class TranslationController extends Controller
     private function validated(Request $request, ?PostArticleTranslation $translation, string $locale, ?PostArticle $article): array
     {
         $validated = $request->validate([
-            'title'            => ['required', 'string', 'max:300'],
-            'slug'             => [
+            'title' => ['required', 'string', 'max:300'],
+            'slug' => [
                 'nullable', 'string', 'max:320', 'regex:/^[a-z0-9\-]+$/',
                 Rule::unique('post_article_translations', 'slug')
                     ->where(fn ($q) => $q->where('locale', $locale))
                     ->ignore($translation?->id),
             ],
-            'excerpt'          => ['nullable', 'string', 'max:500'],
-            'direct_answer'    => ['nullable', 'string', 'max:500'],
-            'blocks_json'      => ['nullable', 'string'],
-            'seo_title'        => ['nullable', 'string', 'max:200'],
-            'seo_description'  => ['nullable', 'string', 'max:300'],
+            'excerpt' => ['nullable', 'string', 'max:500'],
+            'direct_answer' => ['nullable', 'string', 'max:500'],
+            'blocks_json' => ['nullable', 'string'],
+            'seo_title' => ['nullable', 'string', 'max:200'],
+            'seo_description' => ['nullable', 'string', 'max:300'],
 
             // spec/dac-ta-ky-thuat-bai-viet-tai-tro.md §6.2 — dùng closure (không phải attribute
             // #[RequiredIf] trên DTO) vì điều kiện nằm ở ArticleData, 1 DTO KHÁC với
@@ -229,12 +229,12 @@ class TranslationController extends Controller
             // chéo giữa 2 DTO. $translation->article dùng khi update (translation đã tồn tại);
             // $article (route param truyền vào) dùng khi tạo mới translation đầu tiên — 2 nguồn
             // loại trừ nhau (không bao giờ cả 2 cùng null hoặc cùng có giá trị).
-            'disclosure_text'  => [
+            'disclosure_text' => [
                 Rule::requiredIf(fn () => ($translation?->article ?? $article)->is_sponsored),
                 'nullable', 'string', 'max:500',
             ],
-            'cta_text'         => ['nullable', 'string', 'max:100'],
-            'cta_url'          => ['nullable', 'url', 'max:500'],
+            'cta_text' => ['nullable', 'string', 'max:100'],
+            'cta_url' => ['nullable', 'url', 'max:500'],
         ]);
 
         $blocks = json_decode($validated['blocks_json'] ?? '[]', true);

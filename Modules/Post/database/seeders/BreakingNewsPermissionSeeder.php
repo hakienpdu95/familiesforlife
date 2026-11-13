@@ -24,7 +24,7 @@ class BreakingNewsPermissionSeeder extends Seeder
 
         foreach (self::PERMISSIONS as $name) {
             Permission::firstOrCreate([
-                'name'       => $name,
+                'name' => $name,
                 'guard_name' => 'web',
             ]);
         }

@@ -11,8 +11,8 @@ class DeleteEventCategoryAction
 
     /**
      * @throws \RuntimeException Nếu danh mục còn danh mục con hoặc còn sự kiện gán trực tiếp —
-     * category_id trên `events` dùng restrictOnDelete() ở tầng DB (spec §5.2) nên xoá sẽ ném
-     * lỗi FK nếu bỏ qua guard này; kiểm tra trước ở đây để trả thông báo rõ ràng thay vì lộ lỗi SQL.
+     *                           category_id trên `events` dùng restrictOnDelete() ở tầng DB (spec §5.2) nên xoá sẽ ném
+     *                           lỗi FK nếu bỏ qua guard này; kiểm tra trước ở đây để trả thông báo rõ ràng thay vì lộ lỗi SQL.
      */
     public function handle(EventCategory $category): void
     {
