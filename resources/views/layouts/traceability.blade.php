@@ -52,17 +52,17 @@
 
         @if ($cta_sticky)
             <div class="fixed bottom-0 inset-x-0 z-30 bg-base-100/95 backdrop-blur border-t border-[rgb(28_25_23/.08)] pb-[env(safe-area-inset-bottom)]">
-                <div class="max-w-xl mx-auto flex gap-2 px-4 py-3">
+                <div class="max-w-xl mx-auto flex gap-2 px-4 py-3" {{ \App\Support\Analytics\ClickTracking::context('qr_trace_sticky', $title, $qr_code ?? null, $kind ?? null) }}>
                     @php($buy = $channels ?? [])
                     @forelse ($buy as $channel)
-                        <a href="{{ $channel['url'] }}" target="_blank" rel="noopener nofollow sponsored"
+                        <a href="{{ $channel['url'] }}" target="_blank" rel="noopener nofollow sponsored" {{ \App\Support\Analytics\ClickTracking::link($channel['platform'] ?? null) }}
                            class="btn flex-1 min-w-0 h-12 min-h-12 px-2 rounded-lg border-0 shadow-none text-white text-[15px] max-[359.98px]:text-[14px] font-semibold gap-2 {{ $channel['button'] }}">
                             @if (! empty($channel['logo']))<span class="w-7 h-7 rounded-md bg-white flex items-center justify-center shrink-0" aria-hidden="true"><img src="{{ $channel['logo'] }}" alt="" width="22" height="22" class="w-[22px] h-[22px] object-contain"></span>@endif
                             <span class="truncate">{{ count($buy) === 1 ? __('Mua trên :channel', ['channel' => $channel['name']]) : ($channel['short'] ?? $channel['name']) }}</span>
                         </a>
                     @empty
                         @if ($cta)
-                        <a href="{{ $cta['url'] }}" @if (! empty($cta['external'])) target="_blank" rel="noopener nofollow sponsored" @endif
+                        <a href="{{ $cta['url'] }}" @if (! empty($cta['external'])) target="_blank" rel="noopener nofollow sponsored" @endif {{ \App\Support\Analytics\ClickTracking::link(null, 'cta_click') }}
                            class="btn btn-primary flex-1 h-12 min-h-12 rounded-lg text-[15px] font-semibold shadow-none border-0">{{ $cta['label'] }}</a>
                         @endif
                     @endforelse

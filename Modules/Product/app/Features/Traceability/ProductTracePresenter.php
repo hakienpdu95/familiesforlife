@@ -108,9 +108,9 @@ class ProductTracePresenter implements TracePresenter
     private function channels(Product $product): array
     {
         $channels = [
-            ['url' => $product->shopee_url, 'name' => 'Shopee', 'short' => 'Shopee', 'logo' => 'images/shopee.png', 'domains' => ['shopee.vn', 'shp.ee'], 'button' => 'bg-[#ee4d2d] hover:bg-[#d73211]'],
-            ['url' => $product->tiktok_url, 'name' => 'TikTok Shop', 'short' => 'TikTok', 'logo' => 'images/tiktok.png', 'domains' => ['tiktok.com'], 'button' => 'bg-[#161823] hover:bg-black'],
-            ['url' => $product->supplier_url, 'name' => 'Nhà cung cấp', 'short' => __('Nhà cung cấp'), 'logo' => null, 'domains' => [], 'button' => 'bg-[#44403c] hover:bg-[#292524]'],
+            ['platform' => 'shopee', 'url' => $product->shopee_url, 'name' => 'Shopee', 'short' => 'Shopee', 'logo' => 'images/shopee.png', 'domains' => ['shopee.vn', 'shp.ee'], 'button' => 'bg-[#ee4d2d] hover:bg-[#d73211]'],
+            ['platform' => 'tiktok', 'url' => $product->tiktok_url, 'name' => 'TikTok Shop', 'short' => 'TikTok', 'logo' => 'images/tiktok.png', 'domains' => ['tiktok.com'], 'button' => 'bg-[#161823] hover:bg-black'],
+            ['platform' => 'supplier', 'url' => $product->supplier_url, 'name' => 'Nhà cung cấp', 'short' => __('Nhà cung cấp'), 'logo' => null, 'domains' => [], 'button' => 'bg-[#44403c] hover:bg-[#292524]'],
         ];
 
         return array_values(array_filter(array_map(function (array $c) {

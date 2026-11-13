@@ -2,8 +2,10 @@
 
 namespace Modules\Post\Models;
 
+use App\Support\Analytics\ClickTracking;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\HtmlString;
 use Modules\Post\Enums\ButtonStyle;
 use Modules\Post\Enums\ButtonTarget;
 use Modules\Post\Enums\ButtonUrlType;
@@ -87,6 +89,11 @@ class PostProductBlockButton extends Model
      * URL đích thật — resolve động từ `Product` khi use_product_link, không bao giờ đọc
      * cột `url` (luôn null cho case này — docs/post-module-spec.md §9.8.1).
      */
+    public function trackingAttributes(): HtmlString
+    {
+        return ClickTracking::link($this->channel?->trackingPlatform());
+    }
+
     public function resolveTargetUrl(): ?string
     {
         if ($this->url_type === ButtonUrlType::UseProductLink) {

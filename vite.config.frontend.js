@@ -35,6 +35,7 @@ export default defineConfig(({ mode }) => {
           'resources/css/icon.css',
           'resources/css/frontend.css',
           'resources/js/frontend.js',
+          'resources/js/shared/click-tracker.js',
 
           // Widget libs — lazy per-page (spec/Event_Management_Technical_Specification.md
           // §10.6: chỉ load ở trang submit-event, không load site-wide).

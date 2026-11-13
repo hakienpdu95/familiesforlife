@@ -9,18 +9,27 @@ namespace Modules\Product\Enums;
  */
 enum ProductLinkType: string
 {
-    case Shopee            = 'shopee';
-    case TikTok             = 'tiktok';
-    case SupplierProduct    = 'supplier_product';    // link sản phẩm tại NCC
-    case SupplierHomepage   = 'supplier_homepage';   // trang chủ/fanpage NCC (fallback)
+    case Shopee = 'shopee';
+    case TikTok = 'tiktok';
+    case SupplierProduct = 'supplier_product';    // link sản phẩm tại NCC
+    case SupplierHomepage = 'supplier_homepage';   // trang chủ/fanpage NCC (fallback)
 
     public function label(): string
     {
         return match ($this) {
-            self::Shopee           => __('Mua trên Shopee'),
-            self::TikTok           => __('Mua trên TikTok'),
-            self::SupplierProduct  => __('Xem tại nhà cung cấp'),
+            self::Shopee => __('Mua trên Shopee'),
+            self::TikTok => __('Mua trên TikTok'),
+            self::SupplierProduct => __('Xem tại nhà cung cấp'),
             self::SupplierHomepage => __('Website nhà cung cấp'),
+        };
+    }
+
+    public function trackingPlatform(): string
+    {
+        return match ($this) {
+            self::Shopee => 'shopee',
+            self::TikTok => 'tiktok',
+            self::SupplierProduct, self::SupplierHomepage => 'supplier',
         };
     }
 
@@ -29,7 +38,7 @@ enum ProductLinkType: string
         return match ($this) {
             self::Shopee => 'images/shopee.png',
             self::TikTok => 'images/tiktok.png',
-            default      => null,
+            default => null,
         };
     }
 
@@ -38,7 +47,7 @@ enum ProductLinkType: string
         return match ($this) {
             self::Shopee => 'border-0 bg-[#ee4d2d] text-white hover:bg-[#d73211]',
             self::TikTok => 'border-0 bg-[#161823] text-white hover:bg-black',
-            default      => null,
+            default => null,
         };
     }
 
@@ -58,9 +67,9 @@ enum ProductLinkType: string
     public function urlColumn(): string
     {
         return match ($this) {
-            self::Shopee           => 'shopee_url',
-            self::TikTok           => 'tiktok_url',
-            self::SupplierProduct  => 'supplier_url',
+            self::Shopee => 'shopee_url',
+            self::TikTok => 'tiktok_url',
+            self::SupplierProduct => 'supplier_url',
             self::SupplierHomepage => 'supplier_homepage_url',
         };
     }

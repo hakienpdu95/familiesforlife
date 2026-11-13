@@ -121,8 +121,8 @@
     @endif
 
     @if($article->isCurrentlySponsored() && $translation->cta_text && $translation->cta_url)
-    <div class="mt-4">
-        <a href="{{ $translation->cta_url }}" target="_blank" rel="sponsored nofollow noopener"
+    <div class="mt-4" {{ \App\Support\Analytics\ClickTracking::context('article_sponsored_cta', $translation->title, $article->id, 'article') }}>
+        <a href="{{ $translation->cta_url }}" target="_blank" rel="sponsored nofollow noopener" {{ \App\Support\Analytics\ClickTracking::link(null, 'cta_click') }}
            class="btn btn-warning btn-sm">{{ $translation->cta_text }}</a>
     </div>
     @endif

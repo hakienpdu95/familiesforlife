@@ -2,9 +2,11 @@
 
 namespace Modules\Post\Models;
 
+use App\Support\Analytics\ClickTracking;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Modules\Ocop\Enums\OcopProductStatus;
 use Modules\Ocop\Models\OcopProduct;
@@ -58,6 +60,13 @@ class PostProductBlockItem extends Model
         $column = $type->urlColumn();
 
         return $source && array_key_exists($column, $source->getAttributes()) ? $source->getAttribute($column) : null;
+    }
+
+    public function trackingAttributes(?string $placement = null): HtmlString
+    {
+        $category = $this->ocop_product_id ? 'ocop' : 'product';
+
+        return ClickTracking::context($placement, $this->display_title, $this->referenceId() ? $category.'-'.$this->referenceId() : null, $category);
     }
 
     public function referenceId(): ?int

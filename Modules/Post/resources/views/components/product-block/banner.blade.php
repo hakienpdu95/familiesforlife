@@ -1,6 +1,6 @@
 @php($item = $block->items->first())
 @php($price = $item?->ocop_stars && blank($item?->price_label_override) ? null : $item?->display_price_label)
-<aside class="not-prose @container my-7 rounded-lg bg-base-200/70 overflow-hidden" aria-label="{{ $block->heading ?: __('Sản phẩm nổi bật') }}">
+<aside class="not-prose @container my-7 rounded-lg bg-base-200/70 overflow-hidden" {{ $item?->trackingAttributes('article_product_block:'.$block->template?->value) ?? \App\Support\Analytics\ClickTracking::context('article_product_block:'.$block->template?->value) }} aria-label="{{ $block->heading ?: __('Sản phẩm nổi bật') }}">
     <div class="flex flex-col @md:flex-row">
         @include('post::components.product-block.partials.media', ['class' => 'aspect-[4/3] @md:aspect-square @md:w-52 shrink-0', 'size' => 480])
         <div class="flex flex-1 flex-col justify-center gap-3 p-5">

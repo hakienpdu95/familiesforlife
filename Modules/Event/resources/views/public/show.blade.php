@@ -88,7 +88,7 @@
             </div>
             <div class="self-end">
                 @if($ctaUrl)
-                <a href="{{ $ctaUrl }}" target="_blank" rel="noopener"
+                <a href="{{ $ctaUrl }}" target="_blank" rel="noopener" {{ \App\Support\Analytics\ClickTracking::link(null, 'cta_click') }} {{ \App\Support\Analytics\ClickTracking::context('event_detail', $event->title ?? null, $event->id ?? null, 'event') }}
                    class="inline-block rounded-sm bg-blue-800 px-6 py-3 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-blue-900">
                     {{ __('Tìm hiểu thêm') }}
                 </a>

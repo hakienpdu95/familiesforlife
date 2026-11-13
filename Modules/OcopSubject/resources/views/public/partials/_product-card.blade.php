@@ -1,7 +1,7 @@
 @php
     $productUrl = route('ocop.public.show', ['slug' => $product->slug, 'id' => $product->id]);
 @endphp
-<div class="group flex flex-col overflow-hidden rounded-sm border border-[#e0e0e0] bg-white transition hover:shadow-md">
+<div class="group flex flex-col overflow-hidden rounded-sm border border-[#e0e0e0] bg-white transition hover:shadow-md" {{ \App\Support\Analytics\ClickTracking::context('ocop_subject_products', $product->originalAttribute('name'), $product->id, 'ocop') }}>
     <a href="{{ $productUrl }}" class="block aspect-square overflow-hidden bg-base-200">
         <img src="{{ $product->imageUrl('medium') ?: asset('images/post-cover-placeholder.svg') }}" alt="{{ $product->name }}"
              class="h-full w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy">
@@ -20,7 +20,7 @@
                 </div>
             </div>
             @if($buyUrl = $product->shopee_url ?: $product->tiktok_url)
-            <a href="{{ $buyUrl }}" target="_blank" rel="noopener nofollow sponsored" title="{{ __('Mua sản phẩm') }}"
+            <a href="{{ $buyUrl }}" target="_blank" rel="noopener nofollow sponsored" title="{{ __('Mua sản phẩm') }}" {{ \App\Support\Analytics\ClickTracking::link($product->shopee_url ? 'shopee' : 'tiktok') }}
                class="btn btn-circle btn-xs border-0 bg-[#117a3a] text-white hover:bg-[#0d6230]">
             @else
             <a href="{{ $productUrl }}" title="{{ __('Xem sản phẩm') }}"
