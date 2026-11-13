@@ -10,9 +10,17 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasColumn('ocop_subjects', 'slug') && Schema::hasColumn('ocop_subjects', 'story')) {
+            return;
+        }
+
         Schema::table('ocop_subjects', function (Blueprint $table) {
-            $table->string('slug', 255)->nullable()->after('name_en');
-            $table->longText('story')->nullable()->after('website');
+            if (! Schema::hasColumn('ocop_subjects', 'slug')) {
+                $table->string('slug', 255)->nullable()->after(Schema::hasColumn('ocop_subjects', 'name_en') ? 'name_en' : 'name');
+            }
+            if (! Schema::hasColumn('ocop_subjects', 'story')) {
+                $table->longText('story')->nullable()->after('website');
+            }
         });
 
         $used = [];

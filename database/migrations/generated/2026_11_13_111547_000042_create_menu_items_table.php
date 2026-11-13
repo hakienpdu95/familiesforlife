@@ -23,7 +23,6 @@ return new class extends Migration
             $table->foreignId('parent_id')->nullable()->constrained('menu_items')->cascadeOnDelete();
             $table->unsignedTinyInteger('depth')->default(0);
             $table->string('label', 150);
-            $table->string('icon', 80)->nullable();
             $table->unsignedSmallInteger('sort_order')->default(0);
             $table->boolean('is_active')->default(true);
             $table->boolean('open_in_new_tab')->default(false);

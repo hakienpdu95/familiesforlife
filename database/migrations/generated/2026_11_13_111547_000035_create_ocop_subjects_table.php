@@ -20,7 +20,6 @@ return new class extends Migration
             $table->uuid()->nullable()->unique()->comment('Public UUID — expose ra ngoài, không phải PK');
             $table->unsignedInteger('order_column')->nullable()->index()->comment('Thứ tự sắp xếp — Spatie Sortable / ORDER BY');
             $table->string('name', 255);
-            $table->string('name_en', 255)->nullable();
             $table->string('tax_code', 20)->nullable()->index();
             $table->string('organization_type', 20)->nullable();
             $table->string('legal_representative', 150)->nullable();
