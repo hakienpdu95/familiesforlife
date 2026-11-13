@@ -7,7 +7,7 @@ return [
         'vi' => 'Tiếng Việt',
         'en' => 'English',
     ],
-    'default_locale' => 'vi',
+    'default_locale' => env('PORTAL_DEFAULT_LOCALE', 'vi'),
 
     // "Xem thêm bài viết" (trang chủ) dừng hẳn khi đã tải đủ ngần này bài — dùng chung bởi
     // PublicCategoryController (chặn server-side) và home.blade.php (khởi tạo Alpine), tránh

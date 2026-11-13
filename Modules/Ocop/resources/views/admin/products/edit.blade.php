@@ -3,12 +3,19 @@
 
 @section('content')
 
-<div class="flex items-center justify-between mb-6">
-    <div>
-        <h1 class="text-2xl font-bold text-base-content">{{ __('Sửa sản phẩm OCOP') }}</h1>
-        <p class="text-sm text-base-content/50 mt-0.5">{{ $product->name }}</p>
+<div class="flex flex-wrap items-start justify-between gap-3 mb-6">
+    <div class="min-w-0">
+        <p class="text-xs font-medium text-base-content/50">
+            <a href="{{ route('backend.ocop.products.index') }}" class="link link-hover">{{ __('Sản phẩm OCOP') }}</a>
+            <span class="mx-1 text-base-content/30">/</span>{{ __('Sửa sản phẩm') }}
+        </p>
+        <h1 class="mt-1 text-2xl font-bold text-base-content truncate">{{ $product->name }}</h1>
+        <div class="mt-2 flex flex-wrap items-center gap-1.5">
+            <span class="badge badge-sm badge-soft badge-warning">{{ str_repeat('★', (int) $product->star_rating) }}</span>
+            <span class="badge badge-sm badge-ghost">{{ $product->status->label() }}</span>
+        </div>
     </div>
-    <a href="{{ route('backend.ocop.products.index') }}" class="btn btn-ghost btn-sm gap-1.5">
+    <a href="{{ route('backend.ocop.products.index') }}" class="btn btn-ghost btn-sm gap-1.5 shrink-0">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
         </svg>

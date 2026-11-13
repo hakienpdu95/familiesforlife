@@ -31,7 +31,7 @@
                     </span>
                     <div>
                         <h2 class="text-base font-semibold leading-tight">{{ __('Nội dung trang') }}</h2>
-                        <p class="text-xs text-base-content/50 mt-0.5">{{ __('Bản gốc tiếng Việt') }}</p>
+                        <p class="text-xs text-base-content/50 mt-0.5">{{ __('Bản gốc :language', ['language' => \App\Support\I18n\PortalLocale::label(\App\Support\I18n\PortalLocale::default())]) }}</p>
                     </div>
                 </header>
 
@@ -148,6 +148,7 @@
             </div>
         </section>
 
+        @if(\App\Support\I18n\PortalLocale::prefixed())
         <section class="card bg-base-100 shadow-sm border border-base-200">
             <div class="card-body p-5 sm:p-6 gap-0">
                 <header class="flex items-start gap-3 mb-5">
@@ -172,6 +173,7 @@
                 </div>
             </div>
         </section>
+        @endif
     </div>
 
     <aside class="xl:sticky xl:top-4 space-y-4">

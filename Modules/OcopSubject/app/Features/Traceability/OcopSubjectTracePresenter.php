@@ -5,6 +5,7 @@ namespace Modules\OcopSubject\Features\Traceability;
 use App\Shared\Traceability\Concerns\BuildsRelatedCards;
 use App\Shared\Traceability\Contracts\TracePresenter;
 use App\Shared\Traceability\TraceabilityService as T;
+use App\Support\I18n\PortalLocale;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -42,8 +43,11 @@ class OcopSubjectTracePresenter implements TracePresenter
         $story = trim(preg_replace('/\s+/u', ' ', strip_tags((string) $target->story)));
 
         return [
-            'name' => $target->name,
-            'name_en' => $target->translationFor('en')?->name,
+            'name' => $target->originalAttribute('name'),
+            'name_translations' => collect(PortalLocale::prefixed())
+                ->mapWithKeys(fn (string $locale) => [$locale => $target->translationFor($locale)?->name])
+                ->filter()
+                ->all(),
             'type' => $target->organization_type?->label(),
             'stars' => $target->ocop_star,
             'cert_expiry' => $target->ocop_cert_expiry?->toDateString(),
@@ -78,9 +82,11 @@ class OcopSubjectTracePresenter implements TracePresenter
             ? OcopProduct::query()->with(['media', 'qrIdentity'])->published()->where('ocop_subject_id', $live->id)->orderByDesc('star_rating')->latest()->limit(12)->get()
             : collect();
 
+        [$title, $subtitle] = self::localizedName($payload);
+
         return $this->base([
-            'title' => $payload['name'] ?? __('Chủ thể OCOP'),
-            'subtitle' => $payload['name_en'] ?? null,
+            'title' => $title,
+            'subtitle' => $subtitle,
             'images' => $live ? ($this->mediaUrls($live, OcopSubject::IMAGE_COLLECTION) ?: array_filter([$payload['image']['url'] ?? null])) : array_filter([$payload['image']['url'] ?? null]),
             'image_srcsets' => $live ? $this->mediaSrcsets($live, OcopSubject::IMAGE_COLLECTION) : [],
             'badges' => array_values(array_filter([
@@ -151,5 +157,24 @@ class OcopSubjectTracePresenter implements TracePresenter
         }
 
         return $m[1].','.$m[2];
+    }
+
+    /** @return array{0: string, 1: ?string} */
+    private static function localizedName(array $payload): array
+    {
+        $original = $payload['name'] ?? __('Chủ thể OCOP');
+        $translations = (array) ($payload['name_translations'] ?? []);
+        foreach ($payload as $key => $value) {
+            if (is_string($key) && preg_match('/^name_([a-z]{2})$/', $key, $m) && filled($value)) {
+                $translations[$m[1]] ??= $value;
+            }
+        }
+        $translated = $translations[app()->getLocale()] ?? null;
+
+        if (filled($translated)) {
+            return [$translated, $original];
+        }
+
+        return [$original, collect($translations)->first(fn ($name) => filled($name) && $name !== $original)];
     }
 }

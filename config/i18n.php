@@ -19,13 +19,18 @@ return [
 
     'target_locales' => ['en'],
 
-    'portal_locales' => ['vi', 'en'],
+    'portal_locales' => array_values(array_filter(array_map('trim', explode(',', (string) env('PORTAL_LOCALES', 'vi,en'))))),
 
-    'portal_default_locale' => 'vi',
+    'portal_default_locale' => env('PORTAL_DEFAULT_LOCALE', 'vi'),
 
     'portal_locale_labels' => [
         'vi' => 'Tiếng Việt',
         'en' => 'English',
+    ],
+
+    'portal_locale_flags' => [
+        'vi' => '🇻🇳',
+        'en' => '🇬🇧',
     ],
 
     'portal_routes' => [
@@ -40,12 +45,14 @@ return [
         'page.public.*',
         'newsletter.public.subscribe',
         'video.index',
+        'traceability.*',
     ],
 
     'portal_routes_except' => [
         'post.public.sitemap',
         'post.public.robots',
         'event.public.sitemap',
+        'traceability.document',
     ],
 
     'scan_paths' => [

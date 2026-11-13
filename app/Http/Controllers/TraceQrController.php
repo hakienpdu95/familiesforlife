@@ -26,6 +26,7 @@ class TraceQrController extends Controller
         $identity = $traceability->resolveQrCode($qrCode);
 
         $this->recordScan($request, $identity->id);
+        $traceability->localize($identity);
 
         $page = $traceability->present($identity);
 

@@ -31,8 +31,11 @@
                         @if ($tagline)<span class="block text-[12px] text-[#78716c] truncate">{{ $tagline }}</span>@endif
                     </span>
                 </div>
+                @include('traceability.partials.locale-switcher')
             </div>
         </header>
+
+        @include('traceability.partials.locale-fallback')
 
         @include('traceability.partials.status-banner')
 

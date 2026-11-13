@@ -3,12 +3,21 @@
 
 @section('content')
 
-<div class="flex items-center justify-between mb-6">
-    <div>
-        <h1 class="text-2xl font-bold text-base-content">{{ __('Thêm chủ thể OCOP') }}</h1>
-        <p class="text-sm text-base-content/50 mt-0.5">{{ __('Doanh nghiệp, HTX hoặc hộ kinh doanh có sản phẩm OCOP') }}</p>
+<div class="flex flex-wrap items-start justify-between gap-3 mb-6">
+    <div class="min-w-0">
+        <p class="text-xs font-medium text-base-content/50">
+            <a href="{{ route('backend.ocop-subjects.index') }}" class="link link-hover">{{ __('Chủ thể OCOP') }}</a>
+            <span class="mx-1 text-base-content/30">/</span>{{ __('Thêm chủ thể') }}
+        </p>
+        <h1 class="mt-1 text-2xl font-bold text-base-content truncate">{{ __('Thêm chủ thể OCOP') }}</h1>
+        <p class="mt-1 text-sm text-base-content/50">{{ __('Doanh nghiệp, HTX hoặc hộ kinh doanh có sản phẩm OCOP') }}</p>
     </div>
-    <a href="{{ route('backend.ocop-subjects.index') }}" class="btn btn-ghost btn-sm">{{ __('← Quay lại') }}</a>
+    <div class="flex items-center gap-2 shrink-0">
+        <a href="{{ route('backend.ocop-subjects.index') }}" class="btn btn-ghost btn-sm gap-1.5">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            {{ __('Quay lại') }}
+        </a>
+    </div>
 </div>
 
 @if($errors->any())

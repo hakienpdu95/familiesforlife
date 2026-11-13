@@ -68,6 +68,7 @@ class OcopSubjectAdminController extends Controller
     public function edit(OcopSubject $ocopSubject): View
     {
         $types = OcopSubjectOrganizationType::cases();
+        $ocopSubject->loadCount('products');
 
         return view('ocopsubject::admin.edit', compact('ocopSubject', 'types'));
     }

@@ -64,8 +64,8 @@
 
                     <x-admin.translation-fields :model="$menuItem" :fields="[
                         'label' => ['label' => __('Nhãn hiển thị'), 'maxlength' => 150],
-                    ]" :fallbacks="['label' => $labelFallbacks]" :description="__('Nhãn trên menu ở trang /en/')"
-                       :note="__('Để trống: mục trỏ tới danh mục hoặc trang tĩnh tự dùng tên tiếng Anh của đích; mục khác hiển thị nhãn gốc.')" />
+                    ]" :fallbacks="['label' => $labelFallbacks]"
+                       :note="__('Để trống: mục trỏ tới danh mục hoặc trang tĩnh tự dùng tên đã dịch của đích; mục khác hiển thị nhãn gốc.')" />
                 </div>
             </div>
         </section>

@@ -6,6 +6,7 @@ use App\Models\Media;
 use App\Services\Media\MediaUrlService;
 use App\Shared\Traceability\Contracts\ExposesPublicDocuments;
 use App\Shared\Traceability\Models\QrIdentity;
+use App\Support\I18n\PortalLocale;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\Storage;
@@ -39,6 +40,25 @@ class TraceabilityService
         }
 
         return $identity;
+    }
+
+    public function localize(QrIdentity $identity): void
+    {
+        $portal = app(PortalLocale::class);
+
+        if (! $portal->active()) {
+            return;
+        }
+
+        $target = $identity->target;
+        $translated = array_filter(
+            PortalLocale::prefixed(),
+            fn (string $locale) => $target && method_exists($target, 'hasTranslation') && $target->hasTranslation($locale),
+        );
+
+        $portal->availableIn($translated)->setAlternates(
+            collect(PortalLocale::supported())->mapWithKeys(fn (string $locale) => [$locale => $portal->urlFor($locale)])->all()
+        );
     }
 
     public function present(QrIdentity $identity): array

@@ -113,7 +113,7 @@ Quyết định đã chốt (2026-11-12): portal phục vụ **song song** 2 ng�
 | Portal (route gắn middleware `localized`) | Tiền tố URL: không tiền tố = `vi`, `/en/...` = `en` |
 | Admin, API, email/notification, queue, console | `system_settings.locale` như Giai đoạn 1 |
 
-`vi` là ngôn ngữ gốc, URL tiếng Việt giữ nguyên như hiện tại (không đổi URL đã index). Danh sách locale portal: `config('i18n.portal_locales')` = `['vi', 'en']`, `config('i18n.portal_default_locale')` = `'vi'`.
+`vi` là ngôn ngữ gốc, URL tiếng Việt giữ nguyên như hiện tại (không đổi URL đã index). Danh sách locale portal: `config('i18n.portal_locales')` = `['vi', 'en']`, `config('i18n.portal_default_locale')` = `'vi'`. Hai giá trị này đọc từ env `PORTAL_LOCALES` (mặc định `vi,en`) và `PORTAL_DEFAULT_LOCALE` (mặc định `vi`; `post.default_locale` dùng chung biến này) để có thể triển khai bản cài riêng chỉ tiếng Anh (`PORTAL_LOCALES=en`, `PORTAL_DEFAULT_LOCALE=en`): khi đó không còn locale có tiền tố nên không sinh route `/en/...`, và các khối/tab "Bản dịch" trong form admin tự ẩn (điều kiện `PortalLocale::prefixed()` rỗng).
 
 ### 5.2 Định tuyến — không nhân đôi route
 
@@ -176,7 +176,7 @@ Form của entity trong phạm vi có tab theo locale (`Tiếng Việt` = cột 
 ### 5.7d Hiện thực 3c
 
 - Bảng `event_category_translations` (name), `banner_translations` (alt_text, badge_label), `ocop_category_translations` (name), `ocop_product_translations` (name, slug, description, story, origin, ingredients, usage_instructions, storage_instructions — `unique(locale, slug)`), `ocop_subject_translations` (name, story).
-- `ocop_subjects.name_en` → migration chép giá trị (trim, bỏ chuỗi rỗng) sang `ocop_subject_translations(locale=en, name)`, đối chiếu số dòng rồi mới drop cột; `down()` khôi phục cột và dữ liệu. `render_migration_file.json` đã bỏ `name_en`. Snapshot truy xuất QR vẫn giữ key `name_en` (đọc từ bản dịch) để tương thích snapshot cũ.
+- `ocop_subjects.name_en` → migration chép giá trị (trim, bỏ chuỗi rỗng) sang `ocop_subject_translations(locale=en, name)`, đối chiếu số dòng rồi mới drop cột; `down()` khôi phục cột và dữ liệu. `render_migration_file.json` đã bỏ `name_en`. Snapshot truy xuất QR lưu `name_translations` (mọi locale có tiền tố, không gán cứng `en`); trang QR chọn tên theo `app()->getLocale()`, thiếu thì dùng tên gốc và hiện bản dịch có sẵn làm phụ đề. Snapshot cũ còn key `name_xx` vẫn được đọc.
 - **Lệch so với §5.4:**
   - Banner: `title` là ghi chú nội bộ (không hiển thị công khai) nên không dịch; ảnh banner dùng chung mọi ngôn ngữ.
   - Slug danh mục sự kiện và slug chủ thể OCOP (`/brands/{slug}`, tên riêng) **không** dịch — cùng lý do slug chuyên mục ở 5.7c. Slug sản phẩm OCOP **có** dịch, tự sinh từ tên `en` (`SaveModelTranslationsAction::run($model, $input, slugFrom: 'name')`).
@@ -197,6 +197,14 @@ Form của entity trong phạm vi có tab theo locale (`Tiếng Việt` = cột 
 - Sitemap chưa có trang tĩnh, sản phẩm/chủ thể OCOP, danh mục sự kiện.
 - Danh sách `/en/ocop`, `/en/su-kien` chưa lọc theo bản dịch (đang fallback + noindex).
 - Tìm kiếm (Meilisearch) chỉ index bản `vi`.
+
+### 5.7h Trang truy xuất QR trong luồng portal
+
+- `config('i18n.portal_routes')` thêm `traceability.*` (`/p/{qr_code}`, `/p/{qr_code}/report`) → `/en/p/{qr_code}` hoạt động theo nguyên tắc tiền tố URL; `traceability.document` nằm trong `portal_routes_except` vì là signed URL (tiền tố làm hỏng chữ ký).
+- `TraceabilityService::localize()` đánh dấu trang đã dịch khi đích QR có `hasTranslation(locale)`; đích không dùng `HasTranslations` (bài viết, di tích, sản phẩm thường) hoặc đã bị xoá luôn coi là chưa dịch. Alternates được đặt cho mọi locale để nút đổi ngôn ngữ luôn trỏ đúng URL QR, kể cả khi chưa có bản dịch.
+- Chưa có bản dịch: hiển thị nội dung gốc + banner `traceability.partials.locale-fallback` (dịch theo ngôn ngữ đang xem), không 404, không redirect. Trang QR vốn `noindex` nên không phát `hreflang`.
+- Header trang QR có dropdown đổi ngôn ngữ (`traceability.partials.locale-switcher`), cờ lấy từ `config('i18n.portal_locale_flags')`.
+- Banner fallback chung (`layouts.partials.portal-fallback-notice`) dùng `:language` thay cho chữ "tiếng Anh" cố định.
 
 ### 5.8 Thứ tự triển khai
 
