@@ -2,7 +2,7 @@
 
 use App\Shared\Traceability\Models\QrIdentity;
 use App\Shared\Traceability\Models\QrReport;
-use App\Shared\Traceability\Models\QrScan;
+use App\Shared\Traceability\Support\QrScanUserAgent;
 use Modules\ActivityLog\Http\Controllers\ActivityLogApiController;
 use Modules\AIVideoStudioTemplate\Features\FormulaAdvisor\Support\PersonaCatalog;
 use Modules\AIVideoStudioTemplate\Features\FormulaAdvisor\Support\ProductFormulaCatalog;
@@ -80,8 +80,10 @@ return [
         QrReport::class.'::REASONS',
         QrReport::class.'::REASON_HINTS',
         QrIdentity::class.'::KIND_LABELS',
-        QrScan::class.'::DEVICES',
-        QrScan::class.'::PLATFORMS',
+        QrScanUserAgent::class.'::APPS',
+        QrScanUserAgent::class.'::DEVICE_TYPES',
+        QrScanUserAgent::class.'::OPERATING_SYSTEMS',
+        QrScanUserAgent::class.'::BRANDS',
         ApprovalLog::class.'::ACTION_LABELS',
         OcopProduct::class.'::SHELF_LIFE_UNITS',
         OcopSubject::class.'::DOCUMENT_LABELS',

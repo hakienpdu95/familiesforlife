@@ -25,6 +25,8 @@
       {{ \App\Support\Analytics\ClickTracking::view('qr_view', [
           'scan_id' => $scan['scan_id'] ?? null,
           'scan_source' => $scan['scan_source'] ?? null,
+          'scan_app' => $scan['scan_app'] ?? null,
+          'is_repeat_scan' => $scan['is_repeat'] ?? null,
           'page_locale' => $scan['locale'] ?? app()->getLocale(),
           'subject_name' => $subject['name'] ?? null,
           'ocop_stars' => $stars ?? null,

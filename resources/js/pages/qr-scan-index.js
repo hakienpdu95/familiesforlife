@@ -142,37 +142,57 @@ function renderHistory() {
             },
         },
         columns: [
-            { title: t('Thời gian'), field: 'scanned_at', width: 160, headerSort: false, formatter: (c) => `<span class="text-xs tabular-nums whitespace-nowrap">${esc(c.getValue())}</span>` },
             {
-                title: t('Mã QR'), field: 'qr_code', width: 110, headerSort: false, visible: showTarget,
+                title: t('Thời gian'), field: 'scanned_at', width: 165, headerSort: false,
+                formatter: (c) => {
+                    const d = c.getRow().getData();
+                    return `<div class="leading-tight"><span class="text-xs tabular-nums whitespace-nowrap">${esc(d.scanned_at)}</span><br><span class="font-mono text-[10px] text-base-content/40" title="${esc(t('Mã lượt quét'))}">#${esc((d.scan_id || '').slice(0, 8))}</span></div>`;
+                },
+            },
+            {
+                title: t('Mã QR'), field: 'qr_code', width: 105, headerSort: false, visible: showTarget,
                 formatter: (c) => {
                     const d = c.getRow().getData();
                     return d.qr_code ? `<a href="${esc(d.qr_url)}" target="_blank" rel="noopener" class="font-mono text-sm font-semibold link link-primary">${esc(d.qr_code)}</a>` : EMPTY;
                 },
             },
             {
-                title: t('Đối tượng'), field: 'title', minWidth: 200, headerSort: false, visible: showTarget,
+                title: t('Đối tượng'), field: 'title', minWidth: 180, headerSort: false, visible: showTarget,
                 formatter: (c) => {
                     const d = c.getRow().getData();
                     return `<div class="text-xs text-base-content/50">${esc(d.kind)}</div><div class="text-sm font-medium">${esc(d.title)}</div>`;
                 },
             },
             {
-                title: t('Nguồn'), field: 'source_label', width: 170, headerSort: false,
+                title: t('Ứng dụng quét'), field: 'app_label', width: 175, headerSort: false,
+                formatter: (c) => {
+                    const d = c.getRow().getData();
+                    const tag = d.in_app ? `<span class="badge badge-warning badge-soft badge-xs">${t('Trong app')}</span>` : `<span class="badge badge-ghost badge-xs">${t('Trình duyệt')}</span>`;
+                    return `<div class="text-sm font-medium">${esc(d.app_label)}</div>${tag}`;
+                },
+            },
+            {
+                title: t('Thiết bị'), field: 'device', width: 165, headerSort: false,
+                formatter: (c) => {
+                    const d = c.getRow().getData();
+                    return `<div class="text-sm">${esc(d.brand)}</div><div class="text-xs text-base-content/50">${esc(d.os_label)} · ${esc(d.device)}</div>`;
+                },
+            },
+            {
+                title: t('Nguồn'), field: 'source_label', width: 160, headerSort: false,
                 formatter: (c) => {
                     const d = c.getRow().getData();
                     return `<span class="badge badge-sm whitespace-nowrap ${badges[d.source] || 'badge-ghost'}">${esc(d.source_label)}</span>`;
                 },
             },
-            { title: t('Ngôn ngữ'), field: 'locale', width: 90, hozAlign: 'center', headerSort: false, formatter: (c) => (c.getValue() ? esc(c.getValue()) : EMPTY) },
+            { title: t('Ngôn ngữ'), field: 'locale', width: 85, hozAlign: 'center', headerSort: false, formatter: (c) => (c.getValue() ? esc(c.getValue()) : EMPTY) },
             {
-                title: t('Thiết bị'), field: 'device', width: 160, headerSort: false,
-                formatter: (c) => {
-                    const d = c.getRow().getData();
-                    return `<div class="text-sm">${esc(d.device)}</div><div class="text-xs text-base-content/50">${esc(d.platform)}</div>`;
-                },
+                title: t('Lượt'), field: 'is_repeat', width: 95, hozAlign: 'center', headerSort: false,
+                formatter: (c) => (c.getValue()
+                    ? `<span class="badge badge-ghost badge-sm" title="${esc(t('Cùng khách quét lại mã này trong 30 phút'))}">${t('Quét lại')}</span>`
+                    : `<span class="badge badge-success badge-soft badge-sm">${t('Mới')}</span>`),
             },
-            { title: t('Khách'), field: 'visitor', width: 100, headerSort: false, formatter: (c) => `<span class="font-mono text-xs text-base-content/60" title="${esc(t('Mã khách ẩn danh — cùng mã là cùng thiết bị/mạng'))}">${esc(c.getValue())}</span>` },
+            { title: t('Khách'), field: 'visitor', width: 95, headerSort: false, formatter: (c) => `<span class="font-mono text-xs text-base-content/60" title="${esc(t('Mã khách ẩn danh — mỗi trình duyệt/ứng dụng là một khách'))}">${esc(c.getValue())}</span>` },
         ],
         placeholder: `<div class="py-12 text-center opacity-40"><p class="text-sm">${t('Chưa có lượt quét nào')}</p></div>`,
     });

@@ -285,5 +285,18 @@
         "scan_source///string///20///_NULL///NULL///__///Nguồn lượt quét: qr | campaign | internal | referral — trùng giá trị scan_source gửi lên GA",
         "locale///string///10///_NULL///NULL///__///Ngôn ngữ trang truy xuất lúc quét",
         "__index///index///__///__///__///scanned_at,scan_source|idx_qr_scans_time_source///__"
+    ],
+    [
+        "qr_scans///add///locale///",
+        "client_hash///char///64///_NULL///NULL///__///HMAC(IP + User-Agent) — chống đếm trùng khi trình duyệt chặn cookie",
+        "scan_app///string///30///_NULL///NULL///__///Ứng dụng mở trang: zalo | facebook | safari | chrome... (QrScanUserAgent)",
+        "device_type///string///10///_NULL///NULL///__///mobile | tablet | desktop",
+        "os///string///20///_NULL///NULL///__///ios | android | windows | macos | other",
+        "os_version///string///10///_NULL///NULL///__///Phiên bản hệ điều hành chính (17, 14...)",
+        "device_brand///string///30///_NULL///NULL///__///Hãng máy suy ra từ User-Agent (apple, samsung, xiaomi...)",
+        "is_repeat///boolean///__///NOT_NULL///false///__///Quét lại cùng mã trong DEDUPE_MINUTES bởi cùng khách — vẫn là 1 dòng lịch sử, chỉ đánh dấu",
+        "__index///index///__///__///__///qr_identity_id,client_hash|idx_qr_scans_identity_client///__",
+        "__index///index///__///__///__///scanned_at,scan_app|idx_qr_scans_time_app///__",
+        "__index///index///__///__///__///scanned_at,is_repeat|idx_qr_scans_time_repeat///__"
     ]
 ]

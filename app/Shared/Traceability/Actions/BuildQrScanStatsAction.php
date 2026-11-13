@@ -6,6 +6,7 @@ use App\Models\SystemSetting;
 use App\Shared\Traceability\Enums\QrScanSource;
 use App\Shared\Traceability\Models\QrIdentity;
 use App\Shared\Traceability\Models\QrScan;
+use App\Shared\Traceability\Support\QrScanUserAgent;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Builder;
@@ -26,7 +27,7 @@ class BuildQrScanStatsAction
 
     private string $appTimezone;
 
-    public function handle(CarbonImmutable $from, CarbonImmutable $to, ?string $source = null, ?int $identityId = null): array
+    public function handle(CarbonImmutable $from, CarbonImmutable $to, ?string $source = null, ?int $identityId = null, ?string $app = null): array
     {
         $this->timezone = SystemSetting::current()->timezone ?: config('app.timezone');
         $this->appTimezone = config('app.timezone');
@@ -35,11 +36,11 @@ class BuildQrScanStatsAction
         $end = $to->setTimezone($this->timezone)->endOfDay();
         $days = (int) $start->diffInDays($end) + 1;
 
-        $current = fn (): Builder => $this->scope($start, $end, $source, $identityId);
-        $previous = fn (): Builder => $this->scope($start->subDays($days), $start->subSecond(), $source, $identityId);
+        $current = fn (): Builder => $this->scope($start, $end, $source, $identityId, $app);
+        $previous = fn (): Builder => $this->scope($start->subDays($days), $start->subSecond(), $source, $identityId, $app);
         $local = $this->localTimeSql();
 
-        $totals = $current()->selectRaw('COUNT(*) as scans, COUNT(DISTINCT visitor_hash) as visitors, COUNT(DISTINCT qr_identity_id) as codes')->toBase()->first();
+        $totals = $current()->selectRaw('COUNT(*) as scans, SUM(is_repeat = 0) as new_scans, COUNT(DISTINCT visitor_hash) as visitors, COUNT(DISTINCT qr_identity_id) as codes')->toBase()->first();
         $previousTotals = $previous()->selectRaw('COUNT(*) as scans, COUNT(DISTINCT visitor_hash) as visitors')->toBase()->first();
         $returning = DB::query()->fromSub($current()->select('visitor_hash')->groupBy('visitor_hash')->havingRaw('COUNT(*) > 1')->toBase(), 'v')->count();
         $activeCodes = $identityId ? null : QrIdentity::query()->where('status', QrIdentity::STATUS_ACTIVE)->count();
@@ -59,6 +60,8 @@ class BuildQrScanStatsAction
                 'scans' => (int) $totals->scans,
                 'scans_previous' => (int) $previousTotals->scans,
                 'scans_change' => $this->change((int) $totals->scans, (int) $previousTotals->scans),
+                'new_scans' => (int) $totals->new_scans,
+                'repeat_scans' => (int) $totals->scans - (int) $totals->new_scans,
                 'visitors' => (int) $totals->visitors,
                 'visitors_change' => $this->change((int) $totals->visitors, (int) $previousTotals->visitors),
                 'returning_rate' => $totals->visitors ? round($returning / $totals->visitors * 100, 1) : null,
@@ -73,9 +76,11 @@ class BuildQrScanStatsAction
             'trend' => $trend,
             'timing' => $this->timing($current(), $local),
             'sources' => $this->labelled($sources, fn ($key) => $this->sourceLabel($key), self::SOURCE_ORDER),
+            'apps' => $this->apps($current(), (int) $totals->scans),
             'audience' => [
-                'devices' => $this->labelled($this->breakdown($current(), QrScan::deviceSql()), fn ($key) => __(QrScan::DEVICES[$key] ?? $key), array_keys(QrScan::DEVICES)),
-                'platforms' => $this->labelled($this->breakdown($current(), QrScan::platformSql()), fn ($key) => __(QrScan::PLATFORMS[$key] ?? $key), array_keys(QrScan::PLATFORMS)),
+                'devices' => $this->labelled($this->breakdown($current(), "COALESCE(device_type, 'unknown')"), fn ($key) => __(QrScanUserAgent::DEVICE_TYPES[$key] ?? 'Chưa phân loại'), array_keys(QrScanUserAgent::DEVICE_TYPES)),
+                'os' => $this->operatingSystems($current()),
+                'brands' => $this->labelled($this->breakdown($current(), "COALESCE(device_brand, 'unknown')"), fn ($key) => __(QrScanUserAgent::BRANDS[$key] ?? 'Chưa phân loại')),
                 'locales' => $this->labelled($this->breakdown($current(), "COALESCE(locale, 'unknown')"), fn ($key) => $key === 'unknown' ? __('Chưa ghi nhận') : strtoupper($key)),
             ],
             'kinds' => $identityId ? [] : $this->kinds($current()),
@@ -89,12 +94,69 @@ class BuildQrScanStatsAction
         return QrScanSource::tryFrom($key)?->label() ?? __('Chưa phân loại');
     }
 
-    private function scope(CarbonImmutable $from, CarbonImmutable $to, ?string $source, ?int $identityId): Builder
+    private function scope(CarbonImmutable $from, CarbonImmutable $to, ?string $source, ?int $identityId, ?string $app): Builder
     {
         return QrScan::query()
             ->whereBetween('scanned_at', [$from->setTimezone($this->appTimezone), $to->setTimezone($this->appTimezone)])
             ->when($source, fn ($q) => $q->where('scan_source', $source))
-            ->when($identityId, fn ($q) => $q->where('qr_identity_id', $identityId));
+            ->when($identityId, fn ($q) => $q->where('qr_identity_id', $identityId))
+            ->when($app, fn ($q) => $q->where('scan_app', $app));
+    }
+
+    private function apps(Builder $query, int $scans): array
+    {
+        $rows = $query->selectRaw("COALESCE(scan_app, 'unknown') as app, COALESCE(os, 'other') as os_key, COUNT(*) as total, COUNT(DISTINCT visitor_hash) as visitors")
+            ->groupBy('app', 'os_key')
+            ->toBase()
+            ->get();
+
+        return $rows->groupBy('app')
+            ->map(function (Collection $items, string $app) use ($scans) {
+                $total = (int) $items->sum('total');
+                $byOs = $items->pluck('total', 'os_key');
+
+                return [
+                    'key' => $app,
+                    'label' => $app === 'unknown' ? __('Chưa phân loại') : QrScanUserAgent::appLabel($app),
+                    'in_app' => QrScanUserAgent::isInApp($app),
+                    'total' => $total,
+                    'visitors' => (int) $items->sum('visitors'),
+                    'percent' => $scans ? round($total / $scans * 100, 1) : 0,
+                    'ios' => (int) ($byOs['ios'] ?? 0),
+                    'android' => (int) ($byOs['android'] ?? 0),
+                    'other' => $total - (int) ($byOs['ios'] ?? 0) - (int) ($byOs['android'] ?? 0),
+                ];
+            })
+            ->sortByDesc('total')
+            ->values()
+            ->all();
+    }
+
+    private function operatingSystems(Builder $query): array
+    {
+        $rows = $query->selectRaw("COALESCE(os, 'unknown') as os_key, os_version, COUNT(*) as total")
+            ->groupBy('os_key', 'os_version')
+            ->toBase()
+            ->get();
+
+        $sum = $rows->sum('total') ?: 1;
+
+        return $rows->groupBy('os_key')
+            ->map(fn (Collection $items, string $os) => [
+                'key' => $os,
+                'label' => __(QrScanUserAgent::OPERATING_SYSTEMS[$os] ?? 'Chưa phân loại'),
+                'total' => (int) $items->sum('total'),
+                'percent' => round($items->sum('total') / $sum * 100, 1),
+                'versions' => $items->whereNotNull('os_version')
+                    ->sortByDesc('total')
+                    ->take(4)
+                    ->map(fn ($row) => ['version' => $row->os_version, 'total' => (int) $row->total])
+                    ->values()
+                    ->all(),
+            ])
+            ->sortByDesc('total')
+            ->values()
+            ->all();
     }
 
     private function localTimeSql(): string

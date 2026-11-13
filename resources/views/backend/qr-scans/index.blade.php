@@ -46,7 +46,7 @@
             <div class="flex flex-wrap items-end gap-2.5">
                 <div class="join">
                     @foreach($presets as $preset)
-                    <a href="{{ route('backend.qr-scans.index', array_filter(['days' => $preset, 'source' => $filters['source'], 'code' => $filters['code']])) }}"
+                    <a href="{{ route('backend.qr-scans.index', array_filter(['days' => $preset, 'source' => $filters['source'], 'app' => $filters['app'], 'code' => $filters['code']])) }}"
                        @class(['btn btn-sm join-item', 'btn-primary' => $filters['days'] === $preset])>{{ __(':days ngày', ['days' => $preset]) }}</a>
                     @endforeach
                     <button type="button" @click="custom = !custom" @class(['btn btn-sm join-item', 'btn-primary' => ! $filters['days']])>{{ __('Tuỳ chọn') }}</button>
@@ -72,11 +72,20 @@
                     </select>
                 </label>
                 <label class="flex flex-col">
+                    <span class="label-text text-xs mb-1">{{ __('Ứng dụng quét') }}</span>
+                    <select name="app" class="select select-sm select-bordered min-w-40">
+                        <option value="">{{ __('Tất cả ứng dụng') }}</option>
+                        @foreach($apps as $value => $label)
+                        <option value="{{ $value }}" @selected($filters['app'] === $value)>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <label class="flex flex-col">
                     <span class="label-text text-xs mb-1">{{ __('Mã QR') }}</span>
                     <input type="text" name="code" value="{{ $filters['code'] }}" maxlength="16" spellcheck="false" autocomplete="off" placeholder="{{ __('Tất cả mã') }}" class="input input-sm input-bordered font-mono w-36">
                 </label>
                 <button type="submit" class="btn btn-sm btn-primary">{{ __('Áp dụng') }}</button>
-                @if($filters['source'] || $filters['code'] || $filters['days'] !== 30)
+                @if($filters['source'] || $filters['app'] || $filters['code'] || $filters['days'] !== 30)
                 <a href="{{ route('backend.qr-scans.index') }}" class="btn btn-sm btn-ghost text-error">{{ __('Đặt lại') }}</a>
                 @endif
             </div>
@@ -120,14 +129,15 @@
     @if($stats)
     @php
         $s = $stats['summary'];
-        $audience = [__('Thiết bị') => $stats['audience']['devices'], __('Hệ điều hành') => $stats['audience']['platforms'], __('Ngôn ngữ trang') => $stats['audience']['locales']];
+        $audience = [__('Loại thiết bị') => $stats['audience']['devices'], __('Hãng máy') => $stats['audience']['brands'], __('Ngôn ngữ trang') => $stats['audience']['locales']];
+        $appMax = max(1, $stats['apps'][0]['total'] ?? 1);
     @endphp
     <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
         @php($d = $delta($s['scans_change']))
         <div class="bg-base-100 border border-base-200 rounded-box p-4">
-            <div class="flex items-center justify-between gap-2"><p class="text-xs font-medium text-base-content/55">{{ __('Lượt quét') }}</p><span class="badge badge-sm {{ $d['class'] }}">{{ $d['label'] }}</span></div>
+            <div class="flex items-center justify-between gap-2"><p class="text-xs font-medium text-base-content/55">{{ __('Lượt quét') }}</p><span class="badge badge-sm {{ $d['class'] }}" title="{{ __('Kỳ trước: :value', ['value' => number_format($s['scans_previous'])]) }}">{{ $d['label'] }}</span></div>
             <p class="text-3xl font-bold mt-1.5 tabular-nums">{{ number_format($s['scans']) }}</p>
-            <p class="text-xs text-base-content/45 mt-1">{{ __('Kỳ trước: :value', ['value' => number_format($s['scans_previous'])]) }}</p>
+            <p class="text-xs text-base-content/45 mt-1">{{ __(':new lượt mới · :repeat quét lại', ['new' => number_format($s['new_scans']), 'repeat' => number_format($s['repeat_scans'])]) }}</p>
         </div>
         @php($d = $delta($s['visitors_change']))
         <div class="bg-base-100 border border-base-200 rounded-box p-4">
@@ -209,29 +219,76 @@
         <section class="card bg-base-100 border border-base-200 xl:col-span-8 min-w-0">
             <div class="card-body p-4 gap-3">
                 <div class="flex flex-wrap items-start justify-between gap-2">
-                    <div>
-                        <h2 class="font-semibold">{{ __('Thời điểm quét') }}</h2>
-                        <p class="text-xs text-base-content/50">{{ __('Theo múi giờ hệ thống') }}</p>
+                    <div class="min-w-0 flex-1">
+                        <h2 class="font-semibold">{{ __('Ứng dụng dùng để quét') }}</h2>
+                        <p class="text-xs text-base-content/50">{{ __('Camera iPhone mở bằng Safari, camera Android/Google Lens thường mở bằng Chrome; quét trong Zalo, Facebook… mở bằng trình duyệt của chính ứng dụng đó.') }}</p>
                     </div>
-                    <div class="flex gap-4 text-right">
-                        @if($stats['timing']['peak_hour'] !== null)
-                        <div><p class="text-[11px] uppercase tracking-wide text-base-content/45">{{ __('Giờ cao điểm') }}</p><p class="font-semibold tabular-nums">{{ sprintf('%02d:00–%02d:59', $stats['timing']['peak_hour'], $stats['timing']['peak_hour']) }}</p></div>
-                        @endif
-                        @if($stats['timing']['peak_weekday'] !== null)
-                        <div><p class="text-[11px] uppercase tracking-wide text-base-content/45">{{ __('Ngày cao điểm') }}</p><p class="font-semibold">{{ $weekdays[$stats['timing']['peak_weekday']] }}</p></div>
-                        @endif
+                    @php($inAppShare = collect($stats['apps'])->where('in_app', true)->sum('percent'))
+                    <div class="text-right shrink-0">
+                        <p class="text-[11px] uppercase tracking-wide text-base-content/45">{{ __('Quét trong ứng dụng') }}</p>
+                        <p class="font-semibold tabular-nums">{{ number_format($inAppShare, 1) }}%</p>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-4 min-w-0">
-                    <div id="qr-scan-hours" class="w-full h-56 min-w-0"></div>
-                    <div id="qr-scan-weekdays" class="w-full h-56 min-w-0"></div>
+                <div class="overflow-x-auto">
+                    <table class="table table-sm">
+                        <thead class="text-xs">
+                            <tr>
+                                <th>{{ __('Ứng dụng') }}</th>
+                                <th class="w-2/5">{{ __('Lượt quét') }}</th>
+                                <th class="text-right">{{ __('Khách') }}</th>
+                                <th class="text-right">iOS</th>
+                                <th class="text-right">Android</th>
+                                <th class="text-right">{{ __('Khác') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach($stats['apps'] as $row)
+                            <tr class="hover">
+                                <td class="whitespace-nowrap">
+                                    <a href="{{ route('backend.qr-scans.index', [...$query, 'app' => $row['key'] === 'unknown' ? null : $row['key']]) }}" class="font-medium hover:text-primary">{{ $row['label'] }}</a>
+                                    <span @class(['badge badge-xs ml-1', 'badge-warning badge-soft' => $row['in_app'], 'badge-ghost' => ! $row['in_app']])>{{ $row['in_app'] ? __('Trong app') : __('Trình duyệt') }}</span>
+                                </td>
+                                <td>
+                                    <div class="flex items-center gap-2">
+                                        <progress class="progress progress-primary h-1.5 flex-1" value="{{ $row['total'] }}" max="{{ $appMax }}"></progress>
+                                        <span class="tabular-nums font-semibold w-10 text-right">{{ number_format($row['total']) }}</span>
+                                        <span class="tabular-nums text-xs text-base-content/50 w-12 text-right">{{ $row['percent'] }}%</span>
+                                    </div>
+                                </td>
+                                <td class="text-right tabular-nums">{{ number_format($row['visitors']) }}</td>
+                                <td class="text-right tabular-nums text-base-content/70">{{ $row['ios'] ?: '—' }}</td>
+                                <td class="text-right tabular-nums text-base-content/70">{{ $row['android'] ?: '—' }}</td>
+                                <td class="text-right tabular-nums text-base-content/70">{{ $row['other'] ?: '—' }}</td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </section>
 
         <section class="card bg-base-100 border border-base-200 xl:col-span-4 min-w-0">
             <div class="card-body p-4 gap-4">
-                <h2 class="font-semibold">{{ __('Thiết bị & ngôn ngữ') }}</h2>
+                <h2 class="font-semibold">{{ __('Thiết bị quét') }}</h2>
+                <div>
+                    <p class="text-xs font-medium text-base-content/55 mb-1.5">{{ __('Hệ điều hành') }}</p>
+                    <ul class="space-y-2">
+                        @foreach($stats['audience']['os'] as $row)
+                        <li>
+                            <div class="flex items-center justify-between gap-2 text-sm">
+                                <span class="font-medium">{{ $row['label'] }}</span>
+                                <span class="tabular-nums">{{ number_format($row['total']) }} <span class="text-base-content/45">· {{ $row['percent'] }}%</span></span>
+                            </div>
+                            <progress class="progress progress-primary h-1.5 w-full" value="{{ $row['percent'] }}" max="100"></progress>
+                            @if($row['versions'])
+                            <p class="text-[11px] text-base-content/50">
+                                @foreach($row['versions'] as $version){{ $row['label'] }} {{ $version['version'] }}: {{ number_format($version['total']) }}@if(! $loop->last) · @endif @endforeach
+                            </p>
+                            @endif
+                        </li>
+                        @endforeach
+                    </ul>
+                </div>
                 @foreach($audience as $title => $rows)
                 <div>
                     <p class="text-xs font-medium text-base-content/55 mb-1.5">{{ $title }}</p>
@@ -254,8 +311,48 @@
             </div>
         </section>
 
+        <section class="card bg-base-100 border border-base-200 {{ $identity ? 'xl:col-span-12' : 'xl:col-span-8' }} min-w-0">
+            <div class="card-body p-4 gap-3">
+                <div class="flex flex-wrap items-start justify-between gap-2">
+                    <div>
+                        <h2 class="font-semibold">{{ __('Thời điểm quét') }}</h2>
+                        <p class="text-xs text-base-content/50">{{ __('Theo múi giờ hệ thống') }}</p>
+                    </div>
+                    <div class="flex gap-4 text-right">
+                        @if($stats['timing']['peak_hour'] !== null)
+                        <div><p class="text-[11px] uppercase tracking-wide text-base-content/45">{{ __('Giờ cao điểm') }}</p><p class="font-semibold tabular-nums">{{ sprintf('%02d:00–%02d:59', $stats['timing']['peak_hour'], $stats['timing']['peak_hour']) }}</p></div>
+                        @endif
+                        @if($stats['timing']['peak_weekday'] !== null)
+                        <div><p class="text-[11px] uppercase tracking-wide text-base-content/45">{{ __('Ngày cao điểm') }}</p><p class="font-semibold">{{ $weekdays[$stats['timing']['peak_weekday']] }}</p></div>
+                        @endif
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-4 min-w-0">
+                    <div id="qr-scan-hours" class="w-full h-56 min-w-0"></div>
+                    <div id="qr-scan-weekdays" class="w-full h-56 min-w-0"></div>
+                </div>
+            </div>
+        </section>
+
         @unless($identity)
-        <section class="card bg-base-100 border border-base-200 xl:col-span-8 min-w-0">
+        <section class="card bg-base-100 border border-base-200 xl:col-span-4 min-w-0">
+            <div class="card-body p-4 gap-3">
+                <h2 class="font-semibold">{{ __('Theo loại đối tượng') }}</h2>
+                <ul class="space-y-3">
+                    @foreach($stats['kinds'] as $row)
+                    <li>
+                        <div class="flex items-center justify-between gap-2 text-sm">
+                            <span class="truncate font-medium">{{ $row['label'] }}</span>
+                            <span class="tabular-nums">{{ number_format($row['total']) }} <span class="text-base-content/45">· {{ $row['percent'] }}%</span></span>
+                        </div>
+                        <progress class="progress progress-primary h-1.5 w-full" value="{{ $row['percent'] }}" max="100"></progress>
+                        <p class="text-[11px] text-base-content/45">{{ __(':count mã có lượt quét', ['count' => number_format($row['codes'])]) }}</p>
+                    </li>
+                    @endforeach
+                </ul>
+            </div>
+        </section>
+        <section class="card bg-base-100 border border-base-200 xl:col-span-12 min-w-0">
             <div class="card-body p-0">
                 <div class="flex items-center justify-between gap-3 px-4 pt-4 pb-2">
                     <div>
@@ -305,23 +402,6 @@
             </div>
         </section>
 
-        <section class="card bg-base-100 border border-base-200 xl:col-span-4 min-w-0">
-            <div class="card-body p-4 gap-3">
-                <h2 class="font-semibold">{{ __('Theo loại đối tượng') }}</h2>
-                <ul class="space-y-3">
-                    @foreach($stats['kinds'] as $row)
-                    <li>
-                        <div class="flex items-center justify-between gap-2 text-sm">
-                            <span class="truncate font-medium">{{ $row['label'] }}</span>
-                            <span class="tabular-nums">{{ number_format($row['total']) }} <span class="text-base-content/45">· {{ $row['percent'] }}%</span></span>
-                        </div>
-                        <progress class="progress progress-primary h-1.5 w-full" value="{{ $row['percent'] }}" max="100"></progress>
-                        <p class="text-[11px] text-base-content/45">{{ __(':count mã có lượt quét', ['count' => number_format($row['codes'])]) }}</p>
-                    </li>
-                    @endforeach
-                </ul>
-            </div>
-        </section>
         @endunless
     </div>
     @endif

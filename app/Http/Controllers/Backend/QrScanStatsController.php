@@ -8,6 +8,7 @@ use App\Shared\Traceability\Actions\BuildQrScanStatsAction;
 use App\Shared\Traceability\Enums\QrScanSource;
 use App\Shared\Traceability\Models\QrIdentity;
 use App\Shared\Traceability\Models\QrScan;
+use App\Shared\Traceability\Support\QrScanUserAgent;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -33,8 +34,8 @@ class QrScanStatsController extends Controller
         $identity = $filters['code'] ? QrIdentity::query()->with(QrIdentity::targetEagerLoad())->where('qr_code', $filters['code'])->first() : null;
         $codeNotFound = $filters['code'] && ! $identity;
 
-        $cacheKey = 'qr-scan-stats:v2:'.md5(json_encode([
-            $filters['from']->toDateString(), $filters['to']->toDateString(), $filters['source'], $identity?->id,
+        $cacheKey = 'qr-scan-stats:v3:'.md5(json_encode([
+            $filters['from']->toDateString(), $filters['to']->toDateString(), $filters['source'], $identity?->id, $filters['app'],
             app()->getLocale(), SystemSetting::current()->timezone,
         ]));
 
@@ -47,8 +48,9 @@ class QrScanStatsController extends Controller
             'query' => $this->query($filters),
             'identity' => $identity,
             'codeNotFound' => $codeNotFound,
-            'stats' => $codeNotFound ? null : Cache::remember($cacheKey, self::CACHE_SECONDS, fn () => $stats->handle($filters['from'], $filters['to'], $filters['source'], $identity?->id)),
+            'stats' => $codeNotFound ? null : Cache::remember($cacheKey, self::CACHE_SECONDS, fn () => $stats->handle($filters['from'], $filters['to'], $filters['source'], $identity?->id, $filters['app'])),
             'sources' => collect(QrScanSource::cases())->mapWithKeys(fn (QrScanSource $s) => [$s->value => $s->label()])->all(),
+            'apps' => collect(QrScanUserAgent::APPS)->map(fn ($label) => __($label))->all(),
             'presets' => self::PRESETS,
         ]);
     }
@@ -86,14 +88,14 @@ class QrScanStatsController extends Controller
         return response()->streamDownload(function () use ($filters) {
             $out = fopen('php://output', 'w');
             fwrite($out, "\xEF\xBB\xBF");
-            fputcsv($out, [__('Thời gian'), __('Mã QR'), __('Loại đối tượng'), __('Đối tượng'), __('Nguồn'), __('Ngôn ngữ'), __('Thiết bị'), __('Hệ điều hành'), __('Mã khách')], escape: '');
+            fputcsv($out, [__('Mã lượt quét'), __('Thời gian'), __('Mã QR'), __('Loại đối tượng'), __('Đối tượng'), __('Nguồn'), __('Ứng dụng quét'), __('Loại thiết bị'), __('Hệ điều hành'), __('Hãng máy'), __('Ngôn ngữ'), __('Quét lại'), __('Mã khách')], escape: '');
 
             $this->historyQuery($filters)
                 ->with(['identity' => fn ($q) => $q->with(QrIdentity::targetEagerLoad())])
                 ->lazyById(1000)
                 ->each(function (QrScan $scan) use ($out) {
                     $row = $this->row($scan);
-                    fputcsv($out, [$row['scanned_at'], $row['qr_code'], $row['kind'], $row['title'], $row['source_label'], $row['locale'], $row['device'], $row['platform'], $row['visitor']], escape: '');
+                    fputcsv($out, [$row['scan_id'], $row['scanned_at'], $row['qr_code'], $row['kind'], $row['title'], $row['source_label'], $row['app_label'], $row['device'], $row['os_label'], $row['brand'], $row['locale'], $row['is_repeat'] ? __('Có') : __('Không'), $row['visitor']], escape: '');
                 });
 
             fclose($out);
@@ -107,6 +109,7 @@ class QrScanStatsController extends Controller
         return QrScan::query()
             ->whereBetween('scanned_at', [$filters['from']->startOfDay()->setTimezone($appTimezone), $filters['to']->endOfDay()->setTimezone($appTimezone)])
             ->when($filters['source'], fn ($q, $source) => $q->where('scan_source', $source))
+            ->when($filters['app'], fn ($q, $app) => $q->where('scan_app', $app))
             ->when($filters['code'], fn ($q, $code) => $q->whereHas('identity', fn ($i) => $i->where('qr_code', $code)));
     }
 
@@ -117,6 +120,7 @@ class QrScanStatsController extends Controller
             'from' => $filters['days'] ? null : $filters['from']->format('Y-m-d'),
             'to' => $filters['days'] ? null : $filters['to']->format('Y-m-d'),
             'source' => $filters['source'],
+            'app' => $filters['app'],
             'code' => $filters['code'],
         ]);
     }
@@ -124,10 +128,11 @@ class QrScanStatsController extends Controller
     private function row(QrScan $scan): array
     {
         $identity = $scan->identity;
-        $device = QrScan::deviceOf($scan->user_agent);
-        $platform = QrScan::platformOf($scan->user_agent);
+        $device = $scan->scan_app ? $scan->only(['scan_app', 'device_type', 'os', 'os_version', 'device_brand']) : QrScanUserAgent::parse($scan->user_agent);
+        $os = QrScanUserAgent::OPERATING_SYSTEMS[$device['os']] ?? null;
 
         return [
+            'scan_id' => $scan->uuid,
             'scanned_at' => format_datetime($scan->scanned_at, true),
             'qr_code' => $identity?->qr_code,
             'qr_url' => $identity?->publicUrl(),
@@ -135,15 +140,20 @@ class QrScanStatsController extends Controller
             'title' => $identity?->targetTitle() ?: __('(đã xoá)'),
             'source' => $scan->scan_source?->value,
             'source_label' => $scan->scan_source?->label() ?? __('Chưa phân loại'),
+            'app' => $device['scan_app'],
+            'app_label' => QrScanUserAgent::appLabel($device['scan_app']),
+            'in_app' => QrScanUserAgent::isInApp($device['scan_app']),
+            'device' => __(QrScanUserAgent::DEVICE_TYPES[$device['device_type']] ?? 'Chưa phân loại'),
+            'os_label' => $os ? trim(__($os).' '.($device['os_version'] ?? '')) : __('Chưa phân loại'),
+            'brand' => __(QrScanUserAgent::BRANDS[$device['device_brand']] ?? 'Chưa phân loại'),
             'locale' => $scan->locale ? strtoupper($scan->locale) : null,
-            'device' => __(QrScan::DEVICES[$device]),
-            'platform' => __(QrScan::PLATFORMS[$platform]),
+            'is_repeat' => (bool) $scan->is_repeat,
             'visitor' => substr((string) $scan->visitor_hash, 0, 8),
         ];
     }
 
     /**
-     * @return array{from: CarbonImmutable, to: CarbonImmutable, days: ?int, source: ?string, code: ?string}
+     * @return array{from: CarbonImmutable, to: CarbonImmutable, days: ?int, source: ?string, app: ?string, code: ?string}
      */
     private function filters(Request $request): array
     {
@@ -152,6 +162,7 @@ class QrScanStatsController extends Controller
             'from' => ['nullable', 'date_format:Y-m-d'],
             'to' => ['nullable', 'date_format:Y-m-d'],
             'source' => ['nullable', Rule::enum(QrScanSource::class)],
+            'app' => ['nullable', Rule::in(array_keys(QrScanUserAgent::APPS))],
             'code' => ['nullable', 'string', 'max:'.QrIdentity::CODE_LENGTH * 2],
         ]);
 
@@ -177,6 +188,7 @@ class QrScanStatsController extends Controller
             'to' => $to,
             'days' => $days,
             'source' => $validated['source'] ?? null,
+            'app' => $validated['app'] ?? null,
             'code' => filled($validated['code'] ?? null) ? trim($validated['code']) : null,
         ];
     }
