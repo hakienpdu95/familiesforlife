@@ -278,5 +278,9 @@
     [
         "system_settings///add///time_format///",
         "show_portal_locale_switcher///boolean///__///NOT_NULL///true///__///Hiện nút đổi ngôn ngữ trên header cổng thông tin"
+    ],
+    [
+        "system_settings///add///show_portal_locale_switcher///",
+        "ga_measurement_id///string///32///_NULL///NULL///__///Measurement ID GA4 (G-XXXXXXX) gắn gtag trên cổng thông tin"
     ]
 ]

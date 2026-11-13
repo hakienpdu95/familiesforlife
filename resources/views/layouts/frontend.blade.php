@@ -10,6 +10,7 @@
     @endif
     @stack('meta')
     @include('layouts.partials.portal-locale-head')
+    @include('layouts.partials.google-analytics')
 
     @php
         $homeUrl = route('post.public.home');

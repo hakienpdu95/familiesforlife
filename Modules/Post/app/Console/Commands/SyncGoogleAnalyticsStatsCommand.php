@@ -5,6 +5,7 @@ namespace Modules\Post\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Modules\Post\Features\ContentAnalytics\Support\GoogleAnalyticsPageMatcher;
+use Modules\Post\Features\ContentAnalytics\Support\GoogleAnalyticsReporting;
 use Modules\Post\Models\PostArticleTranslation;
 use Spatie\Analytics\Facades\Analytics;
 use Spatie\Analytics\OrderBy;
@@ -24,6 +25,12 @@ class SyncGoogleAnalyticsStatsCommand extends Command
 
     public function handle(GoogleAnalyticsPageMatcher $matcher): int
     {
+        if (! GoogleAnalyticsReporting::configured()) {
+            $this->info('Bỏ qua: chưa cấu hình ANALYTICS_PROPERTY_ID / Service Account.');
+
+            return self::SUCCESS;
+        }
+
         $syncedAt = now();
 
         try {

@@ -97,6 +97,7 @@ if (form) {
     };
 
     form.addEventListener('change', render);
+    form.addEventListener('input', render);
     form.addEventListener('reset', () => {
         setTimeout(() => {
             timezoneTs?.setValue(initial.timezone, true);

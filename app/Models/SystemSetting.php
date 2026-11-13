@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Cache;
 
 class SystemSetting extends Model
 {
-    public const CACHE_KEY = 'system_settings.current.v3';
+    public const CACHE_KEY = 'system_settings.current.v4';
 
     public const LOCALES = [
         'vi' => 'Tiếng Việt',
@@ -19,7 +19,9 @@ class SystemSetting extends Model
 
     public const TIME_FORMATS = ['H:i', 'h:i A'];
 
-    protected $fillable = ['locale', 'timezone', 'date_format', 'time_format', 'show_portal_locale_switcher'];
+    public const GA_MEASUREMENT_ID_PATTERN = '/^G-[A-Z0-9]{4,20}$/';
+
+    protected $fillable = ['locale', 'timezone', 'date_format', 'time_format', 'show_portal_locale_switcher', 'ga_measurement_id'];
 
     protected $casts = [
         'show_portal_locale_switcher' => 'boolean',
@@ -54,12 +56,20 @@ class SystemSetting extends Model
             'date_format' => 'd/m/Y',
             'time_format' => 'H:i',
             'show_portal_locale_switcher' => true,
+            'ga_measurement_id' => null,
         ]);
     }
 
     public static function showPortalLocaleSwitcher(): bool
     {
         return (bool) (static::current()->show_portal_locale_switcher ?? true);
+    }
+
+    public static function gaMeasurementId(): ?string
+    {
+        $id = trim((string) static::current()->ga_measurement_id);
+
+        return preg_match(self::GA_MEASUREMENT_ID_PATTERN, $id) ? $id : null;
     }
 
     public static function activeLocale(): string

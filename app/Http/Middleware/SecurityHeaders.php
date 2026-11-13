@@ -56,6 +56,7 @@ class SecurityHeaders
             "'unsafe-eval'",
             'https://challenges.cloudflare.com',  // Turnstile widget
             'https://cdn.jsdelivr.net',            // ECharts (Survey module)
+            'https://www.googletagmanager.com',
             $dev ? 'http://localhost:*' : null,    // Vite dev server JS assets
         ]));
 
@@ -70,6 +71,9 @@ class SecurityHeaders
         // connect-src: ws://localhost cho Vite HMR chỉ trên dev
         $connectSrc = implode(' ', array_filter([
             "'self'",
+            'https://*.google-analytics.com',
+            'https://*.analytics.google.com',
+            'https://www.googletagmanager.com',
             $dev ? 'ws://localhost:* wss://localhost:* http://localhost:*' : null,
         ]));
 
@@ -83,6 +87,8 @@ class SecurityHeaders
             $this->mediaOrigin(),
             'https://api.dicebear.com',
             'https://i.ytimg.com', // thumbnail video YouTube (Modules/Video)
+            'https://*.google-analytics.com',
+            'https://www.googletagmanager.com',
         ])));
 
         return implode('; ', [

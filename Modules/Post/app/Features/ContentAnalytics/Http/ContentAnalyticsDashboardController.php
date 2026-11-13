@@ -3,6 +3,7 @@
 namespace Modules\Post\Features\ContentAnalytics\Http;
 
 use App\Http\Controllers\Controller;
+use App\Models\SystemSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
@@ -10,6 +11,7 @@ use Modules\Post\Features\ContentAnalytics\Queries\GetAnalyticsOverviewHandler;
 use Modules\Post\Features\ContentAnalytics\Queries\GetAnalyticsOverviewQuery;
 use Modules\Post\Features\ContentAnalytics\Queries\GetTopViewedArticlesHandler;
 use Modules\Post\Features\ContentAnalytics\Queries\GetTopViewedArticlesQuery;
+use Modules\Post\Features\ContentAnalytics\Support\GoogleAnalyticsReporting;
 
 /**
  * spec/ga-dashboard-statistics.md — trang "Thống kê traffic" cho đội biên tập Post (platform
@@ -36,15 +38,18 @@ class ContentAnalyticsDashboardController extends Controller
         // credentials, property ID sai, 403/429...) rơi vào đây, KHÔNG để lộ exception 500.
         $overview = null;
         $error = null;
+        $reportingReady = GoogleAnalyticsReporting::configured();
 
-        try {
-            $overview = $overviewHandler->handle(new GetAnalyticsOverviewQuery(days: $days));
-        } catch (\Throwable $e) {
-            Log::warning('[GA Dashboard] Không tải được dữ liệu Google Analytics.', [
-                'message' => $e->getMessage(),
-            ]);
+        if ($reportingReady) {
+            try {
+                $overview = $overviewHandler->handle(new GetAnalyticsOverviewQuery(days: $days));
+            } catch (\Throwable $e) {
+                Log::warning('[GA Dashboard] Không tải được dữ liệu Google Analytics.', [
+                    'message' => $e->getMessage(),
+                ]);
 
-            $error = __('Không thể tải dữ liệu Google Analytics. Kiểm tra cấu hình ANALYTICS_PROPERTY_ID / Service Account trong .env.');
+                $error = __('Không thể tải dữ liệu Google Analytics. Kiểm tra cấu hình ANALYTICS_PROPERTY_ID / Service Account trong .env.');
+            }
         }
 
         // Top nội dung đọc từ ga_views_30d (cột DB, không gọi GA) — không phụ thuộc vào việc
@@ -56,6 +61,9 @@ class ContentAnalyticsDashboardController extends Controller
             'overview' => $overview,
             'error' => $error,
             'topArticles' => $topArticles,
+            'reportingReady' => $reportingReady,
+            'measurementId' => SystemSetting::gaMeasurementId(),
+            'gaConsoleUrl' => GoogleAnalyticsReporting::consoleUrl(),
         ]);
     }
 }

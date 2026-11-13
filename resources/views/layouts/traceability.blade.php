@@ -15,6 +15,7 @@
     <meta property="og:url" content="{{ url()->current() }}">
     @if (! empty($images[0]))<meta property="og:image" content="{{ $images[0] }}">@endif
     @include('layouts.partials.font-preload', ['fonts' => ['inter'], 'build' => 'build/frontend'])
+    @include('layouts.partials.google-analytics')
     @include('layouts.partials.i18n-script')
     @vite(['resources/css/frontend.css'], 'build/frontend')
     @stack('head')

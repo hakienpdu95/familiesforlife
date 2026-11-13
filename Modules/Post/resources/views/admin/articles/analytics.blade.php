@@ -37,16 +37,50 @@
             <p class="text-xs text-base-content/40 mt-1">{{ __('Dữ liệu Google Analytics có thể trễ 1-2 ngày so với thời gian thực.') }}</p>
         </div>
 
-        <form method="GET" class="flex items-center gap-2 shrink-0">
+        <div class="flex items-center gap-2 shrink-0">
+        <a href="{{ $gaConsoleUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline gap-1.5">
+            {{ __('Mở Google Analytics') }}
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        </a>
+        @if($reportingReady)
+        <form method="GET" class="flex items-center gap-2">
             <select name="days" class="select select-bordered select-sm" onchange="this.form.submit()">
                 <option value="7" @selected($days === 7)>{{ __('7 ngày') }}</option>
                 <option value="30" @selected($days === 30)>{{ __('30 ngày') }}</option>
                 <option value="90" @selected($days === 90)>{{ __('90 ngày') }}</option>
             </select>
         </form>
+        @endif
+        </div>
     </div>
 
-    @if($error)
+    @if(! $reportingReady)
+    <div class="card bg-base-100 border border-base-200 shadow-sm">
+        <div class="card-body p-5 lg:p-6 gap-4">
+            <div class="flex items-start gap-3">
+                <span class="inline-flex items-center justify-center w-9 h-9 rounded-full shrink-0 {{ $measurementId ? 'bg-success/15 text-success' : 'bg-warning/15 text-warning' }}">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                </span>
+                <div class="min-w-0">
+                    @if($measurementId)
+                    <h2 class="font-semibold text-base-content">{{ __('Đang theo dõi bằng Google Analytics') }}</h2>
+                    <p class="text-sm text-base-content/60 mt-0.5">{{ __('Mã :id đã gắn trên cổng thông tin và trang truy xuất QR. Xem báo cáo lượt truy cập, nguồn truy cập và chiến dịch UTM trực tiếp trên Google Analytics.', ['id' => $measurementId]) }}</p>
+                    @else
+                    <h2 class="font-semibold text-base-content">{{ __('Chưa bật Google Analytics') }}</h2>
+                    <p class="text-sm text-base-content/60 mt-0.5">{{ __('Nhập Measurement ID (G-XXXXXXX) trong Cài đặt hệ thống để bắt đầu ghi nhận lượt truy cập.') }}</p>
+                    @endif
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ $gaConsoleUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary">{{ __('Mở Google Analytics') }}</a>
+                @can('manageSystemSettings')
+                <a href="{{ route('backend.settings.index') }}" class="btn btn-sm btn-ghost">{{ __('Cài đặt hệ thống') }}</a>
+                @endcan
+            </div>
+            <p class="text-xs text-base-content/45 leading-relaxed border-t border-base-200 pt-3">{{ __('Muốn xem biểu đồ ngay tại đây và cột "Lượt xem GA" trong danh sách bài viết, cần cấu hình thêm ANALYTICS_PROPERTY_ID và Service Account trong .env.') }}</p>
+        </div>
+    </div>
+    @elseif($error)
     <div class="alert alert-warning text-sm">
         <span>{{ $error }}</span>
     </div>
@@ -112,7 +146,7 @@
     </div>
     @endif
 
-    {{-- ── Top nội dung (luôn hiển thị được — đọc ga_views_30d, không phụ thuộc $error) ──── --}}
+    @if($reportingReady)
     <div class="card bg-base-100 border border-base-200 shadow-sm">
         <div class="card-body p-4">
             <h2 class="font-semibold text-base-content mb-3">{{ __('Top nội dung') }}</h2>
@@ -146,6 +180,7 @@
             @endif
         </div>
     </div>
+    @endif
 
 </div>
 @endsection

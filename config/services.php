@@ -91,6 +91,10 @@ return [
         'redirect'      => env('GOOGLE_REDIRECT_URI', '/auth/social/google/callback'),
     ],
 
+    'google_analytics' => [
+        'tracking_enabled' => env('GA_TRACKING_ENABLED'),
+    ],
+
     'facebook' => [
         'client_id'     => env('FACEBOOK_CLIENT_ID'),
         'client_secret' => env('FACEBOOK_CLIENT_SECRET'),

@@ -104,6 +104,31 @@
                 <section class="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)] gap-x-8 gap-y-3 p-5 lg:p-6">
                     <div>
                         <h2 class="text-sm font-semibold text-base-content flex items-center gap-2">
+                            <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                            {{ __('Google Analytics') }}
+                        </h2>
+                        <p class="text-xs text-base-content/50 mt-1 leading-relaxed">{{ __('Gắn mã theo dõi GA4 lên cổng thông tin và trang truy xuất QR. Không gắn trên trang quản trị.') }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1.5" for="ga_measurement_id">{{ __('Measurement ID') }}</label>
+                        <input type="text" id="ga_measurement_id" name="ga_measurement_id" maxlength="32" autocomplete="off" spellcheck="false" placeholder="G-XXXXXXXXXX" data-settings-field
+                               value="{{ old('ga_measurement_id', $settings->ga_measurement_id) }}"
+                               class="input input-bordered input-sm w-full sm:max-w-xs font-mono uppercase @error('ga_measurement_id') input-error @enderror">
+                        @error('ga_measurement_id')<p class="mt-1.5 text-xs text-error">{{ $message }}</p>@enderror
+                        <p class="mt-1.5 text-xs text-base-content/45 leading-snug">{{ __('Lấy tại Google Analytics → Admin → Data streams → chọn luồng Web. Để trống để tắt theo dõi.') }} {{ __('Không ghi nhận lượt xem của tài khoản quản trị đang đăng nhập.') }}</p>
+                        @if(\App\Models\SystemSetting::gaMeasurementId() && ! \App\Support\Analytics\GoogleAnalyticsTag::enabledForEnvironment())
+                        <span class="badge badge-warning badge-soft badge-sm mt-2">{{ __('Đã lưu — đang tắt ở môi trường :env', ['env' => app()->environment()]) }}</span>
+                        @elseif(\App\Models\SystemSetting::gaMeasurementId())
+                        <span class="badge badge-success badge-soft badge-sm mt-2">{{ __('Đang theo dõi') }}</span>
+                        @else
+                        <span class="badge badge-ghost badge-sm mt-2">{{ __('Chưa bật') }}</span>
+                        @endif
+                    </div>
+                </section>
+
+                <section class="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)] gap-x-8 gap-y-3 p-5 lg:p-6">
+                    <div>
+                        <h2 class="text-sm font-semibold text-base-content flex items-center gap-2">
                             <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             {{ __('Múi giờ') }}
                         </h2>

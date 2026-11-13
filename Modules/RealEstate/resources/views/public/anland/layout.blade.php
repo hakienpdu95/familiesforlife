@@ -9,6 +9,7 @@
     @endif
 
     @include('layouts.partials.i18n-script')
+    @include('layouts.partials.google-analytics')
     @vite(['resources/css/anland.css', 'resources/js/anland.js'], 'build/frontend')
     @stack('styles')
 </head>

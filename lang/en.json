@@ -4604,5 +4604,18 @@
     "Cổng thông tin": "Portal",
     "Hiện nút đổi ngôn ngữ": "Show language switcher",
     "Tuỳ chọn hiển thị trên header trang công khai.": "Display options for the public site header.",
-    "Tắt để ẩn nút VI | EN trên header. Các URL /en/... vẫn hoạt động bình thường.": "Turn off to hide the VI | EN switcher in the header. /en/... URLs keep working."
+    "Tắt để ẩn nút VI | EN trên header. Các URL /en/... vẫn hoạt động bình thường.": "Turn off to hide the VI | EN switcher in the header. /en/... URLs keep working.",
+    "Chưa bật": "Disabled",
+    "Chưa bật Google Analytics": "Google Analytics is not enabled",
+    "Gắn mã theo dõi GA4 lên cổng thông tin và trang truy xuất QR. Không gắn trên trang quản trị.": "Adds the GA4 tracking tag to the portal and QR traceability pages. Not added to the admin area.",
+    "Lấy tại Google Analytics → Admin → Data streams → chọn luồng Web. Để trống để tắt theo dõi.": "Find it in Google Analytics → Admin → Data streams → your Web stream. Leave empty to disable tracking.",
+    "Measurement ID phải có dạng G-XXXXXXX.": "The Measurement ID must look like G-XXXXXXX.",
+    "Muốn xem biểu đồ ngay tại đây và cột \"Lượt xem GA\" trong danh sách bài viết, cần cấu hình thêm ANALYTICS_PROPERTY_ID và Service Account trong .env.": "To see charts here and the \"GA views\" column in the article list, also configure ANALYTICS_PROPERTY_ID and a Service Account in .env.",
+    "Mã :id đã gắn trên cổng thông tin và trang truy xuất QR. Xem báo cáo lượt truy cập, nguồn truy cập và chiến dịch UTM trực tiếp trên Google Analytics.": "Tag :id is installed on the portal and QR traceability pages. View traffic, sources and UTM campaign reports directly in Google Analytics.",
+    "Mở Google Analytics": "Open Google Analytics",
+    "Nhập Measurement ID (G-XXXXXXX) trong Cài đặt hệ thống để bắt đầu ghi nhận lượt truy cập.": "Enter the Measurement ID (G-XXXXXXX) in System settings to start recording visits.",
+    "Đang theo dõi": "Tracking",
+    "Đang theo dõi bằng Google Analytics": "Tracking with Google Analytics",
+    "Không ghi nhận lượt xem của tài khoản quản trị đang đăng nhập.": "Visits from signed-in admin accounts are not recorded.",
+    "Đã lưu — đang tắt ở môi trường :env": "Saved — disabled in the :env environment"
 }
