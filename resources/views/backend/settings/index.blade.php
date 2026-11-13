@@ -82,6 +82,28 @@
                 <section class="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)] gap-x-8 gap-y-3 p-5 lg:p-6">
                     <div>
                         <h2 class="text-sm font-semibold text-base-content flex items-center gap-2">
+                            <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+                            {{ __('Cổng thông tin') }}
+                        </h2>
+                        <p class="text-xs text-base-content/50 mt-1 leading-relaxed">{{ __('Tuỳ chọn hiển thị trên header trang công khai.') }}</p>
+                    </div>
+                    <div>
+                        <label class="flex items-center justify-between gap-4 rounded-box border border-base-300 px-4 py-3 cursor-pointer select-none">
+                            <span class="min-w-0">
+                                <span class="block font-medium text-sm">{{ __('Hiện nút đổi ngôn ngữ') }}</span>
+                                <span class="block text-xs text-base-content/45 leading-snug">{{ __('Tắt để ẩn nút VI | EN trên header. Các URL /en/... vẫn hoạt động bình thường.') }}</span>
+                            </span>
+                            <input type="hidden" name="show_portal_locale_switcher" value="0" data-settings-field>
+                            <input type="checkbox" name="show_portal_locale_switcher" value="1" class="toggle toggle-primary toggle-sm shrink-0" data-settings-field
+                                   @checked(old('show_portal_locale_switcher', $settings->show_portal_locale_switcher ?? true))>
+                        </label>
+                        @error('show_portal_locale_switcher')<p class="mt-1.5 text-xs text-error">{{ $message }}</p>@enderror
+                    </div>
+                </section>
+
+                <section class="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)] gap-x-8 gap-y-3 p-5 lg:p-6">
+                    <div>
+                        <h2 class="text-sm font-semibold text-base-content flex items-center gap-2">
                             <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             {{ __('Múi giờ') }}
                         </h2>

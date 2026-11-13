@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Cache;
 
 class SystemSetting extends Model
 {
-    public const CACHE_KEY = 'system_settings.current.v2';
+    public const CACHE_KEY = 'system_settings.current.v3';
 
     public const LOCALES = [
         'vi' => 'Tiếng Việt',
@@ -19,7 +19,11 @@ class SystemSetting extends Model
 
     public const TIME_FORMATS = ['H:i', 'h:i A'];
 
-    protected $fillable = ['locale', 'timezone', 'date_format', 'time_format'];
+    protected $fillable = ['locale', 'timezone', 'date_format', 'time_format', 'show_portal_locale_switcher'];
+
+    protected $casts = [
+        'show_portal_locale_switcher' => 'boolean',
+    ];
 
     protected static function booted(): void
     {
@@ -49,7 +53,13 @@ class SystemSetting extends Model
             'timezone' => config('app.timezone', 'Asia/Ho_Chi_Minh'),
             'date_format' => 'd/m/Y',
             'time_format' => 'H:i',
+            'show_portal_locale_switcher' => true,
         ]);
+    }
+
+    public static function showPortalLocaleSwitcher(): bool
+    {
+        return (bool) (static::current()->show_portal_locale_switcher ?? true);
     }
 
     public static function activeLocale(): string

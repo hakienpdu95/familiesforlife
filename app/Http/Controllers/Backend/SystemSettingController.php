@@ -33,6 +33,7 @@ class SystemSettingController extends Controller
             'timezone' => ['required', Rule::in(timezone_identifiers_list())],
             'date_format' => ['required', Rule::in(SystemSetting::DATE_FORMATS)],
             'time_format' => ['required', Rule::in(SystemSetting::TIME_FORMATS)],
+            'show_portal_locale_switcher' => ['boolean'],
         ]);
 
         $action->handle($validated);

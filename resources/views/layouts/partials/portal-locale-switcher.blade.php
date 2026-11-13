@@ -1,5 +1,5 @@
 @php($portal = app(\App\Support\I18n\PortalLocale::class))
-@if($portal->active())
+@if($portal->active() && \App\Models\SystemSetting::showPortalLocaleSwitcher())
 <span class="portal-locale-switcher inline-flex items-center gap-1 mx-3 text-xs font-semibold" aria-label="{{ __('Ngôn ngữ') }}">
     @foreach($portal->switcherLinks() as $code => $link)
         @if(! $loop->first)<span aria-hidden="true">|</span>@endif

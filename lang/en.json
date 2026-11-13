@@ -4600,5 +4600,9 @@
     "Đường dẫn bản dịch tự sinh từ tên": "Đường dẫn bản dịch tự sinh từ tên",
     "Để trống: mục trỏ tới danh mục hoặc trang tĩnh tự dùng tên đã dịch của đích; mục khác hiển thị nhãn gốc.": "Để trống: mục trỏ tới danh mục hoặc trang tĩnh tự dùng tên đã dịch của đích; mục khác hiển thị nhãn gốc.",
     "Bản dịch :language cho mục này chưa có — nội dung đang hiển thị bằng ngôn ngữ gốc.": "The :language translation for this item is not yet available — showing the original content.",
-    "Bản :language của trang này chưa sẵn sàng — nội dung bên dưới đang hiển thị bằng ngôn ngữ gốc.": "The :language version of this page isn't ready yet — the content below is shown in its original language."
+    "Bản :language của trang này chưa sẵn sàng — nội dung bên dưới đang hiển thị bằng ngôn ngữ gốc.": "The :language version of this page isn't ready yet — the content below is shown in its original language.",
+    "Cổng thông tin": "Portal",
+    "Hiện nút đổi ngôn ngữ": "Show language switcher",
+    "Tuỳ chọn hiển thị trên header trang công khai.": "Display options for the public site header.",
+    "Tắt để ẩn nút VI | EN trên header. Các URL /en/... vẫn hoạt động bình thường.": "Turn off to hide the VI | EN switcher in the header. /en/... URLs keep working."
 }

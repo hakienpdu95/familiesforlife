@@ -274,5 +274,9 @@
     [
         "qr_identities///add///__///",
         "snapshot_at///timestamp///__///_NULL///NULL///__///Thời điểm chụp snapshot gần nhất (bản công khai cuối cùng)"
+    ],
+    [
+        "system_settings///add///time_format///",
+        "show_portal_locale_switcher///boolean///__///NOT_NULL///true///__///Hiện nút đổi ngôn ngữ trên header cổng thông tin"
     ]
 ]
