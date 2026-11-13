@@ -133,9 +133,9 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
                 ? OcopProduct::query()->with('media')->published()->where('ocop_subject_id', $live->ocop_subject_id)->whereKeyNot($live->id)->latest()->limit(8)->get()
                 : collect();
             $related = [
-                ['title' => __('Di tích, làng nghề gắn với sản phẩm'), 'icon' => 'fa-landmark', 'items' => $this->heritageCards($heritage)],
-                ['title' => __('Bài viết nhắc tới sản phẩm'), 'icon' => 'fa-newspaper', 'items' => $this->articleCards($live->articles)],
-                ['title' => __('Sản phẩm khác cùng chủ thể'), 'icon' => 'fa-store', 'items' => $this->ocopCards($siblings)],
+                ['key' => 'heritage', 'title' => __('Di tích, làng nghề gắn với sản phẩm'), 'icon' => 'fa-landmark', 'items' => $this->heritageCards($heritage)],
+                ['key' => 'articles', 'title' => __('Bài viết nhắc tới sản phẩm'), 'icon' => 'fa-newspaper', 'items' => $this->articleCards($live->articles)],
+                ['key' => 'sibling_products', 'title' => __('Sản phẩm khác cùng chủ thể'), 'icon' => 'fa-store', 'items' => $this->ocopCards($siblings)],
             ];
         }
 

@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Enums\RoleEnum;
 use App\Models\User;
+use App\Shared\Traceability\Actions\RecordQrScanAction;
 use App\Shared\Traceability\Models\QrReport;
-use App\Shared\Traceability\Models\QrScan;
 use App\Shared\Traceability\Notifications\QrReportSubmittedNotification;
 use App\Shared\Traceability\TraceabilityService;
 use Illuminate\Http\RedirectResponse;
@@ -19,14 +19,12 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TraceQrController extends Controller
 {
-    private const BOT_PATTERN = '/bot|crawl|spider|slurp|preview|facebookexternalhit|curl|wget|python|headless/i';
-
     public function __invoke(Request $request, TraceabilityService $traceability, string $qrCode): View
     {
         $identity = $traceability->resolveQrCode($qrCode);
 
-        $this->recordScan($request, $identity->id);
         $traceability->localize($identity);
+        $scan = RecordQrScanAction::run($request, $identity->id);
 
         $page = $traceability->present($identity);
 
@@ -34,6 +32,7 @@ class TraceQrController extends Controller
             'brand' => config('app.site_name'),
             'reportReasons' => array_map('__', QrReport::REASONS),
             'reportHints' => array_map(fn (array $hints) => array_map('__', $hints), QrReport::REASON_HINTS),
+            'scan' => $scan,
             ...$page,
         ]);
     }
@@ -87,6 +86,7 @@ class TraceQrController extends Controller
         return redirect()->to(route('traceability.qr', $qrCode).'#phan-anh')->with('report_sent', [
             'ref' => $report->ref(),
             'reason' => $report->reasonLabel(),
+            'reason_key' => $report->reason,
             'contact' => filled($report->contact),
         ]);
     }
@@ -106,33 +106,5 @@ class TraceQrController extends Controller
         if ($reviewers->isNotEmpty()) {
             Notification::send($reviewers, new QrReportSubmittedNotification($report, $targetLabel));
         }
-    }
-
-    private function recordScan(Request $request, int $identityId): void
-    {
-        $userAgent = (string) $request->userAgent();
-
-        if ($userAgent === '' || preg_match(self::BOT_PATTERN, $userAgent)) {
-            return;
-        }
-
-        $hash = QrReport::visitorHash($request->ip());
-
-        dispatch(function () use ($identityId, $hash, $userAgent): void {
-            $recent = QrScan::query()
-                ->where('qr_identity_id', $identityId)
-                ->where('visitor_hash', $hash)
-                ->where('scanned_at', '>=', now()->subMinutes(QrScan::DEDUPE_MINUTES))
-                ->exists();
-
-            if (! $recent) {
-                QrScan::create([
-                    'qr_identity_id' => $identityId,
-                    'visitor_hash' => $hash,
-                    'user_agent' => mb_substr($userAgent, 0, 255),
-                    'scanned_at' => now(),
-                ]);
-            }
-        })->afterResponse();
     }
 }

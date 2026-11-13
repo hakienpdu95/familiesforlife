@@ -35,13 +35,38 @@ class ClickTracking
         ]);
     }
 
-    public static function link(?string $platform = null, ?string $event = null, ?string $label = null): HtmlString
+    public static function link(?string $platform = null, ?string $event = null, ?string $label = null, array $params = []): HtmlString
     {
         return static::attributes([
             'data-track' => $event,
             'data-track-platform' => $platform,
             'data-track-label' => $label,
+            ...static::paramAttributes($params),
         ]);
+    }
+
+    public static function view(string $event, array $params = []): HtmlString
+    {
+        return static::attributes([
+            'data-track-view' => $event,
+            ...static::paramAttributes($params),
+        ]);
+    }
+
+    public static function toggle(string $event, ?string $section = null, array $params = []): HtmlString
+    {
+        return static::attributes([
+            'data-track-toggle' => $event,
+            'data-track-section' => $section,
+            ...static::paramAttributes($params),
+        ]);
+    }
+
+    private static function paramAttributes(array $params): array
+    {
+        return collect($params)
+            ->mapWithKeys(fn ($value, $key) => ['data-track-param-'.Str::kebab(Str::camel((string) $key)) => is_bool($value) ? ($value ? 'true' : 'false') : $value])
+            ->all();
     }
 
     public static function clientConfig(): array

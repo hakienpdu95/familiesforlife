@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Enums\PermissionEnum;
 use App\Models\Media;
 use App\Models\User;
 use App\Notifications\Channels\WebPushChannel;
@@ -99,6 +100,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         // super-admin bypass toàn bộ Gate checks
+        Gate::define('viewQrScanStats', fn (User $user) => $user->hasGlobalRole('super-admin') || $user->isPlatformContentModerator() || $user->isPlatformContentHead() || $user->isPlatformOps() || $user->can(PermissionEnum::OCOP_MANAGE->value));
         Gate::define('manageQrReports', fn (User $user) => $user->hasGlobalRole('super-admin') || $user->isPlatformContentModerator() || $user->isPlatformContentHead() || $user->isPlatformOps());
         Gate::define('viewSystemMonitor', fn (User $user) => $user->hasGlobalRole('super-admin') || $user->isPlatformOps());
 

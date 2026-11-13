@@ -199,6 +199,7 @@ export default defineConfig(({ mode }) => {
 
           /* ── CORE PAGES ───────────────────────────────────────── */
           'resources/js/pages/qr-report-index.js',
+          'resources/js/pages/qr-scan-index.js',
           'resources/js/pages/system-settings.js',
 
           /* ── MODULE ASSETS (lazy per-page) ────────────────────── */

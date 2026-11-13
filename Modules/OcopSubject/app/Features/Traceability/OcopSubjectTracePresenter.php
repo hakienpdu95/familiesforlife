@@ -116,7 +116,7 @@ class OcopSubjectTracePresenter implements TracePresenter
             'docs' => array_map(fn ($d) => is_array($d) ? [...$d, 'label' => __($d['label'] ?? '')] : $d, $payload['docs'] ?? []),
             'sections' => $sections,
             'related' => [
-                ['title' => __('Sản phẩm OCOP của chủ thể'), 'icon' => 'fa-certificate', 'items' => $this->ocopCards($products, linkToQr: true)],
+                ['key' => 'subject_products', 'title' => __('Sản phẩm OCOP của chủ thể'), 'icon' => 'fa-certificate', 'items' => $this->ocopCards($products, linkToQr: true)],
             ],
             'cta' => $live
                 ? ['url' => route('ocop-subject.public.show', $live->slug), 'label' => __('Trang thương hiệu'), 'icon' => 'fa-store']

@@ -4,7 +4,7 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', @js($gaMeasurementId));
+    gtag('config', @js($gaMeasurementId), @js((object) array_filter(['content_group' => $gaContentGroup ?? null])));
 </script>
 @if(\App\Support\Analytics\ClickTracking::scriptBuilt())
 <script>window.__clickTracking = @js(\App\Support\Analytics\ClickTracking::clientConfig());</script>

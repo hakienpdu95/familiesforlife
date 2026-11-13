@@ -87,7 +87,7 @@
                         @foreach ($panel['items'] as $section)
                             @php($has = filled($section['html'] ?? null) || filled($section['text'] ?? null))
                             @if ($has)
-                                <details @if ($section['key'] === 'mo-ta') id="mo-ta" @endif class="tx-details group/acc scroll-mt-20" @if (! empty($section['open'])) open @endif>
+                                <details @if ($section['key'] === 'mo-ta') id="mo-ta" @endif {{ \App\Support\Analytics\ClickTracking::toggle('qr_section_open', $section['key']) }} class="tx-details group/acc scroll-mt-20" @if (! empty($section['open'])) open @endif>
                                     <summary class="tx-row-link flex items-center gap-4 px-4 min-h-[3.25rem] py-3">
                                         <span class="flex-1 min-w-0 leading-snug">
                                             <span class="block text-[15px] font-semibold">{{ $section['title'] }}</span>

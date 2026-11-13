@@ -15,12 +15,22 @@
     <meta property="og:url" content="{{ url()->current() }}">
     @if (! empty($images[0]))<meta property="og:image" content="{{ $images[0] }}">@endif
     @include('layouts.partials.font-preload', ['fonts' => ['inter'], 'build' => 'build/frontend'])
-    @include('layouts.partials.google-analytics')
+    @include('layouts.partials.google-analytics', ['gaContentGroup' => 'qr_trace'])
     @include('layouts.partials.i18n-script')
     @vite(['resources/css/frontend.css'], 'build/frontend')
     @stack('head')
 </head>
-<body class="bg-[#ebebe8] antialiased" {{ \App\Support\Analytics\ClickTracking::context(null, $track_item ?? $title, $qr_code ?? null, $track_category ?? null) }}>
+<body class="bg-[#ebebe8] antialiased"
+      {{ \App\Support\Analytics\ClickTracking::context(null, $track_item ?? $title, $qr_code ?? null, $track_category ?? null) }}
+      {{ \App\Support\Analytics\ClickTracking::view('qr_view', [
+          'scan_id' => $scan['scan_id'] ?? null,
+          'scan_source' => $scan['scan_source'] ?? null,
+          'page_locale' => $scan['locale'] ?? app()->getLocale(),
+          'subject_name' => $subject['name'] ?? null,
+          'ocop_stars' => $stars ?? null,
+          'verification_status' => $status ?? null,
+      ]) }}
+      {{ \App\Support\Analytics\ClickTracking::toggle('qr_section_open') }}>
     <div @class(['tx-scope tx-canvas max-w-xl mx-auto min-h-dvh flex flex-col sm:border-x sm:border-[rgb(28_25_23/.08)]', 'pb-[calc(6rem+env(safe-area-inset-bottom))]' => $cta_sticky])>
         @php($tagline = trim(\Illuminate\Support\Str::before((string) config('app.site_description'), '—')))
         <header class="sticky top-0 z-20 bg-base-100/95 backdrop-blur border-b border-[var(--tx-line)] pt-[env(safe-area-inset-top)]">

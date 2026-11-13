@@ -3,26 +3,17 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
+use App\Shared\Traceability\Models\QrIdentity;
 use App\Shared\Traceability\Models\QrReport;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
-use Modules\Post\Models\PostArticle;
 
 class QrReportController extends Controller
 {
     private const SORTABLE = ['created_at', 'reason', 'resolved_at'];
-
-    private const KIND_LABELS = [
-        'OcopProduct' => 'Sản phẩm OCOP',
-        'PostArticle' => 'Bài viết',
-        'HeritageSite' => 'Di tích',
-        'OcopSubject' => 'Chủ thể OCOP',
-    ];
 
     public function index(): View
     {
@@ -53,7 +44,7 @@ class QrReportController extends Controller
         $paginator = QrReport::query()
             ->with([
                 'resolvedBy:id,name',
-                'identity.target' => fn (MorphTo $morph) => $morph->withTrashed()->morphWith([PostArticle::class => ['translations']]),
+                'identity' => fn ($q) => $q->with(QrIdentity::targetEagerLoad()),
             ])
             ->when($validated['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
             ->when($validated['reason'] ?? null, fn ($q, $reason) => $q->where('reason', $reason))
@@ -92,11 +83,6 @@ class QrReportController extends Controller
     private function row(QrReport $report): array
     {
         $identity = $report->identity;
-        $target = $identity?->target;
-        $class = $identity ? class_basename((string) (Relation::getMorphedModel($identity->target_type) ?? $identity->target_type)) : null;
-        $title = $target instanceof PostArticle
-            ? ($target->translations->firstWhere('locale', $target->main_locale)?->title ?? $target->translations->first()?->title)
-            : $target?->name;
 
         return [
             'id' => $report->id,
@@ -104,9 +90,9 @@ class QrReportController extends Controller
             'created_at' => format_datetime($report->created_at),
             'qr_code' => $identity?->qr_code,
             'qr_url' => $identity?->publicUrl(),
-            'target_kind' => isset(self::KIND_LABELS[$class]) ? __(self::KIND_LABELS[$class]) : $class,
-            'target_title' => $title ?: __('(đã xoá)'),
-            'target_trashed' => $target && method_exists($target, 'trashed') && $target->trashed(),
+            'target_kind' => $identity?->targetKindLabel(),
+            'target_title' => $identity?->targetTitle() ?: __('(đã xoá)'),
+            'target_trashed' => (bool) $identity?->targetTrashed(),
             'reason' => $report->reason,
             'reason_label' => $report->reasonLabel(),
             'content' => $report->content,

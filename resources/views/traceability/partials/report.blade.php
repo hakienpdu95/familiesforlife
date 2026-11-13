@@ -4,7 +4,7 @@
 @php($hints = $reportHints ?? [])
 <footer class="tx-section mt-8 pb-6">
     @if ($sent)
-        <div role="status" class="mb-3 rounded-lg bg-[#f0faf3] border border-[#cfe9d8] px-4 py-3 text-[#14532d]">
+        <div role="status" class="mb-3 rounded-lg bg-[#f0faf3] border border-[#cfe9d8] px-4 py-3 text-[#14532d]" {{ \App\Support\Analytics\ClickTracking::view('qr_report_submit', ['reason' => $sent['reason_key'] ?? null, 'has_contact' => (bool) ($sent['contact'] ?? false)]) }}>
             <p class="flex items-center gap-2 text-[15px] font-semibold"><span aria-hidden="true">✓</span>{{ __('Đã gửi phản ánh tới ban quản lý') }}</p>
             @if (! empty($sent['ref']))
                 <dl class="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[13px]">
@@ -22,7 +22,7 @@
         </div>
     @endif
 
-    <details id="phan-anh" class="tx-details tx-card group/rp scroll-mt-20" @if ($errors->any()) open @endif>
+    <details id="phan-anh" {{ \App\Support\Analytics\ClickTracking::toggle('qr_report_open', 'phan-anh') }} class="tx-details tx-card group/rp scroll-mt-20" @if ($errors->any()) open @endif>
         <summary class="tx-row-link flex items-center gap-3 px-4 py-3 min-h-[3.25rem]">
             <span class="tx-ico">@include('traceability.partials.icon', ['name' => 'flag'])</span>
             <span class="flex-1 min-w-0 leading-snug">

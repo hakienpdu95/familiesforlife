@@ -76,7 +76,7 @@
                     <div class="tx-prose text-[15px] px-4 py-3.5 [overflow-wrap:anywhere]">{!! $description !!}</div>
                 @endif
                 @if ($content_html)
-                    <details class="tx-details group/acc @if ($description) border-t border-[var(--tx-line)] @endif" @unless ($description) open @endunless>
+                    <details {{ \App\Support\Analytics\ClickTracking::toggle('qr_section_open', 'chi-tiet') }} class="tx-details group/acc @if ($description) border-t border-[var(--tx-line)] @endif" @unless ($description) open @endunless>
                         <summary class="tx-row-link flex items-center gap-4 px-4 min-h-[3.25rem] py-3">
                             <span class="flex-1 text-[15px] font-semibold">{{ __('Thông tin chi tiết') }}</span>
                             <span class="tx-chevron transition-transform group-open/acc:rotate-90">@include('traceability.partials.icon', ['name' => 'chevron'])</span>

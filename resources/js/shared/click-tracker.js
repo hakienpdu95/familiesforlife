@@ -97,7 +97,6 @@ const classify = (el, url) => {
 
 const track = (e) => {
     if (e.type === 'auxclick' && e.button !== 1) return;
-    if (typeof window.gtag !== 'function') return;
 
     const el = e.target instanceof Element ? e.target.closest('a[href], [data-track]') : null;
     if (!el) return;
@@ -116,21 +115,68 @@ const track = (e) => {
         outbound: kind.external || undefined,
     };
 
+    send(kind.event, params, el);
+};
+
+const extraParams = (el) => {
+    const params = {};
     Object.entries(el.dataset)
         .filter(([key]) => key.startsWith('trackParam') && key.length > 10)
         .slice(0, MAX_EXTRA_PARAMS)
         .forEach(([key, value]) => {
             params[toSnake(key.slice(10))] = value;
         });
+    return params;
+};
+
+const send = (event, params, el) => {
+    if (typeof window.gtag !== 'function') return;
 
     const payload = { transport_type: 'beacon' };
-    Object.entries(params).forEach(([key, value]) => {
+    Object.entries({ ...params, ...extraParams(el) }).forEach(([key, value]) => {
         if (typeof value === 'boolean') payload[key] = value;
         else if (clip(value) !== undefined) payload[key] = clip(value);
     });
 
-    window.gtag('event', kind.event, payload);
+    window.gtag('event', event, payload);
+};
+
+let lastGesture = 0;
+const markGesture = () => {
+    lastGesture = Date.now();
+};
+
+const summaryText = (details) => details.querySelector(':scope > summary')?.innerText?.split('\n')[0];
+
+const trackToggle = (e) => {
+    const details = e.target;
+    if (!(details instanceof HTMLDetailsElement) || !details.open) return;
+    if (Date.now() - lastGesture > 1500) return;
+
+    const own = details.dataset.trackToggle;
+    const event = own || details.parentElement?.closest('[data-track-toggle]')?.dataset.trackToggle;
+    if (!event || event === 'off' || own === 'off') return;
+
+    send(event, {
+        ...contextOf(details),
+        section: details.dataset.trackSection || details.id || summaryText(details),
+    }, details);
+};
+
+const trackViews = () => {
+    document.querySelectorAll('[data-track-view]').forEach((el) => {
+        send(el.dataset.trackView, contextOf(el), el);
+    });
 };
 
 document.addEventListener('click', track, { capture: true, passive: true });
 document.addEventListener('auxclick', track, { capture: true, passive: true });
+document.addEventListener('pointerdown', markGesture, { capture: true, passive: true });
+document.addEventListener('keydown', markGesture, { capture: true, passive: true });
+document.addEventListener('toggle', trackToggle, { capture: true });
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', trackViews, { once: true });
+} else {
+    trackViews();
+}

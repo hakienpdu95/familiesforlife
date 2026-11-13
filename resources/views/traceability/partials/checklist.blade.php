@@ -9,7 +9,7 @@
 @php($stale = $items->filter(fn ($i) => ! empty($i['stale']))->pluck('label'))
 
 @if ($done > 0)
-    <details class="tx-details group/doc border-t border-[#ead9a8] bg-base-100">
+    <details {{ \App\Support\Analytics\ClickTracking::toggle('qr_section_open', 'ho-so') }} class="tx-details group/doc border-t border-[#ead9a8] bg-base-100">
         <summary class="tx-row-link flex items-center gap-3 px-3.5 py-2.5 min-h-11">
             <span class="flex-1 min-w-0 leading-snug">
                 <span class="flex items-center gap-2">
@@ -67,7 +67,7 @@
                             <ul class="mt-2 rounded-md border border-[rgb(28_25_23/.1)] divide-y divide-[rgb(28_25_23/.08)]">
                                 @foreach ($files as $file)
                                     <li class="flex items-center gap-2">
-                                        <a href="{{ \App\Shared\Traceability\TraceabilityService::documentUrl($qr_code, $file['uuid']) }}" target="_blank" rel="noopener nofollow"
+                                        <a href="{{ \App\Shared\Traceability\TraceabilityService::documentUrl($qr_code, $file['uuid']) }}" target="_blank" rel="noopener nofollow" {{ \App\Support\Analytics\ClickTracking::link(null, 'qr_document_view', null, ['document' => $item['key'] ?? $item['label'], 'document_type' => $file['type']]) }}
                                            data-doc data-doc-type="{{ $file['type'] }}" data-doc-title="{{ $item['label'] }}{{ count($files) > 1 ? ' · '.__('tệp :number', ['number' => $loop->iteration]) : '' }}"
                                            data-doc-meta="{{ implode(' · ', array_filter([$file['type'], $file['size'], ! empty($file['uploaded_at']) ? __('đăng :date', ['date' => $file['uploaded_at']]) : null, ! empty($file['ref']) ? __('mã :code', ['code' => $file['ref']]) : null])) }}"
                                            aria-label="{{ __('Xem :item:files (:file, :file2, mã :file3)', ['item' => $item['label'], 'files' => count($files) > 1 ? ', '.__('tệp :number trên :total', ['number' => $loop->iteration, 'total' => count($files)]) : '', 'file' => $file['type'], 'file2' => $file['size'], 'file3' => $file['ref'] ?? '']) }}"

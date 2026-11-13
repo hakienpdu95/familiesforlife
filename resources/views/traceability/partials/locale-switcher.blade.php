@@ -3,7 +3,7 @@
 @php($links = $portal->switcherLinks())
 @php($flags = config('i18n.portal_locale_flags', []))
 @php($current = $portal->current())
-<details class="relative shrink-0 group/lang">
+<details class="relative shrink-0 group/lang" data-track-toggle="off">
     <summary class="list-none [&::-webkit-details-marker]:hidden flex items-center gap-1.5 h-9 pl-2 pr-1.5 rounded-lg border border-[rgb(28_25_23/.12)] bg-base-100 text-[13px] font-semibold cursor-pointer select-none hover:border-primary/50"
              aria-label="{{ __('Ngôn ngữ') }}: {{ $links[$current]['label'] ?? strtoupper($current) }}">
         <span class="text-base leading-none" aria-hidden="true">{{ $flags[$current] ?? '' }}</span>
@@ -18,7 +18,7 @@
                 <span class="text-base leading-none" aria-hidden="true">{{ $flags[$code] ?? '' }}</span>{{ $link['label'] }}
             </span>
             @else
-            <a href="{{ $link['url'] }}" hreflang="{{ $code }}" lang="{{ $code }}" class="flex items-center gap-2.5 px-3 py-2 text-[14px] hover:bg-base-200">
+            <a href="{{ $link['url'] }}" {{ \App\Support\Analytics\ClickTracking::link(null, 'qr_language_switch', null, ['from_locale' => $current, 'to_locale' => $code]) }} hreflang="{{ $code }}" lang="{{ $code }}" class="flex items-center gap-2.5 px-3 py-2 text-[14px] hover:bg-base-200">
                 <span class="text-base leading-none" aria-hidden="true">{{ $flags[$code] ?? '' }}</span>{{ $link['label'] }}
             </a>
             @endif

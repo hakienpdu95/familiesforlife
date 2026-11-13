@@ -5,11 +5,21 @@ namespace App\Shared\Traceability\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use LogicException;
+use Modules\Post\Models\PostArticle;
 
 class QrIdentity extends Model
 {
     public const STATUS_ACTIVE = 'active';
+
+    public const KIND_LABELS = [
+        'OcopProduct' => 'Sản phẩm OCOP',
+        'Product' => 'Sản phẩm',
+        'PostArticle' => 'Bài viết',
+        'HeritageSite' => 'Di tích',
+        'OcopSubject' => 'Chủ thể OCOP',
+    ];
 
     public const STATUS_REVOKED = 'revoked';
 
@@ -102,6 +112,45 @@ class QrIdentity extends Model
         if ($this->isActive()) {
             $this->forceFill(['status' => self::STATUS_REVOKED, 'revoked_at' => now()])->save();
         }
+    }
+
+    public function targetKind(): string
+    {
+        return class_basename((string) (Relation::getMorphedModel($this->target_type) ?? $this->target_type));
+    }
+
+    public function targetKindLabel(): string
+    {
+        $kind = $this->targetKind();
+
+        return isset(self::KIND_LABELS[$kind]) ? __(self::KIND_LABELS[$kind]) : $kind;
+    }
+
+    public function targetTitle(): ?string
+    {
+        $target = $this->target;
+
+        if ($target instanceof PostArticle) {
+            return $target->translations->firstWhere('locale', $target->main_locale)?->title ?? $target->translations->first()?->title;
+        }
+
+        if (! $target) {
+            return null;
+        }
+
+        return method_exists($target, 'originalAttribute') ? $target->originalAttribute('name') : $target->name;
+    }
+
+    public function targetTrashed(): bool
+    {
+        $target = $this->target;
+
+        return $target && method_exists($target, 'trashed') && $target->trashed();
+    }
+
+    public static function targetEagerLoad(): array
+    {
+        return ['target' => fn (MorphTo $morph) => $morph->withTrashed()->morphWith([PostArticle::class => ['translations']])];
     }
 
     public function publicUrl(): string

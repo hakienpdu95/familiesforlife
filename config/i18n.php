@@ -1,7 +1,8 @@
 <?php
 
-use App\Http\Controllers\Backend\QrReportController;
+use App\Shared\Traceability\Models\QrIdentity;
 use App\Shared\Traceability\Models\QrReport;
+use App\Shared\Traceability\Models\QrScan;
 use Modules\ActivityLog\Http\Controllers\ActivityLogApiController;
 use Modules\AIVideoStudioTemplate\Features\FormulaAdvisor\Support\PersonaCatalog;
 use Modules\AIVideoStudioTemplate\Features\FormulaAdvisor\Support\ProductFormulaCatalog;
@@ -78,7 +79,9 @@ return [
     'translatable_constants' => [
         QrReport::class.'::REASONS',
         QrReport::class.'::REASON_HINTS',
-        QrReportController::class.'::KIND_LABELS',
+        QrIdentity::class.'::KIND_LABELS',
+        QrScan::class.'::DEVICES',
+        QrScan::class.'::PLATFORMS',
         ApprovalLog::class.'::ACTION_LABELS',
         OcopProduct::class.'::SHELF_LIFE_UNITS',
         OcopSubject::class.'::DOCUMENT_LABELS',

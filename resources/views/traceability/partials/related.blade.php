@@ -5,7 +5,7 @@
         <ul class="tx-card tx-rows">
             @foreach ($group['items'] as $item)
                 <li>
-                    <a href="{{ $item['url'] }}" class="tx-row group">
+                    <a href="{{ $item['url'] }}" {{ \App\Support\Analytics\ClickTracking::link(null, 'qr_related_click', null, ['related_group' => $group['key'] ?? $group['title'], 'related_item' => $item['title']]) }} class="tx-row group">
                         @if ($item['image'])
                             <img src="{{ $item['image'] }}" alt="" width="56" height="56" loading="lazy" decoding="async" class="w-14 h-14 rounded-md object-cover bg-[#efefec] shrink-0">
                         @endif

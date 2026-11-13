@@ -229,6 +229,15 @@
         </x-sidebar-section>
 
         <x-sidebar-section :title="__('Dữ liệu chuyên ngành')">
+        @can('viewQrScanStats')
+        <div class="nav-group">
+            <a href="{{ route('backend.qr-scans.index') }}"
+               class="nav-link {{ request()->routeIs('backend.qr-scans.*') ? 'active' : '' }}">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 14h2v2h-2zM14 18h2v2h-2zM18 18h2v2h-2z"/></svg>
+                <span class="nav-label">{{ __('Thống kê quét QR') }}</span>
+            </a>
+        </div>
+        @endcan
         @can('manageQrReports')
         @php($newQrReports = \App\Shared\Traceability\Models\QrReport::where('status', 'new')->count())
         <div class="nav-group">
