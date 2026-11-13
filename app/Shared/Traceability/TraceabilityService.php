@@ -239,6 +239,8 @@ class TraceabilityService
             'cta' => null,
             'cta_secondary' => null,
             'cta_sticky' => true,
+            'track_category' => null,
+            'track_item' => null,
             ...$page,
         ];
     }

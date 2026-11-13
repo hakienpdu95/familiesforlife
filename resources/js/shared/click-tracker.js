@@ -9,6 +9,7 @@ Object.entries(config.platforms || {}).forEach(([platform, domains]) => {
 });
 
 const MAX_VALUE = 100;
+const MAX_EXTRA_PARAMS = 10;
 
 const clip = (value) => {
     if (value === undefined || value === null) return undefined;
@@ -23,6 +24,15 @@ const platformOf = (hostname) => {
         host = host.slice(host.indexOf('.') + 1);
     }
     return null;
+};
+
+const readableUrl = (url) => {
+    const raw = `${url.origin}${url.pathname}`;
+    try {
+        return decodeURI(raw);
+    } catch {
+        return raw;
+    }
 };
 
 const toSnake = (key) => key.replace(/^[A-Z]/, (c) => c.toLowerCase()).replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`);
@@ -101,14 +111,17 @@ const track = (e) => {
         platform: kind.platform,
         method: kind.method,
         link_text: labelOf(el),
-        link_url: kind.web ? url.href : undefined,
+        link_url: kind.web ? readableUrl(url) : undefined,
         link_domain: kind.web ? url.hostname : undefined,
         outbound: kind.external || undefined,
     };
 
-    Object.entries(el.dataset).forEach(([key, value]) => {
-        if (key.startsWith('trackParam') && key.length > 10) params[toSnake(key.slice(10))] = value;
-    });
+    Object.entries(el.dataset)
+        .filter(([key]) => key.startsWith('trackParam') && key.length > 10)
+        .slice(0, MAX_EXTRA_PARAMS)
+        .forEach(([key, value]) => {
+            params[toSnake(key.slice(10))] = value;
+        });
 
     const payload = { transport_type: 'beacon' };
     Object.entries(params).forEach(([key, value]) => {

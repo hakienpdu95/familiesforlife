@@ -5,7 +5,9 @@
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', @js($gaMeasurementId));
-    window.__clickTracking = @js(\App\Support\Analytics\ClickTracking::clientConfig());
 </script>
-@vite(['resources/js/shared/click-tracker.js'], 'build/frontend')
+@if(\App\Support\Analytics\ClickTracking::scriptBuilt())
+<script>window.__clickTracking = @js(\App\Support\Analytics\ClickTracking::clientConfig());</script>
+@vite([\App\Support\Analytics\ClickTracking::SCRIPT], \App\Support\Analytics\ClickTracking::BUILD_DIRECTORY)
+@endif
 @endif

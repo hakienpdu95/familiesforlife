@@ -67,6 +67,7 @@ class ProductTracePresenter implements TracePresenter
         return $this->base([
             'title' => $payload['name'] ?? __('Sản phẩm_Single'),
             'kind' => $type === ProductType::Service ? __('Dịch vụ') : __('Sản phẩm_Single'),
+            'track_category' => $type === ProductType::Service ? 'service' : 'product',
             'summary' => $payload['short_description'] ?? null,
             'category' => $payload['category'] ?? null,
             'gallery' => $this->gallery(($payload['gallery'] ?? []) ?: array_values(array_filter([$payload['image']['url'] ?? null]))),
@@ -93,6 +94,7 @@ class ProductTracePresenter implements TracePresenter
             'heading' => __('Truy xuất sản phẩm'),
             'icon' => 'fa-box',
             'kind' => __('Sản phẩm_Single'),
+            'track_category' => 'product',
             'summary' => null,
             'category' => null,
             'gallery' => [],

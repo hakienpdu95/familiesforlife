@@ -186,6 +186,7 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
     {
         return $this->base([
             'title' => $target->name,
+            'track_item' => $target->originalAttribute('name'),
             'notice' => __('Thông tin sản phẩm đang được cập nhật.'),
         ]);
     }
@@ -196,6 +197,7 @@ class OcopProductTracePresenter implements ExposesPublicDocuments, TracePresente
             'heading' => __('Truy xuất sản phẩm OCOP'),
             'icon' => 'fa-certificate',
             'kind' => __('Sản phẩm OCOP_Single'),
+            'track_category' => 'ocop_product',
             'stars' => null,
             'subject' => [],
             'category' => null,

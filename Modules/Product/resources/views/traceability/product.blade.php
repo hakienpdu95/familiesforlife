@@ -32,12 +32,12 @@
     </div>
 
     @if ($channels)
-        <section id="mua-hang" class="tx-section">
+        <section id="mua-hang" class="tx-section" {{ \App\Support\Analytics\ClickTracking::context('qr_buy_section') }}>
             <h2 class="tx-section-title">{{ __('Nơi mua') }} <small>{{ __(':channels kênh', ['channels' => count($channels)]) }}</small></h2>
             <ul class="tx-card tx-rows">
                 @foreach ($channels as $channel)
                     <li>
-                        <a href="{{ $channel['url'] }}" target="_blank" rel="noopener nofollow sponsored" class="tx-row gap-3.5 py-3.5"
+                        <a href="{{ $channel['url'] }}" target="_blank" rel="noopener nofollow sponsored" {{ \App\Support\Analytics\ClickTracking::link($channel['platform'] ?? null, null, $channel['name']) }} class="tx-row gap-3.5 py-3.5"
                            aria-label="{{ __('Mua :title tại :channel (mở trang mới)', ['title' => $title, 'channel' => $channel['name']]) }}">
                             <span class="w-11 h-11 rounded-[10px] bg-white ring-1 ring-[rgb(28_25_23/.08)] flex items-center justify-center shrink-0 text-[#57534e] [&>svg]:w-5 [&>svg]:h-5">
                                 @if ($channel['logo'])

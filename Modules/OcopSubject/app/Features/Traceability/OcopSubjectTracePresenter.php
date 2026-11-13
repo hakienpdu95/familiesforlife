@@ -86,6 +86,7 @@ class OcopSubjectTracePresenter implements TracePresenter
 
         return $this->base([
             'title' => $title,
+            'track_item' => $payload['name'] ?? $title,
             'subtitle' => $subtitle,
             'images' => $live ? ($this->mediaUrls($live, OcopSubject::IMAGE_COLLECTION) ?: array_filter([$payload['image']['url'] ?? null])) : array_filter([$payload['image']['url'] ?? null]),
             'image_srcsets' => $live ? $this->mediaSrcsets($live, OcopSubject::IMAGE_COLLECTION) : [],
@@ -128,6 +129,7 @@ class OcopSubjectTracePresenter implements TracePresenter
     {
         return $this->base([
             'title' => $target->name,
+            'track_item' => $target->originalAttribute('name'),
             'notice' => __('Hồ sơ chủ thể đang được cập nhật.'),
         ]);
     }
@@ -138,6 +140,7 @@ class OcopSubjectTracePresenter implements TracePresenter
             'heading' => __('Hồ sơ chủ thể OCOP'),
             'icon' => 'fa-building',
             'kind' => __('Chủ thể OCOP'),
+            'track_category' => 'ocop_subject',
             'stars' => null,
             'type' => null,
             'products_count' => null,
