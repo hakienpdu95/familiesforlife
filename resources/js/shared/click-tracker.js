@@ -48,13 +48,13 @@ const contextOf = (el) => {
     for (let node = el; node && node !== document.documentElement; node = node.parentElement) {
         const data = node.dataset;
         if (!data) continue;
-        if (ctx.item_name === undefined && data.trackItem) {
-            ctx.item_name = data.trackItem;
-            ctx.item_id = data.trackItemId;
-            ctx.item_category = data.trackItemCategory;
+        if (ctx.product_name === undefined && data.trackItem) {
+            ctx.product_name = data.trackItem;
+            ctx.product_id = data.trackItemId;
+            ctx.product_category = data.trackItemCategory;
         }
         if (ctx.placement === undefined && data.trackPlacement) ctx.placement = data.trackPlacement;
-        if (ctx.item_name !== undefined && ctx.placement !== undefined) break;
+        if (ctx.product_name !== undefined && ctx.placement !== undefined) break;
     }
     return ctx;
 };
