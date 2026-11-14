@@ -3,6 +3,14 @@
 @section('title', $event->title)
 @section('meta_description', \Illuminate\Support\Str::limit(strip_tags($event->description), 160))
 
+@php
+    \App\Support\Analytics\ClickTracking::page([
+        'content_type' => 'event',
+        'content_id' => $event->id,
+        'content_category' => $event->relationLoaded('category') ? $event->category?->name : null,
+    ]);
+@endphp
+
 @push('meta')
 <link rel="canonical" href="{{ $canonicalUrl }}">
 <meta property="og:type" content="event">
@@ -139,7 +147,7 @@
             <li><strong>{{ $label }}:</strong> {{ $value }}</li>
             @endforeach
             @if($ctaUrl)
-            <li><strong>{{ __('Đăng ký / tham gia:') }}</strong> <a href="{{ $ctaUrl }}" target="_blank" rel="noopener" class="break-all">{{ $ctaUrl }}</a></li>
+            <li><strong>{{ __('Đăng ký / tham gia:') }}</strong> <a href="{{ $ctaUrl }}" target="_blank" rel="noopener" {{ \App\Support\Analytics\ClickTracking::link(null, 'cta_click') }} {{ \App\Support\Analytics\ClickTracking::context('event_detail_info', $event->title ?? null, $event->id ?? null, 'event') }} class="break-all">{{ $ctaUrl }}</a></li>
             @endif
         </ol>
     </div>

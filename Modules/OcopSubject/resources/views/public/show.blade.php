@@ -1,6 +1,9 @@
 @extends('layouts.frontend')
 
 @section('title', $subject->name)
+@php
+    \App\Support\Analytics\ClickTracking::page(['content_type' => 'brand', 'content_id' => $subject->id]);
+@endphp
 @section('meta_description', \Illuminate\Support\Str::limit(trim(strip_tags((string) $subject->story)) ?: __(':name — chủ thể sản phẩm OCOP :province', ['name' => $subject->name, 'province' => $subject->province_name]), 160))
 
 @section('content')

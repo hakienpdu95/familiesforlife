@@ -26,4 +26,26 @@ return [
 
     'contact_platforms' => ['zalo', 'messenger'],
 
+    'content_groups' => [
+        'post.public.home' => 'home',
+        'post.public.article' => 'article',
+        'post.public.category' => 'article_listing',
+        'post.public.author-hub.*' => 'author',
+        'ocop.public.show' => 'ocop_product',
+        'ocop.public.index' => 'ocop_listing',
+        'ocop-subject.public.show' => 'brand',
+        'event.public.show' => 'event',
+        'event.public.submit.*' => 'event_submit',
+        'event.public.*' => 'event_listing',
+        'heritage.public.show' => 'heritage',
+        'heritage.public.index' => 'heritage_listing',
+        'province.public.*' => 'province',
+        'playlist.public.*' => 'video',
+        'video.index' => 'video',
+        'real-estate.public.*' => 'real_estate',
+        'page.public.*' => 'page',
+        'newsletter.public.*' => 'newsletter',
+        'traceability.*' => 'qr_trace',
+    ],
+
 ];

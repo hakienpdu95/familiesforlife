@@ -3,6 +3,15 @@
 @section('title', $product->name)
 @section('meta_description', \Illuminate\Support\Str::limit(\Modules\Ocop\Models\OcopProduct::plainText($product->description), 160) ?: $product->name)
 
+@php
+    \App\Support\Analytics\ClickTracking::page([
+        'content_type' => 'ocop_product',
+        'content_id' => $product->id,
+        'content_category' => $product->relationLoaded('category') ? $product->category?->name : null,
+        'ocop_stars' => $product->star_rating,
+    ]);
+@endphp
+
 @section('content')
 @php
     $placeholder = asset('images/post-cover-placeholder.svg');
@@ -184,7 +193,7 @@
                     @endif
                 </div>
 
-                <aside class="lg:col-span-4 space-y-6">
+                <aside class="lg:col-span-4 space-y-6" {{ \App\Support\Analytics\ClickTracking::context('ocop_brand_contact', $product->originalAttribute('name'), $product->id, 'ocop') }}>
                     @php
                         $brandName = $subject?->name ?? $product->producer_name;
                         $brandAddress = $subject?->fullAddress() ?: $address;

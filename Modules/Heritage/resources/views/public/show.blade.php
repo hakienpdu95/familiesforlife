@@ -1,6 +1,9 @@
 @extends('layouts.frontend')
 
 @section('title', $site->name)
+@php
+    \App\Support\Analytics\ClickTracking::page(['content_type' => 'heritage', 'content_id' => $site->id]);
+@endphp
 @section('meta_description', \Illuminate\Support\Str::limit($site->description ?: $site->name, 160))
 
 @section('content')

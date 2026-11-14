@@ -6,6 +6,16 @@
 @endif
 
 @php
+    \App\Support\Analytics\ClickTracking::page([
+        'content_type' => 'article',
+        'content_id' => $article->id,
+        'content_category' => $leftCategory?->name,
+        'content_author' => $article->createdBy?->authorProfile?->is_public ? $article->createdBy->authorProfile->slug : null,
+        'is_sponsored' => $article->isCurrentlySponsored(),
+    ]);
+@endphp
+
+@php
     $ogTitle       = $translation->seo_title ?: $translation->title;
     $ogDescription = $translation->seo_description ?: $translation->direct_answer ?: $translation->excerpt;
     $ogImage       = $article->cover_image_url;
@@ -95,7 +105,7 @@
                     @endif
                 </div>
                 <div class="detail__share">
-                    <iframe title="Like share" src="https://www.facebook.com/plugins/like.php?href=https://treemvietnam.net.vn/thieu-sach-giao-khoa-phu-huynh-nen-lam-gi-de-con-khong-gian-doan-viec-hoc-d10076.html&amp;width=175&amp;layout=button_count&amp;action=like&amp;size=small&amp;share=true&amp;height=35" width="138" height="20" style="border: none; overflow: hidden;width: 138px;" scrolling="no" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+                    <iframe title="Like share" src="https://www.facebook.com/plugins/like.php?href={{ urlencode($canonicalUrl) }}&amp;width=175&amp;layout=button_count&amp;action=like&amp;size=small&amp;share=true&amp;height=35" width="138" height="20" style="border: none; overflow: hidden;width: 138px;" scrolling="no" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
                 </div>
             </div>
             @if($translation->excerpt)

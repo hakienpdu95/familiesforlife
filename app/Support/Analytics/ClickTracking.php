@@ -69,6 +69,38 @@ class ClickTracking
             ->all();
     }
 
+    public static function page(array $params): void
+    {
+        $request = request();
+        $request->attributes->set('ga_page', [...$request->attributes->get('ga_page', []), ...$params]);
+    }
+
+    public static function pageConfig(?string $contentGroup = null): array
+    {
+        $params = request()->attributes->get('ga_page', []);
+        $group = $contentGroup ?? ($params['content_group'] ?? static::contentGroupFor(request()->route()?->getName()));
+
+        return collect(['content_group' => $group, 'page_locale' => app()->getLocale(), ...$params])
+            ->reject(fn ($value) => $value === null || $value === '')
+            ->map(fn ($value) => is_bool($value) ? $value : Str::limit(trim(strip_tags((string) $value)), 100, ''))
+            ->all();
+    }
+
+    public static function contentGroupFor(?string $routeName): ?string
+    {
+        if ($routeName === null) {
+            return null;
+        }
+
+        foreach (config('click_tracking.content_groups', []) as $pattern => $group) {
+            if (Str::is($pattern, $routeName)) {
+                return $group;
+            }
+        }
+
+        return null;
+    }
+
     public static function clientConfig(): array
     {
         $config = config('click_tracking', []);

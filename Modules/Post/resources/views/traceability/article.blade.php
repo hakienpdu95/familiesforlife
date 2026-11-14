@@ -42,7 +42,7 @@
 
         @if ($cta)
         <div class="px-4 pt-4 pb-6">
-            <a href="{{ $cta['url'] }}" class="btn btn-outline w-full h-12 rounded-lg text-[15px] font-semibold shadow-none border-[rgb(28_25_23/.16)] hover:border-primary hover:bg-transparent hover:text-primary">{{ $cta['label'] }} →</a>
+            <a href="{{ $cta['url'] }}" {{ \App\Support\Analytics\ClickTracking::link(null, 'cta_click') }} class="btn btn-outline w-full h-12 rounded-lg text-[15px] font-semibold shadow-none border-[rgb(28_25_23/.16)] hover:border-primary hover:bg-transparent hover:text-primary">{{ $cta['label'] }} →</a>
         </div>
         @endif
     </article>
